@@ -1,0 +1,693 @@
+/* =====================================================================
+   main.css — Little Phatty chassis, layout, and section styling.
+
+   Color reference (from hardware photos): the Little Phatty panel is a
+   light brushed silver/white metal, NOT the dark/black theme of most synth
+   emulations, with an amber/orange OLED window and dark blue-grey knob
+   caps with a white indicator line. Entire chassis is sized to comfortably
+   fit inside a 1366x768 viewport including the full keyboard.
+   ===================================================================== */
+
+@font-face {
+  font-family: 'Futura Book';
+  src: url('../ui/Futura-Book.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+:root {
+  --md-sys-color-primary: #ffd39a;
+  --md-sys-color-on-primary: #422b00;
+  --md-sys-color-primary-container: #644000;
+  --md-sys-color-on-primary-container: #ffddb3;
+  --md-sys-shape-corner-full: 999px;
+  --launcher-ink: #f4f5fa;
+  --launcher-muted: #c4c8d4;
+  --panel-silver: #d9dade;
+  --panel-silver-light: #eef0f2;
+  --panel-silver-dark: #b7b9c0;
+  --panel-shadow: #8b8d94;
+  --chassis-dark: #2b2c30;
+  --section-bg: #c7c9cf;
+  --section-border: #9a9ca4;
+  --text-dark: #2a2b2e;
+  --text-mid: #55575e;
+  --oled-bg: #1a0f00;
+  --oled-amber: #ff9f0a;
+  --oled-amber-dim: #6b4200;
+  --led-off: #4a2b10;
+  --led-on: #ff9f0a;
+  --led-on-glow: rgba(255, 159, 10, 0.85);
+  --wheel-blue: #1b3a8a;
+  --wheel-blue-glow: rgba(70, 130, 255, 0.9);
+  --accent-red: #b3271a;
+
+  --font-display: 'Futura Book', 'Arial Narrow', Arial, Helvetica, sans-serif;
+  --font-body: 'Figtree', 'Segoe UI', Helvetica, sans-serif;
+  --font-mono: 'DM Mono', 'Courier New', Courier, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background:
+    radial-gradient(circle at 50% -20%, #4d535b 0%, #24272c 32%, #111214 76%),
+    #111214;
+  font-family: var(--font-body);
+  overflow: hidden; /* instrument pages must fit without scrolling */
+  overscroll-behavior: none;
+}
+
+body {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+}
+
+html, body, #app-root, #sub37-root {
+  max-width: 100vw;
+  max-height: 100vh;
+}
+
+body * {
+  scrollbar-width: none;
+}
+
+body *::-webkit-scrollbar {
+  display: none;
+}
+
+button, select, input, textarea {
+  touch-action: manipulation;
+}
+
+html, body {
+  scroll-behavior: auto;
+}
+
+/* ---------------------------------------------------------------------
+   #app-root fills the viewport; #chassis is centered inside it via
+   absolute positioning + transform, NOT flex centering. This is
+   deliberate: app.js computes a scale factor at runtime so the full
+   instrument (panel + wheels + keyboard) always fits within the
+   available viewport - including the 1366x768 target - and a plain
+   CSS `transform: scale()` does not participate in flex/grid layout
+   sizing, so absolute positioning is what keeps it perfectly centered
+   at any scale factor.
+   --------------------------------------------------------------------- */
+
+#app-root {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  isolation: isolate;
+}
+
+/* ---------------------------------------------------------------------
+   Chassis: the curved aluminum-profile body the panel sits in.
+   --------------------------------------------------------------------- */
+
+#chassis {
+  width: 1240px;
+  background: linear-gradient(180deg, #50545a 0%, #2a2c30 20%, #151619 100%);
+  border-radius: 18px 18px 10px 10px;
+  padding: 14px 14px 0;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 35px 85px rgba(0, 0, 0, 0.62), 0 2px 0 rgba(255, 255, 255, 0.12) inset, 0 -12px 26px rgba(0, 0, 0, 0.36) inset;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  transform-origin: center center;
+}
+
+#chassis::before {
+  content: '';
+  position: absolute;
+  inset: 7px;
+  z-index: -1;
+  border-radius: 13px 13px 7px 7px;
+  background: linear-gradient(90deg, rgba(255,255,255,.06), transparent 8%, transparent 92%, rgba(255,255,255,.06));
+  box-shadow: 0 0 0 1px rgba(0,0,0,.45) inset;
+}
+
+#brand-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 12px 12px;
+  color: #cfd0d3;
+  font-family: var(--font-display);
+  letter-spacing: 0.14em;
+  font-size: 13px;
+}
+
+#brand-strip .brand-logo {
+  width: 96px;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  filter: brightness(0) invert(1);
+  opacity: 0.96;
+}
+
+#brand-strip .brand-model {
+  color: #d6d8dc;
+  font-size: 11px;
+  text-transform: uppercase;
+  padding: 5px 9px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* ---------------------------------------------------------------------
+   The main control panel: light brushed-metal surface.
+   --------------------------------------------------------------------- */
+
+#panel {
+  background: linear-gradient(145deg, #f8fafc 0%, #e7e9ed 30%, #c3c7ce 75%, #aeb3bc 100%);
+  border-radius: 10px 10px 4px 4px;
+  padding: 16px 20px 18px;
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  box-shadow: inset 0 2px 6px rgba(255, 255, 255, 0.85), inset 0 -3px 10px rgba(28, 32, 39, 0.22), 0 1px 0 rgba(0, 0, 0, 0.45);
+}
+
+/* subtle brushed-metal texture via repeating gradient */
+#panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: repeating-linear-gradient(
+    100deg,
+    rgba(255, 255, 255, 0.35) 0px,
+    rgba(255, 255, 255, 0) 1px,
+    rgba(0, 0, 0, 0.02) 2px,
+    rgba(255, 255, 255, 0) 3px
+  );
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+#panel::after {
+  content: '';
+  position: absolute;
+  inset: 11px;
+  pointer-events: none;
+  opacity: .72;
+  background:
+    radial-gradient(circle at 5px 5px, #5d6168 0 1px, #dfe2e6 1.7px 2.6px, transparent 3px) 0 0 / 100% 100%,
+    radial-gradient(circle at calc(100% - 5px) 5px, #5d6168 0 1px, #dfe2e6 1.7px 2.6px, transparent 3px) 0 0 / 100% 100%,
+    radial-gradient(circle at 5px calc(100% - 5px), #5d6168 0 1px, #dfe2e6 1.7px 2.6px, transparent 3px) 0 0 / 100% 100%,
+    radial-gradient(circle at calc(100% - 5px) calc(100% - 5px), #5d6168 0 1px, #dfe2e6 1.7px 2.6px, transparent 3px) 0 0 / 100% 100%;
+}
+
+#panel-top-row, #sections-row, #master-row, #scope-row { position: relative; z-index: 1; }
+
+#panel-top-row {
+  display: flex;
+  gap: 16px;
+  align-items: stretch;
+}
+
+/* ---------------------------------------------------------------------
+   OLED display window.
+   --------------------------------------------------------------------- */
+
+.lp-oled {
+  width: 230px;
+  min-width: 230px;
+  background: linear-gradient(145deg, #120d05, #281504);
+  border-radius: 7px;
+  padding: 10px 12px;
+  border: 2px solid #34363a;
+  box-shadow: inset 0 0 0 2px #050403, inset 0 0 18px rgba(0, 0, 0, 0.85), 0 2px 4px rgba(0, 0, 0, 0.32), 0 1px 0 rgba(255, 255, 255, 0.5);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+}
+
+.lp-oled-line {
+  font-family: var(--font-mono);
+  color: var(--oled-amber);
+  text-shadow: 0 0 6px var(--led-on-glow), 0 0 2px var(--led-on-glow);
+  font-size: 15px;
+  letter-spacing: 0.06em;
+  white-space: pre;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lp-oled-line2 {
+  font-size: 12px;
+  color: #d98a2e;
+  opacity: 0.9;
+}
+
+/* ---------------------------------------------------------------------
+   Preset bank controls (next to OLED).
+   --------------------------------------------------------------------- */
+
+#preset-controls {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  min-width: 332px;
+}
+
+#preset-controls .preset-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lp-btn {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  background: linear-gradient(180deg, #4a4b50 0%, #2c2d30 100%);
+  color: #e5e6e8;
+  border: none;
+  border: 1px solid rgba(0, 0, 0, 0.65);
+  border-radius: 5px;
+  padding: 7px 12px;
+  cursor: pointer;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  transition: filter 0.12s ease, transform 0.12s ease, box-shadow 0.12s ease;
+  white-space: nowrap;
+}
+
+.lp-btn:hover {
+  filter: brightness(1.16);
+  transform: translateY(-1px);
+}
+
+.lp-btn:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.lp-btn.lit {
+  background: linear-gradient(180deg, #ffb347 0%, #d9820f 100%);
+  color: #241300;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.4), 0 0 10px rgba(255, 159, 10, 0.55);
+}
+
+.lp-btn:not(.lit)::before { content: ''; display: inline-block; width: 3px; height: 3px; margin: 0 5px 1px 0; border-radius: 50%; background: #767a81; box-shadow: 0 0 4px rgba(255,255,255,.18); }
+.lp-btn.lit::before { content: ''; display: inline-block; width: 3px; height: 3px; margin: 0 5px 1px 0; border-radius: 50%; background: #fff3d4; box-shadow: 0 0 7px #fff3d4; }
+
+#preset-select {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 7px 8px;
+  border-radius: 3px;
+  border: 1px solid var(--section-border);
+  background: linear-gradient(180deg, #f7f7f7, #dde0e6);
+  color: #2a2f36;
+  width: 100%;
+}
+
+/* ---------------------------------------------------------------------
+   Four control-block sections: VCO / LFO / VCF / EG.
+   --------------------------------------------------------------------- */
+
+#sections-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.lp-section {
+  flex: 1;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.52), rgba(167, 172, 182, 0.46));
+  border: 1px solid rgba(89, 94, 104, 0.48);
+  border-radius: 8px;
+  padding: 8px 10px 10px;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.82), inset 0 -1px 1px rgba(38, 42, 50, 0.18), 0 2px 3px rgba(40, 44, 50, 0.12);
+}
+
+.lp-section-title {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #3c4149;
+  text-align: center;
+  margin-bottom: 6px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+  padding-bottom: 4px;
+}
+
+.lp-section-knobs {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.lp-section-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.lp-section-buttons .lp-btn {
+  padding: 5px 8px;
+  font-size: 9.5px;
+}
+
+/* ---------------------------------------------------------------------
+   Master row: volume, glide, octave, view toggles.
+   --------------------------------------------------------------------- */
+
+#master-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+  gap: 14px;
+}
+
+#octave-display {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text-dark);
+  background: #f4f4f4;
+  border: 1px solid var(--section-border);
+  border-radius: 4px;
+  padding: 6px 10px;
+  min-width: 70px;
+  text-align: center;
+}
+
+#view-toggles {
+  display: flex;
+  gap: 6px;
+}
+
+/* ---------------------------------------------------------------------
+   Scope / Spectrum floating panels.
+   --------------------------------------------------------------------- */
+
+.lp-scope-panel {
+  background: var(--oled-bg);
+  border-radius: 4px;
+  padding: 6px;
+  border: 2px solid #33363b;
+  box-shadow: inset 0 0 0 2px #070503, inset 0 0 16px rgba(0,0,0,.8), 0 2px 3px rgba(0,0,0,.24);
+}
+
+.lp-scope, .lp-spectrum {
+  width: 100%;
+  height: 70px;
+  display: block;
+}
+
+/* ---------------------------------------------------------------------
+   Wheels + keyboard row.
+   --------------------------------------------------------------------- */
+
+#lower-row {
+  display: flex;
+  gap: 14px;
+  margin-top: 14px;
+  align-items: stretch;
+}
+
+#wheel-housing-block {
+  background: linear-gradient(145deg, #4b4e54 0%, #23252a 52%, #121315 100%);
+  border-radius: 8px 4px 4px 8px;
+  padding: 10px 14px;
+  display: flex;
+  gap: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 2px 5px rgba(255, 255, 255, 0.1), inset 0 -4px 8px rgba(0, 0, 0, 0.5);
+}
+
+#keyboard-block {
+  flex: 1;
+  background: linear-gradient(145deg, #46494f 0%, #23252a 52%, #111214 100%);
+  border-radius: 4px 8px 8px 4px;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 2px 5px rgba(255, 255, 255, 0.1), inset 0 -4px 8px rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: flex-end;
+}
+
+#chassis-bottom-cap {
+  height: 14px;
+  background: linear-gradient(180deg, #232427 0%, #1a1b1d 100%);
+  border-radius: 0 0 10px 10px;
+  margin-top: 0;
+}
+
+/* ---------------------------------------------------------------------
+   Modal (save/rename/import-export) — kept minimal, matches panel language.
+   --------------------------------------------------------------------- */
+
+.lp-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.lp-modal {
+  background: var(--panel-silver-light);
+  border-radius: 8px;
+  padding: 20px 22px;
+  min-width: 320px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  font-family: var(--font-body);
+  color: var(--text-dark);
+}
+
+.lp-modal h3 {
+  margin: 0 0 12px;
+  font-family: var(--font-display);
+  letter-spacing: 0.06em;
+  font-size: 14px;
+}
+
+.lp-modal input[type="text"], .lp-modal textarea {
+  width: 100%;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid var(--section-border);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  margin-bottom: 10px;
+}
+
+.lp-modal textarea {
+  height: 120px;
+  resize: vertical;
+}
+
+.lp-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+/* Accessibility: visible focus ring across all interactive elements. */
+button:focus-visible,
+.lp-knob:focus-visible,
+.lp-wheel:focus-visible,
+select:focus-visible,
+input:focus-visible {
+  outline: 2px solid #2f6fed;
+  outline-offset: 2px;
+}
+
+/* High-contrast mode toggle. */
+body.high-contrast {
+  filter: contrast(1.3) brightness(1.05);
+}
+
+body.high-contrast .lp-oled-line {
+  text-shadow: none;
+  color: #ffcc66;
+}
+
+/* ---------------------------------------------------------------------
+   Power-on overlay: doubles as the required user-gesture surface for
+   unlocking the AudioContext (browser autoplay policy) and as clear
+   communication that the instrument is silent until touched.
+   --------------------------------------------------------------------- */
+
+#power-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 18% 20%, rgba(89, 123, 203, 0.23), transparent 26%),
+    radial-gradient(circle at 80% 85%, rgba(236, 153, 48, 0.16), transparent 25%),
+    rgba(9, 12, 17, 0.88);
+  backdrop-filter: blur(14px) saturate(1.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: opacity 0.5s ease;
+}
+
+#power-overlay.power-overlay-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#power-overlay-inner {
+  position: relative;
+  width: min(560px, calc(100vw - 40px));
+  overflow: hidden;
+  padding: 58px 48px 34px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 32px;
+  background: linear-gradient(145deg, rgba(56, 64, 77, 0.94), rgba(18, 22, 29, 0.96));
+  box-shadow: 0 42px 110px rgba(0, 0, 0, 0.58), inset 0 1px rgba(255, 255, 255, 0.2), inset 0 -1px rgba(0,0,0,.3);
+  text-align: center;
+  color: #eee;
+  font-family: var(--font-display);
+}
+
+#power-overlay-title {
+  position: relative;
+  font-size: clamp(34px, 6vw, 52px);
+  font-weight: 700;
+  letter-spacing: -0.055em;
+  color: var(--launcher-ink);
+  margin: 8px 0 12px;
+}
+
+#power-overlay-sub {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  justify-content: center;
+  margin-top: 18px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  color: var(--oled-amber);
+  text-transform: uppercase;
+  animation: power-pulse 1.8s ease-in-out infinite;
+}
+
+.power-eyebrow, .power-launcher-copy, .power-launcher-footer, .power-launcher-mark, .power-orbit {
+  position: relative;
+}
+
+.power-eyebrow {
+  color: #ffba59;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+}
+
+.power-launcher-copy {
+  margin: 0 0 25px;
+  color: var(--launcher-muted);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.power-launcher-mark {
+  display: grid;
+  place-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 58px;
+  height: 58px;
+  margin: 0 auto 22px;
+  border: 1px solid rgba(255, 214, 150, .32);
+  border-radius: 19px;
+  background: linear-gradient(145deg, rgba(255, 201, 124, .25), rgba(255, 139, 0, .08));
+  box-shadow: 0 12px 30px rgba(0,0,0,.25), inset 0 1px rgba(255,255,255,.2);
+}
+
+.power-launcher-mark span { color: #ffd399; font-size: 31px; font-variation-settings: 'FILL' 1, 'wght' 500; text-shadow: 0 0 22px rgba(255, 159, 10, .48); }
+
+#power-launcher-button { --md-filled-button-container-color: #ffd39a; --md-filled-button-label-text-color: #422b00; --md-filled-button-container-elevation: 0; --md-filled-button-hover-container-elevation: 2; min-width: 230px; font-family: var(--font-body); font-weight: 800; letter-spacing: .01em; }
+#power-launcher-button .material-symbols-rounded { font-size: 18px; }
+
+.power-dot { width: 7px; height: 7px; border-radius: 50%; background: #ffb347; box-shadow: 0 0 12px #ff9f0a; }
+.power-launcher-footer { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 26px; color: #7f8794; font-size: 9px; font-weight: 700; letter-spacing: 0.11em; }
+.power-launcher-footer i { display: block; width: 3px; height: 3px; border-radius: 50%; background: #ff9f0a; }
+.power-orbit { position: absolute; width: 420px; height: 420px; border: 1px solid rgba(255, 183, 83, 0.1); border-radius: 50%; pointer-events: none; }
+.power-orbit-one { top: -310px; left: -180px; }
+.power-orbit-two { right: -245px; bottom: -345px; border-color: rgba(111, 156, 255, 0.12); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
+}
+
+@keyframes power-pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+/* Scalable instrument library. Each tile is rendered from launcher.js data. */
+#launcher-page { position:fixed; inset:0; z-index:200; overflow-y:auto; color:var(--launcher-ink); background:radial-gradient(circle at 18% 20%,rgba(89,123,203,.23),transparent 26%),radial-gradient(circle at 80% 85%,rgba(236,153,48,.16),transparent 25%),rgba(9,12,17,.94); backdrop-filter:blur(14px) saturate(1.25); transition:opacity .42s ease,transform .42s cubic-bezier(.2,.8,.2,1),visibility .42s; }
+.launcher-page--leaving{opacity:0;transform:scale(1.012);visibility:hidden}.launcher-header,.launcher-hero,.instrument-grid,.launcher-footer{position:relative;z-index:1;width:min(1120px,calc(100% - 48px));margin-inline:auto}.launcher-header{display:flex;align-items:center;justify-content:space-between;padding-top:30px}.launcher-brand{display:inline-flex;align-items:center;gap:11px;font-size:14px;font-weight:750;letter-spacing:-.03em}.launcher-brand__mark{display:flex;align-items:end;gap:2px;width:24px;height:24px;padding:5px;border-radius:8px;background:linear-gradient(145deg,#ffdfaf,#d9800e);box-shadow:0 5px 14px rgba(255,157,10,.2)}.launcher-brand__mark i{display:block;width:3px;border-radius:3px;background:#533000}.launcher-brand__mark i:nth-child(1){height:7px}.launcher-brand__mark i:nth-child(2){height:13px}.launcher-brand__mark i:nth-child(3){height:9px}.launcher-status{display:flex;gap:8px;align-items:center;color:#bac0ce;font-size:12px;font-weight:600}.launcher-status span{width:7px;height:7px;border-radius:50%;background:#83e6a8;box-shadow:0 0 0 4px rgba(131,230,168,.12)}
+.launcher-hero{padding:90px 0 46px}.launcher-overline{margin:0 0 16px;color:#ffcb87;font-size:11px;font-weight:750;letter-spacing:.14em;text-transform:uppercase}.launcher-hero h1{margin:0;color:#f7f8fc;font-size:clamp(48px,7vw,86px);line-height:.96;letter-spacing:-.075em;font-weight:760}.launcher-hero h1 em{color:#ffd29b;font-style:normal}.launcher-hero>p:last-child{max-width:560px;margin:25px 0 0;color:#bcc4d4;font-size:15px;line-height:1.7;letter-spacing:-.01em}
+.instrument-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,420px));gap:20px;padding-bottom:50px}.instrument-tile{display:grid;grid-template-columns:155px 1fr;min-height:275px;overflow:hidden;border:1px solid rgba(255,255,255,.12);border-radius:24px;background:linear-gradient(145deg,rgba(53,60,72,.94),rgba(24,28,35,.96));box-shadow:0 18px 45px rgba(0,0,0,.22),inset 0 1px rgba(255,255,255,.12);cursor:pointer;outline:none;transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease}.instrument-tile:hover,.instrument-tile:focus-visible,.instrument-tile.is-selected{transform:translateY(-4px);border-color:rgba(255,205,137,.58);box-shadow:0 25px 55px rgba(0,0,0,.35),0 0 0 4px rgba(255,179,84,.08),inset 0 1px rgba(255,255,255,.16)}
+.instrument-tile__visual{position:relative;overflow:hidden;background:linear-gradient(160deg,#e4e6eb,#aeb4bf 55%,#6e747e)}.instrument-tile__glow{position:absolute;inset:-35%;background:radial-gradient(circle,rgba(255,171,57,.65),transparent 52%);filter:blur(7px)}.instrument-tile__display{position:absolute;top:37px;left:31px;width:95px;height:37px;padding:8px;border:4px solid #3b3f47;border-radius:5px;background:#201303;box-shadow:inset 0 0 13px #000,0 2px 4px rgba(0,0,0,.35)}.instrument-tile__display span{display:block;height:3px;margin:3px 0;background:#ffb54f;box-shadow:0 0 5px #ff9f0a}.instrument-tile__keys{position:absolute;right:-12px;bottom:22px;width:145px;height:47px;transform:rotate(-18deg);background:repeating-linear-gradient(90deg,#f8f8f5 0 11px,#2d3035 11px 14px,#f8f8f5 14px 25px);border:3px solid #30343b;box-shadow:0 4px 6px rgba(0,0,0,.32)}.instrument-tile__icon{position:absolute;right:16px;top:16px;color:rgba(54,59,68,.55);font-size:21px;display:inline-flex;align-items:center;justify-content:center;line-height:1}
+.instrument-tile--little-phatty .instrument-tile__visual{background:linear-gradient(160deg,#f6f7fa,#ccd3df 57%,#8f99a8)}
+.instrument-tile--sub-37 .instrument-tile__visual{background:linear-gradient(160deg,#2f333b,#14181f 60%,#090c12)}
+.instrument-tile--sub-37 .instrument-tile__display{border-color:#3d4248;background:#0f1f2c}
+.instrument-tile--sub-37 .instrument-tile__display span{background:#7de4ff;box-shadow:0 0 8px rgba(125,228,255,.9)}
+.instrument-tile--sub-37 .instrument-tile__keys{background:repeating-linear-gradient(90deg,#f6f6f3 0 11px,#1f232a 11px 14px,#f6f6f3 14px 25px)}
+.instrument-tile--sub-37 .instrument-tile__icon{color:rgba(185,208,224,.62)}
+.instrument-tile__content{display:flex;flex-direction:column;padding:21px 20px 17px}.instrument-tile__eyebrow{color:#f9c67d;font-size:10px;font-weight:750;letter-spacing:.13em;text-transform:uppercase}.instrument-tile h2{margin:7px 0 0;color:#f5f6f9;font-size:25px;font-weight:720;letter-spacing:-.055em}.instrument-tile__model{margin:1px 0 11px;color:#a7afbf;font-size:11px;font-weight:650}.instrument-tile__description{margin:0;color:#cad1df;font-size:11.5px;line-height:1.55}.instrument-specs{display:flex;gap:10px;margin-top:15px}.instrument-spec{display:grid;grid-template-columns:15px auto;align-items:center;column-gap:4px;color:#9ea7b8;font-size:9px;line-height:1.2}.instrument-spec .material-symbols-rounded{grid-row:span 2;font-size:14px;color:#f7c178;display:inline-flex;align-items:center;justify-content:center;line-height:1}.instrument-spec strong{grid-column:2;color:#e3e6ed;font-size:10px;font-weight:700}.instrument-tile__actions{display:flex;align-items:center;justify-content:space-between;min-height:34px;margin-top:auto;padding-top:14px}.instrument-tile__hint{display:flex;gap:5px;align-items:center;color:#919aaa;font-size:10px;font-weight:600}.instrument-tile__hint .material-symbols-rounded{font-size:14px;display:inline-flex;align-items:center;justify-content:center;line-height:1}.instrument-launch-button{display:none;--md-filled-button-container-color:#ffd39a;--md-filled-button-label-text-color:#422b00;--md-filled-button-container-elevation:0;font-family:var(--font-body);font-size:11px;font-weight:750}.instrument-tile.is-selected .instrument-launch-button{display:inline-flex}.instrument-tile.is-selected .instrument-tile__hint{display:none}
+.instrument-launch-button .material-symbols-rounded{display:inline-flex;align-items:center;justify-content:center;line-height:1;font-size:16px}
+.launcher-footer{display:flex;justify-content:space-between;padding:0 0 32px;color:#737c8c;font-size:9px;font-weight:700;letter-spacing:.12em}.launcher-ambient{position:absolute;width:640px;height:640px;border-radius:50%;filter:blur(1px);pointer-events:none}.launcher-ambient--one{top:-400px;right:-160px;background:radial-gradient(circle,rgba(91,130,222,.17),transparent 67%)}.launcher-ambient--two{bottom:-500px;left:-240px;background:radial-gradient(circle,rgba(237,149,46,.13),transparent 67%)}
+@media(max-width:560px){.launcher-header,.launcher-hero,.instrument-grid,.launcher-footer{width:min(100% - 32px,1120px)}.launcher-header{padding-top:22px}.launcher-status{font-size:10px}.launcher-hero{padding:60px 0 34px}.instrument-tile{grid-template-columns:120px 1fr}.instrument-tile__display{left:17px}.instrument-tile__keys{right:-35px}.launcher-footer{gap:10px;font-size:8px}.instrument-tile__content{padding:18px 16px}.instrument-specs{gap:7px}}
+
+/* Library motion: depth and atmosphere without distracting from selection. */
+.launcher-header { animation: launcher-enter .65s .05s both cubic-bezier(.2,.8,.2,1); }
+.launcher-hero { animation: launcher-enter .75s .15s both cubic-bezier(.2,.8,.2,1); }
+.instrument-tile { animation: tile-enter .8s .32s both cubic-bezier(.2,.8,.2,1), tile-breathe 5.5s 1.2s ease-in-out infinite; }
+.launcher-footer { animation: launcher-enter .7s .48s both cubic-bezier(.2,.8,.2,1); }
+.launcher-brand { letter-spacing: .12em; font-size: 12px; }
+.launcher-brand__mark { animation: mark-pulse 3.2s ease-in-out infinite; }
+.launcher-status span { animation: status-pulse 2.3s ease-in-out infinite; }
+.launcher-ambient--one { animation: ambient-drift-one 12s ease-in-out infinite alternate; }
+.launcher-ambient--two { animation: ambient-drift-two 15s ease-in-out infinite alternate; }
+.instrument-tile__glow { animation: glow-sweep 6s 1s ease-in-out infinite alternate; }
+.instrument-tile__keys { animation: keybed-float 4.8s ease-in-out infinite; }
+.instrument-tile.is-selected { animation: selected-settle .38s cubic-bezier(.2,.9,.2,1); }
+.instrument-tile.is-selected .instrument-launch-button { animation: launch-reveal .28s both cubic-bezier(.2,.8,.2,1); }
+.launcher-noise { position:fixed; inset:0; z-index:0; opacity:.07; pointer-events:none; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 140 140' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E"); mix-blend-mode:soft-light; }
+@keyframes launcher-enter { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } }
+@keyframes tile-enter { from { opacity:0; transform:translateY(26px) scale(.975); } to { opacity:1; transform:translateY(0) scale(1); } }
+@keyframes tile-breathe { 0%,100% { box-shadow:0 18px 45px rgba(0,0,0,.22),inset 0 1px rgba(255,255,255,.12); } 50% { box-shadow:0 24px 55px rgba(0,0,0,.3),inset 0 1px rgba(255,255,255,.15); } }
+@keyframes mark-pulse { 0%,100% { transform:scale(1); box-shadow:0 5px 14px rgba(255,157,10,.2); } 50% { transform:scale(1.06); box-shadow:0 7px 22px rgba(255,157,10,.42); } }
+@keyframes status-pulse { 0%,100% { opacity:1; box-shadow:0 0 0 4px rgba(131,230,168,.12); } 50% { opacity:.65; box-shadow:0 0 0 7px rgba(131,230,168,.04); } }
+@keyframes ambient-drift-one { from { transform:translate3d(0,0,0) scale(1); } to { transform:translate3d(-55px,65px,0) scale(1.16); } }
+@keyframes ambient-drift-two { from { transform:translate3d(0,0,0) scale(1); } to { transform:translate3d(70px,-45px,0) scale(1.13); } }
+@keyframes glow-sweep { from { transform:translate(-8%,-4%) scale(.96); opacity:.7; } to { transform:translate(10%,8%) scale(1.12); opacity:1; } }
+@keyframes keybed-float { 0%,100% { transform:rotate(-18deg) translateY(0); } 50% { transform:rotate(-18deg) translateY(-4px); } }
+@keyframes selected-settle { 0% { transform:translateY(-4px) scale(1); } 55% { transform:translateY(-5px) scale(1.018); } 100% { transform:translateY(-4px) scale(1); } }
+@keyframes launch-reveal { from { opacity:0; transform:translateX(8px) scale(.92); } to { opacity:1; transform:translateX(0) scale(1); } }

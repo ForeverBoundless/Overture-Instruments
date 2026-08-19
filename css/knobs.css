@@ -1,0 +1,187 @@
+/* =====================================================================
+   knobs.css — Rotary knob, LED ring, and pitch/mod wheel styling.
+   ===================================================================== */
+
+.lp-knob {
+  --knob-size: 54px;
+  width: var(--knob-size);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  cursor: ns-resize;
+  user-select: none;
+  touch-action: none;
+  border-radius: 10px;
+  padding: 2px;
+}
+
+.lp-knob-svg {
+  width: var(--knob-size);
+  height: var(--knob-size);
+  overflow: visible;
+}
+
+/* LED ring track: faint always-visible groove the LEDs sit in. */
+.lp-knob-ring-track {
+  fill: none;
+  stroke: rgba(0, 0, 0, 0.18);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+.lp-knob-led {
+  fill: var(--led-off);
+  transition: fill 0.06s ease, filter 0.06s ease;
+}
+
+.lp-knob-led.lit {
+  fill: var(--led-on);
+  filter: drop-shadow(0 0 2px var(--led-on-glow));
+}
+
+/* Knob body: dark, subtly domed, machined-metal look via layered radial gradients. */
+.lp-knob-body {
+  /* fill is set inline via the per-instance <radialGradient> in Knob.js */
+  stroke: #07080a;
+  stroke-width: 1.35;
+  filter: drop-shadow(0 3px 2px rgba(0, 0, 0, 0.48));
+}
+
+.lp-knob-flute {
+  stroke: rgba(0, 0, 0, 0.5);
+  stroke-width: 0.6;
+}
+
+.lp-knob-pointer {
+  stroke: #f4f4f4;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 1px rgba(255, 255, 255, 0.6));
+}
+
+.lp-knob-pointer-dot {
+  fill: #f4f4f4;
+}
+
+.lp-knob-cap {
+  fill: #2e2f34;
+  stroke: rgba(255, 255, 255, 0.08);
+  stroke-width: 0.5;
+}
+
+.lp-knob-label {
+  font-family: var(--font-display);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #343942;
+  text-align: center;
+  text-transform: uppercase;
+  line-height: 1.15;
+  max-width: calc(var(--knob-size) + 14px);
+}
+
+.lp-knob:hover .lp-knob-body {
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.5)) brightness(1.08);
+}
+
+.lp-knob-dragging .lp-knob-body {
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.5)) brightness(1.18);
+}
+
+.lp-knob-dragging {
+  cursor: grabbing;
+}
+
+/* ---------------------------------------------------------------------
+   Pitch / mod wheels — dark plastic housing, blue backlight glow, ridged
+   rubber-look thumb, matching the Little Phatty's signature blue wheel
+   lighting.
+   --------------------------------------------------------------------- */
+
+.lp-wheel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 46px;
+}
+
+.lp-wheel-housing {
+  width: 40px;
+  height: 150px;
+  background: linear-gradient(90deg, #0c0d0f 0%, #1a1b1e 50%, #0c0d0f 100%);
+  border: 1px solid rgba(112, 146, 255, 0.32);
+  border-radius: 8px;
+  padding: 6px;
+  box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.9), inset 0 0 25px var(--wheel-blue-glow), 0 1px 1px rgba(255, 255, 255, 0.12);
+  position: relative;
+  overflow: hidden;
+}
+
+.lp-wheel-housing::before {
+  /* Blue backlight bleeding from the wheel slot, characteristic of the hardware. */
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 50%, rgba(70, 130, 255, 0.35), transparent 70%);
+  pointer-events: none;
+}
+
+.lp-wheel-track {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.lp-wheel-thumb {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 34px;
+  transform: translateY(-50%);
+  background: linear-gradient(90deg, #26272b 0%, #3d3e43 50%, #26272b 100%);
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.6), 0 0 8px var(--wheel-blue-glow);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+}
+
+.lp-wheel-grip {
+  width: 70%;
+  height: 1.5px;
+  background: rgba(120, 170, 255, 0.55);
+  border-radius: 1px;
+}
+
+.lp-wheel.active .lp-wheel-thumb {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.6), 0 0 16px rgba(90, 150, 255, 1);
+}
+
+.lp-wheel-label {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #c9cad0;
+  text-transform: uppercase;
+}
+
+/* Center detent mark for the pitch wheel only, showing the spring-return zero point. */
+.lp-wheel-pitch .lp-wheel-housing::after {
+  content: '';
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  top: 50%;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-50%);
+  pointer-events: none;
+}

@@ -1,0 +1,68 @@
+/* =====================================================================
+   keyboard.css — 37-key virtual piano.
+   ===================================================================== */
+
+.lp-keyboard {
+  position: relative;
+  width: 100%;
+  height: 154px;
+  user-select: none;
+}
+
+.lp-key {
+  position: absolute;
+  top: 0;
+  box-sizing: border-box;
+  cursor: pointer;
+  transition: background 0.04s ease;
+}
+
+.lp-key-white {
+  height: 100%;
+  background: linear-gradient(100deg, #d8d8d6 0%, #ffffff 8%, #fcfcfa 52%, #dededb 100%);
+  border: 1px solid #1a1b1d;
+  border-radius: 0 0 3px 3px;
+  z-index: 1;
+  box-shadow: inset 1px 0 rgba(255, 255, 255, 0.8), inset 0 -4px 3px rgba(0, 0, 0, 0.1), 0 2px 1px rgba(0, 0, 0, 0.18);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 6px;
+}
+
+.lp-key-white.active {
+  background: linear-gradient(180deg, #ffe3ad 0%, #ffb347 96%, #e8951f 100%);
+}
+
+.lp-key-black {
+  height: 62%;
+  background: linear-gradient(100deg, #101114 0%, #3d3f45 44%, #141518 68%, #050506 100%);
+  border-radius: 0 0 3px 3px;
+  z-index: 2;
+  box-shadow: 2px 4px 5px rgba(0, 0, 0, 0.58), inset 1px 0 rgba(255, 255, 255, 0.12), inset 0 -2px 2px rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 5px;
+}
+
+.lp-key-black.active {
+  background: linear-gradient(180deg, #ffb347 0%, #d9820f 85%, #b3690a 100%);
+  box-shadow: 0 3px 4px rgba(0, 0, 0, 0.5), 0 0 10px rgba(255, 159, 10, 0.6);
+}
+
+.lp-key-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: #666;
+  pointer-events: none;
+}
+
+.lp-key-black .lp-key-label {
+  color: #999;
+}
+
+/* When the whole app is used on a lower-height viewport, keys still must
+   stay tappable; height is controlled by the JS-computed chassis scale
+   rather than a media query, so no additional breakpoint rules are
+   required here. */
