@@ -15,6 +15,14 @@
   font-style: normal;
 }
 
+@font-face {
+  font-family: 'Figtree';
+  src: url('../ui/Figtree-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --md-sys-color-primary: #ffd39a;
   --md-sys-color-on-primary: #422b00;
@@ -43,7 +51,7 @@
   --accent-red: #b3271a;
 
   --font-display: 'Futura Book', 'Arial Narrow', Arial, Helvetica, sans-serif;
-  --font-body: 'Figtree', 'Segoe UI', Helvetica, sans-serif;
+  --font-body: 'Inter Variable', 'Inter', 'Segoe UI', Helvetica, sans-serif;
   --font-mono: 'DM Mono', 'Courier New', Courier, monospace;
 }
 
