@@ -15,14 +15,6 @@
   font-style: normal;
 }
 
-@font-face {
-  font-family: 'Figtree';
-  src: url('../ui/Figtree-VariableFont_wght.ttf') format('truetype');
-  font-weight: 100 900;
-  font-style: normal;
-  font-display: swap;
-}
-
 :root {
   --md-sys-color-primary: #ffd39a;
   --md-sys-color-on-primary: #422b00;
