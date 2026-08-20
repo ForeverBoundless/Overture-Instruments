@@ -23,6 +23,14 @@
   font-display: swap;
 }
 
+#launcher-page {
+  font-family: var(--font-body);
+}
+
+#launcher-page {
+  font-family: 'Inter Variable', 'Inter', 'Segoe UI', Helvetica, sans-serif;
+}
+
 :root {
   --md-sys-color-primary: #ffd39a;
   --md-sys-color-on-primary: #422b00;
