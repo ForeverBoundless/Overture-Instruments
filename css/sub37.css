@@ -324,7 +324,7 @@
 }
 
 #sub37-power strong {
-  font-family: var(--font-display);
+  font-family: 'Inter Variable', 'Inter', sans-serif;
   font-size: 22px;
   letter-spacing: 0.15em;
 }
