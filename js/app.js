@@ -968,7 +968,7 @@ class App {
     cancelRow.className = 'lp-modal-actions';
     const cancelBtn = document.createElement('button');
     cancelBtn.className = 'lp-btn';
-    cancelBtn.textContent = 'CANCEL';
+    cancelBtn.textContent = 'CLOSE';
     cancelBtn.addEventListener('click', close);
     cancelRow.appendChild(cancelBtn);
     modal.appendChild(cancelRow);
