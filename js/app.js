@@ -135,7 +135,7 @@ class App {
     const name = document.createElement('img');
     name.className = 'brand-logo';
     name.alt = 'Moog';
-    name.src = './ui/Moog_Music_logo.png';
+    name.src = './ui/Logos/Moog_Music_logo.png';
     name.title = 'Moog';
 
     const model = document.createElement('div');

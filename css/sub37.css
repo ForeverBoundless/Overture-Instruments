@@ -323,6 +323,48 @@
   font-size: 38px;
 }
 
+#sub37-power .sub37-power-icon {
+  filter: brightness(0) invert(1);
+  animation: sub37-logo-flicker 3s infinite;
+}
+
+@keyframes sub37-logo-flicker {
+  0%, 100% {
+    opacity: 1;
+    filter: brightness(0) invert(1);
+  }
+
+  2% {
+    opacity: 0.75;
+    filter: brightness(0) invert(1);
+  }
+
+  3% {
+    opacity: 1;
+    filter: brightness(0) invert(1);
+  }
+
+  4% {
+    opacity: 0.4;
+    filter: brightness(0) invert(1);
+  }
+
+  5% {
+    opacity: 1;
+    filter: brightness(0) invert(1);
+  }
+
+  7% {
+    opacity: 0.8;
+    filter: brightness(0) invert(1);
+  }
+
+  8% {
+    opacity: 1;
+    filter: brightness(0) invert(1);
+  }
+}
+
 #sub37-power strong {
   font-family: 'Inter Variable', 'Inter', sans-serif;
   font-size: 22px;

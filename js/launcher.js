@@ -29,9 +29,52 @@ function buildTile(instrument) {
 }
 
 const page = document.getElementById('launcher-page');
-page.innerHTML = `<div class="launcher-ambient launcher-ambient--one" aria-hidden="true"></div><div class="launcher-ambient launcher-ambient--two" aria-hidden="true"></div><div class="launcher-noise" aria-hidden="true"></div><header class="launcher-header"><div class="launcher-brand"><span class="launcher-brand__mark"><img class="launcher-brand__mark-img" src="/ui/OvertureLogo.png" alt="Overture" width="24" height="24"></span>
-<span>OVERTURE INSTRUMENTS</span></div><div class="launcher-status"><span></span>Instrument library</div></header><section class="launcher-hero" aria-labelledby="launcher-title"><p class="launcher-overline">An expanding collection of MIDI-playable classics</p><h1 id="launcher-title">Ch<img class="launcher-hero__o-icon" src="/ui/OvertureLogo.png" alt="o">ose your<br><em>instrument.</em></h1>
-<p>Explore Overture's growing library of free synth emulators, brought to life with incredible realism and attention to detail.<br><b>The legends, faithfully recreated. Completely free.</b></p></section><section class="instrument-grid" aria-label="Available instruments"></section><footer class="launcher-footer"><span>01 AVAILABLE INSTRUMENT</span><span>SELECT A TILE TO CONTINUE</span></footer>`;
+page.innerHTML = `<div class="launcher-ambient launcher-ambient--one" aria-hidden="true"></div><div class="launcher-ambient launcher-ambient--two" aria-hidden="true"></div><div class="launcher-noise" aria-hidden="true"></div><header class="launcher-header"><div class="launcher-brand"><span class="launcher-brand__mark"><img class="launcher-brand__mark-img" src="./ui/Logos/OvertureLogo.png" alt="Overture" width="24" height="24"></span>
+<span>OVERTURE INSTRUMENTS</span></div><div class="launcher-status"><span></span>Instrument library</div></header><section class="launcher-hero" aria-labelledby="launcher-title">
+  <div class="launcher-hero__copy">
+    <p class="launcher-overline">An expanding collection of MIDI-playable classics</p>
+
+    <h1 id="launcher-title">
+      Ch<img class="launcher-hero__o-icon" src="./ui/Logos/OvertureLogo.png" alt="o">ose your<br>
+      <em>instrument.</em>
+    </h1>
+
+    <p>
+      Explore OI's growing library of free synth emulators, brought to life with incredible realism and attention to detail.<br>
+      <b>At long last, the legends, completely for free.</b>
+    </p>
+  </div>
+
+  <div class="launcher-brand-grid" aria-label="Emulated instrument brands">
+    <div class="launcher-brand-slot">
+      <img src="/ui/Logos/Moog_Music_logo.png" alt="Moog">
+    </div>
+
+    <div class="launcher-brand-slot">
+      <img src="/ui/Logos/Roland_logo.png" alt="Roland">
+    </div>
+
+    <div class="launcher-brand-slot">
+      <img src="/ui/Logos/Sequential_logo.png" alt="Sequential">
+    </div>
+
+    <div class="launcher-brand-slot">
+      <img src="/ui/Logos/Oberheim_logo.png" alt="Oberheim">
+    </div>
+
+    <div class="launcher-brand-slot">
+      <img src="/ui/Logos/Novation_logo.png" alt="Novation">
+    </div>
+
+    <div class="launcher-brand-slot">
+      <img src="/ui/Logos/Korg_logo.png" alt="Korg">
+    </div>
+  </div>
+</section><section class="instrument-grid" aria-label="Available instruments"></section><footer class="launcher-footer"><span>01 AVAILABLE INSTRUMENT</span><span>SELECT A TILE TO CONTINUE</span></footer>
+<div class="launcher-legal">
+  © 2026 Overture Instruments. Independent, unofficial project. Not affiliated with, endorsed by, or sponsored by any manufacturer represented here.
+  All trademarks and brand names belong to their respective owners.
+</div>`;
 const grid = page.querySelector('.instrument-grid');
 INSTRUMENTS.forEach((instrument) => grid.appendChild(buildTile(instrument)));
 
