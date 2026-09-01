@@ -16,23 +16,12 @@
 </head>
 <body>
 
-<div id="app-root"></div>
-
 <main id="launcher-page" aria-label="Instrument library"></main>
 
 <!--
-  This is the only script tag the page needs: app.js is loaded as an ES
-  module, and the browser resolves every `import` inside it (and inside
-  everything IT imports) automatically by following the module graph.
-  That's why this file doesn't also list Voice.js, AudioEngine.js, Knob.js,
-  etc. individually - they're all pulled in transitively from js/app.js.
-
-  Because this uses real ES modules (`type="module"`), opening this file
-  directly from disk (a file:// URL) will be blocked by the browser's
-  module-loading CORS policy. It must be served over http:// - see the
-  project's README.md for the two-minute setup.
+  The home page is now the instrument library only. The Little Phatty lives
+  on its own standalone route so it is not mounted inside the home page.
 -->
-<script type="module" src="js/app.js"></script>
 <script type="module" src="js/launcher-components.js"></script>
 
 </body>

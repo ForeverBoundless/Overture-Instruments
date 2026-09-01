@@ -22,6 +22,7 @@ function buildTile(instrument) {
   tile.addEventListener('keydown', (event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); select(); } });
   tile.querySelector('.instrument-launch-button').addEventListener('click', (event) => {
     event.stopPropagation();
+    if (instrument.id === 'little-phatty') { window.location.assign('./little-phatty/'); return; }
     if (instrument.id === 'sub-37') { window.location.assign('./sub37.html'); return; }
     document.dispatchEvent(new CustomEvent('launcher:launch', { detail: instrument }));
   });
