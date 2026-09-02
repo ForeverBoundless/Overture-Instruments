@@ -41,6 +41,10 @@ These are prospective additions to the library, not announcements of official pr
 
 ## Legal Notice
 
-Overture Instruments has no official partnerships, endorsements, sponsorships, or licensing relationships with Moog Music, Roland, Sequential, Oberheim, Novation, Korg, or any other brand represented in the app. References to these brands and instruments are used only to identify the sounds and designs being independently emulated.
+Overture Instruments is an independent, unofficial project and has no affiliation with, endorsement from, sponsorship by, or licensing relationship with Moog Music Inc., Roland Corporation, Sequential LLC, Marion Systems LLC, Focusrite Audio Engineering Limited, KORG INC., or any other manufacturer or brand referenced by the project.
 
-The programs in this project are unofficial emulators. They are not original manufacturer software, are not approved by the respective brands, and should not be presented as official versions of any named instrument. Overture Instruments does not claim ownership of the referenced trademarks, product names, logos, or designs. All trademarks and brand names belong to their respective owners.
+The instruments in this project are independently developed software emulations. They are not original manufacturer software and are not official versions of any referenced instrument.
+
+**Moog®, Roland®, Sequential®, Oberheim®, Novation®, and KORG®** are trademarks or registered trademarks of their respective owners. Overture Instruments does not claim ownership of any referenced trademarks, product names, logos, trade dress, or other intellectual property belonging to their respective owners.
+
+Product names and brand references are used for identification and descriptive purposes only.
