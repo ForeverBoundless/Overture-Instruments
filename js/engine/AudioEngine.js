@@ -49,6 +49,12 @@ export class AudioEngine {
 
     this.lfos = {};
     this._lfoDestinations = new Map(); // name -> {node, connectFn}
+    // The Little Phatty has one user-facing modulation matrix: one source,
+    // one destination and one amount, all scaled by the physical Mod wheel.
+    // Keep it distinct from the generic LFO depth helpers used by legacy UI.
+    this._lpMatrixPatch = { source: 'triangle', destination: 'pitch', amount: 0 };
+    this._lpOutputEnabled = true;
+    this._masterVolume = 0.25;
   }
 
   /** Must be called from a user gesture (click) per browser autoplay policy. */
@@ -90,6 +96,7 @@ export class AudioEngine {
     this.voice.connect(this.masterGain);
 
     this._buildLFOs();
+    this._buildLPMatrix();
 
     this.started = true;
   }
@@ -123,6 +130,51 @@ export class AudioEngine {
     this.voice.connectLFOToPulseWidth(this._lfoDepths.pulseWidth);
     this.voice.connectLFOToMix(this._lfoDepths.mix);
     this.voice.connectLFOToAmplitude(this._lfoDepths.amplitude);
+  }
+
+  _buildLPMatrix() {
+    const sourceNodes = {
+      lfo: this.lfos.main.output,
+      filter: this.voice._filterEnvSummer,
+      osc2: this.voice.osc2.output,
+      noise: this.voice.noise.output,
+    };
+    this._lpMatrixSourceGains = {};
+    Object.entries(sourceNodes).forEach(([key, source]) => {
+      const gain = this.ctx.createGain();
+      gain.gain.value = 0;
+      source.connect(gain);
+      this._lpMatrixSourceGains[key] = gain;
+    });
+    this._lpMatrixTargets = {
+      pitch: this.ctx.createGain(),
+      filter: this.ctx.createGain(),
+      wave: this.ctx.createGain(),
+      osc2: this.ctx.createGain(),
+    };
+    Object.values(this._lpMatrixSourceGains).forEach((source) => Object.values(this._lpMatrixTargets).forEach((target) => source.connect(target)));
+    this._lpMatrixTargets.pitch.connect(this.voice.osc1.pitchModInput);
+    this._lpMatrixTargets.pitch.connect(this.voice.osc2.pitchModInput);
+    this.voice.filter.poles.forEach((pole) => this._lpMatrixTargets.filter.connect(pole.frequency));
+    this._lpMatrixTargets.wave.connect(this.voice.osc1.pwmOscB.detune);
+    this._lpMatrixTargets.wave.connect(this.voice.osc2.pwmOscB.detune);
+    this._lpMatrixTargets.osc2.connect(this.voice.osc2.pitchModInput);
+    this.setLPModulation(this._lpMatrixPatch);
+  }
+
+  /** Configure the Little Phatty's single source -> destination modulation matrix. */
+  setLPModulation(patch = {}) {
+    this._lpMatrixPatch = { ...this._lpMatrixPatch, ...patch };
+    if (!this._lpMatrixSourceGains) return;
+    const { source, destination, amount } = this._lpMatrixPatch;
+    const sourceMap = { triangle: 'lfo', square: 'lfo', saw: 'lfo', ramp: 'lfo', filter: 'filter', sh: 'lfo', osc2: 'osc2', noise: 'noise' };
+    const lfoWave = { triangle: 'triangle', square: 'square', saw: 'saw', ramp: 'reverseSaw', sh: 'sh' }[source];
+    if (lfoWave) this.setLFOWaveform(lfoWave);
+    const selectedSource = sourceMap[source] ?? 'lfo';
+    const destinationScale = { pitch: 95, filter: 5600, wave: 34, osc2: 220 }[destination] ?? 1;
+    const depth = Math.max(0, Math.min(1, amount)) * destinationScale * (this._modWheelAmount ?? 0);
+    Object.entries(this._lpMatrixSourceGains).forEach(([key, gain]) => setImmediate(gain.gain, key === selectedSource ? depth : 0, this.ctx));
+    Object.entries(this._lpMatrixTargets).forEach(([key, gain]) => setImmediate(gain.gain, key === destination ? 1 : 0, this.ctx));
   }
 
   setLFODestinationAmount(destination, amount) {
@@ -278,6 +330,7 @@ export class AudioEngine {
       const base = this._lfoDestinationBaseAmounts?.[dest] ?? 0;
       this.setLFODestinationAmount(dest, base * amount);
     });
+    this.setLPModulation();
   }
 
   /** Called by UI when a destination's knob changes, so mod wheel scaling has a base to work from. */
@@ -289,7 +342,13 @@ export class AudioEngine {
   }
 
   setMasterVolume(v) {
+    this._masterVolume = v;
     if (!this.masterGain) return;
-    setImmediate(this.masterGain.gain, v, this.ctx);
+    setImmediate(this.masterGain.gain, this._lpOutputEnabled ? v : 0, this.ctx);
+  }
+
+  setLPOutputEnabled(enabled) {
+    this._lpOutputEnabled = !!enabled;
+    if (this.masterGain) setImmediate(this.masterGain.gain, this._lpOutputEnabled ? this._masterVolume : 0, this.ctx);
   }
 }
