@@ -32,7 +32,7 @@ function recipe(name, index) {
     osc2Shape: bass ? 0.66 : 0.32 + ((index + 2) % 5) * 0.1,
     osc1Level: 0.82,
     osc2Level: duo ? 0.8 : 0.62,
-    osc2Semitones: /5th|fifth/.test(n) ? 7 : duo ? (index % 3 === 0 ? 12 : 0) : (index % 5 === 0 ? 12 : 0),
+    osc2Semitones: index === 0 ? 0 : (/5th|fifth/.test(n) ? 7 : duo ? (index % 3 === 0 ? 12 : 0) : (index % 5 === 0 ? 12 : 0)),
     subLevel: bass ? 0.62 : 0.2,
     noiseLevel: noise ? 0.38 : 0.03,
     cutoff: bass ? 900 : soft ? 1800 : 3300 + (index % 4) * 520,
