@@ -33,7 +33,7 @@ class Sub37 {
   _buildHeader() {
     const header = document.createElement('header');
     header.className = 's37-header';
-    header.innerHTML = `<div class="s37-moog">moog</div><div class="s37-model"><b>SUB 37</b><span>BOB MOOG TRIBUTE EDITION</span></div>`;
+    header.innerHTML = `<img class="s37-moog" src="/ui/Logos/Moog_Music_logo.png" alt="Overture"><div class="s37-model"><b>SUB 37</b><span>BOB MOOG TRIBUTE EDITION</span></div>`;
     const display = document.createElement('div');
     display.className = 's37-display';
     this.displayTop = document.createElement('div');
