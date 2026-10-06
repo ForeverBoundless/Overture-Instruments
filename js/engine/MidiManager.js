@@ -105,6 +105,9 @@ export class MidiManager {
       case 0xc0: // Program Change
         this.callbacks.onProgramChange?.(d1);
         break;
+      case 0xd0: // Channel aftertouch
+        this.callbacks.onAftertouch?.(d1 / 127);
+        break;
       default:
         break;
     }

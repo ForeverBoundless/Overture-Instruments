@@ -14,6 +14,8 @@ class Sub37 {
     this.buttons = {};
     this.currentPreset = 0;
     this.activeKeys = new Set();
+    this._modKeyDirection = 0;
+    this._modRampRAF = null;
     this.arp = { on: false, latch: false, sync: false, pattern: 'UP', range: 0, rate: 120, index: 0, notes: [] };
     this.sequence = Array.from({ length: 64 }, () => ({ note: null, tie: false, rest: true, mod: 0 }));
     this.seq = { playing: false, recording: false, page: 0, selected: 0, index: 0, timer: null };
@@ -229,9 +231,55 @@ class Sub37 {
   _renderSequence(playingIndex = -1) { if (!this.stepGrid) return; [...this.stepGrid.children].forEach((button, local) => { const index = this.seq.page * 16 + local; const step = this.sequence[index]; button.classList.toggle('lit', !step.rest); button.classList.toggle('selected', index === this.seq.selected); button.classList.toggle('playing', index === playingIndex); button.title = step.rest ? `Step ${index + 1}: rest` : `Step ${index + 1}: ${step.note}${step.tie ? ' (tie)' : ''}`; }); }
 
   _bindComputerKeyboard() {
-    window.addEventListener('keydown', (event) => { if (event.repeat || ['INPUT', 'TEXTAREA', 'SELECT'].includes(event.target?.tagName)) return; const key = event.key.toLowerCase(); if (key === 'tab') { event.preventDefault(); this.pitchWheel.setExternalValue(1); return; } if (event.key === 'Shift' && event.location === KeyboardEvent.DOM_KEY_LOCATION_LEFT) { this.pitchWheel.setExternalValue(-1); return; } if (key === 'arrowup') { event.preventDefault(); this.modWheel.setExternalValue(clamp(this.modWheel.value + 0.08, 0, 1)); return; } if (key === 'arrowdown') { event.preventDefault(); this.modWheel.setExternalValue(clamp(this.modWheel.value - 0.08, 0, 1)); return; } if (key === '-' || key === '_') { this._setOctave(this.engine.octaveShift - 1); return; } if (key === '=' || key === '+') { this._setOctave(this.engine.octaveShift + 1); return; } const note = KEY_TO_NOTE[key]; if (note && !this.activeKeys.has(key)) { this.activeKeys.add(key); this._noteOn(note); } });
-    window.addEventListener('keyup', (event) => { const key = event.key.toLowerCase(); if (key === 'tab' || (event.key === 'Shift' && event.location === KeyboardEvent.DOM_KEY_LOCATION_LEFT)) { this.pitchWheel.springReturnToCenter(); return; } const note = KEY_TO_NOTE[key]; if (note && this.activeKeys.has(key)) { this.activeKeys.delete(key); this._noteOff(note); } });
-    window.addEventListener('blur', () => { this.activeKeys.clear(); this.engine.allNotesOff(); this.pitchWheel.springReturnToCenter(); });
+    window.addEventListener('keydown', (event) => {
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(event.target?.tagName)) return;
+      const key = event.key.toLowerCase();
+      if (key === 'tab') { event.preventDefault(); this.pitchWheel.setExternalValue(1); return; }
+      if (event.key === 'Shift' && event.location === KeyboardEvent.DOM_KEY_LOCATION_LEFT) { this.pitchWheel.setExternalValue(-1); return; }
+      if (key === 'arrowup' || key === 'arrowdown') {
+        event.preventDefault();
+        this._startModWheelRamp(key === 'arrowup' ? 1 : -1);
+        return;
+      }
+      if (event.repeat) return;
+      if (key === '-' || key === '_') { this._setOctave(this.engine.octaveShift - 1); return; }
+      if (key === '=' || key === '+') { this._setOctave(this.engine.octaveShift + 1); return; }
+      const note = KEY_TO_NOTE[key];
+      if (note && !this.activeKeys.has(key)) { this.activeKeys.add(key); this._noteOn(note); }
+    });
+    window.addEventListener('keyup', (event) => {
+      const key = event.key.toLowerCase();
+      if (key === 'arrowup' || key === 'arrowdown') {
+        if ((key === 'arrowup' && this._modKeyDirection === 1) || (key === 'arrowdown' && this._modKeyDirection === -1)) {
+          this._stopModWheelRamp();
+        }
+        return;
+      }
+      if (key === 'tab' || (event.key === 'Shift' && event.location === KeyboardEvent.DOM_KEY_LOCATION_LEFT)) { this.pitchWheel.springReturnToCenter(); return; }
+      const note = KEY_TO_NOTE[key];
+      if (note && this.activeKeys.has(key)) { this.activeKeys.delete(key); this._noteOff(note); }
+    });
+    window.addEventListener('blur', () => { this.activeKeys.clear(); this.engine.allNotesOff(); this.pitchWheel.springReturnToCenter(); this._stopModWheelRamp(); });
+  }
+
+  _startModWheelRamp(direction) {
+    this._modKeyDirection = direction;
+    if (this._modRampRAF) return;
+    let previous = performance.now();
+    const step = (now) => {
+      if (!this._modKeyDirection) { this._modRampRAF = null; return; }
+      const elapsed = Math.min(0.05, Math.max(0, (now - previous) / 1000));
+      previous = now;
+      this.modWheel.setExternalValue(clamp(this.modWheel.value + this._modKeyDirection * elapsed * 1.4, 0, 1));
+      this._modRampRAF = requestAnimationFrame(step);
+    };
+    this._modRampRAF = requestAnimationFrame(step);
+  }
+
+  _stopModWheelRamp() {
+    this._modKeyDirection = 0;
+    if (this._modRampRAF) cancelAnimationFrame(this._modRampRAF);
+    this._modRampRAF = null;
   }
 }
 

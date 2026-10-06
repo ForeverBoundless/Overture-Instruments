@@ -1,0 +1,139 @@
+.prophet10-shell {
+  width: min(1510px, calc(100vw - 28px));
+  max-width: 1510px;
+  min-width: 0 !important;
+}
+
+.prophet10-shell .s37-header {
+  padding-inline: 30px;
+}
+
+.prophet10-shell .s37-sound-area {
+  gap: 8px;
+}
+
+.prophet10-shell .s37-env-row {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.prophet10-shell .s37-env-row > .s37-section:last-child {
+  grid-column: 1 / -1;
+}
+
+.prophet10-shell .s37-section-body {
+  min-height: 0;
+}
+
+.prophet10-shell .s37-row {
+  align-items: start;
+}
+
+.prophet10-shell .s37-section {
+  align-self: start;
+}
+
+.prophet10-shell .s37-button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.prophet10-shell .s37-select-wrap {
+  min-width: 80px;
+}
+
+.prophet10-shell .s37-select-wrap select {
+  width: 100%;
+}
+
+.prophet10-shell .s37-keybed {
+  min-height: 132px;
+}
+
+@media (max-width: 1180px) {
+  .prophet10-shell {
+    width: calc(100vw - 16px);
+    margin: 0 auto;
+  }
+
+  .prophet10-shell .s37-row,
+  .prophet10-shell .s37-keybed,
+  .prophet10-shell .s37-footer {
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+
+  .prophet10-shell .s37-performance,
+  .prophet10-shell .s37-osc-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .prophet10-shell .s37-env-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .prophet10-shell .s37-env-row > .s37-section:nth-child(3),
+  .prophet10-shell .s37-env-row > .s37-section:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .prophet10-shell .s37-keybed {
+    grid-template-columns: 96px minmax(0, 1fr);
+  }
+
+  .prophet10-shell .s37-keybed .s37-octave {
+    display: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .prophet10-shell {
+    width: calc(100vw - 12px);
+    padding-inline: 8px;
+  }
+
+  .prophet10-shell .s37-header {
+    padding-inline: 8px;
+  }
+
+  .prophet10-shell .s37-model b {
+    font-size: 16px;
+  }
+
+  .prophet10-shell .s37-model span {
+    font-size: 6px;
+  }
+
+  .prophet10-shell .s37-display {
+    width: 170px;
+  }
+
+  .prophet10-shell .s37-performance,
+  .prophet10-shell .s37-osc-row,
+  .prophet10-shell .s37-env-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .prophet10-shell .s37-section {
+    align-self: start;
+  }
+
+  .prophet10-shell .s37-section-body {
+    min-height: 0 !important;
+  }
+
+  .prophet10-shell .s37-keybed {
+    grid-template-columns: 1fr;
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+
+  .prophet10-shell .s37-wheels {
+    justify-content: flex-start;
+  }
+
+  .prophet10-shell .s37-performance > .s37-section:first-child,
+  .prophet10-shell .s37-env-row > .s37-section:last-child {
+    grid-column: 1 / -1;
+  }
+}

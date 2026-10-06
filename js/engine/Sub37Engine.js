@@ -176,7 +176,23 @@ export class Sub37Engine {
 
   setModWheel(value) {
     this._modWheel = clamp(value, 0, 1);
-    this.modBusses.forEach((patch, index) => this.setModulation(index, patch));
+    if (!this._modNodes) return;
+    this.modBusses.forEach((patch, index) => {
+      const node = this._modNodes[index];
+      if (!node) return;
+      const scale = {
+        PITCH: 145,
+        FILTER: 6200,
+        WAVE: 34,
+        'OSC 2': 230,
+        AMP: 0.28,
+      }[patch.destination] ?? 1;
+      Object.entries(node.sources).forEach(([source, gain]) => {
+        if (!source.startsWith('LFO')) return;
+        const value = source === patch.source ? patch.amount * scale * this._modWheelScale(source) : 0;
+        setImmediate(gain.gain, value, this.ctx);
+      });
+    });
   }
 
   setLFO(index, { rate, waveform, sync, retrigger } = {}) {
@@ -326,8 +342,8 @@ export class Sub37Engine {
     const b = held[1] ?? a;
     const midiA = noteNameToMidi(a.note) + this.octaveShift * 12;
     const midiB = noteNameToMidi(b.note) + this.octaveShift * 12;
-    const f1 = midiToFreq(midiA + this.osc1Semitones / 12) * this._octaveRatio(this.osc1Octave);
-    const f2 = midiToFreq(midiB + this.osc2Semitones / 12) * this._octaveRatio(this.osc2Octave);
+    const f1 = midiToFreq(midiA + this.osc1Semitones) * this._octaveRatio(this.osc1Octave);
+    const f2 = midiToFreq(midiB + this.osc2Semitones) * this._octaveRatio(this.osc2Octave);
     const glideDuration = this.glide.timeFor(this.voice._currentFreq || f1, f1, legato);
     const tc = glideDuration ? this.glide.timeConstantFor(glideDuration) : 0;
     this.voice._currentMidiNote = midiA;

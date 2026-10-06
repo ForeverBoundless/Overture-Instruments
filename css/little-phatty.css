@@ -1,0 +1,350 @@
+/*
+ * Little Phatty presentation layer.
+ *
+ * The instrument keeps its existing DOM and controls, but uses the same
+ * compact dark-panel language as the Sub 37: anodized shell, walnut end
+ * cheeks, cyan display, inset control cards, and small hardware legends.
+ */
+
+.little-phatty-body {
+  overflow: auto;
+  background: radial-gradient(ellipse at 50% -15%, #4e545c, #181b20 48%, #090a0c);
+  color: #e7e9eb;
+}
+
+.little-phatty-body #app-root {
+  min-height: 100vh;
+  height: auto;
+  padding: 18px;
+  display: grid;
+  place-items: center;
+}
+
+.little-phatty-body #chassis {
+  width: min(1510px, calc(100vw - 28px));
+  min-width: 1020px;
+  padding: 13px 22px 16px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #5e636a;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #292d33 0%, #15171b 7%, #0a0b0d 100%);
+  box-shadow: 0 32px 85px #000b, inset 0 1px #ffffff1f, inset 0 -1px #000;
+  font-family: 'Inter Variable', Inter, sans-serif;
+  transform: none;
+}
+
+.little-phatty-body #chassis::before,
+.little-phatty-body #chassis::after {
+  content: '';
+  position: absolute;
+  top: 42px;
+  bottom: 12px;
+  width: 25px;
+  z-index: 0;
+  background: linear-gradient(90deg, #1a0c05, #6e3512 35%, #8f5a32 56%, #48200c 80%, #160a05);
+  box-shadow: inset 1px 0 #d69a6550, inset -2px 0 #000b;
+}
+
+.little-phatty-body #chassis::before { left: 0; border-radius: 0 2px 2px 0; }
+.little-phatty-body #chassis::after { right: 0; border-radius: 2px 0 0 2px; transform: scaleX(-1); }
+
+.little-phatty-body #brand-strip,
+.little-phatty-body #panel,
+.little-phatty-body #lower-row,
+.little-phatty-body #chassis-bottom-cap {
+  position: relative;
+  z-index: 1;
+}
+
+.little-phatty-body #brand-strip {
+  min-height: 53px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 2px 26px 10px;
+  border-bottom: 1px solid #ffffff13;
+  color: #e7e9eb;
+}
+
+.little-phatty-body #brand-strip .brand-logo {
+  width: auto;
+  height: 36px;
+  filter: brightness(0) invert(1);
+}
+
+.little-phatty-body #brand-strip .brand-model {
+  min-width: 205px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: #aeafb2;
+  font-size: 21px;
+  font-weight: 800;
+  letter-spacing: .19em;
+  line-height: 1;
+}
+
+.little-phatty-body #panel {
+  margin: 8px 25px 0;
+  padding: 10px;
+  border: 1px solid #50545a;
+  border-radius: 3px;
+  background: linear-gradient(145deg, #24272c, #101214 64%, #08090a);
+  box-shadow: inset 0 1px #ffffff10, inset 0 -1px #000;
+}
+
+.little-phatty-body #panel::before,
+.little-phatty-body #panel::after {
+  display: none;
+}
+
+.little-phatty-body #panel-top-row {
+  min-height: 53px;
+  display: flex;
+  align-items: stretch;
+  gap: 15px;
+  padding: 2px 4px 10px;
+  border-bottom: 1px solid #ffffff13;
+}
+
+.little-phatty-body .lp-oled {
+  width: 260px;
+  min-width: 260px;
+  padding: 6px 10px;
+  border: 2px solid #0a0e10;
+  border-radius: 3px;
+  background: linear-gradient(145deg, #031017, #071e26);
+  box-shadow: inset 0 0 0 1px #5596a533, inset 0 0 16px #000, 0 1px #fff2;
+}
+
+.little-phatty-body .lp-oled-line {
+  color: #8de8ff;
+  text-shadow: 0 0 6px #5bd4ff;
+  font: 12px/1.25 'DM Mono', monospace;
+  letter-spacing: .05em;
+}
+
+.little-phatty-body .lp-oled-line2 {
+  margin-top: 2px;
+  color: #5b9cae;
+  font-size: 9px;
+}
+
+.little-phatty-body #preset-controls {
+  min-width: 0;
+  flex: 1;
+  flex-direction: row;
+  align-items: center;
+  gap: 7px;
+}
+
+.little-phatty-body #preset-controls .preset-row {
+  gap: 4px;
+}
+
+.little-phatty-body #preset-controls .preset-row:nth-of-type(2) {
+  margin-left: auto;
+}
+
+.little-phatty-body #preset-select {
+  width: min(330px, 100%);
+  height: 21px;
+  padding: 1px 4px;
+  border: 1px solid #555b62;
+  border-radius: 2px;
+  color: #c8f5ff;
+  background: #0d171b;
+  font: 8px 'DM Mono', monospace;
+}
+
+.little-phatty-body .lp-btn {
+  min-height: 21px;
+  padding: 4px 6px;
+  border: 1px solid #595d64;
+  border-radius: 2px;
+  color: #c9cbd0;
+  background: linear-gradient(#373b42, #17191d);
+  box-shadow: inset 0 1px #ffffff15, 0 1px #000;
+  font: 700 7px/1 'Inter Variable', sans-serif;
+  letter-spacing: .06em;
+}
+
+.little-phatty-body .lp-btn:hover { filter: brightness(1.25); transform: none; }
+.little-phatty-body .lp-btn:active { transform: translateY(1px); }
+.little-phatty-body .lp-btn.lit {
+  color: #1a0b03;
+  border-color: #ffb76b;
+  background: linear-gradient(#ffd07e, #e46e28);
+  box-shadow: 0 0 9px #ff7b3266, inset 0 1px #fff8;
+}
+.little-phatty-body .lp-btn::before { display: none; }
+
+.little-phatty-body #sections-row {
+  display: grid;
+  grid-template-columns: 1.05fr 1.15fr .9fr 1.45fr;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.little-phatty-body .lp-section {
+  min-width: 0;
+  padding: 8px 9px 9px;
+  border: 1px solid #50545a;
+  border-radius: 3px;
+  background: linear-gradient(145deg, #24272c, #101214 64%, #08090a);
+  box-shadow: inset 0 1px #ffffff10, inset 0 -1px #000;
+}
+
+.little-phatty-body .lp-section-title {
+  margin: 0 0 7px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #ffffff17;
+  color: #dedfe2;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: .16em;
+  text-align: left;
+}
+
+.little-phatty-body .lp-section-knobs {
+  gap: 6px;
+}
+
+.little-phatty-body .lp-section-buttons {
+  gap: 4px;
+  margin-top: 7px;
+}
+
+.little-phatty-body .lp-knob {
+  --knob-size: 48px;
+  min-width: 48px;
+}
+
+.little-phatty-body .lp-knob-label {
+  color: #c9cbcf;
+  font-size: 6px;
+  letter-spacing: .04em;
+  line-height: 1.1;
+  max-width: 60px;
+}
+
+.little-phatty-body #master-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 8px 9px 0;
+  color: #c9cbd0;
+}
+
+.little-phatty-body #octave-display {
+  margin-left: auto;
+  min-width: 72px;
+  padding: 5px;
+  border: 1px solid #4a5058;
+  border-radius: 2px;
+  color: #8de8ff;
+  background: #0a171c;
+  font: 8px 'DM Mono', monospace;
+}
+
+.little-phatty-body #view-toggles { display: flex; gap: 4px; }
+
+.little-phatty-body #scope-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.little-phatty-body .lp-scope-panel {
+  padding: 6px;
+  border: 1px solid #393d42;
+  border-radius: 3px;
+  background: #071116;
+  box-shadow: inset 0 0 0 1px #000, inset 0 0 16px #000;
+}
+
+.little-phatty-body .lp-scope,
+.little-phatty-body .lp-spectrum { height: 58px; }
+
+.little-phatty-body #lower-row {
+  display: grid;
+  grid-template-columns: 125px 1fr;
+  gap: 10px;
+  align-items: end;
+  margin: 9px 25px 0;
+  padding: 10px;
+  border: 1px solid #393d42;
+  border-radius: 3px;
+  background: linear-gradient(180deg, #24272c, #0d0f11);
+  box-shadow: inset 0 1px #ffffff13;
+}
+
+.little-phatty-body #wheel-housing-block,
+.little-phatty-body #keyboard-block {
+  padding: 2px 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.little-phatty-body #wheel-housing-block {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.little-phatty-body #keyboard-block {
+  min-width: 0;
+  display: flex;
+  align-items: flex-end;
+}
+
+.little-phatty-body .lp-wheel-housing {
+  width: 28px;
+  height: 86px;
+  background: linear-gradient(90deg, #191c23, #326b84 50%, #171c22);
+  border-color: #5b7d8b;
+}
+
+.little-phatty-body .lp-wheel-label { color: #c3c5c9; font-size: 7px; }
+.little-phatty-body .lp-keyboard { height: 108px; }
+.little-phatty-body .lp-key-white { background: linear-gradient(90deg, #dddeda, #fbfbf7 47%, #d3d4d0); }
+.little-phatty-body .lp-key-black { background: linear-gradient(90deg, #08090a, #34363b 45%, #090a0b); }
+.little-phatty-body .lp-key-white.active,
+.little-phatty-body .lp-key-black.active { background: linear-gradient(#ffd07e, #e46e28); }
+
+.little-phatty-body #chassis-bottom-cap {
+  height: 12px;
+  margin: 0 25px;
+  background: none;
+}
+
+.little-phatty-body .lp-modal {
+  border: 1px solid #50545a;
+  border-radius: 3px;
+  color: #e7e9eb;
+  background: linear-gradient(145deg, #24272c, #101214);
+}
+
+.little-phatty-body .lp-modal h3 { color: #dedfe2; }
+.little-phatty-body .lp-modal input[type="text"],
+.little-phatty-body .lp-modal textarea {
+  border-color: #555b62;
+  color: #c8f5ff;
+  background: #0d171b;
+}
+
+@media (max-width: 1180px) {
+  .little-phatty-body #app-root { place-items: start center; }
+  .little-phatty-body #chassis { transform-origin: top center; }
+}
+
+@media (max-width: 760px) {
+  .little-phatty-body #app-root { padding: 8px; }
+  .little-phatty-body #chassis { min-width: 920px; }
+  .little-phatty-body #sections-row { grid-template-columns: 1fr 1fr; }
+}

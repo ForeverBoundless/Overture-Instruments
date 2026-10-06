@@ -6,6 +6,10 @@ const INSTRUMENTS = [{
   id: 'sub-37', name: 'Sub 37', model: 'Bob Moog Tribute Edition', manufacturer: 'Moog Music',
   voiceMode: 'Mono / 2-note paraphonic', presets: 256, keys: 37, icon: 'tune',
   description: 'A deep, forceful performance synth with two modulation busses, dual DAHDSR envelopes, MultiDrive, and a playable 64-step sequencer.',
+}, {
+  id: 'prophet-10', name: 'Prophet-10', model: 'Rev4 Polyphonic Analog Synthesizer', manufacturer: 'Sequential',
+  voiceMode: '10-voice polyphonic', presets: 400, keys: 61, icon: 'piano',
+  description: 'A ten-voice analog polyphonic classic with dual oscillators, Poly-Mod, Wheel Mod, vintage voice variation, and the unmistakable Prophet architecture.',
 }];
 
 const spec = (label, value, icon) => `<div class="instrument-spec"><span class="material-symbols-rounded">${icon}</span><span>${label}</span><strong>${value}</strong></div>`;
@@ -24,6 +28,7 @@ function buildTile(instrument) {
     event.stopPropagation();
     if (instrument.id === 'little-phatty') { window.location.assign('./little-phatty/'); return; }
     if (instrument.id === 'sub-37') { window.location.assign('./sub37.html'); return; }
+    if (instrument.id === 'prophet-10') { window.location.assign('./prophet10.html'); return; }
     document.dispatchEvent(new CustomEvent('launcher:launch', { detail: instrument }));
   });
   return tile;
