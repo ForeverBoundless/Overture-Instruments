@@ -133,12 +133,14 @@ class Sub37 {
 
   _oscSection(index) {
     const section = this._section(`OSCILLATOR ${index + 1}`); const row = document.createElement('div'); row.className = 's37-knob-row';
-    this._knob(row, `osc${index}Wave`, 'WAVE', 0, 1, 0.42, (v) => this.engine.setOscillator(index, { shape: v }), false, (v) => ['TRI', 'SAW', 'SQR', 'PULSE'][Math.min(3, Math.floor(v * 4))]);
+    this._knob(row, `osc${index}Wave`, 'WAVE', 0, 1, 0.42, (v) => { this.engine.setOscillator(index, { shape: v }); this._showMessage(`OSC ${index + 1} ${this._waveType(v)}`); }, false, (v) => ['TRI', 'SAW', 'SQR', 'PULSE'][Math.min(3, Math.floor(v * 4))]);
     this._knob(row, `osc${index}Level`, 'LEVEL', 0, 1, index ? 0.68 : 0.82, (v) => this.engine.setOscillator(index, { level: v }), false, (v) => `${Math.round(v * 100)}%`);
-    if (index === 1) this._knob(row, 'osc2Tune', 'FREQUENCY', -24, 24, 0, (v) => this.engine.setOscillator(1, { semitones: Math.round(v) }), true, (v) => `${Math.round(v)} st`);
+    this._knob(row, `osc${index}Tune`, 'FREQUENCY', -7, 7, 0, (v) => this.engine.setOscillator(index, { semitones: Math.round(v) }), true, (v) => `${Math.round(v)} st`);
+    this._knob(row, `osc${index}Fine`, 'FINE TUNE', -100, 100, 0, (v) => this.engine.setOscillator(index, { fineCents: v }), true, (v) => `${v > 0 ? '+' : ''}${v.toFixed(0)} ct`);
     const octave = this._selector('OCTAVE', ['16', '8', '4', '2'], '8', (value) => this.engine.setOscillator(index, { octave: Number(value) })); this[`osc${index}Octave`] = octave;
-    section.body.append(row, octave);
-    if (index === 1) { this.buttons.sync = this._toggle('OSC 1–2 SYNC', false, (on) => this.engine.voice?.setOsc2SyncEnabled(on)); section.body.appendChild(this.buttons.sync); }
+    const controls = document.createElement('div'); controls.className = 's37-osc-controls'; controls.appendChild(octave);
+    if (index === 1) { this.buttons.sync = this._toggle('OSC 1–2 SYNC', false, (on) => this.engine.voice?.setOsc2SyncEnabled(on)); controls.appendChild(this.buttons.sync); }
+    section.body.append(row, controls);
     return section.section;
   }
 
@@ -201,16 +203,17 @@ class Sub37 {
   _applyPreset(index) {
     const preset = SUB37_PRESETS[clamp(index, 0, SUB37_PRESETS.length - 1)]; this.currentPreset = preset.id; this.presetSelect?.setValue(String(preset.id), true);
     const set = (key, value) => this.knobs[key]?.setValue(value, true);
-    set('osc0Wave', preset.osc1Shape); set('osc1Wave', preset.osc2Shape); set('osc0Level', preset.osc1Level); set('osc1Level', preset.osc2Level); set('osc2Tune', preset.osc2Semitones); set('sub', preset.subLevel); set('noise', preset.noiseLevel); set('cutoff', preset.cutoff); set('resonance', preset.resonance); set('drive', preset.drive); set('keyTrack', preset.keyTrack); set('filterEnv', preset.filterEnvAmount); set('lfo0Rate', preset.lfo1Rate); set('lfo1Rate', preset.lfo2Rate); set('mod0Amount', preset.mod1.amount); set('mod1Amount', preset.mod2.amount);
+    set('osc0Wave', preset.osc1Shape); set('osc1Wave', preset.osc2Shape); set('osc0Level', preset.osc1Level); set('osc1Level', preset.osc2Level); set('osc0Tune', preset.osc1Semitones ?? 0); set('osc1Tune', preset.osc2Semitones); set('osc0Fine', preset.osc1FineCents ?? 0); set('osc1Fine', preset.osc2FineCents ?? 0); set('sub', preset.subLevel); set('noise', preset.noiseLevel); set('cutoff', preset.cutoff); set('resonance', preset.resonance); set('drive', preset.drive); set('keyTrack', preset.keyTrack); set('filterEnv', preset.filterEnvAmount); set('lfo0Rate', preset.lfo1Rate); set('lfo1Rate', preset.lfo2Rate); set('mod0Amount', preset.mod1.amount); set('mod1Amount', preset.mod2.amount);
     ['filter', 'amp'].forEach((which) => ['delay', 'attack', 'hold', 'decay', 'sustain', 'release'].forEach((key) => set(`${which}${key}`, preset[`${which}Env`][key])));
     this.modSelectors?.[0]?.source.setValue(preset.mod1.source, true); this.modSelectors?.[0]?.destination.setValue(preset.mod1.destination, true); this.modSelectors?.[1]?.source.setValue(preset.mod2.source, true); this.modSelectors?.[1]?.destination.setValue(preset.mod2.destination, true); this.buttons.duo.setValue(preset.duo, true); this.buttons.sync.setValue(preset.sync, true);
-    this.engine.setOscillator(0, { shape: preset.osc1Shape, level: preset.osc1Level }); this.engine.setOscillator(1, { shape: preset.osc2Shape, level: preset.osc2Level, semitones: preset.osc2Semitones }); this.engine.setMixer({ sub: preset.subLevel, noise: preset.noiseLevel }); this.engine.setFilter({ cutoff: preset.cutoff, resonance: preset.resonance, drive: preset.drive, keyTrack: preset.keyTrack, envAmount: preset.filterEnvAmount }); this.engine.setEnvelope('filter', preset.filterEnv); this.engine.setEnvelope('amp', preset.ampEnv); this.engine.setLFO(0, { rate: preset.lfo1Rate, waveform: preset.lfo1Wave }); this.engine.setLFO(1, { rate: preset.lfo2Rate }); this.engine.setModulation(0, preset.mod1); this.engine.setModulation(1, preset.mod2); this.engine.setDuoMode(preset.duo); this.engine.voice?.setOsc2SyncEnabled(preset.sync);
+    this.engine.setOscillator(0, { shape: preset.osc1Shape, level: preset.osc1Level, semitones: preset.osc1Semitones ?? 0, fineCents: preset.osc1FineCents ?? 0 }); this.engine.setOscillator(1, { shape: preset.osc2Shape, level: preset.osc2Level, semitones: preset.osc2Semitones, fineCents: preset.osc2FineCents ?? 0 }); this.engine.setMixer({ sub: preset.subLevel, noise: preset.noiseLevel }); this.engine.setFilter({ cutoff: preset.cutoff, resonance: preset.resonance, drive: preset.drive, keyTrack: preset.keyTrack, envAmount: preset.filterEnvAmount }); this.engine.setEnvelope('filter', preset.filterEnv); this.engine.setEnvelope('amp', preset.ampEnv); this.engine.setLFO(0, { rate: preset.lfo1Rate, waveform: preset.lfo1Wave }); this.engine.setLFO(1, { rate: preset.lfo2Rate }); this.engine.setModulation(0, preset.mod1); this.engine.setModulation(1, preset.mod2); this.engine.setDuoMode(preset.duo); this.engine.voice?.setOsc2SyncEnabled(preset.sync);
     this.displayTop.textContent = `${preset.bank}.${String(preset.slot).padStart(2, '0')} ${preset.name}`.slice(0, 22); this.displayBottom.textContent = preset.initialized ? 'INIT PRESET' : 'PRESET ACTIVE';
   }
 
   _initPatch() { this._applyPreset(255); this._showMessage('PANEL INITIALIZED'); }
   _savePatch() { this._showMessage('PATCH SAVED LOCALLY'); }
   _showMessage(message) { this.displayBottom.textContent = message; clearTimeout(this.messageTimer); this.messageTimer = setTimeout(() => { const preset = SUB37_PRESETS[this.currentPreset]; this.displayBottom.textContent = preset?.initialized ? 'INIT PRESET' : 'PANEL ACTIVE'; }, 1200); }
+  _waveType(value) { return ['TRIANGLE', 'SAW', 'SQUARE', 'PULSE'][Math.min(3, Math.floor(value * 4))]; }
   _setOctave(value) { this.engine.setOctaveShift(value); this._renderOctave(); }
   _renderOctave() { const value = this.engine.octaveShift; this.octaveReadout.textContent = `KB OCT ${value > 0 ? '+' : ''}${value}`; }
 

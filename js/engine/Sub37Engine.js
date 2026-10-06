@@ -39,7 +39,10 @@ export class Sub37Engine {
     this.fineTuneCents = 0;
     this.osc1Octave = 8;
     this.osc2Octave = 8;
+    this.osc1Semitones = 0;
     this.osc2Semitones = 0;
+    this.osc1FineCents = 0;
+    this.osc2FineCents = 0;
     this.subOctave = -1;
     this._held = [];
     this._sustainDown = false;
@@ -225,7 +228,14 @@ export class Sub37Engine {
     if (patch.shape !== undefined) osc.setShape(clamp(patch.shape, 0, 1));
     if (patch.level !== undefined) (index === 0 ? this.voice.mixer.setOsc1Level(patch.level) : this.voice.mixer.setOsc2Level(patch.level));
     if (patch.octave !== undefined) (index === 0 ? this.osc1Octave = patch.octave : this.osc2Octave = patch.octave);
-    if (patch.semitones !== undefined && index === 1) this.osc2Semitones = clamp(patch.semitones, -24, 24);
+    if (patch.semitones !== undefined) {
+      if (index === 0) this.osc1Semitones = clamp(patch.semitones, -7, 7);
+      else this.osc2Semitones = clamp(patch.semitones, -7, 7);
+    }
+    if (patch.fineCents !== undefined) {
+      if (index === 0) this.osc1FineCents = clamp(patch.fineCents, -100, 100);
+      else this.osc2FineCents = clamp(patch.fineCents, -100, 100);
+    }
     this._refreshTuning();
   }
 
@@ -316,8 +326,8 @@ export class Sub37Engine {
     const b = held[1] ?? a;
     const midiA = noteNameToMidi(a.note) + this.octaveShift * 12;
     const midiB = noteNameToMidi(b.note) + this.octaveShift * 12;
-    const f1 = midiToFreq(midiA) * this._octaveRatio(this.osc1Octave);
-    const f2 = midiToFreq(midiB + this.osc2Semitones) * this._octaveRatio(this.osc2Octave);
+    const f1 = midiToFreq(midiA + this.osc1Semitones / 12) * this._octaveRatio(this.osc1Octave);
+    const f2 = midiToFreq(midiB + this.osc2Semitones / 12) * this._octaveRatio(this.osc2Octave);
     const glideDuration = this.glide.timeFor(this.voice._currentFreq || f1, f1, legato);
     const tc = glideDuration ? this.glide.timeConstantFor(glideDuration) : 0;
     this.voice._currentMidiNote = midiA;
@@ -339,8 +349,8 @@ export class Sub37Engine {
 
   _refreshTuning() {
     if (!this.voice) return;
-    this.voice.osc1.setDetuneCents(this.fineTuneCents);
-    this.voice.osc2.setDetuneCents(this.fineTuneCents);
+    this.voice.osc1.setDetuneCents(this.fineTuneCents + this.osc1FineCents);
+    this.voice.osc2.setDetuneCents(this.fineTuneCents + this.osc2FineCents);
     this._voiceFromHeld(false);
   }
 }
