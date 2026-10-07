@@ -49,7 +49,7 @@ function buildTile(instrument) {
 
 const page = document.getElementById('launcher-page');
 page.innerHTML = `<div class="launcher-ambient launcher-ambient--one" aria-hidden="true"></div><div class="launcher-ambient launcher-ambient--two" aria-hidden="true"></div><div class="launcher-noise" aria-hidden="true"></div><header class="launcher-header"><div class="launcher-brand"><span class="launcher-brand__mark"><img class="launcher-brand__mark-img" src="./ui/Logos/OvertureLogo.png" alt="Overture" width="24" height="24"></span>
-<span>OVERTURE INSTRUMENTS</span></div><div class="launcher-status"><span></span>Instrument library</div></header><section class="launcher-hero" aria-labelledby="launcher-title">
+<span>OVERTURE INSTRUMENTS</span></div><div class="launcher-status"><span></span>Library</div></header><section class="launcher-hero" aria-labelledby="launcher-title">
   <div class="launcher-hero__copy">
     <p class="launcher-overline">An expanding collection of MIDI-playable classics</p>
 
@@ -59,8 +59,8 @@ page.innerHTML = `<div class="launcher-ambient launcher-ambient--one" aria-hidde
     </h1>
 
     <p>
-      Explore OI's growing library of free synth emulators, brought to life with incredible realism and attention to detail.<br>
-      <b>At long last, the legends, completely for free.</b>
+      Explore OI's growing library of free emulators, brought to life with incredible realism and attention to detail.<br>
+      <b>And did we mention they're all free?</b>
     </p>
   </div>
 
@@ -100,7 +100,7 @@ INSTRUMENTS.forEach((instrument) => grid.appendChild(buildTile(instrument)));
 const comingSoon = document.createElement('aside');
 comingSoon.className = `launcher-coming-soon ${INSTRUMENTS.length % 2 ? 'launcher-coming-soon--tile' : 'launcher-coming-soon--banner'}`;
 comingSoon.setAttribute('aria-label', 'More instruments coming soon');
-comingSoon.innerHTML = `<span class="launcher-coming-soon__signal" aria-hidden="true"></span><div class="launcher-coming-soon__copy"><span class="launcher-coming-soon__eyebrow">THE LIBRARY GROWS</span><strong>M<img class="launcher-coming-soon__o-icon" src="./ui/Logos/OvertureLogo.png" alt="">re coming soon!</strong><span class="launcher-coming-soon__subline">More instruments are already in development.</span></div><a class="launcher-coming-soon__arrow" href="https://github.com/ForeverBoundless/Overture-Instruments" target="_blank" rel="noopener noreferrer" aria-label="Visit the Overture Instruments GitHub repository">↗</a>`;
+comingSoon.innerHTML = `<span class="launcher-coming-soon__signal" aria-hidden="true"></span><div class="launcher-coming-soon__copy"><span class="launcher-coming-soon__eyebrow">THE LIBRARY GROWS</span><strong>M<img class="launcher-coming-soon__o-icon" src="./ui/Logos/OvertureLogo.png" alt="">re coming soon!</strong><span class="launcher-coming-soon__subline">New instruments are already in development.<br>Check out the GitHub to stay tuned!</span></div><a class="launcher-coming-soon__arrow" href="https://github.com/ForeverBoundless/Overture-Instruments" target="_blank" rel="noopener noreferrer" aria-label="Visit the Overture Instruments GitHub repository">↗</a>`;
 if (INSTRUMENTS.length % 2) grid.appendChild(comingSoon);
 else grid.insertAdjacentElement('afterend', comingSoon);
 
