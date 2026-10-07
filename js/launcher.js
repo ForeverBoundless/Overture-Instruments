@@ -97,6 +97,13 @@ page.innerHTML = `<div class="launcher-ambient launcher-ambient--one" aria-hidde
 const grid = page.querySelector('.instrument-grid');
 INSTRUMENTS.forEach((instrument) => grid.appendChild(buildTile(instrument)));
 
+const comingSoon = document.createElement('aside');
+comingSoon.className = `launcher-coming-soon ${INSTRUMENTS.length % 2 ? 'launcher-coming-soon--tile' : 'launcher-coming-soon--banner'}`;
+comingSoon.setAttribute('aria-label', 'More instruments coming soon');
+comingSoon.innerHTML = `<span class="launcher-coming-soon__signal" aria-hidden="true"></span><div class="launcher-coming-soon__copy"><span class="launcher-coming-soon__eyebrow">THE LIBRARY GROWS</span><strong>M<img class="launcher-coming-soon__o-icon" src="./ui/Logos/OvertureLogo.png" alt="">re coming soon!</strong><span class="launcher-coming-soon__subline">More instruments are already in development.</span></div><a class="launcher-coming-soon__arrow" href="https://github.com/ForeverBoundless/Overture-Instruments" target="_blank" rel="noopener noreferrer" aria-label="Visit the Overture Instruments GitHub repository">↗</a>`;
+if (INSTRUMENTS.length % 2) grid.appendChild(comingSoon);
+else grid.insertAdjacentElement('afterend', comingSoon);
+
 const count = page.querySelector('.launcher-footer span');
 if (count) {
   const amount = String(INSTRUMENTS.length).padStart(2, '0');
