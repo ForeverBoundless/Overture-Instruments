@@ -44,7 +44,7 @@ class NordC2D {
       if (button.dataset.action === 'rotary') this.engine.setRotary(button.classList.contains('active'));
       if (button.dataset.action === 'reverb') this.engine.setReverb(button.classList.contains('active') ? 0.45 : 0.08);
     }));
-    const controls = { master: 0.55, reverb: 0.18, drive: 0 };
+    const controls = { master: 0.50, reverb: 0.18, drive: 0 };
     shell.querySelectorAll('[data-control]').forEach((control) => {
       const output = control.parentElement.querySelector('output');
       const setValue = (value) => {
@@ -101,32 +101,148 @@ class NordC2D {
   _buildManual(label, index) {
     const section = document.createElement('section');
     section.className = `nord-manual nord-manual--${index ? 'upper' : 'lower'}`;
-    section.innerHTML = `<div class="nord-manual-head"><div><span>MANUAL ${index ? 'II' : 'I'}</span><strong>${label}</strong></div><div class="nord-manual-switches"><button data-bank="A" class="active">DRAWBAR A</button><button data-bank="B">DRAWBAR B</button><button data-vibrato="C3">VIB/CHORUS C3</button><button data-vibrato="OFF">VIB OFF</button><button data-percussion="true">PERCUSSION</button></div><div class="nord-octave"><span class="nord-octave-label">OCTAVE</span><button type="button" aria-label="${label} octave down">−</button><output>OCT 0</output><button type="button" aria-label="${label} octave up">+</button></div></div><div class="nord-drawbar-panel"><div class="nord-manual-banks"></div></div><div class="nord-keyboard-wrap"></div>`;
+    section.innerHTML = `<div class="nord-manual-head"><div><span>MANUAL ${index ? 'I' : 'II'}</span><strong>${label}</strong></div><div class="nord-manual-switches"><button data-bank="A" class="active">DRAWBAR A</button><button data-bank="B">DRAWBAR B</button><button data-vibrato="C3">VIB/CHORUS C3</button><button data-vibrato="OFF">VIB OFF</button><button data-percussion="true">PERCUSSION</button></div><div class="nord-octave"><span class="nord-octave-label">OCTAVE</span><button type="button" aria-label="${label} octave down">−</button><output>OCT 0</output><button type="button" aria-label="${label} octave up">+</button></div></div><div class="nord-drawbar-panel"><div class="nord-manual-banks"></div></div><div class="nord-keyboard-wrap"></div>`;
     const drawbarLabels = ["16'", "5 1/3'", "8'", "4'", "2 2/3'", "2'", "1 3/5'", "1 1/3'", "1'"];
-    const banks = section.querySelector('.nord-manual-banks');
-    ['A', 'B'].forEach((bank) => {
-      const bankPanel = document.createElement('div');
-      bankPanel.className = `nord-drawbar-bank nord-drawbar-bank--${bank.toLowerCase()}`;
-      bankPanel.innerHTML = `<header>${index ? 'SWELL' : 'GREAT'} ${bank} <small>${bank === 'A' ? '(PRESET)' : bank === 'B' ? '(PERC)' : ''}</small></header><div class="nord-drawbars"></div>`;
-      const drawbars = bankPanel.querySelector('.nord-drawbars');
-      drawbarLabels.forEach((labelText, drawbarIndex) => {
-      const labelEl = document.createElement('label');
-      const value = 0;
-      const meanings = ['SUB-OCTAVE', 'FIFTH', 'FUNDAMENTAL', 'OCTAVE', 'TWELFTH', 'TWO OCTAVES', 'SEVENTEENTH', 'NINETEENTH', 'THREE OCTAVES'];
-      const color = [0, 1].includes(drawbarIndex) ? 'brown' : [4, 6, 7].includes(drawbarIndex) ? 'black' : 'white';
-      labelEl.innerHTML = `<span>${labelText}</span><small>${meanings[drawbarIndex]}</small><span class="nord-drawbar nord-drawbar--${color}" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="8" aria-valuenow="${value}" aria-label="${labelText} ${bank} drawbar"><i></i><b></b><em>8 7 6 5 4 3 2 1 0</em></span><output>${value}</output>`;
-      const drawbar = labelEl.querySelector('.nord-drawbar');
-      const output = labelEl.querySelector('output');
-      const setValue = (next) => { const amount = clamp(Math.round(next), 0, 8); drawbar.setAttribute('aria-valuenow', amount); drawbar.style.setProperty('--drawbar', amount); output.textContent = amount; this.engine.setBankDrawbar(index, bank, drawbarIndex, amount); };
-      const updateFromPointer = (event) => { const rect = drawbar.getBoundingClientRect(); setValue(8 - ((event.clientY - rect.top) / rect.height) * 8); };
-      drawbar.style.setProperty('--drawbar', value);
-      drawbar.addEventListener('pointerdown', (event) => { drawbar.setPointerCapture(event.pointerId); updateFromPointer(event); });
-      drawbar.addEventListener('pointermove', (event) => { if (event.buttons) updateFromPointer(event); });
-      drawbar.addEventListener('keydown', (event) => { if (event.key === 'ArrowUp' || event.key === 'ArrowDown') { event.preventDefault(); setValue(Number(drawbar.getAttribute('aria-valuenow')) + (event.key === 'ArrowUp' ? 1 : -1)); } });
-      drawbars.appendChild(labelEl);
-      });
-      banks.appendChild(bankPanel);
+
+// Actual Nord C2D pipe-organ stop names for each manual.
+// Upper manual = SWELL
+// Lower manual = GREAT
+const germanNames = index
+  ? [
+      "Fugara 8'",
+      "Rohrflöte 8'",
+      "Principal 4'",
+      "Spitzflöte 4'",
+      "Nasat 3'",
+      "Flöte 2'",
+      "Vox Celeste",
+      "Scharf II-III",
+      "Oboe 8'"
+    ]
+  : [
+      "Principal 8'",
+      "Gamba 8'",
+      "Gedackt 8'",
+      "Octava 4'",
+      "Rohrflöte 4'",
+      "Qvinta 3'",
+      "Octava 2'",
+      "Mixtur III-IV",
+      "Trumpet 8'"
+    ];
+
+const banks = section.querySelector('.nord-manual-banks');
+
+['A', 'B'].forEach((bank) => {
+  const bankPanel = document.createElement('div');
+  bankPanel.className = `nord-drawbar-bank nord-drawbar-bank--${bank.toLowerCase()}`;
+
+  bankPanel.innerHTML = `
+    <header>
+      ${index ? 'SWELL' : 'GREAT'} ${bank}
+      <small>${bank === 'A' ? '(PRESET)' : bank === 'B' ? '(PERC)' : ''}</small>
+    </header>
+    <div class="nord-drawbars"></div>
+  `;
+
+  const drawbars = bankPanel.querySelector('.nord-drawbars');
+
+  drawbarLabels.forEach((labelText, drawbarIndex) => {
+    const labelEl = document.createElement('label');
+    const value = 0;
+
+    const meanings = [
+      'BASS16',
+      'STR16',
+      'FLUTE8',
+      'OBOE8',
+      'TRMP8',
+      'STR8',
+      'FLUTE4',
+      'STR4',
+      '2 2/3'
+    ];
+
+    const color = [0, 1].includes(drawbarIndex)
+      ? 'brown'
+      : [4, 6, 7].includes(drawbarIndex)
+        ? 'black'
+        : 'white';
+
+    labelEl.innerHTML = `
+      <span>${labelText}</span>
+      <small>
+        ${meanings[drawbarIndex]}<br>
+        <span class="nord-drawbar-german">${germanNames[drawbarIndex]}</span>
+      </small>
+      <span
+        class="nord-drawbar nord-drawbar--${color}"
+        role="slider"
+        tabindex="0"
+        aria-valuemin="0"
+        aria-valuemax="8"
+        aria-valuenow="${value}"
+        aria-label="${labelText} ${bank} drawbar"
+      >
+        <i></i>
+        <b></b>
+        <em>0 1 2 3 4 5 6 7 8</em>
+      </span>
+      <output>${8 - value}</output>
+    `;
+
+    const drawbar = labelEl.querySelector('.nord-drawbar');
+    const output = labelEl.querySelector('output');
+
+    const setValue = (next) => {
+      const amount = clamp(Math.round(next), 0, 8);
+      drawbar.setAttribute('aria-valuenow', amount);
+      drawbar.style.setProperty('--drawbar', amount);
+      output.textContent = 8 - amount;
+      this.engine.setBankDrawbar(index, bank, drawbarIndex, amount);
+    };
+
+    const updateFromPointer = (event) => {
+      const rect = drawbar.getBoundingClientRect();
+      const topPadding = 5;
+      const bottomPadding = 5;
+      const travel = rect.height - 29 - topPadding - bottomPadding;
+
+      const y = clamp(
+        event.clientY - rect.top - topPadding - 14.5,
+        0,
+        travel
+      );
+
+      setValue(8 - (y / travel) * 8);
+    };
+
+    drawbar.style.setProperty('--drawbar', value);
+
+    drawbar.addEventListener('pointerdown', (event) => {
+      drawbar.setPointerCapture(event.pointerId);
+      updateFromPointer(event);
     });
+
+    drawbar.addEventListener('pointermove', (event) => {
+      if (event.buttons) updateFromPointer(event);
+    });
+
+    drawbar.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+        event.preventDefault();
+        setValue(
+          Number(drawbar.getAttribute('aria-valuenow')) +
+          (event.key === 'ArrowUp' ? 1 : -1)
+        );
+      }
+    });
+
+    drawbars.appendChild(labelEl);
+  });
+
+  banks.appendChild(bankPanel);
+});
     section.querySelectorAll('[data-vibrato]').forEach((button) => button.addEventListener('click', () => {
       section.querySelectorAll('[data-vibrato]').forEach((item) => item.classList.remove('active'));
       button.classList.add('active');
@@ -140,7 +256,7 @@ class NordC2D {
         const value = this.engine.manuals[index].drawbars[drawbarIndex];
         drawbar.setAttribute('aria-valuenow', value);
         drawbar.style.setProperty('--drawbar', value);
-        drawbar.nextElementSibling.textContent = value;
+        drawbar.nextElementSibling.textContent = 8 - value;
       });
     }));
     section.querySelector('[data-percussion]').addEventListener('click', (event) => {
