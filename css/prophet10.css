@@ -1,41 +1,91 @@
 .prophet10-shell {
+  --led-on: #8de8ff;
+  --led-on-glow: rgba(91, 212, 255, .9);
+  --led-off: #163b47;
   width: min(1510px, calc(100vw - 28px));
   max-width: 1510px;
   min-width: 0 !important;
+  padding: 10px 16px 12px;
 }
 
+.prophet10-shell{background-color:#272134;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cpath d='M0 4h120M0 17h120M0 30h120M0 43h120M0 56h120M0 69h120M0 82h120M0 95h120M0 108h120' stroke='%23fff' stroke-opacity='.035'/%3E%3Cpath d='M0 5h120M0 18h120M0 31h120M0 44h120M0 57h120M0 70h120M0 83h120M0 96h120M0 109h120' stroke='%23000' stroke-opacity='.14'/%3E%3C/svg%3E");background-size:120px 120px;box-shadow:0 32px 85px #000c,inset 0 1px #ffffff35,inset 0 -1px #000,inset 0 0 0 1px #9c82bd44}
+.prophet10-shell::before,.prophet10-shell::after{display:block;top:40px;bottom:10px;width:18px;background-color:#5b2d12;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Cpath d='M0 8c18-7 30 8 49 0s31 6 47 0M0 31c18-7 30 8 49 0s31 6 47 0M0 56c18-7 30 8 49 0s31 6 47 0M0 81c18-7 30 8 49 0s31 6 47 0' fill='none' stroke='%23e6a66a' stroke-opacity='.27' stroke-width='1.2'/%3E%3Cpath d='M0 12c19-5 29 6 47 1s31 5 49 0M0 61c19-5 29 6 47 1s31 5 49 0' fill='none' stroke='%23301409' stroke-opacity='.55'/%3E%3C/svg%3E");background-size:96px 96px;box-shadow:inset 1px 0 #e0a06a44,inset -2px 0 #160702aa,0 0 0 1px #1b090355}
+.prophet10-shell::before{left:0;border-radius:0 2px 2px 0}
+.prophet10-shell::after{right:0;border-radius:2px 0 0 2px;transform:scaleX(-1)}
+.prophet10-shell .s37-section,.prophet10-shell .s37-sequencer,.prophet10-shell .s37-keybed{background-color:#201a2b;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Cpath d='M0 1h48M0 25h48' stroke='%23fff' stroke-opacity='.04'/%3E%3Cpath d='M0 2h48M0 26h48' stroke='%23000' stroke-opacity='.18'/%3E%3C/svg%3E");background-size:48px 48px;box-shadow:inset 0 1px #ffffff18,inset 0 -1px #000,0 2px 3px #0008}
+.prophet10-shell .s37-section{border-color:#66557a;box-shadow:inset 0 1px #d7bff022,inset 0 -1px #09070d,0 2px 3px #0008}
+.prophet10-shell .s37-button{background-color:#30263d;background-image:repeating-linear-gradient(90deg,#fff0 0 3px,#ffffff0a 3px 4px);box-shadow:inset 0 1px #ffffff22,inset 0 -1px #08060b,0 1px #000}
+.prophet10-shell .s37-button.lit{background-color:#d75b91;background-image:repeating-linear-gradient(90deg,#fff3 0 1px,#0002 1px 4px);box-shadow:0 0 9px #ff70b766,inset 0 1px #fff9,inset 0 -1px #6f1c46}
+.prophet10-shell .s37-display{background-color:#170f2a;background-image:repeating-linear-gradient(0deg,#fff0 0 2px,#ff8fc20d 2px 3px);box-shadow:inset 0 0 0 1px #ff8fc255,inset 0 0 16px #000,0 1px #fff3}
+.prophet10-shell .s37-step{background-color:#241d31;background-image:repeating-linear-gradient(90deg,#fff0 0 3px,#fff1 3px 4px);box-shadow:inset 0 1px #fff2,inset 0 -1px #000}
+.prophet10-shell .s37-step.playing{background-color:#ff8fc2;background-image:repeating-linear-gradient(90deg,#fff6 0 1px,#0002 1px 3px)}
+.prophet10-shell .s37-keybed .lp-key-white{background-color:#eee8f1;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='42'%3E%3Cpath d='M3 0v42M9 0v42M15 0v42' stroke='%23fff' stroke-opacity='.28'/%3E%3Cpath d='M6 0v42M12 0v42' stroke='%23000' stroke-opacity='.08'/%3E%3C/svg%3E");box-shadow:inset 1px 0 #fff9,inset -2px 0 #9b8ea7,0 2px 2px #000}
+.prophet10-shell .s37-keybed .lp-key-black{background-color:#181321;background-image:repeating-linear-gradient(90deg,#fff0 0 3px,#ffffff0d 3px 4px);box-shadow:inset 1px 0 #75677e,inset -2px 0 #030204,0 3px 3px #000}
+
+.prophet10-shell button,.prophet10-shell select,.prophet10-shell input,.prophet10-shell output,.prophet10-shell label,.prophet10-shell .s37-button,.prophet10-shell .lp-knob-label,.prophet10-shell .lp-wheel-label,.prophet10-shell .lp-key-label,.prophet10-shell .s37-section h2,.prophet10-shell .s37-footer{font-family:'Inter Variable',Inter,sans-serif!important}
+
 .prophet10-shell .s37-header {
-  padding-inline: 30px;
+  min-height: 46px;
+  padding: 0 22px 7px;
 }
 
 .prophet10-shell .s37-sound-area {
-  gap: 8px;
+  gap: 4px;
+}
+
+.prophet10-shell .s37-row {
+  gap: 5px;
+  margin: 3px 18px 0;
+}
+
+.prophet10-shell .s37-performance {
+  grid-template-columns: 1.35fr 1fr .72fr;
 }
 
 .prophet10-shell .s37-env-row {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.prophet10-shell .s37-performance > .s37-section:nth-child(3) {
+  grid-column: auto;
 }
 
 .prophet10-shell .s37-env-row > .s37-section:last-child {
   grid-column: 1 / -1;
 }
 
+.prophet10-shell .s37-section {
+  padding: 5px 6px 6px;
+}
+
+.prophet10-shell .s37-section h2 {
+  margin-bottom: 4px;
+  padding-bottom: 2px;
+}
+
 .prophet10-shell .s37-section-body {
   min-height: 0;
+  gap: 4px;
 }
 
-.prophet10-shell .s37-row {
-  align-items: start;
+.prophet10-shell .s37-knob-row {
+  gap: 4px;
 }
 
-.prophet10-shell .s37-section {
-  align-self: start;
+.prophet10-shell .s37-knob {
+  --knob-size: 38px;
+  min-width: 38px;
+}
+
+.prophet10-shell .s37-env-knobs .s37-knob {
+  --knob-size: 32px;
+  min-width: 32px;
 }
 
 .prophet10-shell .s37-button-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
+  gap: 3px;
 }
 
 .prophet10-shell .s37-select-wrap {
@@ -47,7 +97,200 @@
 }
 
 .prophet10-shell .s37-keybed {
-  min-height: 132px;
+  min-height: 0;
+  height: 108px;
+  margin: 4px 18px 0;
+  padding: 6px;
+}
+
+.prophet10-shell .s37-performance .s37-section{min-width:0}
+.prophet10-shell .s37-performance .s37-section-body{align-content:start}
+.prophet10-shell .s37-performance .s37-select-wrap select{max-width:100%}
+.prophet10-shell .s37-knob .lp-knob-label{font-size:5.5px;line-height:1}
+.prophet10-shell .s37-env-knobs .lp-knob-label{font-size:5px}
+
+/* Prophet-10 uses a compact four-module surface instead of the taller Sub 37
+   arrangement. The controls stay grouped by function while using the panel
+   width rather than stacking large empty bands vertically. */
+@media (min-width: 761px) {
+  .prophet10-shell {
+    padding: 7px 12px 8px;
+  }
+
+  .prophet10-shell .s37-header {
+    min-height: 39px;
+    padding: 0 16px 5px;
+  }
+
+  .prophet10-shell .s37-moog {
+    height: 31px;
+  }
+
+  .prophet10-shell .s37-display {
+    padding: 4px 8px;
+  }
+
+  .prophet10-shell .s37-row {
+    gap: 4px;
+    margin: 3px 10px 0;
+  }
+
+  .prophet10-shell .s37-osc-row {
+    grid-template-columns: 1.05fr 1.05fr .42fr 2.1fr;
+  }
+
+  .prophet10-shell .s37-env-row {
+    grid-template-columns: 1fr 1fr 1.15fr;
+  }
+
+  .prophet10-shell .s37-env-row > .s37-section:last-child {
+    grid-column: auto;
+  }
+
+  .prophet10-shell .s37-sound-area > .s37-advanced {
+    display: block;
+    margin-top: 3px;
+  }
+
+  .prophet10-shell .s37-section {
+    padding: 4px 5px 5px;
+  }
+
+  .prophet10-shell .s37-section h2 {
+    margin-bottom: 3px;
+    padding-bottom: 2px;
+  }
+
+  .prophet10-shell .s37-section-body {
+    gap: 3px;
+  }
+
+  .prophet10-shell .s37-mixer .s37-section-body {
+    justify-content: center;
+  }
+
+  .prophet10-shell .s37-mixer .s37-knob-row {
+    justify-content: center;
+  }
+
+  .prophet10-shell .s37-knob-row {
+    gap: 2px;
+  }
+
+  .prophet10-shell .s37-knob {
+    --knob-size: 35px;
+    min-width: 35px;
+  }
+
+  .prophet10-shell .s37-env-knobs {
+    gap: 0;
+  }
+
+  .prophet10-shell .s37-env-knobs .s37-knob {
+    --knob-size: 29px;
+    min-width: 29px;
+  }
+
+  .prophet10-shell .s37-select-wrap {
+    min-width: 0;
+    flex: 1 1 68px;
+  }
+
+  .prophet10-shell .s37-select-wrap select {
+    min-width: 0;
+    height: 19px;
+    font-size: 7px;
+  }
+
+  .prophet10-shell .s37-button {
+    min-height: 19px;
+    padding: 3px 4px;
+    font-size: 6px;
+  }
+
+  .prophet10-shell .s37-keybed {
+    height: 92px;
+    margin: 3px 10px 0;
+    padding: 5px;
+  }
+
+  .prophet10-shell .s37-keybed .lp-keyboard {
+    height: 86px;
+  }
+
+  .prophet10-shell .s37-wheels .lp-wheel-housing {
+    height: 70px;
+  }
+
+  .prophet10-shell .s37-footer {
+    margin: 5px 10px 0;
+  }
+}
+
+@media (min-width: 761px) and (max-width: 1180px) {
+  .prophet10-shell .s37-osc-row,
+  .prophet10-shell .s37-env-row {
+    grid-template-columns: 1.05fr 1.05fr .42fr 2.1fr;
+  }
+
+  .prophet10-shell .s37-keybed {
+    grid-template-columns: 78px minmax(0, 1fr);
+  }
+}
+
+/* Layered walnut end cheeks: the broad grain, dark pore flecks, and small
+   knots keep the wood reading as a physical cheek block rather than a brown
+   stripe. */
+.prophet10-shell::before,
+.prophet10-shell::after {
+  top: 0;
+  bottom: 0;
+  width: 26px;
+  border: 1px solid #1b0b05;
+  border-top: 0;
+  border-bottom: 0;
+  background-color: #542711;
+  background-image:
+    radial-gradient(ellipse at 35% 21%, #d58b4b 0 1px, #6d3214 2px 4px, transparent 5px),
+    radial-gradient(ellipse at 66% 73%, #291006 0 1px, #9a5123 2px 3px, transparent 5px),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='104' height='420' viewBox='0 0 104 420'%3E%3Cpath d='M8-10c19 34-10 72 9 109s-15 78 7 116-9 70 8 114-8 70 6 102M28-12c-12 39 18 72-4 116s17 78-5 122 15 76-2 116 12 64-2 91M51-9c16 33-9 79 12 120s-15 81 8 125-13 76 9 119-9 65 5 88M73-12c-15 47 12 75-8 116s18 79-4 122 14 75-7 113 13 68-3 96M94-8c-11 38 9 78-5 112s12 75-2 119 9 74-5 110 10 67-2 96' fill='none' stroke='%23b8672c' stroke-opacity='.44' stroke-width='2'/%3E%3Cpath d='M14-15c14 40-8 74 8 116s-11 78 5 117-9 73 5 118M42-12c-9 42 13 77-4 120s15 77-3 120 12 69-2 110M64-8c14 37-9 79 7 122s-12 77 6 119-10 75 4 104M84-10c-9 38 12 78-4 116s14 80-4 123 12 70-1 108' fill='none' stroke='%232a0c04' stroke-opacity='.62' stroke-width='1.4'/%3E%3Cellipse cx='41' cy='86' rx='13' ry='23' fill='none' stroke='%23c47737' stroke-opacity='.36' stroke-width='2'/%3E%3Cellipse cx='41' cy='86' rx='5' ry='10' fill='%23210904' fill-opacity='.5'/%3E%3C/svg%3E"),
+    linear-gradient(90deg, #2b1006 0%, #713817 18%, #4a1d0b 43%, #93501f 62%, #3b1608 84%, #1d0904 100%);
+  background-size: 100% 100%, 100% 100%, 104px 420px, 100% 100%;
+  background-position: center, center, center, center;
+  box-shadow:
+    inset 2px 0 #e8aa6a55,
+    inset -3px 0 #1a0703cc,
+    inset 0 0 0 1px #b86b3544,
+    0 0 0 1px #0c0502;
+}
+
+.prophet10-shell::before {
+  left: 0;
+  border-radius: 0 3px 3px 0;
+}
+
+.prophet10-shell::after {
+  right: 0;
+  border-radius: 3px 0 0 3px;
+  transform: scaleX(-1);
+}
+
+@media (min-width: 761px) {
+  .prophet10-shell .s37-osc-row,
+  .prophet10-shell .s37-env-row {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .prophet10-shell .s37-env-row > .s37-section:nth-child(3),
+  .prophet10-shell .s37-env-row > .s37-section:last-child {
+    grid-column: auto;
+  }
+
+  .prophet10-shell .s37-keybed {
+    grid-template-columns: 78px minmax(0, 1fr);
+    margin-left: 10px;
+    margin-right: 10px;
+  }
 }
 
 @media (max-width: 1180px) {
@@ -63,7 +306,10 @@
     margin-right: 10px;
   }
 
-  .prophet10-shell .s37-performance,
+  .prophet10-shell .s37-performance {
+    grid-template-columns: 1.2fr 1fr .7fr;
+  }
+
   .prophet10-shell .s37-osc-row {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -136,4 +382,139 @@
   .prophet10-shell .s37-env-row > .s37-section:last-child {
     grid-column: 1 / -1;
   }
+}
+
+@media (min-width: 761px) {
+  .prophet10-shell .s37-row,
+  .prophet10-shell .s37-keybed,
+  .prophet10-shell .s37-footer,
+  .prophet10-shell .s37-sound-area > .s37-advanced {
+    margin-left: 18px;
+    margin-right: 18px;
+  }
+
+  .prophet10-shell .s37-osc-row {
+    grid-template-columns: 1.05fr 1.05fr .42fr 2.1fr;
+  }
+
+  .prophet10-shell .s37-env-row {
+    grid-template-columns: 1fr 1fr 1.15fr;
+  }
+
+  .prophet10-shell .s37-env-row > .s37-section:last-child {
+    grid-column: auto;
+  }
+
+  .prophet10-shell .s37-sound-area > .s37-advanced {
+    grid-column: auto;
+    margin-left: 18px;
+    margin-right: 18px;
+  }
+
+  .prophet10-shell .s37-env-row {
+    align-items: start;
+  }
+
+  .prophet10-shell .s37-env-row > .s37-section {
+    align-self: start;
+  }
+
+  .prophet10-shell .s37-advanced .s37-section-body {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    align-items: start;
+    gap: 3px;
+  }
+
+  .prophet10-shell .s37-advanced .s37-select-wrap {
+    min-width: 0;
+  }
+
+  .prophet10-shell .s37-advanced .s37-select-wrap select {
+    width: 100%;
+  }
+
+  .prophet10-shell .s37-advanced .s37-button-row,
+  .prophet10-shell .s37-advanced .s37-knob-row,
+  .prophet10-shell .s37-advanced .s37-performance-modes {
+    grid-column: 1 / -1;
+  }
+
+  .prophet10-shell .s37-advanced .s37-button-row {
+    justify-content: center;
+    gap: 5px;
+  }
+
+  .prophet10-shell .s37-advanced .s37-knob-row {
+    justify-content: center;
+    gap: 18px;
+  }
+
+  .prophet10-shell .s37-advanced .s37-performance-modes {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding-top: 1px;
+  }
+
+  .prophet10-shell .s37-advanced .s37-performance-modes .s37-button {
+    min-width: 112px;
+    flex: 0 1 150px;
+  }
+
+  .prophet10-shell .s37-modulation .s37-section-body {
+    align-content: start;
+  }
+}
+
+/* Center the contents inside each existing module without changing the
+   module grid, dimensions, or spacing. */
+.prophet10-shell .s37-section-body {
+  justify-content: center;
+  text-align: center;
+}
+
+.prophet10-shell .s37-section-body > .s37-knob-row,
+.prophet10-shell .s37-section-body > .s37-button-row {
+  justify-content: center;
+}
+
+.prophet10-shell .s37-select-wrap {
+  justify-items: center;
+  text-align: center;
+}
+
+.prophet10-shell .s37-select-wrap select {
+  text-align: center;
+  text-align-last: center;
+}
+
+.prophet10-shell .s37-button-row {
+  justify-content: center;
+}
+
+.prophet10-shell .s37-performance-modes {
+  justify-content: center;
+}
+
+.prophet10-shell .s37-advanced .s37-section-body {
+  justify-items: center;
+}
+
+.prophet10-shell .s37-advanced .s37-section-body > .s37-select-wrap {
+  width: 100%;
+}
+
+.prophet10-shell .s37-advanced .s37-section-body > .s37-button-row,
+.prophet10-shell .s37-advanced .s37-section-body > .s37-knob-row,
+.prophet10-shell .s37-advanced .s37-section-body > .s37-performance-modes {
+  justify-self: stretch;
+}
+
+.prophet10-shell .s37-advanced .s37-knob-row {
+  justify-content: center;
+}
+
+.prophet10-shell .s37-advanced .s37-button-row {
+  justify-content: center;
 }

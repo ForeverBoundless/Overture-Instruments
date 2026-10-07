@@ -10,6 +10,10 @@ const INSTRUMENTS = [{
   id: 'prophet-10', name: 'Prophet-10', model: 'Rev4 Polyphonic Analog Synthesizer', manufacturer: 'Sequential',
   voiceMode: '10-voice polyphonic', presets: 400, keys: 61, icon: 'piano',
   description: 'A ten-voice analog polyphonic classic with dual oscillators, Poly-Mod, Wheel Mod, vintage voice variation, and the unmistakable Prophet architecture.',
+}, {
+  id: 'nord-c2d', name: 'Nord C2D', model: 'Dual-manual organ', manufacturer: 'Nord',
+  voiceMode: 'Dual manual', presets: 126, keys: '2 × 37', icon: 'piano',
+  description: 'A stage-ready dual-manual organ layout with drawbar-inspired controls, two independent octave ranges, and the unmistakable Nord red finish.',
 }];
 
 const spec = (label, value, icon) => `<div class="instrument-spec"><span class="material-symbols-rounded">${icon}</span><span>${label}</span><strong>${value}</strong></div>`;
@@ -29,8 +33,17 @@ function buildTile(instrument) {
     if (instrument.id === 'little-phatty') { window.location.assign('./little-phatty/'); return; }
     if (instrument.id === 'sub-37') { window.location.assign('./sub37.html'); return; }
     if (instrument.id === 'prophet-10') { window.location.assign('./prophet10.html'); return; }
+    if (instrument.id === 'nord-c2d') { window.location.assign('./nord-c2d.html'); return; }
     document.dispatchEvent(new CustomEvent('launcher:launch', { detail: instrument }));
   });
+  tile.classList.add('is-entering');
+  const finishEntry = (event) => {
+    if (event.animationName === 'tile-enter') {
+      tile.classList.remove('is-entering');
+      tile.removeEventListener('animationend', finishEntry);
+    }
+  };
+  tile.addEventListener('animationend', finishEntry);
   return tile;
 }
 
@@ -69,7 +82,7 @@ page.innerHTML = `<div class="launcher-ambient launcher-ambient--one" aria-hidde
     </div>
 
     <div class="launcher-brand-slot">
-      <img src="/ui/Logos/Novation_logo.png" alt="Novation">
+      <img src="/ui/Logos/Nord_logo.png" alt="Nord">
     </div>
 
     <div class="launcher-brand-slot">

@@ -19,10 +19,12 @@ The project is owned by **Michael Carpiano**, founder and owner of Overture Inst
 
 - **Little Phatty Stage Edition**: a monophonic 37-key emulator with dual oscillators, a ladder-style filter, envelopes, modulation, factory presets, user preset storage, computer-keyboard input, and MIDI input.
 - **Sub 37 Bob Moog Tribute Edition**: a mono / two-note paraphonic emulator with dual oscillators, modulation, envelopes, presets, pitch and modulation wheels, and a playable 37-key interface.
+- **Nord C2D**: a red dual-manual organ interface with two independent 37-key manuals and per-manual octave controls spanning -2 to +2 octaves.
+- **Sequential Prophet-10**: a ten-voice polyphonic analog synthesizer emulator with Web MIDI note input, pitch bend, mod wheel, aftertouch, sustain, and program changes.
 
 ## Controls
 
-Use the on-screen keyboard or connect a compatible MIDI controller to play. The Little Phatty emulator also supports computer-keyboard note input, pitch and modulation wheel keys, octave controls, and MIDI program changes.
+Use the on-screen keyboard or connect a compatible MIDI controller to play. The Prophet-10 accepts MIDI notes on all channels plus pitch bend, mod wheel, aftertouch, sustain, and program changes. The Nord C2D routes MIDI channel 1 to the upper/Swell manual, channel 2 to the lower/Great manual, and channel 3 to the lower manual when its Great split is enabled.
 
 Audio starts through each instrument's power control. MIDI access may require browser permission and is best supported in Chromium-based browsers.
 

@@ -21,16 +21,24 @@ class Prophet10App {
     this.compareProgram = null;
     this.state = {};
     this.activeKeys = new Set();
+    this.pendingMidiNotes = new Map();
     this._build();
     this._bindKeyboard();
     this._bindPower();
     this.midi = new MidiManager({
-      onNoteOn: (note, velocity) => this._noteOn(note, velocity),
-      onNoteOff: (note) => this._noteOff(note),
+      onNoteOn: (note, velocity) => {
+        if (!this.engine.started) this.pendingMidiNotes.set(note, velocity);
+        else this._noteOn(note, velocity);
+      },
+      onNoteOff: (note) => {
+        this.pendingMidiNotes.delete(note);
+        if (this.engine.started) this._noteOff(note);
+      },
       onPitchBend: (_range, value) => this.engine.setPitchBend(value),
       onModWheel: (value) => this.engine.setModWheel(value),
       onAftertouch: (value) => this.engine.setAftertouch(value),
       onSustain: (down) => this.engine.setSustain(down),
+      onAllNotesOff: () => this.engine.allNotesOff(),
       onProgramChange: (program) => {
         this.program = Math.min(199, program);
         this._refreshProgramSelect();
@@ -213,6 +221,7 @@ class Prophet10App {
     const osc = document.createElement('div'); osc.className = 's37-row s37-osc-row';
     osc.append(this._oscillator('A'), this._oscillator('B'));
     const mixer = this._section('MIXER');
+    mixer.section.classList.add('s37-mixer');
     const mixRow = document.createElement('div'); mixRow.className = 's37-knob-row';
     this._knob(mixRow, 'noise', 'NOISE', 0, 1, 0.02, (v) => this.engine.setMixer({ noise: v }), false, (v) => `${Math.round(v * 100)}%`);
     mixer.body.appendChild(mixRow); osc.append(mixer.section);
@@ -225,12 +234,13 @@ class Prophet10App {
     filter.body.append(this._selector('REVISION', ['rev1', 'rev2', 'rev3', 'rev4'], 'rev4', (v) => this._setState('filterRevision', v)), this._selector('TRACKING', ['0%', '50%', '100%'], '50%', (v) => this._setState('keyTrack', Number.parseInt(v, 10) / 100)), this._selector('Q COMP', ['program', 'vintage'], 'program', (v) => this.engine.setQCompensation(v)));
     osc.append(filter.section); area.appendChild(osc);
     const lower = document.createElement('div'); lower.className = 's37-row s37-env-row';
-    lower.append(this._envelope('filter', 'FILTER ENVELOPE'), this._envelope('amp', 'AMPLIFIER ENVELOPE'), this._modulation(), this._advanced());
-    area.appendChild(lower); return area;
+    lower.append(this._envelope('filter', 'FILTER ENVELOPE'), this._envelope('amp', 'AMPLIFIER ENVELOPE'), this._modulation());
+    area.append(lower, this._advanced()); return area;
   }
 
   _advanced() {
     const section = this._section('PERFORMANCE / ROUTING');
+    section.section.classList.add('s37-advanced');
     const toggles = document.createElement('div'); toggles.className = 's37-button-row';
     const toggle = (label, key) => { const b = this._button(label, (button) => { this._setState(key, !this.state[key]); button.classList.toggle('lit', this.state[key]); }); return b; };
     toggles.append(toggle('A SAW', 'oscAWave'), toggle('A PULSE', 'oscAPulse'), toggle('B SAW', 'oscBWave'), toggle('B TRI', 'oscBTriangle'), toggle('B PULSE', 'oscBPulse'), toggle('SYNC', 'oscBSync'), toggle('B LO FREQ', 'oscBLowFreq'), toggle('B NO KEY', 'oscBKeyboard'));
@@ -247,7 +257,9 @@ class Prophet10App {
     this._knob(knobs, 'glide', 'GLIDE', 0, 5, 0, (v) => this._setState('glide', v), false, (v) => `${v.toFixed(2)}s`);
     this._knob(knobs, 'masterTune', 'MASTER TUNE', -100, 100, 0, (v) => this._setState('masterTune', v), true, (v) => `${v.toFixed(0)} ct`);
     this._knob(knobs, 'splitPoint', 'SPLIT POINT', 36, 96, 60, (v) => this._setState('splitPoint', Math.round(v)), false, (v) => `${Math.round(v)}`);
-    section.body.append(toggles, knobs, toggle('UNISON', 'unison'), toggle('CHORD MEMORY', 'chordMemory'), toggle('STACK', 'stack'), toggle('SPLIT', 'split'), toggle('A440', 'a440'));
+    const performanceModes = document.createElement('div'); performanceModes.className = 's37-performance-modes';
+    performanceModes.append(toggle('UNISON', 'unison'), toggle('CHORD MEMORY', 'chordMemory'), toggle('STACK', 'stack'), toggle('SPLIT', 'split'), toggle('A440', 'a440'));
+    section.body.append(toggles, knobs, performanceModes);
     return section.section;
   }
 
@@ -285,7 +297,10 @@ class Prophet10App {
 
   _bindPower() {
     document.getElementById('prophet10-power').addEventListener('click', async () => {
-      await this.engine.start(); this._applyPreset(0); document.getElementById('prophet10-power').classList.add('sub37-power-off'); this.displayBottom.textContent = 'AUDIO READY';
+      await this.engine.start(); this._applyPreset(0);
+      this.pendingMidiNotes.forEach((velocity, note) => this._noteOn(note, velocity));
+      this.pendingMidiNotes.clear();
+      document.getElementById('prophet10-power').classList.add('sub37-power-off'); this.displayBottom.textContent = 'AUDIO READY';
     }, { once: true });
   }
 

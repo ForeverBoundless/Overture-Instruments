@@ -23,8 +23,8 @@ const CC = {
 export class MidiManager {
   /**
    * @param {object} callbacks
-   * @param {(midiNote:number, velocity:number)=>void} callbacks.onNoteOn
-   * @param {(midiNote:number)=>void} callbacks.onNoteOff
+   * @param {(midiNote:number, velocity:number, channel:number)=>void} callbacks.onNoteOn
+   * @param {(midiNote:number, channel:number)=>void} callbacks.onNoteOff
    * @param {(semitoneRange:number, normalizedValue:number)=>void} callbacks.onPitchBend - normalizedValue is -1..1
    * @param {(value:number)=>void} callbacks.onModWheel - 0..1
    * @param {(down:boolean)=>void} callbacks.onSustain
@@ -80,18 +80,19 @@ export class MidiManager {
 
   _handleMessage(msg) {
     const [status, d1, d2] = msg.data;
+    const channel = (status & 0x0f) + 1;
     const command = status & 0xf0;
 
     switch (command) {
       case 0x90: // Note On
         if (d2 === 0) {
-          this.callbacks.onNoteOff?.(d1);
+          this.callbacks.onNoteOff?.(d1, channel);
         } else {
-          this.callbacks.onNoteOn?.(d1, d2 / 127);
+          this.callbacks.onNoteOn?.(d1, d2 / 127, channel);
         }
         break;
       case 0x80: // Note Off
-        this.callbacks.onNoteOff?.(d1);
+        this.callbacks.onNoteOff?.(d1, channel);
         break;
       case 0xe0: { // Pitch Bend (14-bit, d1=LSB d2=MSB)
         const raw = (d2 << 7) | d1; // 0..16383
@@ -123,6 +124,10 @@ export class MidiManager {
         break;
       case CC.VOLUME:
         this.callbacks.onVolume?.(value / 127);
+        break;
+      case 120:
+      case 123:
+        this.callbacks.onAllNotesOff?.();
         break;
       default:
         // Many controllers map octave up/down to unused CC numbers or
