@@ -2122,3 +2122,972 @@ body.high-contrast .lp-oled-line {
     transform: scaleX(1);
   }
 }
+
+/* =====================================================================
+   COMING SOON SIGNAL
+   Alternates between Overture amber and Sub 37 electric cyan.
+   ===================================================================== */
+
+.launcher-coming-soon__signal {
+  --signal-amber: #ffb84f;
+  --signal-cyan: #7de4ff;
+
+  animation:
+    coming-soon-flicker-color 4.2s ease-in-out infinite,
+    coming-soon-signal-sparkle 2.6s ease-in-out infinite;
+}
+
+
+/* Outer ring */
+.launcher-coming-soon__signal::before {
+  border-color: var(--signal-amber);
+
+  animation:
+    coming-soon-ring-color 4.2s ease-in-out infinite,
+    coming-soon-ring 3.8s ease-in-out infinite;
+}
+
+
+/* Center dot */
+.launcher-coming-soon__signal::after {
+  background: var(--signal-amber);
+
+  animation:
+    coming-soon-dot-color 4.2s ease-in-out infinite,
+    coming-soon-dot 2.2s ease-in-out infinite;
+}
+
+
+/* =====================================================================
+   Whole signal colour cycle
+   ===================================================================== */
+
+@keyframes coming-soon-flicker-color {
+  0%,
+  31%,
+  100% {
+    color: var(--signal-amber);
+  }
+
+  34% {
+    color: var(--signal-cyan);
+  }
+
+  40%,
+  68% {
+    color: var(--signal-cyan);
+  }
+
+  71% {
+    color: var(--signal-amber);
+  }
+}
+
+
+/* =====================================================================
+   Outer ring
+   ===================================================================== */
+
+@keyframes coming-soon-ring-color {
+  0%,
+  31%,
+  100% {
+    border-color: var(--signal-amber);
+    filter: drop-shadow(0 0 5px rgba(255,184,79,.35));
+  }
+
+  34% {
+    border-color: var(--signal-cyan);
+    filter: drop-shadow(0 0 7px rgba(125,228,255,.55));
+  }
+
+  40%,
+  68% {
+    border-color: var(--signal-cyan);
+    filter: drop-shadow(0 0 8px rgba(125,228,255,.65));
+  }
+
+  71% {
+    border-color: var(--signal-amber);
+    filter: drop-shadow(0 0 5px rgba(255,184,79,.35));
+  }
+}
+
+
+/* =====================================================================
+   Center dot
+   ===================================================================== */
+
+@keyframes coming-soon-dot-color {
+  0%,
+  31%,
+  100% {
+    background: var(--signal-amber);
+
+    box-shadow:
+      0 0 8px #ff9f0a,
+      0 0 14px rgba(255,159,10,.45);
+  }
+
+  34% {
+    background: var(--signal-cyan);
+
+    box-shadow:
+      0 0 10px #7de4ff,
+      0 0 18px rgba(125,228,255,.65);
+  }
+
+  40%,
+  68% {
+    background: var(--signal-cyan);
+
+    box-shadow:
+      0 0 12px #7de4ff,
+      0 0 22px rgba(125,228,255,.7);
+  }
+
+  71% {
+    background: var(--signal-amber);
+
+    box-shadow:
+      0 0 8px #ff9f0a,
+      0 0 14px rgba(255,159,10,.45);
+  }
+}
+
+/* =====================================================================
+   COMING SOON SIGNAL
+   Entire signal alternates between Overture amber and Sub 37 cyan.
+   ===================================================================== */
+
+.launcher-coming-soon__signal {
+  --signal-amber: #ffb84f;
+  --signal-cyan: #7de4ff;
+
+  position: relative;
+  z-index: 1;
+
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  margin-right: 18px;
+
+  border: 1px solid var(--signal-amber);
+  border-radius: 50%;
+
+  /*
+    The ENTIRE outer signal glow changes colour with the cycle.
+  */
+  box-shadow:
+    0 0 0 7px rgba(255,159,10,.07),
+    inset 0 0 16px rgba(255,159,10,.16),
+    0 0 12px rgba(255,159,10,.12);
+
+  animation:
+    signal-colour-cycle 4.4s ease-in-out infinite,
+    signal-size-pulse 2.6s ease-in-out infinite;
+}
+
+
+/* ---------------------------------------------------------------------
+   Outer ring
+   --------------------------------------------------------------------- */
+
+.launcher-coming-soon__signal::before {
+  content: '';
+
+  position: absolute;
+  left: 50%;
+  top: 50%;
+
+  width: 18px;
+  height: 18px;
+
+  border: 1px solid var(--signal-amber);
+  border-radius: 50%;
+
+  transform: translate(-50%, -50%);
+
+  opacity: .8;
+
+  box-shadow:
+    0 0 7px rgba(255,159,10,.2);
+
+  animation:
+    signal-ring-cycle 4.4s ease-in-out infinite,
+    signal-ring-pulse 3.8s ease-in-out infinite;
+}
+
+
+/* ---------------------------------------------------------------------
+   Center light
+   --------------------------------------------------------------------- */
+
+.launcher-coming-soon__signal::after {
+  content: '';
+
+  position: absolute;
+  left: 50%;
+  top: 50%;
+
+  width: 7px;
+  height: 7px;
+
+  background: var(--signal-amber);
+  border-radius: 50%;
+
+  transform: translate(-50%, -50%);
+
+  box-shadow:
+    0 0 10px #ff9f0a,
+    0 0 18px rgba(255,159,10,.45);
+
+  animation:
+    signal-dot-cycle 4.4s ease-in-out infinite,
+    signal-dot-pulse 2.2s ease-in-out infinite;
+}
+
+
+/* =====================================================================
+   WHOLE SIGNAL
+   The border, outer halo and inset glow all change together.
+   ===================================================================== */
+
+@keyframes signal-colour-cycle {
+
+  /* AMBER */
+  0%,
+  27% {
+    border-color: #ffb84f;
+
+    box-shadow:
+      0 0 0 7px rgba(255,159,10,.07),
+      inset 0 0 16px rgba(255,159,10,.16),
+      0 0 12px rgba(255,159,10,.12);
+  }
+
+  /* brief electronic transition */
+  30% {
+    border-color: #ffcb78;
+
+    box-shadow:
+      0 0 0 8px rgba(255,184,79,.09),
+      inset 0 0 19px rgba(255,174,45,.2),
+      0 0 17px rgba(255,174,45,.18);
+  }
+
+  /* CYAN */
+  34%,
+  67% {
+    border-color: #7de4ff;
+
+    box-shadow:
+      0 0 0 8px rgba(125,228,255,.09),
+      inset 0 0 19px rgba(125,228,255,.2),
+      0 0 17px rgba(125,228,255,.18);
+  }
+
+  /* snap back toward amber */
+  70% {
+    border-color: #ffd080;
+
+    box-shadow:
+      0 0 0 8px rgba(255,191,91,.08),
+      inset 0 0 18px rgba(255,176,51,.18),
+      0 0 16px rgba(255,176,51,.16);
+  }
+
+  /* AMBER */
+  74%,
+  100% {
+    border-color: #ffb84f;
+
+    box-shadow:
+      0 0 0 7px rgba(255,159,10,.07),
+      inset 0 0 16px rgba(255,159,10,.16),
+      0 0 12px rgba(255,159,10,.12);
+  }
+}
+
+
+/* =====================================================================
+   OUTER RING COLOUR
+   ===================================================================== */
+
+@keyframes signal-ring-cycle {
+
+  0%,
+  27% {
+    border-color: #ffb84f;
+    box-shadow: 0 0 7px rgba(255,159,10,.2);
+  }
+
+  30% {
+    border-color: #ffcb78;
+    box-shadow: 0 0 9px rgba(255,174,45,.28);
+  }
+
+  34%,
+  67% {
+    border-color: #7de4ff;
+    box-shadow: 0 0 10px rgba(125,228,255,.42);
+  }
+
+  70% {
+    border-color: #ffd080;
+    box-shadow: 0 0 9px rgba(255,176,51,.26);
+  }
+
+  74%,
+  100% {
+    border-color: #ffb84f;
+    box-shadow: 0 0 7px rgba(255,159,10,.2);
+  }
+}
+
+
+/* =====================================================================
+   CENTER DOT COLOUR
+   ===================================================================== */
+
+@keyframes signal-dot-cycle {
+
+  0%,
+  27% {
+    background: #ffb84f;
+
+    box-shadow:
+      0 0 10px #ff9f0a,
+      0 0 18px rgba(255,159,10,.45);
+  }
+
+  30% {
+    background: #ffd080;
+
+    box-shadow:
+      0 0 11px #ffb84f,
+      0 0 21px rgba(255,174,45,.55);
+  }
+
+  34%,
+  67% {
+    background: #7de4ff;
+
+    box-shadow:
+      0 0 11px #7de4ff,
+      0 0 21px rgba(125,228,255,.65),
+      0 0 30px rgba(125,228,255,.2);
+  }
+
+  70% {
+    background: #ffd080;
+
+    box-shadow:
+      0 0 11px #ffb84f,
+      0 0 21px rgba(255,174,45,.55);
+  }
+
+  74%,
+  100% {
+    background: #ffb84f;
+
+    box-shadow:
+      0 0 10px #ff9f0a,
+      0 0 18px rgba(255,159,10,.45);
+  }
+}
+
+
+/* =====================================================================
+   SIZE / FLICKER MOTION
+   ===================================================================== */
+
+@keyframes signal-size-pulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.025);
+  }
+}
+
+@keyframes signal-ring-pulse {
+
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(.96);
+    opacity: .55;
+  }
+
+  50% {
+    transform: translate(-50%, -50%) scale(1.08);
+    opacity: 1;
+  }
+}
+
+@keyframes signal-dot-pulse {
+
+  0%,
+  100% {
+    opacity: .75;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+/* =====================================================================
+   COMING SOON SIGNAL
+   Energetic amber/cyan electronic flicker with layered glow, bursts,
+   breathing halo and irregular brightness changes.
+   ===================================================================== */
+
+.launcher-coming-soon__signal {
+  --signal-amber: #ffb84f;
+  --signal-cyan: #7de4ff;
+
+  position: relative;
+  z-index: 1;
+
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  margin-right: 18px;
+
+  border: 1px solid var(--signal-amber);
+  border-radius: 50%;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(255,184,79,.10) 0%,
+      rgba(255,184,79,.035) 32%,
+      transparent 67%
+    );
+
+  box-shadow:
+    0 0 0 4px rgba(255,159,10,.035),
+    0 0 0 8px rgba(255,159,10,.055),
+    0 0 18px rgba(255,159,10,.12),
+    inset 0 0 16px rgba(255,159,10,.18);
+
+  animation:
+    signal-electric-cycle 6.2s linear infinite,
+    signal-breathe 2.7s ease-in-out infinite;
+
+  will-change:
+    opacity,
+    filter,
+    box-shadow,
+    transform;
+}
+
+
+/* =====================================================================
+   EXPANDING ELECTRIC RING
+   ===================================================================== */
+
+.launcher-coming-soon__signal::before {
+  content: '';
+
+  position: absolute;
+  left: 50%;
+  top: 50%;
+
+  width: 17px;
+  height: 17px;
+
+  border: 1px solid var(--signal-amber);
+  border-radius: 50%;
+
+  transform: translate(-50%, -50%) scale(.92);
+
+  opacity: .65;
+
+  box-shadow:
+    0 0 5px rgba(255,184,79,.24),
+    0 0 11px rgba(255,184,79,.12);
+
+  animation:
+    signal-ring-color 6.2s linear infinite,
+    signal-ring-expand 2.15s ease-out infinite;
+
+  will-change:
+    transform,
+    opacity,
+    border-color,
+    box-shadow;
+}
+
+
+/* =====================================================================
+   CORE
+   ===================================================================== */
+
+.launcher-coming-soon__signal::after {
+  content: '';
+
+  position: absolute;
+  left: 50%;
+  top: 50%;
+
+  width: 7px;
+  height: 7px;
+
+  border-radius: 50%;
+
+  transform: translate(-50%, -50%);
+
+  background: var(--signal-amber);
+
+  box-shadow:
+    0 0 5px var(--signal-amber),
+    0 0 11px var(--signal-amber),
+    0 0 20px rgba(255,159,10,.35);
+
+  animation:
+    signal-core-color 6.2s linear infinite,
+    signal-core-flicker 6.2s linear infinite;
+
+  will-change:
+    opacity,
+    transform,
+    background,
+    box-shadow,
+    filter;
+}
+
+
+/* =====================================================================
+   MAIN ELECTRICAL COLOUR / BRIGHTNESS CYCLE
+   Deliberately irregular. It does not simply fade from amber to cyan.
+   ===================================================================== */
+
+@keyframes signal-electric-cycle {
+
+  /* Quiet amber */
+  0% {
+    opacity: .9;
+    filter: brightness(1);
+    border-color: #ffb84f;
+
+    box-shadow:
+      0 0 0 4px rgba(255,159,10,.035),
+      0 0 0 8px rgba(255,159,10,.055),
+      0 0 18px rgba(255,159,10,.12),
+      inset 0 0 16px rgba(255,159,10,.18);
+  }
+
+  /* Tiny amber flicker */
+  7% {
+    opacity: 1;
+    filter: brightness(1.25);
+  }
+
+  8% {
+    opacity: .68;
+    filter: brightness(.82);
+  }
+
+  9% {
+    opacity: 1;
+    filter: brightness(1.4);
+  }
+
+  10.5% {
+    opacity: .84;
+    filter: brightness(.94);
+  }
+
+  12% {
+    opacity: .94;
+    filter: brightness(1);
+  }
+
+  /* First cyan ignition */
+  24% {
+    border-color: #7de4ff;
+
+    background:
+      radial-gradient(
+        circle,
+        rgba(125,228,255,.12) 0%,
+        rgba(125,228,255,.04) 33%,
+        transparent 67%
+      );
+
+    box-shadow:
+      0 0 0 4px rgba(125,228,255,.045),
+      0 0 0 8px rgba(125,228,255,.075),
+      0 0 20px rgba(125,228,255,.17),
+      inset 0 0 18px rgba(125,228,255,.21);
+  }
+
+  /* Snap brighter into cyan */
+  27% {
+    opacity: 1;
+    filter: brightness(1.28);
+  }
+
+  28% {
+    opacity: .78;
+    filter: brightness(.88);
+  }
+
+  29% {
+    opacity: 1;
+    filter: brightness(1.5);
+
+    box-shadow:
+      0 0 0 5px rgba(125,228,255,.07),
+      0 0 0 11px rgba(125,228,255,.09),
+      0 0 25px rgba(125,228,255,.25),
+      inset 0 0 22px rgba(125,228,255,.25);
+  }
+
+  31% {
+    opacity: .96;
+    filter: brightness(1.05);
+  }
+
+  /* Hold cyan */
+  43% {
+    border-color: #7de4ff;
+
+    box-shadow:
+      0 0 0 4px rgba(125,228,255,.045),
+      0 0 0 8px rgba(125,228,255,.07),
+      0 0 19px rgba(125,228,255,.15),
+      inset 0 0 17px rgba(125,228,255,.2);
+  }
+
+  /* Sudden cyan dropout */
+  46% {
+    opacity: .48;
+    filter: brightness(.7);
+  }
+
+  47% {
+    opacity: .94;
+    filter: brightness(1.08);
+  }
+
+  48% {
+    opacity: .63;
+    filter: brightness(.8);
+  }
+
+  49.5% {
+    opacity: 1;
+    filter: brightness(1.34);
+
+    box-shadow:
+      0 0 0 5px rgba(125,228,255,.075),
+      0 0 0 12px rgba(125,228,255,.085),
+      0 0 28px rgba(125,228,255,.24),
+      inset 0 0 22px rgba(125,228,255,.25);
+  }
+
+  /* Transition back toward amber */
+  64% {
+    border-color: #ffb84f;
+
+    background:
+      radial-gradient(
+        circle,
+        rgba(255,184,79,.11) 0%,
+        rgba(255,184,79,.035) 33%,
+        transparent 67%
+      );
+
+    box-shadow:
+      0 0 0 4px rgba(255,159,10,.04),
+      0 0 0 8px rgba(255,159,10,.06),
+      0 0 19px rgba(255,159,10,.14),
+      inset 0 0 17px rgba(255,159,10,.19);
+  }
+
+  /* Amber burst */
+  68% {
+    opacity: 1;
+    filter: brightness(1.42);
+  }
+
+  69% {
+    opacity: .7;
+    filter: brightness(.84);
+  }
+
+  70% {
+    opacity: 1;
+    filter: brightness(1.52);
+
+    box-shadow:
+      0 0 0 5px rgba(255,159,10,.07),
+      0 0 0 12px rgba(255,159,10,.085),
+      0 0 27px rgba(255,159,10,.26),
+      inset 0 0 22px rgba(255,159,10,.25);
+  }
+
+  /* Little dead-air moment */
+  82% {
+    opacity: .76;
+    filter: brightness(.88);
+  }
+
+  83.5% {
+    opacity: .95;
+    filter: brightness(1.05);
+  }
+
+  /* End on amber */
+  100% {
+    opacity: .9;
+    filter: brightness(1);
+
+    border-color: #ffb84f;
+
+    box-shadow:
+      0 0 0 4px rgba(255,159,10,.035),
+      0 0 0 8px rgba(255,159,10,.055),
+      0 0 18px rgba(255,159,10,.12),
+      inset 0 0 16px rgba(255,159,10,.18);
+  }
+}
+
+
+/* =====================================================================
+   RING COLOUR
+   ===================================================================== */
+
+@keyframes signal-ring-color {
+
+  0%,
+  20% {
+    border-color: #ffb84f;
+
+    box-shadow:
+      0 0 5px rgba(255,184,79,.24),
+      0 0 11px rgba(255,184,79,.12);
+  }
+
+  24%,
+  58% {
+    border-color: #7de4ff;
+
+    box-shadow:
+      0 0 6px rgba(125,228,255,.34),
+      0 0 13px rgba(125,228,255,.18);
+  }
+
+  64%,
+  100% {
+    border-color: #ffb84f;
+
+    box-shadow:
+      0 0 5px rgba(255,184,79,.24),
+      0 0 11px rgba(255,184,79,.12);
+  }
+}
+
+
+/* =====================================================================
+   RING MOTION
+   ===================================================================== */
+
+@keyframes signal-ring-expand {
+
+  0% {
+    transform:
+      translate(-50%, -50%)
+      scale(.78);
+
+    opacity: .2;
+  }
+
+  32% {
+    transform:
+      translate(-50%, -50%)
+      scale(1.05);
+
+    opacity: .9;
+  }
+
+  62% {
+    transform:
+      translate(-50%, -50%)
+      scale(1.42);
+
+    opacity: .32;
+  }
+
+  100% {
+    transform:
+      translate(-50%, -50%)
+      scale(1.7);
+
+    opacity: 0;
+  }
+}
+
+
+/* =====================================================================
+   CORE COLOUR
+   ===================================================================== */
+
+@keyframes signal-core-color {
+
+  0%,
+  20% {
+    background: #ffb84f;
+
+    box-shadow:
+      0 0 5px #ffb84f,
+      0 0 11px #ff9f0a,
+      0 0 20px rgba(255,159,10,.35);
+  }
+
+  24%,
+  58% {
+    background: #7de4ff;
+
+    box-shadow:
+      0 0 5px #7de4ff,
+      0 0 12px #7de4ff,
+      0 0 22px rgba(125,228,255,.48);
+  }
+
+  64%,
+  100% {
+    background: #ffb84f;
+
+    box-shadow:
+      0 0 5px #ffb84f,
+      0 0 11px #ff9f0a,
+      0 0 20px rgba(255,159,10,.35);
+  }
+}
+
+
+/* =====================================================================
+   CORE FLICKER
+   ===================================================================== */
+
+@keyframes signal-core-flicker {
+
+  0%,
+  100% {
+    opacity: .86;
+    transform:
+      translate(-50%, -50%)
+      scale(1);
+    filter: brightness(1);
+  }
+
+  7% {
+    opacity: 1;
+    transform:
+      translate(-50%, -50%)
+      scale(1.08);
+    filter: brightness(1.25);
+  }
+
+  8% {
+    opacity: .62;
+    transform:
+      translate(-50%, -50%)
+      scale(.9);
+    filter: brightness(.75);
+  }
+
+  9% {
+    opacity: 1;
+    transform:
+      translate(-50%, -50%)
+      scale(1.13);
+    filter: brightness(1.45);
+  }
+
+  28% {
+    opacity: 1;
+    transform:
+      translate(-50%, -50%)
+      scale(1.1);
+    filter: brightness(1.35);
+  }
+
+  46% {
+    opacity: .45;
+    transform:
+      translate(-50%, -50%)
+      scale(.88);
+    filter: brightness(.68);
+  }
+
+  49% {
+    opacity: 1;
+    transform:
+      translate(-50%, -50%)
+      scale(1.14);
+    filter: brightness(1.5);
+  }
+
+  68% {
+    opacity: 1;
+    transform:
+      translate(-50%, -50%)
+      scale(1.11);
+    filter: brightness(1.38);
+  }
+
+  69% {
+    opacity: .55;
+    transform:
+      translate(-50%, -50%)
+      scale(.9);
+    filter: brightness(.7);
+  }
+
+  70% {
+    opacity: 1;
+    transform:
+      translate(-50%, -50%)
+      scale(1.15);
+    filter: brightness(1.55);
+  }
+}
+
+
+/* =====================================================================
+   WHOLE-SIGNAL BREATHING
+   Slow, subtle movement underneath the electrical flicker.
+   ===================================================================== */
+
+@keyframes signal-breathe {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.035);
+  }
+}
+
+
+/* =====================================================================
+   REDUCED MOTION
+   ===================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .launcher-coming-soon__signal,
+  .launcher-coming-soon__signal::before,
+  .launcher-coming-soon__signal::after {
+    animation: none;
+  }
+}
