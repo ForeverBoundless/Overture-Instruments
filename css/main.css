@@ -679,6 +679,66 @@ body.high-contrast .lp-oled-line {
   min-width: 0;
 }
 
+.launcher-hero__description {
+  font-family: 'Inter Variable', sans-serif;
+  max-width: 620px;
+  margin-top: 22px;
+  font-size: 15px;
+  line-height: 1.65;
+  letter-spacing: -0.01em;
+  color: rgba(255, 255, 255, 0.58);
+}
+
+.launcher-hero__description > span {
+  display: inline-block;
+  animation: description-enter 0.8s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+.launcher-hero__description b {
+  display: inline-block;
+  position: relative;
+  margin-top: 7px;
+  color: #fff;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+  animation: description-enter 0.8s cubic-bezier(.22, 1, .36, 1) 0.12s both;
+}
+
+.launcher-hero__description b::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -3px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.35;
+  transform-origin: left;
+  animation: description-line 0.7s cubic-bezier(.22, 1, .36, 1) 0.45s both;
+}
+
+@keyframes description-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes description-line {
+  from {
+    transform: scaleX(0);
+  }
+
+  to {
+    transform: scaleX(1);
+  }
+}
+
 .launcher-brand-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -762,30 +822,773 @@ body.high-contrast .lp-oled-line {
 @keyframes coming-soon-signal-sparkle{0%,100%{box-shadow:0 0 0 7px rgba(255,159,10,.07),inset 0 0 16px rgba(255,159,10,.16)}50%{box-shadow:0 0 0 9px rgba(255,159,10,.13),inset 0 0 21px rgba(255,159,10,.3),0 0 15px rgba(255,191,105,.22)}}
 @keyframes coming-soon-ring{0%,100%{opacity:.55;transform:translate(-50%,-50%) scale(.96)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}}
 @keyframes coming-soon-dot{0%,100%{opacity:.75;box-shadow:0 0 8px #ff9f0a}50%{opacity:1;box-shadow:0 0 16px #ffc46d,0 0 24px #ff9f0a}}
-.instrument-tile__visual{position:relative;overflow:hidden;background:linear-gradient(160deg,#e4e6eb,#aeb4bf 55%,#6e747e)}.instrument-tile__glow{position:absolute;inset:-35%;background:radial-gradient(circle,rgba(255,171,57,.65),transparent 52%);filter:blur(7px)}.instrument-tile__display{position:absolute;top:37px;left:31px;width:95px;height:37px;padding:8px;border:4px solid #3b3f47;border-radius:5px;background:#201303;box-shadow:inset 0 0 13px #000,0 2px 4px rgba(0,0,0,.35)}.instrument-tile__display span{display:block;height:3px;margin:3px 0;background:#ffb54f;box-shadow:0 0 5px #ff9f0a}.instrument-tile__keys{position:absolute;right:-12px;bottom:22px;width:145px;height:47px;transform:rotate(-18deg);background:repeating-linear-gradient(90deg,#f8f8f5 0 11px,#2d3035 11px 14px,#f8f8f5 14px 25px);border:3px solid #30343b;box-shadow:0 4px 6px rgba(0,0,0,.32)}.instrument-tile__icon{position:absolute;right:16px;top:16px;color:rgba(54,59,68,.55);font-size:21px;display:inline-flex;align-items:center;justify-content:center;line-height:1}
-.instrument-tile__display span{animation:tile-bar-flicker 3.7s ease-in-out infinite, tile-bar-sparkle 2.8s ease-in-out infinite}
-.instrument-tile__display span:nth-child(2){animation-delay:1.05s,.7s}
-.instrument-tile--little-phatty .instrument-tile__visual{--tile-bar-glow:#ff9f0a;background:linear-gradient(160deg,#f6f7fa,#ccd3df 57%,#8f99a8)}
-.instrument-tile--sub-37 .instrument-tile__visual{--tile-bar-glow:#7de4ff;background:linear-gradient(160deg,#2f333b,#14181f 60%,#090c12)}
-.instrument-tile--sub-37 .instrument-tile__display{border-color:#3d4248;background:#0f1f2c}
-.instrument-tile--sub-37 .instrument-tile__display span{background:#7de4ff;box-shadow:0 0 8px rgba(125,228,255,.9)}
-.instrument-tile--sub-37 .instrument-tile__keys{background:repeating-linear-gradient(90deg,#f6f6f3 0 11px,#1f232a 11px 14px,#f6f6f3 14px 25px)}
-.instrument-tile--sub-37 .instrument-tile__icon{color:rgba(185,208,224,.62)}
-.instrument-tile--prophet-10 .instrument-tile__visual{--tile-bar-glow:#ff70b7;background:linear-gradient(160deg,#e8e1f2,#a89bc7 56%,#5d527e)}
-.instrument-tile--prophet-10 .instrument-tile__glow{background:radial-gradient(circle,rgba(255,111,164,.68),transparent 52%)}
-.instrument-tile--prophet-10 .instrument-tile__display{border-color:#3b304d;background:#170f2a}
-.instrument-tile--prophet-10 .instrument-tile__display span{background:#ff8fc2;box-shadow:0 0 7px rgba(255,112,183,.95)}
-.instrument-tile--prophet-10 .instrument-tile__keys{background:repeating-linear-gradient(90deg,#fff8fd 0 11px,#27203a 11px 14px,#fff8fd 14px 25px)}
-.instrument-tile--nord-c2d .instrument-tile__visual{--tile-bar-glow:#ff9e18;background:linear-gradient(160deg,#f34242,#b20e18 58%,#53050d)}
-.instrument-tile--nord-c2d .instrument-tile__display{border-color:#4f070c;background:#250208}
-.instrument-tile--nord-c2d .instrument-tile__keys{background:repeating-linear-gradient(90deg,#fff 0 11px,#24252a 11px 14px,#fff 14px 25px)}
-.instrument-tile--nord-c2d .instrument-tile__visual{background-color:#a50d18;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.06 .8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='1 0 0 0 .08 0 1 0 0 0 0 0 1 0 0 0 0 0 .2 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:72px 72px;box-shadow:inset 0 1px #ffbeb055,inset -10px 0 20px #42030a}
-.instrument-tile--nord-c2d .instrument-tile__visual:after{content:'';position:absolute;inset:10px;border:1px solid #ffb33d55;border-radius:12px;box-shadow:inset 0 0 0 1px #5a030955;pointer-events:none}
-.instrument-tile--nord-c2d .instrument-tile__glow{background:radial-gradient(circle at 52% 27%,#ffc447aa 0,#f48b1c55 20%,transparent 58%);filter:blur(4px)}
-.instrument-tile--nord-c2d .instrument-tile__display{border-color:#ffbf4d;background:#250208;box-shadow:inset 0 0 13px #000,0 0 0 2px #740710,0 2px 4px #2b0105}
-.instrument-tile--nord-c2d .instrument-tile__display span{background:#ffc447;box-shadow:0 0 7px #ff9e18}
-.instrument-tile--nord-c2d .instrument-tile__keys{background:repeating-linear-gradient(90deg,#fff8d8 0 11px,#2b080c 11px 14px,#fff8d8 14px 25px);border-color:#ffbd43;box-shadow:0 4px 6px #350209,0 0 0 2px #760810}
-.instrument-tile--nord-c2d .instrument-tile__icon{color:#ffc447;text-shadow:0 0 12px #ff941c}
+/* =====================================================================
+   INSTRUMENT TILE VISUALS
+   Shared geometry, instrument-specific art direction.
+   The actual display, keyboard and icon all use a stable coordinate
+   system so decorative layers never disturb their alignment.
+   ===================================================================== */
+
+.instrument-tile__visual {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+
+  /*
+    IMPORTANT:
+    The visual column is 155px wide on desktop. Every instrument below
+    is designed around that exact space.
+  */
+  background: #2a2d33;
+
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.12),
+    inset 0 -10px 20px rgba(0,0,0,.18);
+}
+
+/* Decorative material layer */
+.instrument-tile__visual::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Decorative frame / hardware layer */
+.instrument-tile__visual::after {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* The animated light stays behind all actual controls */
+.instrument-tile__glow {
+  position: absolute;
+  inset: -30%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Actual tile objects always sit above the decorative layers */
+.instrument-tile__display,
+.instrument-tile__keys,
+.instrument-tile__icon {
+  z-index: 2;
+}
+
+
+/* ---------------------------------------------------------------------
+   SHARED DISPLAY GEOMETRY
+   --------------------------------------------------------------------- */
+
+.instrument-tile__display {
+  position: absolute;
+
+  /*
+    Keep the display aligned consistently in all four tiles.
+    The instrument personality comes from its surrounding material,
+    not from randomly moving the display around.
+  */
+  left: 25px;
+  top: 35px;
+
+  width: 100px;
+  height: 38px;
+
+  padding: 8px;
+
+  border-radius: 5px;
+
+  overflow: hidden;
+
+  box-sizing: border-box;
+
+  box-shadow:
+    inset 0 0 13px #000,
+    0 2px 5px rgba(0,0,0,.35);
+}
+
+.instrument-tile__display span {
+  position: relative;
+  z-index: 2;
+
+  display: block;
+  height: 3px;
+  margin: 3px 0;
+}
+
+.instrument-tile__keys {
+  position: absolute;
+
+  right: -12px;
+  bottom: 22px;
+
+  width: 145px;
+  height: 47px;
+
+  transform: rotate(-18deg);
+  transform-origin: center center;
+
+  box-sizing: border-box;
+
+  z-index: 2;
+}
+
+.instrument-tile__icon {
+  position: absolute;
+
+  right: 15px;
+  top: 16px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 24px;
+  height: 24px;
+
+  font-size: 21px;
+  line-height: 1;
+
+  transition:
+    transform .25s ease,
+    filter .25s ease;
+}
+
+.instrument-tile:hover .instrument-tile__icon {
+  transform: translateY(-2px) scale(1.06);
+}
+
+
+/* =====================================================================
+   LITTLE PHATTY
+   Silver / graphite / amber.
+   Think: miniature brushed-metal Moog chassis.
+   ===================================================================== */
+
+.instrument-tile--little-phatty .instrument-tile__visual {
+  background:
+    linear-gradient(
+      180deg,
+      #eff1f4 0%,
+      #d2d6dc 55%,
+      #8e959f 100%
+    );
+
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.85),
+    inset 0 -18px 25px rgba(33,38,44,.17);
+}
+
+/* Fine horizontal brushed aluminum */
+.instrument-tile--little-phatty .instrument-tile__visual::before {
+  background:
+    repeating-linear-gradient(
+      102deg,
+      rgba(255,255,255,.28) 0px,
+      rgba(255,255,255,.28) 1px,
+      transparent 1px,
+      transparent 4px
+    ),
+    linear-gradient(
+      90deg,
+      transparent 0 8%,
+      rgba(255,255,255,.22) 9%,
+      transparent 11% 88%,
+      rgba(0,0,0,.06) 90%,
+      transparent 93%
+    );
+  opacity: .85;
+}
+
+/* Dark chassis lip across the bottom */
+.instrument-tile--little-phatty .instrument-tile__visual::after {
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 47px;
+
+  border-top: 1px solid rgba(255,255,255,.2);
+
+  background:
+    radial-gradient(
+      circle at 9px 50%,
+      #737a84 0 1.5px,
+      #30353b 2px 3px,
+      transparent 3.5px
+    ),
+    radial-gradient(
+      circle at calc(100% - 9px) 50%,
+      #737a84 0 1.5px,
+      #30353b 2px 3px,
+      transparent 3.5px
+    ),
+    linear-gradient(
+      180deg,
+      #4e545d,
+      #252a30
+    );
+
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.12),
+    inset 0 -8px 13px rgba(0,0,0,.28);
+}
+
+/* Restrained amber light focused around the LCD */
+.instrument-tile--little-phatty .instrument-tile__glow {
+  background:
+    radial-gradient(
+      ellipse at 49% 28%,
+      rgba(255,190,75,.65) 0,
+      rgba(255,159,10,.24) 24%,
+      transparent 57%
+    );
+
+  filter: blur(6px);
+  opacity: .78;
+}
+
+/* Actual LP-style display */
+.instrument-tile--little-phatty .instrument-tile__display {
+  border: 3px solid #565b62;
+
+  background:
+    linear-gradient(
+      180deg,
+      #291707,
+      #100a03
+    );
+
+  box-shadow:
+    inset 0 0 14px #000,
+    inset 0 0 0 1px rgba(255,159,10,.12),
+    0 0 0 1px rgba(255,255,255,.45),
+    0 2px 5px rgba(0,0,0,.42);
+}
+
+.instrument-tile--little-phatty .instrument-tile__display span {
+  background: #ffb54f;
+
+  box-shadow:
+    0 0 6px #ff9f0a,
+    0 0 13px rgba(255,159,10,.32);
+}
+
+.instrument-tile--little-phatty .instrument-tile__keys {
+  background:
+    repeating-linear-gradient(
+      90deg,
+      #f8f8f5 0 11px,
+      #2d3035 11px 14px,
+      #f8f8f5 14px 25px
+    );
+
+  border: 3px solid #30343b;
+
+  box-shadow:
+    0 4px 7px rgba(0,0,0,.4),
+    0 0 0 1px rgba(255,255,255,.18);
+}
+
+.instrument-tile--little-phatty .instrument-tile__icon {
+  color: #3f464f;
+  text-shadow:
+    0 1px rgba(255,255,255,.65);
+}
+
+
+/* =====================================================================
+   SUB 37
+   Black instrument surface with technical grid + walnut side cheek.
+   Much denser and more mechanical than the Little Phatty.
+   ===================================================================== */
+
+/* =====================================================================
+   SUB 37
+   Symmetrical walnut side cheeks with a technical black control surface.
+   ===================================================================== */
+
+.instrument-tile--sub-37 .instrument-tile__visual {
+  background:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 8px,
+      rgba(255,255,255,.025) 9px,
+      transparent 10px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent 0 8px,
+      rgba(255,255,255,.02) 9px,
+      transparent 10px
+    ),
+    linear-gradient(
+      90deg,
+      #0b0e12,
+      #151a20 50%,
+      #0b0e12
+    );
+
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.1),
+    inset 0 0 18px rgba(0,0,0,.4);
+}
+
+/* Dense control-surface grid */
+/* =====================================================================
+   SUB 37 WOOD PANELS
+   Both sides use the exact same texture, colouring, scale and position.
+   ===================================================================== */
+
+.instrument-tile--sub-37 .instrument-tile__visual::before {
+  content: '';
+
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 17px;
+
+  z-index: 1;
+  pointer-events: none;
+
+  background-color: #633d25;
+
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='160' viewBox='0 0 96 160'%3E%3Cfilter id='wood'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.018 .18' numOctaves='3' seed='17' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0.75 0 0 0 .12 0 .28 0 0 .04 0 .08 0 0 .015 0 0 0 .42 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23wood)'/%3E%3C/svg%3E");
+
+  background-size: 96px 160px;
+  background-position: center center;
+  background-repeat: no-repeat;
+
+  box-shadow:
+    inset -2px 0 5px rgba(0,0,0,.24),
+    inset 1px 0 3px rgba(255,205,156,.09);
+}
+
+
+.instrument-tile--sub-37 .instrument-tile__visual::after {
+  content: '';
+
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 17px;
+
+  z-index: 1;
+  pointer-events: none;
+
+  background-color: #633d25;
+
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='160' viewBox='0 0 96 160'%3E%3Cfilter id='wood'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.018 .18' numOctaves='3' seed='17' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0.75 0 0 0 .12 0 .28 0 0 .04 0 .08 0 0 .015 0 0 0 .42 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23wood)'/%3E%3C/svg%3E");
+
+  background-size: 96px 160px;
+  background-position: center center;
+  background-repeat: no-repeat;
+
+  box-shadow:
+    inset 2px 0 5px rgba(0,0,0,.24),
+    inset 1px 0 3px rgba(255,205,156,.09);
+}
+
+.instrument-tile--sub-37 .instrument-tile__visual::after {
+  filter: saturate(.92) contrast(1.08);
+}
+
+/* Cooler technical glow */
+.instrument-tile--sub-37 .instrument-tile__glow {
+  background:
+    radial-gradient(
+      circle at 45% 28%,
+      rgba(104,224,255,.28),
+      transparent 28%
+    ),
+    radial-gradient(
+      circle at 46% 29%,
+      rgba(255,184,55,.24),
+      transparent 54%
+    );
+
+  filter: blur(5px);
+}
+
+/* Cyan/black performance display */
+.instrument-tile--sub-37 .instrument-tile__display {
+  border: 3px solid #464b52;
+
+  background:
+    linear-gradient(
+      180deg,
+      #101a22,
+      #070b0f
+    );
+
+  box-shadow:
+    inset 0 0 15px #000,
+    inset 0 0 0 1px rgba(125,228,255,.12),
+    0 0 0 1px rgba(255,255,255,.03),
+    0 2px 5px rgba(0,0,0,.6);
+}
+
+.instrument-tile--sub-37 .instrument-tile__display span {
+  background: #7de4ff;
+
+  box-shadow:
+    0 0 7px rgba(125,228,255,.9),
+    0 0 14px rgba(74,190,224,.3);
+}
+
+.instrument-tile--sub-37 .instrument-tile__keys {
+  background:
+    repeating-linear-gradient(
+      90deg,
+      #f6f6f3 0 11px,
+      #20242a 11px 14px,
+      #f6f6f3 14px 25px
+    );
+
+  border: 3px solid #171a1e;
+
+  box-shadow:
+    0 4px 8px rgba(0,0,0,.62),
+    0 0 0 1px rgba(255,255,255,.05);
+}
+
+.instrument-tile--sub-37 .instrument-tile__icon {
+  color: #94ddec;
+  text-shadow:
+    0 0 11px rgba(71,190,224,.38);
+}
+
+
+/* =====================================================================
+   PROPHET-10
+   Walnut frame + recessed black instrument face.
+   This should feel warmer and more luxurious than the Moogs.
+   ===================================================================== */
+
+.instrument-tile--prophet-10 .instrument-tile__visual {
+  background:
+    linear-gradient(
+      90deg,
+      #412317 0%,
+      #74472c 8%,
+      #9d6843 17%,
+      #5f351f 28%,
+      #8b593a 48%,
+      #57301d 66%,
+      #93603f 86%,
+      #432418 100%
+    );
+
+  box-shadow:
+    inset 0 1px rgba(255,229,198,.2),
+    inset 0 -12px 23px rgba(0,0,0,.24);
+}
+
+/* Walnut grain */
+.instrument-tile--prophet-10 .instrument-tile__visual::before {
+  inset: 0;
+
+  background:
+    repeating-linear-gradient(
+      8deg,
+      rgba(255,224,183,.05) 0 1px,
+      transparent 1px 6px
+    ),
+    repeating-linear-gradient(
+      12deg,
+      transparent 0 11px,
+      rgba(36,13,5,.15) 12px,
+      transparent 15px
+    ),
+    radial-gradient(
+      ellipse at 30% 40%,
+      rgba(255,214,170,.1),
+      transparent 48%
+    );
+
+  mix-blend-mode: soft-light;
+}
+
+/* Recessed black Prophet panel */
+.instrument-tile--prophet-10 .instrument-tile__visual::after {
+  top: 9px;
+  left: 8px;
+  right: 8px;
+  bottom: 9px;
+
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 8px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(37,39,43,.99),
+      rgba(9,10,13,.99)
+    );
+
+  box-shadow:
+    inset 0 0 0 1px rgba(0,0,0,.78),
+    inset 0 0 25px rgba(0,0,0,.42),
+    0 2px 7px rgba(0,0,0,.28);
+}
+
+/* Subtle red analog illumination */
+.instrument-tile--prophet-10 .instrument-tile__glow {
+  background:
+    radial-gradient(
+      ellipse at 48% 28%,
+      rgba(255,87,76,.45),
+      transparent 38%
+    );
+
+  filter: blur(6px);
+  opacity: .72;
+}
+
+/* Prophet display */
+.instrument-tile--prophet-10 .instrument-tile__display {
+  border: 3px solid #57595d;
+
+  background:
+    linear-gradient(
+      180deg,
+      #1a090b,
+      #080405
+    );
+
+  box-shadow:
+    inset 0 0 14px #000,
+    inset 0 0 0 1px rgba(255,82,74,.1),
+    0 0 0 1px rgba(255,255,255,.04),
+    0 2px 6px rgba(0,0,0,.68);
+}
+
+.instrument-tile--prophet-10 .instrument-tile__display span {
+  background: #ff615c;
+
+  box-shadow:
+    0 0 6px rgba(255,70,63,.95),
+    0 0 13px rgba(255,70,63,.32);
+}
+
+.instrument-tile--prophet-10 .instrument-tile__keys {
+  background:
+    repeating-linear-gradient(
+      90deg,
+      #fffaf0 0 11px,
+      #26232a 11px 14px,
+      #fffaf0 14px 25px
+    );
+
+  border: 3px solid #17181b;
+
+  box-shadow:
+    0 4px 8px rgba(0,0,0,.56),
+    0 0 0 1px rgba(255,239,212,.14);
+}
+
+.instrument-tile--prophet-10 .instrument-tile__icon {
+  color: #dec5a4;
+  text-shadow:
+    0 0 11px rgba(255,93,79,.2);
+}
+
+
+/* =====================================================================
+   NORD C2D
+   Bright red chassis, gold rails and dual-manual visual language.
+   This remains the most graphic tile of the four.
+   ===================================================================== */
+
+.instrument-tile--nord-c2d .instrument-tile__visual {
+  background:
+    linear-gradient(
+      135deg,
+      #f54843 0%,
+      #c9161f 25%,
+      #a00813 55%,
+      #72050d 78%,
+      #430207 100%
+    );
+
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.35),
+    inset -13px 0 23px rgba(42,0,4,.42),
+    inset 0 -11px 22px rgba(47,0,5,.24);
+}
+
+/* Nord surface texture */
+.instrument-tile--nord-c2d .instrument-tile__visual::before {
+  background:
+    repeating-linear-gradient(
+      108deg,
+      rgba(255,255,255,.055) 0 1px,
+      transparent 1px 4px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent 0 7px,
+      rgba(40,0,4,.07) 8px,
+      transparent 9px
+    );
+
+  opacity: .85;
+}
+
+/* Gold drawbar/control rails */
+.instrument-tile--nord-c2d .instrument-tile__visual::after {
+  top: 11px;
+  left: 10px;
+  right: 10px;
+  height: 71px;
+
+  border: 1px solid rgba(255,218,117,.22);
+  border-radius: 9px;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent 0 7%,
+      rgba(255,194,71,.7) 7.2%,
+      rgba(255,194,71,.7) 7.8%,
+      transparent 8% 23%,
+      rgba(255,194,71,.45) 23.2%,
+      rgba(255,194,71,.45) 23.8%,
+      transparent 24% 100%
+    );
+
+  box-shadow:
+    inset 0 0 0 1px rgba(88,0,7,.34),
+    inset 0 -2px rgba(74,0,6,.28);
+}
+
+/* Gold/amber light */
+.instrument-tile--nord-c2d .instrument-tile__glow {
+  background:
+    radial-gradient(
+      circle at 52% 26%,
+      rgba(255,212,91,.78) 0,
+      rgba(255,145,24,.34) 18%,
+      transparent 54%
+    );
+
+  filter: blur(4px);
+}
+
+/* Nord display */
+.instrument-tile--nord-c2d .instrument-tile__display {
+  border: 3px solid #ffbe45;
+
+  background:
+    linear-gradient(
+      180deg,
+      #2b0408,
+      #150104
+    );
+
+  box-shadow:
+    inset 0 0 14px #000,
+    0 0 0 2px #780812,
+    0 2px 5px rgba(33,0,3,.72);
+}
+
+.instrument-tile--nord-c2d .instrument-tile__display span {
+  background: #ffc74e;
+
+  box-shadow:
+    0 0 7px #ff9e18,
+    0 0 14px rgba(255,158,24,.3);
+}
+
+/* Main manual */
+.instrument-tile--nord-c2d .instrument-tile__keys {
+  background:
+    repeating-linear-gradient(
+      90deg,
+      #fff8d8 0 11px,
+      #2b080c 11px 14px,
+      #fff8d8 14px 25px
+    );
+
+  border: 3px solid #ffbd43;
+
+  box-shadow:
+    0 4px 6px #350209,
+    0 0 0 2px #760810;
+}
+
+/* A second manual is suggested through a dark/gold lower edge,
+   without adding another HTML element or changing the key alignment. */
+.instrument-tile--nord-c2d .instrument-tile__keys::after {
+  content: '';
+
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: -9px;
+
+  height: 7px;
+
+  background:
+    repeating-linear-gradient(
+      90deg,
+      #fff3c9 0 8px,
+      #35070d 8px 11px,
+      #fff3c9 11px 19px
+    );
+
+  border: 1px solid #d99d2e;
+
+  box-shadow:
+    0 2px 4px rgba(30,0,3,.6);
+}
+
+.instrument-tile--nord-c2d .instrument-tile__icon {
+  color: #ffd05b;
+
+  text-shadow:
+    0 0 9px rgba(255,180,39,.68),
+    0 0 18px rgba(255,119,15,.3);
+}
+
+
+/* =====================================================================
+   HOVER STATES
+   ===================================================================== */
+
+.instrument-tile--little-phatty:hover .instrument-tile__visual {
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.9),
+    inset 0 -18px 25px rgba(33,38,44,.17),
+    0 0 22px rgba(255,159,10,.08);
+}
+
+.instrument-tile--sub-37:hover .instrument-tile__visual {
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.13),
+    inset -15px 0 22px rgba(0,0,0,.55),
+    0 0 23px rgba(73,190,224,.06);
+}
+
+.instrument-tile--prophet-10:hover .instrument-tile__visual {
+  box-shadow:
+    inset 0 1px rgba(255,229,198,.22),
+    inset 0 -12px 23px rgba(0,0,0,.24),
+    0 0 24px rgba(255,86,68,.06);
+}
+
+.instrument-tile--nord-c2d:hover .instrument-tile__visual {
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.4),
+    inset -13px 0 23px rgba(42,0,4,.44),
+    0 0 27px rgba(255,83,41,.08);
+}
 .instrument-tile--prophet-10 .instrument-tile__icon{color:rgba(55,38,77,.7)}
 .instrument-tile__content{display:flex;flex-direction:column;padding:21px 20px 17px}.instrument-tile__eyebrow{color:#f9c67d;font-size:10px;font-weight:750;letter-spacing:.13em;text-transform:uppercase}.instrument-tile h2{margin:7px 0 0;color:#f5f6f9;font-size:25px;font-weight:720;letter-spacing:-.055em}.instrument-tile__model{margin:1px 0 11px;color:#a7afbf;font-size:11px;font-weight:650}.instrument-tile__description{margin:0;color:#cad1df;font-size:11.5px;line-height:1.55}.instrument-specs{display:flex;gap:10px;margin-top:15px}.instrument-spec{display:grid;grid-template-columns:15px auto;align-items:center;column-gap:4px;color:#9ea7b8;font-size:9px;line-height:1.2}.instrument-spec .material-symbols-rounded{grid-row:span 2;font-size:14px;color:#f7c178;display:inline-flex;align-items:center;justify-content:center;line-height:1}.instrument-spec strong{grid-column:2;color:#e3e6ed;font-size:10px;font-weight:700}.instrument-tile__actions{display:flex;align-items:center;justify-content:space-between;min-height:34px;margin-top:auto;padding-top:14px}.instrument-tile__hint{display:flex;gap:5px;align-items:center;color:#919aaa;font-size:10px;font-weight:600}.instrument-tile__hint .material-symbols-rounded{font-size:14px;display:inline-flex;align-items:center;justify-content:center;line-height:1}.instrument-launch-button{display:none;--md-filled-button-container-color:#ffd39a;--md-filled-button-label-text-color:#422b00;--md-filled-button-container-elevation:0;font-family:var(--font-body);font-size:11px;font-weight:750}.instrument-tile.is-selected .instrument-launch-button{display:inline-flex}.instrument-tile.is-selected .instrument-tile__hint{display:none}
 .instrument-launch-button .material-symbols-rounded{display:inline-flex;align-items:center;justify-content:center;line-height:1;font-size:16px}
@@ -804,7 +1607,13 @@ body.high-contrast .lp-oled-line {
 .launcher-brand-grid {
   grid-template-columns: repeat(2, 1fr);
   min-height: 220px;
-}.launcher-header,.launcher-hero,.instrument-grid,.launcher-footer{width:min(100% - 32px,1120px)}.launcher-header{padding-top:22px}.launcher-status{font-size:10px}.launcher-hero{padding:60px 0 34px}.instrument-tile{grid-template-columns:120px 1fr}.instrument-tile__display{left:17px}.instrument-tile__keys{right:-35px}.launcher-footer{gap:10px;font-size:8px}.instrument-tile__content{padding:18px 16px}.instrument-specs{gap:7px}}
+}.launcher-header,.launcher-hero,.instrument-grid,.launcher-footer{width:min(100% - 32px,1120px)}.launcher-header{padding-top:22px}.launcher-status{font-size:10px}.launcher-hero{padding:60px 0 34px}.instrument-tile{grid-template-columns:120px 1fr}.instrument-tile__display {
+  left: 17px;
+}
+
+.instrument-tile__keys {
+  right: -28px;
+}.launcher-footer{gap:10px;font-size:8px}.instrument-tile__content{padding:18px 16px}.instrument-specs{gap:7px}}
 
 /* Library motion: depth and atmosphere without distracting from selection. */
 .launcher-header { animation: launcher-enter .65s .05s both cubic-bezier(.2,.8,.2,1); }
@@ -853,4 +1662,314 @@ body.high-contrast .lp-oled-line {
   90% { opacity: 1; }
   91% { opacity: .85; }
   92% { opacity: 1; }
+}
+/* =====================================================================
+   NORD C2D
+   ORIGINAL OVERTURE TILE DESIGN
+   ===================================================================== */
+
+.instrument-tile--nord-c2d .instrument-tile__visual {
+  --tile-bar-glow: #ff9e18;
+
+  background:
+    linear-gradient(
+      160deg,
+      #f34242,
+      #b20e18 58%,
+      #53050d
+    );
+
+  background-color: #a50d18;
+
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.06 .8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='1 0 0 0 .08 0 1 0 0 0 0 0 1 0 0 0 0 0 .2 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+
+  background-size: 72px 72px;
+
+  box-shadow:
+    inset 0 1px #ffbeb055,
+    inset -10px 0 20px #42030a;
+}
+
+/* Cancel the new shared decorative layer */
+.instrument-tile--nord-c2d .instrument-tile__visual::before {
+  content: none;
+}
+
+.instrument-tile--nord-c2d .instrument-tile__visual::after {
+  content: '';
+
+  position: absolute;
+  inset: 10px;
+
+  border: 1px solid #ffb33d55;
+  border-radius: 12px;
+
+  background: transparent;
+
+  box-shadow:
+    inset 0 0 0 1px #5a030955;
+
+  pointer-events: none;
+}
+
+.instrument-tile--nord-c2d .instrument-tile__glow {
+  background:
+    radial-gradient(
+      circle at 52% 27%,
+      #ffc447aa 0,
+      #f48b1c55 20%,
+      transparent 58%
+    );
+
+  filter: blur(4px);
+}
+
+.instrument-tile--nord-c2d .instrument-tile__display {
+  border-color: #ffbf4d;
+  background: #250208;
+
+  box-shadow:
+    inset 0 0 13px #000,
+    0 0 0 2px #740710,
+    0 2px 4px #2b0105;
+}
+
+.instrument-tile--nord-c2d .instrument-tile__display span {
+  background: #ffc447;
+  box-shadow:
+    0 0 7px #ff9e18;
+}
+
+.instrument-tile--nord-c2d .instrument-tile__keys {
+  background:
+    repeating-linear-gradient(
+      90deg,
+      #fff8d8 0 11px,
+      #2b080c 11px 14px,
+      #fff8d8 14px 25px
+    );
+
+  border-color: #ffbd43;
+
+  box-shadow:
+    0 4px 6px #350209,
+    0 0 0 2px #760810;
+}
+
+/* Remove the second-manual addition from the new version */
+.instrument-tile--nord-c2d .instrument-tile__keys::after {
+  content: none;
+}
+
+.instrument-tile--nord-c2d .instrument-tile__icon {
+  color: #ffc447;
+  text-shadow:
+    0 0 12px #ff941c;
+}
+.instrument-tile__icon {
+  display: none !important;
+}
+
+/* =====================================================================
+   OVERTURE MINI KEYBEDS
+   Realistic miniature piano-key construction for all instrument tiles.
+   This block intentionally overrides all previous key styling.
+   ===================================================================== */
+
+/* ---------------------------------------------------------------------
+   Base keybed
+   --------------------------------------------------------------------- */
+
+.instrument-tile__keys {
+  position: absolute;
+
+  right: -12px;
+  bottom: 22px;
+
+  width: 145px;
+  height: 47px;
+
+  transform: rotate(-18deg);
+  transform-origin: center center;
+
+  overflow: hidden;
+
+  border: 2px solid #25282d;
+  border-radius: 4px;
+
+  /*
+    The actual keyboard artwork.
+    14 individual white keys and correctly grouped black keys.
+  */
+  background-color: #f7f7f4;
+
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='290' height='94' viewBox='0 0 290 94'%3E%3Cdefs%3E%3ClinearGradient id='w' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23ffffff'/%3E%3Cstop offset='.72' stop-color='%23f4f4f1'/%3E%3Cstop offset='1' stop-color='%23d9d9d7'/%3E%3C/linearGradient%3E%3ClinearGradient id='b' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23383b40'/%3E%3Cstop offset='.22' stop-color='%231b1d20'/%3E%3Cstop offset='1' stop-color='%230b0c0e'/%3E%3C/linearGradient%3E%3ClinearGradient id='f' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23ffffff' stop-opacity='.5'/%3E%3Cstop offset='1' stop-color='%23ffffff' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='290' height='94' fill='%23e2e3e2'/%3E%3Cg stroke='%23b7b9ba' stroke-width='1'%3E%3Crect x='0' y='0' width='20.714' height='94' fill='url(%23w)'/%3E%3Crect x='20.714' y='0' width='20.714' height='94' fill='url(%23w)'/%3E%3Crect x='41.428' y='0' width='20.714' height='94' fill='url(%23w)'/%3E%3Crect x='62.142' y='0' width='20.714' height='94' fill='url(%23w)'/%3E%3Crect x='82.856' y='0' width='20.714' height='94' fill='url(%23w)'/%3E%3Crect x='103.57' y='0' width='20.714' height='94' fill='url(%23w)'/%3E%3Crect x='124.284' y='0' width='20.714' height='94' fill='url(%23w)'/%3E%3Crect x='144.998' y='0' width='20.714' height='94' fill='url(%23w)'/%3E%3Crect x='165.712' y='0' width='20.714' height='94' fill='url(%23w)'/%3E%3Crect x='186.426' y='0' width='20.714' height='94' fill='url(%23w)'/%3E%3Crect x='207.14' y='0' width='20.714' height='94' fill='url(%23w)'/%3E%3Crect x='227.854' y='0' width='20.714' height='94' fill='url(%23w)'/%3E%3Crect x='248.568' y='0' width='20.714' height='94' fill='url(%23w)'/%3E%3Crect x='269.282' y='0' width='20.718' height='94' fill='url(%23w)'/%3E%3C/g%3E%3Cg fill='url(%23b)' stroke='%23090a0c' stroke-width='1'%3E%3Crect x='14.2' y='0' width='12.4' height='58' rx='2'/%3E%3Crect x='34.9' y='0' width='12.4' height='58' rx='2'/%3E%3Crect x='76.3' y='0' width='12.4' height='58' rx='2'/%3E%3Crect x='97' y='0' width='12.4' height='58' rx='2'/%3E%3Crect x='117.7' y='0' width='12.4' height='58' rx='2'/%3E%3Crect x='159.1' y='0' width='12.4' height='58' rx='2'/%3E%3Crect x='179.8' y='0' width='12.4' height='58' rx='2'/%3E%3Crect x='221.2' y='0' width='12.4' height='58' rx='2'/%3E%3Crect x='241.9' y='0' width='12.4' height='58' rx='2'/%3E%3Crect x='262.6' y='0' width='12.4' height='58' rx='2'/%3E%3C/g%3E%3Cg fill='url(%23f)' opacity='.7'%3E%3Crect x='1' y='1' width='17' height='3'/%3E%3Crect x='21.7' y='1' width='17' height='3'/%3E%3Crect x='42.4' y='1' width='17' height='3'/%3E%3Crect x='63.1' y='1' width='17' height='3'/%3E%3Crect x='83.8' y='1' width='17' height='3'/%3E%3Crect x='104.5' y='1' width='17' height='3'/%3E%3Crect x='125.2' y='1' width='17' height='3'/%3E%3Crect x='145.9' y='1' width='17' height='3'/%3E%3Crect x='166.6' y='1' width='17' height='3'/%3E%3Crect x='187.3' y='1' width='17' height='3'/%3E%3Crect x='208' y='1' width='17' height='3'/%3E%3Crect x='228.7' y='1' width='17' height='3'/%3E%3Crect x='249.4' y='1' width='17' height='3'/%3E%3Crect x='270.1' y='1' width='17' height='3'/%3E%3C/g%3E%3Crect x='0' y='82' width='290' height='12' fill='%23d5d5d3' opacity='.55'/%3E%3C/svg%3E");
+
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+
+  box-shadow:
+    0 7px 11px rgba(0,0,0,.42),
+    0 2px 0 rgba(255,255,255,.35) inset,
+    0 -2px 5px rgba(0,0,0,.22) inset;
+
+  z-index: 3;
+
+  /*
+    Keeps the whole object looking like a physical keyboard rather
+    than a flat image.
+  */
+  filter: saturate(.94);
+}
+
+
+/* ---------------------------------------------------------------------
+   Gloss across the upper edge of the keyboard
+   --------------------------------------------------------------------- */
+
+.instrument-tile__keys::before {
+  content: '';
+
+  position: absolute;
+
+  left: 3px;
+  right: 3px;
+  top: 2px;
+
+  height: 8px;
+
+  border-radius: 2px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.38),
+      rgba(255,255,255,0)
+    );
+
+  box-shadow:
+    0 1px 2px rgba(255,255,255,.25);
+
+  pointer-events: none;
+  z-index: 4;
+}
+
+
+/* ---------------------------------------------------------------------
+   Front edge and depth
+   --------------------------------------------------------------------- */
+
+.instrument-tile__keys::after {
+  content: '';
+
+  position: absolute;
+
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  height: 8px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,.08),
+      rgba(0,0,0,.16)
+    );
+
+  border-top: 1px solid rgba(0,0,0,.14);
+
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.25);
+
+  pointer-events: none;
+  z-index: 5;
+}
+
+
+/* =====================================================================
+   LITTLE PHATTY
+   Cool neutral plastic / graphite frame.
+   ===================================================================== */
+
+.instrument-tile--little-phatty .instrument-tile__keys {
+  border-color: #292d32;
+
+  box-shadow:
+    0 7px 11px rgba(0,0,0,.4),
+    0 2px 0 rgba(255,255,255,.42) inset,
+    0 -2px 5px rgba(0,0,0,.2) inset;
+}
+
+
+/* =====================================================================
+   SUB 37
+   Slightly darker, warmer keybed to sit naturally against black and wood.
+   ===================================================================== */
+
+.instrument-tile--sub-37 .instrument-tile__keys {
+  border-color: #15181c;
+
+  filter:
+    saturate(.82)
+    contrast(1.03)
+    sepia(.035);
+
+  box-shadow:
+    0 8px 12px rgba(0,0,0,.62),
+    0 2px 0 rgba(255,255,255,.25) inset,
+    0 -2px 5px rgba(0,0,0,.28) inset;
+}
+
+
+/* =====================================================================
+   PROPHET-10
+   Warm ivory keys to complement the walnut.
+   ===================================================================== */
+
+.instrument-tile--prophet-10 .instrument-tile__keys {
+  border-color: #17181b;
+
+  filter:
+    saturate(.88)
+    sepia(.07);
+
+  box-shadow:
+    0 7px 11px rgba(0,0,0,.52),
+    0 2px 0 rgba(255,255,255,.48) inset,
+    0 -2px 5px rgba(0,0,0,.23) inset;
+}
+
+
+/* =====================================================================
+   NORD C2D
+   Keep the original cream/gold character.
+   ===================================================================== */
+
+.instrument-tile--nord-c2d .instrument-tile__keys {
+  border-color: #ffbd43;
+
+  filter:
+    saturate(.96)
+    sepia(.09);
+
+  box-shadow:
+    0 7px 9px rgba(53,2,9,.62),
+    0 0 0 2px #760810,
+    0 2px 0 rgba(255,255,255,.4) inset,
+    0 -2px 5px rgba(66,0,4,.38) inset;
+}
+
+
+/* =====================================================================
+   Small hover lift, without changing alignment.
+   ===================================================================== */
+
+.instrument-tile:hover .instrument-tile__keys {
+  filter:
+    saturate(.96)
+    brightness(1.025)
+    drop-shadow(0 2px 2px rgba(0,0,0,.12));
 }

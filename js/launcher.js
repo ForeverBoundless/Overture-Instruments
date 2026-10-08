@@ -49,7 +49,7 @@ function buildTile(instrument) {
 
 const page = document.getElementById('launcher-page');
 page.innerHTML = `<div class="launcher-ambient launcher-ambient--one" aria-hidden="true"></div><div class="launcher-ambient launcher-ambient--two" aria-hidden="true"></div><div class="launcher-noise" aria-hidden="true"></div><header class="launcher-header"><div class="launcher-brand"><span class="launcher-brand__mark"><img class="launcher-brand__mark-img" src="./ui/Logos/OvertureLogo.png" alt="Overture" width="24" height="24"></span>
-<span>OVERTURE INSTRUMENTS</span></div><div class="launcher-status"><span></span>Library</div></header><section class="launcher-hero" aria-labelledby="launcher-title">
+<span>OVERTURE INSTRUMENTS</span></div><div class="launcher-status"><span></span><b>OI Library</b></div></header><section class="launcher-hero" aria-labelledby="launcher-title">
   <div class="launcher-hero__copy">
     <p class="launcher-overline">An expanding collection of MIDI-playable classics</p>
 
@@ -58,9 +58,9 @@ page.innerHTML = `<div class="launcher-ambient launcher-ambient--one" aria-hidde
       <em>instrument.</em>
     </h1>
 
-    <p>
-      Explore OI's growing library of free emulators, brought to life with incredible realism and attention to detail.<br>
-      <b>And did we mention they're all free?</b>
+    <p class="launcher-hero__description">
+      <span>Explore OI's library of free emulators, built with obsessive realism and detail.</span><br>
+      <b>Completely free.</b>
     </p>
   </div>
 
