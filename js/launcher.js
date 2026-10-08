@@ -13,7 +13,7 @@ const INSTRUMENTS = [{
 }, {
   id: 'nord-c2d', name: 'Nord C2D', model: 'Combo organ', manufacturer: 'Nord',
   voiceMode: 'Dual manual', presets: "4 models", keys: '2 x 37', icon: 'piano',
-  description: 'A stage-ready dual-manual organ layout with complete drawbar racks and Leslie-inspired vibrato, with a red Nord finish. Features a full selection of pipe organ stops alongside classic Hammond and Farfisa tones.',
+  description: 'A stage-ready dual-manual organ layout with complete drawbar racks and Leslie-inspired vibrato, with a red Nord finish. Features a full selection of pipe organ stops alongside classic Hammond, VX, and Farfisa tones.',
 }];
 
 const spec = (label, value, icon) => `<div class="instrument-spec"><span class="material-symbols-rounded">${icon}</span><span>${label}</span><strong>${value}</strong></div>`;
@@ -100,7 +100,7 @@ INSTRUMENTS.forEach((instrument) => grid.appendChild(buildTile(instrument)));
 const comingSoon = document.createElement('aside');
 comingSoon.className = `launcher-coming-soon ${INSTRUMENTS.length % 2 ? 'launcher-coming-soon--tile' : 'launcher-coming-soon--banner'}`;
 comingSoon.setAttribute('aria-label', 'More instruments coming soon');
-comingSoon.innerHTML = `<span class="launcher-coming-soon__signal" aria-hidden="true"></span><div class="launcher-coming-soon__copy"><span class="launcher-coming-soon__eyebrow">THE LIBRARY GROWS</span><strong>M<img class="launcher-coming-soon__o-icon" src="./ui/Logos/OvertureLogo.png" alt="">re coming soon!</strong><span class="launcher-coming-soon__subline">New instruments are already in development.<br>Check out the GitHub to stay tuned!</span></div><a class="launcher-coming-soon__arrow" href="https://github.com/ForeverBoundless/Overture-Instruments" target="_blank" rel="noopener noreferrer" aria-label="Visit the Overture Instruments GitHub repository">↗</a>`;
+comingSoon.innerHTML = `<span class="launcher-coming-soon__signal" aria-hidden="true"></span><div class="launcher-coming-soon__copy"><span class="launcher-coming-soon__eyebrow"><!-- Something can go here --></span><strong>M<img class="launcher-coming-soon__o-icon" src="./ui/Logos/OvertureLogo.png" alt="">re is coming soon!</strong><span class="launcher-coming-soon__subline">New instruments are already in development.<br>Check out the GitHub to stay tuned!</span></div><a class="launcher-coming-soon__arrow" href="https://github.com/ForeverBoundless/Overture-Instruments" target="_blank" rel="noopener noreferrer" aria-label="Visit the Overture Instruments GitHub repository">↗</a>`;
 if (INSTRUMENTS.length % 2) grid.appendChild(comingSoon);
 else grid.insertAdjacentElement('afterend', comingSoon);
 
