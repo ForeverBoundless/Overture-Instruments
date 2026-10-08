@@ -794,7 +794,14 @@ body.high-contrast .lp-oled-line {
   letter-spacing: .015em;
   text-align: center;
 }
-.instrument-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,550px));gap:20px;padding-bottom:20px}.instrument-tile{display:grid;grid-template-columns:155px 1fr;min-height:275px;overflow:hidden;border:1px solid rgba(255,255,255,.12);border-radius:24px;background:linear-gradient(145deg,rgba(53,60,72,.94),rgba(24,28,35,.96));box-shadow:0 18px 45px rgba(0,0,0,.22),inset 0 1px rgba(255,255,255,.12);cursor:pointer;outline:none;transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease}.instrument-tile:hover,.instrument-tile:focus-visible,.instrument-tile.is-selected{transform:translateY(-4px);border-color:rgba(255,205,137,.58);box-shadow:0 25px 55px rgba(0,0,0,.35),0 0 0 4px rgba(255,179,84,.08),inset 0 1px rgba(255,255,255,.16)}
+.instrument-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 550px));
+  gap: 20px;
+  width: 100%;
+  max-width: 1120px;
+  padding-bottom: 20px;
+}.instrument-tile{display:grid;grid-template-columns:155px 1fr;min-height:275px;overflow:hidden;border:1px solid rgba(255,255,255,.12);border-radius:24px;background:linear-gradient(145deg,rgba(53,60,72,.94),rgba(24,28,35,.96));box-shadow:0 18px 45px rgba(0,0,0,.22),inset 0 1px rgba(255,255,255,.12);cursor:pointer;outline:none;transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease}.instrument-tile:hover,.instrument-tile:focus-visible,.instrument-tile.is-selected{transform:translateY(-4px);border-color:rgba(255,205,137,.58);box-shadow:0 25px 55px rgba(0,0,0,.35),0 0 0 4px rgba(255,179,84,.08),inset 0 1px rgba(255,255,255,.16)}
 .launcher-coming-soon{position:relative;display:flex;align-items:center;overflow:hidden;color:var(--launcher-ink);border:1px solid rgba(255,255,255,.14);background:linear-gradient(125deg,rgba(40,47,64,.96),rgba(20,24,35,.98));box-shadow:0 18px 45px rgba(0,0,0,.22),inset 0 1px rgba(255,255,255,.12);font-family:'Inter Variable','Inter','Segoe UI',sans-serif}
 .launcher-coming-soon::before{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 16% 50%,rgba(255,159,10,.2),transparent 30%),repeating-linear-gradient(115deg,transparent 0 17px,rgba(255,255,255,.025) 18px,transparent 19px)}
 .launcher-coming-soon--tile{min-height:275px;border-radius:24px;padding:28px 25px}
@@ -3356,4 +3363,28 @@ body.high-contrast .lp-oled-line {
     0 0;
 
   background-repeat: no-repeat;
+}
+
+/* =====================================================================
+   PREVENT ACCIDENTAL HORIZONTAL PAGE SCROLL
+   The launcher is intentionally vertical-only.
+   ===================================================================== */
+
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+#launcher-page {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.launcher-ambient,
+.launcher-noise {
+  pointer-events: none;
 }

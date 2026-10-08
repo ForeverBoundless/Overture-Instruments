@@ -59,7 +59,7 @@ page.innerHTML = `<div class="launcher-ambient launcher-ambient--one" aria-hidde
     </h1>
 
     <p class="launcher-hero__description">
-      <span>Explore OI's library of free emulators, built with obsessive realism and detail.</span><br>
+      <span>Explore OI's library of keyboard emulators, built with obsessive realism and detail.</span><br>
       <b>Completely free.</b>
     </p>
   </div>
