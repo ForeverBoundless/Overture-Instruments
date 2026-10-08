@@ -1973,3 +1973,152 @@ body.high-contrast .lp-oled-line {
     brightness(1.025)
     drop-shadow(0 2px 2px rgba(0,0,0,.12));
 }
+
+/* =====================================================================
+   INSTRUMENT TILE DISPLAY ANIMATION
+   Restore the original flicker + glow behaviour.
+   ===================================================================== */
+
+.instrument-tile__display span {
+  position: relative;
+  display: block;
+
+  transform-origin: left center;
+
+  animation:
+    tile-bar-flicker 3.7s ease-in-out infinite,
+    tile-bar-sparkle 2.8s ease-in-out infinite;
+}
+
+.instrument-tile__display span:nth-child(2) {
+  animation-delay:
+    1.05s,
+    .7s;
+}
+
+
+/* ---------------------------------------------------------------------
+   Little Phatty
+   --------------------------------------------------------------------- */
+
+.instrument-tile--little-phatty {
+  --tile-bar-glow: #ff9f0a;
+}
+
+.instrument-tile--little-phatty .instrument-tile__display span {
+  background: #ffb54f;
+
+  box-shadow:
+    0 0 5px #ff9f0a;
+}
+
+
+/* ---------------------------------------------------------------------
+   Sub 37
+   --------------------------------------------------------------------- */
+
+.instrument-tile--sub-37 {
+  --tile-bar-glow: #7de4ff;
+}
+
+.instrument-tile--sub-37 .instrument-tile__display span {
+  background: #7de4ff;
+
+  box-shadow:
+    0 0 8px rgba(125,228,255,.9);
+}
+
+
+/* ---------------------------------------------------------------------
+   Prophet-10
+   --------------------------------------------------------------------- */
+
+.instrument-tile--prophet-10 {
+  --tile-bar-glow: #ff5c57;
+}
+
+.instrument-tile--prophet-10 .instrument-tile__display span {
+  background: #ff625d;
+
+  box-shadow:
+    0 0 7px rgba(255,70,63,.95);
+}
+
+
+/* ---------------------------------------------------------------------
+   Nord C2D
+   --------------------------------------------------------------------- */
+
+.instrument-tile--nord-c2d {
+  --tile-bar-glow: #ff9e18;
+}
+
+.instrument-tile--nord-c2d .instrument-tile__display span {
+  background: #ffc447;
+
+  box-shadow:
+    0 0 7px #ff9e18;
+}
+
+
+/* =====================================================================
+   FLICKER
+   ===================================================================== */
+
+@keyframes tile-bar-flicker {
+  0%, 100% {
+    opacity: .82;
+    filter: brightness(1);
+  }
+
+  8% {
+    opacity: 1;
+    filter: brightness(1.24);
+  }
+
+  11% {
+    opacity: .68;
+    filter: brightness(.92);
+  }
+
+  14% {
+    opacity: .96;
+    filter: brightness(1.12);
+  }
+
+  58% {
+    opacity: .86;
+    filter: brightness(1);
+  }
+
+  61% {
+    opacity: 1;
+    filter: brightness(1.18);
+  }
+}
+
+
+/* =====================================================================
+   GLOW / LIGHT OUTPUT
+   ===================================================================== */
+
+@keyframes tile-bar-sparkle {
+  0%, 100% {
+    transform: scaleX(1);
+
+    box-shadow:
+      0 0 5px var(--tile-bar-glow, #ff9f0a);
+  }
+
+  42% {
+    transform: scaleX(1.02);
+
+    box-shadow:
+      0 0 8px var(--tile-bar-glow, #ff9f0a),
+      0 0 14px var(--tile-bar-glow, #ff9f0a);
+  }
+
+  50% {
+    transform: scaleX(1);
+  }
+}
