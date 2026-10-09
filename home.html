@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b0e13">
+  <meta name="description" content="Overture Instruments makes expressive electronic instruments and legendary sounds more accessible, with free, open-source emulators for everyone.">
+  <title>Overture Instruments</title>
+  <link rel="icon" type="image/png" href="./ui/Logos/OvertureLogo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Figtree:wght@400;500;600;650;700;750;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/home.css">
+  <script src="./js/home.js" defer></script>
+</head>
+<body>
+  <div class="site-noise" aria-hidden="true"></div>
+  <div class="ambient ambient--amber" aria-hidden="true"></div>
+  <div class="ambient ambient--cyan" aria-hidden="true"></div>
+  <div class="scroll-progress" aria-hidden="true"><span id="scroll-progress-bar"></span></div>
+
+  <header class="site-header" id="top">
+    <a class="site-brand" href="#top" aria-label="Overture Instruments home">
+      <span class="site-brand__mark"><img src="./ui/Logos/OvertureLogo.png" alt="" width="30" height="30"></span>
+      <span class="site-brand__wordmark">OVERTURE <span>INSTRUMENTS</span></span>
+    </a>
+    <nav class="main-nav" id="main-nav" aria-label="Main navigation">
+      <a href="#mission">Our mission</a>
+      <a href="#library">Instrument library</a>
+      <a href="#omni">OMNI</a>
+      <a href="#experiments">Experiments</a>
+    </nav>
+    <a class="header-github" href="https://github.com/ForeverBoundless/Overture-Instruments" target="_blank" rel="noopener noreferrer">
+      <span>GitHub</span><span class="external-arrow" aria-hidden="true">↗</span>
+    </a>
+    <button class="menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="main-nav">
+      <span></span><span></span>
+    </button>
+  </header>
+
+  <main>
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-grid" aria-hidden="true"></div>
+      <svg class="hero-circuit" viewBox="0 0 1440 760" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <defs>
+          <linearGradient id="trace-gradient" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#ffad45" stop-opacity=".06" />
+            <stop offset=".52" stop-color="#ffbd67" stop-opacity=".8" />
+            <stop offset="1" stop-color="#6ee7d5" stop-opacity=".55" />
+          </linearGradient>
+          <radialGradient id="trace-core">
+            <stop offset="0" stop-color="#ffd38d" stop-opacity=".9" />
+            <stop offset="1" stop-color="#ff9f0a" stop-opacity="0" />
+          </radialGradient>
+        </defs>
+        <g class="circuit-lines" fill="none" stroke="url(#trace-gradient)" stroke-width="1.1">
+          <path d="M0 190 H150 L204 244 H350 L410 304 H487" />
+          <path d="M0 228 H130 L183 281 H305" />
+          <path d="M1440 175 H1287 L1226 236 H1101 L1047 290 H975" />
+          <path d="M1440 222 H1320 L1269 273 H1168" />
+          <path d="M90 760 V630 L155 565 V492 L224 423 H322" />
+          <path d="M1350 760 V646 L1281 577 V500 L1212 431 H1114" />
+          <path d="M250 0 V83 L299 132 V186" />
+          <path d="M1190 0 V95 L1145 140 V190" />
+          <path d="M0 510 H108 L151 467 H220" />
+          <path d="M1440 512 H1336 L1287 463 H1224" />
+        </g>
+        <g class="circuit-nodes">
+          <circle cx="150" cy="190" r="4"/><circle cx="350" cy="244" r="3"/><circle cx="487" cy="304" r="3"/>
+          <circle cx="1287" cy="175" r="4"/><circle cx="1101" cy="236" r="3"/><circle cx="975" cy="290" r="3"/>
+          <circle cx="155" cy="565" r="4"/><circle cx="322" cy="423" r="3"/><circle cx="1281" cy="577" r="4"/>
+          <circle cx="1114" cy="431" r="3"/><circle cx="250" cy="132" r="3"/><circle cx="1145" cy="140" r="3"/>
+          <circle cx="108" cy="510" r="3"/><circle cx="1336" cy="512" r="3"/>
+        </g>
+        <g class="circuit-pulses" fill="none" stroke-width="1.2">
+          <circle cx="350" cy="244" r="11"/><circle cx="1101" cy="236" r="11"/><circle cx="155" cy="565" r="11"/><circle cx="1281" cy="577" r="11"/>
+        </g>
+      </svg>
+
+      <div class="hero-content">
+        <div class="hero-kicker reveal"><span class="live-signal" aria-hidden="true"><i></i></span><span>OPEN ACCESS TO ICONIC SOUND</span><span class="kicker-index">OI / 001</span></div>
+        <div class="hero-mark-wrap reveal" data-parallax="0.035">
+          <div class="hero-mark-orbit hero-mark-orbit--one" aria-hidden="true"></div>
+          <div class="hero-mark-orbit hero-mark-orbit--two" aria-hidden="true"></div>
+          <div class="hero-mark-halo" aria-hidden="true"></div>
+          <img class="hero-logo" src="./ui/Logos/OvertureLogo.png" alt="Overture Instruments logo" width="220" height="220" fetchpriority="high">
+          <span class="hero-mark-cross hero-mark-cross--one" aria-hidden="true"></span>
+          <span class="hero-mark-cross hero-mark-cross--two" aria-hidden="true"></span>
+        </div>
+        <p class="hero-wordmark reveal">OVERTURE <span>INSTRUMENTS</span></p>
+        <h1 id="hero-title" class="hero-title reveal">Sound has no <em>gatekeepers.</em></h1>
+        <p class="hero-copy reveal">Legendary instruments. Remarkable detail. Completely free, and open to everyone.</p>
+        <div class="hero-actions reveal">
+          <a class="button button--primary magnetic-button" href="./library.html"><span>Explore the instruments</span><span class="button-arrow" aria-hidden="true">↘</span></a>
+          <a class="text-link" href="#mission">Why Overture exists <span aria-hidden="true">↓</span></a>
+        </div>
+        <div class="hero-baseline reveal" aria-label="Project principles">
+          <span><i></i> FREE TO USE</span><b></b><span><i></i> OPEN SOURCE</span><b></b><span><i></i> MADE FOR MAKING MUSIC</span>
+        </div>
+      </div>
+      <a class="hero-scroll" href="#mission" aria-label="Scroll to learn about Overture"><span class="hero-scroll__line"></span><span>SCROLL TO EXPLORE</span></a>
+      <div class="hero-coordinate" aria-hidden="true">48° 26'  N &nbsp; / &nbsp; 123° 22' W</div>
+    </section>
+
+    <section class="mission-section section-shell" id="mission" aria-labelledby="mission-title">
+      <div class="section-index reveal"><span>01</span><span class="index-rule"></span><span>THE IDEA</span></div>
+      <div class="mission-layout">
+        <div class="mission-heading reveal">
+          <p class="eyebrow">A different kind of instrument company</p>
+          <h2 id="mission-title">Great sound should be a <span>shared resource.</span></h2>
+        </div>
+        <div class="mission-copy reveal">
+          <p>Instruments can change the way you think, play, and create. Access to them shouldn't depend on what you can afford.</p>
+          <p>Overture Instruments is an independent project building detailed, MIDI-playable emulators and creative tools for curious musicians everywhere. The software is free, the code is public, and the point is simple: <strong>make more music possible.</strong></p>
+          <a class="button button--outline" href="./about.html" data-coming-soon="The About page is a placeholder for now. More about the project will live here soon."><span>More about Overture</span><span class="button-arrow" aria-hidden="true">↗</span></a>
+          <span class="placeholder-note">ABOUT PAGE · COMING LATER</span>
+        </div>
+      </div>
+      <div class="mission-footnote reveal"><span class="signal-ring" aria-hidden="true"><i></i></span><span>Built independently. Shared openly. Always evolving.</span><span class="mission-footnote__line"></span></div>
+    </section>
+
+    <section class="feature-section feature-section--library" id="library" aria-labelledby="library-title">
+      <div class="feature-shell">
+        <div class="section-index reveal"><span>02</span><span class="index-rule"></span><span>PLAY SOMETHING REAL</span></div>
+        <div class="feature-layout feature-layout--library">
+          <div class="feature-copy reveal">
+            <p class="eyebrow"><span class="eyebrow-dot"></span> THE INSTRUMENT LIBRARY</p>
+            <h2 id="library-title">Iconic instruments.<br><em>Right here.</em></h2>
+            <p class="feature-description">Explore a growing collection of keyboard and synthesizer emulators, designed with careful attention to the details that make each instrument feel like itself.</p>
+            <div class="feature-points">
+              <span><i>01</i> Play from your computer keyboard</span>
+              <span><i>02</i> Connect a MIDI controller</span>
+              <span><i>03</i> Explore presets and shape your sound</span>
+            </div>
+            <div class="feature-bottomline"><span class="tiny-signal" aria-hidden="true"></span><span>YOUR NEXT SOUND IS WAITING</span></div>
+          </div>
+          <div class="library-showcase reveal" data-tilt>
+            <div class="showcase-topline"><span><i class="status-dot"></i> OI / LIBRARY</span><span>COLLECTION 001—004</span></div>
+            <div class="instrument-stack" aria-hidden="true">
+              <div class="stack-orbit stack-orbit--outer"></div><div class="stack-orbit stack-orbit--inner"></div>
+              <div class="stack-card stack-card--back"><span class="stack-card__brand">SEQUENTIAL</span><span class="stack-card__lines"></span><span class="stack-card__display"></span></div>
+              <div class="stack-card stack-card--mid"><span class="stack-card__brand">MOOG</span><span class="stack-card__lines"></span><span class="stack-card__display"></span></div>
+              <div class="stack-card stack-card--front"><span class="stack-card__brand">OVERTURE / INSTRUMENT 01</span><span class="stack-keys"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><span class="stack-meter"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span></div>
+              <div class="floating-readout floating-readout--one"><span>VOICE MODE</span><b>POLYPHONIC</b><i class="readout-spark"></i></div>
+              <div class="floating-readout floating-readout--two"><span>ACCESS</span><b>100% OPEN</b><i class="readout-spark"></i></div>
+              <div class="showcase-crosshair showcase-crosshair--one"></div><div class="showcase-crosshair showcase-crosshair--two"></div>
+            </div>
+            <div class="showcase-bottomline"><span>FOUR INSTRUMENTS AND GROWING</span><span class="showcase-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span></div>
+            <a class="showcase-cta" href="./launcher.html"><span class="showcase-cta__icon" aria-hidden="true">↗</span><span><small>STEP INSIDE</small><strong>Take me to the library</strong></span><span class="showcase-cta__arrow" aria-hidden="true">→</span></a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="feature-section feature-section--omni" id="omni" aria-labelledby="omni-title">
+      <div class="feature-shell">
+        <div class="section-index reveal"><span>03</span><span class="index-rule"></span><span>BUILD YOUR OWN INSTRUMENT</span></div>
+        <div class="feature-layout feature-layout--omni">
+          <div class="feature-copy reveal">
+            <p class="eyebrow"><span class="eyebrow-dot eyebrow-dot--cyan"></span> INTRODUCING OMNI</p>
+            <h2 id="omni-title">It's your instrument,<br><em>and your rules.</em></h2>
+            <p class="feature-description">What if a keyboard could be built around the way you make music? OMNI is a new kind of instrument designer: combine controls and components from different emulated instruments, then make the layout, colours, and character your own.</p>
+            <div class="omni-chips"><span>DRAG & DROP</span><span>MODULAR</span><span>MADE BY YOU</span></div>
+            <p class="omni-status"><span class="status-pulse"></span> IN DEVELOPMENT <span class="status-divider">/</span> BIG IDEAS, TAKING SHAPE</p>
+          </div>
+          <div class="omni-showcase reveal" data-tilt>
+            <div class="omni-circuit omni-circuit--left" aria-hidden="true"></div><div class="omni-circuit omni-circuit--right" aria-hidden="true"></div>
+            <div class="omni-orbit omni-orbit--one" aria-hidden="true"></div><div class="omni-orbit omni-orbit--two" aria-hidden="true"></div>
+            <div class="omni-brand-lockup">
+              <div class="omni-brand-lockup__overline"><span>OVERTURE SYSTEMS</span><span>OMNI / 001</span></div>
+              <div class="omni-wordmark"><span>OVERTURE</span><strong><img src="./ui/Logos/OvertureLogo.png" alt="" width="55" height="55">MNI</strong></div>
+              <p>DESIGN A SOUND THAT'S YOURS.</p>
+            </div>
+            <div class="omni-builder-ui" aria-hidden="true">
+              <div class="builder-ui__head"><span><i></i><i></i><i></i></span><b>UNTITLED INSTRUMENT</b><span>● LIVE PREVIEW</span></div>
+              <div class="builder-ui__body">
+                <div class="builder-module builder-module--osc"><small>01 / OSCILLATOR</small><div class="mini-wave"></div><span class="mini-dial"></span><span class="mini-dial mini-dial--two"></span></div>
+                <div class="builder-module builder-module--filter"><small>02 / FILTER</small><div class="mini-filter-line"></div><span class="mini-dial"></span></div>
+                <div class="builder-module builder-module--env"><small>03 / ENVELOPE</small><div class="mini-envelope"></div></div>
+              </div>
+              <div class="builder-ui__keys"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+            </div>
+            <a class="omni-access" href="#omni" data-coming-soon="Overture OMNI is in development. More soon."><span>ACCESS OMNI</span><b aria-hidden="true">↗</b></a>
+            <div class="omni-index" aria-hidden="true"><span>MODULAR BY DESIGN</span><span>∞</span><span>LIMITLESS CONFIGURATION</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="feature-section feature-section--experiments" id="experiments" aria-labelledby="experiments-title">
+      <div class="feature-shell">
+        <div class="section-index reveal"><span>04</span><span class="index-rule"></span><span>LEARN BY PLAYING</span></div>
+        <div class="feature-layout feature-layout--experiments">
+          <div class="feature-copy reveal">
+            <p class="eyebrow"><span class="eyebrow-dot eyebrow-dot--green"></span> OVERTURE EXPERIMENTS</p>
+            <h2 id="experiments-title">Understand sound.<br><em>By exploring it.</em></h2>
+            <p class="feature-description">Small, hands-on simulations for the curious. Explore oscillators, filters, envelopes, modulation, and the building blocks of synthesis by changing things and hearing what happens.</p>
+            <p class="experiments-note">No textbook required. Just curiosity.</p>
+            <a class="button button--outline button--experiments" href="#experiments" data-coming-soon="Overture Experiments is a placeholder for now. Interactive sound labs are planned."><span>Explore experiments</span><span class="button-arrow" aria-hidden="true">↗</span></a>
+            <span class="placeholder-note">INTERACTIVE SOUND LABS · PLANNED</span>
+          </div>
+          <div class="experiments-showcase reveal" data-tilt>
+            <div class="experiment-heading"><span>EXPERIMENT 001</span><span>OSCILLATOR LAB</span></div>
+            <div class="scope-grid" aria-hidden="true">
+              <svg class="scope-svg" viewBox="0 0 600 250" preserveAspectRatio="none">
+                <defs><linearGradient id="scope-stroke" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#70edb2"/><stop offset=".54" stop-color="#8bf0d8"/><stop offset="1" stop-color="#5bc9f4"/></linearGradient></defs>
+                <path class="scope-wave scope-wave--ghost" d="M0 125 C25 20 50 20 75 125 S125 230 150 125 S200 20 225 125 S275 230 300 125 S350 20 375 125 S425 230 450 125 S500 20 525 125 S575 230 600 125" />
+                <path class="scope-wave" d="M0 125 C25 20 50 20 75 125 S125 230 150 125 S200 20 225 125 S275 230 300 125 S350 20 375 125 S425 230 450 125 S500 20 525 125 S575 230 600 125" />
+              </svg>
+              <div class="scope-axis scope-axis--x"></div><div class="scope-axis scope-axis--y"></div>
+              <div class="scope-point scope-point--one"></div><div class="scope-point scope-point--two"></div><span class="scope-axis-label scope-axis-label--x">TIME →</span><span class="scope-axis-label scope-axis-label--y">AMPLITUDE</span>
+            </div>
+            <div class="experiment-controls" aria-hidden="true">
+              <div class="experiment-control"><span>WAVEFORM</span><b class="waveform-symbol">∿</b><small>SINE</small></div>
+              <div class="experiment-control"><span>FREQUENCY</span><b>440 <small>Hz</small></b><div class="fake-slider"><i></i></div></div>
+              <div class="experiment-control"><span>AMPLITUDE</span><b>0.82</b><div class="fake-slider fake-slider--green"><i></i></div></div>
+            </div>
+            <div class="experiments-footer"><span><i class="status-dot status-dot--green"></i> SIMULATION PREVIEW</span><span>VISUAL ONLY / 001</span></div>
+            <div class="experiments-signal experiments-signal--one" aria-hidden="true"></div><div class="experiments-signal experiments-signal--two" aria-hidden="true"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-top">
+      <a class="footer-brand" href="#top" aria-label="Back to top">
+        <img src="./ui/Logos/OvertureLogo.png" alt="" width="34" height="34">
+        <span>OVERTURE <b>INSTRUMENTS</b></span>
+      </a>
+      <p>More access. More experiments. More music.</p>
+      <a class="footer-github" href="https://github.com/ForeverBoundless/Overture-Instruments" target="_blank" rel="noopener noreferrer"><span>Explore the open-source project</span><b aria-hidden="true">↗</b></a>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="copyright-year">2026</span> Overture Instruments</span>
+      <span class="footer-disclaimer">Independent, unofficial project. Not affiliated with or endorsed by any instrument manufacturer. All trademarks belong to their respective owners.</span>
+      <a href="#top" class="back-to-top">BACK TO TOP ↑</a>
+    </div>
+  </footer>
+
+  <div class="toast" id="site-toast" role="status" aria-live="polite"></div>
+</body>
+</html>
