@@ -2,9 +2,9 @@
   'use strict';
 
   // Change this one path if your existing instrument launcher has a different filename.
-  const LIBRARY_URL = './library.html';
+  const LIBRARY_URL = './html/library.html';
 
-  const libraryLinks = document.querySelectorAll('a[href="./launcher.html"]');
+  const libraryLinks = document.querySelectorAll('a[href="./html/launcher.html"]');
   libraryLinks.forEach((link) => link.setAttribute('href', LIBRARY_URL));
 
   const year = document.getElementById('copyright-year');
