@@ -408,3 +408,42 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
   .reveal { opacity: 1; transform: none; }
 }
+
+/* =====================================================================
+   HOMEPAGE HIGHLIGHT FLICKER
+   Matches the library page's "instrument" glow and flicker.
+   Preserves each highlight's existing accent colour.
+   ===================================================================== */
+
+.hero-title em,
+.feature-copy h2 em {
+  text-shadow:
+    0 0 .05em currentColor,
+    0 0 .16em currentColor,
+    0 0 .4em currentColor,
+    0 0 .7em currentColor;
+
+  animation: instrument-flicker 4.6s ease-in-out infinite;
+}
+
+/* Identical flicker timing to the library page */
+@keyframes instrument-flicker {
+  0%, 100% { opacity: 1; }
+  4%  { opacity: .96; }
+  6%  { opacity: 1; }
+  7%  { opacity: .55; }
+  8%  { opacity: .98; }
+  9%  { opacity: .8; }
+  10% { opacity: 1; }
+  34% { opacity: 1; }
+  35% { opacity: .7; }
+  36% { opacity: 1; }
+  62% { opacity: 1; }
+  63% { opacity: .9; }
+  64% { opacity: 1; }
+  65% { opacity: .6; }
+  66% { opacity: 1; }
+  90% { opacity: 1; }
+  91% { opacity: .85; }
+  92% { opacity: 1; }
+}
