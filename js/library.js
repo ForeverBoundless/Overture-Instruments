@@ -30,10 +30,10 @@ function buildTile(instrument) {
   tile.addEventListener('keydown', (event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); select(); } });
   tile.querySelector('.instrument-launch-button').addEventListener('click', (event) => {
     event.stopPropagation();
-    if (instrument.id === 'little-phatty') { window.location.assign('./little-phatty/'); return; }
-    if (instrument.id === 'sub-37') { window.location.assign('./sub37.html'); return; }
-    if (instrument.id === 'prophet-10') { window.location.assign('./prophet10.html'); return; }
-    if (instrument.id === 'nord-c2d') { window.location.assign('./nord-c2d.html'); return; }
+    if (instrument.id === 'little-phatty') { window.location.assign('./html/little-phatty'); return; }
+    if (instrument.id === 'sub-37') { window.location.assign('./html/sub37'); return; }
+    if (instrument.id === 'prophet-10') { window.location.assign('./html/prophet10'); return; }
+    if (instrument.id === 'nord-c2d') { window.location.assign('./html/nord-c2d'); return; }
     document.dispatchEvent(new CustomEvent('launcher:launch', { detail: instrument }));
   });
   tile.classList.add('is-entering');
@@ -48,13 +48,13 @@ function buildTile(instrument) {
 }
 
 const page = document.getElementById('launcher-page');
-page.innerHTML = `<div class="launcher-ambient launcher-ambient--one" aria-hidden="true"></div><div class="launcher-ambient launcher-ambient--two" aria-hidden="true"></div><div class="launcher-noise" aria-hidden="true"></div><header class="launcher-header"><div class="launcher-brand"><span class="launcher-brand__mark"><img class="launcher-brand__mark-img" src="./ui/Logos/OvertureLogo.png" alt="Overture" width="24" height="24"></span>
+page.innerHTML = `<div class="launcher-ambient launcher-ambient--one" aria-hidden="true"></div><div class="launcher-ambient launcher-ambient--two" aria-hidden="true"></div><div class="launcher-noise" aria-hidden="true"></div><header class="launcher-header"><div class="launcher-brand"><span class="launcher-brand__mark"><img class="launcher-brand__mark-img" src="/ui/Logos/OvertureLogo.png" alt="Overture" width="24" height="24"></span>
 <span>OVERTURE INSTRUMENTS</span></div><div class="launcher-status"><span></span><b>OI Library</b></div></header><section class="launcher-hero" aria-labelledby="launcher-title">
   <div class="launcher-hero__copy">
     <p class="launcher-overline">An expanding collection of MIDI-playable classics</p>
 
     <h1 id="launcher-title">
-      Ch<img class="launcher-hero__o-icon" src="./ui/Logos/OvertureLogo.png" alt="o">ose your<br>
+      Ch<img class="launcher-hero__o-icon" src="/ui/Logos/OvertureLogo.png" alt="o">ose your<br>
       <em>instrument.</em>
     </h1>
 
@@ -100,7 +100,7 @@ INSTRUMENTS.forEach((instrument) => grid.appendChild(buildTile(instrument)));
 const comingSoon = document.createElement('aside');
 comingSoon.className = `launcher-coming-soon ${INSTRUMENTS.length % 2 ? 'launcher-coming-soon--tile' : 'launcher-coming-soon--banner'}`;
 comingSoon.setAttribute('aria-label', 'More instruments coming soon');
-comingSoon.innerHTML = `<span class="launcher-coming-soon__signal" aria-hidden="true"></span><div class="launcher-coming-soon__copy"><span class="launcher-coming-soon__eyebrow"><!-- Something can go here --></span><strong>M<img class="launcher-coming-soon__o-icon" src="./ui/Logos/OvertureLogo.png" alt="">re is coming soon!</strong><span class="launcher-coming-soon__subline">New instruments are already in development.<br>Check out the GitHub to stay tuned!</span></div><a class="launcher-coming-soon__arrow" href="https://github.com/ForeverBoundless/Overture-Instruments" target="_blank" rel="noopener noreferrer" aria-label="Visit the Overture Instruments GitHub repository">↗</a>`;
+comingSoon.innerHTML = `<span class="launcher-coming-soon__signal" aria-hidden="true"></span><div class="launcher-coming-soon__copy"><span class="launcher-coming-soon__eyebrow"><!-- Something can go here --></span><strong>M<img class="launcher-coming-soon__o-icon" src="/ui/Logos/OvertureLogo.png" alt="">re is coming soon!</strong><span class="launcher-coming-soon__subline">New instruments are already in development.<br>Check out the GitHub to stay tuned!</span></div><a class="launcher-coming-soon__arrow" href="https://github.com/ForeverBoundless/Overture-Instruments" target="_blank" rel="noopener noreferrer" aria-label="Visit the Overture Instruments GitHub repository">↗</a>`;
 if (INSTRUMENTS.length % 2) grid.appendChild(comingSoon);
 else grid.insertAdjacentElement('afterend', comingSoon);
 
