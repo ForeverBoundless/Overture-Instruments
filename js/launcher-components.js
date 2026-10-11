@@ -4,7 +4,7 @@
  * bespoke controls: a generic button/slider kit cannot reproduce the
  * physical Little Phatty panel's interaction and proportions.
  */
-import './launcher.js';
+import './library.js';
 
 // Enhancement only: the catalog remains functional if the CDN is offline.
 // The custom element's text still presents a usable Launch control while
