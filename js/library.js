@@ -30,10 +30,10 @@ function buildTile(instrument) {
   tile.addEventListener('keydown', (event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); select(); } });
   tile.querySelector('.instrument-launch-button').addEventListener('click', (event) => {
     event.stopPropagation();
-    if (instrument.id === 'little-phatty') { window.location.assign('./html/little-phatty'); return; }
-    if (instrument.id === 'sub-37') { window.location.assign('./html/sub37'); return; }
-    if (instrument.id === 'prophet-10') { window.location.assign('./html/prophet10'); return; }
-    if (instrument.id === 'nord-c2d') { window.location.assign('./html/nord-c2d'); return; }
+    if (instrument.id === 'little-phatty') { window.location.assign('/html/little-phatty'); return; }
+    if (instrument.id === 'sub-37') { window.location.assign('/html/sub37'); return; }
+    if (instrument.id === 'prophet-10') { window.location.assign('/html/prophet10'); return; }
+    if (instrument.id === 'nord-c2d') { window.location.assign('/html/nord-c2d'); return; }
     document.dispatchEvent(new CustomEvent('launcher:launch', { detail: instrument }));
   });
   tile.classList.add('is-entering');
@@ -89,7 +89,7 @@ page.innerHTML = `<div class="launcher-ambient launcher-ambient--one" aria-hidde
       <img src="/ui/Logos/Korg_logo.png" alt="Korg">
     </div>
   </div>
-</section><section class="instrument-grid" aria-label="Available instruments"></section><footer class="launcher-footer"><span>01 AVAILABLE INSTRUMENT</span><span>SELECT A TILE TO CONTINUE</span></footer>
+</section><section class="instrument-grid" aria-label="Available instruments"></section><footer class="launcher-footer"><span>04 AVAILABLE INSTRUMENTS</span><span>SELECT A TILE TO CONTINUE</span></footer>
 <div class="launcher-legal">
   © 2026 Overture Instruments. Independent, unofficial project. Not affiliated with, endorsed by, or sponsored by any manufacturer represented here.
   All trademarks and brand names belong to their respective owners.
