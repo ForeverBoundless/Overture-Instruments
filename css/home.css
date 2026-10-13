@@ -21,7 +21,7 @@
   --faint: #6f7989;
   --amber: #ffb75e;
   --amber-bright: #ff9f0a;
-  --cyan: #70dcf0;
+  --cyan: #7de4ff;
   --green: #82e6a8;
   --line: rgba(224, 233, 246, .13);
   --line-strong: rgba(224, 233, 246, .22);
@@ -110,7 +110,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
 .hero-wordmark { margin: 13px 0 16px; color: #f7f8fb; font-size: clamp(14px, 1.4vw, 17px); font-weight: 750; letter-spacing: .29em; }
 .hero-wordmark span { color: #9aa5b5; font-weight: 500; }
 .hero-title { margin: 0; font-size: clamp(34px, 5.35vw, 66px); font-weight: 500; letter-spacing: -.065em; line-height: 1.04; }
-.hero-title em { color: var(--amber); font-family: var(--font-display); font-weight: 400; font-style: normal; text-shadow: 0 0 22px rgba(255,159,10,.17); }
+.hero-title em { color: var(--amber-bright); font-family: var(--font-display); font-weight: 400; font-style: normal; text-shadow: 0 0 22px rgba(255,159,10,.17); }
 .hero-copy { margin: 20px auto 0; color: #aeb7c6; font-size: clamp(13px, 1.4vw, 15px); line-height: 1.8; }
 .hero-actions { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 25px; margin-top: 30px; }
 .button { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 24px; min-height: 49px; padding: 0 17px 0 21px; border: 1px solid transparent; border-radius: 9px; text-decoration: none; font-size: 11px; font-weight: 750; letter-spacing: -.01em; transition: transform .22s ease, border-color .22s ease, background .22s ease, box-shadow .22s ease; overflow: hidden; }
@@ -125,7 +125,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
 .text-link span { display: inline-block; margin-left: 9px; color: var(--amber); transition: transform .2s ease; }
 .text-link:hover { color: #fff; }
 .text-link:hover span { transform: translateY(3px); }
-.hero-baseline { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 16px; margin-top: 47px; color: #8a95a6; font-family: var(--font-mono); font-size: 8px; letter-spacing: .1em; }
+.hero-baseline { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 16px; margin-top: 47px; color: #8a95a6; font-family: var(--font-mono); font-size: 10px; letter-spacing: .1em; }
 .hero-baseline span { display: inline-flex; align-items: center; gap: 8px; }
 .hero-baseline span i { width: 4px; height: 4px; border-radius: 50%; background: var(--green); box-shadow: 0 0 9px rgba(130,230,168,.8); animation: signal-color 7s linear infinite; }
 .hero-baseline span:nth-of-type(2) i { animation-delay: -2.2s; }
@@ -173,7 +173,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
 .feature-layout { position: relative; display: grid; grid-template-columns: minmax(0, .88fr) minmax(0, 1.12fr); gap: clamp(36px, 6.5vw, 85px); align-items: center; padding-top: 57px; }
 .feature-copy { min-width: 0; }
 .feature-copy h2 { margin: 0; font-size: clamp(40px, 5.1vw, 65px); font-weight: 500; letter-spacing: -.07em; line-height: .99; }
-.feature-copy h2 em { color: var(--amber); font-family: var(--font-display); font-weight: 400; font-style: normal; }
+.feature-copy h2 em { color: var(--amber-bright); font-family: var(--font-display); font-weight: 400; font-style: normal; }
 .feature-description { max-width: 460px; margin: 25px 0 0; color: #aab4c3; font-size: 13px; line-height: 1.9; }
 .feature-points { display: grid; gap: 15px; margin-top: 29px; }
 .feature-points span { display: flex; align-items: baseline; gap: 13px; color: #d9dfe9; font-size: 10px; }
