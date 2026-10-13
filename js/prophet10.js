@@ -129,7 +129,7 @@ class Prophet10App {
 
   _header() {
     const header = document.createElement('header'); header.className = 's37-header';
-    header.innerHTML = '<img class="s37-moog" src="./ui/Logos/Sequential_logo.png" alt="Sequential"><div class="s37-model"><b>PROPHET-10</b><span>REV4 POLYPHONIC ANALOG SYNTHESIZER</span></div>';
+    header.innerHTML = '<img class="s37-moog" src="/ui/Logos/Sequential_logo.png" alt="Sequential"><div class="s37-model"><b>PROPHET-10</b><span>REV4 POLYPHONIC ANALOG SYNTHESIZER</span></div>';
     const display = document.createElement('div'); display.className = 's37-display';
     this.displayTop = document.createElement('div'); this.displayBottom = document.createElement('div');
     display.append(this.displayTop, this.displayBottom); header.appendChild(display);
