@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b0e13">
+  <meta name="description" content="Meet the person behind Overture Instruments, learn why the project exists, and follow its evolution from early experiments to expressive, open-source music tools.">
+  <title>About | Overture Instruments</title>
+  <link rel="icon" type="image/png" href="/ui/Logos/OvertureLogo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/about.css">
+  <script src="/js/about.js" defer></script>
+</head>
+<body>
+  <div class="site-noise" aria-hidden="true"></div>
+  <div class="scroll-progress" aria-hidden="true"><span id="scroll-progress-bar"></span></div>
+
+  <header class="site-header" id="top">
+    <a class="site-brand" href="/" aria-label="Overture Instruments home">
+      <span class="site-brand__mark"><img src="/ui/Logos/OvertureLogo.png" alt="" width="30" height="30"></span>
+      <span class="site-brand__wordmark">OVERTURE <span>INSTRUMENTS</span></span>
+    </a>
+
+    <nav class="main-nav" id="main-nav" aria-label="Main navigation">
+      <a href="/#mission">Our mission</a>
+      <a href="/library">Instrument library</a>
+      <a href="/#omni">OMNI</a>
+      <a href="/#experiments">Experiments</a>
+      <a href="/about.html" aria-current="page">About</a>
+    </nav>
+
+    <a class="header-github" href="https://github.com/ForeverBoundless/Overture-Instruments" target="_blank" rel="noopener noreferrer">
+      <span>GitHub</span><span class="external-arrow" aria-hidden="true">↗</span>
+    </a>
+
+    <button class="menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="main-nav">
+      <span></span><span></span>
+    </button>
+  </header>
+
+  <main>
+    <section class="about-hero" aria-labelledby="about-title">
+      <div class="about-hero__grid" aria-hidden="true"></div>
+      <div class="about-hero__glow about-hero__glow--amber" aria-hidden="true"></div>
+      <div class="about-hero__glow about-hero__glow--cyan" aria-hidden="true"></div>
+
+      <div class="about-hero__content">
+        <p class="eyebrow about-reveal"><span class="eyebrow-dot"></span> A LITTLE ABOUT OVERTURE</p>
+        <h1 id="about-title" class="about-reveal">Built by curiosity.<br><span>Open to everyone.</span></h1>
+        <p class="about-hero__lede about-reveal">Overture Instruments is an independent project exploring what happens when a love of music meets a love of building things.</p>
+        <p class="about-hero__body about-reveal">The goal is simple: make expressive instruments and creative tools easier to explore, without putting them behind a price tag.</p>
+        <div class="about-hero__actions about-reveal">
+          <a class="button button--primary" href="/library"><span>Explore the instruments</span><span class="button-arrow" aria-hidden="true">↘</span></a>
+          <a class="text-link" href="#story">Read the story <span aria-hidden="true">↓</span></a>
+        </div>
+      </div>
+
+      <div class="about-hero__instrument about-reveal" aria-label="Overture project information">
+        <div class="instrument-panel__top"><span><i></i> OVERTURE / PROJECT PROFILE</span><span>OI—001</span></div>
+        <div class="instrument-panel__logo"><img src="/ui/Logos/OvertureLogo.png" alt="" width="92" height="92"><span>OVERTURE<br><b>INSTRUMENTS</b></span></div>
+        <div class="instrument-panel__readout">
+          <div><span>PHILOSOPHY</span><strong>ACCESS FIRST</strong></div>
+          <div><span>APPROACH</span><strong>BUILD / LISTEN / REFINE</strong></div>
+          <div><span>CODE</span><strong>OPEN SOURCE</strong></div>
+        </div>
+        <div class="instrument-panel__wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="instrument-panel__bottom"><span><i></i> INDEPENDENT PROJECT</span><span>MADE TO BE EXPLORED</span></div>
+      </div>
+
+      <a class="hero-scroll" href="#story" aria-label="Scroll to the story"><span class="hero-scroll__line"></span><span>THE STORY</span></a>
+      <span class="about-hero__coordinate" aria-hidden="true">48° / SOUND IN PROGRESS</span>
+    </section>
+
+    <section class="story-section section-shell" id="story" aria-labelledby="story-title">
+      <div class="section-index about-reveal"><span>01</span><span class="index-rule"></span><span>WHY IT EXISTS</span></div>
+      <div class="story-layout">
+        <div class="story-heading about-reveal">
+          <p class="eyebrow"><span class="eyebrow-dot"></span> THE IDEA</p>
+          <h2 id="story-title">Great sound<br>shouldn't be<br><em>locked away.</em></h2>
+        </div>
+        <div class="story-copy about-reveal">
+          <p class="story-copy__lead">The instruments that inspire us can be extraordinary. Access to them, though, often depends on what we can afford.</p>
+          <p>Overture started with the idea that people should be able to explore the sounds and possibilities of electronic instruments without needing to own the original hardware. The project builds detailed, MIDI-playable emulators and creative tools with the code available for anyone to inspect, learn from, and contribute to.</p>
+          <p>This isn't about replacing the experience of playing a real instrument. It's about opening another door: a way to experiment, learn, compose, and follow an idea wherever it goes.</p>
+          <div class="story-signoff"><span class="signal-ring" aria-hidden="true"><i></i></span><span>FREE TO USE. OPEN TO EXPLORE.</span><span class="story-signoff__line"></span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="founder-section" aria-labelledby="founder-title">
+      <div class="section-shell">
+        <div class="section-index about-reveal"><span>02</span><span class="index-rule"></span><span>THE PERSON BEHIND THE PROJECT</span></div>
+        <div class="founder-layout">
+          <div class="founder-copy about-reveal">
+            <p class="eyebrow"><span class="eyebrow-dot eyebrow-dot--cyan"></span> MUSIC MEETS MAKING</p>
+            <h2 id="founder-title">Hello, I'm<br><em>Michael.</em></h2>
+            <p class="founder-copy__lead">I'm a musician and developer building Overture Instruments around two things I never get tired of: making music and figuring out how things work.</p>
+            <p>Music gives me the questions. Building gives me a way to chase them. I started out learning through Python and Java, then moved into the web technologies that let me create playable instruments directly in a browser, with custom audio engines and MIDI support.</p>
+            <p>Overture is a place to bring those interests together, keep learning in public, and make something that other musicians can use. It's an ongoing project, and there is plenty more to figure out.</p>
+            <a class="text-link founder-copy__link" href="https://github.com/ForeverBoundless/Overture-Instruments" target="_blank" rel="noopener noreferrer">See what I'm building on GitHub <span aria-hidden="true">↗</span></a>
+          </div>
+
+          <!-- PHOTO PLACEHOLDER: when ready, replace a .photo-placeholder block with <img class="carousel-image carousel-image--portrait" src="/ui/About/your-photo.jpg" alt="Describe the photo">. -->
+          <div class="about-carousel founder-carousel about-reveal" data-carousel aria-label="Photos of Michael and the project">
+            <div class="carousel-frame">
+              <div class="carousel-track" data-carousel-track>
+                <article class="carousel-slide" data-slide aria-label="Photo 1 of 3">
+                  <div class="photo-placeholder photo-placeholder--portrait">
+                    <span class="photo-placeholder__index">PORTRAIT / 01</span>
+                    <span class="photo-placeholder__orbit photo-placeholder__orbit--one" aria-hidden="true"></span>
+                    <span class="photo-placeholder__orbit photo-placeholder__orbit--two" aria-hidden="true"></span>
+                    <span class="photo-placeholder__cross" aria-hidden="true">+</span>
+                    <span class="photo-placeholder__icon" aria-hidden="true">M</span>
+                    <span class="photo-placeholder__label">Your portrait goes here</span>
+                    <span class="photo-placeholder__hint">Recommended: portrait or candid photo</span>
+                  </div>
+                  <div class="carousel-caption"><span>01 / THE PERSON</span><strong>Behind the keys</strong><p>A portrait, performance photo, or candid shot.</p></div>
+                </article>
+                <article class="carousel-slide" data-slide aria-label="Photo 2 of 3">
+                  <div class="photo-placeholder photo-placeholder--portrait photo-placeholder--cyan">
+                    <span class="photo-placeholder__index">PORTRAIT / 02</span>
+                    <span class="photo-placeholder__orbit photo-placeholder__orbit--one" aria-hidden="true"></span>
+                    <span class="photo-placeholder__orbit photo-placeholder__orbit--two" aria-hidden="true"></span>
+                    <span class="photo-placeholder__cross" aria-hidden="true">+</span>
+                    <span class="photo-placeholder__icon" aria-hidden="true">OI</span>
+                    <span class="photo-placeholder__label">Add another photo</span>
+                    <span class="photo-placeholder__hint">Recommended: portrait or studio setting</span>
+                  </div>
+                  <div class="carousel-caption"><span>02 / THE MUSICIAN</span><strong>Where it starts</strong><p>A glimpse into the music and people behind Overture.</p></div>
+                </article>
+                <article class="carousel-slide" data-slide aria-label="Photo 3 of 3">
+                  <div class="photo-placeholder photo-placeholder--portrait photo-placeholder--green">
+                    <span class="photo-placeholder__index">PORTRAIT / 03</span>
+                    <span class="photo-placeholder__orbit photo-placeholder__orbit--one" aria-hidden="true"></span>
+                    <span class="photo-placeholder__orbit photo-placeholder__orbit--two" aria-hidden="true"></span>
+                    <span class="photo-placeholder__cross" aria-hidden="true">+</span>
+                    <span class="photo-placeholder__icon" aria-hidden="true">♪</span>
+                    <span class="photo-placeholder__label">Your photo here</span>
+                    <span class="photo-placeholder__hint">Recommended: a personal moment or setup</span>
+                  </div>
+                  <div class="carousel-caption"><span>03 / THE PROCESS</span><strong>Learning as I go</strong><p>The project is personal, practical, and always evolving.</p></div>
+                </article>
+              </div>
+            </div>
+            <div class="carousel-controls">
+              <div class="carousel-controls__count"><span data-carousel-current>01</span><i></i><span data-carousel-total>03</span></div>
+              <div class="carousel-dots" aria-label="Choose a photo">
+                <button type="button" data-carousel-dot="0" aria-label="Show photo 1" aria-current="true"></button>
+                <button type="button" data-carousel-dot="1" aria-label="Show photo 2"></button>
+                <button type="button" data-carousel-dot="2" aria-label="Show photo 3"></button>
+              </div>
+              <div class="carousel-arrows">
+                <button type="button" data-carousel-prev aria-label="Previous photo">←</button>
+                <button type="button" data-carousel-next aria-label="Next photo">→</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="process-section" aria-labelledby="process-title">
+      <div class="section-shell">
+        <div class="section-index about-reveal"><span>03</span><span class="index-rule"></span><span>FROM FIRST IDEA TO WORKING INSTRUMENT</span></div>
+        <div class="process-heading about-reveal">
+          <div>
+            <p class="eyebrow"><span class="eyebrow-dot"></span> THE BUILD LOG</p>
+            <h2 id="process-title">Made one experiment<br><em>at a time.</em></h2>
+          </div>
+          <p>There isn't a single leap from idea to finished instrument. It's a chain of small discoveries, prototypes, mistakes, and refinements. This carousel is reserved for snapshots from that process.</p>
+        </div>
+
+        <!-- DEVELOPMENT IMAGE PLACEHOLDERS: replace a .process-placeholder block with <img class="carousel-image carousel-image--process" src="/ui/About/your-screenshot.jpg" alt="Describe the development image">. -->
+        <div class="about-carousel process-carousel about-reveal" data-carousel aria-label="Development process gallery">
+          <div class="carousel-frame">
+            <div class="carousel-track" data-carousel-track>
+              <article class="carousel-slide" data-slide aria-label="Development stage 1 of 4">
+                <div class="process-placeholder process-placeholder--amber">
+                  <span class="process-placeholder__meta">STAGE 01 <i></i> EARLY NOTES</span>
+                  <div class="process-placeholder__visual process-placeholder__visual--notes" aria-hidden="true"><span>IDEA</span><b>→</b><span>PROTOTYPE</span><b>→</b><span>LISTEN</span></div>
+                  <span class="process-placeholder__label">Early sketches and ideas</span>
+                  <span class="process-placeholder__hint">Space for notebook photos, diagrams, or first concepts</span>
+                </div>
+                <div class="carousel-caption"><span>01 / STARTING POINT</span><strong>First, a question</strong><p>The sketches, plans, and experiments that start a build.</p></div>
+              </article>
+              <article class="carousel-slide" data-slide aria-label="Development stage 2 of 4">
+                <div class="process-placeholder process-placeholder--cyan">
+                  <span class="process-placeholder__meta">STAGE 02 <i></i> FIRST BUILD</span>
+                  <div class="process-placeholder__visual process-placeholder__visual--code" aria-hidden="true"><span>const</span> <b>sound</b> = <em>explore()</em><br><span>audio</span>.<b>connect</b>(output)<br><i>// keep iterating</i></div>
+                  <span class="process-placeholder__label">The first working prototype</span>
+                  <span class="process-placeholder__hint">Space for screenshots of code, UI, or early audio tests</span>
+                </div>
+                <div class="carousel-caption"><span>02 / PROTOTYPING</span><strong>Make it work</strong><p>Trying an idea in code and getting the first sound out.</p></div>
+              </article>
+              <article class="carousel-slide" data-slide aria-label="Development stage 3 of 4">
+                <div class="process-placeholder process-placeholder--green">
+                  <span class="process-placeholder__meta">STAGE 03 <i></i> REFINEMENT</span>
+                  <div class="process-placeholder__visual process-placeholder__visual--controls" aria-hidden="true"><span><i></i><i></i><i></i></span><span><i></i><i></i><i></i></span><span><i></i><i></i><i></i></span><b>TEST / LISTEN / ADJUST</b></div>
+                  <span class="process-placeholder__label">Tuning the sound and interface</span>
+                  <span class="process-placeholder__hint">Space for emulator screenshots and iteration comparisons</span>
+                </div>
+                <div class="carousel-caption"><span>03 / REFINING</span><strong>Listen closely</strong><p>Polishing the interface, response, details, and sound.</p></div>
+              </article>
+              <article class="carousel-slide" data-slide aria-label="Development stage 4 of 4">
+                <div class="process-placeholder process-placeholder--violet">
+                  <span class="process-placeholder__meta">STAGE 04 <i></i> WHAT'S NEXT</span>
+                  <div class="process-placeholder__visual process-placeholder__visual--modules" aria-hidden="true"><span>OSC</span><b>+</b><span>FILTER</span><b>+</b><span>ENV</span><b>→</b><span>YOU</span></div>
+                  <span class="process-placeholder__label">New tools taking shape</span>
+                  <span class="process-placeholder__hint">Space for OMNI mockups, experiments, and future concepts</span>
+                </div>
+                <div class="carousel-caption"><span>04 / LOOKING AHEAD</span><strong>Keep exploring</strong><p>OMNI, interactive learning tools, and ideas still taking shape.</p></div>
+              </article>
+            </div>
+          </div>
+          <div class="carousel-controls">
+            <div class="carousel-controls__count"><span data-carousel-current>01</span><i></i><span data-carousel-total>04</span></div>
+            <div class="carousel-dots" aria-label="Choose a development stage">
+              <button type="button" data-carousel-dot="0" aria-label="Show development stage 1" aria-current="true"></button>
+              <button type="button" data-carousel-dot="1" aria-label="Show development stage 2"></button>
+              <button type="button" data-carousel-dot="2" aria-label="Show development stage 3"></button>
+              <button type="button" data-carousel-dot="3" aria-label="Show development stage 4"></button>
+            </div>
+            <div class="carousel-arrows">
+              <button type="button" data-carousel-prev aria-label="Previous development stage">←</button>
+              <button type="button" data-carousel-next aria-label="Next development stage">→</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="next-section" aria-labelledby="next-title">
+      <div class="section-shell">
+        <div class="section-index about-reveal"><span>04</span><span class="index-rule"></span><span>WHERE IT'S GOING</span></div>
+        <div class="next-heading about-reveal">
+          <p class="eyebrow"><span class="eyebrow-dot eyebrow-dot--green"></span> STILL IN PROGRESS</p>
+          <h2 id="next-title">The next sound is<br><em>still being built.</em></h2>
+          <p>Overture is growing beyond a collection of emulators. The library, OMNI, and Overture Experiments each explore a different way to make sound more accessible, understandable, and personal.</p>
+        </div>
+        <div class="next-cards">
+          <a class="next-card next-card--amber about-reveal" href="/library">
+            <span class="next-card__index">01 / LIBRARY</span><span class="next-card__icon" aria-hidden="true">↗</span>
+            <h3>Play the instruments.</h3><p>Explore free, MIDI-playable emulators built around distinctive sounds.</p><span class="next-card__link">EXPLORE LIBRARY <b>→</b></span>
+          </a>
+          <a class="next-card next-card--cyan about-reveal" href="/#omni">
+            <span class="next-card__index">02 / OMNI</span><span class="next-card__icon" aria-hidden="true">⌘</span>
+            <h3>OMNI</h3><p>A modular instrument concept for combining controls and components.</p><span class="next-card__link">DISCOVER OMNI <b>→</b></span>
+          </a>
+          <a class="next-card next-card--green about-reveal" href="/#experiments">
+            <span class="next-card__index">03 / EXPERIMENTS</span><span class="next-card__icon" aria-hidden="true">∿</span>
+            <h3>Learn by exploring.</h3><p>Hands-on simulations for understanding the building blocks of sound.</p><span class="next-card__link">SEE WHAT'S PLANNED <b>→</b></span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="about-cta-section" aria-labelledby="about-cta-title">
+      <div class="about-cta about-reveal">
+        <div><p class="eyebrow">AND A GREAT PROJECT IS BETTER WHEN IT'S SHARED</p><h2 id="about-cta-title">Come see how it's made.</h2><p>Follow the code, explore what's there, or help shape what comes next.</p></div>
+        <a class="button button--primary" href="https://github.com/ForeverBoundless/Overture-Instruments" target="_blank" rel="noopener noreferrer"><span>Visit the GitHub repo</span><span class="button-arrow" aria-hidden="true">↗</span></a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-top">
+      <a class="footer-brand" href="/" aria-label="Overture Instruments home">
+        <img src="/ui/Logos/OvertureLogo.png" alt="" width="34" height="34">
+        <span>OVERTURE <b>INSTRUMENTS</b></span>
+      </a>
+      <p>Great sound should be open to everyone.</p>
+      <a class="footer-github" href="https://github.com/ForeverBoundless/Overture-Instruments" target="_blank" rel="noopener noreferrer"><span>Explore the open-source codebase</span><b aria-hidden="true">↗</b></a>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="copyright-year">2026</span> Overture Instruments</span>
+      <span class="footer-disclaimer">Independent, unofficial project. Not affiliated with, endorsed by, or sponsored by any manufacturer represented here. All trademarks and brand names belong to their respective owners.</span>
+      <a href="#top" class="back-to-top">BACK TO TOP ↑</a>
+    </div>
+  </footer>
+</body>
+</html>
