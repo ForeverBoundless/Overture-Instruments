@@ -1,6 +1,6 @@
 # Overture Instruments
 
-### Sound has no gatekeepers.
+### Sound without limits.
 
 **Free, browser-based keyboard and synthesizer emulators, built to make expressive instruments and the technology behind them more accessible to everyone.**
 
