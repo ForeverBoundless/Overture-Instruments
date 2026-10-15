@@ -72,7 +72,7 @@ const page = document.getElementById('launcher-page');
 page.innerHTML = `<div class="launcher-ambient launcher-ambient--one" aria-hidden="true"></div><div class="launcher-ambient launcher-ambient--two" aria-hidden="true"></div><div class="launcher-noise" aria-hidden="true"></div><header class="launcher-header"><div class="launcher-brand"><span class="launcher-brand__mark"><img class="launcher-brand__mark-img" src="/ui/Logos/OvertureLogo.png" alt="Overture" width="24" height="24"></span>
 <span>OVERTURE INSTRUMENTS</span></div><div class="launcher-status"><span></span><b>OI Library</b></div></header><section class="launcher-hero" aria-labelledby="launcher-title">
   <div class="launcher-hero__copy">
-    <p class="launcher-overline">Eight MIDI-playable classics, from analog polysynths to FM and a rhythm machine</p>
+    <p class="launcher-overline">An expanding collection of MIDI-playable classics</p>
 
     <h1 id="launcher-title">
       Ch<img class="launcher-hero__o-icon" src="/ui/Logos/OvertureLogo.png" alt="o">ose your<br>
@@ -99,7 +99,7 @@ page.innerHTML = `<div class="launcher-ambient launcher-ambient--one" aria-hidde
     </div>
 
     <div class="launcher-brand-slot">
-      <img src="/ui/Logos/Oberheim_logo.png" alt="Oberheim">
+      <img src="/ui/Logos/Yamaha_logo.png" alt="Yamaha">
     </div>
 
     <div class="launcher-brand-slot">
@@ -108,22 +108,6 @@ page.innerHTML = `<div class="launcher-ambient launcher-ambient--one" aria-hidde
 
     <div class="launcher-brand-slot">
       <img src="/ui/Logos/Korg_logo.png" alt="Korg">
-    </div>
-
-    <div class="launcher-brand-slot launcher-brand-slot--text" aria-label="Yamaha">
-      <span>YAMAHA</span>
-    </div>
-
-    <div class="launcher-brand-slot launcher-brand-slot--text" aria-label="Yamaha">
-      <span>YAMAHA</span>
-    </div>
-
-    <div class="launcher-brand-slot launcher-brand-slot--text" aria-label="Yamaha">
-      <span>YAMAHA</span>
-    </div>
-
-    <div class="launcher-brand-slot launcher-brand-slot--text" aria-label="Yamaha">
-      <span>YAMAHA</span>
     </div>
   </div>
 </section><section class="instrument-grid" aria-label="Available instruments"></section><footer class="launcher-footer"><span>04 AVAILABLE INSTRUMENTS</span><span>SELECT A TILE TO CONTINUE</span></footer>
