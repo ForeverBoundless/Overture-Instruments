@@ -1,6 +1,7 @@
 /** omni.js - OMNI modular instrument designer: library, canvas, inspector, toolbar, performance input. */
 import { MODULES, CATEGORIES, SIGNAL_COLORS } from './omni/modules.js';
 import { defaultPatch, validatePatch, connectionError, LiveGraph, patchToSVG, defaultParams } from './omni/graph.js';
+import { TEMPLATES, templatePreview } from './omni/templates.js';
 import { PresetStore, downloadText, pickFile } from './shared/presetStore.js';
 import { Keyboard } from '../ui/Keyboard.js';
 import { MidiManager, midiNoteName } from './engine/MidiManager.js';
@@ -31,6 +32,7 @@ class OmniApp {
     this.nameInput = el('input', 'omni-name', bar); this.nameInput.value = this.patch.name; this.nameInput.setAttribute('aria-label', 'Instrument name'); this.nameInput.addEventListener('change', () => { this.patch.name = this.nameInput.value.slice(0, 60) || 'Untitled'; this.pushHistory(); });
     const tb = (label, fn, title) => { const b = el('button', 'omni-tb', bar, label); b.type = 'button'; if (title) b.title = title; b.addEventListener('click', fn); return b; };
     tb('NEW', () => this.load(defaultPatch()));
+    tb('TEMPLATES', () => this.templates(), 'Load a starter patch');
     tb('SAVE', () => this.save());
     this.loadSel = el('select', 'omni-tb omni-load', bar); this.loadSel.setAttribute('aria-label', 'Load saved instrument'); this.loadSel.addEventListener('change', () => { const it = this.store.get(this.loadSel.value); if (it) this.load(JSON.parse(JSON.stringify(it.data)), it.id); this.loadSel.value = ''; });
     this.refreshLoadList();
@@ -281,6 +283,20 @@ class OmniApp {
     while (grew) { grew = false; this.patch.connections.forEach((c) => { if (reaches.has(c.to.module) && !reaches.has(c.from.module)) { reaches.add(c.from.module); grew = true; } }); }
     const unheard = this.patch.modules.filter((m) => !reaches.has(m.id) && MODULES[m.type].outputs.length);
     return unheard.length ? `Not reaching the output: ${unheard.map((m) => m.id).join(', ')}.` : '';
+  }
+  templates() {
+    const o = el('div', 'omni-guide', document.body);
+    const card = el('div', 'omni-guide-card omni-templates', o);
+    el('h2', '', card, 'Templates'); el('p', 'omni-hint', card, 'Click a template to load it. Unsaved changes are replaced (Ctrl+Z restores them).');
+    const grid = el('div', 'omni-tpl-grid', card);
+    TEMPLATES.forEach((t) => {
+      const b = el('button', 'omni-tpl', grid); b.type = 'button';
+      el('div', 'omni-tpl-prev', b).innerHTML = templatePreview(t.patch);
+      el('strong', '', b, t.name); el('span', '', b, t.desc);
+      b.addEventListener('click', () => { this.load(JSON.parse(JSON.stringify(t.patch))); this.view = { x: 20, y: 20, scale: 1 }; this.applyView(); o.remove(); this.msg(`Loaded template "${t.name}".`); });
+    });
+    const close = el('button', '', card, 'CLOSE'); close.type = 'button'; close.addEventListener('click', () => o.remove());
+    o.addEventListener('click', (e) => { if (e.target === o) o.remove(); });
   }
   guide() {
     const o = el('div', 'omni-guide', document.body);
