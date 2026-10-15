@@ -3388,3 +3388,79 @@ body {
 .launcher-noise {
   pointer-events: none;
 }
+/* Yamaha has no local logo asset: a restrained wordmark slot matching the logo grid. */
+.launcher-brand-slot--text { display: grid; place-items: center; }
+.launcher-brand-slot--text span { font: 900 18px/1 'Inter Variable', Inter, sans-serif; letter-spacing: .32em; color: #fff; opacity: .78; }
+.launcher-brand-slot--text:hover span { opacity: 1; }
+
+/* Yamaha has no local logo asset: a restrained wordmark slot matching the logo grid. */
+.launcher-brand-slot--text { display: grid; place-items: center; }
+.launcher-brand-slot--text span { font: 900 18px/1 'Inter Variable', Inter, sans-serif; letter-spacing: .32em; color: #fff; opacity: .78; }
+.launcher-brand-slot--text:hover span { opacity: 1; }
+
+/* Yamaha has no local logo asset: a restrained wordmark slot matching the logo grid. */
+.launcher-brand-slot--text { display: grid; place-items: center; }
+.launcher-brand-slot--text span { font: 900 18px/1 'Inter Variable', Inter, sans-serif; letter-spacing: .32em; color: #fff; opacity: .78; }
+.launcher-brand-slot--text:hover span { opacity: 1; }
+
+/* Yamaha has no local logo asset: a restrained wordmark slot matching the logo grid. */
+.launcher-brand-slot--text { display: grid; place-items: center; }
+.launcher-brand-slot--text span { font: 900 18px/1 'Inter Variable', Inter, sans-serif; letter-spacing: .32em; color: #fff; opacity: .78; }
+.launcher-brand-slot--text:hover span { opacity: 1; }
+
+/* Yamaha has no local logo asset: a restrained wordmark slot matching the logo grid. */
+.launcher-brand-slot--text { display: grid; place-items: center; }
+.launcher-brand-slot--text span { font: 900 18px/1 'Inter Variable', Inter, sans-serif; letter-spacing: .32em; color: #fff; opacity: .78; }
+.launcher-brand-slot--text:hover span { opacity: 1; }
+
+/* ===================================================================== YAMAHA DX7
+   Charcoal chassis, membrane-button strip, green LCD; the "keys" become a
+   six-operator algorithm diagram (3 x 2 operator blocks with carrier row lit). */
+.instrument-tile--yamaha-dx7 .instrument-tile__visual { background: linear-gradient(170deg, #3b3d42 0%, #26282c 40%, #141518 100%); box-shadow: inset 0 1px rgba(255,255,255,.18), inset 0 -12px 22px rgba(0,0,0,.35); }
+.instrument-tile--yamaha-dx7 .instrument-tile__visual::before { inset: 0; background: repeating-linear-gradient(90deg, transparent 0 7px, rgba(255,255,255,.035) 7px 8px), linear-gradient(180deg, transparent 0 62%, rgba(0,0,0,.35) 62% 64%, transparent 64%); }
+.instrument-tile--yamaha-dx7 .instrument-tile__visual::after { left: 24px; right: 24px; bottom: 16px; height: 9px; border-radius: 2px; background: repeating-linear-gradient(90deg, #6e7178 0 10px, #202227 10px 13px); box-shadow: 0 1px 2px rgba(0,0,0,.6); opacity: .9; }
+.instrument-tile--yamaha-dx7 .instrument-tile__glow { background: radial-gradient(ellipse at 36% 32%, rgba(95,211,196,.5), transparent 40%); filter: blur(7px); opacity: .7; }
+.instrument-tile--yamaha-dx7 .instrument-tile__display { border: 3px solid #4a4d53; background: linear-gradient(180deg, #0d2a1e, #061a12); box-shadow: inset 0 0 14px #000, inset 0 0 0 1px rgba(140,245,180,.15), 0 2px 6px rgba(0,0,0,.6); }
+.instrument-tile--yamaha-dx7 .instrument-tile__display span { background: #8cf5b4; box-shadow: 0 0 6px rgba(140,245,180,.95), 0 0 13px rgba(140,245,180,.35); }
+.instrument-tile--yamaha-dx7 .instrument-tile__icon { color: rgba(95,211,196,.8); }
+
+/* ===================================================================== ROLAND JUNO-106
+   Black panel with the Juno's red / orange / blue section colour bands; the
+   "keys" become a row of slider tracks with caps at different heights. */
+.instrument-tile--roland-juno-106 .instrument-tile__visual { background: linear-gradient(180deg, #2b2c30 0%, #1a1a1d 55%, #0d0d0f 100%); box-shadow: inset 0 1px rgba(255,255,255,.14), inset 0 -10px 20px rgba(0,0,0,.4); }
+.instrument-tile--roland-juno-106 .instrument-tile__visual::before { inset: 0; background: linear-gradient(90deg, #d8362b 0 22%, #f08a2a 22% 44%, #3a7bd5 44% 70%, #e9e2cf 70% 100%) 0 100% / 100% 5px no-repeat, repeating-linear-gradient(0deg, transparent 0 9px, rgba(255,255,255,.03) 9px 10px); }
+.instrument-tile--roland-juno-106 .instrument-tile__visual::after { left: 18px; right: 18px; top: 22px; height: 1px; background: rgba(255,255,255,.14); }
+.instrument-tile--roland-juno-106 .instrument-tile__glow { background: radial-gradient(ellipse at 60% 70%, rgba(255,106,61,.45), transparent 42%); filter: blur(8px); opacity: .7; }
+.instrument-tile--roland-juno-106 .instrument-tile__display { border: 3px solid #45474c; background: linear-gradient(180deg, #230806, #0d0302); box-shadow: inset 0 0 14px #000, inset 0 0 0 1px rgba(255,138,92,.15), 0 2px 6px rgba(0,0,0,.6); }
+.instrument-tile--roland-juno-106 .instrument-tile__display span { background: #ff8a5c; box-shadow: 0 0 6px rgba(255,138,92,.95), 0 0 13px rgba(255,138,92,.35); }
+.instrument-tile--roland-juno-106 .instrument-tile__icon { color: rgba(255,138,92,.75); }
+
+/* ===================================================================== ROLAND TR-808
+   Grey rhythm-composer chassis, a row of knobs, and the sixteen coloured step
+   pads with a few lit "steps" in place of a keyboard. */
+.instrument-tile--roland-tr-808 .instrument-tile__visual { background: linear-gradient(170deg, #45484e 0%, #2b2d32 45%, #16171a 100%); box-shadow: inset 0 1px rgba(255,255,255,.2), inset 0 -12px 22px rgba(0,0,0,.4); }
+.instrument-tile--roland-tr-808 .instrument-tile__visual::before { inset: 0; background: radial-gradient(circle at 50% 50%, #0d0d0f 0 4px, #3a3c42 4.5px 6px, transparent 6.5px) 14px 18px / 24px 24px repeat-x; background-size: 24px 24px; background-repeat: repeat-x; }
+.instrument-tile--roland-tr-808 .instrument-tile__visual::after { left: 18px; right: 18px; bottom: 14px; height: 2px; background: linear-gradient(90deg, #d8362b 0 25%, #f08a2a 25% 50%, #f3d23c 50% 75%, #f2f0e6 75% 100%); opacity: .85; }
+.instrument-tile--roland-tr-808 .instrument-tile__glow { background: radial-gradient(ellipse at 70% 72%, rgba(255,159,10,.5), transparent 40%); filter: blur(7px); opacity: .75; }
+.instrument-tile--roland-tr-808 .instrument-tile__display { border: 3px solid #4d5057; background: linear-gradient(180deg, #2a0a06, #110403); box-shadow: inset 0 0 14px #000, inset 0 0 0 1px rgba(255,106,61,.18), 0 2px 6px rgba(0,0,0,.6); }
+.instrument-tile--roland-tr-808 .instrument-tile__display span { background: #ff6a3d; box-shadow: 0 0 6px rgba(255,106,61,.95), 0 0 13px rgba(255,106,61,.35); }
+.instrument-tile--roland-tr-808 .instrument-tile__keys { width: 160px; height: 40px; right: -8px; bottom: 28px; border: 0; box-shadow: none; transform: rotate(-12deg); background:
+  radial-gradient(circle at 50% 30%, #ff3b20 0 2px, transparent 2.5px) 0 0 / 20px 40px repeat-x,
+  repeating-linear-gradient(90deg, #d8362b 0 17px, transparent 17px 20px) 0 0 / 80px 40px no-repeat,
+  repeating-linear-gradient(90deg, #f08a2a 0 17px, transparent 17px 20px) 80px 0 / 80px 40px no-repeat; border-radius: 3px; filter: drop-shadow(0 4px 6px rgba(0,0,0,.7)); }
+.instrument-tile--roland-tr-808 .instrument-tile__icon { color: rgba(255,159,10,.8); }
+
+/* ===================================================================== KORG MS-20
+   Black steel panel with the patch bay: a grid of jack sockets, two yellow
+   patch cables and the familiar amber legends. */
+.instrument-tile--korg-ms-20 .instrument-tile__visual { background: linear-gradient(170deg, #2c2c2e 0%, #171718 50%, #090909 100%); box-shadow: inset 0 1px rgba(255,255,255,.12), inset 0 -12px 22px rgba(0,0,0,.5); }
+.instrument-tile--korg-ms-20 .instrument-tile__visual::before { inset: 0; background: repeating-linear-gradient(0deg, transparent 0 5px, rgba(255,255,255,.025) 5px 6px), linear-gradient(90deg, transparent 0 55%, rgba(255,211,107,.06) 55%, transparent 56%); }
+.instrument-tile--korg-ms-20 .instrument-tile__visual::after { left: 14px; top: 14px; width: 86px; height: 1px; background: rgba(255,211,107,.35); }
+.instrument-tile--korg-ms-20 .instrument-tile__glow { background: radial-gradient(ellipse at 72% 60%, rgba(255,211,107,.42), transparent 40%); filter: blur(8px); opacity: .7; }
+.instrument-tile--korg-ms-20 .instrument-tile__display { border: 3px solid #3f3f42; background: linear-gradient(180deg, #1a1308, #0b0804); box-shadow: inset 0 0 14px #000, inset 0 0 0 1px rgba(255,207,122,.15), 0 2px 6px rgba(0,0,0,.6); }
+.instrument-tile--korg-ms-20 .instrument-tile__display span { background: #ffcf7a; box-shadow: 0 0 6px rgba(255,207,122,.95), 0 0 13px rgba(255,207,122,.35); }
+.instrument-tile--korg-ms-20 .instrument-tile__icon { color: rgba(255,211,107,.75); }
+
+.instrument-tile--yamaha-dx7 .instrument-tile__keys { background: repeating-linear-gradient(90deg, #fffaf0 0 11px, #26232a 11px 14px, #fffaf0 14px 25px); border: 3px solid #17181b; box-shadow: 0 4px 8px rgba(0,0,0,.56), 0 0 0 1px rgba(255,239,212,.14); }
+.instrument-tile--roland-juno-106 .instrument-tile__keys { background: repeating-linear-gradient(90deg, #fffaf0 0 11px, #26232a 11px 14px, #fffaf0 14px 25px); border: 3px solid #17181b; box-shadow: 0 4px 8px rgba(0,0,0,.56), 0 0 0 1px rgba(255,239,212,.14); }
+.instrument-tile--korg-ms-20 .instrument-tile__keys { background: repeating-linear-gradient(90deg, #fffaf0 0 11px, #26232a 11px 14px, #fffaf0 14px 25px); border: 3px solid #17181b; box-shadow: 0 4px 8px rgba(0,0,0,.56), 0 0 0 1px rgba(255,239,212,.14); }

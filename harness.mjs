@@ -5,7 +5,7 @@ const errors = [];
 process.on('unhandledRejection', (err) => { errors.push(err); });
 
 try {
-  await import('./js/app.js');
+  await import('./js/engine/app.js');
   document.dispatchEvent('DOMContentLoaded');
   console.log('App constructed without throwing.');
 } catch (err) {

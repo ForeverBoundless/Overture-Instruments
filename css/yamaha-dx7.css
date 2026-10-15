@@ -1,0 +1,25 @@
+/* yamaha-dx7.css - dark DX7 chassis: charcoal panel, green display, teal accents. */
+.dx7-shell { --pn-shell: #232528; --pn-shell-edge: #4a4e55; --pn-section: #17191c; --pn-border: #3a3e45; --pn-accent: #5fd3c4; --pn-accent-glow: rgba(95,211,196,.5); --pn-display-bg: #0a1f16; --pn-display-ink: #8cf5b4; --pn-led-off: #1c3a33; }
+.dx7-brand { color: #e9e7df; font-family: 'Inter Variable', sans-serif; letter-spacing: .3em; font-weight: 900; }
+.dx7-shell .pn-model b { color: #e5e0d2; }
+.dx7-row-top { grid-template-columns: 1.1fr 1.2fr 1.3fr; }
+.dx7-alg { width: 100%; max-width: 300px; height: 130px; background: #0d0f12; border: 1px solid #2c3036; border-radius: 4px; }
+.dx7-alg-wire { stroke: #6f7781; stroke-width: 1.2; }
+.dx7-alg-out { stroke: #5fd3c4; stroke-width: 1.4; }
+.dx7-alg-fb { fill: none; stroke: #ff9f0a; stroke-width: 1; }
+.dx7-alg-op { cursor: pointer; }
+.dx7-alg-op rect { fill: #2a2f36; stroke: #8a929d; stroke-width: 1; }
+.dx7-alg-op.is-carrier rect { fill: #163d37; stroke: #5fd3c4; }
+.dx7-alg-op.is-selected rect { stroke: #ffd36b; stroke-width: 2; }
+.dx7-alg-op.is-off rect { opacity: .3; }
+.dx7-alg-op text { fill: #fff; font: 700 10px 'Inter Variable', sans-serif; pointer-events: none; }
+.dx7-tabs { display: flex; flex-wrap: wrap; gap: 6px; width: 100%; }
+.dx7-tab { display: grid; gap: 3px; justify-items: stretch; }
+.dx7-tab-button { min-width: 54px; }
+.dx7-op-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 10px; width: 100%; }
+.dx7-op-group { padding: 6px; border: 1px solid #2d3238; border-radius: 4px; background: #121417; }
+.dx7-op-group h3 { margin: 0 0 6px; font-size: 8px; letter-spacing: .14em; color: #aab3bd; }
+.dx7-eg { width: 100%; max-width: 420px; height: 110px; display: block; margin-top: 6px; background: #0b0d10; border-radius: 3px; }
+.dx7-role { color: #8cf5b4; }
+@media (max-width: 1000px) { .dx7-row-top { grid-template-columns: 1fr 1fr; } .dx7-op-body { grid-template-columns: 1fr; } }
+@media (max-width: 640px) { .dx7-row-top { grid-template-columns: 1fr; } }

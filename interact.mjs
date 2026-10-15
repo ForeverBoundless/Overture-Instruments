@@ -5,7 +5,7 @@
 
 import './harness-setup.mjs';
 
-await import('./js/app.js');
+await import('./js/engine/app.js');
 document.dispatchEvent('DOMContentLoaded');
 
 const app = window.__littlePhattyApp;
@@ -37,7 +37,7 @@ function assert(cond, msg) {
   const voice = app.engine.voice;
   assert(app.engine.lfos.main.output.gain.value === 1, 'LFO control signal is live at unity gain');
   voice.filter.setResonance(0);
-  assert(voice.filter.feedbackAmount.gain.value === 0, 'zero resonance fully removes filter feedback');
+  assert(voice.filter.poles[1].Q.value <= 0.6, 'zero resonance leaves the resonant section flat');
   assert(voice.tremoloVCA.gain.value === 1, 'tremolo VCA starts at unity downstream of the envelope');
 }
 

@@ -31,7 +31,19 @@ export class NordC2DEngine {
     this.rotary = false;
     this.reverb = 0.18;
     this.drive = 0;
+    this.masterLevel = 0.55;
+    this.expressionLevel = 1;
     this._rotaryPhase = 0;
+  }
+
+  /** Swell / expression pedal (MIDI CC11). Applied after the limiter so the whole organ, reverb included, swells. */
+  setExpression(value) {
+    this.expressionLevel = clamp(Number(value), 0, 1);
+    if (!this.expression) return;
+    // A swell pedal never fully mutes a tonewheel organ; keep a quiet floor
+    // and use a squared taper so the pedal travel feels even.
+    const gain = 0.06 + 0.94 * this.expressionLevel * this.expressionLevel;
+    this.expression.gain.setTargetAtTime(gain, this.ctx.currentTime, 0.02);
   }
 
   _manualState() {
@@ -44,7 +56,7 @@ export class NordC2DEngine {
     this.ctx = new AudioContextClass();
     if (this.ctx.state === 'suspended') await this.ctx.resume();
     this.output = this.ctx.createGain();
-    this.output.gain.value = 0.55;
+    this.output.gain.value = this.masterLevel;
     this.driveNode = this.ctx.createWaveShaper();
     this.driveNode.curve = this._driveCurve();
     this.delay = this.ctx.createDelay(1);
@@ -58,23 +70,75 @@ export class NordC2DEngine {
     this.limiter = this.ctx.createDynamicsCompressor();
     this.limiter.threshold.value = -6;
     this.limiter.ratio.value = 12;
+    // Per-manual buses feed a scanner-style vibrato/chorus (delay modulated by a
+    // 6.1 Hz triangle; chorus = 50 % dry mix, vibrato = wet only) before the shared drive.
+    this.manualBus = [0, 1].map(() => {
+      const input = this.ctx.createGain();
+      const dry = this.ctx.createGain();
+      const wet = this.ctx.createGain();
+      const delay = this.ctx.createDelay(0.05);
+      delay.delayTime.value = 0.004;
+      const lfo = this.ctx.createOscillator();
+      lfo.type = 'triangle';
+      lfo.frequency.value = 6.1;
+      const depth = this.ctx.createGain();
+      depth.gain.value = 0.0009;
+      lfo.connect(depth);
+      depth.connect(delay.delayTime);
+      lfo.start();
+      input.connect(dry); input.connect(delay); delay.connect(wet);
+      dry.connect(this.output); wet.connect(this.output);
+      dry.gain.value = 1; wet.gain.value = 0;
+      return { input, dry, wet, depth };
+    });
     this.output.connect(this.driveNode);
-    this.driveNode.connect(this.limiter);
+    this._buildLeslie();
+    this.driveNode.connect(this.leslie.input);
+    this.leslie.output.connect(this.limiter);
     this.output.connect(this.delay);
     this.delay.connect(this.delayGain);
     this.delayGain.connect(this.limiter);
     this.output.connect(this.reverbNode);
     this.reverbNode.connect(this.reverbGain);
     this.reverbGain.connect(this.limiter);
-    this.limiter.connect(this.ctx.destination);
-    this.rotaryLfo = this.ctx.createOscillator();
-    this.rotaryDepth = this.ctx.createGain();
-    this.rotaryLfo.frequency.value = 0.8;
-    this.rotaryDepth.gain.value = 0;
-    this.rotaryLfo.connect(this.rotaryDepth);
-    this.rotaryLfo.start();
+    this.expression = this.ctx.createGain();
+    this.expression.gain.value = 1;
+    this.limiter.connect(this.expression);
+    this.expression.connect(this.ctx.destination);
     this.started = true;
+    this.manuals.forEach((m, i) => this.setVibrato(i, m.vibrato));
+    this.setExpression(this.expressionLevel);
+    if (this.rotaryEnabled) this.setRotary(this.rotary); else this.setRotaryEnabled(false);
     this._startTonewheelLeakage();
+  }
+
+  /**
+   * Rotary speaker: a 800 Hz crossover sends highs to a "horn" (fast tremolo +
+   * stereo sweep + slight Doppler via a modulated delay) and lows to a "drum"
+   * (slower sweep). Slow 0.7 Hz / fast 6.8 Hz, with a motor ramp between them.
+   */
+  _buildLeslie() {
+    const ctx = this.ctx;
+    const L = { input: ctx.createGain(), output: ctx.createGain(), bypass: ctx.createGain(), wet: ctx.createGain() };
+    L.input.connect(L.bypass); L.bypass.connect(L.output);
+    const hornHP = ctx.createBiquadFilter(); hornHP.type = 'highpass'; hornHP.frequency.value = 800;
+    const drumLP = ctx.createBiquadFilter(); drumLP.type = 'lowpass'; drumLP.frequency.value = 800;
+    L.input.connect(hornHP); L.input.connect(drumLP);
+    const make = (src, trem, panDepth, doppler) => {
+      const lfo = ctx.createOscillator(); lfo.type = 'sine'; lfo.frequency.value = 0.7;
+      const tremGain = ctx.createGain(); tremGain.gain.value = trem; const amp = ctx.createGain(); amp.gain.value = 1 - trem;
+      lfo.connect(tremGain); tremGain.connect(amp.gain);
+      const panGain = ctx.createGain(); panGain.gain.value = panDepth; const pan = ctx.createStereoPanner(); lfo.connect(panGain); panGain.connect(pan.pan);
+      const delay = ctx.createDelay(0.02); delay.delayTime.value = 0.003; const dop = ctx.createGain(); dop.gain.value = doppler; lfo.connect(dop); dop.connect(delay.delayTime);
+      src.connect(delay); delay.connect(amp); amp.connect(pan); pan.connect(L.wet);
+      lfo.start();
+      return lfo;
+    };
+    L.horn = make(hornHP, 0.35, 0.85, 0.0006);
+    L.drum = make(drumLP, 0.18, 0.5, 0.0002);
+    L.horn.frequency.value = 0.8; L.drum.frequency.value = 0.7;
+    L.wet.connect(L.output); L.wet.gain.value = 0; L.bypass.gain.value = 1;
+    this.leslie = L;
   }
 
   _driveCurve() {
@@ -212,20 +276,37 @@ export class NordC2DEngine {
     this._updateLeakage();
   }
 
+  /** 'OFF', 'V1'..'V3' (vibrato only) or 'C1'..'C3' (chorus = vibrato mixed with dry). */
   setVibrato(manual, value) {
     this.manuals[manual].vibrato = value;
+    const bus = this.manualBus?.[manual];
+    if (!bus) return;
+    const t = this.ctx.currentTime;
+    const off = value === 'OFF' || !this.manuals[manual].vibratoEnabled;
+    const level = Number(String(value).slice(1)) || 3;
+    const chorus = String(value).startsWith('C');
+    bus.depth.gain.setTargetAtTime(off ? 0 : 0.00035 * level, t, 0.02);
+    bus.wet.gain.setTargetAtTime(off ? 0 : chorus ? 0.5 : 1, t, 0.02);
+    bus.dry.gain.setTargetAtTime(off ? 1 : chorus ? 0.5 : 0, t, 0.02);
   }
 
-  setRotary(enabled) {
-    this.rotary = !!enabled;
-    this.voices.forEach((voices) => voices.forEach((voice) => voice.rotaryGain?.gain.setTargetAtTime(this.rotary ? 6 : 0, this.ctx.currentTime, 0.25)));
-    if (this.rotary) {
-      this.rotaryLfo.frequency.setTargetAtTime(6.2, this.ctx.currentTime, 0.25);
-      this.rotaryDepth.gain.setTargetAtTime(0.012, this.ctx.currentTime, 0.25);
-    } else {
-      this.rotaryLfo.frequency.setTargetAtTime(0.8, this.ctx.currentTime, 0.25);
-      this.rotaryDepth.gain.setTargetAtTime(0, this.ctx.currentTime, 0.25);
-    }
+  /** Rotary speaker: true = fast, false = slow. See setRotaryEnabled for the stop/bypass state. */
+  setRotary(fast) {
+    this.rotary = !!fast;
+    if (!this.leslie) return;
+    const t = this.ctx.currentTime;
+    // Motor ramps: the horn speeds up quicker than the heavy bass drum.
+    this.leslie.horn.frequency.setTargetAtTime(fast ? 6.8 : 0.8, t, fast ? 0.6 : 1.2);
+    this.leslie.drum.frequency.setTargetAtTime(fast ? 5.9 : 0.7, t, fast ? 1.6 : 2.4);
+    this.setRotaryEnabled(true);
+  }
+
+  setRotaryEnabled(on) {
+    this.rotaryEnabled = !!on;
+    if (!this.leslie) return;
+    const t = this.ctx.currentTime;
+    this.leslie.wet.gain.setTargetAtTime(on ? 1 : 0, t, 0.1);
+    this.leslie.bypass.gain.setTargetAtTime(on ? 0 : 1, t, 0.1);
   }
 
   setReverb(value) {
@@ -272,7 +353,7 @@ export class NordC2DEngine {
     const voice = { partials: [], gain: this.ctx.createGain(), note };
     voice.gain.gain.setValueAtTime(0.0001, now);
     voice.gain.gain.exponentialRampToValueAtTime(Math.max(0.018, velocity * 0.58), now + 0.008);
-    voice.gain.connect(this.output);
+    voice.gain.connect(this.manualBus[manual].input);
     const vibratoCents = !this.manuals[manual].vibratoEnabled || this.manuals[manual].vibrato === 'OFF'
       ? 0
       : this.manuals[manual].vibrato === 'C3' ? 5 : 8;
@@ -296,19 +377,6 @@ export class NordC2DEngine {
       this._click(voice, { Low: 0.015, Normal: 0.03, High: 0.05, Higher: 0.08 }[this.keyClick] ?? 0.03);
       this._percussion(manual, midi, velocity);
     }
-    voice.gain.connect(this.reverbNode);
-    voice.gain.connect(this.delay);
-    voice.lfo = this.ctx.createOscillator();
-    voice.lfo.frequency.value = vibratoCents ? 5.9 : 0;
-    voice.lfoGain = this.ctx.createGain();
-    voice.lfoGain.gain.value = vibratoCents;
-    voice.lfo.connect(voice.lfoGain);
-    if (this.model === 'B3') voice.partials.forEach(({ oscillator }) => voice.lfoGain.connect(oscillator.detune));
-    voice.rotaryGain = this.ctx.createGain();
-    voice.rotaryGain.gain.value = this.rotary && this.model === 'B3' ? 6 : 0;
-    this.rotaryLfo.connect(voice.rotaryGain);
-    voice.partials.forEach(({ oscillator }) => voice.rotaryGain.connect(oscillator.detune));
-    voice.lfo.start(now);
     this.voices[manual].set(note, voice);
   }
 
@@ -324,7 +392,6 @@ export class NordC2DEngine {
     voice.gain.gain.cancelScheduledValues(now);
     voice.gain.gain.setTargetAtTime(0.0001, now, 0.09);
     voice.partials.forEach(({ oscillator }) => oscillator.stop(now + 0.45));
-    voice.lfo.stop(now + 0.45);
     this.voices[manual].delete(note);
   }
 

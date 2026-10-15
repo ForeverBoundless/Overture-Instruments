@@ -11,17 +11,18 @@
  * whether or not a MIDI controller is connected.
  */
 
-import { AudioEngine } from './engine/AudioEngine.js';
-import { MidiManager } from './engine/MidiManager.js';
-import { PresetManager } from './engine/PresetManager.js';
-import { midiToFreq } from './engine/Voice.js';
-import { Knob } from '../ui/Knob.js';
-import { PitchWheel, ModWheel } from '../ui/Wheel.js';
-import { Keyboard } from '../ui/Keyboard.js';
-import { OLEDDisplay } from '../ui/OLEDDisplay.js';
-import { Scope } from '../ui/Scope.js';
-import { Spectrum } from '../ui/Spectrum.js';
-import { PRESETS } from './data/presets.js';
+// This module lives in /js/engine/, so sibling engine modules are "./" and
+// the shared UI/data folders are resolved from there.
+import { AudioEngine } from './AudioEngine.js';
+import { MidiManager } from './MidiManager.js';
+import { PresetManager } from './PresetManager.js';
+import { Knob } from '../../ui/Knob.js';
+import { PitchWheel, ModWheel } from '../../ui/Wheel.js';
+import { Keyboard } from '../../ui/Keyboard.js';
+import { OLEDDisplay } from '../../ui/OLEDDisplay.js';
+import { Scope } from '../../ui/Scope.js';
+import { Spectrum } from '../../ui/Spectrum.js';
+import { PRESETS } from '../data/presets.js';
 
 const MIDI_NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 function midiNoteToName(midi) {
@@ -41,15 +42,23 @@ class App {
   constructor() {
     this.engine = new AudioEngine();
     this.presetManager = new PresetManager(this.engine, (patch) => this._syncKnobsToPatch(patch));
+    // MIDI notes that arrive before the audio context is unlocked are held
+    // here and sounded as soon as a real user gesture starts audio. (MIDI
+    // input is not a user activation, so it must never try to start audio.)
+    this._pendingMidiNotes = new Map();
+    this._midiCutoffMsb = null;
     this.midi = new MidiManager({
-      onNoteOn: (midiNote, vel) => this._handleNoteOn(midiNoteToName(midiNote), vel, 'midi'),
-      onNoteOff: (midiNote) => this._handleNoteOff(midiNoteToName(midiNote), 'midi'),
+      onNoteOn: (midiNote, vel) => this._handleMidiNoteOn(midiNote, vel),
+      onNoteOff: (midiNote) => this._handleMidiNoteOff(midiNote),
       onPitchBend: (rangeSemi, normalized) => this._handleMidiPitchBend(normalized),
       onModWheel: (v) => this._handleModWheelInput(v, 'midi'),
-      onSustain: (down) => this.engine.setSustain(down),
+      onSustain: (down) => { if (this.engine.started) this.engine.setSustain(down); },
+      onVolume: (v) => this.knobs.masterVolume?.setValue(v),
       onProgramChange: (num) => this._loadFactoryPreset(num % PRESETS.length),
+      onAllNotesOff: () => this._midiAllNotesOff(),
+      onResetControllers: () => this._midiResetControllers(),
+      onControlChange: (cc, value) => this._handleMidiCC(cc, value),
       onConnectionChange: (connected, name) => this.oled?.setMidiStatus(connected, name),
-      onUnhandledCC: (cc, value) => this._handleUnmappedMidiCC(cc, value),
     });
 
     // Keyboard-held-note bookkeeping for pitch-bend spring-return and mod-hold semantics.
@@ -285,6 +294,7 @@ class App {
     const buttons = document.createElement('div');
     buttons.className = 'lp-section-buttons';
     const syncBtn = document.createElement('button');
+    this._syncBtn = syncBtn;
     syncBtn.className = 'lp-btn';
     syncBtn.textContent = 'SYNC';
     syncBtn.addEventListener('click', () => {
@@ -566,6 +576,7 @@ class App {
         await this.engine.start();
         this.presetManager.restoreLastSession();
         this._initScopeAndSpectrum();
+        this._flushPendingMidiNotes();
         document.removeEventListener('launcher:launch', unlock);
         document.removeEventListener('pointerdown', this._standaloneUnlock);
         document.removeEventListener('keydown', this._standaloneUnlock);
@@ -625,6 +636,93 @@ class App {
     if (!this.engine.started) return;
     this.engine.noteOff(note);
     this.keyboard.setKeyActive(note, false);
+  }
+
+  // -------------------------------------------------------------------
+  // MIDI input
+  // -------------------------------------------------------------------
+
+  _handleMidiNoteOn(midiNote, velocity) {
+    const note = midiNoteToName(midiNote);
+    if (!this.engine.started) {
+      this._pendingMidiNotes.set(note, velocity);
+      this.keyboard.setKeyActive(note, true);
+      this.oled?.showParameter('AUDIO', 'CLICK TO START', 1800);
+      return;
+    }
+    this.engine.noteOn(note, velocity);
+    this.keyboard.setKeyActive(note, true);
+  }
+
+  _handleMidiNoteOff(midiNote) {
+    const note = midiNoteToName(midiNote);
+    if (this._pendingMidiNotes.delete(note)) this.keyboard.setKeyActive(note, false);
+    this._handleNoteOff(note, 'midi');
+  }
+
+  _flushPendingMidiNotes() {
+    this._pendingMidiNotes.forEach((velocity, note) => this._handleNoteOn(note, velocity, 'midi'));
+    this._pendingMidiNotes.clear();
+  }
+
+  _midiAllNotesOff() {
+    this._pendingMidiNotes.forEach((_, note) => this.keyboard.setKeyActive(note, false));
+    this._pendingMidiNotes.clear();
+    if (!this.engine.started) return;
+    this.engine.allNotesOff();
+    this.keyboard.el.querySelectorAll('.lp-key.active').forEach((key) => key.classList.remove('active'));
+  }
+
+  _midiResetControllers() {
+    this.pitchWheel.setExternalValue(0);
+    this._handleModWheelInput(0, 'midi');
+    if (this.engine.started) this.engine.setSustain(false);
+  }
+
+  /**
+   * Little Phatty Stage II MIDI CC map (User's Manual, "LP Stage II MIDI CC
+   * messages"), applied to the controls this emulation exposes. Values go
+   * through the knobs so the panel, OLED and engine stay in sync.
+   */
+  _handleMidiCC(cc, value) {
+    // Knob handlers drive the live voice, which only exists once audio runs.
+    if (!this.engine.started) return;
+    const n = value / 127;
+    const set = (key, v) => this.knobs[key]?.setValue(v);
+    const time = (x) => 0.001 * Math.pow(4000, x); // 1 ms .. 4 s, matching the envelope knobs
+    switch (cc) {
+      case 3: set('lfoRate', 0.02 * Math.pow(1000, n)); break;
+      case 5: set('glideTime', n * 2); break;
+      case 9: set('osc1Shape', n); break;
+      case 10: set('osc2Detune', -50 + n * 100); break;
+      case 11: set('osc2Shape', n); break;
+      case 15: set('osc1Level', n); break;
+      case 16: set('osc2Level', n); break;
+      case 18: set('drive', n); break;
+      case 19: // Cutoff MSB; CC51 supplies the optional high-resolution LSB.
+        this._midiCutoffMsb = value;
+        set('cutoff', 20 * Math.pow(600, n));
+        break;
+      case 51:
+        if (this._midiCutoffMsb !== null) set('cutoff', 20 * Math.pow(600, ((this._midiCutoffMsb << 7) | value) / 16383));
+        break;
+      case 21: set('resonance', n); break;
+      case 22: set('keyTrack', n); break;
+      case 23: set('fAttack', time(n)); break;
+      case 24: set('fDecay', time(n)); break;
+      case 25: set('fSustain', n); break;
+      case 26: set('fRelease', time(n)); break;
+      case 27: set('filterEnvAmount', value === 64 ? 0 : (n - 64 / 127) * (8000 / (63 / 127))); break;
+      case 28: set('aAttack', time(n)); break;
+      case 29: set('aDecay', time(n)); break;
+      case 30: set('aSustain', n); break;
+      case 31: set('aRelease', time(n)); break;
+      case 77:
+        if (this._syncBtn && this.engine.started && (value >= 64) !== this._syncBtn.classList.contains('lit')) this._syncBtn.click();
+        break;
+      default:
+        break;
+    }
   }
 
   // -------------------------------------------------------------------
@@ -839,20 +937,6 @@ class App {
   _handleModWheelInput(value, source) {
     this.modWheel.setExternalValue(value);
     this.engine.setModWheel(value);
-  }
-
-  _handleUnmappedMidiCC(cc, value) {
-    // Common octave-button CC numbers vary by controller; rather than
-    // guessing wrong and silently doing nothing useful, we treat any
-    // unmapped CC crossing from low->high as a generic "octave up" trigger
-    // and high->low as "octave down", which covers the vast majority of
-    // controllers that expose octave buttons as momentary CC switches.
-    if (value >= 100 && !this._lastUnmappedHigh) {
-      this._stepOctave(1);
-      this._lastUnmappedHigh = true;
-    } else if (value < 20) {
-      this._lastUnmappedHigh = false;
-    }
   }
 
   // -------------------------------------------------------------------

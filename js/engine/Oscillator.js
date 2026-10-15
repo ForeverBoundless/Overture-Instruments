@@ -24,7 +24,7 @@ const WAVE_SAW = 1 / 3;
 const WAVE_SQUARE = 2 / 3;
 const WAVE_PULSE = 1;
 
-function makePeriodicWave(ctx, type, harmonics = 16) {
+function makePeriodicWave(ctx, type, harmonics = 64) {
   const real = new Float32Array(harmonics + 1);
   const imag = new Float32Array(harmonics + 1);
 
@@ -39,13 +39,13 @@ function makePeriodicWave(ctx, type, harmonics = 16) {
       break;
     case 'saw':
       for (let n = 1; n <= harmonics; n++) {
-        real[n] = (n % 2 === 0 ? -1 : 1) / n;
+        real[n] = ((n % 2 === 0 ? -1 : 1) / n) * Math.cos((n / (harmonics + 1)) * Math.PI / 2);
       }
       break;
     case 'square':
       for (let n = 1; n <= harmonics; n++) {
         if (n % 2 === 1) {
-          real[n] = 4 / (Math.PI * n);
+          real[n] = (4 / (Math.PI * n)) * Math.cos((n / (harmonics + 1)) * Math.PI / 2);
         }
       }
       break;
@@ -105,12 +105,20 @@ export class Oscillator {
     this.pwmGain = ctx.createGain();
     this.pwmGain.gain.value = 0;
 
+    // A pulse of width w is saw(t) - saw(t - w/f): the second saw runs through a
+    // DelayNode whose time tracks the period. pwModInput (unit: ~1 = +1% width
+    // per input value, scaled per frequency) modulates the width at audio rate.
     this.pwmSubA = ctx.createGain();
     this.pwmSubB = ctx.createGain();
     this.pwmSubA.gain.value = 1;
     this.pwmSubB.gain.value = -1;
+    this.pwmDelay = ctx.createDelay(0.1);
+    this.pwModInput = ctx.createGain();
+    this.pwModInput.gain.value = 0;
+    this.pwModInput.connect(this.pwmDelay.delayTime);
     this.pwmOscA.connect(this.pwmSubA);
-    this.pwmOscB.connect(this.pwmSubB);
+    this.pwmOscB.connect(this.pwmDelay);
+    this.pwmDelay.connect(this.pwmSubB);
     this.pwmSubA.connect(this.pwmGain);
     this.pwmSubB.connect(this.pwmGain);
 
@@ -227,13 +235,23 @@ export class Oscillator {
    */
   setPulseWidth(w) {
     this._pulseWidth = Math.min(0.95, Math.max(0.05, w));
-    const widthDetune = (0.5 - this._pulseWidth) * 24; // cents; empirically stable range
-    setImmediate(this.pwmOscB.detune, widthDetune, this.ctx);
+    this._updatePulse();
+  }
+
+  _updatePulse(glideTimeConstant = 0) {
+    const period = 1 / Math.max(1, this._baseFrequency);
+    const t = this.ctx.currentTime;
+    this.pwmDelay.delayTime.cancelScheduledValues(t);
+    if (glideTimeConstant > 0) this.pwmDelay.delayTime.setTargetAtTime(this._pulseWidth * period, t, glideTimeConstant);
+    else this.pwmDelay.delayTime.setValueAtTime(this._pulseWidth * period, t);
+    // modulation inputs are scaled so a value of 30 swings the width by ~30 %
+    this.pwModInput.gain.setValueAtTime(0.01 * period, t);
   }
 
   /** Base pitch in Hz, before drift/detune/glide/bend are summed. */
   setFrequency(hz, glideTimeConstant = 0) {
     this._baseFrequency = hz;
+    this._updatePulse(glideTimeConstant);
     [this.oscA, this.oscB, this.pwmOscA, this.pwmOscB].forEach((osc) => {
       if (glideTimeConstant > 0) {
         osc.frequency.cancelScheduledValues(this.ctx.currentTime);

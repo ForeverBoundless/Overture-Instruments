@@ -361,3 +361,18 @@
   .little-phatty-body #chassis { min-width: 920px; }
   .little-phatty-body #sections-row { grid-template-columns: 1fr 1fr; }
 }
+
+/* Realism pass: Little Phatty Stage II - charcoal powder-coated steel panel,
+   amber LED-ring knobs with rubber caps, blue-lit buttons and wheels. */
+#panel { background-color: #202226; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8 .02' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"), linear-gradient(180deg, #26282d, #1b1d21 60%, #151719); box-shadow: inset 0 1px #ffffff14, inset 0 -1px #000, 0 20px 50px #000a; }
+.lp-section { background: linear-gradient(160deg, #1a1c20, #121316); border-color: #3b3f46; box-shadow: inset 0 1px #ffffff10, inset 0 -1px #000; }
+.lp-section-title { color: #e6e6ea; }
+.lp-knob-cap { fill: #2a2b2f; stroke: #6b6d73; stroke-width: .8; }
+.lp-knob-body { stroke: #050505; }
+.lp-knob-flute { stroke: rgba(0,0,0,.65); stroke-width: .9; }
+.lp-knob-pointer { stroke: #fff; }
+.lp-knob-led.lit { filter: drop-shadow(0 0 3px var(--led-on-glow)); }
+.lp-btn { background: linear-gradient(#34373d, #1b1d21); border-color: #4a4e56; color: #d7dae0; box-shadow: inset 0 1px #ffffff1a, 0 1px #000; }
+.lp-btn.lit { background: linear-gradient(#67a9ff, #2b6fd6); border-color: #8fc2ff; color: #06142a; box-shadow: 0 0 10px #3f8dff88, inset 0 1px #ffffff99; }
+.brand-model::after { content: ' · stage ii edition'; font-size: .55em; letter-spacing: .18em; color: #9aa0ab; vertical-align: middle; }
+#keyboard-block .lp-key-white { background-image: linear-gradient(180deg, #d7d7d2 0%, #f8f8f5 9%, #fbfbf9 72%, #e0e0da 100%); }

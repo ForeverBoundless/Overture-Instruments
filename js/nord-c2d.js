@@ -3,6 +3,9 @@ import { NordC2DEngine } from './engine/NordC2DEngine.js';
 import { MidiManager } from './engine/MidiManager.js';
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+// Tonewheel, transistor and pipe organs are not touch sensitive: every key
+// speaks at the same level whatever its MIDI velocity or input method.
+const ORGAN_VELOCITY = 0.85;
 const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 const noteName = (midi) => `${NOTE_NAMES[midi % 12]}${Math.floor(midi / 12) - 1}`;
 const makeChromaticMap = (keys, startMidi) => keys.map((key, index) => [key, noteName(startMidi + index)]);
@@ -20,17 +23,42 @@ class NordC2D {
     this.keyboards = [];
     this.computerNotes = new Map();
     this.pendingMidiNotes = new Map();
+    this.sliderSetters = {};
     this._build();
     this._bindComputerKeyboard();
     this._bindPower();
     this.midi = new MidiManager({
       onNoteOn: (note, velocity, channel) => this._midiNoteOn(note, velocity, channel),
       onNoteOff: (note, channel) => this._midiNoteOff(note, channel),
-      onSustain: (down) => this.engine.setSustain(down),
-      onAllNotesOff: () => this.engine.allNotesOff(),
+      onSustain: (down) => { if (this.engine.started) this.engine.setSustain(down); },
+      onExpression: (value) => this.engine.setExpression(value),
+      onVolume: (value) => this.sliderSetters.master?.(value),
+      onModWheel: (value) => this._setRotorFromController(value >= 0.5),
+      onAllNotesOff: () => this._midiAllNotesOff(),
+      onResetControllers: () => { this.engine.setExpression(1); if (this.engine.started) this.engine.setSustain(false); },
       onProgramChange: (program) => this._selectMidiProgram(program),
     });
     this.midi.init();
+  }
+
+  /** Mod wheel / CC1 acts as the half-moon rotor switch: up = fast, down = slow. */
+  _setRotorFromController(fast) {
+    const button = document.querySelector('[data-action="rotary"]');
+    const speed = document.querySelector('.nord-rotary-speed');
+    button?.classList.add('active');
+    if (speed) speed.value = fast ? 'Fast' : 'Slow';
+    this.engine.rotary = fast; this.engine.rotaryEnabled = true;
+    if (this.engine.started) this.engine.setRotary(fast);
+  }
+
+  _midiAllNotesOff() {
+    this.pendingMidiNotes.clear();
+    [...this.computerNotes.keys()].filter((key) => key.startsWith('midi:')).forEach((key) => {
+      const held = this.computerNotes.get(key);
+      this.keyboards[held.manual]?.setKeyActive(held.note, false);
+      this.computerNotes.delete(key);
+    });
+    if (this.engine.started) this.engine.allNotesOff();
   }
 
   _build() {
@@ -40,8 +68,9 @@ class NordC2D {
     shell.innerHTML = `<header class="nord-header"><img src="/ui/Logos/Nord_logo.png" alt="Nord" class="nord-logo"><div class="nord-title"><strong><b>c2d</b></strong><span>DUAL MANUAL ORGAN</span></div></header><section class="nord-top-panel"><div class="nord-brand-display"><small>PROGRAM <b class="nord-program-number">001</b></small><strong class="nord-program-name">B3 DRAWBAR PANEL</strong><span>LIVE MEMORY</span></div><div class="nord-global-controls"><label>ORGAN MODEL<select class="nord-model"><option>B3</option><option>VX</option><option>Farf</option><option>Pipe</option></select></label><button data-action="rotary">ROTARY</button><button data-action="reverb">REVERB</button><button data-action="drive">DRIVE</button><button data-action="split">TO GREAT</button><button data-action="pedal">PEDAL</button><button data-action="store">STORE</button></div><div class="nord-global-knobs"><label class="nord-control-slider"><span>MASTER LEVEL</span><i class="nord-slider-face" data-control="master" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="1" aria-valuenow=".55" aria-label="Master level"><b></b></i><output>55</output></label><label class="nord-control-slider"><span>REVERB</span><i class="nord-slider-face" data-control="reverb" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="1" aria-valuenow=".18" aria-label="Reverb"><b></b></i><output>18</output></label><label class="nord-control-slider"><span>DRIVE</span><i class="nord-slider-face" data-control="drive" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="1" aria-valuenow="0" aria-label="Drive"><b></b></i><output>0</output></label></div></section><section class="nord-system-row"><label>CROSSTALK<select class="nord-crosstalk"><option>Clean</option><option>Vintage 1</option><option>Vintage 2</option><option selected>Vintage 3</option></select></label><label>KEY CLICK<select class="nord-click"><option>Low</option><option selected>Normal</option><option>High</option><option>Higher</option></select></label><label>ROTARY SPEED<select class="nord-rotary-speed"><option>Slow</option><option selected>Stop</option><option>Fast</option></select></label><label>PROGRAM <button data-program="previous">−</button><output class="nord-program-readout">001</output><button data-program="next">+</button></label></section><section class="nord-model-panel"></section><section class="nord-manuals"></section><footer class="nord-footer">NORD C2D • DUAL 37-KEY MANUALS • B3 / VX / FARF / PIPE • COMPUTER KEYBOARD READY</footer>`;
     root.appendChild(shell);
     shell.querySelectorAll('[data-action]').forEach((button) => button.addEventListener('click', () => {
+      if (button.dataset.action === 'store') return; // momentary
       button.classList.toggle('active');
-      if (button.dataset.action === 'rotary') this.engine.setRotary(button.classList.contains('active'));
+      if (button.dataset.action === 'rotary') { const on = button.classList.contains('active'); this.engine.setRotaryEnabled(on); const speed = shell.querySelector('.nord-rotary-speed'); if (on && speed.value === 'Stop') { speed.value = 'Slow'; this.engine.setRotary(false); } }
       if (button.dataset.action === 'reverb') this.engine.setReverb(button.classList.contains('active') ? 0.45 : 0.08);
     }));
     const controls = { master: 0.50, reverb: 0.18, drive: 0 };
@@ -53,11 +82,12 @@ class NordC2D {
         control.setAttribute('aria-valuenow', next);
         control.style.setProperty('--slider-value', next);
         output.textContent = `${Math.round(next * 100)}`;
-        if (control.dataset.control === 'master' && this.engine.output) this.engine.output.gain.value = next;
+        if (control.dataset.control === 'master') { this.engine.masterLevel = next; if (this.engine.output) this.engine.output.gain.value = next; }
         if (control.dataset.control === 'reverb') this.engine.setReverb(next);
         if (control.dataset.control === 'drive') this.engine.setDrive(next);
       };
       setValue(controls[control.dataset.control]);
+      this.sliderSetters[control.dataset.control] = setValue;
       control.addEventListener('pointerdown', (event) => {
         control.setPointerCapture(event.pointerId);
         const bounds = control.getBoundingClientRect();
@@ -79,8 +109,9 @@ class NordC2D {
     shell.querySelector('.nord-model').addEventListener('change', (event) => this.engine.setModel(event.target.value));
     shell.querySelector('.nord-crosstalk').addEventListener('change', (event) => this.engine.setCrosstalk(event.target.value));
     shell.querySelector('.nord-click').addEventListener('change', (event) => this.engine.setKeyClick(event.target.value));
-    shell.querySelector('.nord-rotary-speed').addEventListener('change', (event) => this.engine.setRotary(event.target.value === 'Fast'));
-    shell.querySelector('[data-action="split"]').addEventListener('click', (event) => { event.currentTarget.classList.toggle('active'); this.engine.setGreatSplit(event.currentTarget.classList.contains('active')); });
+    shell.querySelector('.nord-rotary-speed').addEventListener('change', (event) => { const v = event.target.value; const btn = shell.querySelector('[data-action="rotary"]'); if (v === 'Stop') { this.engine.setRotaryEnabled(false); btn.classList.remove('active'); } else { this.engine.setRotary(v === 'Fast'); btn.classList.add('active'); } });
+    // The generic [data-action] listener above already toggled the button.
+    shell.querySelector('[data-action="split"]').addEventListener('click', (event) => { this.engine.setGreatSplit(event.currentTarget.classList.contains('active')); });
     shell.querySelectorAll('[data-program]').forEach((button) => button.addEventListener('click', () => this._changeProgram(button.dataset.program)));
     shell.querySelector('[data-action="store"]').addEventListener('click', () => this._storeProgram());
     this._buildModelPanel(shell.querySelector('.nord-model-panel'));
@@ -101,7 +132,7 @@ class NordC2D {
   _buildManual(label, index) {
     const section = document.createElement('section');
     section.className = `nord-manual nord-manual--${index ? 'upper' : 'lower'}`;
-    section.innerHTML = `<div class="nord-manual-head"><div><span>MANUAL ${index ? 'I' : 'II'}</span><strong>${label}</strong></div><div class="nord-manual-switches"><button data-bank="A" class="active">DRAWBAR A</button><button data-bank="B">DRAWBAR B</button><button data-vibrato="C3">VIB/CHORUS C3</button><button data-vibrato="OFF">VIB OFF</button><button data-percussion="true">PERCUSSION</button></div><div class="nord-octave"><span class="nord-octave-label">OCTAVE</span><button type="button" aria-label="${label} octave down">−</button><output>OCT 0</output><button type="button" aria-label="${label} octave up">+</button></div></div><div class="nord-drawbar-panel"><div class="nord-manual-banks"></div></div><div class="nord-keyboard-wrap"></div>`;
+    section.innerHTML = `<div class="nord-manual-head"><div><span>MANUAL ${index ? 'I' : 'II'}</span><strong>${label}</strong></div><div class="nord-manual-switches"><button data-bank="A" class="active">DRAWBAR A</button><button data-bank="B">DRAWBAR B</button><button data-vibrato="V3">VIBRATO V3</button><button data-vibrato="C3" class="active">CHORUS C3</button><button data-vibrato="OFF">VIB OFF</button><button data-percussion="true">PERCUSSION</button></div><div class="nord-octave"><span class="nord-octave-label">OCTAVE</span><button type="button" aria-label="${label} octave down">−</button><output>OCT 0</output><button type="button" aria-label="${label} octave up">+</button></div></div><div class="nord-drawbar-panel"><div class="nord-manual-banks"></div></div><div class="nord-keyboard-wrap"></div>`;
     const drawbarLabels = ["16'", "5 1/3'", "8'", "4'", "2 2/3'", "2'", "1 3/5'", "1 1/3'", "1'"];
 
 // Actual Nord C2D pipe-organ stop names for each manual.
@@ -295,9 +326,12 @@ const banks = section.querySelector('.nord-manual-banks');
     document.querySelector('.nord-program-name').textContent = this.engine.program.index <= 104 ? 'FACTORY ORGAN PROGRAM' : 'EMPTY PROGRAM';
   }
 
+  // MIDI channel 1 = upper (Swell) manual, channel 2 = lower (Great) manual,
+  // channel 3 = lower manual while the Great split ("TO GREAT") is engaged.
   _midiManual(channel) {
     if (channel === 1) return 1;
     if (channel === 2) return 0;
+    if (channel === 3 && this.engine.greatSplit) return 0;
     return null;
   }
 
@@ -314,6 +348,7 @@ const banks = section.querySelector('.nord-manual-banks');
     this.computerNotes.set(key, { manual, note: noteName });
     if (!this.engine.started) {
       this.pendingMidiNotes.set(key, { manual, note: noteName, velocity });
+      this.keyboards[manual].setKeyActive(noteName, true);
       return;
     }
     this._noteOn(manual, noteName, velocity);
@@ -324,6 +359,7 @@ const banks = section.querySelector('.nord-manual-banks');
     if (!held) return;
     this.pendingMidiNotes.delete(`midi:${channel}:${note}`);
     if (!this.engine.started) {
+      this.keyboards[held.manual].setKeyActive(held.note, false);
       this.computerNotes.delete(`midi:${channel}:${note}`);
       return;
     }
@@ -343,10 +379,11 @@ const banks = section.querySelector('.nord-manual-banks');
 
   _bindComputerKeyboard() {
     window.addEventListener('keydown', (event) => {
-      if (event.repeat) return;
+      if (event.repeat || event.ctrlKey || event.metaKey || event.altKey) return;
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(event.target?.tagName)) return;
       const key = event.key.toLowerCase();
       const entry = COMPUTER_KEY_MAP.get(key);
-      if (!entry) return;
+      if (!entry || this.computerNotes.has(key)) return;
       this.computerNotes.set(key, entry);
       this._noteOn(entry.manual, entry.note, 0.8);
       event.preventDefault();
@@ -375,9 +412,9 @@ const banks = section.querySelector('.nord-manual-banks');
     power.addEventListener('keydown', (event) => { if (event.key === 'Enter' || event.key === ' ') start(); });
   }
 
-  _noteOn(index, note, velocity) {
+  _noteOn(index, note) {
     this.keyboards[index].setKeyActive(note, true);
-    this.engine.noteOn(index, note, velocity);
+    this.engine.noteOn(index, note, ORGAN_VELOCITY);
   }
 
   _noteOff(index, note) {

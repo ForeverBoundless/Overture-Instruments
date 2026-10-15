@@ -1,0 +1,11 @@
+/* roland-juno-106.css - Juno: black panel, cream legends, red/orange/blue section accents. */
+.juno-shell { --pn-shell: #1f1f22; --pn-shell-edge: #52555c; --pn-section: #141416; --pn-border: #3d3f45; --pn-accent: #ff6a3d; --pn-accent-glow: rgba(255,106,61,.5); --pn-display-bg: #1a0806; --pn-display-ink: #ff8a5c; --pn-led-off: #3a1a10; }
+.juno-shell .pn-brand img { height: 20px; }
+.juno-shell .pn-model b { color: #f4efe3; }
+.juno-row { grid-template-columns: .7fr 1.6fr .5fr 1.9fr .6fr 1.5fr .9fr; }
+.juno-row-bottom { grid-template-columns: 1.2fr 2fr; }
+.juno-shell .pn-section:nth-child(2) h2, .juno-shell .pn-section:nth-child(4) h2 { color: #ffb75e; }
+.juno-shell .pn-section:nth-child(7) h2 { color: #7de4ff; }
+.juno-shell .pn-knob .lp-knob-label { color: #e8dfcf; }
+@media (max-width: 1200px) { .juno-row { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (max-width: 760px) { .juno-row, .juno-row-bottom { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

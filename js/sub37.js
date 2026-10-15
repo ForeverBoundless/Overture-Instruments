@@ -2,6 +2,7 @@ import { Knob } from '../ui/Knob.js';
 import { Keyboard } from '../ui/Keyboard.js';
 import { PitchWheel, ModWheel } from '../ui/Wheel.js';
 import { Sub37Engine } from './engine/Sub37Engine.js';
+import { MidiManager, midiNoteName } from './engine/MidiManager.js';
 import { SUB37_PRESETS } from './data/sub37Presets.js';
 
 const KEY_TO_NOTE = { a: 'C3', w: 'C#3', s: 'D3', e: 'D#3', d: 'E3', f: 'F3', t: 'F#3', g: 'G3', y: 'G#3', h: 'A3', u: 'A#3', j: 'B3', k: 'C4', o: 'C#4', l: 'D4', p: 'D#4', ';': 'E4', "'": 'F4' };
@@ -19,9 +20,141 @@ class Sub37 {
     this.arp = { on: false, latch: false, sync: false, pattern: 'UP', range: 0, rate: 120, index: 0, notes: [] };
     this.sequence = Array.from({ length: 64 }, () => ({ note: null, tie: false, rest: true, mod: 0 }));
     this.seq = { playing: false, recording: false, page: 0, selected: 0, index: 0, timer: null };
+    this.pendingMidiNotes = new Map();
+    this.midiHeld = new Set();
+    this._midiClockTicks = 0;
+    this._midiClockLast = 0;
+    this._midiStepMs = 0;
+    this._cutoffMsb = null;
     this._build();
     this._bindPower();
     this._bindComputerKeyboard();
+    this._bindMidi();
+  }
+
+  // -------------------------------------------------------------------
+  // MIDI (Sub 37 User's Manual, "MIDI Operations" and CC table)
+  // -------------------------------------------------------------------
+
+  _bindMidi() {
+    this.midi = new MidiManager({
+      onNoteOn: (note, velocity) => this._midiNoteOn(note, velocity),
+      onNoteOff: (note) => this._midiNoteOff(note),
+      onPitchBend: (_range, value) => this.pitchWheel.setExternalValue(value),
+      onModWheel: (value) => this.modWheel.setExternalValue(value),
+      onSustain: (down) => { if (this.engine.started) this.engine.setSustain(down); },
+      onVolume: (value) => this.knobs.volume?.setValue(value),
+      onProgramChange: (program, _channel, bank) => this._applyPreset((bank.lsb >= 1 ? 128 : 0) + program),
+      onAllNotesOff: () => this._midiAllNotesOff(),
+      onResetControllers: () => {
+        this.pitchWheel.setExternalValue(0);
+        this.modWheel.setExternalValue(0);
+        if (this.engine.started) this.engine.setSustain(false);
+      },
+      onControlChange: (cc, value) => this._midiControl(cc, value),
+      onClock: () => this._midiClock(),
+      onStart: () => { this._midiClockTicks = 0; this.arp.index = 0; this.seq.index = 0; },
+      onContinue: () => { this._midiClockTicks = 0; },
+      onStop: () => { if (this.arp.sync && this.engine.started) this.engine.allNotesOff(); },
+      onConnectionChange: (connected, name) => this._showMessage(connected ? `MIDI: ${name}`.slice(0, 22).toUpperCase() : 'MIDI DISCONNECTED'),
+    });
+    this.midi.init();
+  }
+
+  _midiNoteOn(note, velocity) {
+    const name = midiNoteName(note);
+    this.midiHeld.add(name);
+    if (!this.engine.started) {
+      this.pendingMidiNotes.set(name, velocity);
+      this.keyboard.setKeyActive(name, true);
+      return;
+    }
+    this._noteOn(name, velocity);
+  }
+
+  _midiNoteOff(note) {
+    const name = midiNoteName(note);
+    this.midiHeld.delete(name);
+    if (this.pendingMidiNotes.delete(name)) this.keyboard.setKeyActive(name, false);
+    this._noteOff(name);
+  }
+
+  _midiAllNotesOff() {
+    this.pendingMidiNotes.clear();
+    this.midiHeld.clear();
+    this.arp.notes = [];
+    this.keyboard.el.querySelectorAll('.lp-key.active').forEach((key) => key.classList.remove('active'));
+    if (this.engine.started) this.engine.allNotesOff();
+  }
+
+  /** MIDI clock drives the arpeggiator/sequencer when ARP SYNC is lit (24 PPQN, eighth-note steps). */
+  _midiClock() {
+    const now = performance.now();
+    if (this._midiClockLast) {
+      const step = (now - this._midiClockLast) * 12;
+      if (step > 0 && step < 4000) this._midiStepMs = this._midiStepMs ? this._midiStepMs * 0.8 + step * 0.2 : step;
+    }
+    this._midiClockLast = now;
+    if (!this.arp.sync || !this.engine.started || (!this.arp.on && !this.seq.playing)) return;
+    if (this._midiClockTicks % 12 === 0) this._clock();
+    this._midiClockTicks += 1;
+  }
+
+  _stepMs() {
+    return this.arp.sync && this._midiStepMs ? this._midiStepMs : 60000 / Math.max(2, this.arp.rate) / 2;
+  }
+
+  /** Sub 37 CC map (User's Manual pp. 53-55), applied to the controls this emulation exposes. */
+  _midiControl(cc, value) {
+    const n = value / 127;
+    const set = (key, v) => this.knobs[key]?.setValue(v);
+    const time = (x) => 10 * Math.pow(x, 3); // matches the 0..10 s envelope knobs' musical spread
+    const bipolar = (span) => (value === 64 ? 0 : value < 64 ? -span * (64 - value) / 64 : span * (value - 64) / 63);
+    const toggle = (button) => button?.setValue(value >= 64);
+    const octave = (selector) => selector?.setValue(String([16, 8, 4, 2][Math.min(3, Math.floor(value / 32))]));
+    switch (cc) {
+      case 3: set('lfo0Rate', 0.05 * Math.pow(2000, n)); break;
+      case 5: set('glide', n * 5); break;
+      case 8: set('lfo1Rate', 0.05 * Math.pow(2000, n)); break;
+      case 9: set('osc0Wave', n); break;
+      case 12: set('osc1Tune', bipolar(7)); break;
+      case 13: set('osc1Fine', bipolar(100)); break;
+      case 14: set('osc1Wave', n); break;
+      case 18: set('drive', n); break;
+      case 19: this._cutoffMsb = value; set('cutoff', 20 * Math.pow(1000, n)); break;
+      case 51: if (this._cutoffMsb !== null) set('cutoff', 20 * Math.pow(1000, ((this._cutoffMsb << 7) | value) / 16383)); break;
+      case 21: set('resonance', n); break;
+      case 22: set('keyTrack', n); break;
+      case 23: set('filterattack', time(n)); break;
+      case 24: set('filterdecay', time(n)); break;
+      case 25: set('filtersustain', n); break;
+      case 26: set('filterrelease', time(n)); break;
+      case 27: set('filterEnv', bipolar(10000)); break;
+      case 28: set('ampattack', time(n)); break;
+      case 29: set('ampdecay', time(n)); break;
+      case 30: set('ampsustain', n); break;
+      case 31: set('amprelease', time(n)); break;
+      case 65: toggle(this.buttons.glide); break;
+      case 69: toggle(this.buttons.arpLatch); break;
+      case 73: toggle(this.buttons.arpOn); break;
+      case 74: octave(this.osc0Octave); break;
+      case 75: octave(this.osc1Octave); break;
+      case 77: toggle(this.buttons.sync); break;
+      case 94: toggle(this.buttons.legato); break;
+      case 103: set('filterdelay', time(n)); break;
+      case 104: set('ampdelay', time(n)); break;
+      case 105: set('filterhold', time(n)); break;
+      case 106: set('amphold', time(n)); break;
+      case 107: set('bendRange', Math.min(12, value)); break;
+      case 109: this.slopeSelect?.setValue(String([6, 12, 18, 24][Math.min(3, Math.floor(value / 32))])); break;
+      case 110: toggle(this.buttons.duo); break;
+      case 114: set('osc0Level', n); break;
+      case 115: set('sub', n); break;
+      case 116: set('osc1Level', n); break;
+      case 117: set('noise', n); break;
+      case 118: set('feedback', n); break;
+      default: break;
+    }
   }
 
   _build() {
@@ -97,7 +230,7 @@ class Sub37 {
     const arp = this._section('ARPEGGIATOR'); const arpButtons = document.createElement('div'); arpButtons.className = 's37-button-grid';
     this.buttons.arpOn = this._toggle('ON', false, (on) => { this.arp.on = on; this._refreshClock(); });
     this.buttons.arpLatch = this._toggle('LATCH', false, (on) => { this.arp.latch = on; });
-    this.buttons.arpSync = this._toggle('SYNC', false, (on) => { this.arp.sync = on; this._showMessage(on ? 'ARP MIDI SYNC' : 'ARP INTERNAL'); });
+    this.buttons.arpSync = this._toggle('SYNC', false, (on) => { this.arp.sync = on; this._midiClockTicks = 0; this._showMessage(on ? 'ARP MIDI SYNC' : 'ARP INTERNAL'); this._refreshClock(); });
     arpButtons.append(this.buttons.arpOn, this.buttons.arpLatch, this.buttons.arpSync);
     arp.body.append(arpButtons, this._selector('PATTERN', ['UP', 'DWN', 'ORDR', 'RND', 'SEQ'], 'UP', (pattern) => { this.arp.pattern = pattern; this._refreshClock(); }));
     const arpKnobs = document.createElement('div'); arpKnobs.className = 's37-knob-row';
@@ -160,7 +293,8 @@ class Sub37 {
     this._knob(row, 'drive', 'MULTIDRIVE', 0, 1, 0.12, (v) => this.engine.setFilter({ drive: v }), false, (v) => `${Math.round(v * 100)}%`);
     this._knob(row, 'filterEnv', 'FILTER EG', -10000, 10000, 3000, (v) => this.engine.setFilter({ envAmount: v }), true, (v) => `${Math.round(v)} Hz`);
     this._knob(row, 'keyTrack', 'KB CTRL', 0, 1, 0.5, (v) => this.engine.setFilter({ keyTrack: v }), false, (v) => `${Math.round(v * 100)}%`);
-    section.body.append(row, this._selector('SLOPE', ['6', '12', '18', '24'], '24', (value) => this.engine.setFilter({ slope: Number(value) }))); return section.section;
+    this.slopeSelect = this._selector('SLOPE', ['6', '12', '18', '24'], '24', (value) => this.engine.setFilter({ slope: Number(value) }));
+    section.body.append(row, this.slopeSelect); return section.section;
   }
 
   _envelopeSection(which, title) {
@@ -200,7 +334,18 @@ class Sub37 {
 
   _buildFooter() { const footer = document.createElement('footer'); footer.className = 's37-footer'; footer.textContent = '37-KEY VELOCITY + AFTERTOUCH • TWO-NOTE PARAPHONIC ANALOG SYNTHESIZER • WEB MIDI READY'; return footer; }
 
-  _bindPower() { const power = document.getElementById('sub37-power'); power.addEventListener('click', async () => { await this.engine.start(); this._applyPreset(this.currentPreset); power.classList.add('sub37-power-off'); this._showMessage('AUDIO READY'); }, { once: true }); }
+  _bindPower() {
+    const power = document.getElementById('sub37-power');
+    power.addEventListener('click', async () => {
+      await this.engine.start();
+      this._applyPreset(this.currentPreset);
+      power.classList.add('sub37-power-off');
+      this._showMessage('AUDIO READY');
+      // Sound any MIDI keys that are still held from before power-on.
+      this.pendingMidiNotes.forEach((velocity, note) => this._noteOn(note, velocity));
+      this.pendingMidiNotes.clear();
+    }, { once: true });
+  }
 
   _applyPreset(index) {
     const preset = SUB37_PRESETS[clamp(index, 0, SUB37_PRESETS.length - 1)]; this.currentPreset = preset.id; this.presetSelect?.setValue(String(preset.id), true);
@@ -222,10 +367,10 @@ class Sub37 {
   _noteOn(note, velocity = 0.86) { if (!this.engine.started) return; this.keyboard.setKeyActive(note, true); if (this.seq.recording) { Object.assign(this.sequence[this.seq.selected], { note, rest: false, tie: false }); this.seq.selected = (this.seq.selected + 1) % 64; this._renderSequence(); return; } if (this.arp.on) { if (!this.arp.notes.includes(note)) this.arp.notes.push(note); this._refreshClock(); return; } this.engine.noteOn(note, velocity); }
   _noteOff(note) { if (!this.engine.started) return; this.keyboard.setKeyActive(note, false); if (this.arp.on) { this.arp.notes = this.arp.notes.filter((item) => item !== note); if (!this.arp.latch && !this.arp.notes.length) this.engine.allNotesOff(); return; } this.engine.noteOff(note); }
 
-  _refreshClock() { clearInterval(this.seq.timer); this.seq.timer = null; if (!this.engine.started || (!this.arp.on && !this.seq.playing)) return; const ms = clamp(60000 / Math.max(2, this.arp.rate) / 2, 28, 2000); this.seq.timer = setInterval(() => this._clock(), ms); this._clock(); }
+  _refreshClock() { clearInterval(this.seq.timer); this.seq.timer = null; if (!this.engine.started || (!this.arp.on && !this.seq.playing)) return; if (this.arp.sync) return; /* MIDI clock drives steps */ const ms = clamp(60000 / Math.max(2, this.arp.rate) / 2, 28, 2000); this.seq.timer = setInterval(() => this._clock(), ms); this._clock(); }
   _clock() { if (this.seq.playing || this.arp.pattern === 'SEQ') this._playSequenceStep(); else this._playArpStep(); }
-  _playArpStep() { if (!this.arp.notes.length) return; const notes = [...this.arp.notes].sort(); let index = this.arp.index++; if (this.arp.pattern === 'DWN') index = notes.length - 1 - (index % notes.length); else if (this.arp.pattern === 'RND') index = Math.floor(Math.random() * notes.length); else index %= notes.length; const note = notes[index]; this.engine.noteOn(note, 0.88); clearTimeout(this.arp.releaseTimer); this.arp.releaseTimer = setTimeout(() => this.engine.noteOff(note), clamp(60000 / this.arp.rate * 0.38, 16, 600)); }
-  _playSequenceStep() { const index = this.seq.index++ % 64; const step = this.sequence[index]; this._renderSequence(index); if (step.rest || !step.note) { if (!step.tie) this.engine.allNotesOff(); return; } this.engine.noteOn(step.note, 0.88); if (!step.tie) { clearTimeout(this.seq.releaseTimer); this.seq.releaseTimer = setTimeout(() => this.engine.noteOff(step.note), clamp(60000 / this.arp.rate * 0.42, 18, 600)); } }
+  _playArpStep() { if (!this.arp.notes.length) return; const notes = [...this.arp.notes].sort(); let index = this.arp.index++; if (this.arp.pattern === 'DWN') index = notes.length - 1 - (index % notes.length); else if (this.arp.pattern === 'RND') index = Math.floor(Math.random() * notes.length); else index %= notes.length; const note = notes[index]; this.engine.noteOn(note, 0.88); clearTimeout(this.arp.releaseTimer); this.arp.releaseTimer = setTimeout(() => this.engine.noteOff(note), clamp(this._stepMs() * 0.76, 16, 600)); }
+  _playSequenceStep() { const index = this.seq.index++ % 64; const step = this.sequence[index]; this._renderSequence(index); if (step.rest || !step.note) { if (!step.tie) this.engine.allNotesOff(); return; } this.engine.noteOn(step.note, 0.88); if (!step.tie) { clearTimeout(this.seq.releaseTimer); this.seq.releaseTimer = setTimeout(() => this.engine.noteOff(step.note), clamp(this._stepMs() * 0.84, 18, 600)); } }
   _setSeqFlag(flag) { const step = this.sequence[this.seq.selected]; step[flag] = !step[flag]; if (flag === 'rest' && !step.rest) step.note ??= 'C3'; this._renderSequence(); }
   _clearSequence() { this.sequence.forEach((step) => Object.assign(step, { note: null, rest: true, tie: false, mod: 0 })); this._renderSequence(); this._showMessage('SEQUENCE CLEARED'); }
   _renderSequence(playingIndex = -1) { if (!this.stepGrid) return; [...this.stepGrid.children].forEach((button, local) => { const index = this.seq.page * 16 + local; const step = this.sequence[index]; button.classList.toggle('lit', !step.rest); button.classList.toggle('selected', index === this.seq.selected); button.classList.toggle('playing', index === playingIndex); button.title = step.rest ? `Step ${index + 1}: rest` : `Step ${index + 1}: ${step.note}${step.tie ? ' (tie)' : ''}`; }); }

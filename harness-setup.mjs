@@ -1,5 +1,5 @@
 // harness.mjs — a deliberately minimal DOM + Web Audio API shim, just
-// enough surface area for js/app.js and everything it imports to
+// enough surface area for js/engine/app.js and everything it imports to
 // construct and run without throwing. This is a testing tool only; it is
 // NOT part of the delivered synth.
 
@@ -51,6 +51,9 @@ class MockAudioContext {
       detune: makeAudioParam(0),
     });
   }
+  createDelay() { return makeNode({ delayTime: makeAudioParam(0) }); }
+  createStereoPanner() { return makeNode({ pan: makeAudioParam(0) }); }
+  createChannelMerger() { return makeNode({}); }
   createWaveShaper() {
     return makeNode({ curve: null, oversample: 'none' });
   }

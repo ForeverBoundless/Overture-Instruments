@@ -31,9 +31,12 @@ const A4 = 440;
 const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
 export function noteNameToMidi(note) {
-  const pitch = note.slice(0, -1);
-  const octave = parseInt(note.slice(-1), 10);
-  return (octave + 1) * 12 + NOTE_NAMES.indexOf(pitch);
+  if (typeof note === 'number') return note;
+  // Accepts negative octaves ("C-1" = MIDI 0) as produced for the lowest
+  // MIDI notes; the old slice(-1) parser mis-read those as octave 1.
+  const match = /^([A-G]#?)(-?\d+)$/.exec(String(note).trim());
+  if (!match) return NaN;
+  return (parseInt(match[2], 10) + 1) * 12 + NOTE_NAMES.indexOf(match[1]);
 }
 
 export function midiToFreq(midi) {
@@ -246,7 +249,7 @@ export class Voice {
 
   /** Route an LFO's output node into pulse-width modulation for both oscillators. */
   connectLFOToPulseWidth(lfoOutputNode) {
-    lfoOutputNode.connect(this.osc1.pwmOscB.detune);
-    lfoOutputNode.connect(this.osc2.pwmOscB.detune);
+    lfoOutputNode.connect(this.osc1.pwModInput);
+    lfoOutputNode.connect(this.osc2.pwModInput);
   }
 }

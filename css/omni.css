@@ -1,0 +1,75 @@
+/* omni.css - OMNI modular instrument designer workspace. */
+@font-face { font-family: 'Inter Variable'; src: url('/ui/Inter-Variable.ttf') format('truetype'); font-weight: 100 900; font-display: swap; }
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; background: #0b0e13; color: #e9ebf0; font-family: 'Inter Variable', Inter, sans-serif; overflow: hidden; }
+#omni-root { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; height: 100vh; }
+.omni-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 8px 12px; border-bottom: 1px solid #ffffff14; background: linear-gradient(180deg, #161a21, #0f1218); }
+.omni-logo { display: flex; align-items: center; gap: 8px; margin-right: 8px; }
+.omni-logo img { width: 24px; height: 24px; }
+.omni-logo strong { letter-spacing: .3em; color: #7de4ff; font-size: 14px; }
+.omni-name { width: 180px; padding: 6px 8px; border: 1px solid #ffffff22; border-radius: 6px; background: #0b0e13; color: #fff; font: 600 12px 'Inter Variable', sans-serif; }
+.omni-tb { padding: 6px 10px; border: 1px solid #ffffff22; border-radius: 6px; background: #1b2029; color: #e9ebf0; font: 700 10px 'Inter Variable', sans-serif; letter-spacing: .08em; cursor: pointer; }
+.omni-tb:hover { background: #262c38; }
+.omni-tb:disabled { opacity: .4; cursor: default; }
+.omni-tb:focus-visible, .omni-port:focus-visible, .omni-lib-item:focus-visible { outline: 2px solid #ff9f0a; outline-offset: 2px; }
+.omni-tb.lit { background: #ff9f0a; color: #140a00; border-color: #ffb75e; }
+.omni-load { max-width: 150px; }
+.omni-status { margin-left: auto; font: 11px 'DM Mono', monospace; color: #9aa1ad; max-width: 40vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.omni-status.is-error { color: #ff6a3d; }
+.omni-main { display: grid; grid-template-columns: 210px minmax(0, 1fr) 280px; min-height: 0; }
+.omni-library, .omni-inspector { overflow: auto; padding: 10px; background: #0f1218; border-right: 1px solid #ffffff10; }
+.omni-inspector { border-right: 0; border-left: 1px solid #ffffff10; }
+.omni-library h2, .omni-inspector h2 { margin: 0 0 6px; font-size: 10px; letter-spacing: .2em; color: #ff9f0a; }
+.omni-library h3 { margin: 12px 0 4px; font-size: 9px; letter-spacing: .14em; color: #7f8794; }
+.omni-inspector h3 { margin: 8px 0 2px; font-size: 13px; }
+.omni-hint { font-size: 11px; color: #8f97a3; line-height: 1.45; margin: 4px 0; }
+.omni-warn { font-size: 11px; color: #ffb75e; margin-top: 10px; }
+.omni-lib-item { display: block; width: 100%; margin: 3px 0; padding: 7px 8px 7px 12px; border: 1px solid #ffffff14; border-left: 3px solid var(--c); border-radius: 6px; background: #151a22; color: #e9ebf0; font: 600 11px 'Inter Variable', sans-serif; text-align: left; cursor: grab; }
+.omni-lib-item:hover { background: #1f2531; }
+.omni-canvas { position: relative; overflow: hidden; background-color: #0b0e13; background-image: linear-gradient(#ffffff08 1px, transparent 1px), linear-gradient(90deg, #ffffff08 1px, transparent 1px); background-size: 24px 24px; cursor: grab; touch-action: none; outline: none; }
+.omni-world { position: absolute; left: 0; top: 0; transform-origin: 0 0; width: 0; height: 0; }
+.omni-wires { position: absolute; left: 0; top: 0; width: 1px; height: 1px; overflow: visible; }
+.omni-wire { fill: none; stroke-width: 2.5; pointer-events: stroke; cursor: pointer; opacity: .9; }
+.omni-wire.is-selected { stroke-width: 4; filter: drop-shadow(0 0 4px #fff); }
+.omni-wire.is-temp { stroke-dasharray: 6 4; pointer-events: none; }
+.omni-cards { position: absolute; left: 0; top: 0; }
+.omni-module { position: absolute; width: 190px; border: 1px solid #ffffff22; border-radius: 8px; background: #161b23; box-shadow: 0 8px 20px #0008; }
+.omni-module.is-selected { border-color: #ff9f0a; box-shadow: 0 0 0 1px #ff9f0a, 0 8px 20px #000a; }
+.omni-module-head { display: flex; justify-content: space-between; align-items: center; padding: 6px 8px; border-radius: 8px 8px 0 0; background: color-mix(in srgb, var(--c) 22%, #161b23); border-bottom: 2px solid var(--c); font-size: 11px; font-weight: 700; cursor: move; }
+.omni-module-head small { color: #8f97a3; font: 9px 'DM Mono', monospace; }
+.omni-ports { display: grid; grid-template-columns: 1fr 1fr; padding: 6px 0; }
+.omni-port-col { display: grid; gap: 4px; align-content: start; }
+.omni-port-row { display: flex; align-items: center; gap: 5px; font-size: 10px; color: #c9cfd8; }
+.omni-port-col--out .omni-port-row { justify-content: flex-end; }
+.omni-port { width: 14px; height: 14px; margin: 0 -7px 0 -7px; padding: 0; border-radius: 50%; border: 2px solid #0b0e13; cursor: crosshair; }
+.omni-port-col--out .omni-port { margin: 0 -7px 0 0; }
+.omni-port-col .omni-port { margin-left: -7px; }
+.omni-port--audio { background: #ff9f0a; } .omni-port--cv { background: #7de4ff; } .omni-port--note { background: #82e6a8; }
+.omni-port.is-valid { box-shadow: 0 0 0 3px #82e6a8aa; transform: scale(1.3); }
+.omni-port.is-pending { box-shadow: 0 0 0 3px #ffffffaa; }
+.omni-module-summary { padding: 0 8px 6px; font: 9px 'DM Mono', monospace; color: #8f97a3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.omni-param { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; margin: 8px 0; font-size: 11px; }
+.omni-param span { grid-column: 1 / -1; color: #c9cfd8; }
+.omni-param input[type=range] { width: 100%; accent-color: #ff9f0a; }
+.omni-param select { grid-column: 1 / -1; padding: 4px; border-radius: 4px; background: #0b0e13; color: #fff; border: 1px solid #ffffff22; }
+.omni-param output { font: 10px 'DM Mono', monospace; color: #7de4ff; min-width: 40px; text-align: right; }
+.omni-insp-buttons { display: flex; gap: 6px; margin-top: 10px; }
+.omni-perf { display: grid; grid-template-columns: auto auto auto auto minmax(0, 1fr); align-items: center; gap: 12px; padding: 8px 12px; border-top: 1px solid #ffffff14; background: #0f1218; }
+.omni-power { background: #182a21; border-color: #82e6a855; }
+.omni-master { display: flex; align-items: center; gap: 6px; font-size: 10px; letter-spacing: .1em; color: #9aa1ad; }
+.omni-master input { width: 110px; accent-color: #ff9f0a; }
+.omni-midi { font: 10px 'DM Mono', monospace; color: #9aa1ad; }
+.omni-keys .lp-keyboard { height: 70px; }
+.omni-guide { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; background: #000a; }
+.omni-guide-card { width: min(640px, calc(100vw - 32px)); max-height: 90vh; overflow: auto; padding: 22px; border: 1px solid #ffffff22; border-radius: 12px; background: #161b23; font-size: 12.5px; line-height: 1.55; }
+.omni-guide-card h2 { margin: 0 0 8px; }
+.omni-guide-card button { margin-top: 6px; padding: 7px 14px; border-radius: 999px; border: 1px solid #ffffff33; background: #2a3140; color: #fff; cursor: pointer; }
+@media (max-width: 960px) {
+  .omni-main { grid-template-columns: 150px minmax(0, 1fr); }
+  .omni-inspector { position: fixed; right: 0; bottom: 96px; top: auto; max-height: 45vh; width: 240px; background: #0f1218ee; border-top-left-radius: 8px; z-index: 5; }
+  .omni-status { display: none; }
+  .omni-perf { grid-template-columns: 1fr 1fr; }
+  .omni-keys { grid-column: 1 / -1; }
+}
+@media (max-width: 600px) { .omni-main { grid-template-columns: minmax(0, 1fr); } .omni-library { position: fixed; left: 0; bottom: 96px; max-height: 40vh; width: 170px; background: #0f1218ee; z-index: 5; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }

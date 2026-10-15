@@ -1,216 +1,142 @@
 /**
  * LadderFilter.js
  *
- * A 24 dB/octave, 4-pole resonant low-pass filter modeled after the Moog
- * transistor ladder topology.
+ * 24 dB/octave resonant low-pass modelled on the Moog transistor ladder, built
+ * from native nodes so the whole Little Phatty / Sub 37 voice stays on the
+ * Web Audio graph (parameters stay automatable from LFOs and envelopes).
  *
- * True ladder filters derive their character from a nonlinear feedback path
- * (the resonance signal is fed back through a soft-clipping stage before
- * subtracting from the input), which is what allows self-oscillation and
- * gives Moog filters their particular "squelchy," slightly overdriven
- * resonance rather than the clean, ringing resonance of a linear filter.
+ * The previous version fed the output back into the input through a
+ * WaveShaper. Web Audio delays every feedback loop by one render quantum
+ * (128 samples), which turns "resonance" into a comb filter rather than a peak
+ * at the cutoff. This version instead distributes the resonance across two
+ * cascaded 2-pole sections (the classic analytic decomposition of a 4-pole
+ * ladder): the first section stays near-Butterworth and the second section's
+ * Q rises with the resonance control, giving a genuine peak at the cutoff that
+ * sweeps with it. Two things the hardware does are reproduced on top:
+ *   - passband droop: the ladder loses low-end as resonance rises,
+ *   - saturation: a tanh drive stage before the filter and a gentler one after
+ *     it, so high resonance and hot inputs round off instead of ringing cleanly.
  *
- * This is approximated here using four cascaded native BiquadFilterNodes
- * (each contributing ~6 dB/octave, four in series = 24 dB/octave) with the
- * resonance signal tapped after the final pole, driven through a
- * WaveShaperNode implementing a soft-clip (tanh-style) curve, and summed
- * back into the input via a feedback gain stage. This reproduces the two
- * qualities that make a ladder filter sound like a ladder filter:
- *   1) resonance-dependent output-level compensation (ladder filters lose
- *      volume as resonance/cutoff interact - real hardware compensates),
- *   2) soft saturation in the feedback path, so high resonance drives
- *      gentle harmonic distortion rather than clean ringing, and can be
- *      pushed into full self-oscillation at maximum resonance.
- *
- * A dedicated "drive" stage adds pre-filter saturation, modeling the
- * Little Phatty's overdrive control.
+ * Slope (6/12/18/24 dB) selects which sections are in the chain. `poles[]`
+ * stays a four-element array of BiquadFilterNodes whose `frequency` params are
+ * the modulation targets used by the engines.
  */
 
 import { setImmediate, glideTo } from './ParamRamp.js';
 
-function makeSoftClipCurve(amount, samples = 1024) {
+function makeSoftClipCurve(amount, samples = 2048) {
   const curve = new Float32Array(samples);
-  const k = amount;
+  const norm = Math.tanh(amount);
   for (let i = 0; i < samples; i++) {
     const x = (i / (samples - 1)) * 2 - 1;
-    // tanh-style soft clip; k controls how hard the knee is.
-    curve[i] = Math.tanh(k * x) / Math.tanh(k);
+    curve[i] = Math.tanh(amount * x) / norm;
   }
   return curve;
 }
 
 export class LadderFilter {
-  /**
-   * @param {AudioContext} ctx
-   */
   constructor(ctx) {
     this.ctx = ctx;
-
     this.input = ctx.createGain();
     this.output = ctx.createGain();
-    this.output.gain.value = 1;
 
-    // --- Pre-filter drive/saturation stage ---
+    // --- drive stage ---
+    this.driveInputTrim = ctx.createGain();
     this.driveShaper = ctx.createWaveShaper();
     this.driveShaper.curve = makeSoftClipCurve(1.0);
     this.driveShaper.oversample = '4x';
-    this.driveInputTrim = ctx.createGain(); // compensates level before hitting the shaper
-    this.driveInputTrim.gain.value = 1;
-    this.driveOutputTrim = ctx.createGain(); // compensates makeup gain after the shaper
-    this.driveOutputTrim.gain.value = 1;
-
+    this.driveOutputTrim = ctx.createGain();
     this.input.connect(this.driveInputTrim);
     this.driveInputTrim.connect(this.driveShaper);
     this.driveShaper.connect(this.driveOutputTrim);
 
-    // --- Four cascaded one-pole-equivalent stages (24 dB/oct total) ---
+    // --- four sections (two 2-pole pairs + two gentle 2-pole stages for the 6/18 dB taps) ---
     this.poles = [];
     for (let i = 0; i < 4; i++) {
       const f = ctx.createBiquadFilter();
       f.type = 'lowpass';
       f.frequency.value = 1000;
-      // Individual pole Q kept low/flat; the *ladder's* resonance character
-      // comes from the nonlinear feedback loop below, not from stacking Qs,
-      // which would just produce a steep but sterile linear response.
-      f.Q.value = 0.55;
+      f.Q.value = 0.5;
       this.poles.push(f);
     }
+    // Chain: drive -> p0 -> p1 -> p2 -> p3. Taps select the slope.
     this.driveOutputTrim.connect(this.poles[0]);
     this.poles[0].connect(this.poles[1]);
     this.poles[1].connect(this.poles[2]);
     this.poles[2].connect(this.poles[3]);
-
-    // --- Nonlinear resonance feedback loop ---
-    this.feedbackTap = ctx.createGain();
-    this.feedbackTap.gain.value = 1;
-    this.feedbackShaper = ctx.createWaveShaper();
-    this.feedbackShaper.curve = makeSoftClipCurve(2.2);
-    this.feedbackShaper.oversample = '2x';
-    this.feedbackAmount = ctx.createGain(); // this is "resonance"
-    this.feedbackAmount.gain.value = 0;
-    this.feedbackInvert = ctx.createGain(); // subtract feedback from input, per ladder topology
-    this.feedbackInvert.gain.value = -1;
-
-    this.feedbackTap.connect(this.feedbackShaper);
-    this.feedbackShaper.connect(this.feedbackAmount);
-    this.feedbackAmount.connect(this.feedbackInvert);
-    this.feedbackInvert.connect(this.input);
-
-    // Tap each pole so we can select 6/12/18/24 dB outputs like classic
-    // Moog switchable ladders.
-    this._slopeOutputGains = this.poles.map((pole) => {
-      const gain = ctx.createGain();
-      gain.gain.value = 0;
-      pole.connect(gain);
-      return gain;
+    this._taps = this.poles.map((pole) => {
+      const g = ctx.createGain();
+      g.gain.value = 0;
+      pole.connect(g);
+      return g;
     });
 
-    this._slopeFeedbackGains = this.poles.map((pole) => {
-      const gain = ctx.createGain();
-      gain.gain.value = 0;
-      pole.connect(gain);
-      gain.connect(this.feedbackTap);
-      return gain;
-    });
-
-    // --- Output compensation: resonant ladder filters lose perceived
-    // level as resonance rises (energy is diverted into the feedback loop
-    // rather than passed straight through), so we add a small resonance-
-    // dependent makeup gain to keep loudness roughly constant, matching
-    // how the hardware's output stage is calibrated. ---
+    // --- output saturation + resonance-dependent level ---
+    this.outputShaper = ctx.createWaveShaper();
+    this.outputShaper.curve = makeSoftClipCurve(1.6);
+    this.outputShaper.oversample = '2x';
     this.outputCompensation = ctx.createGain();
-    this.outputCompensation.gain.value = 1;
-    this._slopeOutputGains.forEach((gain) => gain.connect(this.outputCompensation));
+    this._taps.forEach((g) => g.connect(this.outputShaper));
+    this.outputShaper.connect(this.outputCompensation);
     this.outputCompensation.connect(this.output);
 
     this._cutoff = 1000;
     this._resonance = 0;
     this._drive = 0;
-    this._keyTrackAmount = 0;
     this._slopeDb = 24;
     this.setSlope(24);
+    this.setResonance(0);
   }
 
-  connect(dest) {
-    this.output.connect(dest);
-    return dest;
-  }
+  connect(dest) { this.output.connect(dest); return dest; }
+  disconnect() { this.output.disconnect(); }
 
-  /**
-   * @param {number} hz - target cutoff frequency.
-   * @param {number} [glideSec=0] - if >0, smoothly glides rather than stepping (used by envelope/LFO modulation to avoid zipper noise).
-   */
   setCutoff(hz, glideSec = 0.003) {
     this._cutoff = Math.min(20000, Math.max(20, hz));
     this.poles.forEach((p) => glideTo(p.frequency, this._cutoff, glideSec, this.ctx));
   }
+  getCutoff() { return this._cutoff; }
 
-  getCutoff() {
-    return this._cutoff;
-  }
-
-  /**
-   * @param {number} amount - 0..1, mapped internally to a feedback gain that
-   * approaches (but is clamped just under) full self-oscillation at 1.0.
-   */
+  /** 0..1. The peak rises smoothly; near 1 it rings hard but stays bounded by the output stage. */
   setResonance(amount) {
     this._resonance = Math.min(1, Math.max(0, amount));
-    // The Little Phatty's ladder filter stays musical and punchy without
-    // going into an unstable, digital-sounding self-oscillation regime, so
-    // we keep the feedback gain below the harsh edge while still giving a
-    // strong, classic resonance peak.
-    // At zero resonance there must be no feedback at all.  A non-zero
-    // baseline changes the filter response even when the front-panel
-    // resonance control is fully counter-clockwise.  The upper range is
-    // deliberately capped below unstable runaway while retaining a strong
-    // Moog-style peak.
-    const fbGain = this._resonance * 1.25;
-    setImmediate(this.feedbackAmount.gain, fbGain, this.ctx);
+    this._applyQ();
+    // Ladder passband droop (about -8 dB at full resonance), partly made up in level.
+    const droop = 1 - 0.55 * this._resonance;
+    setImmediate(this.outputCompensation.gain, droop * (1 + this._resonance * 0.35), this.ctx);
+  }
+  getResonance() { return this._resonance; }
 
-    // Output compensation scales up gently with resonance since the
-    // feedback loop siphons off amplitude from the forward path.
-    const comp = 1 + this._resonance * 0.18;
-    setImmediate(this.outputCompensation.gain, comp, this.ctx);
+  _applyQ() {
+    const r = this._resonance;
+    const peakQ = 0.55 + Math.pow(r, 1.5) * 15; // the resonant section
+    const now = this.ctx.currentTime;
+    const q = (i, v) => this.poles[i].Q.setTargetAtTime(v, now, 0.005);
+    switch (this._slopeDb) {
+      case 6: q(0, 0.5); break;
+      case 12: q(0, Math.max(0.6, peakQ * 0.9)); break;
+      case 18: q(0, 0.6); q(1, 0.5); q(2, peakQ); break;
+      default: q(0, 0.54 + r * 0.3); q(1, peakQ); q(2, 0.5); q(3, 0.5); break;
+    }
   }
 
-  getResonance() {
-    return this._resonance;
-  }
-
-  /** @param {number} db - one of 6, 12, 18, 24 dB/oct. */
+  /** @param {number} db - 6, 12, 18 or 24 dB/oct. */
   setSlope(db) {
     const allowed = [6, 12, 18, 24];
-    const next = allowed.includes(db) ? db : 24;
-    this._slopeDb = next;
-
-    const index = next / 6 - 1;
-    this._slopeOutputGains.forEach((gain, i) => {
-      setImmediate(gain.gain, i === index ? 1 : 0, this.ctx);
-    });
-    this._slopeFeedbackGains.forEach((gain, i) => {
-      setImmediate(gain.gain, i === index ? 1 : 0, this.ctx);
-    });
+    this._slopeDb = allowed.includes(db) ? db : 24;
+    // 6 dB: p0 with Q 0.5 behaves close to a one-pole; 12: p0 resonant; 18: p0+p1+p2; 24: p0+p1.
+    const tap = { 6: 0, 12: 0, 18: 2, 24: 1 }[this._slopeDb];
+    this._taps.forEach((g, i) => setImmediate(g.gain, i === tap ? 1 : 0, this.ctx));
+    this._applyQ();
   }
+  getSlope() { return this._slopeDb; }
 
-  getSlope() {
-    return this._slopeDb;
-  }
-
-  /** @param {number} amount - 0..1 drive/overdrive into the filter input. */
+  /** 0..1 pre-filter overdrive (Little Phatty Overload / Sub 37 Multidrive). */
   setDrive(amount) {
     this._drive = Math.min(1, Math.max(0, amount));
-    const k = 1 + this._drive * 1.8; // softer, more analog-style saturation
-    this.driveShaper.curve = makeSoftClipCurve(k);
-    setImmediate(this.driveInputTrim.gain, 1 + this._drive * 0.9, this.ctx);
-    // Makeup gain keeps perceived loudness roughly constant as drive increases saturation.
-    setImmediate(this.driveOutputTrim.gain, 1 / (1 + this._drive * 0.35), this.ctx);
+    this.driveShaper.curve = makeSoftClipCurve(1 + this._drive * 3);
+    setImmediate(this.driveInputTrim.gain, 1 + this._drive * 2.2, this.ctx);
+    setImmediate(this.driveOutputTrim.gain, 1 / (1 + this._drive * 0.9), this.ctx);
   }
-
-  getDrive() {
-    return this._drive;
-  }
-
-  disconnect() {
-    this.output.disconnect();
-  }
+  getDrive() { return this._drive; }
 }

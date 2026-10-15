@@ -156,8 +156,8 @@ export class AudioEngine {
     this._lpMatrixTargets.pitch.connect(this.voice.osc1.pitchModInput);
     this._lpMatrixTargets.pitch.connect(this.voice.osc2.pitchModInput);
     this.voice.filter.poles.forEach((pole) => this._lpMatrixTargets.filter.connect(pole.frequency));
-    this._lpMatrixTargets.wave.connect(this.voice.osc1.pwmOscB.detune);
-    this._lpMatrixTargets.wave.connect(this.voice.osc2.pwmOscB.detune);
+    this._lpMatrixTargets.wave.connect(this.voice.osc1.pwModInput);
+    this._lpMatrixTargets.wave.connect(this.voice.osc2.pwModInput);
     this._lpMatrixTargets.osc2.connect(this.voice.osc2.pitchModInput);
     this.setLPModulation(this._lpMatrixPatch);
   }

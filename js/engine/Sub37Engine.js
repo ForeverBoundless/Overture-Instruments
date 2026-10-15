@@ -140,8 +140,8 @@ export class Sub37Engine {
       targets.FILTER.connect(this.voice.filter.poles[1].frequency);
       targets.FILTER.connect(this.voice.filter.poles[2].frequency);
       targets.FILTER.connect(this.voice.filter.poles[3].frequency);
-      targets.WAVE.connect(this.voice.osc1.pwmOscB.detune);
-      targets.WAVE.connect(this.voice.osc2.pwmOscB.detune);
+      targets.WAVE.connect(this.voice.osc1.pwModInput);
+      targets.WAVE.connect(this.voice.osc2.pwModInput);
       targets['OSC 2'].connect(this.voice.osc2.pitchModInput);
       targets.AMP.connect(this.voice.tremoloVCA.gain);
       Object.values(targets).forEach((target) => { target.gain.value = 0; });

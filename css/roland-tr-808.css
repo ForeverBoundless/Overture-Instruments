@@ -1,0 +1,30 @@
+/* roland-tr-808.css - rhythm composer: dark grey chassis with the red / orange / yellow / white step colours. */
+.tr-shell { --pn-shell: #26282c; --pn-shell-edge: #5b5f66; --pn-section: #17181b; --pn-border: #3c3f46; --pn-accent: #ff9f0a; --pn-accent-glow: rgba(255,159,10,.55); --pn-display-bg: #1d0a07; --pn-display-ink: #ff6a3d; --pn-led-off: #3a2a10; }
+.tr-shell .pn-brand img { height: 20px; }
+.tr-instruments { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 5px; margin-top: 10px; }
+.tr-inst { padding: 6px 4px 7px; }
+.tr-inst h2 { font-size: 6.4px; letter-spacing: .08em; min-height: 18px; }
+.tr-inst .pn-knobs { gap: 2px; justify-content: center; }
+.tr-inst .pn-knob { --knob-size: 36px; min-width: 36px; }
+.tr-inst .pn-buttons { width: 100%; justify-content: center; }
+.tr-seq { margin-top: 2px; }
+.tr-grid { width: 100%; display: grid; gap: 3px; }
+.tr-grid-row { display: grid; grid-template-columns: 54px repeat(16, minmax(0, 1fr)); gap: 3px; align-items: center; }
+.tr-lane-name { font: 800 8px 'Inter Variable', sans-serif; letter-spacing: .08em; color: #d8dbe0; background: #101114; border: 1px solid #3a3e45; border-radius: 3px; padding: 5px 2px; text-align: center; cursor: pointer; }
+.tr-step-head { font: 700 8px 'DM Mono', monospace; color: #8a8f99; text-align: center; padding: 3px 0; border-radius: 3px; border: 1px solid transparent; }
+.tr-step-head.is-playing { background: #ff9f0a; color: #140a00; box-shadow: 0 0 10px rgba(255,159,10,.8); }
+.tr-step { height: 26px; border-radius: 3px; border: 1px solid #000; cursor: pointer; box-shadow: inset 0 1px #ffffff33, 0 2px 0 #000; position: relative; }
+.tr-step::after { content: ''; position: absolute; left: 50%; top: 4px; width: 5px; height: 5px; margin-left: -2.5px; border-radius: 50%; background: #2a1a05; box-shadow: inset 0 0 1px #000; }
+.tr-step.is-on::after { background: #ff3b20; box-shadow: 0 0 6px #ff3b20, 0 0 12px #ff3b2088; }
+.tr-step.is-accent::after { background: #fff4d6; box-shadow: 0 0 6px #ffd36b, 0 0 12px #ffd36b; }
+.tr-step:active { transform: translateY(1px); }
+.tr-color-0 { background: linear-gradient(#d8362b, #8f1c14); }
+.tr-color-1 { background: linear-gradient(#f08a2a, #a85610); }
+.tr-color-2 { background: linear-gradient(#f3d23c, #a98d18); }
+.tr-color-3 { background: linear-gradient(#f2f0e6, #b8b6ab); }
+.tr-step-head.tr-color-0, .tr-step-head.tr-color-1, .tr-step-head.tr-color-2, .tr-step-head.tr-color-3 { background: none; }
+.tr-controls { width: 100%; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.tr-bottom { grid-template-columns: 1fr 1.6fr; }
+.tr-start { min-width: 90px; min-height: 30px; font-size: 10px; }
+@media (max-width: 1100px) { .tr-instruments { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+@media (max-width: 760px) { .tr-instruments { grid-template-columns: repeat(3, minmax(0, 1fr)); } .tr-grid-row { grid-template-columns: 34px repeat(16, minmax(0, 1fr)); } .tr-step { height: 20px; } .tr-bottom { grid-template-columns: 1fr; } .tr-lane-name { font-size: 6.5px; } }

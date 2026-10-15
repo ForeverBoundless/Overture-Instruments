@@ -42,3 +42,20 @@
 
 /* Keep the cyan display mono, but use Inter Variable for every compact control label. */
 .sub37-shell button,.sub37-shell select,.sub37-shell input,.sub37-shell output,.sub37-shell label,.sub37-shell .s37-button,.sub37-shell .lp-knob-label,.sub37-shell .lp-wheel-label,.sub37-shell .lp-key-label,.sub37-shell .s37-section h2,.sub37-shell .s37-footer{font-family:'Inter Variable',Inter,sans-serif!important}
+
+/* Realism pass: the Sub 37's knobs are plain black Moog caps with a white
+   pointer and skirt (no LED rings), its wheels are unlit black rubber. */
+.sub37-shell .lp-knob-led, .sub37-shell .lp-knob-ring-track { display: none; }
+.sub37-shell .lp-knob-body { stroke: #0a0a0b; stroke-width: 2; filter: drop-shadow(0 3px 2px rgba(0,0,0,.6)); }
+.sub37-shell .lp-knob-cap { fill: #1b1b1e; stroke: #4a4c52; }
+.sub37-shell .lp-knob-pointer { stroke: #f7f7f7; stroke-width: 3; }
+.sub37-shell .lp-knob-flute { stroke: rgba(255,255,255,.07); }
+.sub37-shell .lp-knob-svg { background: radial-gradient(circle at 50% 50%, #2a2b2f 0 44%, #151618 46%, #0a0a0b 52%, transparent 54%); border-radius: 50%; }
+.sub37-shell .s37-wheels .lp-wheel-housing { background: linear-gradient(90deg, #0e0f11, #26272b 50%, #0e0f11); border-color: #3a3d43; box-shadow: inset 0 0 12px #000, 0 1px #ffffff14; }
+.sub37-shell .s37-wheels .lp-wheel-housing::before { background: none; }
+.sub37-shell .s37-wheels .lp-wheel-thumb { background: linear-gradient(90deg, #141416, #3a3b3f 50%, #141416); box-shadow: 0 1px 3px #000; }
+.sub37-shell .s37-wheels .lp-wheel-grip { background: rgba(255,255,255,.14); }
+.sub37-shell .s37-display { background-color: #061a2a; color: #9be7ff; text-shadow: 0 0 5px #4fd0ff, 0 0 12px #1f8fc0; }
+.sub37-shell .s37-section h2 { color: #f1f2f4; }
+.sub37-shell .s37-keybed .lp-key-white { background-image: linear-gradient(180deg, #d9d9d4 0%, #f7f7f3 8%, #fbfbf8 70%, #e2e2dc 100%); }
+.sub37-shell .s37-keybed .lp-key-black { background-image: linear-gradient(90deg, #050506, #2c2d31 40%, #121214 80%, #000); }
