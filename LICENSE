@@ -1,0 +1,45 @@
+MIT License
+
+Copyright (c) 2026 Michael Carpiano
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of the software source code and associated software documentation covered by
+this license (the "Software"), to deal in the Software without restriction,
+including without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to permit
+persons to whom the Software is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+SCOPE AND THIRD-PARTY MATERIALS
+
+This license is intended to apply to original software source code and
+associated software documentation authored by Michael Carpiano for Overture
+Instruments, except where a file contains a different license or copyright
+notice.
+
+This license does not, by itself, grant permission to use third-party
+materials that may be present in, bundled with, or referenced by the
+repository. Such materials may include manufacturer logos, trademarks,
+product names, fonts, manual pages, screenshots, reference images, and other
+artwork. Those materials remain subject to the rights and terms of their
+respective owners. Users are responsible for identifying and complying with
+any applicable terms before redistributing or reusing them.
+
+No trademark rights or permission to imply endorsement, sponsorship, or
+affiliation with Overture Instruments or any third-party manufacturer are
+granted by this license. The names and marks of manufacturers remain the
+property of their respective owners.
+
+The absence of a separate notice on a third-party asset should not be treated
+as evidence that the asset is available for unrestricted use.
