@@ -262,5 +262,113 @@ class FMLab extends Lab {
   draw() { if (!this.audio.analyser) return; this.drawSpectrum(this.specPlot, 6000); const box = this.specPlot.box; const x = box.L + (this.p.carrier / 6000) * (box.R - box.L); this.specPlot.line([[x, box.T], [x, box.B]], '#ff9f0a88', 1); this.drawMeasured(this.wavePlot, Math.max(0.004, 3 / this.p.carrier), AMBER); }
 }
 
-const LABS = { oscillator: OscillatorLab, filter: FilterLab, envelope: EnvelopeLab, fm: FMLab };
+// ============================================================================ 005 Harmonics Lab
+class HarmonicsLab extends Lab {
+  constructor() {
+    super();
+    this.p = { hz: 220, h: [1, 0, 0, 0, 0, 0, 0, 0] };
+    this.setText('Experiment 005 - Harmonics Lab', 'Any repeating sound can be built from sine waves at whole-number multiples of one base frequency. Mix eight of them by hand and watch the waveform you draw become the waveform you hear.',
+      `<p>The lowest sine is the <b>fundamental</b> (1×); the others are <b>harmonics</b> or overtones at 2×, 3×, 4×... The pitch you hear comes from the fundamental; the <em>balance</em> of the harmonics gives the timbre. This is called <b>additive synthesis</b>, and the reverse operation (finding which sines are inside a sound) is the Fourier transform used by the spectrum plot.</p><p>Classic shapes are just recipes: a <b>sawtooth</b> is every harmonic at 1/n; a <b>square</b> is odd harmonics only at 1/n; a <b>triangle</b> is odd harmonics at 1/n², which is why it sounds so much softer. The upper plot is the <em>theoretical</em> sum of your eight sines; the lower plots are <em>measured</em> from the audio.</p>`,
+      ['Start with only harmonic 1 (a sine). Add harmonic 2 at half level - the pitch is unchanged but the tone gets a little fuller.', 'Press the SAWTOOTH recipe, then set every even harmonic to zero. You just turned a sawtooth into a square.', 'Mute harmonic 1 entirely but keep 2 to 8. Does the pitch move? (Usually not: the ear infers the missing fundamental.)', 'Put only harmonics 1 and 8 on. The spectrum shows two spikes far apart and the sound is a buzzing "two-note" tone.']);
+    this.sumPlot = new Plot(this.vis, { title: 'Sum of the eight sines (theoretical)', xLabel: 'one cycle', yLabel: 'amplitude', height: 200 });
+    this.wavePlot = new Plot(this.vis, { title: 'Waveform (measured)', xLabel: 'time', yLabel: 'amplitude', height: 150 });
+    this.specPlot = new Plot(this.vis, { title: 'Spectrum (measured): one peak per harmonic', xLabel: 'frequency (Hz)', yLabel: 'level', height: 170 });
+    const pre = el('div', 'lab-choice', this.controls);
+    [['Sine', [1, 0, 0, 0, 0, 0, 0, 0]], ['Sawtooth', [1, 0.5, 0.33, 0.25, 0.2, 0.17, 0.14, 0.13]], ['Square', [1, 0, 0.33, 0, 0.2, 0, 0.14, 0]], ['Triangle', [1, 0, 0.11, 0, 0.04, 0, 0.02, 0]], ['Organ', [1, 0.6, 0.3, 0.6, 0.1, 0.3, 0, 0.4]]].forEach(([n, v]) => { const b = el('button', 'lab-chip', pre, n); b.type = 'button'; b.addEventListener('click', () => v.forEach((x, i) => this.sl[i].set(x))); });
+    this.sl = this.p.h.map((v, i) => slider(this.controls, { label: `Harmonic ${i + 1} (${i + 1}×)`, min: 0, max: 1, value: v, format: (x) => x.toFixed(2), onInput: (x) => { this.p.h[i] = x; this.apply(); } }));
+    this.freq = slider(this.controls, { label: 'Fundamental', min: 55, max: 880, value: 220, log: true, format: (v) => `${v.toFixed(1)} Hz · ${hzToNote(v)}`, onInput: (v) => { this.p.hz = v; this.osc?.frequency.setTargetAtTime(v, this.audio.ctx.currentTime, 0.01); } });
+    this.keyInput(this.controls, (m) => { this.freq.set(440 * Math.pow(2, (m - 69) / 12)); this.play(); }, () => {});
+    this.drawSum();
+  }
+  wave(c) { const re = new Float32Array(9); const im = new Float32Array(9); this.p.h.forEach((v, i) => { im[i + 1] = v; }); return c.createPeriodicWave(re, im, { disableNormalization: true }); }
+  apply() { this.drawSum(); if (this.osc) this.osc.setPeriodicWave(this.wave(this.audio.ctx)); }
+  start() { const c = this.audio.ctx; this.osc = c.createOscillator(); this.osc.setPeriodicWave(this.wave(c)); this.osc.frequency.value = this.p.hz; this.gain = c.createGain(); this.gain.gain.value = 0; this.osc.connect(this.gain); this.gain.connect(this.audio.master); this.osc.start(); this.gain.gain.setTargetAtTime(0.3, c.currentTime, 0.02); }
+  end() { const c = this.audio.ctx; const g = this.gain, o = this.osc; g.gain.setTargetAtTime(0, c.currentTime, 0.02); o.stop(c.currentTime + 0.2); this.osc = this.gain = null; }
+  drawSum() { const box = this.sumPlot.frame([[0, '0'], [0.5, '½'], [1, '1 cycle']], [[0, '-2'], [0.5, '0'], [1, '+2']]); const pts = []; for (let i = 0; i <= 400; i += 1) { const t = i / 400; let y = 0; this.p.h.forEach((v, k) => { y += v * Math.sin(2 * Math.PI * (k + 1) * t); }); pts.push([box.L + t * (box.R - box.L), (box.B + box.T) / 2 - clamp(y / 2, -1, 1) * (box.B - box.T) / 2]); } this.sumPlot.line(pts, AMBER); }
+  draw() { this.drawMeasured(this.wavePlot, 2 / this.p.hz); this.drawSpectrum(this.specPlot, this.p.hz * 10); }
+}
+
+// ============================================================================ 006 Beats & Tuning Lab
+class BeatsLab extends Lab {
+  constructor() {
+    super();
+    this.p = { hz: 220, off: 3, wave: 'sine' }; this.hist = new Float32Array(360).fill(0);
+    this.setText('Experiment 006 - Beats and Tuning Lab', 'Play two tones a few hertz apart and you hear one tone that pulses. That pulse is how musicians tune by ear - and how synth players make sounds "fat".',
+      `<p>Two sines at 220 Hz and 223 Hz drift in and out of phase: when their peaks line up they add, when they oppose they cancel. The result swells and fades <b>3 times per second</b> - the <b>beat frequency</b> is simply the difference between the two frequencies. The plot shows a long window of the measured signal so the slow envelope is visible.</p><p>Tuning a guitar or a synth oscillator is just slowing the beats down until they stop. Doing the opposite - deliberately detuning by a few cents - gives the chorus-like width of a two-oscillator lead or a supersaw. Push the offset past ~20 Hz and the beats stop being a rhythm and become a rough, buzzy tone (the ear can no longer follow them individually).</p>`,
+      ['Set the offset to 0 Hz: a single steady tone. Move to 1 Hz, then 4 Hz, and count the pulses per second.', 'Set the offset to 2 Hz and switch the waveform to sawtooth. The beating stays, but each harmonic now beats at its own rate.', 'Slide to 30 Hz and beyond. At what point does the pulse become roughness, then a second pitch?', 'Return to around 1.5 Hz: this is roughly the detune used for a classic "fat" two-oscillator synth lead.']);
+    this.envPlot = new Plot(this.vis, { title: 'Measured peak level, last ~6 s (the slow swell is the beat)', xLabel: 'time \u2192', yLabel: 'amplitude', height: 220 });
+    this.wavePlot = new Plot(this.vis, { title: 'Waveform (measured, 80 ms)', xLabel: 'time', yLabel: 'amplitude', height: 150 });
+    this.specPlot = new Plot(this.vis, { title: 'Spectrum (measured) - two close peaks', xLabel: 'frequency (Hz)', yLabel: 'level', height: 170 });
+    this.info = el('div', 'lab-diagram', this.vis);
+    choice(this.controls, { label: 'Waveform', options: [{ value: 'sine', label: 'Sine' }, { value: 'sawtooth', label: 'Sawtooth' }], value: 'sine', onChange: (v) => { this.p.wave = v; this.oscs?.forEach((o) => { o.type = v; }); } });
+    slider(this.controls, { label: 'Tone A frequency', min: 55, max: 880, value: 220, log: true, format: (v) => `${v.toFixed(1)} Hz`, onInput: (v) => { this.p.hz = v; this.apply(); } });
+    slider(this.controls, { label: 'Tone B offset', min: 0, max: 60, value: 3, step: 0.1, format: (v) => `+${v.toFixed(1)} Hz`, onInput: (v) => { this.p.off = v; this.apply(); } });
+    this.apply();
+  }
+  apply() { const cents = this.p.off ? 1200 * Math.log2((this.p.hz + this.p.off) / this.p.hz) : 0; this.info.innerHTML = `<span class="lab-box lab-box--car">TONE A<br><b>${this.p.hz.toFixed(1)} Hz</b></span><span class="lab-arrow">+</span><span class="lab-box lab-box--mod">TONE B<br><b>${(this.p.hz + this.p.off).toFixed(1)} Hz (${cents.toFixed(1)}¢)</b></span><span class="lab-arrow">=</span><span class="lab-box">BEAT RATE<br><b>${this.p.off.toFixed(1)} per second</b></span>`; if (!this.oscs) return; const t = this.audio.ctx.currentTime; this.oscs[0].frequency.setTargetAtTime(this.p.hz, t, 0.01); this.oscs[1].frequency.setTargetAtTime(this.p.hz + this.p.off, t, 0.01); }
+  start() { const c = this.audio.ctx; this.gain = c.createGain(); this.gain.gain.value = 0; this.gain.connect(this.audio.master); this.oscs = [0, 1].map((i) => { const o = c.createOscillator(); o.type = this.p.wave; o.frequency.value = this.p.hz + (i ? this.p.off : 0); o.connect(this.gain); o.start(); return o; }); this.gain.gain.setTargetAtTime(0.25, c.currentTime, 0.02); }
+  end() { const c = this.audio.ctx; this.gain.gain.setTargetAtTime(0, c.currentTime, 0.02); this.oscs.forEach((o) => o.stop(c.currentTime + 0.2)); this.oscs = this.gain = null; }
+  draw() { const buf = this.measured(); let pk = 0; for (let i = 0; i < buf.length; i += 1) pk = Math.max(pk, Math.abs(buf[i])); this.hist.copyWithin(0, 1); this.hist[this.hist.length - 1] = pk;
+    const box = this.envPlot.frame([[0, '-6 s'], [0.5, '-3 s'], [1, 'now']], [[0, '-1'], [0.5, '0'], [1, '+1']]); const mid = (box.B + box.T) / 2; const X = (i) => box.L + (i / (this.hist.length - 1)) * (box.R - box.L); const Y = (v) => mid - clamp(v, 0, 1) * (box.B - box.T) / 2;
+    this.envPlot.line(Array.from(this.hist, (v, i) => [X(i), Y(v)]), ACCENT); this.envPlot.line(Array.from(this.hist, (v, i) => [X(i), 2 * mid - Y(v)]), ACCENT);
+    this.drawMeasured(this.wavePlot, 0.08); this.drawSpectrum(this.specPlot, Math.min(4000, this.p.hz * 4)); }
+}
+
+// ============================================================================ 007 Echo & Reverb Lab
+class SpaceLab extends Lab {
+  constructor() {
+    super();
+    this.p = { time: 0.35, fb: 0.4, dmix: 0.4, size: 2, rmix: 0.25 }; this.hist = new Float32Array(600).fill(0);
+    this.setText('Experiment 007 - Echo and Reverb Lab', 'Space is an effect. A delay line repeats a sound after a set time; feed some of it back and you get echoes; blur thousands of them together and you get the reverb of a room or a hall.',
+      `<p>A <b>delay</b> stores the signal and plays it again <em>time</em> seconds later. Routing part of the output back into the input (<b>feedback</b>) makes each echo spawn another, quieter one; at 100% they would never die away. Short times (under ~40 ms) are heard as thickening rather than echo - that is how chorus and flanger effects work.</p><p><b>Reverb</b> is what a real room does: countless reflections arriving so densely that they merge into a decaying wash. Here it is simulated by convolving the sound with a synthetic <em>impulse response</em> - a burst of decaying noise whose length is the <b>size</b>. The lower plot is a rolling history of the <em>measured</em> output level, so you can see echoes as separate bumps and reverb as a smooth tail.</p>`,
+      ['Set reverb mix to 0, delay feedback to 0 and time to 0.5 s. Tap a key: one pluck and one echo, clearly visible as two bumps.', 'Raise feedback to 70%: the bumps become a decaying staircase. Try 95% and listen to it almost run away.', 'Set delay mix to 0 and reverb mix to 50% with size 0.5 s, then 6 s. A small room versus a cathedral - same pluck.', 'Delay time 0.02 s, feedback 60%: the echoes are too fast to hear separately and turn into a metallic ringing tone.']);
+    this.lvlPlot = new Plot(this.vis, { title: 'Output level history (measured, last ~6 s)', xLabel: 'time →', yLabel: 'level', height: 200 });
+    this.wavePlot = new Plot(this.vis, { title: 'Waveform (measured)', xLabel: 'time', yLabel: 'amplitude', height: 150 });
+    slider(this.controls, { label: 'Delay time', min: 0.01, max: 1.5, value: 0.35, log: true, format: (v) => `${(v * 1000).toFixed(0)} ms`, onInput: (v) => { this.p.time = v; this.delay?.delayTime.setTargetAtTime(v, this.audio.ctx.currentTime, 0.05); } });
+    slider(this.controls, { label: 'Delay feedback', min: 0, max: 0.95, value: 0.4, format: (v) => `${Math.round(v * 100)}%`, onInput: (v) => { this.p.fb = v; this.fb?.gain.setTargetAtTime(v, this.audio.ctx.currentTime, 0.02); } });
+    slider(this.controls, { label: 'Delay mix', min: 0, max: 1, value: 0.4, format: (v) => `${Math.round(v * 100)}%`, onInput: (v) => { this.p.dmix = v; this.dwet?.gain.setTargetAtTime(v, this.audio.ctx.currentTime, 0.02); } });
+    slider(this.controls, { label: 'Reverb size', min: 0.2, max: 8, value: 2, format: (v) => `${v.toFixed(1)} s`, onInput: (v) => { this.p.size = v; clearTimeout(this.irT); this.irT = setTimeout(() => this.buildIR(), 150); } });
+    slider(this.controls, { label: 'Reverb mix', min: 0, max: 1, value: 0.25, format: (v) => `${Math.round(v * 100)}%`, onInput: (v) => { this.p.rmix = v; this.rwet?.gain.setTargetAtTime(v * 1.5, this.audio.ctx.currentTime, 0.02); } });
+    this.keyInput(this.controls, (m) => this.pluck(m), () => {});
+    this.playBtn.replaceWith(this.playBtn.cloneNode(true)); this.playBtn = this.transport.querySelector('.lab-play'); this.playBtn.textContent = 'PLUCK'; this.playBtn.addEventListener('click', () => this.pluck(57));
+  }
+  buildIR() { const c = this.audio.ctx; if (!c || !this.conv) return; const n = Math.floor(c.sampleRate * this.p.size); const b = c.createBuffer(2, n, c.sampleRate); for (let ch = 0; ch < 2; ch += 1) { const d = b.getChannelData(ch); for (let i = 0; i < n; i += 1) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 3); } this.conv.buffer = b; }
+  async ensureGraph() { await this.audio.ensure(); if (!this.playing) { this.playing = true; this.loop(); } if (this.input) return; const c = this.audio.ctx; this.audio.master.gain.setTargetAtTime(this.level, c.currentTime, 0.02);
+    this.input = c.createGain(); this.delay = c.createDelay(2); this.delay.delayTime.value = this.p.time; this.fb = c.createGain(); this.fb.gain.value = this.p.fb; const lp = c.createBiquadFilter(); lp.frequency.value = 4000; this.dwet = c.createGain(); this.dwet.gain.value = this.p.dmix; this.conv = c.createConvolver(); this.rwet = c.createGain(); this.rwet.gain.value = this.p.rmix * 1.5; const sum = c.createGain();
+    this.input.connect(sum); this.input.connect(this.delay); this.delay.connect(lp); lp.connect(this.fb); this.fb.connect(this.delay); lp.connect(this.dwet); this.dwet.connect(sum); sum.connect(this.audio.master); sum.connect(this.conv); this.conv.connect(this.rwet); this.rwet.connect(this.audio.master); this.buildIR(); }
+  async pluck(m) { await this.ensureGraph(); const c = this.audio.ctx; const hz = 440 * Math.pow(2, (m - 69) / 12); const t = c.currentTime; const o = c.createOscillator(); o.type = 'triangle'; o.frequency.value = hz; const g = c.createGain(); g.gain.setValueAtTime(0.5, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.25); o.connect(g); g.connect(this.input); o.start(t); o.stop(t + 0.3); }
+  draw() { const buf = this.measured(); let s = 0; for (let i = 0; i < buf.length; i += 4) s += buf[i] * buf[i]; const rms = Math.sqrt(s / (buf.length / 4)); this.hist.copyWithin(0, 1); this.hist[this.hist.length - 1] = rms;
+    const box = this.lvlPlot.frame([[0, '-6 s'], [0.5, '-3 s'], [1, 'now']], [[0, '-60 dB'], [0.5, '-30 dB'], [1, '0 dB']]); const pts = Array.from(this.hist, (v, i) => [box.L + (i / (this.hist.length - 1)) * (box.R - box.L), box.B - clamp((20 * Math.log10(Math.max(1e-3, v)) + 60) / 60, 0, 1) * (box.B - box.T)]); this.lvlPlot.line([...pts], GREEN);
+    this.drawMeasured(this.wavePlot, 0.02); }
+  end() {}
+}
+
+// ============================================================================ 008 Modulation Lab
+class ModulationLab extends Lab {
+  constructor() {
+    super();
+    this.p = { target: 'pitch', rate: 5, depth: 0.3, shape: 'sine', hz: 220 };
+    this.setText('Experiment 008 - Modulation (LFO) Lab', 'An LFO is an oscillator too slow to hear - instead you aim it at another control and hear that control move. The same wobble becomes vibrato, tremolo or wah depending on where you point it.',
+      `<p>A <b>low-frequency oscillator</b> runs at a few hertz. Its output is not sent to the speaker; it is added to a parameter. Aimed at <b>pitch</b> the result is <b>vibrato</b> (a singer's wobble); aimed at <b>amplitude</b> it is <b>tremolo</b> (a pulsing volume); aimed at a <b>filter cutoff</b> it is an <b>auto-wah</b>. The <b>rate</b> sets how fast the wobble is and the <b>depth</b> how far it travels.</p><p>The LFO's <b>shape</b> matters as much as its rate: a sine glides, a square jumps between two values (a trill when aimed at pitch), a sawtooth ramps and snaps back. The top plot is the <em>theoretical</em> LFO shape; the lower plots are <em>measured</em>. Push the rate above ~20 Hz and the modulation itself becomes a tone - which is the doorway to FM and ring modulation.</p>`,
+      ['Target pitch, sine, rate 5 Hz, depth 30%: a vibrato. Lower the depth to 5% for a realistic singer-style wobble.', 'Switch the target to amplitude: the pitch is now steady and the loudness pulses. Watch the measured waveform swell and shrink.', 'Target the filter with a square LFO at 2 Hz: the tone jumps between dull and bright.', 'Target pitch with a square at 6 Hz and depth 100%: that is a trill between two notes. Raise the rate to 40 Hz and hear it become a buzzy new timbre.']);
+    this.lfoPlot = new Plot(this.vis, { title: 'LFO shape (theoretical, one second)', xLabel: 'time (s)', yLabel: 'value', height: 160 });
+    this.wavePlot = new Plot(this.vis, { title: 'Waveform (measured, 100 ms)', xLabel: 'time', yLabel: 'amplitude', height: 170 });
+    this.specPlot = new Plot(this.vis, { title: 'Spectrum (measured)', xLabel: 'frequency (Hz)', yLabel: 'level', height: 160 });
+    choice(this.controls, { label: 'LFO target', options: [{ value: 'pitch', label: 'Pitch (vibrato)' }, { value: 'amp', label: 'Amplitude (tremolo)' }, { value: 'filter', label: 'Filter (wah)' }], value: 'pitch', onChange: (v) => { this.p.target = v; this.apply(); } });
+    choice(this.controls, { label: 'LFO shape', options: ['sine', 'triangle', 'square', 'sawtooth'].map((v) => ({ value: v, label: v })), value: 'sine', onChange: (v) => { this.p.shape = v; this.apply(); } });
+    slider(this.controls, { label: 'LFO rate', min: 0.1, max: 60, value: 5, log: true, format: (v) => `${v.toFixed(2)} Hz`, onInput: (v) => { this.p.rate = v; this.apply(); } });
+    slider(this.controls, { label: 'LFO depth', min: 0, max: 1, value: 0.3, format: (v) => `${Math.round(v * 100)}%`, onInput: (v) => { this.p.depth = v; this.apply(); } });
+    this.keyInput(this.controls, (m) => { this.p.hz = 440 * Math.pow(2, (m - 69) / 12); this.osc?.frequency.setTargetAtTime(this.p.hz, this.audio.ctx.currentTime, 0.01); this.play(); }, () => {});
+    this.drawLFO();
+  }
+  apply() { this.drawLFO(); if (!this.lfo) return; const t = this.audio.ctx.currentTime; const p = this.p; this.lfo.type = p.shape; this.lfo.frequency.setTargetAtTime(p.rate, t, 0.02);
+    this.toPitch.gain.setTargetAtTime(p.target === 'pitch' ? p.depth * 1200 : 0, t, 0.02); this.toAmp.gain.setTargetAtTime(p.target === 'amp' ? p.depth * 0.5 : 0, t, 0.02); this.amp.gain.setTargetAtTime(p.target === 'amp' ? 1 - p.depth * 0.5 : 1, t, 0.02); this.toFilt.gain.setTargetAtTime(p.target === 'filter' ? p.depth * 3600 : 0, t, 0.02); }
+  start() { const c = this.audio.ctx; this.osc = c.createOscillator(); this.osc.type = 'sawtooth'; this.osc.frequency.value = this.p.hz; this.filt = c.createBiquadFilter(); this.filt.frequency.value = 900; this.filt.Q.value = 6; this.amp = c.createGain(); this.out = c.createGain(); this.out.gain.value = 0; this.lfo = c.createOscillator(); this.toPitch = c.createGain(); this.toAmp = c.createGain(); this.toFilt = c.createGain();
+    this.lfo.connect(this.toPitch); this.toPitch.connect(this.osc.detune); this.lfo.connect(this.toAmp); this.toAmp.connect(this.amp.gain); this.lfo.connect(this.toFilt); this.toFilt.connect(this.filt.detune); this.osc.connect(this.filt); this.filt.connect(this.amp); this.amp.connect(this.out); this.out.connect(this.audio.master); this.osc.start(); this.lfo.start(); this.apply(); this.out.gain.setTargetAtTime(0.3, c.currentTime, 0.02); }
+  end() { const c = this.audio.ctx; this.out.gain.setTargetAtTime(0, c.currentTime, 0.02); [this.osc, this.lfo].forEach((o) => o.stop(c.currentTime + 0.2)); this.osc = this.lfo = null; }
+  drawLFO() { const box = this.lfoPlot.frame([[0, '0'], [0.5, '0.5'], [1, '1']], [[0, '-1'], [0.5, '0'], [1, '+1']]); const f = { sine: (x) => Math.sin(2 * Math.PI * x), triangle: (x) => 1 - 4 * Math.abs(((x + 0.25) % 1) - 0.5), square: (x) => ((x % 1) < 0.5 ? 1 : -1), sawtooth: (x) => 2 * (x % 1) - 1 }[this.p.shape]; const pts = []; for (let i = 0; i <= 600; i += 1) { const t = i / 600; pts.push([box.L + t * (box.R - box.L), (box.B + box.T) / 2 - f(t * this.p.rate) * this.p.depth * (box.B - box.T) / 2]); } this.lfoPlot.line(pts, '#c89bff'); }
+  draw() { this.drawMeasured(this.wavePlot, 0.1); this.drawSpectrum(this.specPlot, 6000); }
+}
+
+const LABS = { oscillator: OscillatorLab, filter: FilterLab, envelope: EnvelopeLab, fm: FMLab, harmonics: HarmonicsLab, beats: BeatsLab, space: SpaceLab, modulation: ModulationLab };
 document.addEventListener('DOMContentLoaded', () => { const L = LABS[document.body.dataset.lab]; if (L) window.__lab = new L(); });
