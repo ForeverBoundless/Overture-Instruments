@@ -672,7 +672,7 @@ body.high-contrast .lp-oled-line {
   grid-template-columns: minmax(0, 1fr) minmax(360px, 0.8fr);
   align-items: center;
   gap: 70px;
-  padding: 90px 0 46px;
+  padding: 185px 0 46px;
 }
 
 .launcher-hero__copy {
@@ -1614,7 +1614,7 @@ body.high-contrast .lp-oled-line {
 .launcher-brand-grid {
   grid-template-columns: repeat(2, 1fr);
   min-height: 220px;
-}.launcher-header,.launcher-hero,.instrument-grid,.launcher-footer{width:min(100% - 32px,1120px)}.launcher-header{padding-top:22px}.launcher-status{font-size:10px}.launcher-hero{padding:120px 0 34px}.instrument-tile{grid-template-columns:120px 1fr}.instrument-tile__display {
+}.launcher-header,.launcher-hero,.instrument-grid,.launcher-footer{width:min(100% - 32px,1120px)}.launcher-header{padding-top:22px}.launcher-status{font-size:10px}.launcher-hero{padding:150px 0 34px}.instrument-tile{grid-template-columns:120px 1fr}.instrument-tile__display {
   left: 17px;
 }
 
