@@ -205,6 +205,18 @@ export class PresetManager {
     }
   }
 
+  /** Returns the patch restoreLastSession() would apply, without touching the engine. */
+  peekLastSession() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY_LAST_SESSION);
+      const { presetId = 0, source = 'factory' } = raw ? JSON.parse(raw) : {};
+      if (source === 'user' && this.userPresets[presetId]) return { patch: this._userSnapshots.get(presetId) ?? this.userPresets[presetId], presetId, source };
+      return { patch: this._factorySnapshots.get(presetId) ?? getPreset(presetId) ?? getPreset(0), presetId: getPreset(presetId) ? presetId : 0, source: 'factory' };
+    } catch (e) {
+      return { patch: getPreset(0), presetId: 0, source: 'factory' };
+    }
+  }
+
   /** Called once on startup to restore the last session, if any. */
   restoreLastSession() {
     try {

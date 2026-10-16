@@ -56,10 +56,11 @@ class DX7App {
     const page = el('div', 'pn-page', root);
     this.shell = el('main', 'pn-shell dx7-shell', page);
     const header = el('header', 'pn-header', this.shell);
-    el('div', 'pn-brand', header).innerHTML = '<span class="pn-brand-text dx7-brand">YAMAHA</span><div class="pn-model"><b>DX7</b><span>DIGITAL PROGRAMMABLE ALGORITHM SYNTHESIZER</span></div>';
+    el('div', 'pn-brand', header).innerHTML = '<span class="dx7-logo"><img src="/ui/Logos/Yamaha_logo.png" alt="Yamaha"></span><div class="pn-model dx7-model"><b>DX7</b><span>DIGITAL PROGRAMMABLE ALGORITHM SYNTHESIZER</span></div>';
     const right = el('div', 'pn-header-right', header);
     this.disp = display(right);
     this.midiEl = el('div', 'pn-midi', right, 'MIDI: searching…');
+    el('div', 'dx7-stripe', this.shell);
     const rows = el('div', 'pn-rows', this.shell);
     const row1 = el('div', 'pn-row dx7-row-top', rows);
     const presets = section(row1, 'VOICE MEMORY', 'ORIGINAL OVERTURE VOICES');
@@ -69,15 +70,19 @@ class DX7App {
       capture: () => JSON.parse(JSON.stringify(this.patch)),
     });
     const g = section(row1, 'ALGORITHM', 'TOPOLOGY & FEEDBACK');
-    this.algSelect = select(g.body, 'ALGORITHM', Array.from({ length: 32 }, (_, i) => ({ value: i + 1, label: `${i + 1}  (${ALGORITHMS[i].carriers.length} carrier${ALGORITHMS[i].carriers.length > 1 ? 's' : ''})` })), 1, (v) => this.edit((p) => { p.algorithm = Number(v); }));
-    const gk = el('div', 'pn-knobs', g.body);
+    g.body.classList.add('dx7-alg-body');
+    const gc = el('div', 'dx7-alg-controls', g.body);
+    this.algSelect = select(gc, 'ALGORITHM', Array.from({ length: 32 }, (_, i) => ({ value: i + 1, label: `${i + 1}  (${ALGORITHMS[i].carriers.length} carrier${ALGORITHMS[i].carriers.length > 1 ? 's' : ''})` })), 1, (v) => this.edit((p) => { p.algorithm = Number(v); }));
+    const gk = el('div', 'pn-knobs', gc);
     this.knobs.feedback = knob(gk, { label: 'FEEDBACK', min: 0, max: 7, value: 5, formatValue: (v) => String(Math.round(v)), onChange: (v) => this.edit((p) => { p.feedback = Math.round(v); }) });
     this.knobs.transpose = knob(gk, { label: 'TRANSPOSE', min: -24, max: 24, value: 0, bipolar: true, formatValue: (v) => `${Math.round(v)} st`, onChange: (v) => this.edit((p) => { p.transpose = Math.round(v); }) });
     this.knobs.volume = knob(gk, { label: 'VOLUME', min: 0, max: 1, value: 0.7, formatValue: (v) => `${Math.round(v * 100)}%`, onChange: (v) => this.engine.setVolume(v) });
     this.algSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    this.algSvg.setAttribute('viewBox', '0 0 240 120');
+    this.algSvg.setAttribute('viewBox', '0 -8 240 130');
     this.algSvg.classList.add('dx7-alg');
-    g.body.appendChild(this.algSvg);
+    const algWrap = el('div', 'dx7-alg-wrap', g.body);
+    algWrap.appendChild(this.algSvg);
+    el('div', 'dx7-alg-legend', algWrap).innerHTML = '<i class="is-carrier"></i>CARRIER <i></i>MODULATOR <i class="is-fb"></i>FEEDBACK <em>CLICK AN OP TO EDIT IT</em>';
     const lfo = section(row1, 'LFO & CONTROLLERS');
     const lk = el('div', 'pn-knobs', lfo.body);
     const lknob = (key, label, max, fmt) => { this.knobs[key] = knob(lk, { label, min: 0, max, value: 0, formatValue: fmt || ((v) => String(Math.round(v))), onChange: (v) => this.edit((p) => { p.lfo[key] = Math.round(v); }) }); };
@@ -101,7 +106,9 @@ class DX7App {
       const b = button(tab, `OP ${i + 1}`, () => { this.selectedOp = i; this.refreshOp(); });
       b.classList.add('dx7-tab-button');
       this.tabs.push(b);
-      this.opEnables.push(toggle(tab, 'ON', true, (v) => this.edit((p) => { p.ops[i].enabled = v; })));
+      const en = toggle(tab, 'ON', true, (v) => this.edit((p) => { p.ops[i].enabled = v; }));
+      en.classList.add('dx7-tab-on');
+      this.opEnables.push(en);
     }
     const opBody = el('div', 'dx7-op-body', opSec.body);
     const freq = el('div', 'dx7-op-group', opBody);
@@ -119,12 +126,13 @@ class DX7App {
     this.opRole = el('div', 'pn-help dx7-role', freq);
     const eg = el('div', 'dx7-op-group', opBody);
     el('h3', '', eg, 'ENVELOPE GENERATOR  (RATE 1-4 / LEVEL 1-4)');
-    const ek = el('div', 'pn-knobs', eg);
+    const ek = el('div', 'pn-knobs dx7-eg-knobs', eg);
     this.egKnobs = { rates: [], levels: [] };
     for (let i = 0; i < 4; i += 1) this.egKnobs.rates.push(knob(ek, { label: `RATE ${i + 1}`, min: 0, max: 99, value: 50, formatValue: (v) => String(Math.round(v)), onChange: (v) => this.editOp((o) => { o.rates[i] = Math.round(v); }) }));
     for (let i = 0; i < 4; i += 1) this.egKnobs.levels.push(knob(ek, { label: `LEVEL ${i + 1}`, min: 0, max: 99, value: 99, formatValue: (v) => String(Math.round(v)), onChange: (v) => this.editOp((o) => { o.levels[i] = Math.round(v); }) }));
     this.egCanvas = el('canvas', 'dx7-eg', eg);
     this.egCanvas.width = 420; this.egCanvas.height = 110;
+    if (typeof ResizeObserver !== 'undefined') new ResizeObserver(() => this.drawEnvelope()).observe(this.egCanvas);
     el('div', 'pn-help', eg, 'The envelope runs through rate/level 1 → 2 → 3 on key-down, stays at level 3 while held, then rate 4 → level 4 on release. A modulator\'s envelope shapes brightness; a carrier\'s shapes loudness.');
   }
 
@@ -145,7 +153,7 @@ class DX7App {
 
   refreshOp() {
     const o = this.patch.ops[this.selectedOp];
-    this.tabs.forEach((t, i) => t.classList.toggle('lit', i === this.selectedOp));
+    this.tabs.forEach((t, i) => { t.classList.toggle('lit', i === this.selectedOp); t.parentElement.classList.toggle('is-active', i === this.selectedOp); });
     this.modeToggle.setValue(o.mode === 'fixed', true);
     ['coarse', 'fine', 'detune', 'level', 'velSens', 'rateScale', 'ams'].forEach((k) => this.opKnobs[k].setValue(o[k], true));
     o.rates.forEach((r, i) => this.egKnobs.rates[i].setValue(r, true));
@@ -202,7 +210,10 @@ class DX7App {
   drawEnvelope() {
     const c = this.egCanvas.getContext('2d');
     const o = this.patch.ops[this.selectedOp];
-    const W = this.egCanvas.width; const H = this.egCanvas.height;
+    const dpr = window.devicePixelRatio || 1;
+    const W = Math.max(200, this.egCanvas.clientWidth || 420); const H = 110;
+    if (this.egCanvas.width !== Math.round(W * dpr)) { this.egCanvas.width = Math.round(W * dpr); this.egCanvas.height = Math.round(H * dpr); }
+    c.setTransform(dpr, 0, 0, dpr, 0, 0);
     c.clearRect(0, 0, W, H);
     const t = (r) => 0.001 * Math.pow(10, (99 - r) / 24);
     const segs = [t(o.rates[0]), t(o.rates[1]), t(o.rates[2]), 0.5, t(o.rates[3])];

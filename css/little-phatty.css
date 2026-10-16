@@ -473,3 +473,52 @@
 @media (max-width: 760px) {
   .little-phatty-body #app-root { padding: 8px; }
 }
+
+/* =====================================================================
+   Quality pass - brings the Little Phatty up to the Sub 37 / Prophet
+   finish: anodized grain on the chassis, inset bordered sections with the
+   screen-printed header tabs, crisper legends, properly bevelled buttons,
+   and a backlit LCD with a visible pixel grid. No controls added/removed.
+   ===================================================================== */
+.little-phatty-body{background-color:#121419;background-image:radial-gradient(ellipse at 50% -10%,#585d66,#22252a 50%,#0e1013),url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.7' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 .12 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:100% 100%,96px 96px}
+.little-phatty-body #chassis{border:1px solid #4b4f57;border-bottom-color:#000;box-shadow:0 34px 80px #000d,0 0 0 1px #000,inset 0 1px #ffffff22}
+.little-phatty-body #chassis-rail{height:14px;background-image:repeating-linear-gradient(90deg,#fff0 0 2px,#ffffff14 2px 3px),linear-gradient(180deg,#f4f5f7 0%,#c9ccd1 30%,#979ba2 65%,#5a5d64 100%);box-shadow:0 3px 5px #000c,inset 0 1px #fff,inset 0 -1px #0006}
+.little-phatty-body #panel{padding:12px 10px 6px;background-color:#16171a;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cpath d='M0 3h120M0 16h120M0 29h120M0 42h120M0 55h120M0 68h120M0 81h120M0 94h120M0 107h120' stroke='%23fff' stroke-opacity='.03'/%3E%3Cpath d='M0 4h120M0 17h120M0 30h120M0 43h120M0 56h120M0 69h120M0 82h120M0 95h120M0 108h120' stroke='%23000' stroke-opacity='.14'/%3E%3C/svg%3E"),linear-gradient(180deg,#202125 0%,#17181b 40%,#121316 100%);background-size:120px 120px,100% 100%;box-shadow:inset 0 1px #ffffff14,inset 0 -1px #000,0 6px 14px #0008}
+.little-phatty-body #sections-row{gap:6px;grid-template-columns:248px minmax(172px,1fr) minmax(0,1.45fr) minmax(172px,1fr) minmax(0,1.75fr) 118px}
+.little-phatty-body .lp-section{padding:20px 6px 9px;border:1px solid #3b3e45;border-radius:4px;background-color:#1a1c20;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Cpath d='M0 1h48M0 25h48' stroke='%23fff' stroke-opacity='.035'/%3E%3Cpath d='M0 2h48M0 26h48' stroke='%23000' stroke-opacity='.18'/%3E%3C/svg%3E"),linear-gradient(160deg,#23262b,#141518 70%);background-size:48px 48px,100% 100%;box-shadow:inset 0 1px #ffffff16,inset 0 -1px #000,0 2px 3px #0008}
+.little-phatty-body .lp-section::before{top:8px;left:8px;right:8px;background:#ffffff33}
+.little-phatty-body .lp-section-title{top:1px;padding:4px 14px;border-radius:0 0 3px 3px;background:linear-gradient(#d2d5da,#9ca0a7);font-size:8px;letter-spacing:.16em;box-shadow:0 1px 2px #000c,inset 0 1px #fff}
+.little-phatty-body .lp-section-master{padding-top:9px}
+.little-phatty-body .lp-section-knobs{gap:5px 6px}
+.little-phatty-body .lp-knob{--knob-size:47px!important;min-width:47px;filter:drop-shadow(0 2px 2px #0009)}
+.little-phatty-body .lp-section-output .lp-knob,.little-phatty-body #master-row .lp-knob{--knob-size:43px!important;min-width:43px}
+.little-phatty-body .lp-knob-label{color:#eceef1;font-size:6.6px;letter-spacing:.07em;max-width:62px}
+.little-phatty-body .lp-knob-cap{fill:#d9dbde;stroke:#f8f9fa}
+.little-phatty-body .lp-knob-svg{background:radial-gradient(circle at 50% 50%,#0000 0 60%,#00000055 62%,#0000 70%);border-radius:50%}
+.little-phatty-body .lp-knob-led{fill:#2e1c0c}
+.little-phatty-body .lp-knob-led.lit{fill:#ffb648;filter:drop-shadow(0 0 3px #ff9a1ae0)}
+.little-phatty-body .lp-eg-label{color:#f1f2f4;font-size:7px}
+.little-phatty-body .lp-btn{gap:4px;color:#eceef1;font-size:6.2px;letter-spacing:.08em}
+.little-phatty-body .lp-btn::before{width:22px;height:22px;border-radius:3px;border:1px solid #05060a;background:radial-gradient(circle at 50% 38%,#4f6690 0%,#2f3d5c 55%,#1a2234 100%);box-shadow:inset 0 1px #ffffff55,inset 0 -3px 3px #0009,0 1px 0 #ffffff14,0 2px 2px #000}
+.little-phatty-body .lp-btn.lit::before{background:radial-gradient(circle at 50% 36%,#d6ecff 0%,#5aa6ff 42%,#2562cc 100%);box-shadow:0 0 12px #3f8dffbb,inset 0 1px #fff,inset 0 -2px 2px #0a2a6a99,0 1px 0 #ffffff14}
+.little-phatty-body .lp-section-buttons{gap:6px 8px;margin-top:7px}
+.little-phatty-body #brand-strip{padding:4px 9px;border-radius:2px;background-color:#b9bdc4;background-image:repeating-linear-gradient(90deg,#fff0 0 2px,#ffffff2e 2px 3px),linear-gradient(#d3d6db,#9ea3aa);box-shadow:inset 0 1px #fff,inset 0 -1px #0004,0 1px 1px #000a}
+.little-phatty-body #brand-strip .brand-model{font-size:16px}
+.little-phatty-body #brand-strip .brand-sub{font-size:6px}
+.little-phatty-body .lp-oled{position:relative;padding:6px 10px;border:3px solid #1b1d21;border-radius:3px;background-color:#a6b9a3;background-image:repeating-linear-gradient(0deg,#0000 0 2px,#00000010 2px 3px),repeating-linear-gradient(90deg,#0000 0 2px,#00000008 2px 3px),linear-gradient(170deg,#bccfb6,#9eb39b 60%,#90a48e);box-shadow:inset 0 0 0 1px #0009,inset 0 2px 8px #0007,0 1px #ffffff14,0 0 0 1px #000}
+.little-phatty-body .lp-oled-line{color:#15201b;font-weight:500;font-size:11.5px;text-shadow:0 0 1px #15201b55}
+.little-phatty-body .lp-oled-line2{color:#2a3831;font-size:8.5px}
+.little-phatty-body #preset-controls{margin-top:8px;gap:6px 8px}
+.little-phatty-body #preset-select,.little-phatty-body #octave-display{height:18px;border:1px solid #05060a;border-radius:2px;color:#e1e3e8;background:linear-gradient(#2b2d33,#1d1f24);font-size:8px;box-shadow:inset 0 1px #ffffff1c,0 1px 0 #ffffff10}
+.little-phatty-body #octave-display{min-width:60px;padding:4px 6px}
+.little-phatty-body #master-row{gap:14px;margin-top:5px}
+.little-phatty-body #panel-logo{height:28px;margin:8px auto 4px;opacity:.95}
+.little-phatty-body #lower-row{margin-top:8px;border-top:1px solid #000;box-shadow:0 -1px 0 #ffffff14}
+.little-phatty-body #wheel-housing-block{gap:20px;background:linear-gradient(180deg,#202227,#121316);box-shadow:inset 0 1px #ffffff18,inset -1px 0 #000,inset 1px 0 #ffffff0a}
+.little-phatty-body .lp-wheel-housing{width:32px;height:94px;border-color:#33373f;box-shadow:inset 0 0 10px #000,inset 0 0 20px #2e5aa044,0 1px #ffffff18,0 2px 3px #000}
+.little-phatty-body .lp-wheel-thumb{background:linear-gradient(90deg,#44474f,#878b94 50%,#44474f);box-shadow:0 1px 3px #000c,0 0 8px #3f7fff55,inset 0 1px #ffffff33}
+.little-phatty-body .lp-wheel-label{color:#eceef1;font-size:6.5px}
+.little-phatty-body #keyboard-block{box-shadow:inset 0 10px 12px #000,inset 0 1px #ffffff0a}
+.little-phatty-body .lp-key-white{background-color:#efeee8;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='42'%3E%3Cpath d='M3 0v42M9 0v42M15 0v42' stroke='%23fff' stroke-opacity='.26'/%3E%3Cpath d='M6 0v42M12 0v42' stroke='%23000' stroke-opacity='.06'/%3E%3C/svg%3E"),linear-gradient(180deg,#d9d8d1 0%,#f3f2ec 6%,#f7f6f1 70%,#dcdbd4 100%);box-shadow:inset 1px 0 #fff9,inset -2px 0 #a9a9a4,0 3px 2px #000c}
+.little-phatty-body .lp-key-black{background-image:repeating-linear-gradient(90deg,#fff0 0 3px,#ffffff0b 3px 4px),linear-gradient(90deg,#060607,#2b2c31 40%,#1a1b1f 60%,#050506);box-shadow:inset 1px 0 #777,inset -2px 0 #000,0 4px 4px #000}
+.little-phatty-body #chassis-bottom-cap{height:6px;margin:10px -46px 0;background:linear-gradient(180deg,#2b2d33,#0b0c0e);box-shadow:inset 0 1px #ffffff1c}

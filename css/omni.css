@@ -52,7 +52,9 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .omni-lib-item:hover { transform: translateY(-2px); border-color: var(--line-strong); border-left-color: var(--c); box-shadow: 0 10px 24px rgba(0,0,0,.28); }
 
 /* Canvas */
-.omni-canvas { position: relative; overflow: hidden; outline: none; cursor: grab; touch-action: none; background-color: var(--bg); background-image: radial-gradient(ellipse at 50% 40%, rgba(57,178,198,.07), transparent 55%), linear-gradient(rgba(199,216,239,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(199,216,239,.045) 1px, transparent 1px); background-size: 100% 100%, 24px 24px, 24px 24px; }
+.omni-canvas { position: relative; overflow: hidden; outline: none; cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; background-color: var(--bg); background-image: radial-gradient(ellipse at 50% 40%, rgba(57,178,198,.07), transparent 55%), linear-gradient(rgba(199,216,239,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(199,216,239,.045) 1px, transparent 1px); background-size: 100% 100%, 24px 24px, 24px 24px; }
+.omni-canvas.is-panning { cursor: grabbing; }
+.omni-canvas.is-panning * { cursor: grabbing !important; }
 .omni-world { position: absolute; left: 0; top: 0; transform-origin: 0 0; width: 0; height: 0; }
 .omni-wires { position: absolute; left: 0; top: 0; width: 1px; height: 1px; overflow: visible; }
 .omni-wire { fill: none; stroke-width: 2.5; pointer-events: stroke; cursor: pointer; opacity: .9; }

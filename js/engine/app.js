@@ -72,6 +72,13 @@ class App {
     this._bindComputerKeyboard();
     this._bindScrollGuard();
     this._bindStartButton();
+    // Show the stored patch on the panel (knob positions, LED rings, preset
+    // name) immediately - the engine applies it later, at audio unlock.
+    const initial = this.presetManager.peekLastSession();
+    if (initial?.patch) {
+      this._syncKnobsToPatch(initial.patch);
+      if (initial.source === 'factory' && this._presetSelect) { this._presetSelect.value = initial.presetId; this.oled?.showPreset(initial.presetId, initial.patch.name); }
+    }
     this._fitToViewport();
     window.addEventListener('resize', () => this._scheduleFit());
 

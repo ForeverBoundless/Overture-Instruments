@@ -196,10 +196,12 @@ class OmniApp {
       if (card) {
         const m = this.patch.modules.find((x) => x.id === card.dataset.id);
         this.selected = m.id; this.selectedWire = null; this.renderSelection(); this.renderInspector();
-        if (e.target.closest('.omni-module-head')) { drag = { kind: 'move', m, ox: e.clientX, oy: e.clientY, sx: m.x, sy: m.y }; this.canvas.setPointerCapture(e.pointerId); }
+        if (e.target.closest('.omni-module-head')) { e.preventDefault(); drag = { kind: 'move', m, ox: e.clientX, oy: e.clientY, sx: m.x, sy: m.y }; this.canvas.setPointerCapture(e.pointerId); }
         return;
       }
-      drag = { kind: 'pan', ox: e.clientX, oy: e.clientY, sx: this.view.x, sy: this.view.y }; this.canvas.setPointerCapture(e.pointerId);
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      e.preventDefault(); window.getSelection?.()?.removeAllRanges?.();
+      drag = { kind: 'pan', ox: e.clientX, oy: e.clientY, sx: this.view.x, sy: this.view.y }; this.canvas.setPointerCapture(e.pointerId); this.canvas.classList.add('is-panning');
       this.selected = null; this.selectedWire = null; this.renderSelection(); this.renderInspector();
     });
     this.canvas.addEventListener('pointermove', (e) => {
@@ -217,6 +219,7 @@ class OmniApp {
         else this.msg(`${drag.from.port} selected - now click a highlighted input.`);
         this.renderWires();
       } else if (drag.kind === 'move') this.pushHistory();
+      this.canvas.classList.remove('is-panning');
       drag = null;
     };
     this.canvas.addEventListener('pointerup', up); this.canvas.addEventListener('pointercancel', up);
