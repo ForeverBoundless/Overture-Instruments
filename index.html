@@ -25,8 +25,8 @@
 
   <header class="site-header" id="top">
     <a class="site-brand" href="#top" aria-label="Overture Instruments home">
-      <span class="site-brand__mark"><img src="/ui/Logos/OvertureLogo.png" alt="" width="30" height="30"></span>
-      <span class="site-brand__wordmark">OVERTURE <span>INSTRUMENTS</span></span>
+      <span class="site-brand__mark"><img src="/ui/Logos/OvertureLogo.png" alt="" width="24" height="24"></span>
+      <span class="site-brand__wordmark">OVERTURE INSTRUMENTS</span>
     </a>
     <nav class="main-nav" id="main-nav" aria-label="Main navigation">
       <a href="#mission">About</a>
@@ -165,7 +165,7 @@
             <h2 id="omni-title">It's your instrument,<br><em>and your rules.</em></h2>
             <p class="feature-description">What if a keyboard could be built around the way you make music? OMNI might be what you're looking for. <br><br> Assemble a synthesizer from functional modules - oscillators, noise, filters, envelopes, LFOs, amplifiers, a step sequencer and instrument-derived blocks such as the Moog ladder filter, the MS-20 dual filter, the Juno chorus and a six-operator DX7 voice. Connect real audio and control signals, play the result, then save it, export it as JSON, or draw it as an SVG schematic. Native CAD export is a longer-term goal; the schematic export is its first step.</p>
             <div class="omni-chips"><span>DRAG & DROP</span><span>MODULAR</span><span>CUSTOMIZABLE</span></div>
-            <p class="omni-status"><span class="status-pulse"></span> FIRST RELEASE AVAILABLE /<span class="status-divider"> </span> SCHEMA 1</p>
+            <p class="omni-status"><span class="status-pulse"></span>FIRST RELEASE AVAILABLE /<span class="status-divider"> </span></p>
           </div>
           <div class="omni-showcase reveal" data-tilt>
             <div class="omni-circuit omni-circuit--left" aria-hidden="true"></div><div class="omni-circuit omni-circuit--right" aria-hidden="true"></div>
@@ -201,7 +201,7 @@
             <p class="feature-description">Small, hands-on simulations for the curious. Explore oscillators, filters, envelopes, modulation, and the building blocks of synthesis by changing things and hearing what happens. These PHET-style mini-programs are ideal for both classroom-style education and for self-directed learning.</p>
             <p class="experiments-note">No musical experience required.</p>
             <a class="button button--outline button--experiments" href="/experiments"><span>Explore experiments</span><span class="button-arrow" aria-hidden="true">↗</span></a>
-            <span class="placeholder-note">IN DEVELOPMENT /</span>
+            <span class="placeholder-note">FIRST RELEASE AVAILABLE /</span>
           </div>
           <div class="experiments-showcase reveal" data-tilt>
             <div class="experiment-heading"><span>EXPERIMENT 001</span><span>OSCILLATOR LAB</span></div>
@@ -219,7 +219,7 @@
               <div class="experiment-control"><span>FREQUENCY</span><b>440 <small>Hz</small></b><div class="fake-slider"><i></i></div></div>
               <div class="experiment-control"><span>AMPLITUDE</span><b>0.82</b><div class="fake-slider fake-slider--green"><i></i></div></div>
             </div>
-            <div class="experiments-footer"><span><i class="status-dot status-dot--green"></i> PREVIEW - <a href="/experiments/oscillator-lab" style="color:inherit">open the real Oscillator Lab</a></span><span> </span></div>
+            <div class="experiments-footer"><span><i class="status-dot status-dot--green"></i><a href="/experiments/oscillator-lab" style="color:inherit">Oscillator Lab</a></span><span> </span></div>
             <div class="experiments-signal experiments-signal--one" aria-hidden="true"></div><div class="experiments-signal experiments-signal--two" aria-hidden="true"></div>
           </div>
         </div>
@@ -259,7 +259,7 @@
         <img src="/ui/Logos/OvertureLogo.png" alt="" width="34" height="34">
         <span>OVERTURE <b>INSTRUMENTS</b></span>
       </a>
-      <p> </p>
+      <button class="footer-contact" type="button" id="contact-open">Contact</button>
       <a class="footer-github" href="https://github.com/ForeverBoundless/Overture-Instruments" target="_blank" rel="noopener noreferrer"><span>Explore the open-source codebase</span><b aria-hidden="true">↗</b></a>
     </div>
     <div class="footer-bottom">
@@ -268,6 +268,39 @@
       <a href="#top" class="back-to-top">BACK TO TOP ↑</a>
     </div>
   </footer>
+
+  <div class="contact-modal" id="contact-modal" hidden>
+    <div class="contact-modal__backdrop" data-contact-close></div>
+    <form class="contact-modal__panel" id="contact-form" role="dialog" aria-modal="true" aria-labelledby="contact-title">
+      <div class="contact-modal__head">
+        <h2 id="contact-title">Get in touch</h2>
+        <button type="button" class="contact-modal__close" aria-label="Close" data-contact-close>×</button>
+      </div>
+      <input type="text" name="_honey" tabindex="-1" autocomplete="off" style="display:none">
+      <label class="contact-field"><span>Name <em>(optional)</em></span><input type="text" name="name" autocomplete="name"></label>
+      <label class="contact-field"><span>Subject</span><input type="text" name="subject" required></label>
+      <div class="contact-field">
+        <span>Message</span>
+        <div class="contact-toolbar" aria-label="Formatting">
+          <button type="button" data-wrap="**" title="Bold"><b>B</b></button>
+          <button type="button" data-wrap="_" title="Italic"><i>I</i></button>
+          <button type="button" data-wrap="`" title="Code">&lt;/&gt;</button>
+          <button type="button" data-prefix="# " title="Heading">H</button>
+          <button type="button" data-prefix="- " title="Bullet list">•</button>
+          <button type="button" data-prefix="1. " title="Numbered list">1.</button>
+          <button type="button" data-prefix="&gt; " title="Quote">"</button>
+          <button type="button" data-link title="Link">🔗</button>
+        </div>
+        <textarea name="body" rows="8" required placeholder="Write your message…"></textarea>
+        <small>Supports Markdown-style formatting.</small>
+      </div>
+      <p class="contact-status" role="status" aria-live="polite"></p>
+      <div class="contact-modal__actions">
+        <button type="button" class="contact-cancel" data-contact-close>Cancel</button>
+        <button type="submit" class="button button--primary">Send email</button>
+      </div>
+    </form>
+  </div>
 
   <div class="toast" id="site-toast" role="status" aria-live="polite"></div>
 </body>

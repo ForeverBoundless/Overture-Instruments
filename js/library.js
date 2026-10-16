@@ -69,8 +69,8 @@ function buildTile(instrument) {
 }
 
 const page = document.getElementById('launcher-page');
-page.innerHTML = `<div class="launcher-ambient launcher-ambient--one" aria-hidden="true"></div><div class="launcher-ambient launcher-ambient--two" aria-hidden="true"></div><div class="launcher-noise" aria-hidden="true"></div><header class="launcher-header"><div class="launcher-brand"><span class="launcher-brand__mark"><img class="launcher-brand__mark-img" src="/ui/Logos/OvertureLogo.png" alt="Overture" width="24" height="24"></span>
-<span>OVERTURE INSTRUMENTS</span></div><div class="launcher-status"><span></span><b>OI Library</b></div></header><section class="launcher-hero" aria-labelledby="launcher-title">
+page.innerHTML = `<div class="launcher-ambient launcher-ambient--one" aria-hidden="true"></div><div class="launcher-ambient launcher-ambient--two" aria-hidden="true"></div><div class="launcher-noise" aria-hidden="true"></div><header class="launcher-header"><a class="launcher-brand" href="/" aria-label="Overture Instruments home"><span class="launcher-brand__mark"><img class="launcher-brand__mark-img" src="/ui/Logos/OvertureLogo.png" alt="Overture" width="24" height="24"></span>
+<span>OVERTURE INSTRUMENTS</span></a><div class="launcher-status"><span></span><b>OI Library</b></div></header><section class="launcher-hero" aria-labelledby="launcher-title">
   <div class="launcher-hero__copy">
     <p class="launcher-overline">An expanding collection of MIDI-playable classics</p>
 
