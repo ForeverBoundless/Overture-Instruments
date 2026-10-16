@@ -149,3 +149,9 @@
   window.addEventListener('resize', updateProgress, { passive: true });
   updateProgress();
 })();
+
+// Hero stats: once the load-in animation finishes, hand control back to the hover transitions.
+document.querySelectorAll('.hero-stat').forEach((stat) => {
+  stat.addEventListener('animationend', () => stat.classList.add('hero-stat--in'), { once: true });
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) stat.classList.add('hero-stat--in');
+});
