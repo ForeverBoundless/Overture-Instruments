@@ -229,7 +229,7 @@
       fluidCanvas.width = Math.floor(width * scale);
       fluidCanvas.height = Math.floor(height * scale);
       context.setTransform(scale, 0, 0, scale, 0, 0);
-      const count = Math.round(Math.min(500, Math.max(180, width * height / 1800)));
+      const count = Math.round(Math.min(950, Math.max(420, width * height / 580)));
       particles.length = 0;
       for (let i = 0; i < count; i += 1) {
         const angle = Math.random() * Math.PI * 2;
@@ -282,8 +282,10 @@
         x += pushX;
         y += pushY;
         const pulse = .5 + .5 * Math.sin(elapsed * .002 + particle.phase * 2);
-        const alpha = (.08 + pulse * .28) * ease;
+        const alpha = (.17 + pulse * .46) * ease;
         context.fillStyle = `rgba(${colors[particle.color]},${alpha})`;
+        context.shadowColor = `rgba(${colors[particle.color]},${alpha * .9})`;
+        context.shadowBlur = 4;
         context.beginPath();
         context.arc(x, y, particle.size * (.7 + pulse * .55), 0, Math.PI * 2);
         context.fill();
@@ -300,6 +302,7 @@
       });
       while (ripples[0] && now - ripples[0].born > 1800) ripples.shift();
       context.globalCompositeOperation = 'source-over';
+      context.shadowBlur = 0;
       frame = requestAnimationFrame(drawFluid);
     };
 

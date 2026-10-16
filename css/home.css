@@ -144,8 +144,8 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
 .mission-section { position: relative; isolation: isolate; overflow: hidden; padding-top: 104px; padding-bottom: 94px; }
 .mission-section > :not(.idea-fluid):not(.idea-fluid__glow) { position: relative; z-index: 1; }
 .idea-fluid { position: absolute; z-index: 0; inset: -1px; width: calc(100% + 2px); height: calc(100% + 2px); pointer-events: none; opacity: 0; mix-blend-mode: screen; transition: opacity 1s ease .15s; }
-.mission-section.is-fluid-ready .idea-fluid { opacity: .9; }
-.idea-fluid__glow { position: absolute; z-index: 0; top: 16%; right: -11%; width: min(58vw, 720px); aspect-ratio: 1.45; pointer-events: none; opacity: 0; background: radial-gradient(ellipse, rgba(46,203,203,.11), rgba(103,229,163,.045) 31%, rgba(255,167,65,.035) 48%, transparent 70%); filter: blur(15px); transform: translateX(16%) scale(.84); transition: opacity 1.3s ease, transform 1.5s cubic-bezier(.16,.85,.28,1); }
+.mission-section.is-fluid-ready .idea-fluid { opacity: 1; }
+.idea-fluid__glow { position: absolute; z-index: 0; top: 16%; right: -11%; width: min(58vw, 720px); aspect-ratio: 1.45; pointer-events: none; opacity: 0; background: radial-gradient(ellipse, rgba(46,203,203,.16), rgba(103,229,163,.075) 31%, rgba(255,167,65,.06) 48%, transparent 70%); filter: blur(15px); transform: translateX(16%) scale(.84); transition: opacity 1.3s ease, transform 1.5s cubic-bezier(.16,.85,.28,1); }
 .mission-section.is-fluid-ready .idea-fluid__glow { opacity: 1; transform: translateX(0) scale(1); }
 .mission-layout { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(290px, .7fr); align-items: start; gap: clamp(38px, 8vw, 112px); padding: 61px 0 54px; }
 .mission-heading h2 { max-width: 650px; margin: 0; font-size: clamp(40px, 5.4vw, 68px); font-weight: 500; letter-spacing: -.065em; line-height: 1.01; }
@@ -388,7 +388,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
   .reveal { opacity: 1; transform: none; }
-  .idea-fluid, .idea-fluid__glow { display: none; }
+  .idea-fluid, .idea-fluid__glow, .feature-section::after { display: none; }
 }
 
 /* =====================================================================
@@ -787,4 +787,14 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
 .feature-section--experiments {
   padding-bottom: 50px;
 }
+
+/* Section-specific ambient motion: each layer remains behind its copy and showcase. */
+.feature-section { isolation: isolate; }
+.feature-section::after { position: absolute; z-index: 0; inset: 0; content: ''; pointer-events: none; opacity: .7; }
+.feature-section--library::after { background: linear-gradient(90deg, transparent 0 18%, rgba(255,183,94,.12) 28%, transparent 38%) -55% 0 / 62% 100% no-repeat, repeating-linear-gradient(0deg, transparent 0 35px, rgba(255,183,94,.045) 36px, transparent 37px); mask-image: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent); animation: library-signal-scan 10s linear infinite; }
+.feature-section--omni::after { top: 50%; right: -18vw; bottom: auto; left: auto; width: min(68vw, 780px); aspect-ratio: 1; border: 1px solid rgba(125,228,255,.12); border-radius: 50%; background: repeating-conic-gradient(from 10deg, rgba(125,228,255,.13) 0 1deg, transparent 1deg 12deg); mask-image: radial-gradient(circle, transparent 0 44%, #000 45% 47%, transparent 48%); transform: translateY(-50%); animation: omni-field-orbit 28s linear infinite; }
+.feature-section--experiments::after { background: radial-gradient(ellipse at 0% 50%, rgba(130,230,168,.13), transparent 22%) -22% 0 / 52% 100% no-repeat, repeating-radial-gradient(ellipse at 50% 100%, transparent 0 20px, rgba(130,230,168,.06) 21px 22px, transparent 23px 42px); mask-image: linear-gradient(90deg, transparent, #000 18%, #000 83%, transparent); animation: experiment-signal-drift 13s linear infinite; }
+@keyframes library-signal-scan { to { background-position: 155% 0, 0 0; } }
+@keyframes omni-field-orbit { to { transform: translateY(-50%) rotate(360deg); } }
+@keyframes experiment-signal-drift { to { background-position: 122% 0, 0 44px; } }
 /* Contact */
