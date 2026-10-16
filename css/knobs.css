@@ -185,3 +185,16 @@
   transform: translateY(-50%);
   pointer-events: none;
 }
+
+/* Performance: SVG filters are re-rasterised on every knob move. Replace the
+   per-LED and per-body drop-shadows with cheap stroke/opacity glow instead,
+   and promote the pointer group so rotation stays on the compositor. */
+.lp-knob-led, .lp-knob-led.lit, .lp-knob-body, .lp-knob:hover .lp-knob-body, .lp-knob-dragging .lp-knob-body,
+.little-phatty-body .lp-knob-led.lit, .little-phatty-body .lp-knob, .sub37-shell .lp-knob-body, .s37-knob .lp-knob { filter: none !important; }
+.lp-knob-led { transition: none; }
+.lp-knob-led.lit { stroke: var(--led-on-glow); stroke-width: 2.2; stroke-opacity: .55; paint-order: stroke; }
+.little-phatty-body .lp-knob-led.lit { stroke: #ff9a1a; }
+.lp-knob-body { stroke-width: 2; }
+.lp-knob:hover .lp-knob-body { stroke: #15171b; }
+.lp-knob-dragging .lp-knob-body { stroke: #2a2d33; }
+.lp-knob-svg { will-change: transform; }
