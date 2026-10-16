@@ -69,8 +69,20 @@ function buildTile(instrument) {
 }
 
 const page = document.getElementById('launcher-page');
-page.innerHTML = `<div class="launcher-ambient launcher-ambient--one" aria-hidden="true"></div><div class="launcher-ambient launcher-ambient--two" aria-hidden="true"></div><div class="launcher-noise" aria-hidden="true"></div><header class="launcher-header"><div class="launcher-brand" role="link" tabindex="0" aria-label="Overture Instruments home"><span class="launcher-brand__mark"><img class="launcher-brand__mark-img" src="/ui/Logos/OvertureLogo.png" alt="Overture" width="24" height="24"></span>
-<span>OVERTURE INSTRUMENTS</span></div><div class="launcher-status"><span></span><b>OI Library</b></div></header><section class="launcher-hero" aria-labelledby="launcher-title">
+page.innerHTML = `<div class="launcher-ambient launcher-ambient--one" aria-hidden="true"></div><div class="launcher-ambient launcher-ambient--two" aria-hidden="true"></div><div class="launcher-noise" aria-hidden="true"></div><header class="site-header">
+  <a class="site-brand" href="/" aria-label="Overture Instruments home">
+    <span class="site-brand__mark"><img src="/ui/Logos/OvertureLogo.png" alt="" width="24" height="24"></span>
+    <span class="site-brand__wordmark">OVERTURE INSTRUMENTS</span>
+  </a>
+  <nav class="main-nav" id="main-nav" aria-label="Main navigation">
+    <a href="/about">About</a>
+    <a href="/library" aria-current="page">Instrument library</a>
+    <a href="/#omni">OMNI</a>
+    <a href="/#experiments">Experiments</a>
+  </nav>
+  <a class="header-github" href="https://github.com/ForeverBoundless/Overture-Instruments" target="_blank" rel="noopener noreferrer"><span>GitHub</span><span class="external-arrow" aria-hidden="true">↗</span></a>
+  <button class="menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="main-nav"><span></span><span></span></button>
+</header><section class="launcher-hero" aria-labelledby="launcher-title">
   <div class="launcher-hero__copy">
     <p class="launcher-overline">An expanding collection of MIDI-playable classics</p>
 
@@ -116,11 +128,15 @@ page.innerHTML = `<div class="launcher-ambient launcher-ambient--one" aria-hidde
   All trademarks and brand names belong to their respective owners.
 </div>`;
 {
-  const brand = page.querySelector('.launcher-brand');
-  if (brand) {
-    const go = () => { window.location.href = '/'; };
-    brand.addEventListener('click', go);
-    brand.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+  const nav = page.querySelector('#main-nav');
+  const toggle = page.querySelector('.menu-toggle');
+  if (nav && toggle) {
+    toggle.addEventListener('click', () => {
+      const opening = toggle.getAttribute('aria-expanded') !== 'true';
+      toggle.setAttribute('aria-expanded', String(opening));
+      toggle.setAttribute('aria-label', opening ? 'Close navigation' : 'Open navigation');
+      nav.classList.toggle('is-open', opening);
+    });
   }
 }
 const grid = page.querySelector('.instrument-grid');
