@@ -25,6 +25,32 @@
     revealItems.forEach((item) => item.classList.add('is-visible'));
   }
 
+  // Deep links (#omni etc.): the browser scrolls before fonts/images settle, so
+  // re-align to the target once layout is final. Instant on load, smooth after.
+  const scrollToHash = (smooth) => {
+    const id = decodeURIComponent(window.location.hash.slice(1));
+    if (!id) return;
+    const target = document.getElementById(id);
+    if (!target) return;
+    const top = id === 'top' ? 0 : target.getBoundingClientRect().top + window.scrollY;
+    window.scrollTo({ top, behavior: smooth ? 'smooth' : 'auto' });
+  };
+
+  if (window.location.hash) {
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    document.documentElement.style.scrollBehavior = 'auto';
+    const settle = () => scrollToHash(false);
+    settle();
+    requestAnimationFrame(settle);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(settle);
+    window.addEventListener('load', () => {
+      settle();
+      setTimeout(() => { settle(); document.documentElement.style.scrollBehavior = ''; }, 150);
+    }, { once: true });
+  }
+
+  window.addEventListener('hashchange', () => scrollToHash(true));
+
   // Hero responds gently to pointer movement without shifting page layout.
   const hero = document.querySelector('.hero');
   const heroMark = document.querySelector('.hero-mark-wrap');

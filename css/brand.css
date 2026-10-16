@@ -1,0 +1,14 @@
+/* Shared header brand lockup. Single source of truth for every page. */
+.site-brand, .launcher-brand {
+  display: inline-flex; flex: 0 0 auto; align-items: center; gap: 11px; margin: 0; padding: 0;
+  color: #f4f5fa; background: none; border: 0;
+  font-family: 'Inter Variable', 'Inter', 'Segoe UI', Helvetica, sans-serif;
+  font-size: 12px; font-weight: 750; font-style: normal; letter-spacing: .12em; line-height: 1;
+  text-transform: none; text-decoration: none; white-space: nowrap;
+  -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+  cursor: pointer; animation: none;
+}
+.site-brand *, .launcher-brand * { color: inherit; font: inherit; letter-spacing: inherit; text-decoration: none; }
+.site-brand:hover, .launcher-brand:hover, .site-brand:visited, .launcher-brand:visited { color: #f4f5fa; text-decoration: none; }
+.site-brand__mark, .launcher-brand__mark { display: flex; width: 24px; height: 24px; align-items: center; justify-content: center; }
+.site-brand__mark img, .launcher-brand__mark-img { display: block; width: 100%; height: 100%; object-fit: contain; }
