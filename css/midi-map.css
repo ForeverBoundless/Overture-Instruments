@@ -1,0 +1,55 @@
+/* MIDI assignment pane (shared by every instrument). */
+.oi-midi-tab { position: fixed; top: 50%; right: 0; z-index: 900; display: flex; flex-direction: column; gap: 2px; padding: 10px 7px 10px 9px; border: 1px solid rgba(255,255,255,.14); border-right: 0; border-radius: 8px 0 0 8px; background: rgba(12,14,19,.92); color: #d8dee8; font: 700 8px/1.1 'Inter Variable', 'Inter', 'Segoe UI', sans-serif; letter-spacing: .18em; text-align: center; cursor: pointer; transform: translateY(-50%); transition: background .2s ease, color .2s ease, right .25s ease; backdrop-filter: blur(6px); }
+.oi-midi-tab:hover { background: rgba(255,183,94,.14); color: #fff; }
+.oi-midi-tab.is-open { right: min(340px, 92vw); }
+.oi-midi-pane { position: fixed; top: 0; right: 0; bottom: 0; z-index: 901; width: min(340px, 92vw); display: flex; flex-direction: column; gap: 14px; padding: 18px 18px 22px; overflow-y: auto; border-left: 1px solid rgba(255,255,255,.1); background: linear-gradient(180deg, rgba(16,19,26,.98), rgba(9,11,15,.98)); color: #e8edf5; font: 400 12px/1.5 'Inter Variable', 'Inter', 'Segoe UI', sans-serif; box-shadow: -20px 0 60px rgba(0,0,0,.45); animation: oi-midi-in .25s ease; }
+.oi-midi-pane[hidden] { display: none; }
+@keyframes oi-midi-in { from { transform: translateX(24px); opacity: 0; } }
+.oi-midi-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.oi-midi-head h2 { margin: 0; font-size: 15px; font-weight: 700; letter-spacing: -.01em; }
+.oi-midi-device { margin: 3px 0 0; color: #7f8a9b; font-family: 'DM Mono', 'Courier New', monospace; font-size: 9px; letter-spacing: .08em; }
+.oi-midi-device.is-on { color: #83e6a8; }
+.oi-midi-close { width: 28px; height: 28px; flex: 0 0 auto; border: 1px solid rgba(255,255,255,.12); border-radius: 7px; background: transparent; color: #9aa4b4; font-size: 18px; line-height: 1; cursor: pointer; }
+.oi-midi-close:hover { color: #fff; border-color: rgba(255,255,255,.3); }
+.oi-midi-count { margin: 0; color: #a9b2c2; font-family: 'DM Mono', 'Courier New', monospace; font-size: 9px; letter-spacing: .08em; text-transform: uppercase; }
+.oi-midi-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.oi-midi-btn { padding: 8px 12px; border: 1px solid rgba(255,255,255,.14); border-radius: 7px; background: rgba(255,255,255,.04); color: #d8dee8; font-family: inherit; font-size: 10px; font-weight: 700; line-height: 1; letter-spacing: .04em; cursor: pointer; transition: background .15s ease, border-color .15s ease, color .15s ease; }
+.oi-midi-btn:hover:not(:disabled) { background: rgba(255,255,255,.09); color: #fff; border-color: rgba(255,255,255,.3); }
+.oi-midi-btn:disabled { opacity: .45; cursor: not-allowed; }
+.oi-midi-btn--primary { color: #241808; background: linear-gradient(135deg, #ffd18a, #ffad4a); border-color: transparent; }
+.oi-midi-btn--primary:hover:not(:disabled) { color: #241808; background: linear-gradient(135deg, #ffdca3, #ffb85e); }
+.oi-midi-btn--small { padding: 6px 9px; font-size: 9px; }
+.oi-midi-btn--danger:hover:not(:disabled) { color: #ff9a8a; border-color: rgba(255,120,100,.5); }
+.oi-midi-learn { display: grid; gap: 12px; padding: 14px; border: 1px solid rgba(255,183,94,.35); border-radius: 10px; background: rgba(255,183,94,.06); }
+.oi-midi-learn h3 { margin: 0; font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: #ffd18a; }
+.oi-midi-step { display: flex; gap: 10px; opacity: .5; }
+.oi-midi-step.is-current, .oi-midi-step.is-done { opacity: 1; }
+.oi-midi-step > div { display: grid; gap: 4px; min-width: 0; flex: 1; }
+.oi-midi-step p { margin: 0; color: #a9b2c2; }
+.oi-midi-step strong { font-size: 11px; }
+.oi-midi-step__n { display: grid; place-items: center; width: 20px; height: 20px; flex: 0 0 auto; border-radius: 50%; background: rgba(255,255,255,.08); font-size: 10px; font-weight: 700; }
+.oi-midi-step.is-current .oi-midi-step__n { background: #ffb75e; color: #241808; animation: oi-midi-pulse 1.2s ease-in-out infinite; }
+.oi-midi-step.is-done .oi-midi-step__n { background: #83e6a8; color: #0b2a17; }
+@keyframes oi-midi-pulse { 50% { box-shadow: 0 0 0 5px rgba(255,183,94,.25); } }
+.oi-midi-source { color: #7de4ff; font-family: 'DM Mono', 'Courier New', monospace; font-size: 10px; letter-spacing: .04em; }
+.oi-midi-link { justify-self: start; padding: 0; border: 0; background: none; color: #ffb75e; font: inherit; font-size: 10px; text-decoration: underline; cursor: pointer; }
+.oi-midi-select { width: 100%; padding: 8px 10px; border: 1px solid rgba(255,255,255,.14); border-radius: 7px; background: #0e1118; color: #e8edf5; font: inherit; font-size: 11px; }
+.oi-midi-check { display: flex; align-items: center; gap: 8px; font-size: 11px; color: #a9b2c2; cursor: pointer; }
+.oi-midi-check input { accent-color: #ffb75e; }
+.oi-midi-warn { color: #ffb08a; font-size: 10px; }
+.oi-midi-list { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.oi-midi-empty { padding: 14px; border: 1px dashed rgba(255,255,255,.12); border-radius: 10px; color: #7f8a9b; text-align: center; font-size: 11px; }
+.oi-midi-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border: 1px solid rgba(255,255,255,.08); border-radius: 10px; background: rgba(255,255,255,.03); transition: border-color .12s ease, background .12s ease; }
+.oi-midi-row.is-active { border-color: #7de4ff; background: rgba(125,228,255,.08); }
+.oi-midi-row.is-editing { border-color: rgba(255,183,94,.5); }
+.oi-midi-row__info { display: grid; gap: 2px; min-width: 0; }
+.oi-midi-row__info strong { font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.oi-midi-row__info small { color: #7f8a9b; font-size: 9px; letter-spacing: .06em; text-transform: uppercase; }
+.oi-midi-row__btns { display: flex; gap: 6px; flex: 0 0 auto; }
+.oi-midi-help { margin: auto 0 0; color: #677282; font-size: 10px; line-height: 1.6; }
+
+/* On-screen control feedback. */
+.oi-midi-active { outline: 2px solid #7de4ff !important; outline-offset: 3px; }
+body.oi-midi-learning [data-oi-midi] { outline: 2px dashed rgba(255,183,94,.85) !important; outline-offset: 3px; cursor: crosshair !important; animation: oi-midi-learn-blink 1.4s ease-in-out infinite; }
+body.oi-midi-learning [data-oi-midi][data-oi-midi-assigned] { outline-color: rgba(125,228,255,.75) !important; }
+@keyframes oi-midi-learn-blink { 50% { outline-offset: 5px; } }

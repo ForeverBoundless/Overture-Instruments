@@ -6,6 +6,7 @@ import { PresetStore, downloadText, pickFile } from './shared/presetStore.js';
 import { Keyboard } from '../ui/Keyboard.js';
 import { MidiManager, midiNoteName } from './engine/MidiManager.js';
 import { noteToMidi, KEY_TO_SEMI } from './shared/panel.js';
+import { registerMidiTarget, registerMidiTargetProvider } from './shared/midiMap.js';
 
 const el = (tag, cls, parent, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text !== undefined) n.textContent = text; if (parent) parent.appendChild(n); return n; };
 const uid = (p) => `${p}${Math.random().toString(36).slice(2, 8)}`;
@@ -74,6 +75,24 @@ class OmniApp {
     this.powerBtn = el('button', 'omni-tb omni-power', perf, 'POWER ON AUDIO'); this.powerBtn.type = 'button'; this.powerBtn.addEventListener('click', () => this.power());
     const master = el('label', 'omni-master', perf); el('span', '', master, 'MASTER'); this.masterInput = el('input', '', master); this.masterInput.type = 'range'; this.masterInput.min = 0; this.masterInput.max = 1; this.masterInput.step = 0.01; this.masterInput.value = this.patch.global.master;
     this.masterInput.addEventListener('input', () => { this.patch.global.master = Number(this.masterInput.value); if (this.master) this.master.gain.setTargetAtTime(this.patch.global.master, this.ctx.currentTime, 0.01); });
+    registerMidiTarget(this.masterInput, { id: 'omni::master', label: 'MASTER', group: 'OUTPUT', get: () => Number(this.masterInput.value), set: (t) => { this.masterInput.value = t; this.masterInput.dispatchEvent(new Event('input')); } });
+    // Every numeric module parameter is assignable, even when its module is not in the inspector.
+    registerMidiTargetProvider(() => {
+      const out = [];
+      this.patch.modules.forEach((m) => {
+        const def = MODULES[m.type]; if (!def) return;
+        def.params.forEach((p) => {
+          if (p.options) return;
+          const log = !!p.log;
+          const norm = (v) => (log ? (Math.log(v) - Math.log(p.min)) / (Math.log(p.max) - Math.log(p.min)) : (v - p.min) / (p.max - p.min));
+          const denorm = (t) => { let v = log ? Math.exp(Math.log(p.min) + t * (Math.log(p.max) - Math.log(p.min))) : p.min + t * (p.max - p.min); if (p.step) v = Math.round(v / p.step) * p.step; return Math.min(p.max, Math.max(p.min, v)); };
+          out.push({ id: `omni::${m.id}::${p.key}`, label: p.label, group: `${def.name} (${m.id})`, el: document.getElementById(`p-${m.id}-${p.key}`),
+            get: () => norm(m.params[p.key]),
+            set: (t) => { const v = denorm(t); this.setParam(m.id, p.key, v, false); const inp = document.getElementById(`p-${m.id}-${p.key}`); if (inp) { inp.value = log ? Math.log(v) : v; const o = inp.parentElement?.querySelector('output'); if (o) o.textContent = v.toFixed(p.step === 1 ? 0 : 2); } } });
+        });
+      });
+      return out;
+    });
     const panic = el('button', 'omni-tb', perf, 'PANIC'); panic.type = 'button'; panic.addEventListener('click', () => this.allOff());
     this.midiEl = el('span', 'omni-midi', perf, 'MIDI: searching…');
     const kbWrap = el('div', 'omni-keys', perf);
@@ -268,6 +287,8 @@ class OmniApp {
         inp.addEventListener('input', () => { this.setParam(m.id, p.key, val(), false); out.textContent = val().toFixed(p.step === 1 ? 0 : 2); });
         inp.addEventListener('change', () => { this.setParam(m.id, p.key, val(), true); this.renderCards(); this.renderWires(); });
         lab.htmlFor = inp.id = `p-${m.id}-${p.key}`;
+        inp.setAttribute('role', 'slider');
+        inp._oiMidi = { id: `omni::${m.id}::${p.key}`, label: p.label, group: `${def.name} (${m.id})`, get: () => 0, set: () => {} };
       }
     });
     const bb = el('div', 'omni-insp-buttons', body);

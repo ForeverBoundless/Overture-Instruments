@@ -451,7 +451,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
   position: relative;
   display: flex;
   align-items: center;
-  width: min(1450px, calc(100% - (var(--gutter) * 2)));
+  width: min(1440px, calc(100% - (var(--gutter) * 2)));
   min-height: 76px;
   margin: 0 auto 42px;
   padding: 16px 28px;

@@ -88,6 +88,7 @@ class NordC2D {
       };
       setValue(controls[control.dataset.control]);
       this.sliderSetters[control.dataset.control] = setValue;
+      control._oiMidi = { id: `nord::${control.dataset.control}`, label: control.dataset.control.toUpperCase(), group: 'OUTPUT', get: () => controls[control.dataset.control], set: (t) => setValue(t) };
       control.addEventListener('pointerdown', (event) => {
         control.setPointerCapture(event.pointerId);
         const bounds = control.getBoundingClientRect();
@@ -249,6 +250,7 @@ const banks = section.querySelector('.nord-manual-banks');
     };
 
     drawbar.style.setProperty('--drawbar', value);
+    drawbar._oiMidi = { id: `nord::${index}:${bank}:${drawbarIndex}`, label: `${labelText} drawbar`, group: `${label} · BANK ${bank}`, get: () => Number(drawbar.getAttribute('aria-valuenow')) / 8, set: (t) => setValue(t * 8) };
 
     drawbar.addEventListener('pointerdown', (event) => {
       drawbar.setPointerCapture(event.pointerId);

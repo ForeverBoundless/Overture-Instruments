@@ -288,6 +288,9 @@ class PanelKnob {
     }
     this._bind();
     this.render();
+    // MIDI assignment hook (js/shared/midiMap.js).
+    const words = (def.id || '').replace(/([A-Z])/g, ' $1').trim().toUpperCase();
+    this.el._oiMidi = { id: `P10::${def.id}`, label: def.label ? def.label.replace(/s+/g, ' ') : words, group: def.side || '', get: () => this.position / 127, set: (t) => this.turnTo(Math.round(t * 127)) };
   }
 
   _drawScale(svg) {

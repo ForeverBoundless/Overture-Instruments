@@ -57,6 +57,21 @@ function channelState() {
 
 export class MidiManager {
   /**
+   * Global hooks shared by every instance (used by shared/midiMap.js so one
+   * MIDI access can serve both the instrument and user CC assignments).
+   * ccListeners: (controller, value, channel, deviceName) => boolean; return
+   * true to consume the CC so the instrument's built-in CC handling is skipped.
+   */
+  static instances = new Set();
+  static ccListeners = new Set();
+  static connectionListeners = new Set();
+  static get connectedNames() {
+    const names = new Set();
+    for (const m of MidiManager.instances) m.deviceNames.forEach((n) => names.add(n));
+    return [...names];
+  }
+
+  /**
    * @param {object} callbacks
    * @param {(note:number, velocity:number, channel:number, rawVelocity:number)=>void} [callbacks.onNoteOn] velocity 0..1
    * @param {(note:number, channel:number)=>void} [callbacks.onNoteOff]
@@ -90,6 +105,7 @@ export class MidiManager {
     this._initPromise = null;
     this._channels = Array.from({ length: 16 }, channelState);
     this._handler = (msg) => this._handleMessage(msg);
+    MidiManager.instances.add(this);
   }
 
   /** Begin MIDI detection. Safe to call repeatedly and when Web MIDI is unsupported. */
@@ -136,6 +152,7 @@ export class MidiManager {
     }
     if (added !== null) this.callbacks.onConnectionChange?.(true, added, this.deviceNames);
     else if (removed) this.callbacks.onConnectionChange?.(this.inputs.size > 0, this.deviceNames[0] || '', this.deviceNames);
+    if (added !== null || removed) MidiManager.connectionListeners.forEach((fn) => fn(this.deviceNames));
   }
 
   /** Decode one MIDI message. Public so tests and virtual sources can inject data. */
@@ -165,7 +182,7 @@ export class MidiManager {
         cb.onPolyAftertouch?.(d1, d2 / 127, channel);
         break;
       case 0xb0:
-        this._handleCC(d1, d2, channel);
+        this._handleCC(d1, d2, channel, msg.target?.name || '');
         break;
       case 0xc0: {
         const state = this._channels[channel - 1];
@@ -195,9 +212,12 @@ export class MidiManager {
     else if (status === 0xfc) cb.onStop?.();
   }
 
-  _handleCC(controller, value, channel) {
+  _handleCC(controller, value, channel, deviceName = '') {
     const cb = this.callbacks;
     const state = this._channels[channel - 1];
+    let consumed = false;
+    for (const fn of MidiManager.ccListeners) { if (fn(controller, value, channel, deviceName)) consumed = true; }
+    if (consumed) return;
     cb.onControlChange?.(controller, value, channel);
     switch (controller) {
       case CC.BANK_MSB:
@@ -297,6 +317,7 @@ export class MidiManager {
     }
     this.inputs.clear();
     if (this.access) this.access.onstatechange = null;
+    MidiManager.instances.delete(this);
   }
 
   get isConnected() {

@@ -49,6 +49,12 @@ export class Knob {
     this.el = this._buildDOM();
     this._bindEvents();
     this._render();
+    // MIDI assignment hook (see js/shared/midiMap.js): normalised 0..1 get/set.
+    this.el._oiMidi = {
+      label: this.label,
+      get: () => (this.value - this.min) / (this.max - this.min || 1),
+      set: (t) => this.setValue(this.min + t * (this.max - this.min)),
+    };
   }
 
   _buildDOM() {
