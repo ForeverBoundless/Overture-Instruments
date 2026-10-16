@@ -92,8 +92,8 @@ page.innerHTML = `<div class="launcher-ambient launcher-ambient--one" aria-hidde
     </h1>
 
     <p class="launcher-hero__description">
-      <span>Explore OI's library of keyboard emulators, built with obsessive realism and attention to every detail.</span><br>
-      <b>Completely free.</b>
+      <span>Explore OI's library of instrument emulators, built with obsessive realism and attention to every detail. Here you'll find plug-and-play versions of all your favourite sounds from legendary brands.</span><br>
+      <b>The difference? These are free.</b>
     </p>
   </div>
 
