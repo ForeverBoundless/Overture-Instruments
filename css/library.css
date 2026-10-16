@@ -3463,3 +3463,6 @@ body {
 .instrument-tile--yamaha-dx7 .instrument-tile__keys { background: repeating-linear-gradient(90deg, #fffaf0 0 11px, #26232a 11px 14px, #fffaf0 14px 25px); border: 3px solid #17181b; box-shadow: 0 4px 8px rgba(0,0,0,.56), 0 0 0 1px rgba(255,239,212,.14); }
 .instrument-tile--roland-juno-106 .instrument-tile__keys { background: repeating-linear-gradient(90deg, #fffaf0 0 11px, #26232a 11px 14px, #fffaf0 14px 25px); border: 3px solid #17181b; box-shadow: 0 4px 8px rgba(0,0,0,.56), 0 0 0 1px rgba(255,239,212,.14); }
 .instrument-tile--korg-ms-20 .instrument-tile__keys { background: repeating-linear-gradient(90deg, #fffaf0 0 11px, #26232a 11px 14px, #fffaf0 14px 25px); border: 3px solid #17181b; box-shadow: 0 4px 8px rgba(0,0,0,.56), 0 0 0 1px rgba(255,239,212,.14); }
+/* The Yamaha asset is a square canvas with the wordmark occupying only the middle ~22%,
+   so size it by the wordmark rather than the canvas to match the other brand logos. */
+.launcher-brand-slot img[alt="Yamaha"] { width: 165px; max-width: none; max-height: none; margin: -52px 0; }
