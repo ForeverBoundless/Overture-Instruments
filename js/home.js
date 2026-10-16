@@ -204,4 +204,121 @@
   window.addEventListener('resize', updateProgress, { passive: true });
 
   updateProgress();
+
+  // THE IDEA: a tiny, self-contained liquid particle field. It comes in from
+  // the left, settles into a slow current, and accepts stone-drop ripples.
+  const mission = document.getElementById('mission');
+  const fluidCanvas = mission?.querySelector('.idea-fluid');
+
+  if (mission && fluidCanvas && !reduceMotion.matches) {
+    const context = fluidCanvas.getContext('2d', { alpha: true });
+    const colors = ['255,183,94', '125,228,255', '130,230,168'];
+    const particles = [];
+    const ripples = [];
+    let width = 0;
+    let height = 0;
+    let active = false;
+    let frame = 0;
+    let start = performance.now();
+
+    const resizeFluid = () => {
+      const bounds = mission.getBoundingClientRect();
+      const scale = Math.min(window.devicePixelRatio || 1, 1.5);
+      width = Math.max(1, Math.floor(bounds.width));
+      height = Math.max(1, Math.floor(bounds.height));
+      fluidCanvas.width = Math.floor(width * scale);
+      fluidCanvas.height = Math.floor(height * scale);
+      context.setTransform(scale, 0, 0, scale, 0, 0);
+      const count = Math.round(Math.min(500, Math.max(180, width * height / 1800)));
+      particles.length = 0;
+      for (let i = 0; i < count; i += 1) {
+        const angle = Math.random() * Math.PI * 2;
+        const spread = Math.sqrt(Math.random());
+        particles.push({
+          x: -width * (.35 + Math.random() * .9),
+          y: height * (.18 + Math.random() * .67),
+          targetX: width * (.66 + Math.cos(angle) * spread * .43),
+          targetY: height * (.54 + Math.sin(angle) * spread * .31),
+          phase: Math.random() * Math.PI * 2,
+          speed: .35 + Math.random() * .65,
+          size: .55 + Math.random() * 1.45,
+          color: Math.floor(Math.random() * colors.length)
+        });
+      }
+    };
+
+    const dropRipple = (event) => {
+      if (event.target.closest('a, button')) return;
+      const bounds = mission.getBoundingClientRect();
+      ripples.push({ x: event.clientX - bounds.left, y: event.clientY - bounds.top, born: performance.now() });
+      if (ripples.length > 5) ripples.shift();
+    };
+
+    const drawFluid = (now) => {
+      if (!active) return;
+      const elapsed = now - start;
+      context.clearRect(0, 0, width, height);
+      context.globalCompositeOperation = 'lighter';
+
+      particles.forEach((particle, index) => {
+        const enter = Math.min(1, Math.max(0, (elapsed - index * 5) / 1180));
+        const ease = 1 - Math.pow(1 - enter, 3);
+        const orbit = elapsed * .00035 * particle.speed + particle.phase;
+        const swirlX = Math.cos(orbit * 1.8) * (10 + particle.speed * 7);
+        const swirlY = Math.sin(orbit * 2.4) * (8 + particle.speed * 6);
+        let x = particle.x + (particle.targetX - particle.x) * ease + swirlX;
+        let y = particle.y + (particle.targetY - particle.y) * ease + swirlY;
+        let pushX = 0;
+        let pushY = 0;
+        ripples.forEach((ripple) => {
+          const age = (now - ripple.born) / 1000;
+          const dx = x - ripple.x;
+          const dy = y - ripple.y;
+          const distance = Math.hypot(dx, dy) || 1;
+          const wave = Math.sin(distance * .09 - age * 13) * Math.exp(-Math.abs(distance - age * 165) / 48) * Math.max(0, 1 - age / 1.7);
+          pushX += dx / distance * wave * 13;
+          pushY += dy / distance * wave * 13;
+        });
+        x += pushX;
+        y += pushY;
+        const pulse = .5 + .5 * Math.sin(elapsed * .002 + particle.phase * 2);
+        const alpha = (.08 + pulse * .28) * ease;
+        context.fillStyle = `rgba(${colors[particle.color]},${alpha})`;
+        context.beginPath();
+        context.arc(x, y, particle.size * (.7 + pulse * .55), 0, Math.PI * 2);
+        context.fill();
+      });
+
+      ripples.forEach((ripple) => {
+        const age = (now - ripple.born) / 1000;
+        if (age >= 1.8) return;
+        context.strokeStyle = `rgba(125,228,255,${(1 - age / 1.8) * .2})`;
+        context.lineWidth = 1;
+        context.beginPath();
+        context.arc(ripple.x, ripple.y, 10 + age * 102, 0, Math.PI * 2);
+        context.stroke();
+      });
+      while (ripples[0] && now - ripples[0].born > 1800) ripples.shift();
+      context.globalCompositeOperation = 'source-over';
+      frame = requestAnimationFrame(drawFluid);
+    };
+
+    const fluidObserver = new IntersectionObserver((entries) => {
+      active = entries[0].isIntersecting;
+      if (active && !frame) {
+        start = performance.now();
+        mission.classList.add('is-fluid-ready');
+        frame = requestAnimationFrame(drawFluid);
+      }
+      if (!active && frame) {
+        cancelAnimationFrame(frame);
+        frame = 0;
+      }
+    }, { threshold: .08 });
+
+    resizeFluid();
+    new ResizeObserver(resizeFluid).observe(mission);
+    mission.addEventListener('pointerdown', dropRipple);
+    fluidObserver.observe(mission);
+  }
 })();

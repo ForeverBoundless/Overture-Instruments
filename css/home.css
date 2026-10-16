@@ -141,7 +141,12 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
 .eyebrow-dot--green { background: var(--green); box-shadow: 0 0 12px rgba(130,230,168,.6); }
 
 /* Mission */
-.mission-section { padding-top: 104px; padding-bottom: 94px; }
+.mission-section { position: relative; isolation: isolate; overflow: hidden; padding-top: 104px; padding-bottom: 94px; }
+.mission-section > :not(.idea-fluid):not(.idea-fluid__glow) { position: relative; z-index: 1; }
+.idea-fluid { position: absolute; z-index: 0; inset: -1px; width: calc(100% + 2px); height: calc(100% + 2px); pointer-events: none; opacity: 0; mix-blend-mode: screen; transition: opacity 1s ease .15s; }
+.mission-section.is-fluid-ready .idea-fluid { opacity: .9; }
+.idea-fluid__glow { position: absolute; z-index: 0; top: 16%; right: -11%; width: min(58vw, 720px); aspect-ratio: 1.45; pointer-events: none; opacity: 0; background: radial-gradient(ellipse, rgba(46,203,203,.11), rgba(103,229,163,.045) 31%, rgba(255,167,65,.035) 48%, transparent 70%); filter: blur(15px); transform: translateX(16%) scale(.84); transition: opacity 1.3s ease, transform 1.5s cubic-bezier(.16,.85,.28,1); }
+.mission-section.is-fluid-ready .idea-fluid__glow { opacity: 1; transform: translateX(0) scale(1); }
 .mission-layout { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(290px, .7fr); align-items: start; gap: clamp(38px, 8vw, 112px); padding: 61px 0 54px; }
 .mission-heading h2 { max-width: 650px; margin: 0; font-size: clamp(40px, 5.4vw, 68px); font-weight: 500; letter-spacing: -.065em; line-height: 1.01; }
 .mission-heading h2 span { color: #8e9aaa; font-family: var(--font-display); font-weight: 400; }
@@ -383,6 +388,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
   .reveal { opacity: 1; transform: none; }
+  .idea-fluid, .idea-fluid__glow { display: none; }
 }
 
 /* =====================================================================
