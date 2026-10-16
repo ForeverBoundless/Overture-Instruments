@@ -112,7 +112,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
 .story-copy { padding-top: 5px; }
 .story-copy p, .founder-copy p { margin: 0 0 19px; color: #aeb7c5; font-size: 13px; line-height: 1.9; }
 .story-copy .story-copy__lead, .founder-copy .founder-copy__lead { color: #edf0f6; font-size: 15px; line-height: 1.78; }
-.story-signoff { display: flex; align-items: center; gap: 12px; margin-top: 29px; padding-top: 20px; border-top: 1px solid var(--line); color: #788394; font-family: var(--font-mono); font-size: 12px; letter-spacing: .07em; }
+.story-signoff { display: flex; align-items: center; gap: 12px; margin-top: 29px; padding-top: 20px; border-top: 1px solid var(--line); color: #788394; font-family: var(--font-mono); font-size: 15px; letter-spacing: .07em; }
 .signal-ring { position: relative; display: grid; flex: 0 0 auto; width: 20px; height: 20px; place-items: center; border: 1px solid rgba(255,183,94,.4); border-radius: 50%; animation: signal-color 7s linear infinite; }
 .signal-ring::before { position: absolute; inset: -4px; content: ''; border: 1px solid rgba(255,183,94,.1); border-radius: 50%; }
 .signal-ring i { width: 5px; height: 5px; border-radius: 50%; background: var(--amber); box-shadow: 0 0 8px var(--amber); }
