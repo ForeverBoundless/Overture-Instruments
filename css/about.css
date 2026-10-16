@@ -157,6 +157,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
 /* Ready-to-use styles for replacing the gallery placeholders with real images. */
 .carousel-image { display: block; width: 100%; border: 1px solid rgba(255,255,255,.075); border-radius: 8px; background: #111923; object-fit: cover; }
 .carousel-image--portrait { aspect-ratio: 4 / 3; }
+.carousel-image--contain { object-fit: contain; }
 .carousel-image--process { aspect-ratio: 16 / 7; min-height: 230px; }
 .carousel-caption { display: grid; gap: 7px; padding: 16px 6px 7px; }
 .carousel-caption p { margin: 0; color: #8894a4; font-size: 10px; line-height: 1.6; }
