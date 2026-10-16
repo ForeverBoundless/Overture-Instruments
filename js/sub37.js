@@ -161,16 +161,14 @@ class Sub37 {
     const root = document.getElementById('sub37-root');
     const shell = document.createElement('main');
     shell.className = 'sub37-shell';
-    const rail = document.createElement('div'); rail.className = 's37-rail';
-    const panel = document.createElement('div'); panel.className = 's37-panel';
-    const grid = document.createElement('div'); grid.className = 's37-grid';
-    grid.append(...this._buildPerformanceRow(), ...this._buildSoundRows());
-    panel.append(grid, this._buildSequencer());
-    shell.append(rail, panel, this._buildKeybed());
+    shell.append(this._buildHeader(), this._buildPerformanceRow(), this._buildSoundRows(), this._buildSequencer(), this._buildKeybed(), this._buildFooter());
     root.appendChild(shell);
   }
 
-  _buildDisplay() {
+  _buildHeader() {
+    const header = document.createElement('header');
+    header.className = 's37-header';
+    header.innerHTML = `<img class="s37-moog" src="/ui/Logos/Moog_Music_logo.png" alt="Overture"><div class="s37-model"><b>SUB 37</b><span>BOB MOOG TRIBUTE EDITION</span></div>`;
     const display = document.createElement('div');
     display.className = 's37-display';
     this.displayTop = document.createElement('div');
@@ -178,13 +176,8 @@ class Sub37 {
     this.displayTop.textContent = '1.01 RHYTHMIC 5TH';
     this.displayBottom.textContent = 'PRESET ACTIVE';
     display.append(this.displayTop, this.displayBottom);
-    return display;
-  }
-
-  _subRow(badge, label) {
-    const row = document.createElement('div'); row.className = 's37-sub';
-    row.innerHTML = `<span class="s37-sub-badge">${badge}</span><span class="s37-sub-label">${label}</span>`;
-    return row;
+    header.appendChild(display);
+    return header;
   }
 
   _section(title, subtitle = '') {
@@ -227,8 +220,8 @@ class Sub37 {
   }
 
   _buildPerformanceRow() {
+    const row = document.createElement('div'); row.className = 's37-row s37-performance';
     const program = this._section('PROGRAMMING');
-    program.body.appendChild(this._buildDisplay());
     const bank = this._selector('BANK / PRESET', SUB37_PRESETS.map((preset) => ({ value: preset.id, label: `${preset.bank}.${String(preset.slot).padStart(2, '0')}  ${preset.name}` })), 0, (value) => this._applyPreset(Number(value)));
     this.presetSelect = bank; program.body.appendChild(bank);
     const programButtons = document.createElement('div'); programButtons.className = 's37-button-grid';
@@ -250,7 +243,7 @@ class Sub37 {
     glideButtons.append(this.buttons.glide, this.buttons.legato); const glideKnobs = document.createElement('div'); glideKnobs.className = 's37-knob-row';
     this._knob(glideKnobs, 'glide', 'TIME', 0, 5, 0.12, (v) => this.engine.setGlide(undefined, v), false, (v) => `${v.toFixed(2)}s`);
     this._knob(glideKnobs, 'fine', 'FINE TUNE', -100, 100, 0, (v) => this.engine.setFineTune(v), true, (v) => `${v.toFixed(0)} ct`);
-    glide.body.append(glideButtons, glideKnobs); return [program.section, arp.section, glide.section];
+    glide.body.append(glideButtons, glideKnobs); row.append(program.section, arp.section, glide.section); return row;
   }
 
   _modSection(index) {
@@ -266,13 +259,15 @@ class Sub37 {
   }
 
   _buildSoundRows() {
-    const osc = this._section('OSCILLATORS'); osc.section.classList.add('s37-col-osc'); this._oscSection(0, osc.body); this._oscSection(1, osc.body);
-    const env = this._section('ENVELOPE GENERATORS'); env.section.classList.add('s37-col-env'); this._envelopeSection('filter', 'F', 'FILTER', env.body); this._envelopeSection('amp', 'A', 'AMPLIFIER', env.body);
-    return [this._modSection(0), this._modSection(1), osc.section, this._mixerSection(), this._filterSection(), env.section, this._outputSection()];
+    const all = document.createElement('div'); all.className = 's37-sound-area';
+    const mods = document.createElement('div'); mods.className = 's37-row s37-mod-row'; mods.append(this._modSection(0), this._modSection(1));
+    const oscillatorRow = document.createElement('div'); oscillatorRow.className = 's37-row s37-osc-row'; oscillatorRow.append(this._oscSection(0), this._oscSection(1), this._mixerSection(), this._filterSection());
+    const envRow = document.createElement('div'); envRow.className = 's37-row s37-env-row'; envRow.append(this._envelopeSection('filter', 'FILTER ENVELOPE'), this._envelopeSection('amp', 'AMPLIFIER ENVELOPE'), this._outputSection());
+    all.append(mods, oscillatorRow, envRow); return all;
   }
 
-  _oscSection(index, body) {
-    body.appendChild(this._subRow(String(index + 1), `OSC ${index + 1}`)); const row = document.createElement('div'); row.className = 's37-knob-row';
+  _oscSection(index) {
+    const section = this._section(`OSCILLATOR ${index + 1}`); const row = document.createElement('div'); row.className = 's37-knob-row';
     this._knob(row, `osc${index}Wave`, 'WAVE', 0, 1, 0.42, (v) => { this.engine.setOscillator(index, { shape: v }); this._showMessage(`OSC ${index + 1} ${this._waveType(v)}`); }, false, (v) => ['TRI', 'SAW', 'SQR', 'PULSE'][Math.min(3, Math.floor(v * 4))]);
     this._knob(row, `osc${index}Level`, 'LEVEL', 0, 1, index ? 0.68 : 0.82, (v) => this.engine.setOscillator(index, { level: v }), false, (v) => `${Math.round(v * 100)}%`);
     this._knob(row, `osc${index}Tune`, 'FREQUENCY', -7, 7, 0, (v) => this.engine.setOscillator(index, { semitones: Math.round(v) }), true, (v) => `${Math.round(v)} st`);
@@ -280,7 +275,8 @@ class Sub37 {
     const octave = this._selector('OCTAVE', ['16', '8', '4', '2'], '8', (value) => this.engine.setOscillator(index, { octave: Number(value) })); this[`osc${index}Octave`] = octave;
     const controls = document.createElement('div'); controls.className = 's37-osc-controls'; controls.appendChild(octave);
     if (index === 1) { this.buttons.sync = this._toggle('OSC 1–2 SYNC', false, (on) => this.engine.voice?.setOsc2SyncEnabled(on)); controls.appendChild(this.buttons.sync); }
-    body.append(row, controls);
+    section.body.append(row, controls);
+    return section.section;
   }
 
   _mixerSection() {
@@ -301,12 +297,12 @@ class Sub37 {
     section.body.append(row, this.slopeSelect); return section.section;
   }
 
-  _envelopeSection(which, badge, title, body) {
-    body.appendChild(this._subRow(badge, title)); const row = document.createElement('div'); row.className = 's37-knob-row s37-env-knobs';
+  _envelopeSection(which, title) {
+    const section = this._section(title, 'DAHDSR'); const row = document.createElement('div'); row.className = 's37-knob-row s37-env-knobs';
     const defaults = which === 'filter' ? [0, 0.004, 0, 0.32, 0.28, 0.34] : [0, 0.004, 0, 0.26, 0.72, 0.3];
     const keys = ['delay', 'attack', 'hold', 'decay', 'sustain', 'release']; const labels = ['DELAY', 'ATTACK', 'HOLD', 'DECAY', 'SUSTAIN', 'RELEASE'];
     keys.forEach((key, index) => this._knob(row, `${which}${key}`, labels[index], 0, key === 'sustain' ? 1 : 10, defaults[index], (v) => this.engine.setEnvelope(which, { [key]: v }), key === 'sustain', (v) => key === 'sustain' ? `${Math.round(v * 100)}%` : `${v.toFixed(2)}s`));
-    const loop = this._toggle('LOOP', false, (on) => this.engine.setEnvelope(which, { loop: on })); row.appendChild(loop); body.appendChild(row);
+    const loop = this._toggle('LOOP', false, (on) => this.engine.setEnvelope(which, { loop: on })); section.body.append(row, loop); return section.section;
   }
 
   _outputSection() {
@@ -317,7 +313,7 @@ class Sub37 {
   }
 
   _buildSequencer() {
-    const section = document.createElement('section'); section.className = 's37-sequencer'; const head = document.createElement('div'); head.className = 's37-seq-head'; head.innerHTML = '<strong>SEQUENCER</strong><span>64 STEP</span>';
+    const section = document.createElement('section'); section.className = 's37-sequencer'; const head = document.createElement('div'); head.className = 's37-seq-head'; head.innerHTML = '<strong>64-STEP SEQUENCER</strong><span>REST / TIE / STEP MOD</span>';
     const controls = document.createElement('div'); controls.className = 's37-button-grid';
     this.buttons.seqPlay = this._toggle('PLAY', false, (on) => { this.seq.playing = on; this.arp.on = false; this.buttons.arpOn.setValue(false, true); this._refreshClock(); });
     this.buttons.seqRecord = this._toggle('REC', false, (on) => { this.seq.recording = on; this._showMessage(on ? 'STEP RECORD' : 'STEP RECORD OFF'); });
@@ -325,9 +321,7 @@ class Sub37 {
     this.seqPage = this._selector('PAGE', ['1', '2', '3', '4'], '1', (page) => { this.seq.page = Number(page) - 1; this._renderSequence(); }); controls.appendChild(this.seqPage);
     this.stepGrid = document.createElement('div'); this.stepGrid.className = 's37-step-grid';
     Array.from({ length: 16 }, (_, localIndex) => { const button = this._button(String(localIndex + 1).padStart(2, '0'), () => { this.seq.selected = this.seq.page * 16 + localIndex; this._renderSequence(); }, false, 's37-step'); this.stepGrid.appendChild(button); });
-    const brand = document.createElement('div'); brand.className = 's37-brand';
-    brand.innerHTML = '<b>SUB 37</b><i>TRIBUTE</i><span>PARAPHONIC ANALOG SYNTHESIZER</span><img src="/ui/Logos/Moog_Music_logo.png" alt="Moog">';
-    section.append(head, controls, this.stepGrid, brand); this._renderSequence(); return section;
+    section.append(head, controls, this.stepGrid); this._renderSequence(); return section;
   }
 
   _buildKeybed() {
@@ -337,6 +331,8 @@ class Sub37 {
     const octave = document.createElement('div'); octave.className = 's37-octave'; this.octaveReadout = document.createElement('span'); octave.append(this._button('KB OCT –', () => this._setOctave(this.engine.octaveShift - 1)), this.octaveReadout, this._button('KB OCT +', () => this._setOctave(this.engine.octaveShift + 1))); this._renderOctave();
     lower.append(wheels, keyboardWrap, octave); return lower;
   }
+
+  _buildFooter() { const footer = document.createElement('footer'); footer.className = 's37-footer'; footer.textContent = '37-KEY VELOCITY + AFTERTOUCH • TWO-NOTE PARAPHONIC ANALOG SYNTHESIZER • WEB MIDI READY'; return footer; }
 
   _bindPower() {
     const power = document.getElementById('sub37-power');
