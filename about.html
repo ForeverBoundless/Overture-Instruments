@@ -12,7 +12,9 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/about.css">
   <link rel="stylesheet" href="/css/brand.css">
+  <link rel="stylesheet" href="/css/site-footer.css">
   <script src="/js/about.js" defer></script>
+  <script src="/js/shared/contact.js" defer></script>
   <script>
     window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
   </script>
@@ -106,50 +108,24 @@
             <a class="text-link founder-copy__link" href="https://github.com/ForeverBoundless" target="_blank" rel="noopener noreferrer">See what I'm building on GitHub <span aria-hidden="true">↗</span></a>
           </div>
 
-          <!-- PHOTO PLACEHOLDER: when ready, replace a .photo-placeholder block with <img class="carousel-image carousel-image--portrait" src="/ui/About/your-photo.jpg" alt="Describe the photo">. -->
           <div class="about-carousel founder-carousel about-reveal" data-carousel aria-label="Photos of Michael and the project">
             <div class="carousel-frame">
               <div class="carousel-track" data-carousel-track>
                 <article class="carousel-slide" data-slide aria-label="Photo 1 of 3">
-                  <div class="photo-placeholder photo-placeholder--portrait">
-                    <span class="photo-placeholder__index">PORTRAIT / 01</span>
-                    <span class="photo-placeholder__orbit photo-placeholder__orbit--one" aria-hidden="true"></span>
-                    <span class="photo-placeholder__orbit photo-placeholder__orbit--two" aria-hidden="true"></span>
-                    <span class="photo-placeholder__cross" aria-hidden="true">+</span>
-                    <span class="photo-placeholder__icon" aria-hidden="true">M</span>
-                    <span class="photo-placeholder__label">Your portrait goes here</span>
-                    <span class="photo-placeholder__hint">Recommended: portrait or candid photo</span>
-                  </div>
-                  <div class="carousel-caption"><span>01 / THE PERSON</span><strong>Behind the keys</strong><p>A portrait, performance photo, or candid shot.</p></div>
+                  <img class="carousel-image carousel-image--portrait" src="/ui/Photos/Me1.png" alt="Michael at the West Coast Jazz Festival, 2026">
+                  <div class="carousel-caption"><p>At the West Coast Jazz Festival, 2026</p></div>
                 </article>
                 <article class="carousel-slide" data-slide aria-label="Photo 2 of 3">
-                  <div class="photo-placeholder photo-placeholder--portrait photo-placeholder--cyan">
-                    <span class="photo-placeholder__index">PORTRAIT / 02</span>
-                    <span class="photo-placeholder__orbit photo-placeholder__orbit--one" aria-hidden="true"></span>
-                    <span class="photo-placeholder__orbit photo-placeholder__orbit--two" aria-hidden="true"></span>
-                    <span class="photo-placeholder__cross" aria-hidden="true">+</span>
-                    <span class="photo-placeholder__icon" aria-hidden="true">OI</span>
-                    <span class="photo-placeholder__label">Add another photo</span>
-                    <span class="photo-placeholder__hint">Recommended: portrait or studio setting</span>
-                  </div>
-                  <div class="carousel-caption"><span>02 / THE MUSICIAN</span><strong>Where it starts</strong><p>A glimpse into the music and people behind Overture.</p></div>
+                  <img class="carousel-image carousel-image--portrait" src="/ui/Photos/Me2.png" alt="Michael after winning 2nd place at BC School Sports Cross Country Championship, 2024">
+                  <div class="carousel-caption"><p>After winning 2nd place at BC School Sports Cross Country Championship, 2024</p></div>
                 </article>
                 <article class="carousel-slide" data-slide aria-label="Photo 3 of 3">
-                  <div class="photo-placeholder photo-placeholder--portrait photo-placeholder--green">
-                    <span class="photo-placeholder__index">PORTRAIT / 03</span>
-                    <span class="photo-placeholder__orbit photo-placeholder__orbit--one" aria-hidden="true"></span>
-                    <span class="photo-placeholder__orbit photo-placeholder__orbit--two" aria-hidden="true"></span>
-                    <span class="photo-placeholder__cross" aria-hidden="true">+</span>
-                    <span class="photo-placeholder__icon" aria-hidden="true">♪</span>
-                    <span class="photo-placeholder__label">Your photo here</span>
-                    <span class="photo-placeholder__hint">Recommended: a personal moment or setup</span>
-                  </div>
-                  <div class="carousel-caption"><span>03 / THE PROCESS</span><strong>Learning as I go</strong><p>The project is personal, practical, and always evolving.</p></div>
+                  <img class="carousel-image carousel-image--portrait" src="/ui/Photos/Me3.png" alt="Michael performing live at The Mint with friends, 2026">
+                  <div class="carousel-caption"><p>Performing live at The Mint with friends, 2026</p></div>
                 </article>
               </div>
             </div>
             <div class="carousel-controls">
-              <div class="carousel-controls__count"><span data-carousel-current>01</span><i></i><span data-carousel-total>03</span></div>
               <div class="carousel-dots" aria-label="Choose a photo">
                 <button type="button" data-carousel-dot="0" aria-label="Show photo 1" aria-current="true"></button>
                 <button type="button" data-carousel-dot="1" aria-label="Show photo 2"></button>
@@ -176,59 +152,32 @@
           <p>There isn't a single leap from idea to finished instrument. It's a chain of small discoveries, prototypes, mistakes, and refinements. This carousel is reserved for snapshots from that process.</p>
         </div>
 
-        <!-- DEVELOPMENT IMAGE PLACEHOLDERS: replace a .process-placeholder block with <img class="carousel-image carousel-image--process" src="/ui/About/your-screenshot.jpg" alt="Describe the development image">. -->
         <div class="about-carousel process-carousel about-reveal" data-carousel aria-label="Development process gallery">
           <div class="carousel-frame">
             <div class="carousel-track" data-carousel-track>
-              <article class="carousel-slide" data-slide aria-label="Development stage 1 of 4">
-                <div class="process-placeholder process-placeholder--amber">
-                  <span class="process-placeholder__meta">STAGE 01 <i></i> EARLY NOTES</span>
-                  <div class="process-placeholder__visual process-placeholder__visual--notes" aria-hidden="true"><span>IDEA</span><b>→</b><span>PROTOTYPE</span><b>→</b><span>LISTEN</span></div>
-                  <span class="process-placeholder__label">Early sketches and ideas</span>
-                  <span class="process-placeholder__hint">Space for notebook photos, diagrams, or first concepts</span>
-                </div>
-                <div class="carousel-caption"><span>01 / STARTING POINT</span><strong>First, a question</strong><p>The sketches, plans, and experiments that start a build.</p></div>
+              <article class="carousel-slide" data-slide aria-label="Photo 1 of 3">
+                <img class="carousel-image carousel-image--process" src="/ui/Photos/Dev1.png" alt="The first successful emulator: a very janky Moog Little Phatty prototype.">
+                <div class="carousel-caption"><p>The first successful emulator: a very janky Moog Little Phatty protoype.</p></div>
               </article>
-              <article class="carousel-slide" data-slide aria-label="Development stage 2 of 4">
-                <div class="process-placeholder process-placeholder--cyan">
-                  <span class="process-placeholder__meta">STAGE 02 <i></i> FIRST BUILD</span>
-                  <div class="process-placeholder__visual process-placeholder__visual--code" aria-hidden="true"><span>const</span> <b>sound</b> = <em>explore()</em><br><span>audio</span>.<b>connect</b>(output)<br><i>// keep iterating</i></div>
-                  <span class="process-placeholder__label">The first working prototype</span>
-                  <span class="process-placeholder__hint">Space for screenshots of code, UI, or early audio tests</span>
-                </div>
-                <div class="carousel-caption"><span>02 / PROTOTYPING</span><strong>Make it work</strong><p>Trying an idea in code and getting the first sound out.</p></div>
+              <article class="carousel-slide" data-slide aria-label="Photo 2 of 3">
+                <img class="carousel-image carousel-image--process" src="/ui/Photos/Dev2.png" alt="The OI library's original appearance, with just two emulators.">
+                <div class="carousel-caption"><p>The OI library's original appearance, with just two emulators.</p></div>
               </article>
-              <article class="carousel-slide" data-slide aria-label="Development stage 3 of 4">
-                <div class="process-placeholder process-placeholder--green">
-                  <span class="process-placeholder__meta">STAGE 03 <i></i> REFINEMENT</span>
-                  <div class="process-placeholder__visual process-placeholder__visual--controls" aria-hidden="true"><span><i></i><i></i><i></i></span><span><i></i><i></i><i></i></span><span><i></i><i></i><i></i></span><b>TEST / LISTEN / ADJUST</b></div>
-                  <span class="process-placeholder__label">Tuning the sound and interface</span>
-                  <span class="process-placeholder__hint">Space for emulator screenshots and iteration comparisons</span>
-                </div>
-                <div class="carousel-caption"><span>03 / REFINING</span><strong>Listen closely</strong><p>Polishing the interface, response, details, and sound.</p></div>
-              </article>
-              <article class="carousel-slide" data-slide aria-label="Development stage 4 of 4">
-                <div class="process-placeholder process-placeholder--violet">
-                  <span class="process-placeholder__meta">STAGE 04 <i></i> WHAT'S NEXT</span>
-                  <div class="process-placeholder__visual process-placeholder__visual--modules" aria-hidden="true"><span>OSC</span><b>+</b><span>FILTER</span><b>+</b><span>ENV</span><b>→</b><span>YOU</span></div>
-                  <span class="process-placeholder__label">New tools taking shape</span>
-                  <span class="process-placeholder__hint">Space for OMNI mockups, experiments, and future concepts</span>
-                </div>
-                <div class="carousel-caption"><span>04 / LOOKING AHEAD</span><strong>Keep exploring</strong><p>OMNI, interactive learning tools, and ideas still taking shape.</p></div>
+              <article class="carousel-slide" data-slide aria-label="Photo 3 of 3">
+                <img class="carousel-image carousel-image--process" src="/ui/Photos/Dev3.png" alt="An embarassingly bad first attempt at creating the Sequential Prophet-10 emulator.">
+                <div class="carousel-caption"><p>An embarassingly bad first attempt at creating the Sequential Prophet-10 emulator.</p></div>
               </article>
             </div>
           </div>
           <div class="carousel-controls">
-            <div class="carousel-controls__count"><span data-carousel-current>01</span><i></i><span data-carousel-total>04</span></div>
-            <div class="carousel-dots" aria-label="Choose a development stage">
-              <button type="button" data-carousel-dot="0" aria-label="Show development stage 1" aria-current="true"></button>
-              <button type="button" data-carousel-dot="1" aria-label="Show development stage 2"></button>
-              <button type="button" data-carousel-dot="2" aria-label="Show development stage 3"></button>
-              <button type="button" data-carousel-dot="3" aria-label="Show development stage 4"></button>
+            <div class="carousel-dots" aria-label="Choose a photo">
+              <button type="button" data-carousel-dot="0" aria-label="Show photo 1" aria-current="true"></button>
+              <button type="button" data-carousel-dot="1" aria-label="Show photo 2"></button>
+              <button type="button" data-carousel-dot="2" aria-label="Show photo 3"></button>
             </div>
             <div class="carousel-arrows">
-              <button type="button" data-carousel-prev aria-label="Previous development stage">←</button>
-              <button type="button" data-carousel-next aria-label="Next development stage">→</button>
+              <button type="button" data-carousel-prev aria-label="Previous photo">←</button>
+              <button type="button" data-carousel-next aria-label="Next photo">→</button>
             </div>
           </div>
         </div>
@@ -270,11 +219,11 @@
 
   <footer class="site-footer">
     <div class="footer-top">
-      <a class="footer-brand" href="/" aria-label="Overture Instruments home">
+      <a class="footer-brand" href="#top" aria-label="Back to top">
         <img src="/ui/Logos/OvertureLogo.png" alt="" width="34" height="34">
         <span>OVERTURE <b>INSTRUMENTS</b></span>
       </a>
-      <p>Great sound should be open to everyone.</p>
+      <button class="footer-contact" type="button" id="contact-open">Contact</button>
       <a class="footer-github" href="https://github.com/ForeverBoundless/Overture-Instruments" target="_blank" rel="noopener noreferrer"><span>Explore the open-source codebase</span><b aria-hidden="true">↗</b></a>
     </div>
     <div class="footer-bottom">
@@ -283,5 +232,39 @@
       <a href="#top" class="back-to-top">BACK TO TOP ↑</a>
     </div>
   </footer>
+
+  <div class="contact-modal" id="contact-modal" hidden>
+    <div class="contact-modal__backdrop" data-contact-close></div>
+    <form class="contact-modal__panel" id="contact-form" role="dialog" aria-modal="true" aria-labelledby="contact-title">
+      <div class="contact-modal__head">
+        <h2 id="contact-title">Get in touch</h2>
+        <button type="button" class="contact-modal__close" aria-label="Close" data-contact-close>×</button>
+      </div>
+      <input type="text" name="_honey" tabindex="-1" autocomplete="off" style="display:none">
+      <label class="contact-field"><span>Name <em>(optional)</em></span><input type="text" name="name" autocomplete="name"></label>
+      <label class="contact-field"><span>Subject</span><input type="text" name="subject" required></label>
+      <div class="contact-field">
+        <span>Message</span>
+        <div class="contact-toolbar" aria-label="Formatting">
+          <button type="button" data-wrap="**" title="Bold"><b>B</b></button>
+          <button type="button" data-wrap="_" title="Italic"><i>I</i></button>
+          <button type="button" data-wrap="`" title="Code">&lt;/&gt;</button>
+          <button type="button" data-prefix="# " title="Heading">H</button>
+          <button type="button" data-prefix="- " title="Bullet list">•</button>
+          <button type="button" data-prefix="1. " title="Numbered list">1.</button>
+          <button type="button" data-prefix="&gt; " title="Quote">"</button>
+          <button type="button" data-link title="Link">🔗</button>
+        </div>
+        <textarea name="body" rows="8" required placeholder="Write your message…"></textarea>
+        <small>Supports Markdown-style formatting.</small>
+      </div>
+      <p class="contact-status" role="status" aria-live="polite"></p>
+      <div class="contact-modal__actions">
+        <button type="button" class="contact-cancel" data-contact-close>Cancel</button>
+        <button type="submit" class="button button--primary">Send email</button>
+      </div>
+    </form>
+  </div>
+
 </body>
 </html>

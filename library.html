@@ -14,6 +14,7 @@
 <link rel="stylesheet" href="/css/brand.css">
 <link rel="stylesheet" href="/css/knobs.css">
 <link rel="stylesheet" href="/css/keyboard.css">
+<link rel="stylesheet" href="/css/site-footer.css">
 <script>
   window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
 </script>
@@ -23,7 +24,61 @@
 
 <main id="launcher-page" aria-label="Instrument library"></main>
 
+<!-- Site footer + contact modal (same markup as index.html); moved into #launcher-page by library.js -->
+<template id="site-footer-template">
+  <footer class="site-footer">
+    <div class="footer-top">
+      <a class="footer-brand" href="#top" aria-label="Back to top">
+        <img src="/ui/Logos/OvertureLogo.png" alt="" width="34" height="34">
+        <span>OVERTURE <b>INSTRUMENTS</b></span>
+      </a>
+      <button class="footer-contact" type="button" id="contact-open">Contact</button>
+      <a class="footer-github" href="https://github.com/ForeverBoundless/Overture-Instruments" target="_blank" rel="noopener noreferrer"><span>Explore the open-source codebase</span><b aria-hidden="true">↗</b></a>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="copyright-year">2026</span> Overture Instruments</span>
+      <span class="footer-disclaimer">Independent, unofficial project. Not affiliated with, endorsed by, or sponsored by any manufacturer represented here. All trademarks and brand names belong to their respective owners.</span>
+      <a href="#top" class="back-to-top">BACK TO TOP ↑</a>
+    </div>
+  </footer>
+
+  <div class="contact-modal" id="contact-modal" hidden>
+    <div class="contact-modal__backdrop" data-contact-close></div>
+    <form class="contact-modal__panel" id="contact-form" role="dialog" aria-modal="true" aria-labelledby="contact-title">
+      <div class="contact-modal__head">
+        <h2 id="contact-title">Get in touch</h2>
+        <button type="button" class="contact-modal__close" aria-label="Close" data-contact-close>×</button>
+      </div>
+      <input type="text" name="_honey" tabindex="-1" autocomplete="off" style="display:none">
+      <label class="contact-field"><span>Name <em>(optional)</em></span><input type="text" name="name" autocomplete="name"></label>
+      <label class="contact-field"><span>Subject</span><input type="text" name="subject" required></label>
+      <div class="contact-field">
+        <span>Message</span>
+        <div class="contact-toolbar" aria-label="Formatting">
+          <button type="button" data-wrap="**" title="Bold"><b>B</b></button>
+          <button type="button" data-wrap="_" title="Italic"><i>I</i></button>
+          <button type="button" data-wrap="`" title="Code">&lt;/&gt;</button>
+          <button type="button" data-prefix="# " title="Heading">H</button>
+          <button type="button" data-prefix="- " title="Bullet list">•</button>
+          <button type="button" data-prefix="1. " title="Numbered list">1.</button>
+          <button type="button" data-prefix="&gt; " title="Quote">"</button>
+          <button type="button" data-link title="Link">🔗</button>
+        </div>
+        <textarea name="body" rows="8" required placeholder="Write your message…"></textarea>
+        <small>Supports Markdown-style formatting.</small>
+      </div>
+      <p class="contact-status" role="status" aria-live="polite"></p>
+      <div class="contact-modal__actions">
+        <button type="button" class="contact-cancel" data-contact-close>Cancel</button>
+        <button type="submit" class="button button--primary">Send email</button>
+      </div>
+    </form>
+  </div>
+
+</template>
+
 <script type="module" src="/js/launcher-components.js"></script>
+<script type="module" src="/js/shared/contact.js"></script>
 
 </body>
 </html>

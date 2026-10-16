@@ -294,18 +294,6 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
 .experiments-footer { margin-top: 16px; padding-top: 13px; border-top: 1px solid rgba(255,255,255,.08); font-size: 6px; }.experiments-footer span:first-child { display: inline-flex; align-items: center; gap: 8px; }.status-dot--green { background: var(--green); box-shadow: 0 0 8px var(--green); }
 .experiments-signal { position: absolute; width: 110px; height: 110px; border: 1px solid rgba(130,230,168,.08); border-radius: 50%; pointer-events: none; }.experiments-signal::before, .experiments-signal::after { position: absolute; content: ''; inset: 10px; border: 1px solid rgba(130,230,168,.1); border-radius: 50%; }.experiments-signal::after { inset: 27px; border-color: rgba(112,220,240,.14); }.experiments-signal--one { top: 12%; right: -61px; }.experiments-signal--two { bottom: 9%; left: -68px; }
 
-/* Footer */
-.site-footer { position: relative; z-index: 1; padding: 31px var(--gutter) 19px; border-top: 1px solid rgba(255,255,255,.095); background: rgba(7,9,13,.62); }
-.footer-top, .footer-bottom { display: flex; align-items: center; justify-content: space-between; gap: 22px; width: min(var(--page-width), 100%); margin-inline: auto; }
-.footer-top { padding-bottom: 27px; }
-.footer-brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; }
-.footer-brand img { width: 31px; height: 31px; object-fit: contain; }
-.footer-brand span { display: grid; gap: 4px; color: #e8edf5; font-size: 10px; font-weight: 800; letter-spacing: .06em; }.footer-brand b { color: #778393; font-family: var(--font-mono); font-size: 7px; font-weight: 400; letter-spacing: .17em; }
-.footer-top > p { margin: 0; color: #808b9b; font-size: 10px; }
-.footer-github { display: inline-flex; align-items: center; gap: 18px; color: #bac4d1; font-size: 10px; text-decoration: none; transition: color .2s ease; }.footer-github b { color: var(--amber); font-size: 16px; font-weight: 400; transition: transform .2s ease; }.footer-github:hover { color: #fff; }.footer-github:hover b { transform: translate(2px,-2px); }
-.footer-bottom { gap: 18px; padding-top: 17px; border-top: 1px solid rgba(255,255,255,.07); color: #677282; font-family: var(--font-mono); font-size: 7px; letter-spacing: .04em; }
-.footer-disclaimer { max-width: 570px; line-height: 1.7; text-align: center; }
-.back-to-top { flex: 0 0 auto; color: #9ca6b5; font-family: var(--font-mono); font-size: 7px; letter-spacing: .09em; text-decoration: none; transition: color .2s ease; }.back-to-top:hover { color: var(--amber); }
 .toast { position: fixed; z-index: 200; right: 22px; bottom: 22px; max-width: min(390px, calc(100vw - 44px)); padding: 14px 17px; border: 1px solid rgba(112,220,240,.26); border-radius: 10px; color: #e6f7fa; background: rgba(15,23,30,.94); box-shadow: 0 12px 40px rgba(0,0,0,.4), inset 0 1px rgba(255,255,255,.06); font-size: 11px; line-height: 1.5; opacity: 0; pointer-events: none; transform: translateY(10px); backdrop-filter: blur(14px); transition: opacity .25s ease, transform .25s ease; }.toast.is-visible { opacity: 1; transform: translateY(0); }
 
 /* Scroll reveals and interactive states */
@@ -337,7 +325,6 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
   .instrument-stack { min-height: 316px; }
   .stack-card { width: 74%; }
   .omni-wordmark > span { letter-spacing: .13em; }
-  .footer-bottom { align-items: flex-start; }
 }
 @media (max-width: 760px) {
   :root { --gutter: 23px; }
@@ -373,10 +360,6 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
   .omni-wordmark > span { font-size: clamp(28px, 6vw, 36px); }.omni-wordmark strong { font-size: clamp(52px, 11vw, 65px); }
   .experiments-showcase { padding: 16px; }
   .scope-grid { height: 225px; }
-  .footer-top { flex-wrap: wrap; }
-  .footer-top > p { order: 3; width: 100%; }
-  .footer-bottom { flex-wrap: wrap; align-items: center; }
-  .footer-disclaimer { order: 4; flex: 0 0 100%; max-width: none; text-align: left; }
 }
 @media (max-width: 440px) {
   :root { --gutter: 18px; }
@@ -396,7 +379,6 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
   .showcase-topline, .showcase-bottomline { font-size: 6px; }.showcase-topline { padding-inline: 13px; }.showcase-bottomline { padding-inline: 13px; }.showcase-cta { margin-inline: 9px; padding: 12px; }
   .omni-showcase { min-height: 455px; padding-inline: 13px; }.omni-brand-lockup__overline { font-size: 6px; }.omni-wordmark { margin-top: 28px; }.omni-wordmark > span { font-size: 26px; }.omni-wordmark strong { font-size: 52px; }.omni-builder-ui { margin-top: 26px; padding: 7px; }.builder-ui__head { font-size: 5px; }.builder-module { padding: 6px 5px; }.builder-module small { font-size: 5px; }.builder-ui__body { gap: 4px; }.omni-index { right: 13px; left: 13px; font-size: 5px; }
   .scope-grid { height: 185px; }.experiments-showcase { padding: 12px; }.experiment-controls { gap: 5px; }.experiment-control { padding: 9px 7px; }.experiment-control > span { font-size: 5px; }.experiment-control b { font-size: 13px; }
-  .footer-top { align-items: flex-start; gap: 17px; }.footer-github { gap: 8px; font-size: 9px; }.footer-bottom { gap: 12px; }.back-to-top { margin-left: auto; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
@@ -800,31 +782,3 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
   padding-bottom: 50px;
 }
 /* Contact */
-.footer-contact { padding: 8px 16px; border: 1px solid rgba(255,255,255,.14); border-radius: 999px; background: rgba(255,255,255,.04); color: #bac4d1; font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; cursor: pointer; transition: color .2s ease, border-color .2s ease, background .2s ease; }
-.footer-contact:hover { color: #fff; border-color: var(--amber); background: rgba(255,183,94,.08); }
-.contact-modal { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 20px; }
-.contact-modal[hidden] { display: none; }
-.contact-modal__backdrop { position: absolute; inset: 0; background: rgba(5,7,11,.72); backdrop-filter: blur(6px); }
-.contact-modal__panel { position: relative; width: min(480px, 100%); max-height: calc(100vh - 40px); overflow: auto; display: grid; gap: 16px; padding: 24px; border: 1px solid rgba(255,255,255,.1); border-radius: 14px; background: linear-gradient(160deg, rgba(22,26,34,.98), rgba(10,12,17,.98)); box-shadow: 0 30px 80px rgba(0,0,0,.6), inset 0 1px rgba(255,255,255,.06); animation: contact-in .25s ease; }
-@keyframes contact-in { from { opacity: 0; transform: translateY(10px) scale(.98); } }
-.contact-modal__head { display: flex; align-items: center; justify-content: space-between; }
-.contact-modal__head h2 { margin: 0; font-family: var(--font-display); font-size: 20px; font-weight: 600; letter-spacing: -.02em; }
-.contact-modal__close { width: 30px; height: 30px; border: 1px solid rgba(255,255,255,.1); border-radius: 8px; background: transparent; color: #8f99aa; font-size: 18px; line-height: 1; cursor: pointer; }
-.contact-modal__close:hover { color: #fff; border-color: rgba(255,255,255,.3); }
-.contact-field { display: grid; gap: 6px; }
-.contact-field > span { color: #8f99aa; font-family: var(--font-mono); font-size: 12px; letter-spacing: .2em; text-transform: uppercase; }
-.contact-field em { font-style: normal; text-transform: none; letter-spacing: .05em; opacity: .7; }
-.contact-field input, .contact-field textarea { width: 100%; padding: 10px 12px; border: 1px solid rgba(255,255,255,.1); border-radius: 8px; background: rgba(255,255,255,.04); color: #e8edf5; font: inherit; font-size: 12px; resize: vertical; }
-.contact-field input:focus, .contact-field textarea:focus { outline: none; border-color: var(--amber); box-shadow: 0 0 0 3px rgba(255,183,94,.14); }
-.contact-field textarea { font-family: var(--font-mono); line-height: 1.6; border-top-left-radius: 0; border-top-right-radius: 0; }
-.contact-field small { color: #677282; font-family: var(--font-mono); font-size: 10px; letter-spacing: .04em; }
-.contact-toolbar { display: flex; flex-wrap: wrap; gap: 2px; padding: 4px; border: 1px solid rgba(255,255,255,.1); border-bottom: 0; border-radius: 8px 8px 0 0; background: rgba(255,255,255,.03); }
-.contact-toolbar button { min-width: 28px; height: 26px; padding: 0 8px; border: 0; border-radius: 5px; background: transparent; color: #bac4d1; font-size: 11px; cursor: pointer; }
-.contact-toolbar button:hover { background: rgba(255,255,255,.08); color: #fff; }
-.contact-modal__actions { display: flex; justify-content: flex-end; gap: 10px; }
-.contact-modal__actions .button { min-height: 40px; gap: 0; padding: 0 20px; }
-.contact-cancel { padding: 0 16px; border: 1px solid rgba(255,255,255,.12); border-radius: 9px; background: transparent; color: #bac4d1; font-size: 11px; font-weight: 700; cursor: pointer; }
-.contact-cancel:hover { color: #fff; border-color: rgba(255,255,255,.3); }
-.contact-status { min-height: 1em; margin: -6px 0 0; color: #8f99aa; font-family: var(--font-mono); font-size: 8px; letter-spacing: .1em; }
-.contact-status[data-kind="ok"] { color: #83e6a8; }.contact-status[data-kind="error"] { color: #ff8a7a; }
-.contact-modal__actions .button:disabled { opacity: .6; pointer-events: none; }

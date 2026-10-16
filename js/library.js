@@ -154,3 +154,7 @@ if (count) {
   const amount = String(INSTRUMENTS.length).padStart(2, '0');
   count.textContent = `${amount} AVAILABLE INSTRUMENT${INSTRUMENTS.length === 1 ? '' : 'S'}`;
 }
+
+// Shared site footer + contact modal (markup lives in library.html; #launcher-page is the scroll container).
+const footerTemplate = document.getElementById('site-footer-template');
+if (footerTemplate) page.append(footerTemplate.content.cloneNode(true));
