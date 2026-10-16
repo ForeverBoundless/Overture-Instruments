@@ -2,7 +2,7 @@
  * app.js
  *
  * Top-level application: builds the DOM UI (panel sections, knobs, wheels,
- * keyboard, OLED, scope/spectrum), wires it to the AudioEngine, and owns
+ * keyboard, OLED), wires it to the AudioEngine, and owns
  * the two "outer" input sources that are NOT part of the DSP engine
  * itself: computer-keyboard key handling (piano notes, pitch/mod wheel
  * keys, octave keys) and MIDI device events. Both input sources funnel
@@ -20,8 +20,6 @@ import { Knob } from '../../ui/Knob.js';
 import { PitchWheel, ModWheel } from '../../ui/Wheel.js';
 import { Keyboard } from '../../ui/Keyboard.js';
 import { OLEDDisplay } from '../../ui/OLEDDisplay.js';
-import { Scope } from '../../ui/Scope.js';
-import { Spectrum } from '../../ui/Spectrum.js';
 import { PRESETS } from '../data/presets.js';
 
 const MIDI_NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
@@ -117,15 +115,20 @@ class App {
     const chassis = document.createElement('div');
     chassis.id = 'chassis';
 
-    chassis.appendChild(this._buildBrandStrip());
+    const rail = document.createElement('div');
+    rail.id = 'chassis-rail';
+    chassis.appendChild(rail);
 
     const panel = document.createElement('div');
     panel.id = 'panel';
 
-    panel.appendChild(this._buildTopRow());
     panel.appendChild(this._buildSectionsRow());
-    panel.appendChild(this._buildMasterRow());
-    panel.appendChild(this._buildScopeRow());
+
+    const logo = document.createElement('img');
+    logo.id = 'panel-logo';
+    logo.alt = 'Moog';
+    logo.src = '/ui/Logos/Moog_Music_logo.png';
+    panel.appendChild(logo);
 
     chassis.appendChild(panel);
     chassis.appendChild(this._buildLowerRow());
@@ -137,34 +140,21 @@ class App {
     root.appendChild(chassis);
   }
 
-  _buildBrandStrip() {
-    const strip = document.createElement('div');
-    strip.id = 'brand-strip';
+  _buildMasterSection() {
+    const sec = document.createElement('div');
+    sec.className = 'lp-section lp-section-master';
 
-    const name = document.createElement('img');
-    name.className = 'brand-logo';
-    name.alt = 'Moog';
-    name.src = '/ui/Logos/Moog_Music_logo.png';
-    name.title = 'Moog';
-
-    const model = document.createElement('div');
-    model.className = 'brand-model';
-    model.textContent = 'little phatty';
-    strip.appendChild(name);
-    strip.appendChild(model);
-    return strip;
-  }
-
-  _buildTopRow() {
-    const row = document.createElement('div');
-    row.id = 'panel-top-row';
+    const badge = document.createElement('div');
+    badge.id = 'brand-strip';
+    badge.innerHTML = '<span class="brand-model">little phatty</span><span class="brand-sub">analog<br>synthesizer</span>';
+    sec.appendChild(badge);
 
     this.oled = new OLEDDisplay();
-    row.appendChild(this.oled.el);
+    sec.appendChild(this.oled.el);
 
-    row.appendChild(this._buildPresetControls());
-
-    return row;
+    sec.appendChild(this._buildPresetControls());
+    sec.appendChild(this._buildMasterRow());
+    return sec;
   }
 
   _buildPresetControls() {
@@ -230,21 +220,29 @@ class App {
     const row = document.createElement('div');
     row.id = 'sections-row';
 
-    row.appendChild(this._buildOscSection());
+    row.appendChild(this._buildMasterSection());
     row.appendChild(this._buildLFOSection());
+    row.appendChild(this._buildOscSection());
     row.appendChild(this._buildFilterSection());
     row.appendChild(this._buildEnvSection());
+    row.appendChild(this._buildOutputSection());
 
     return row;
   }
 
-  _makeSection(title) {
+  _makeSection(title, subLabel) {
     const sec = document.createElement('div');
     sec.className = 'lp-section';
     const h = document.createElement('div');
     h.className = 'lp-section-title';
     h.textContent = title;
     sec.appendChild(h);
+    if (subLabel) {
+      const sub = document.createElement('div');
+      sub.className = 'lp-eg-label';
+      sub.textContent = subLabel;
+      sec.appendChild(sub);
+    }
     const knobsRow = document.createElement('div');
     knobsRow.className = 'lp-section-knobs';
     sec.appendChild(knobsRow);
@@ -323,7 +321,7 @@ class App {
   }
 
   _buildLFOSection() {
-    const { sec, knobsRow } = this._makeSection('LFO');
+    const { sec, knobsRow } = this._makeSection('MODULATION');
 
     this._addKnob(knobsRow, 'lfoRate', {
       label: 'RATE', min: 0.02, max: 20, defaultValue: 4, formatValue: (v) => `${v.toFixed(2)} Hz`,
@@ -412,17 +410,7 @@ class App {
   }
 
   _buildEnvSection() {
-    const { sec, knobsRow } = this._makeSection('ENVELOPES');
-
-    const envRow1 = document.createElement('div');
-    envRow1.className = 'lp-section-knobs';
-    const label1 = document.createElement('div');
-    label1.className = 'lp-knob-label';
-    label1.style.width = '100%';
-    label1.style.textAlign = 'center';
-    label1.style.fontSize = '9px';
-    label1.textContent = 'FILTER EG';
-    sec.appendChild(label1);
+    const { sec, knobsRow } = this._makeSection('ENVELOPE GENERATORS', 'FILTER');
 
     ['fAttack', 'fDecay', 'fSustain', 'fRelease'].forEach((key, i) => {
       const names = ['ATTACK', 'DECAY', 'SUSTAIN', 'RELEASE'];
@@ -443,13 +431,9 @@ class App {
     const ampRow = document.createElement('div');
     ampRow.className = 'lp-section-knobs';
     const label2 = document.createElement('div');
-    label2.className = 'lp-knob-label';
-    label2.style.width = '100%';
-    label2.style.textAlign = 'center';
-    label2.style.fontSize = '9px';
-    label2.style.marginTop = '6px';
+    label2.className = 'lp-eg-label';
+    label2.textContent = 'VOLUME';
     sec.appendChild(label2);
-    label2.textContent = 'AMP EG';
     sec.appendChild(ampRow);
 
     ['aAttack', 'aDecay', 'aSustain', 'aRelease'].forEach((key, i) => {
@@ -471,15 +455,32 @@ class App {
     return sec;
   }
 
-  _buildMasterRow() {
-    const row = document.createElement('div');
-    row.id = 'master-row';
-
-    const volKnobWrap = document.createElement('div');
-    this._addKnob(volKnobWrap, 'masterVolume', {
+  _buildOutputSection() {
+    const { sec, knobsRow } = this._makeSection('OUTPUT');
+    sec.classList.add('lp-section-output');
+    this._addKnob(knobsRow, 'masterVolume', {
       label: 'VOLUME', min: 0, max: 1, defaultValue: 0.25, formatValue: (v) => `${Math.round(v * 100)}%`,
       onChange: (v) => { this.engine.setMasterVolume(v); this.oled.showParameter('VOLUME', `${Math.round(v * 100)}%`); this._rememberCurrentPresetState(); },
     });
+    const buttons = document.createElement('div');
+    buttons.className = 'lp-section-buttons';
+    const contrastBtn = document.createElement('button');
+    contrastBtn.className = 'lp-btn';
+    contrastBtn.textContent = 'CONTRAST';
+    contrastBtn.addEventListener('click', () => document.body.classList.toggle('high-contrast'));
+    const helpBtn = document.createElement('button');
+    helpBtn.className = 'lp-btn';
+    helpBtn.textContent = 'HELP';
+    helpBtn.addEventListener('click', () => this._toggleHelp());
+    buttons.appendChild(contrastBtn);
+    buttons.appendChild(helpBtn);
+    sec.appendChild(buttons);
+    return sec;
+  }
+
+  _buildMasterRow() {
+    const row = document.createElement('div');
+    row.id = 'master-row';
 
     const glideKnobWrap = document.createElement('div');
     this._addKnob(glideKnobWrap, 'glideTime', {
@@ -491,46 +492,9 @@ class App {
     this.octaveDisplay.id = 'octave-display';
     this._renderOctaveDisplay();
 
-    const toggles = document.createElement('div');
-    toggles.id = 'view-toggles';
-    const contrastBtn = document.createElement('button');
-    contrastBtn.className = 'lp-btn';
-    contrastBtn.textContent = 'CONTRAST';
-    contrastBtn.addEventListener('click', () => document.body.classList.toggle('high-contrast'));
-    const helpBtn = document.createElement('button');
-    helpBtn.className = 'lp-btn';
-    helpBtn.textContent = 'HELP';
-    helpBtn.addEventListener('click', () => this._toggleHelp());
-    toggles.appendChild(contrastBtn);
-    toggles.appendChild(helpBtn);
-
-    row.appendChild(volKnobWrap);
     row.appendChild(glideKnobWrap);
     row.appendChild(this.octaveDisplay);
-    row.appendChild(toggles);
 
-    return row;
-  }
-
-  _buildScopeRow() {
-    const row = document.createElement('div');
-    row.id = 'scope-row';
-    row.style.display = 'flex';
-    row.style.gap = '10px';
-    row.style.marginTop = '10px';
-
-    const scopePanel = document.createElement('div');
-    scopePanel.className = 'lp-scope-panel';
-    scopePanel.style.flex = '1';
-    this._scopePanel = scopePanel;
-
-    const spectrumPanel = document.createElement('div');
-    spectrumPanel.className = 'lp-scope-panel';
-    spectrumPanel.style.flex = '1';
-    this._spectrumPanel = spectrumPanel;
-
-    row.appendChild(scopePanel);
-    row.appendChild(spectrumPanel);
     return row;
   }
 
@@ -575,7 +539,6 @@ class App {
       this._unlockPromise = (async () => {
         await this.engine.start();
         this.presetManager.restoreLastSession();
-        this._initScopeAndSpectrum();
         this._flushPendingMidiNotes();
         document.removeEventListener('launcher:launch', unlock);
         document.removeEventListener('pointerdown', this._standaloneUnlock);
@@ -607,15 +570,6 @@ class App {
     }
   }
 
-  _initScopeAndSpectrum() {
-    this.scope = new Scope(this.engine.ctx, this.engine.masterGain);
-    this._scopePanel.appendChild(this.scope.el);
-    this.scope.start();
-
-    this.spectrum = new Spectrum(this.engine.ctx, this.engine.masterGain);
-    this._spectrumPanel.appendChild(this.spectrum.el);
-    this.spectrum.start();
-  }
 
   // -------------------------------------------------------------------
   // Note routing (shared by mouse/computer-keyboard/MIDI)

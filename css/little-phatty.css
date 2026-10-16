@@ -1,18 +1,20 @@
 /*
- * Little Phatty presentation layer.
+ * Little Phatty Stage II presentation layer.
  *
- * The instrument keeps its existing DOM and controls, but uses the same
- * compact dark-panel language as the Sub 37: anodized shell, walnut end
- * cheeks, cyan display, inset control cards, and small hardware legends.
+ * Modeled on the hardware: matte black steel panel with a brushed
+ * aluminium top rail, grey rubber end cheeks, grey section-header tabs
+ * sitting on a white rule line, silver-capped black knobs with LED rings,
+ * blue square buttons captioned underneath, a grey-green LCD in the MASTER
+ * block, and the moog logo centred under the panel. Pitch/mod wheels live
+ * in a black box left of the 37-key keybed.
  */
 
 .little-phatty-body {
   overflow: auto;
-  background: radial-gradient(ellipse at 50% -15%, #4e545c, #181b20 48%, #090a0c);
   color: #e7e9eb;
+  background-color: #2a2d33;
+  background-image: radial-gradient(ellipse at 50% -10%, #585d66, #22252a 50%, #0e1013);
 }
-
-.little-phatty-body{background-color:#171b21;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.72' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 .13 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:96px 96px}
 
 .little-phatty-body #app-root {
   min-height: 100vh;
@@ -22,47 +24,53 @@
   place-items: center;
 }
 
+/* ---------------- Chassis + end cheeks ---------------- */
+
 .little-phatty-body #chassis {
   width: min(1510px, calc(100vw - 28px));
   min-width: 1020px;
-  padding: 13px 22px 16px;
   position: relative;
   overflow: hidden;
-  border: 1px solid #5e636a;
-  border-radius: 12px;
-  background: linear-gradient(180deg, #292d33 0%, #15171b 7%, #0a0b0d 100%);
-  box-shadow: 0 32px 85px #000b, inset 0 1px #ffffff1f, inset 0 -1px #000;
+  padding: 0 46px 22px;
+  border: 0;
+  border-radius: 10px 10px 6px 6px;
+  background: linear-gradient(180deg, #121316, #0b0c0e);
+  box-shadow: 0 34px 80px #000c, 0 2px 0 #ffffff14 inset;
   font-family: 'Inter Variable', Inter, sans-serif;
   transform: none;
 }
 
-.little-phatty-body #chassis{background-color:#191c21;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='110' height='110'%3E%3Cpath d='M0 4h110M0 17h110M0 30h110M0 43h110M0 56h110M0 69h110M0 82h110M0 95h110' stroke='%23fff' stroke-opacity='.035'/%3E%3Cpath d='M0 5h110M0 18h110M0 31h110M0 44h110M0 57h110M0 70h110M0 83h110M0 96h110' stroke='%23000' stroke-opacity='.13'/%3E%3C/svg%3E");background-size:110px 110px;box-shadow:0 32px 85px #000c,inset 0 1px #ffffff35,inset 0 -1px #000,inset 0 0 0 1px #78808a33}
-.little-phatty-body #chassis::before,.little-phatty-body #chassis::after{background-color:#5d2e13;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cpath d='M0 8c18-5 30 7 48 0s27 5 32 0M0 31c18-5 30 7 48 0s27 5 32 0M0 56c18-5 30 7 48 0s27 5 32 0' fill='none' stroke='%23e3a56c' stroke-opacity='.24'/%3E%3C/svg%3E");background-size:80px 80px}
-.little-phatty-body .lp-panel,.little-phatty-body #panel section{background-image:repeating-linear-gradient(0deg,#fff0 0 2px,#ffffff08 2px 3px),linear-gradient(145deg,#292d33,#101215 70%);box-shadow:inset 0 1px #ffffff18,inset 0 -1px #000,0 2px 3px #0008}
-.little-phatty-body .lp-btn{background-color:#24282e;background-image:repeating-linear-gradient(90deg,#fff0 0 3px,#ffffff09 3px 4px);box-shadow:inset 0 1px #ffffff22,inset 0 -1px #08090a,0 1px #000}
-.little-phatty-body .lp-oled{background-color:#1a0f00;background-image:repeating-linear-gradient(0deg,#fff0 0 2px,#ffb54f10 2px 3px);box-shadow:inset 0 0 15px #000,inset 0 0 0 1px #ffb54f55,0 1px #fff3}
-.little-phatty-body .lp-key-white{background-color:#e5e4df;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='42'%3E%3Cpath d='M3 0v42M9 0v42M15 0v42' stroke='%23fff' stroke-opacity='.26'/%3E%3Cpath d='M6 0v42M12 0v42' stroke='%23000' stroke-opacity='.08'/%3E%3C/svg%3E");box-shadow:inset 1px 0 #fff9,inset -2px 0 #999,0 2px 2px #000}
-.little-phatty-body .lp-key-black{background-color:#17181b;background-image:repeating-linear-gradient(90deg,#fff0 0 3px,#ffffff0d 3px 4px);box-shadow:inset 1px 0 #777,inset -2px 0 #030303,0 3px 3px #000}
-
-/* Use the bundled face for compact controls while retaining the OLED's mono readout. */
-.little-phatty-body button,.little-phatty-body select,.little-phatty-body input,.little-phatty-body output,.little-phatty-body label,.little-phatty-body .lp-btn,.little-phatty-body .lp-knob-label,.little-phatty-body .lp-key-label,.little-phatty-body .lp-section-title{font-family:'Inter Variable',Inter,sans-serif!important}
-
+/* Grey rubberised end cheeks. */
 .little-phatty-body #chassis::before,
 .little-phatty-body #chassis::after {
   content: '';
   position: absolute;
-  top: 42px;
-  bottom: 12px;
-  width: 25px;
+  top: 0;
+  bottom: 0;
+  width: 46px;
   z-index: 0;
-  background: linear-gradient(90deg, #1a0c05, #6e3512 35%, #8f5a32 56%, #48200c 80%, #160a05);
-  box-shadow: inset 1px 0 #d69a6550, inset -2px 0 #000b;
+  background-color: #6f737a;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+    linear-gradient(180deg, #8d9198 0%, #74787f 30%, #5c6067 75%, #44474d 100%);
+  box-shadow: inset 0 1px #ffffff40, inset 0 -2px #0008;
+}
+.little-phatty-body #chassis::before { left: 0; border-radius: 10px 0 0 6px; box-shadow: inset -3px 0 6px #0006, inset 0 1px #ffffff40; }
+.little-phatty-body #chassis::after { right: 0; border-radius: 0 10px 6px 0; box-shadow: inset 3px 0 6px #0006, inset 0 1px #ffffff40; }
+
+/* Brushed aluminium top rail. */
+.little-phatty-body #chassis-rail {
+  position: relative;
+  z-index: 1;
+  height: 12px;
+  margin: 0 -2px;
+  border-radius: 3px 3px 0 0;
+  background-image:
+    repeating-linear-gradient(90deg, #fff0 0 2px, #ffffff10 2px 3px),
+    linear-gradient(180deg, #f0f1f3 0%, #c3c6cb 35%, #8e9299 70%, #5e6168 100%);
+  box-shadow: 0 2px 4px #000a, inset 0 1px #fff;
 }
 
-.little-phatty-body #chassis::before { left: 0; border-radius: 0 2px 2px 0; }
-.little-phatty-body #chassis::after { right: 0; border-radius: 2px 0 0 2px; transform: scaleX(-1); }
-
-.little-phatty-body #brand-strip,
 .little-phatty-body #panel,
 .little-phatty-body #lower-row,
 .little-phatty-body #chassis-bottom-cap {
@@ -70,271 +78,372 @@
   z-index: 1;
 }
 
-.little-phatty-body #brand-strip {
-  min-height: 53px;
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  padding: 2px 26px 10px;
-  border-bottom: 1px solid #ffffff13;
-  color: #e7e9eb;
-}
-
-.little-phatty-body #brand-strip .brand-logo {
-  width: auto;
-  height: 36px;
-  filter: brightness(0) invert(1);
-}
-
-.little-phatty-body #brand-strip .brand-model {
-  min-width: 205px;
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: none;
-  color: #aeafb2;
-  font-size: 21px;
-  font-weight: 800;
-  letter-spacing: .19em;
-  line-height: 1;
-}
+/* ---------------- Control panel ---------------- */
 
 .little-phatty-body #panel {
-  margin: 8px 25px 0;
-  padding: 10px;
-  border: 1px solid #50545a;
-  border-radius: 3px;
-  background: linear-gradient(145deg, #24272c, #101214 64%, #08090a);
-  box-shadow: inset 0 1px #ffffff10, inset 0 -1px #000;
+  margin: 0;
+  padding: 14px 10px 6px;
+  border: 0;
+  border-radius: 0 0 4px 4px;
+  background-color: #17181b;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+    linear-gradient(180deg, #202125 0%, #17181b 40%, #121316 100%);
+  box-shadow: inset 0 1px #ffffff12, inset 0 -1px #000, 0 6px 14px #0008;
 }
-
 .little-phatty-body #panel::before,
-.little-phatty-body #panel::after {
-  display: none;
-}
+.little-phatty-body #panel::after { display: none; }
 
-.little-phatty-body #panel-top-row {
-  min-height: 53px;
-  display: flex;
-  align-items: stretch;
-  gap: 15px;
-  padding: 2px 4px 10px;
-  border-bottom: 1px solid #ffffff13;
+.little-phatty-body #panel-logo {
+  display: block;
+  height: 26px;
+  margin: 6px auto 4px;
+  filter: brightness(0) invert(1);
+  opacity: .92;
+  position: relative;
+  z-index: 1;
 }
-
-.little-phatty-body .lp-oled {
-  width: 260px;
-  min-width: 260px;
-  padding: 6px 10px;
-  border: 2px solid #0a0e10;
-  border-radius: 3px;
-  background: linear-gradient(145deg, #031017, #071e26);
-  box-shadow: inset 0 0 0 1px #5596a533, inset 0 0 16px #000, 0 1px #fff2;
-}
-
-.little-phatty-body .lp-oled-line {
-  color: #8de8ff;
-  text-shadow: 0 0 6px #5bd4ff;
-  font: 12px/1.25 'DM Mono', monospace;
-  letter-spacing: .05em;
-}
-
-.little-phatty-body .lp-oled-line2 {
-  margin-top: 2px;
-  color: #5b9cae;
-  font-size: 9px;
-}
-
-.little-phatty-body #preset-controls {
-  min-width: 0;
-  flex: 1;
-  flex-direction: row;
-  align-items: center;
-  gap: 7px;
-}
-
-.little-phatty-body #preset-controls .preset-row {
-  gap: 4px;
-}
-
-.little-phatty-body #preset-controls .preset-row:nth-of-type(2) {
-  margin-left: auto;
-}
-
-.little-phatty-body #preset-select {
-  width: min(330px, 100%);
-  height: 21px;
-  padding: 1px 4px;
-  border: 1px solid #555b62;
-  border-radius: 2px;
-  color: #c8f5ff;
-  background: #0d171b;
-  font: 8px 'DM Mono', monospace;
-}
-
-.little-phatty-body .lp-btn {
-  min-height: 21px;
-  padding: 4px 6px;
-  border: 1px solid #595d64;
-  border-radius: 2px;
-  color: #c9cbd0;
-  background: linear-gradient(#373b42, #17191d);
-  box-shadow: inset 0 1px #ffffff15, 0 1px #000;
-  font: 700 7px/1 'Inter Variable', sans-serif;
-  letter-spacing: .06em;
-}
-
-.little-phatty-body .lp-btn:hover { filter: brightness(1.25); transform: none; }
-.little-phatty-body .lp-btn:active { transform: translateY(1px); }
-.little-phatty-body .lp-btn.lit {
-  color: #1a0b03;
-  border-color: #ffb76b;
-  background: linear-gradient(#ffd07e, #e46e28);
-  box-shadow: 0 0 9px #ff7b3266, inset 0 1px #fff8;
-}
-.little-phatty-body .lp-btn::before { display: none; }
 
 .little-phatty-body #sections-row {
   display: grid;
-  grid-template-columns: 1.05fr 1.15fr .9fr 1.45fr;
-  gap: 8px;
-  margin-top: 8px;
+  grid-template-columns: 250px 1.05fr 1.5fr 1.05fr 1.75fr 118px;
+  gap: 0;
+  margin-top: 0;
+  position: relative;
+  z-index: 1;
 }
 
+/* Sections are open areas separated by thin white hairlines, with a grey
+   header tab sitting on the top rule - like the screen-printed hardware. */
 .little-phatty-body .lp-section {
+  position: relative;
   min-width: 0;
-  padding: 8px 9px 9px;
-  border: 1px solid #50545a;
-  border-radius: 3px;
-  background: linear-gradient(145deg, #24272c, #101214 64%, #08090a);
-  box-shadow: inset 0 1px #ffffff10, inset 0 -1px #000;
+  padding: 22px 8px 8px;
+  border: 0;
+  border-right: 1px solid #ffffff28;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+.little-phatty-body .lp-section:last-child { border-right: 0; }
+.little-phatty-body .lp-section::before {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; top: 7px;
+  height: 1px;
+  background: #ffffff55;
 }
 
 .little-phatty-body .lp-section-title {
-  margin: 0 0 7px;
-  padding-bottom: 4px;
-  border-bottom: 1px solid #ffffff17;
-  color: #dedfe2;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
+  margin: 0;
+  padding: 3px 12px;
+  border: 0;
+  border-radius: 2px;
+  background: linear-gradient(#babec5, #8f949b);
+  color: #0f1012;
   font-size: 8px;
   font-weight: 800;
-  letter-spacing: .16em;
-  text-align: left;
+  letter-spacing: .14em;
+  line-height: 1;
+  white-space: nowrap;
+  box-shadow: 0 1px 1px #000a;
 }
 
 .little-phatty-body .lp-section-knobs {
-  gap: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px 6px;
 }
 
-.little-phatty-body .lp-section-buttons {
-  gap: 4px;
-  margin-top: 7px;
+.little-phatty-body .lp-eg-label {
+  position: relative;
+  margin: 2px 0 1px;
+  text-align: center;
+  color: #e8e9ec;
+  font-size: 6.5px;
+  font-weight: 800;
+  letter-spacing: .14em;
 }
+.little-phatty-body .lp-eg-label::before,
+.little-phatty-body .lp-eg-label::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: calc(50% - 30px);
+  height: 1px;
+  background: #ffffff33;
+}
+.little-phatty-body .lp-eg-label::before { left: 0; }
+.little-phatty-body .lp-eg-label::after { right: 0; }
+.little-phatty-body .lp-eg-label + .lp-section-knobs { margin-top: 2px; }
 
-.little-phatty-body .lp-knob {
-  --knob-size: 48px;
-  min-width: 48px;
-}
+/* ---------------- Knobs ---------------- */
+
+.little-phatty-body .lp-knob { --knob-size: 44px; min-width: 44px; padding: 1px; gap: 2px; }
+.little-phatty-body .lp-section-output .lp-knob,
+.little-phatty-body #master-row .lp-knob { --knob-size: 40px; min-width: 40px; }
 
 .little-phatty-body .lp-knob-label {
-  color: #c9cbcf;
+  color: #e6e7ea;
   font-size: 6px;
-  letter-spacing: .04em;
+  font-weight: 700;
+  letter-spacing: .06em;
   line-height: 1.1;
-  max-width: 60px;
+  max-width: 58px;
+}
+
+/* Silver aluminium cap on a black rubber skirt, amber LED ring. */
+.little-phatty-body .lp-knob-body { stroke: #050505; stroke-width: 1.2; }
+.little-phatty-body .lp-knob-flute { stroke: #000c; stroke-width: 1; }
+.little-phatty-body .lp-knob-cap { fill: #d4d6d9; stroke: #f5f6f8; stroke-width: .8; }
+.little-phatty-body .lp-knob-pointer { stroke: #15161a; stroke-width: 2.2; filter: none; }
+.little-phatty-body .lp-knob-pointer-dot { fill: #15161a; }
+.little-phatty-body .lp-knob-ring-track { stroke: #ffffff10; }
+.little-phatty-body .lp-knob-led { fill: #3a2410; }
+.little-phatty-body .lp-knob-led.lit { fill: #ffb13b; filter: drop-shadow(0 0 2.5px #ff9a1acc); }
+
+/* ---------------- Blue square buttons with caption ---------------- */
+
+.little-phatty-body .lp-btn {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none !important;
+  box-shadow: none !important;
+  color: #e6e7ea;
+  font: 700 5.5px/1 'Inter Variable', sans-serif;
+  letter-spacing: .06em;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.little-phatty-body .lp-btn::before {
+  content: '';
+  display: block;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  border-radius: 3px;
+  border: 1px solid #0a0b0e;
+  background: radial-gradient(circle at 50% 42%, #4a5e86 0%, #2d3a57 55%, #1b2335 100%);
+  box-shadow: inset 0 1px #ffffff40, inset 0 -2px 2px #0008, 0 1px 1px #000;
+  transition: background .08s, box-shadow .08s;
+}
+.little-phatty-body .lp-btn:hover { filter: none; transform: none; }
+.little-phatty-body .lp-btn:hover::before { filter: brightness(1.2); }
+.little-phatty-body .lp-btn:active { transform: none; }
+.little-phatty-body .lp-btn:active::before { transform: translateY(1px); }
+.little-phatty-body .lp-btn.lit { color: #e6e7ea; border: 0; }
+.little-phatty-body .lp-btn.lit::before {
+  background: radial-gradient(circle at 50% 40%, #b9dcff 0%, #4f9cff 45%, #2461c9 100%);
+  box-shadow: 0 0 10px #3f8dffaa, inset 0 1px #ffffffaa, 0 1px 1px #000;
+}
+.little-phatty-body .lp-btn:focus-visible { outline: 1px solid #ffb13b; outline-offset: 2px; }
+
+.little-phatty-body .lp-section-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 5px 7px;
+  margin-top: 6px;
+}
+
+/* ---------------- MASTER block (LCD, presets, glide, octave) ---------------- */
+
+.little-phatty-body .lp-section-master { padding-top: 10px; }
+.little-phatty-body .lp-section-master::before { display: none; }
+
+.little-phatty-body #brand-strip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 0;
+  margin: 0 0 6px;
+  padding: 3px 8px;
+  border: 0;
+  border-radius: 2px;
+  background: linear-gradient(#c9cdd3, #9ea3aa);
+  color: #0f1012;
+}
+.little-phatty-body #brand-strip .brand-model {
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #0f1012;
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: -.02em;
+  line-height: 1;
+  transform: scaleX(.9);
+  transform-origin: left;
+}
+.little-phatty-body #brand-strip .brand-model::after { content: none; }
+.little-phatty-body #brand-strip .brand-sub {
+  color: #2a2d33;
+  font-size: 5.5px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+/* Grey-green backlit LCD. */
+.little-phatty-body .lp-oled {
+  width: 100%;
+  min-width: 0;
+  margin: 0 auto;
+  padding: 5px 10px;
+  border: 2px solid #26282c;
+  border-radius: 2px;
+  background: linear-gradient(170deg, #b4c5ae, #98ac95 60%, #8ea18b);
+  box-shadow: inset 0 0 0 1px #0007, inset 0 2px 6px #0006, 0 1px #ffffff14;
+}
+.little-phatty-body .lp-oled-line {
+  color: #1a2520;
+  text-shadow: 0 0 1px #1a252066;
+  font: 500 11px/1.25 'DM Mono', monospace;
+  letter-spacing: .06em;
+  white-space: pre;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.little-phatty-body .lp-oled-line2 { margin-top: 1px; color: #2f3d36; font-size: 8.5px; }
+.little-phatty-body.high-contrast .lp-oled-line { color: #000; }
+
+.little-phatty-body #preset-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 5px 7px;
+  min-width: 0;
+  margin-top: 7px;
+}
+.little-phatty-body #preset-controls .preset-row { display: flex; gap: 7px; }
+.little-phatty-body #preset-controls .preset-row:nth-of-type(2) { margin-left: 0; }
+
+.little-phatty-body #preset-select {
+  width: 100%;
+  height: 16px;
+  padding: 0 3px;
+  border: 1px solid #0a0b0e;
+  border-radius: 2px;
+  color: #d8dadf;
+  background: #26282d;
+  font: 7.5px 'DM Mono', monospace;
+  box-shadow: inset 0 1px #ffffff14;
 }
 
 .little-phatty-body #master-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-top: 8px;
-  padding: 8px 9px 0;
-  color: #c9cbd0;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 4px;
+  padding: 0;
+  color: #e6e7ea;
 }
-
 .little-phatty-body #octave-display {
-  margin-left: auto;
-  min-width: 72px;
-  padding: 5px;
-  border: 1px solid #4a5058;
+  margin-left: 0;
+  min-width: 56px;
+  padding: 3px 6px;
+  border: 1px solid #0a0b0e;
   border-radius: 2px;
-  color: #8de8ff;
-  background: #0a171c;
+  color: #d8dadf;
+  background: #26282d;
+  text-align: center;
   font: 8px 'DM Mono', monospace;
+  box-shadow: inset 0 1px #ffffff14;
 }
+.little-phatty-body #view-toggles { display: none; }
 
-.little-phatty-body #view-toggles { display: flex; gap: 4px; }
-
-.little-phatty-body #scope-row {
-  display: flex;
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.little-phatty-body .lp-scope-panel {
-  padding: 6px;
-  border: 1px solid #393d42;
-  border-radius: 3px;
-  background: #071116;
-  box-shadow: inset 0 0 0 1px #000, inset 0 0 16px #000;
-}
-
-.little-phatty-body .lp-scope,
-.little-phatty-body .lp-spectrum { height: 58px; }
+/* ---------------- Keybed + wheels ---------------- */
 
 .little-phatty-body #lower-row {
   display: grid;
-  grid-template-columns: 125px 1fr;
-  gap: 10px;
-  align-items: end;
-  margin: 9px 25px 0;
-  padding: 10px;
-  border: 1px solid #393d42;
-  border-radius: 3px;
-  background: linear-gradient(180deg, #24272c, #0d0f11);
-  box-shadow: inset 0 1px #ffffff13;
-}
-
-.little-phatty-body #wheel-housing-block,
-.little-phatty-body #keyboard-block {
-  padding: 2px 0;
+  grid-template-columns: 180px 1fr;
+  gap: 0;
+  align-items: stretch;
+  margin: 6px 0 0;
+  padding: 0;
   border: 0;
-  border-radius: 0;
+  border-radius: 0 0 4px 4px;
   background: none;
   box-shadow: none;
 }
 
 .little-phatty-body #wheel-housing-block {
   display: flex;
+  align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 18px;
+  padding: 10px 0;
+  border: 0;
+  border-radius: 0 0 0 4px;
+  background: linear-gradient(180deg, #1d1e22, #121316);
+  box-shadow: inset 0 1px #ffffff14, inset -1px 0 #000;
 }
 
 .little-phatty-body #keyboard-block {
   min-width: 0;
   display: flex;
   align-items: flex-end;
+  padding: 4px 4px 0 2px;
+  border: 0;
+  border-radius: 0;
+  background: linear-gradient(180deg, #0a0b0d, #050506 40%);
+  box-shadow: inset 0 8px 10px #000;
 }
 
+.little-phatty-body .lp-wheel { width: 34px; }
 .little-phatty-body .lp-wheel-housing {
-  width: 28px;
-  height: 86px;
-  background: linear-gradient(90deg, #191c23, #326b84 50%, #171c22);
-  border-color: #5b7d8b;
+  width: 30px;
+  height: 92px;
+  padding: 4px;
+  border: 1px solid #2b2e36;
+  border-radius: 4px;
+  background: linear-gradient(90deg, #08090b, #16181d 50%, #08090b);
+  box-shadow: inset 0 0 10px #000, inset 0 0 18px #2e5aa033, 0 1px #ffffff12;
 }
+.little-phatty-body .lp-wheel-housing::before { background: radial-gradient(ellipse at 50% 50%, #3a6fd655, transparent 70%); }
+.little-phatty-body .lp-wheel-thumb {
+  height: 36px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #4a4d55, #80848d 50%, #4a4d55);
+  box-shadow: 0 1px 3px #000a, 0 0 6px #3f7fff44;
+}
+.little-phatty-body .lp-wheel-grip { background: #ffffff2a; }
+.little-phatty-body .lp-wheel-label { color: #e6e7ea; font-size: 6px; letter-spacing: .14em; }
 
-.little-phatty-body .lp-wheel-label { color: #c3c5c9; font-size: 7px; }
-.little-phatty-body .lp-keyboard { height: 108px; }
-.little-phatty-body .lp-key-white { background: linear-gradient(90deg, #dddeda, #fbfbf7 47%, #d3d4d0); }
-.little-phatty-body .lp-key-black { background: linear-gradient(90deg, #08090a, #34363b 45%, #090a0b); }
+.little-phatty-body .lp-keyboard { height: 130px; }
+.little-phatty-body .lp-key-white {
+  border-color: #0d0e10;
+  border-radius: 0 0 2px 2px;
+  background: linear-gradient(180deg, #d9d8d1 0%, #f3f2ec 6%, #f7f6f1 70%, #dcdbd4 100%);
+  box-shadow: inset 1px 0 #fff9, inset -2px 0 #a9a9a4, 0 3px 2px #000c;
+}
+.little-phatty-body .lp-key-black {
+  border-radius: 0 0 2px 2px;
+  background: linear-gradient(90deg, #060607, #2b2c31 40%, #1a1b1f 60%, #050506);
+  box-shadow: inset 1px 0 #666, inset -2px 0 #000, 0 4px 4px #000;
+}
 .little-phatty-body .lp-key-white.active,
 .little-phatty-body .lp-key-black.active { background: linear-gradient(#ffd07e, #e46e28); }
 
-.little-phatty-body #chassis-bottom-cap {
-  height: 12px;
-  margin: 0 25px;
-  background: none;
-}
+.little-phatty-body #chassis-bottom-cap { height: 0; margin: 0; background: none; }
+
+/* ---------------- Modals ---------------- */
 
 .little-phatty-body .lp-modal {
   border: 1px solid #50545a;
@@ -342,37 +451,25 @@
   color: #e7e9eb;
   background: linear-gradient(145deg, #24272c, #101214);
 }
-
 .little-phatty-body .lp-modal h3 { color: #dedfe2; }
 .little-phatty-body .lp-modal input[type="text"],
-.little-phatty-body .lp-modal textarea {
-  border-color: #555b62;
-  color: #c8f5ff;
-  background: #0d171b;
+.little-phatty-body .lp-modal textarea { border-color: #555b62; color: #e6e7ea; background: #1b1d21; }
+.little-phatty-body .lp-modal .lp-btn,
+.little-phatty-body .lp-help-panel .lp-btn {
+  flex-direction: row;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid #4a4e56;
+  border-radius: 3px;
+  background: linear-gradient(#34373d, #1b1d21) !important;
+  font-size: 8px;
 }
+.little-phatty-body .lp-modal .lp-btn::before,
+.little-phatty-body .lp-help-panel .lp-btn::before { display: none; }
 
 @media (max-width: 1180px) {
   .little-phatty-body #app-root { place-items: start center; }
-  .little-phatty-body #chassis { transform-origin: top center; }
 }
-
 @media (max-width: 760px) {
   .little-phatty-body #app-root { padding: 8px; }
-  .little-phatty-body #chassis { min-width: 920px; }
-  .little-phatty-body #sections-row { grid-template-columns: 1fr 1fr; }
 }
-
-/* Realism pass: Little Phatty Stage II - charcoal powder-coated steel panel,
-   amber LED-ring knobs with rubber caps, blue-lit buttons and wheels. */
-#panel { background-color: #202226; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8 .02' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"), linear-gradient(180deg, #26282d, #1b1d21 60%, #151719); box-shadow: inset 0 1px #ffffff14, inset 0 -1px #000, 0 20px 50px #000a; }
-.lp-section { background: linear-gradient(160deg, #1a1c20, #121316); border-color: #3b3f46; box-shadow: inset 0 1px #ffffff10, inset 0 -1px #000; }
-.lp-section-title { color: #e6e6ea; }
-.lp-knob-cap { fill: #2a2b2f; stroke: #6b6d73; stroke-width: .8; }
-.lp-knob-body { stroke: #050505; }
-.lp-knob-flute { stroke: rgba(0,0,0,.65); stroke-width: .9; }
-.lp-knob-pointer { stroke: #fff; }
-.lp-knob-led.lit { filter: drop-shadow(0 0 3px var(--led-on-glow)); }
-.lp-btn { background: linear-gradient(#34373d, #1b1d21); border-color: #4a4e56; color: #d7dae0; box-shadow: inset 0 1px #ffffff1a, 0 1px #000; }
-.lp-btn.lit { background: linear-gradient(#67a9ff, #2b6fd6); border-color: #8fc2ff; color: #06142a; box-shadow: 0 0 10px #3f8dff88, inset 0 1px #ffffff99; }
-.brand-model::after { content: ' · stage ii edition'; font-size: .55em; letter-spacing: .18em; color: #9aa0ab; vertical-align: middle; }
-#keyboard-block .lp-key-white { background-image: linear-gradient(180deg, #d7d7d2 0%, #f8f8f5 9%, #fbfbf9 72%, #e0e0da 100%); }

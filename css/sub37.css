@@ -1,61 +1,111 @@
-/* Sub 37 Tribute panel: black anodized steel, aluminium edging, walnut ends,
-   compact white legends and the original blue-green display language. */
-.sub37-body { overflow: auto; background: radial-gradient(ellipse at 50% -15%, #4e545c, #181b20 48%, #090a0c); color: #e7e9eb; }
+/* Sub 37 Tribute Edition - modeled on the hardware: one continuous matte
+   black panel, columns divided by white hairlines with white legends on a
+   top rule, small black knobs with white pointers and printed scale arcs,
+   black rectangular buttons with amber LEDs, blue LCD in PROGRAMMING,
+   preset/step strip along the panel's bottom edge with SUB 37 branding,
+   pale maple end cheeks and a flush black wheel box beside the keybed. */
+.sub37-body { overflow: auto; color: #e7e9eb; background-color: #2a2d33; background-image: radial-gradient(ellipse at 50% -10%, #585d66, #22252a 50%, #0e1013); }
 #sub37-root { min-height: 100vh; padding: 18px; display: grid; place-items: center; }
-.sub37-shell { width: min(1510px, calc(100vw - 28px)); padding: 13px 22px 16px; position: relative; overflow: hidden; border: 1px solid #5e636a; border-radius: 12px; background: linear-gradient(180deg, #292d33 0%, #15171b 7%, #0a0b0d 100%); box-shadow: 0 32px 85px #000b, inset 0 1px #ffffff1f, inset 0 -1px #000; font-family: 'Inter Variable', Inter, sans-serif; }
-.sub37-shell::before,.sub37-shell::after { content: ''; position: absolute; top: 42px; bottom: 12px; width: 25px; z-index: 0; background: linear-gradient(90deg,#1a0c05,#6e3512 35%,#8f5a32 56%,#48200c 80%,#160a05); box-shadow: inset 1px 0 #d69a6550, inset -2px 0 #000b; }
-.sub37-shell::before { left: 0; border-radius: 0 2px 2px 0; }.sub37-shell::after { right: 0; border-radius: 2px 0 0 2px; transform: scaleX(-1); }
-.s37-header,.s37-row,.s37-sequencer,.s37-keybed,.s37-footer { position: relative; z-index: 1; }
-.s37-header { min-height: 53px; display: flex; align-items: center; gap: 15px; padding: 2px 26px 10px; border-bottom: 1px solid #ffffff13; }
-.s37-moog { height: 36px; width: auto; display: block; object-fit: contain; filter: brightness(0) invert(1);}
-.s37-model { display: grid; gap: 2px; min-width: 205px; line-height: 1; }.s37-model b { font-size: 21px; letter-spacing: .19em; }.s37-model span { color: #aeafb2; font-size: 7px; letter-spacing: .17em; }
-.s37-display { width: 260px; margin-left: auto; padding: 6px 10px; border: 2px solid #0a0e10; border-radius: 3px; background: linear-gradient(145deg,#031017,#071e26); box-shadow: inset 0 0 0 1px #5596a533,inset 0 0 16px #000,0 1px #fff2; font: 12px/1.25 'DM Mono', monospace; color: #8de8ff; text-shadow: 0 0 6px #5bd4ff; letter-spacing: .05em; }.s37-display div:last-child { color: #5b9cae; font-size: 9px; margin-top: 2px; }
-.s37-row { display: grid; gap: 8px; margin: 8px 25px 0; }.s37-performance { grid-template-columns: 1.15fr 1.1fr .7fr; }.s37-mod-row { grid-template-columns: 1fr 1fr; }.s37-osc-row { grid-template-columns: .9fr .95fr .9fr 1.6fr; }.s37-env-row { grid-template-columns: 1.25fr 1.25fr .5fr; }
-.s37-section,.s37-sequencer { min-width: 0; padding: 8px 9px 9px; border: 1px solid #50545a; border-radius: 3px; background: linear-gradient(145deg,#24272c,#101214 64%,#08090a); box-shadow: inset 0 1px #ffffff10,inset 0 -1px #000; }
-.s37-section h2 { margin: 0 0 7px; padding-bottom: 4px; border-bottom: 1px solid #ffffff17; color: #dedfe2; font-size: 8px; font-weight: 800; letter-spacing: .16em; text-align: left; }.s37-section h2 span { margin-left: 6px; color: #8a8e94; font-size: 6px; letter-spacing: .11em; }
-.s37-section-body { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 7px; }.s37-knob-row { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 6px; }.s37-knob-row--wide { gap: 2px; }.s37-env-knobs { gap: 1px; }
-.s37-osc-controls { display: flex; align-items: flex-end; gap: 6px; width: 100%; }.s37-osc-controls .s37-select-wrap { flex: 0 0 auto; }.s37-osc-controls .s37-button { margin-bottom: 0; }
-.s37-knob { --knob-size: 48px; min-width: 48px; }.s37-knob .lp-knob-label { color: #c9cbcf; font-size: 6px; letter-spacing: .04em; line-height: 1.1; max-width: 60px; }.s37-env-knobs .s37-knob { --knob-size: 39px; min-width: 39px; }.s37-env-knobs .lp-knob-label { font-size: 5.4px; white-space: nowrap; }
-.s37-button-grid { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }.s37-button { min-height: 21px; padding: 4px 6px; border: 1px solid #595d64; border-radius: 2px; color: #c9cbd0; background: linear-gradient(#373b42,#17191d); box-shadow: inset 0 1px #ffffff15,0 1px #000; font: 700 7px/1 'Inter Variable',sans-serif; letter-spacing: .06em; cursor: pointer; }.s37-button:hover { filter: brightness(1.25); }.s37-button:active { transform: translateY(1px); }.s37-button.lit { color: #1a0b03; border-color: #ffb76b; background: linear-gradient(#ffd07e,#e46e28); box-shadow: 0 0 9px #ff7b3266,inset 0 1px #fff8; }
-.s37-select-wrap { display: grid; gap: 2px; color: #afb2b7; font-size: 6px; font-weight: 800; letter-spacing: .08em; }.s37-select-wrap select { min-width: 72px; max-width: 214px; height: 21px; padding: 1px 4px; border: 1px solid #555b62; border-radius: 2px; color: #c8f5ff; background: #0d171b; font: 8px 'DM Mono',monospace; }.s37-performance .s37-select-wrap select { width: min(100%, 220px); }
-.s37-sound-area { display: grid; gap: 0; }.s37-sequencer { margin: 8px 25px 0; display: grid; grid-template-columns: 165px 290px 1fr; gap: 12px; align-items: center; }.s37-seq-head { display: grid; gap: 3px; color: #c5c8cc; font-size: 7px; letter-spacing: .16em; }.s37-seq-head strong { color: #fafafa; font-size: 9px; }.s37-seq-head span { color: #8b9097; font-size: 6px; }.s37-step-grid { display: grid; grid-template-columns: repeat(16,minmax(0,1fr)); gap: 3px; }.s37-step { min-width: 0; height: 25px; padding: 0; color: #82878d; background: linear-gradient(#24282e,#121416); font-size: 7px; }.s37-step.selected { outline: 1px solid #79d8f2; outline-offset: 1px; }.s37-step.playing { color: #061217; background: #9cecff; box-shadow: 0 0 10px #76dff7; }
-.s37-keybed { display: grid; grid-template-columns: 125px 1fr 112px; gap: 10px; align-items: end; margin: 9px 25px 0; padding: 10px; border: 1px solid #393d42; border-radius: 3px; background: linear-gradient(180deg,#24272c,#0d0f11); box-shadow: inset 0 1px #ffffff13; }.s37-wheels { display: flex; justify-content: center; gap: 12px; padding: 2px 0; }.s37-wheels .lp-wheel-housing { width: 28px; height: 86px; background: linear-gradient(90deg,#191c23,#326b84 50%,#171c22); border-color: #5b7d8b; }.s37-wheels .lp-wheel-thumb { background: linear-gradient(90deg,#202125,#696b6d,#252629); }.s37-wheels .lp-wheel-label { color: #c3c5c9; font-size: 7px; }.s37-keyboard-wrap { min-width: 0; }.s37-keybed .lp-keyboard { height: 108px; border-color: #090a0b; }.s37-keybed .lp-key-white { background: linear-gradient(90deg,#dddeda,#fbfbf7 47%,#d3d4d0); }.s37-keybed .lp-key-black { background: linear-gradient(90deg,#08090a,#34363b 45%,#090a0b); }.s37-octave { display: grid; gap: 5px; justify-items: stretch; }.s37-octave span { padding: 5px; border: 1px solid #4a5058; color: #8de8ff; background: #0a171c; text-align: center; font: 8px 'DM Mono',monospace; }.s37-octave .s37-button { font-size: 6px; }
-.s37-footer { margin: 9px 25px 0; color: #878b90; text-align: center; font: 6px 'DM Mono',monospace; letter-spacing: .15em; }
-#sub37-power,#prophet10-power { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; background: radial-gradient(circle,#28323a99,#050607ec); cursor: pointer; transition: opacity .45s ease,visibility .45s; }.sub37-power-off { opacity: 0; visibility: hidden; pointer-events: none; }.sub37-power-off * { pointer-events: none; }#sub37-power>div,#prophet10-power>div { display: grid; justify-items: center; gap: 7px; padding: 30px 54px; border: 1px solid #ffffff2b; border-radius: 12px; background: linear-gradient(145deg,#2c3239,#101215); box-shadow: 0 28px 80px #000a; color: #f0f0f1; }#sub37-power strong,#prophet10-power strong { font-size: 30px; letter-spacing: .14em; }#sub37-power small,#prophet10-power small { color: #81def9; font: 10px 'DM Mono',monospace; letter-spacing: .14em; text-transform: uppercase; }
-@media (max-width: 1180px) { #sub37-root { place-items: start center; }.sub37-shell { min-width: 1020px; transform-origin: top center; }.s37-header { padding-inline: 26px; } }
-@media (max-width: 760px) { #sub37-root { padding: 8px; }.sub37-shell { min-width: 920px; }.s37-performance { grid-template-columns: 1fr 1fr 1fr; }.s37-sequencer { grid-template-columns: 140px 250px 1fr; } }
 
-/* Physical surface treatment: preserve the Sub 37 geometry while adding anodized grain,
-   inset seams, walnut pores, and tactile hardware highlights. */
-.sub37-body{background-color:#111419;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.7' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 .13 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:96px 96px}
-.sub37-shell{background-color:#111419;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cpath d='M0 3h120M0 16h120M0 29h120M0 42h120M0 55h120M0 68h120M0 81h120M0 94h120M0 107h120' stroke='%23fff' stroke-opacity='.035'/%3E%3Cpath d='M0 4h120M0 17h120M0 30h120M0 43h120M0 56h120M0 69h120M0 82h120M0 95h120M0 108h120' stroke='%23000' stroke-opacity='.12'/%3E%3C/svg%3E");background-size:120px 120px;box-shadow:0 32px 85px #000c,inset 0 1px #ffffff35,inset 0 -1px #000,inset 0 0 0 1px #78808a33}
-.sub37-shell::before,.sub37-shell::after{background-color:#5d2e13;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cpath d='M0 8c18-5 30 7 48 0s27 5 32 0M0 31c18-5 30 7 48 0s27 5 32 0M0 56c18-5 30 7 48 0s27 5 32 0' fill='none' stroke='%23e3a56c' stroke-opacity='.24'/%3E%3C/svg%3E");background-size:80px 80px}
-.s37-section,.s37-sequencer,.s37-keybed{background-color:#171a1e;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Cpath d='M0 1h48M0 25h48' stroke='%23fff' stroke-opacity='.035'/%3E%3Cpath d='M0 2h48M0 26h48' stroke='%23000' stroke-opacity='.18'/%3E%3C/svg%3E");background-size:48px 48px;box-shadow:inset 0 1px #ffffff18,inset 0 -1px #000,0 2px 3px #0008}
-.s37-button{background-color:#24282e;background-image:repeating-linear-gradient(90deg,#fff0 0 3px,#ffffff09 3px 4px);box-shadow:inset 0 1px #ffffff22,inset 0 -1px #08090a,0 1px #000}
-.s37-button.lit{background-color:#d76d27;background-image:repeating-linear-gradient(90deg,#fff3 0 1px,#0002 1px 4px);box-shadow:0 0 9px #ff7b3266,inset 0 1px #fff9,inset 0 -1px #70300b}
-.s37-display{background-color:#04151b;background-image:repeating-linear-gradient(0deg,#fff0 0 2px,#71e1ff0d 2px 3px);box-shadow:inset 0 0 0 1px #5596a555,inset 0 0 16px #000,0 1px #fff3}
-.s37-step{background-color:#181c21;background-image:repeating-linear-gradient(90deg,#fff0 0 3px,#fff1 3px 4px);box-shadow:inset 0 1px #fff2,inset 0 -1px #000}
-.s37-step.playing{background-color:#9cecff;background-image:repeating-linear-gradient(90deg,#fff6 0 1px,#0002 1px 3px)}
-.s37-knob .lp-knob,.s37-wheels .lp-wheel-housing{filter:drop-shadow(0 2px 2px #0008)}
-.s37-keybed .lp-key-white{background-color:#e5e4df;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='42'%3E%3Cpath d='M3 0v42M9 0v42M15 0v42' stroke='%23fff' stroke-opacity='.26'/%3E%3Cpath d='M6 0v42M12 0v42' stroke='%23000' stroke-opacity='.08'/%3E%3C/svg%3E");box-shadow:inset 1px 0 #fff9,inset -2px 0 #999,0 2px 2px #000}
-.s37-keybed .lp-key-black{background-color:#17181b;background-image:repeating-linear-gradient(90deg,#fff0 0 3px,#ffffff0d 3px 4px);box-shadow:inset 1px 0 #777,inset -2px 0 #030303,0 3px 3px #000}
+.sub37-shell { width: min(1600px, calc(100vw - 28px)); min-width: 1180px; position: relative; overflow: hidden; padding: 0 40px 20px; border-radius: 8px 8px 5px 5px; background: linear-gradient(180deg, #121316, #0a0b0d); box-shadow: 0 34px 80px #000c; font-family: 'Inter Variable', Inter, sans-serif; }
+/* Maple end cheeks. */
+.sub37-shell::before,.sub37-shell::after { content: ''; position: absolute; top: 0; bottom: 0; width: 40px; z-index: 0; background-color: #c38a52; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='160'%3E%3Cpath d='M6 0c4 40-4 80 2 120s-2 30 0 40M15 0c-3 50 5 90 0 130s3 20 1 30M24 0c5 60-3 100 2 160M33 0c-4 45 4 95-1 160' fill='none' stroke='%23000' stroke-opacity='.13'/%3E%3Cpath d='M10 0c3 40-3 90 1 160M28 0c-4 50 4 100-2 160' fill='none' stroke='%23fff' stroke-opacity='.16'/%3E%3C/svg%3E"), linear-gradient(90deg, #d9a66d, #c48a52 45%, #a66f3e); background-size: 40px 160px, 100%; }
+.sub37-shell::before { left: 0; border-radius: 8px 0 0 5px; box-shadow: inset -4px 0 8px #0006, inset 2px 0 #ffffff4a; }
+.sub37-shell::after { right: 0; border-radius: 0 8px 5px 0; box-shadow: inset 4px 0 8px #0006, inset -2px 0 #ffffff4a; }
+.s37-rail,.s37-panel,.s37-keybed { position: relative; z-index: 1; }
+.s37-rail { height: 10px; background-image: repeating-linear-gradient(90deg, #fff0 0 2px, #ffffff10 2px 3px), linear-gradient(180deg, #eef0f2, #c0c3c8 40%, #80848b 75%, #55585e); box-shadow: 0 2px 4px #000a, inset 0 1px #fff; border-radius: 3px 3px 0 0; }
 
-/* Keep the cyan display mono, but use Inter Variable for every compact control label. */
-.sub37-shell button,.sub37-shell select,.sub37-shell input,.sub37-shell output,.sub37-shell label,.sub37-shell .s37-button,.sub37-shell .lp-knob-label,.sub37-shell .lp-wheel-label,.sub37-shell .lp-key-label,.sub37-shell .s37-section h2,.sub37-shell .s37-footer{font-family:'Inter Variable',Inter,sans-serif!important}
+/* Panel. */
+.s37-panel { padding: 10px 8px 8px; background-color: #17181b; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"), linear-gradient(180deg, #1f2024, #161719 40%, #111214); box-shadow: inset 0 1px #ffffff12, 0 6px 14px #0008; }
+.s37-grid { display: grid; grid-template-columns: 150px 118px 72px 128px 128px 1fr 92px 236px 270px 70px; }
 
-/* Realism pass: the Sub 37's knobs are plain black Moog caps with a white
-   pointer and skirt (no LED rings), its wheels are unlit black rubber. */
-.sub37-shell .lp-knob-led, .sub37-shell .lp-knob-ring-track { display: none; }
-.sub37-shell .lp-knob-body { stroke: #0a0a0b; stroke-width: 2; filter: drop-shadow(0 3px 2px rgba(0,0,0,.6)); }
-.sub37-shell .lp-knob-cap { fill: #1b1b1e; stroke: #4a4c52; }
-.sub37-shell .lp-knob-pointer { stroke: #f7f7f7; stroke-width: 3; }
-.sub37-shell .lp-knob-flute { stroke: rgba(255,255,255,.07); }
-.sub37-shell .lp-knob-svg { background: radial-gradient(circle at 50% 50%, #2a2b2f 0 44%, #151618 46%, #0a0a0b 52%, transparent 54%); border-radius: 50%; }
-.sub37-shell .s37-wheels .lp-wheel-housing { background: linear-gradient(90deg, #0e0f11, #26272b 50%, #0e0f11); border-color: #3a3d43; box-shadow: inset 0 0 12px #000, 0 1px #ffffff14; }
-.sub37-shell .s37-wheels .lp-wheel-housing::before { background: none; }
-.sub37-shell .s37-wheels .lp-wheel-thumb { background: linear-gradient(90deg, #141416, #3a3b3f 50%, #141416); box-shadow: 0 1px 3px #000; }
-.sub37-shell .s37-wheels .lp-wheel-grip { background: rgba(255,255,255,.14); }
-.sub37-shell .s37-display { background-color: #061a2a; color: #9be7ff; text-shadow: 0 0 5px #4fd0ff, 0 0 12px #1f8fc0; }
-.sub37-shell .s37-section h2 { color: #f1f2f4; }
-.sub37-shell .s37-keybed .lp-key-white { background-image: linear-gradient(180deg, #d9d9d4 0%, #f7f7f3 8%, #fbfbf8 70%, #e2e2dc 100%); }
-.sub37-shell .s37-keybed .lp-key-black { background-image: linear-gradient(90deg, #050506, #2c2d31 40%, #121214 80%, #000); }
+.s37-section { position: relative; min-width: 0; padding: 20px 5px 6px; border-right: 1px solid #ffffff2e; }
+.s37-section:last-child { border-right: 0; }
+.s37-section::before { content: ''; position: absolute; left: 4px; right: 4px; top: 10px; height: 1px; background: #ffffff66; }
+.s37-section h2 { position: absolute; top: 5px; left: 50%; transform: translateX(-50%); margin: 0; padding: 0 6px; border: 0; background: #151619; color: #f3f4f6; font-size: 6.5px; font-weight: 800; letter-spacing: .18em; white-space: nowrap; z-index: 1; }
+.s37-section h2 span { display: none; }
+.s37-section-body { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: center; gap: 5px 6px; }
+.s37-knob-row { display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-end; gap: 2px 4px; width: 100%; }
+.s37-osc-controls { display: flex; align-items: flex-end; justify-content: center; gap: 8px; width: 100%; }
+
+/* Sub-rows (OSC 1/2, F/A envelopes) with the hardware's white square badge. */
+.s37-sub { position: relative; display: flex; align-items: center; gap: 5px; width: 100%; margin: 2px 0 0; }
+.s37-sub::after { content: ''; flex: 1; height: 1px; background: #ffffff33; }
+.s37-sub-badge { display: grid; place-items: center; width: 12px; height: 12px; border: 1px solid #f3f4f6; color: #f3f4f6; font-size: 7px; font-weight: 900; line-height: 1; }
+.s37-sub-label { color: #e6e7ea; font-size: 5.5px; font-weight: 800; letter-spacing: .14em; }
+.s37-col-osc .s37-section-body,.s37-col-env .s37-section-body { gap: 2px 6px; }
+
+/* Knobs: black Moog caps, white pointer, printed scale arc. */
+.s37-knob { --knob-size: 36px; min-width: 36px; padding: 1px; gap: 1px; }
+.s37-col-env .s37-knob { --knob-size: 32px; min-width: 32px; }
+.s37-knob .lp-knob-label { color: #e6e7ea; font-size: 5.3px; font-weight: 700; letter-spacing: .05em; line-height: 1.1; max-width: 46px; white-space: nowrap; }
+.sub37-shell .lp-knob-led { display: none; }
+.sub37-shell .lp-knob-ring-track { stroke: #ffffff8c; stroke-width: 1.4; stroke-dasharray: 1 5.4; }
+.sub37-shell .lp-knob-body { stroke: #050506; stroke-width: 1.6; filter: drop-shadow(0 2px 2px #000a); }
+.sub37-shell .lp-knob-cap { fill: #1c1c1f; stroke: #3a3b40; }
+.sub37-shell .lp-knob-pointer { stroke: #f7f7f7; stroke-width: 3; filter: none; }
+.sub37-shell .lp-knob-flute { stroke: #ffffff10; }
+.sub37-shell .lp-knob-svg { background: radial-gradient(circle at 50% 50%, #27282c 0 42%, #121315 44%, #0a0a0b 50%, transparent 52%); border-radius: 50%; }
+.sub37-shell .lp-knob:focus-visible { outline: 1px solid #ffa63a; outline-offset: 1px; }
+
+/* Buttons: amber LED above a black rectangular cap, label below. */
+.s37-button-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 7px; align-items: flex-end; }
+.s37-button { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; min-height: 0; padding: 0; border: 0; border-radius: 0; background: none !important; box-shadow: none !important; color: #e6e7ea; font: 700 5.3px/1 'Inter Variable', sans-serif; letter-spacing: .06em; white-space: nowrap; cursor: pointer; }
+.s37-button::after { content: ''; order: -1; width: 4px; height: 4px; border-radius: 50%; background: #3a2a14; box-shadow: inset 0 0 1px #000; transition: background .08s, box-shadow .08s; }
+.s37-button::before { content: ''; width: 24px; height: 12px; border-radius: 2px; border: 1px solid #000; background: linear-gradient(#34353a, #1a1b1e); box-shadow: inset 0 1px #ffffff2a, inset 0 -1px #000, 0 1px 1px #000; }
+.s37-button:hover { filter: none; }
+.s37-button:hover::before { filter: brightness(1.25); }
+.s37-button:active { transform: none; }
+.s37-button:active::before { transform: translateY(1px); }
+.s37-button.lit { color: #e6e7ea; border: 0; }
+.s37-button.lit::after { background: #ffb13b; box-shadow: 0 0 6px #ff9a1acc, 0 0 2px #fff6; }
+.s37-button:focus-visible { outline: 1px solid #ffa63a; outline-offset: 2px; }
+
+/* Selects as small dark readouts. */
+.s37-select-wrap { display: grid; gap: 2px; color: #e6e7ea; font-size: 5.3px; font-weight: 800; letter-spacing: .1em; text-align: center; }
+.s37-select-wrap select { min-width: 56px; max-width: 150px; height: 16px; padding: 0 3px; border: 1px solid #000; border-radius: 2px; color: #ffc46b; background: #0d0e10; font: 7px 'DM Mono', monospace; box-shadow: inset 0 1px #ffffff10; }
+.s37-section:first-child .s37-select-wrap { width: 100%; } .s37-section:first-child .s37-select-wrap select { width: 100%; max-width: none; }
+
+/* Blue LCD inside PROGRAMMING. */
+.s37-display { width: 100%; padding: 4px 6px; border: 2px solid #26282c; border-radius: 2px; background: linear-gradient(170deg, #8fd7f0, #5db5d6 60%, #4ea5c6); box-shadow: inset 0 0 0 1px #0007, inset 0 2px 6px #0007, 0 1px #ffffff14; font: 500 9.5px/1.25 'DM Mono', monospace; color: #0a2130; letter-spacing: .05em; white-space: pre; overflow: hidden; }
+.s37-display div:last-child { color: #164258; font-size: 7.5px; margin-top: 1px; }
+
+/* Bottom strip: sequencer controls, 16 steps, branding. */
+.s37-sequencer { display: grid; grid-template-columns: auto auto 1fr auto; gap: 14px; align-items: center; margin-top: 8px; padding: 6px 8px 2px; border-top: 1px solid #ffffff2e; }
+.s37-seq-head { display: grid; gap: 2px; color: #f3f4f6; font-size: 6.5px; letter-spacing: .16em; } .s37-seq-head strong { font-size: 7px; } .s37-seq-head span { color: #9a9ea5; font-size: 5.5px; }
+.s37-step-grid { display: grid; grid-template-columns: repeat(16, minmax(0, 1fr)); gap: 4px; }
+.s37-step { font-size: 5.3px; }
+.s37-step.selected::before { border-color: #ffb13b; }
+.s37-step.playing::after { background: #ffb13b; box-shadow: 0 0 6px #ff9a1acc; }
+.s37-step.playing::before { background: linear-gradient(#5c5033, #2a2418); }
+.s37-brand { display: grid; grid-template-columns: auto auto; column-gap: 8px; align-items: center; padding: 2px 8px; border: 1px solid #ffffff44; border-radius: 2px; color: #f3f4f6; }
+.s37-brand b { font-size: 15px; font-weight: 900; letter-spacing: .02em; line-height: 1; } .s37-brand i { font: 800 5px/1 'Inter Variable', sans-serif; letter-spacing: .2em; align-self: end; }
+.s37-brand span { grid-column: 1 / 3; font-size: 4.5px; font-weight: 700; letter-spacing: .16em; color: #c9ccd1; } .s37-brand img { grid-column: 1 / 3; height: 10px; width: auto; justify-self: end; filter: brightness(0) invert(1); margin-top: 2px; }
+
+/* Keybed: flush black wheel box, keys hard against the panel. */
+.s37-keybed { display: grid; grid-template-columns: 170px 1fr 60px; gap: 0; align-items: stretch; margin: 0; padding: 0; border: 0; border-radius: 0 0 4px 4px; background: linear-gradient(180deg, #0a0b0d, #050506 40%); box-shadow: inset 0 8px 10px #000; }
+.s37-wheels { display: flex; justify-content: center; align-items: center; gap: 22px; padding: 10px 0; background: linear-gradient(180deg, #1d1e22, #121316); box-shadow: inset 0 1px #ffffff14, inset -1px 0 #000; }
+.s37-wheels .lp-wheel { width: 34px; }
+.s37-wheels .lp-wheel-housing { width: 30px; height: 94px; padding: 4px; border: 1px solid #2b2e36; border-radius: 4px; background: linear-gradient(90deg, #08090b, #16181d 50%, #08090b); box-shadow: inset 0 0 10px #000, inset 0 0 16px #ff8a1a22, 0 1px #ffffff12; }
+.s37-wheels .lp-wheel-housing::before { background: radial-gradient(ellipse at 50% 50%, #ff9a2a33, transparent 70%); }
+.s37-wheels .lp-wheel-thumb { height: 36px; border-radius: 3px; background: linear-gradient(90deg, #141416, #3a3b3f 50%, #141416); box-shadow: 0 1px 3px #000, 0 0 6px #ff9a2a33; }
+.s37-wheels .lp-wheel-grip { background: #ffffff22; }
+.s37-wheels .lp-wheel-label { color: #e6e7ea; font-size: 5.5px; letter-spacing: .14em; }
+.s37-keyboard-wrap { min-width: 0; padding: 4px 0 0 2px; display: flex; align-items: flex-end; }
+.s37-keybed .lp-keyboard { height: 132px; }
+.s37-keybed .lp-key-white { border-color: #0d0e10; border-radius: 0 0 2px 2px; background: linear-gradient(180deg, #d9d8d1 0%, #f3f2ec 6%, #f7f6f1 70%, #dcdbd4 100%); box-shadow: inset 1px 0 #fff9, inset -2px 0 #a9a9a4, 0 3px 2px #000c; }
+.s37-keybed .lp-key-black { border-radius: 0 0 2px 2px; background: linear-gradient(90deg, #060607, #2b2c31 40%, #1a1b1f 60%, #050506); box-shadow: inset 1px 0 #666, inset -2px 0 #000, 0 4px 4px #000; }
+.s37-keybed .lp-key-white.active,.s37-keybed .lp-key-black.active { background: linear-gradient(#ffd07e, #e46e28); }
+.s37-octave { display: grid; align-content: center; gap: 4px; justify-items: center; padding: 6px 4px; background: linear-gradient(180deg, #1d1e22, #121316); box-shadow: inset 1px 0 #000; }
+.s37-octave span { width: 100%; padding: 3px; border: 1px solid #000; border-radius: 2px; color: #ffc46b; background: #0d0e10; text-align: center; font: 7px 'DM Mono', monospace; }
+
+.sub37-shell button,.sub37-shell select,.sub37-shell label,.sub37-shell .lp-knob-label,.sub37-shell .lp-wheel-label,.sub37-shell .s37-section h2 { font-family: 'Inter Variable', Inter, sans-serif !important; }
+
+/* Power overlay (shared with Prophet 10). */
+#sub37-power,#prophet10-power { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; background: radial-gradient(circle,#28323a99,#050607ec); cursor: pointer; transition: opacity .45s ease,visibility .45s; }
+.sub37-power-off { opacity: 0; visibility: hidden; pointer-events: none; } .sub37-power-off * { pointer-events: none; }
+#sub37-power>div,#prophet10-power>div { display: grid; justify-items: center; gap: 7px; padding: 30px 54px; border: 1px solid #ffffff2b; border-radius: 12px; background: linear-gradient(145deg,#2c3239,#101215); box-shadow: 0 28px 80px #000a; color: #f0f0f1; }
+#sub37-power strong,#prophet10-power strong { font-size: 30px; letter-spacing: .14em; } #sub37-power small,#prophet10-power small { color: #ffb13b; font: 10px 'DM Mono',monospace; letter-spacing: .14em; text-transform: uppercase; }
+
+@media (max-width: 1180px) { #sub37-root { place-items: start center; } }
+@media (max-width: 760px) { #sub37-root { padding: 8px; } }
