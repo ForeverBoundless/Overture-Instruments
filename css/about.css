@@ -57,8 +57,6 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
 .main-nav { display: flex; align-items: center; justify-content: center; gap: clamp(14px, 2vw, 28px); margin-left: auto; }
 .main-nav a, .header-github { color: #aeb7c6; font-size: 10px; font-weight: 600; text-decoration: none; transition: color .2s ease; }
 .main-nav a:hover, .header-github:hover, .main-nav a[aria-current="page"] { color: #fff; }
-.main-nav a[aria-current="page"] { position: relative; }
-.main-nav a[aria-current="page"]::after { position: absolute; right: 0; bottom: -8px; left: 0; height: 1px; content: ''; background: var(--amber); box-shadow: 0 0 8px rgba(255,159,10,.35); }
 .header-github { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 12px; padding: 10px 13px; border: 1px solid var(--line); border-radius: 9px; background: rgba(255,255,255,.025); }
 .external-arrow { color: var(--amber); font-size: 16px; transition: transform .2s ease; }
 .header-github:hover .external-arrow { transform: translate(2px, -2px); }
@@ -234,7 +232,6 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
   .main-nav { position: absolute; top: calc(100% + 1px); right: 16px; left: 16px; display: flex; flex-direction: column; align-items: stretch; gap: 0; padding: 7px; border: 1px solid rgba(255,255,255,.12); border-radius: 12px; background: rgba(12,16,23,.96); box-shadow: 0 18px 44px rgba(0,0,0,.4); opacity: 0; visibility: hidden; transform: translateY(-6px); backdrop-filter: blur(18px); transition: opacity .2s ease, transform .2s ease, visibility .2s ease; }
   .main-nav.is-open { opacity: 1; visibility: visible; transform: translateY(0); }
   .main-nav a { padding: 14px 13px; border-radius: 7px; font-size: 12px; }
-  .main-nav a[aria-current="page"]::after { right: auto; bottom: 8px; left: 13px; width: 24px; }
   .main-nav a:hover { background: rgba(255,255,255,.045); }
   .header-github { margin-left: auto; padding: 8px 10px; font-size: 10px; }
   .menu-toggle { display: flex; width: 38px; height: 38px; flex: 0 0 auto; flex-direction: column; align-items: center; justify-content: center; gap: 5px; border: 1px solid var(--line); border-radius: 9px; color: white; background: rgba(255,255,255,.025); cursor: pointer; }

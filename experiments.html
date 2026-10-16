@@ -3,18 +3,40 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b0e13">
 <title>Overture Experiments - learn sound by exploring it</title>
 <meta name="description" content="Eight hands-on sound laboratories: oscillators, filters, envelopes, FM, harmonics, beats, echo and reverb, and LFO modulation. Real audio, measured visualisations, no musical experience required.">
 <link rel="icon" href="/ui/Logos/OvertureLogo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/experiments.css">
+<link rel="stylesheet" href="/css/brand.css">
+<link rel="stylesheet" href="/css/site-footer.css">
 <script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
 <script defer src="/_vercel/insights/script.js"></script>
+<script src="/js/shared/site-nav.js" defer></script>
+<script src="/js/shared/contact.js" defer></script>
 </head>
 <body>
-<main class="ex-page">
-  <nav class="ex-top"><img src="/ui/Logos/OvertureLogo.png" alt=""><a href="/">OVERTURE INSTRUMENTS</a><span>/</span><span>EXPERIMENTS</span><span style="margin-left:auto"><a href="/library">Instrument library</a> · <a href="/omni">OMNI</a></span></nav>
+<header class="site-header" id="top">
+  <a class="site-brand" href="/" aria-label="Overture Instruments home">
+    <span class="site-brand__mark"><img src="/ui/Logos/OvertureLogo.png" alt="" width="24" height="24"></span>
+    <span class="site-brand__wordmark">OVERTURE INSTRUMENTS</span>
+  </a>
+  <nav class="main-nav" id="main-nav" aria-label="Main navigation">
+    <a href="/about">About</a>
+    <a href="/library">Instrument library</a>
+    <a href="/#omni">OMNI</a>
+    <a href="/experiments" aria-current="page">Experiments</a>
+  </nav>
+  <a class="header-github" href="https://github.com/ForeverBoundless/Overture-Instruments" target="_blank" rel="noopener noreferrer">
+    <span>GitHub</span><span class="external-arrow" aria-hidden="true">↗</span>
+  </a>
+  <button class="menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="main-nav">
+    <span></span><span></span>
+  </button>
+</header>
+<main class="ex-page ex-page--site">
   <p class="ex-eyebrow">LEARN BY PLAYING</p>
   <h1>Understand sound<br><em>by exploring it.</em></h1>
   <p class="ex-lead">Eight small laboratories in the spirit of PhET simulations. Each one plays real audio in your browser, draws what the signal is actually doing, and asks you to change one thing at a time and listen. No musical experience, MIDI controller or sign-up required.</p>
@@ -30,5 +52,52 @@
   </div>
   <p class="ex-note">Honest visualisation: plots marked "measured" come from an analyser on the audio you hear; plots marked "theoretical" are computed from the control settings. Audio only starts when you press Play or a key. Space bar toggles play, Escape stops everything.</p>
 </main>
+<footer class="site-footer">
+  <div class="footer-top">
+    <a class="footer-brand" href="#top" aria-label="Back to top">
+      <img src="/ui/Logos/OvertureLogo.png" alt="" width="34" height="34">
+      <span>OVERTURE <b>INSTRUMENTS</b></span>
+    </a>
+    <button class="footer-contact" type="button" id="contact-open">Contact</button>
+    <a class="footer-github" href="https://github.com/ForeverBoundless/Overture-Instruments" target="_blank" rel="noopener noreferrer"><span>Explore the open-source codebase</span><b aria-hidden="true">↗</b></a>
+  </div>
+  <div class="footer-bottom">
+    <span>© <span id="copyright-year">2026</span> Overture Instruments</span>
+    <span class="footer-disclaimer">Independent, unofficial project. Not affiliated with, endorsed by, or sponsored by any manufacturer represented here. All trademarks and brand names belong to their respective owners.</span>
+    <a href="#top" class="back-to-top">BACK TO TOP ↑</a>
+  </div>
+</footer>
+<div class="contact-modal" id="contact-modal" hidden>
+  <div class="contact-modal__backdrop" data-contact-close></div>
+  <form class="contact-modal__panel" id="contact-form" role="dialog" aria-modal="true" aria-labelledby="contact-title">
+    <div class="contact-modal__head">
+      <h2 id="contact-title">Get in touch</h2>
+      <button type="button" class="contact-modal__close" aria-label="Close" data-contact-close>×</button>
+    </div>
+    <input type="text" name="_honey" tabindex="-1" autocomplete="off" style="display:none">
+    <label class="contact-field"><span>Name <em>(optional)</em></span><input type="text" name="name" autocomplete="name"></label>
+    <label class="contact-field"><span>Subject</span><input type="text" name="subject" required></label>
+    <div class="contact-field">
+      <span>Message</span>
+      <div class="contact-toolbar" aria-label="Formatting">
+        <button type="button" data-wrap="**" title="Bold"><b>B</b></button>
+        <button type="button" data-wrap="_" title="Italic"><i>I</i></button>
+        <button type="button" data-wrap="`" title="Code">&lt;/&gt;</button>
+        <button type="button" data-prefix="# " title="Heading">H</button>
+        <button type="button" data-prefix="- " title="Bullet list">•</button>
+        <button type="button" data-prefix="1. " title="Numbered list">1.</button>
+        <button type="button" data-prefix="&gt; " title="Quote">"</button>
+        <button type="button" data-link title="Link">🔗</button>
+      </div>
+      <textarea name="body" rows="8" required placeholder="Write your message…"></textarea>
+      <small>Supports Markdown-style formatting.</small>
+    </div>
+    <p class="contact-status" role="status" aria-live="polite"></p>
+    <div class="contact-modal__actions">
+      <button type="button" class="contact-cancel" data-contact-close>Cancel</button>
+      <button type="submit" class="button button--primary">Send email</button>
+    </div>
+  </form>
+</div>
 </body>
 </html>

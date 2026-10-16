@@ -17,6 +17,14 @@
 .footer-top .footer-github { justify-self: end; }
 .footer-contact { padding: 8px 16px; border: 1px solid rgba(255,255,255,.14); border-radius: 999px; background: rgba(255,255,255,.04); color: #bac4d1; font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; cursor: pointer; transition: color .2s ease, border-color .2s ease, background .2s ease; }
 .footer-contact:hover { color: #fff; border-color: var(--amber); background: rgba(255,183,94,.08); }
+/* Modal buttons: pages that style .button themselves already match this; the
+   scope keeps the dialog identical on pages that don't (e.g. Experiments). */
+.contact-modal .button { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 18px; min-height: 49px; padding: 0 17px 0 21px; overflow: hidden; border: 1px solid transparent; border-radius: 9px; text-decoration: none; font-size: 11px; font-weight: 750; letter-spacing: -.01em; cursor: pointer; transition: transform .22s ease, border-color .22s ease, background .22s ease, box-shadow .22s ease; }
+.contact-modal .button::before { position: absolute; inset: 0; content: ''; background: linear-gradient(115deg, transparent 15%, rgba(255,255,255,.24) 50%, transparent 78%); transform: translateX(-125%); transition: transform .7s ease; }
+.contact-modal .button:hover::before { transform: translateX(125%); }
+.contact-modal .button:hover { transform: translateY(-3px); }
+.contact-modal .button--primary { color: #241808; background: linear-gradient(135deg, #ffd18a, #ffad4a); box-shadow: 0 7px 28px rgba(255,159,10,.14), inset 0 1px rgba(255,255,255,.52); }
+.contact-modal .button--primary:hover { box-shadow: 0 10px 35px rgba(255,159,10,.25), inset 0 1px rgba(255,255,255,.52); }
 .contact-modal { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 20px; }
 .contact-modal[hidden] { display: none; }
 .contact-modal__backdrop { position: absolute; inset: 0; background: rgba(5,7,11,.72); backdrop-filter: blur(6px); }
