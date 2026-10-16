@@ -220,16 +220,23 @@
     let active = false;
     let frame = 0;
     let start = performance.now();
+    let lastDraw = 0;
 
     const resizeFluid = () => {
       const bounds = mission.getBoundingClientRect();
       const scale = Math.min(window.devicePixelRatio || 1, 1.5);
-      width = Math.max(1, Math.floor(bounds.width));
-      height = Math.max(1, Math.floor(bounds.height));
+      const nextWidth = Math.max(1, Math.floor(bounds.width));
+      const nextHeight = Math.max(1, Math.floor(bounds.height));
+      if (nextWidth === width && nextHeight === height) return;
+      width = nextWidth;
+      height = nextHeight;
       fluidCanvas.width = Math.floor(width * scale);
       fluidCanvas.height = Math.floor(height * scale);
       context.setTransform(scale, 0, 0, scale, 0, 0);
-      const count = Math.round(Math.min(950, Math.max(420, width * height / 580)));
+      // Cap the field deliberately: additive color creates the dense look much
+      // more cheaply than hundreds of blurred canvas paint operations.
+      const mobile = window.matchMedia('(max-width: 760px)').matches;
+      const count = Math.round(Math.min(mobile ? 280 : 520, Math.max(mobile ? 190 : 310, width * height / 1150)));
       particles.length = 0;
       for (let i = 0; i < count; i += 1) {
         const angle = Math.random() * Math.PI * 2;
@@ -256,6 +263,13 @@
 
     const drawFluid = (now) => {
       if (!active) return;
+      // This ambient layer does not need a 60 FPS budget. Limiting it to ~30 FPS
+      // prevents its entrance from competing with the page's scroll/reveal work.
+      if (now - lastDraw < 32) {
+        frame = requestAnimationFrame(drawFluid);
+        return;
+      }
+      lastDraw = now;
       const elapsed = now - start;
       context.clearRect(0, 0, width, height);
       context.globalCompositeOperation = 'lighter';
@@ -282,12 +296,10 @@
         x += pushX;
         y += pushY;
         const pulse = .5 + .5 * Math.sin(elapsed * .002 + particle.phase * 2);
-        const alpha = (.17 + pulse * .46) * ease;
+        const alpha = (.2 + pulse * .42) * ease;
         context.fillStyle = `rgba(${colors[particle.color]},${alpha})`;
-        context.shadowColor = `rgba(${colors[particle.color]},${alpha * .9})`;
-        context.shadowBlur = 4;
         context.beginPath();
-        context.arc(x, y, particle.size * (.7 + pulse * .55), 0, Math.PI * 2);
+        context.arc(x, y, particle.size * (.78 + pulse * .45), 0, Math.PI * 2);
         context.fill();
       });
 
@@ -302,7 +314,6 @@
       });
       while (ripples[0] && now - ripples[0].born > 1800) ripples.shift();
       context.globalCompositeOperation = 'source-over';
-      context.shadowBlur = 0;
       frame = requestAnimationFrame(drawFluid);
     };
 
@@ -310,6 +321,7 @@
       active = entries[0].isIntersecting;
       if (active && !frame) {
         start = performance.now();
+        lastDraw = 0;
         mission.classList.add('is-fluid-ready');
         frame = requestAnimationFrame(drawFluid);
       }
