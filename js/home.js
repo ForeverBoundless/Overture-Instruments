@@ -221,6 +221,7 @@
     let frame = 0;
     let start = performance.now();
     let lastDraw = 0;
+    let hasStarted = false;
 
     const resizeFluid = () => {
       const bounds = mission.getBoundingClientRect();
@@ -296,10 +297,10 @@
         x += pushX;
         y += pushY;
         const pulse = .5 + .5 * Math.sin(elapsed * .002 + particle.phase * 2);
-        const alpha = (.2 + pulse * .42) * ease;
+        const alpha = (.32 + pulse * .52) * ease;
         context.fillStyle = `rgba(${colors[particle.color]},${alpha})`;
         context.beginPath();
-        context.arc(x, y, particle.size * (.78 + pulse * .45), 0, Math.PI * 2);
+        context.arc(x, y, particle.size * (.9 + pulse * .45), 0, Math.PI * 2);
         context.fill();
       });
 
@@ -319,13 +320,23 @@
 
     const fluidObserver = new IntersectionObserver((entries) => {
       active = entries[0].isIntersecting;
+
       if (active && !frame) {
-        start = performance.now();
+        // Start the entrance animation only the first time the
+        // Mission section becomes visible.
+        if (!hasStarted) {
+          start = performance.now();
+          hasStarted = true;
+        }
+
         lastDraw = 0;
         mission.classList.add('is-fluid-ready');
         frame = requestAnimationFrame(drawFluid);
       }
+
       if (!active && frame) {
+        // Pause when offscreen, but preserve the particle state,
+        // animation clock, and last rendered canvas image.
         cancelAnimationFrame(frame);
         frame = 0;
       }
