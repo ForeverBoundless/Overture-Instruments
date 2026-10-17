@@ -236,6 +236,24 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
 .showcase-cta { position: relative; z-index: 6; display: flex; align-items: center; gap: 13px; margin: 0 13px 13px; padding: 15px 16px; border: 1px solid rgba(255,183,94,.3); border-radius: 10px; color: #fff; background: linear-gradient(105deg, rgba(255,183,94,.11), rgba(255,255,255,.025)); text-decoration: none; transition: background .25s ease, border-color .25s ease, transform .25s ease; }
 .showcase-cta:hover { transform: translateY(-2px); border-color: rgba(255,183,94,.7); background: linear-gradient(105deg, rgba(255,183,94,.18), rgba(255,255,255,.04)); }
 .showcase-cta__icon { display: grid; width: 30px; height: 30px; flex: 0 0 auto; place-items: center; border: 1px solid rgba(255,183,94,.27); border-radius: 7px; color: var(--amber); font-size: 18px; }
+.showcase-cta__icon img {
+  display: block;
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+.omni-showcase .omni-access .showcase-cta__icon img {
+  filter:
+    brightness(0)
+    saturate(100%)
+    invert(86%)
+    sepia(18%)
+    saturate(1722%)
+    hue-rotate(163deg)
+    brightness(104%)
+    contrast(103%)
+    drop-shadow(0 0 4px rgba(125, 228, 255, .65));
+}
 .showcase-cta > span:nth-child(2) { display: grid; gap: 3px; }
 .showcase-cta small { color: #8994a4; font-family: var(--font-mono); font-size: 7px; letter-spacing: .14em; }
 .showcase-cta strong { font-size: 11px; font-weight: 650; }
@@ -553,7 +571,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
   position: relative;
   display: flex;
   align-items: center;
-  width: min(1430px, calc(100% - (var(--gutter) * 2)));
+  width: min(1420px, calc(100% - (var(--gutter) * 2)));
   min-height: 76px;
   margin: 0 auto 42px;
   padding: 16px 28px;

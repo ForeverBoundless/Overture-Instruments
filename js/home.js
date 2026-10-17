@@ -32,7 +32,11 @@
     if (!id) return;
     const target = document.getElementById(id);
     if (!target) return;
-    const top = id === 'top' ? 0 : target.getBoundingClientRect().top + window.scrollY;
+    const offset = (id === 'omni' || id === 'library') ? 80 : 0;
+    const top = id === 'top'
+      ? 0
+      : target.getBoundingClientRect().top + window.scrollY + offset;
+
     window.scrollTo({ top, behavior: smooth ? 'smooth' : 'auto' });
   };
 

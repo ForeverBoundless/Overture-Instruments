@@ -117,7 +117,10 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
 .story-signoff__line { flex: 1; height: 1px; margin-left: 5px; background: linear-gradient(90deg, rgba(255,183,94,.35), transparent); }
 
 /* Founder feature + accessible photo carousel */
-.founder-section, .process-section, .next-section { position: relative; overflow: hidden; padding: 78px 0 100px; border-top: 1px solid rgba(255,255,255,.075); }
+.founder-section, .process-section, .next-section { position: relative; overflow: hidden; padding: 78px 0 35px; border-top: 1px solid rgba(255,255,255,.075); }
+.founder-section {
+  padding-bottom: 0px;
+}
 .founder-section { background: radial-gradient(ellipse at 84% 42%, rgba(66,186,207,.065), transparent 38%), linear-gradient(180deg, rgba(18,23,31,.45), rgba(9,12,17,.1)); }
 .founder-section::before, .process-section::before, .next-section::before { position: absolute; inset: 0; content: ''; pointer-events: none; opacity: .45; background-image: linear-gradient(rgba(180,202,228,.025) 1px, transparent 1px), linear-gradient(90deg, rgba(180,202,228,.025) 1px, transparent 1px); background-size: 54px 54px; mask-image: linear-gradient(90deg, transparent, black 25%, black 80%, transparent); }
 .founder-layout { position: relative; display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1fr); align-items: center; gap: clamp(42px, 7vw, 92px); padding-top: 58px; }
@@ -148,7 +151,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
 
 /* Build-process gallery */
 .process-section { background: radial-gradient(ellipse at 70% 40%, rgba(255,159,10,.055), transparent 38%), linear-gradient(180deg, rgba(13,18,24,.3), rgba(10,14,19,.2)); }
-.process-heading { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(240px, .7fr); align-items: end; gap: 60px; padding-top: 56px; }
+.process-heading { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(240px, .7fr); align-items: end; gap: 10px; padding-top: 10px; }
 .process-heading h2 { font-size: clamp(43px, 5vw, 64px); }
 .process-heading > p { max-width: 430px; margin: 0 0 5px; color: #aab4c3; font-size: 12px; line-height: 1.9; }
 .process-carousel .carousel-controls { padding: 15px 5px 4px; }
@@ -368,7 +371,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
 .story-copy { width: min(100%, 780px); margin-inline: auto; padding-top: 0; text-align: center; }
 .story-copy .eyebrow { justify-content: center; margin-bottom: 34px; }
 .story-copy p { margin: 0 auto 26px; color: #c3cbd7; font-size: clamp(15px, 1.5vw, 18px); line-height: 1.7; letter-spacing: -.01em; }
-.story-copy .story-copy__lead { max-width: 820px; color: #f1f4f9; font-family: var(--font-display); font-size: clamp(30px, 3.6vw, 46px); font-weight: 400; letter-spacing: -.04em; line-height: 1.18; margin-bottom: 36px; }
+.story-copy .story-copy__lead { max-width: 760px; color: #f1f4f9; font-family: var(--font-display); font-size: clamp(30px, 3.6vw, 46px); font-weight: 400; letter-spacing: -.04em; line-height: 1.18; margin-bottom: 36px; }
 .story-copy p:last-of-type { color: #eef1f6; font-size: clamp(16px, 1.65vw, 20px); }
 .story-signoff { justify-content: center; margin-top: 44px; padding-top: 26px; font-size: 9px; }
 .story-signoff__line--left { margin: 0 5px 0 0; background: linear-gradient(270deg, rgba(255,183,94,.35), transparent); }
