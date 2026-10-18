@@ -2,7 +2,7 @@
 
 ### Sound without limits.
 
-**Free, browser-based keyboard and synthesizer emulators, built to make expressive instruments and the technology behind them more accessible to everyone.**
+**Free, browser-based keyboard, synthesizer and other emulators, built to make expressive instruments and the technology behind them more accessible to everyone.**
 
 [**Open Overture Instruments**](https://overture-instruments.vercel.app/) · [**Browse the source code**](https://github.com/ForeverBoundless/Overture-Instruments)
 

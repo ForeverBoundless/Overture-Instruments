@@ -174,7 +174,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
 .next-card__icon { position: absolute; top: 17px; right: 18px; display: grid; width: 30px; height: 30px; place-items: center; border: 1px solid color-mix(in srgb, var(--card-accent) 30%, transparent); border-radius: 7px; color: var(--card-accent); background: color-mix(in srgb, var(--card-accent) 6%, transparent); font-size: 17px; }
 .next-card h3 { margin: 35px 0 9px; color: #f2f5f9; font-size: 22px; font-weight: 550; letter-spacing: -.055em; }
 .next-card p { max-width: 280px; margin: 0; color: #9ba6b6; font-size: 11px; line-height: 1.8; }
-.next-card__link { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: auto; padding-top: 23px; color: var(--card-accent); font-family: var(--font-mono); font-size: 7px; letter-spacing: .11em; }
+.next-card__link { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: auto; padding-top: 23px; color: var(--card-accent); font-family: var(--font-mono); font-size: 10px; letter-spacing: .11em; }
 .next-card__link b { font-size: 15px; font-weight: 400; transition: transform .2s ease; }
 .next-card:hover .next-card__link b { transform: translateX(4px); }
 
