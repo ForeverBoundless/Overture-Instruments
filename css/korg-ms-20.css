@@ -1,6 +1,6 @@
 /* korg-ms-20.css - black MS-20 panel with the patch bay on the right. */
 .ms-shell { --pn-shell: #1b1b1c; --pn-shell-edge: #46474a; --pn-section: #111112; --pn-border: #3b3c40; --pn-accent: #ffd36b; --pn-accent-glow: rgba(255,211,107,.5); --pn-display-bg: #141008; --pn-display-ink: #ffcf7a; --pn-led-off: #3a2f10; }
-.ms-shell .pn-brand img { height: 18px; }
+.ms-shell .pn-brand img { height: 30px; width: auto; }
 .ms-row { grid-template-columns: 1fr 1fr 1.2fr .9fr 1.5fr 1.5fr; }
 .ms-row2 { grid-template-columns: 1fr 1.2fr 1.9fr 1.7fr .9fr; }
 .ms-row3 { grid-template-columns: 2fr 1fr; }
