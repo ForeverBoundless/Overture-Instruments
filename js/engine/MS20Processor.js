@@ -24,7 +24,7 @@ class MS20Processor extends AudioWorkletProcessor {
     this.mgPh = 0; this.sh = 0; this.shClockPrev = 0; this.eg1 = { v: 0, stage: 'idle', t: 0 }; this.eg2 = { v: 0, stage: 'idle', t: 0 };
     this.hp = [0, 0]; this.lp = [0, 0]; this.gain = 0; this.espEnv = 0; this.esp = [0, 0, 0, 0]; this.vcaSm = 0;
     this.pitchRing = new Float32Array(1024); this.pitchFrame = new Float32Array(1024);
-    this.pitchDiff = new Float32Array(221); this.pitchCmnd = new Float32Array(221);
+    this.pitchDiff = new Float32Array(257); this.pitchCmnd = new Float32Array(257);
     this.pitchRingWrite = 0; this.pitchRingCount = 0; this.pitchHopCount = 0;
     this.pitchDecimSum = 0; this.pitchDecimCount = 0; this.pitchTargetCv = 0; this.pitchCv = 0;
     this.pitchSlew = 1 - Math.exp(-1 / (this.sr * 0.02)); this.pitchLostSamples = 0;
@@ -185,7 +185,7 @@ class MS20Processor extends AudioWorkletProcessor {
     const N = this.pitchRing.length;
     const rate = this.sr / 4;
     const minLag = Math.max(2, Math.floor(rate / 900));
-    const maxLag = Math.min(200, Math.floor(rate / 55));
+    const maxLag = Math.min(240, Math.floor(rate / 50));
     let mean = 0;
     for (let i = 0; i < N; i += 1) {
       const v = this.pitchRing[(this.pitchRingWrite + i) % N];
@@ -199,6 +199,7 @@ class MS20Processor extends AudioWorkletProcessor {
       energy += this.pitchFrame[i] * this.pitchFrame[i];
     }
     const rms = Math.sqrt(energy / N);
+    this.pitchCmnd.fill(1);
     let valid = false;
     let frequency = 0;
     let midi = 60;
@@ -218,32 +219,32 @@ class MS20Processor extends AudioWorkletProcessor {
         this.pitchCmnd[lag] = cumulative > 1e-12 ? difference * lag / cumulative : 1;
       }
 
+      // Search all credible local minima rather than accepting the first dip.
+      // A strong second/third harmonic can create an earlier (shorter-lag) dip;
+      // the true fundamental normally has the lower normalized-difference score.
       let candidate = -1;
+      let bestScore = 0.30;
       for (let lag = minLag; lag <= maxLag; lag += 1) {
-        if (this.pitchCmnd[lag] < 0.18) {
+        const score = this.pitchCmnd[lag];
+        const isMinimum = score <= this.pitchCmnd[lag - 1]
+          && (lag === maxLag || score <= this.pitchCmnd[lag + 1]);
+        if (isMinimum && score < bestScore) {
           candidate = lag;
-          while (candidate < maxLag && this.pitchCmnd[candidate + 1] < this.pitchCmnd[candidate]) candidate += 1;
-          break;
+          bestScore = score;
         }
-      }
-      if (candidate < 0) {
-        let best = 1;
-        for (let lag = minLag; lag <= maxLag; lag += 1) {
-          if (this.pitchCmnd[lag] < this.pitchCmnd[best]) best = lag;
-        }
-        if (this.pitchCmnd[best] < 0.30) candidate = best;
       }
 
       if (candidate >= minLag && candidate <= maxLag) {
         const left = this.pitchCmnd[candidate - 1];
         const center = this.pitchCmnd[candidate];
-        const right = this.pitchCmnd[candidate + 1];
+        const right = candidate < maxLag ? this.pitchCmnd[candidate + 1] : center;
         const denom = left - 2 * center + right;
-        const offset = Math.abs(denom) > 1e-9 ? 0.5 * (left - right) / denom : 0;
+        const offset = candidate > minLag && candidate < maxLag && Math.abs(denom) > 1e-9
+          ? 0.5 * (left - right) / denom : 0;
         const refinedLag = candidate + clamp(offset, -0.5, 0.5);
         frequency = rate / refinedLag;
         confidence = clamp(1 - center, 0, 1);
-        if (frequency >= 55 && frequency <= 900 && confidence >= 0.70) {
+        if (frequency >= 50 && frequency <= 900 && confidence >= 0.70) {
           midi = 69 + 12 * Math.log2(frequency / 440);
           this.pitchTargetCv = clamp((midi - 60) / 12, -2.5, 2.5);
           this.pitchLostSamples = 0;
