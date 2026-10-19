@@ -184,8 +184,8 @@ class MS20Processor extends AudioWorkletProcessor {
   _estimateVoicePitch() {
     const N = this.pitchRing.length;
     const rate = this.sr / 4;
-    const minLag = Math.max(2, Math.floor(rate / 500));
-    const maxLag = Math.min(200, Math.floor(rate / 60));
+    const minLag = Math.max(2, Math.floor(rate / 900));
+    const maxLag = Math.min(200, Math.floor(rate / 55));
     let mean = 0;
     for (let i = 0; i < N; i += 1) {
       const v = this.pitchRing[(this.pitchRingWrite + i) % N];
