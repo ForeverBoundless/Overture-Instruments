@@ -243,7 +243,7 @@ class MS20Processor extends AudioWorkletProcessor {
         const refinedLag = candidate + clamp(offset, -0.5, 0.5);
         frequency = rate / refinedLag;
         confidence = clamp(1 - center, 0, 1);
-        if (frequency >= 60 && frequency <= 500 && confidence >= 0.70) {
+        if (frequency >= 55 && frequency <= 900 && confidence >= 0.70) {
           midi = 69 + 12 * Math.log2(frequency / 440);
           this.pitchTargetCv = clamp((midi - 60) / 12, -2.5, 2.5);
           this.pitchLostSamples = 0;
