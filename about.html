@@ -306,16 +306,25 @@
       <div class="contact-field">
         <span>Message</span>
         <div class="contact-toolbar" aria-label="Formatting">
-          <button type="button" data-wrap="**" title="Bold"><b>B</b></button>
-          <button type="button" data-wrap="_" title="Italic"><i>I</i></button>
-          <button type="button" data-wrap="`" title="Code">&lt;/&gt;</button>
-          <button type="button" data-prefix="# " title="Heading">H</button>
-          <button type="button" data-prefix="- " title="Bullet list">•</button>
-          <button type="button" data-prefix="1. " title="Numbered list">1.</button>
-          <button type="button" data-prefix="&gt; " title="Quote">"</button>
-          <button type="button" data-link title="Link">🔗</button>
+          <button type="button" data-command="bold" title="Bold"><b>B</b></button>
+          <button type="button" data-command="italic" title="Italic"><i>I</i></button>
+          <button type="button" data-command="code" title="Code">&lt;/&gt;</button>
+          <button type="button" data-command="heading" title="Heading">H</button>
+          <button type="button" data-command="bullets" title="Bullet list">•</button>
+          <button type="button" data-command="numbered" title="Numbered list">1.</button>
+          <button type="button" data-command="quote" title="Quote">"</button>
+          <button type="button" data-command="link" title="Link">🔗</button>
         </div>
-        <textarea name="body" rows="8" required placeholder="Write your message…"></textarea>
+        <div
+  class="contact-editor__body"
+  contenteditable="true"
+  role="textbox"
+  aria-label="Message"
+  aria-multiline="true"
+  data-placeholder="Write your message…"
+></div>
+
+<textarea name="body" class="contact-editor__source" tabindex="-1" aria-hidden="true"></textarea>
         <small>Supports Markdown-style formatting.</small>
       </div>
       <p class="contact-status" role="status" aria-live="polite"></p>

@@ -48,6 +48,37 @@
   font-size: 12px;
   resize: vertical;
 }
+/* Rich-text message editor */
+.contact-field .contact-editor__body {
+  min-height: 180px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 0 0 8px 8px;
+  background: rgba(255,255,255,.04);
+  color: #e8edf5;
+  font-family: 'Inter Variable', 'Inter', sans-serif;
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+  outline: none;
+  white-space: normal;
+}
+
+.contact-field .contact-editor__body:empty::before {
+  content: attr(data-placeholder);
+  color: #677282;
+  pointer-events: none;
+}
+
+.contact-field .contact-editor__body:focus {
+  border-color: var(--amber);
+  box-shadow: 0 0 0 3px rgba(255,183,94,.14);
+}
+
+/* Keep the submission field out of sight */
+.contact-field .contact-editor__source {
+  display: none;
+}
 .contact-field input:focus, .contact-field textarea:focus { outline: none; border-color: var(--amber); box-shadow: 0 0 0 3px rgba(255,183,94,.14); }
 .contact-field textarea { font-family: 'Inter Variable', 'Inter', sans-serif; line-height: 1.6; border-top-left-radius: 0; border-top-right-radius: 0; }
 .contact-field small { color: #677282; font-family: 'Inter Variable', 'Inter', sans-serif; font-size: 10px; letter-spacing: .04em; }

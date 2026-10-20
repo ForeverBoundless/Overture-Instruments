@@ -17,32 +17,44 @@
   modal.querySelectorAll('[data-contact-close]').forEach((el) => el.addEventListener('click', close));
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !modal.hidden) close(); });
 
-  // Markup toolbar: wrap selection or prefix selected lines.
-  const edit = (fn) => {
-    const { selectionStart: s, selectionEnd: e, value: v } = body;
-    const { text, cursor } = fn(v.slice(s, e), v, s, e);
-    body.value = v.slice(0, s) + text + v.slice(e);
-    body.focus();
-    body.setSelectionRange(cursor[0], cursor[1]);
-  };
+  // Rich-text toolbar: apply formatting directly in the editor.
+  const editor = form.querySelector('.contact-editor__body');
 
   form.querySelectorAll('.contact-toolbar button').forEach((btn) => {
     btn.addEventListener('click', () => {
-      if (btn.dataset.wrap !== undefined) {
-        const w = btn.dataset.wrap;
-        edit((sel, v, s) => ({ text: w + (sel || 'text') + w, cursor: [s + w.length, s + w.length + (sel || 'text').length] }));
-      } else if (btn.dataset.prefix !== undefined) {
-        const p = btn.dataset.prefix;
-        edit((sel, v, s) => {
-          const lineStart = v.lastIndexOf('\n', s - 1) + 1;
-          const block = v.slice(lineStart, s) + sel;
-          const text = block.split('\n').map((l) => p + l).join('\n');
-          return { text: text.slice(s - lineStart), cursor: [s + p.length, s + p.length + text.length - block.length - p.length + sel.length] };
-        });
-      } else if (btn.dataset.link !== undefined) {
+      editor.focus();
+
+      const command = btn.dataset.command;
+
+      if (command === 'link') {
         const url = window.prompt('Link URL', 'https://');
         if (!url) return;
-        edit((sel, v, s) => { const t = `[${sel || 'link text'}](${url})`; return { text: t, cursor: [s + 1, s + 1 + (sel || 'link text').length] }; });
+
+        try {
+          const parsed = new URL(url);
+          if (!['https:', 'http:'].includes(parsed.protocol)) return;
+          document.execCommand('createLink', false, parsed.href);
+        } catch {
+          return;
+        }
+
+        return;
+      }
+
+      const commands = {
+        bold: ['bold'],
+        italic: ['italic'],
+        code: ['formatBlock', 'pre'],
+        heading: ['formatBlock', 'h3'],
+        bullets: ['insertUnorderedList'],
+        numbered: ['insertOrderedList'],
+        quote: ['formatBlock', 'blockquote']
+      };
+
+      const action = commands[command];
+
+      if (action) {
+        document.execCommand(action[0], false, action[1] || null);
       }
     });
   });
@@ -55,7 +67,14 @@
     e.preventDefault();
     const name = form.elements.name.value.trim();
     const subject = form.elements.subject.value.trim();
-    const msg = body.value.trim();
+    body.value = editor.innerHTML.trim();
+    const msg = body.value;
+
+    if (!editor.innerText.trim()) {
+      setStatus('Please enter a message.', 'error');
+      editor.focus();
+      return;
+    }
     if (form.elements._honey.value) return; // bot
 
     submitBtn.disabled = true;
