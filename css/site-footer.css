@@ -89,7 +89,7 @@
 .contact-modal__actions .button { min-height: 40px; gap: 0; padding: 0 20px; }
 .contact-cancel { padding: 0 16px; border: 1px solid rgba(255,255,255,.12); border-radius: 9px; background: transparent; color: #bac4d1; font-size: 11px; font-weight: 700; cursor: pointer; }
 .contact-cancel:hover { color: #fff; border-color: rgba(255,255,255,.3); }
-.contact-status { min-height: 1em; margin: -6px 0 0; color: #8f99aa; font-family: var(--font-mono); font-size: 8px; letter-spacing: .1em; }
+.contact-status { min-height: 1em; margin: -6px 0 0; color: #8f99aa; font-family: 'Inter Variable', 'Inter', sans-serif; font-size: 8px; letter-spacing: .1em; }
 .contact-status[data-kind="ok"] { color: #83e6a8; }.contact-status[data-kind="error"] { color: #ff8a7a; }
 .contact-modal__actions .button:disabled { opacity: .6; pointer-events: none; }
 @media (max-width: 980px) { .footer-bottom { align-items: flex-start; } }

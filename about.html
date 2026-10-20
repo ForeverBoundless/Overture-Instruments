@@ -14,7 +14,9 @@
   <link rel="stylesheet" href="/css/brand.css">
   <link rel="stylesheet" href="/css/site-footer.css">
   <script src="/js/about.js" defer></script>
-  <script src="/js/shared/contact.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@5/dist/email.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js" defer></script>
+<script src="/js/shared/contact.js" defer></script>
   <script>
     window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
   </script>
@@ -325,7 +327,7 @@
 ></div>
 
 <textarea name="body" class="contact-editor__source" tabindex="-1" aria-hidden="true"></textarea>
-        <small>Supports Markdown-style formatting.</small>
+        
       </div>
       <p class="contact-status" role="status" aria-live="polite"></p>
       <div class="contact-modal__actions">
