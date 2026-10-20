@@ -50,7 +50,7 @@
 }
 .contact-field input:focus, .contact-field textarea:focus { outline: none; border-color: var(--amber); box-shadow: 0 0 0 3px rgba(255,183,94,.14); }
 .contact-field textarea { font-family: 'Inter Variable', 'Inter', sans-serif; line-height: 1.6; border-top-left-radius: 0; border-top-right-radius: 0; }
-.contact-field small { color: #677282; font-family: var(--font-mono); font-size: 10px; letter-spacing: .04em; }
+.contact-field small { color: #677282; font-family: 'Inter Variable', 'Inter', sans-serif; font-size: 10px; letter-spacing: .04em; }
 .contact-toolbar { display: flex; flex-wrap: wrap; gap: 2px; padding: 4px; border: 1px solid rgba(255,255,255,.1); border-bottom: 0; border-radius: 8px 8px 0 0; background: rgba(255,255,255,.03); }
 .contact-toolbar button { min-width: 28px; height: 26px; padding: 0 8px; border: 0; border-radius: 5px; background: transparent; color: #bac4d1; font-size: 11px; cursor: pointer; }
 .contact-toolbar button:hover { background: rgba(255,255,255,.08); color: #fff; }
