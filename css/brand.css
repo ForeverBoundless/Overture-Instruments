@@ -100,49 +100,63 @@
    * a rotating spectrum. No white overlay and no screen blend.
    */
   background-image:
+    /* Green: a larger, more prominent central colour field */
     radial-gradient(
-      ellipse 68% 90% at 20% 45%,
-      rgba(255, 159, 10, .95) 0%,
-      rgba(255, 159, 10, .65) 24%,
-      transparent 72%
+      ellipse 34% 55% at 50% 50%,
+      #82e6a8 0%,
+      rgba(130, 230, 168, .98) 25%,
+      rgba(130, 230, 168, .72) 43%,
+      transparent 64%
     ),
+
+    /* Amber: distinct warm field */
     radial-gradient(
-      ellipse 72% 85% at 78% 32%,
-      rgba(125, 228, 255, .96) 0%,
-      rgba(125, 228, 255, .66) 27%,
-      transparent 72%
+      ellipse 32% 53% at 18% 48%,
+      #ff9f0a 0%,
+      rgba(255, 159, 10, .98) 26%,
+      rgba(255, 159, 10, .72) 43%,
+      transparent 62%
     ),
+
+    /* Cyan: distinct cool field */
     radial-gradient(
-      ellipse 75% 95% at 52% 82%,
-      rgba(130, 230, 168, .93) 0%,
-      rgba(130, 230, 168, .6) 26%,
-      transparent 72%
+      ellipse 32% 53% at 82% 48%,
+      #7de4ff 0%,
+      rgba(125, 228, 255, .98) 26%,
+      rgba(125, 228, 255, .72) 43%,
+      transparent 62%
     ),
+
+    /* Rotating base spectrum: green separates amber and cyan */
     conic-gradient(
       from var(--resource-angle) at 50% 50%,
       #ff9f0a 0deg,
-      #ffb75e 42deg,
-      #82e6a8 95deg,
-      #7de4ff 145deg,
-      #82e6a8 205deg,
-      #7de4ff 255deg,
-      #ffb75e 310deg,
+      #ffb75e 35deg,
+      #82e6a8 75deg,
+      #82e6a8 115deg,
+      #7de4ff 155deg,
+      #7de4ff 195deg,
+      #82e6a8 235deg,
+      #82e6a8 275deg,
+      #ffb75e 315deg,
+      #ff9f0a 350deg,
       #ff9f0a 360deg
     );
 
   background-size:
-    200% 220%,
-    230% 210%,
-    210% 250%,
+    160% 180%,
+    150% 170%,
+    150% 170%,
     240% 220%;
 
   background-position:
-    5% 35%,
-    95% 40%,
-    50% 100%,
+    50% 50%,
+    0% 50%,
+    100% 50%,
     50% 50%;
 
   background-repeat: no-repeat;
+  background-blend-mode: normal;
 
   /* A little colour around the glyphs, not a blinding halo. */
   text-shadow:
@@ -169,23 +183,59 @@
  */
 @keyframes resource-kaleidoscope {
   0%, 100% {
-    background-position: 5% 35%, 95% 40%, 50% 100%, 50% 50%;
-    background-size: 200% 220%, 230% 210%, 210% 250%, 240% 220%;
+    background-position:
+      50% 50%,
+      0% 50%,
+      100% 50%,
+      50% 50%;
+
+    background-size:
+      160% 180%,
+      150% 170%,
+      150% 170%,
+      240% 220%;
   }
 
   25% {
-    background-position: 95% 100%, 5% 0%, 100% 10%, 30% 65%;
-    background-size: 250% 190%, 190% 250%, 260% 200%, 220% 250%;
+    background-position:
+      100% 15%,
+      35% 100%,
+      60% 0%,
+      25% 50%;
+
+    background-size:
+      170% 155%,
+      140% 190%,
+      165% 155%,
+      240% 220%;
   }
 
   50% {
-    background-position: 70% 0%, 25% 100%, 0% 60%, 70% 40%;
-    background-size: 190% 270%, 260% 190%, 190% 260%, 270% 210%;
+    background-position:
+      20% 100%,
+      100% 25%,
+      0% 75%,
+      50% 50%;
+
+    background-size:
+      145% 195%,
+      165% 155%,
+      140% 190%,
+      240% 220%;
   }
 
   75% {
-    background-position: 0% 70%, 100% 80%, 70% 0%, 25% 45%;
-    background-size: 230% 200%, 210% 240%, 250% 220%, 230% 240%;
+    background-position:
+      0% 20%,
+      55% 0%,
+      100% 100%,
+      75% 50%;
+
+    background-size:
+      165% 165%,
+      150% 185%,
+      155% 165%,
+      240% 220%;
   }
 }
 
