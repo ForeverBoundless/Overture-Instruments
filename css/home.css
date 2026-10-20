@@ -149,7 +149,126 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
 .mission-section.is-fluid-ready .idea-fluid__glow { opacity: 1; transform: translateX(0) scale(1); }
 .mission-layout { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(290px, .7fr); align-items: start; gap: clamp(38px, 8vw, 112px); padding: 61px 0 54px; }
 .mission-heading h2 { max-width: 650px; margin: 0; font-size: clamp(40px, 5.4vw, 68px); font-weight: 500; letter-spacing: -.065em; line-height: 1.01; }
-.mission-heading h2 span { color: #8e9aaa; font-family: var(--font-display); font-weight: 400; }
+/* Shared resource: flowing, luminous spectrum */
+.mission-heading h2 .resource-highlight {
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+
+  font-family: var(--font-display);
+  font-weight: 400;
+
+  /* Three moving colour pools over a continuous spectrum */
+  background-image:
+    radial-gradient(
+      ellipse at 30% 45%,
+      rgba(255, 183, 94, .95) 0%,
+      rgba(255, 183, 94, 0) 58%
+    ),
+    radial-gradient(
+      ellipse at 75% 55%,
+      rgba(125, 228, 255, .95) 0%,
+      rgba(125, 228, 255, 0) 57%
+    ),
+    radial-gradient(
+      ellipse at 48% 30%,
+      rgba(130, 230, 168, .9) 0%,
+      rgba(130, 230, 168, 0) 62%
+    ),
+    linear-gradient(
+      112deg,
+      var(--amber) 0%,
+      var(--cyan) 32%,
+      var(--green) 58%,
+      var(--amber-bright) 78%,
+      var(--cyan) 100%
+    );
+
+  background-size:
+    190% 180%,
+    210% 200%,
+    185% 190%,
+    280% 100%;
+
+  background-position:
+    0% 45%,
+    100% 55%,
+    50% 100%,
+    0% 50%;
+
+  background-repeat: no-repeat;
+  background-blend-mode: screen, screen, screen, normal;
+
+  /* Soft, persistent neon halo; no animated text-shadow */
+  text-shadow:
+    0 0 .04em rgba(255, 255, 255, .5),
+    0 0 .18em rgba(255, 183, 94, .32),
+    0 0 .34em rgba(125, 228, 255, .24),
+    0 0 .48em rgba(130, 230, 168, .15);
+}
+
+/* Start the animations when the existing reveal observer
+   makes the Mission heading visible. */
+.mission-heading.is-visible h2 .resource-highlight {
+  animation:
+    resource-spectrum 11s cubic-bezier(.45, 0, .55, 1) infinite,
+    resource-liquid-in 1.3s cubic-bezier(.16, 1, .3, 1) both;
+}
+
+/* Slow, overlapping shifts create the fluid-like colour movement */
+@keyframes resource-spectrum {
+  0%, 100% {
+    background-position:
+      0% 45%,
+      100% 55%,
+      50% 100%,
+      0% 50%;
+  }
+
+  35% {
+    background-position:
+      85% 80%,
+      15% 20%,
+      80% 5%,
+      52% 50%;
+  }
+
+  68% {
+    background-position:
+      15% 25%,
+      75% 85%,
+      10% 55%,
+      100% 50%;
+  }
+}
+
+/* One-time entrance: diffuse light resolves into sharp text */
+@keyframes resource-liquid-in {
+  0% {
+    opacity: 0;
+    filter: blur(9px) saturate(1.8) brightness(1.5);
+  }
+
+  60% {
+    opacity: 1;
+    filter: blur(1.5px) saturate(1.3) brightness(1.15);
+  }
+
+  100% {
+    opacity: 1;
+    filter: blur(0) saturate(1) brightness(1);
+  }
+}
+
+/* Keep the colours while respecting reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .mission-heading.is-visible h2 .resource-highlight {
+    animation: none;
+    opacity: 1;
+    filter: none;
+  }
+}
 .mission-copy { padding-top: 5px; }
 .mission-copy p { margin: 0 0 19px; color: #aeb7c5; font-size: 13px; line-height: 1.9; }
 .mission-copy p:first-child { color: #edf0f6; font-size: 15px; line-height: 1.75; }
