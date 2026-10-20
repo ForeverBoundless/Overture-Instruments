@@ -77,11 +77,16 @@ class MS20App {
     const mg = section(r2, 'MODULATION GENERATOR'); const kg = el('div', 'pn-knobs', mg.body); K(kg, 'mgWave', 'WAVEFORM', (v) => (v < 0.45 ? 'RAMP ↓' : v > 0.55 ? 'RAMP ↑' : 'TRI / SQUARE')); K(kg, 'mgFreq', 'FREQUENCY', (v) => `${(0.1 * Math.pow(300, v)).toFixed(2)} Hz`);
     const e1 = section(r2, 'ENVELOPE GENERATOR 1'); const ke1 = el('div', 'pn-knobs', e1.body); const tf = (max) => (v) => `${(0.002 + v * v * max).toFixed(2)} s`; K(ke1, 'eg1Delay', 'DELAY', tf(4)); K(ke1, 'eg1Attack', 'ATTACK', tf(5)); K(ke1, 'eg1Release', 'RELEASE', tf(8));
     const e2 = section(r2, 'ENVELOPE GENERATOR 2'); const ke2 = el('div', 'pn-knobs', e2.body); K(ke2, 'eg2Hold', 'HOLD', tf(4)); K(ke2, 'eg2Attack', 'ATTACK', tf(5)); K(ke2, 'eg2Decay', 'DECAY', tf(8)); K(ke2, 'eg2Sustain', 'SUSTAIN'); K(ke2, 'eg2Release', 'RELEASE', tf(8));
-    const esp = section(r2, 'EXTERNAL SIGNAL PROCESSOR', 'LOCAL ONLY • NO PITCH-TO-CV');
+    const esp = section(r2, 'EXTERNAL SIGNAL PROCESSOR', 'VOICE-TO-CV • LOCAL ONLY');
     const eb = el('div', 'pn-buttons', esp.body);
     this.micBtn = toggle(eb, 'ENABLE INPUT (MIC)', false, (on) => this.toggleMic(on));
+    this.pitchBtn = toggle(eb, 'PITCH TO CV', false, (on) => {
+      this.set('espPitch', on ? 1 : 0);
+      this.pitchStatusEl.textContent = !on ? 'PITCH TRACKING: OFF' : (this.micStream ? 'PITCH: listening for a clear voice…' : 'PITCH: enable microphone input');
+    });
     const kesp = el('div', 'pn-knobs', esp.body); K(kesp, 'espLevel', 'SIGNAL LEVEL'); K(kesp, 'espLow', 'LOW CUT'); K(kesp, 'espHigh', 'HIGH CUT'); K(kesp, 'espThreshold', 'THRESHOLD');
-    el('div', 'pn-help', esp.body, 'Your browser asks for microphone permission only when you enable this. Audio stays in the page. Routes ESP SIGNAL / ENV / TRIG appear on the patch panel; pitch-to-CV is not implemented.');
+    this.pitchStatusEl = el('div', 'pn-help ms-msg', esp.body, 'PITCH TRACKING: OFF');
+    el('div', 'pn-help', esp.body, 'Enable the microphone and PITCH TO CV, then connect ESP PITCH CV OUT → TOTAL (PITCH). The ESP Processing preset includes this cable. Pitch tracking follows voiced fundamentals, not speech syllables; voice audio passthrough remains optional via ESP SIGNAL OUT → EXT SIGNAL IN.');
     const outS = section(r2, 'OUTPUT'); const ko = el('div', 'pn-knobs', outS.body); K(ko, 'volume', 'MASTER', (v) => `${Math.round(v * 100)}%`);
     this.ui.bendRange = select(outS.body, 'BEND RANGE', [1, 2, 5, 7, 12].map((n) => ({ value: n, label: `${n} st` })), 2, (v) => this.set('bendRange', Number(v)));
     // Patch panel
@@ -147,19 +152,43 @@ class MS20App {
   }
 
   async toggleMic(on) {
-    if (!on) { this.micStream?.getTracks().forEach((t) => t.stop()); this.micSource?.disconnect(); this.micStream = null; this.micSource = null; this.patchMsg.textContent = 'External input disabled.'; return; }
+    if (!on) {
+      this.micStream?.getTracks().forEach((t) => t.stop());
+      this.micSource?.disconnect();
+      this.micStream = null; this.micSource = null;
+      this.pitchStatusEl.textContent = this.patch.params.espPitch >= 0.5 ? 'PITCH: enable microphone input' : 'PITCH TRACKING: OFF';
+      this.patchMsg.textContent = 'External input disabled.';
+      return;
+    }
     if (!this.engine.started) { this.micBtn.setValue(false, true); this.patchMsg.textContent = 'Power on first.'; return; }
     try {
       this.micStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } });
       this.micSource = this.engine.ctx.createMediaStreamSource(this.micStream);
       this.micSource.connect(this.engine.node);
-      this.patchMsg.textContent = 'External input live. Patch ESP SIGNAL OUT → EXT SIGNAL IN to run it through the filters.';
-    } catch (err) { this.micBtn.setValue(false, true); this.patchMsg.textContent = `Input unavailable: ${err.message}`; }
+      this.engine.node.port.onmessage = (event) => {
+        const d = event.data;
+        if (d?.t !== 'espPitch' || this.patch.params.espPitch < 0.5) return;
+        if (!d.valid) { this.pitchStatusEl.textContent = 'PITCH: listening for a clear, sustained note…'; return; }
+        const midi = Math.max(0, Math.min(127, Math.round(d.midi)));
+        const names = ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B'];
+        this.pitchStatusEl.textContent = `PITCH: ${names[midi % 12]}${Math.floor(midi / 12) - 1} · ${d.frequency.toFixed(1)} Hz`;
+      };
+      this.pitchStatusEl.textContent = this.patch.params.espPitch >= 0.5 ? 'PITCH: listening for a clear, sustained note…' : 'PITCH TRACKING: OFF';
+      this.patchMsg.textContent = 'Microphone input live. Load ESP Processing or connect ESP PITCH CV OUT → TOTAL (PITCH) to make the oscillators follow your voice.';
+    } catch (err) {
+      this.micBtn.setValue(false, true);
+      this.pitchStatusEl.textContent = 'PITCH: microphone unavailable';
+      this.patchMsg.textContent = `Input unavailable: ${err.message}`;
+    }
   }
 
   refresh() {
     const p = this.patch.params;
     Object.keys(this.ui).forEach((k) => { if (k in p) this.ui[k].setValue(p[k], true); });
+    this.pitchBtn.setValue(p.espPitch >= 0.5, true);
+    this.pitchStatusEl.textContent = p.espPitch >= 0.5
+      ? (this.micStream ? 'PITCH: listening for a clear, sustained note…' : 'PITCH: enable microphone input')
+      : 'PITCH TRACKING: OFF';
     this.drawCables();
   }
 }

@@ -23,6 +23,12 @@ class MS20Processor extends AudioWorkletProcessor {
     this.ph1 = 0; this.ph2 = 0; this.prev1 = 0; this.prev2 = 0; this.noise = 0x1234567; this.pink = [0, 0, 0];
     this.mgPh = 0; this.sh = 0; this.shClockPrev = 0; this.eg1 = { v: 0, stage: 'idle', t: 0 }; this.eg2 = { v: 0, stage: 'idle', t: 0 };
     this.hp = [0, 0]; this.lp = [0, 0]; this.gain = 0; this.espEnv = 0; this.esp = [0, 0, 0, 0]; this.vcaSm = 0;
+    this.pitchRing = new Float32Array(1024); this.pitchFrame = new Float32Array(1024);
+    this.pitchDiff = new Float32Array(257); this.pitchCmnd = new Float32Array(257);
+    this.pitchRingWrite = 0; this.pitchRingCount = 0; this.pitchHopCount = 0;
+    this.pitchDecimSum = 0; this.pitchDecimCount = 0; this.pitchTargetCv = 0; this.pitchCv = 0;
+    this.pitchSlew = 1 - Math.exp(-1 / (this.sr * 0.02)); this.pitchLostSamples = 0;
+    this.pitchValid = false; this.pitchHz = 0; this.pitchMidi = 60; this.pitchConfidence = 0; this.pitchMessageCounter = 0;
     this.trigPrev = { EG1_TRIG_IN: 0, EG2_TRIG_IN: 0 }; this.src = {};
     this.port.onmessage = (e) => this._msg(e.data);
   }
@@ -78,6 +84,14 @@ class MS20Processor extends AudioWorkletProcessor {
       const skew = clamp(p.mgWave, 0.02, 0.98);
       const mgTri = this.mgPh < skew ? -1 + 2 * this.mgPh / skew : 1 - 2 * (this.mgPh - skew) / (1 - skew);
       const mgRect = this.mgPh < skew ? 1 : 0;
+      // Voice pitch tracking. Decimate 4:1, then estimate the fundamental about every 21 ms.
+      if (ext && p.espPitch >= 0.5) this._pushPitchSample(ext[n]);
+      else {
+        this.pitchTargetCv = 0; this.pitchDecimSum = 0; this.pitchDecimCount = 0;
+        this.pitchRingCount = 0; this.pitchHopCount = 0; this.pitchLostSamples = 0; this.pitchValid = false;
+      }
+      this.pitchCv += this.pitchSlew * (this.pitchTargetCv - this.pitchCv);
+
       // ESP
       let esp = 0; let espTrig = 0;
       if (ext) {
@@ -95,6 +109,7 @@ class MS20Processor extends AudioWorkletProcessor {
       src.KBD_CV = (this.pitch - 60) / 12; src.KBD_TRIG = this.gate ? 1 : 0; src.MG_TRI = mgTri; src.MG_RECT = mgRect;
       src.EG1_OUT = this.eg1.v; src.EG2_OUT = this.eg2.v; src.EG2_REV = -this.eg2.v; src.SH_OUT = this.sh; src.NOISE_WHITE = white; src.NOISE_PINK = pink;
       src.VCO2_OUT = this.prev2; src.ESP_SIGNAL = esp; src.ESP_ENV = this.espEnv * 2; src.ESP_TRIG = espTrig;
+      src.ESP_PITCH_CV = p.espPitch >= 0.5 ? this.pitchCv : 0;
       // ---- envelopes (external triggers replace the keyboard)
       const gate1 = egGate1 ? this._in('EG1_TRIG_IN') > 0.5 : this.gate;
       const gate2 = egGate2 ? this._in('EG2_TRIG_IN') > 0.5 : this.gate;
@@ -147,6 +162,114 @@ class MS20Processor extends AudioWorkletProcessor {
       L[n] = y; R[n] = y;
     }
     return true;
+  }
+
+  _pushPitchSample(sample) {
+    this.pitchDecimSum += sample;
+    this.pitchDecimCount += 1;
+    if (this.pitchDecimCount < 4) return;
+    const downsampled = this.pitchDecimSum * 0.25;
+    this.pitchDecimSum = 0; this.pitchDecimCount = 0;
+    this.pitchRing[this.pitchRingWrite] = downsampled;
+    this.pitchRingWrite = (this.pitchRingWrite + 1) % this.pitchRing.length;
+    if (this.pitchRingCount < this.pitchRing.length) this.pitchRingCount += 1;
+    if (this.pitchRingCount < this.pitchRing.length) return;
+    this.pitchHopCount += 1;
+    if (this.pitchHopCount >= 256) {
+      this.pitchHopCount = 0;
+      this._estimateVoicePitch();
+    }
+  }
+
+  _estimateVoicePitch() {
+    const N = this.pitchRing.length;
+    const rate = this.sr / 4;
+    const minLag = Math.max(2, Math.floor(rate / 900));
+    const maxLag = Math.min(240, Math.floor(rate / 50));
+    let mean = 0;
+    for (let i = 0; i < N; i += 1) {
+      const v = this.pitchRing[(this.pitchRingWrite + i) % N];
+      this.pitchFrame[i] = v;
+      mean += v;
+    }
+    mean /= N;
+    let energy = 0;
+    for (let i = 0; i < N; i += 1) {
+      this.pitchFrame[i] -= mean;
+      energy += this.pitchFrame[i] * this.pitchFrame[i];
+    }
+    const rms = Math.sqrt(energy / N);
+    this.pitchCmnd.fill(1);
+    let valid = false;
+    let frequency = 0;
+    let midi = 60;
+    let confidence = 0;
+
+    if (rms >= 0.002) {
+      let cumulative = 0;
+      const limit = N - maxLag;
+      for (let lag = 1; lag <= maxLag; lag += 1) {
+        let difference = 0;
+        for (let i = 0; i < limit; i += 1) {
+          const delta = this.pitchFrame[i] - this.pitchFrame[i + lag];
+          difference += delta * delta;
+        }
+        this.pitchDiff[lag] = difference;
+        cumulative += difference;
+        this.pitchCmnd[lag] = cumulative > 1e-12 ? difference * lag / cumulative : 1;
+      }
+
+      // Search all credible local minima rather than accepting the first dip.
+      // A strong second/third harmonic can create an earlier (shorter-lag) dip;
+      // the true fundamental normally has the lower normalized-difference score.
+      let candidate = -1;
+      let bestScore = 0.30;
+      for (let lag = minLag; lag <= maxLag; lag += 1) {
+        const score = this.pitchCmnd[lag];
+        const isMinimum = score <= this.pitchCmnd[lag - 1]
+          && (lag === maxLag || score <= this.pitchCmnd[lag + 1]);
+        if (isMinimum && score < bestScore) {
+          candidate = lag;
+          bestScore = score;
+        }
+      }
+
+      if (candidate >= minLag && candidate <= maxLag) {
+        const left = this.pitchCmnd[candidate - 1];
+        const center = this.pitchCmnd[candidate];
+        const right = candidate < maxLag ? this.pitchCmnd[candidate + 1] : center;
+        const denom = left - 2 * center + right;
+        const offset = candidate > minLag && candidate < maxLag && Math.abs(denom) > 1e-9
+          ? 0.5 * (left - right) / denom : 0;
+        const refinedLag = candidate + clamp(offset, -0.5, 0.5);
+        frequency = rate / refinedLag;
+        confidence = clamp(1 - center, 0, 1);
+        if (frequency >= 50 && frequency <= 900 && confidence >= 0.70) {
+          midi = 69 + 12 * Math.log2(frequency / 440);
+          this.pitchTargetCv = clamp((midi - 60) / 12, -2.5, 2.5);
+          this.pitchLostSamples = 0;
+          valid = true;
+        }
+      }
+    }
+
+    if (!valid) {
+      this.pitchLostSamples += 1024;
+      if (this.pitchLostSamples > this.sr * 0.16) this.pitchTargetCv = 0;
+      frequency = 0;
+      midi = 60;
+    }
+    this.pitchValid = valid;
+    this.pitchHz = frequency;
+    this.pitchMidi = midi;
+    this.pitchConfidence = confidence;
+    this.pitchMessageCounter += 1;
+    if (this.pitchMessageCounter % 3 === 0) {
+      this.port.postMessage({
+        t: 'espPitch', valid: this.pitchValid, frequency: this.pitchHz,
+        midi: this.pitchMidi, confidence: this.pitchConfidence,
+      });
+    }
   }
 
   _svf(st, x, fc, R, highpass) {
