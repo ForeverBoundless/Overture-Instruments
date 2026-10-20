@@ -36,199 +36,280 @@
   .menu-toggle span { display: block; width: 14px; height: 1px; background: #dbe1eb; transition: transform .2s ease; }.menu-toggle[aria-expanded="true"] span:first-child { transform: translateY(3px) rotate(45deg); }.menu-toggle[aria-expanded="true"] span:last-child { transform: translateY(-3px) rotate(-45deg); }
 }
 @media (max-width: 440px) { .site-header { padding-inline: 18px; } .header-github { gap: 7px; padding: 8px; }.header-github span:first-child { display: none; } }
-/* =========================================================
-   OVERTURE — LIQUID NEON / SHARED RESOURCE
-   ========================================================= */
+
+/* ============================================================
+   OVERTURE — SHARED RESOURCE
+   Liquid-spectrum lettering, chromatic glow and bloom entrance
+   ============================================================ */
+
+/*
+ * The outer wrapper carries the glow and entrance animation.
+ * It remains inline so the heading's layout and margins are
+ * unchanged. The filter spreads light beyond the glyph edges.
+ */
+
+.mission-heading,
+.mission-heading h2,
+.mission-heading h2 .resource-highlight {
+  overflow: visible !important;
+}
 
 .mission-heading h2 .resource-highlight {
   position: relative;
-  color: transparent !important;
-  -webkit-text-fill-color: transparent !important;
-  -webkit-background-clip: text !important;
-  background-clip: text !important;
-  -webkit-box-decoration-break: clone;
-  box-decoration-break: clone;
+  color: inherit !important;
+  -webkit-text-fill-color: currentColor !important;
+
+  /* Prevent older gradient and glow rules affecting this layer. */
+  background: none !important;
+  text-shadow: none !important;
 
   font-family: var(--font-display);
   font-weight: 400;
 
-  /* Saturated, overlapping pools of liquid colour */
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+
+  /* A large, multicolour halo beyond the lettering itself. */
+  filter:
+    drop-shadow(0 0 5px rgba(125, 228, 255, .9))
+    drop-shadow(0 0 17px rgba(125, 228, 255, .65))
+    drop-shadow(0 0 34px rgba(130, 230, 168, .43))
+    drop-shadow(0 0 55px rgba(255, 159, 10, .3));
+}
+
+/* ============================================================
+   THE LETTERING — MOVING LIQUID COLOUR FIELDS
+   ============================================================ */
+
+.mission-heading h2 .resource-highlight__text {
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+
+  /*
+   * A moving liquid sheen, three coloured light pools,
+   * and a saturated spectrum underneath everything.
+   *
+   * Normal alpha compositing preserves the colours instead
+   * of washing them toward white.
+   */
   background-image:
+    linear-gradient(
+      108deg,
+      transparent 0%,
+      transparent 37%,
+      rgba(125, 228, 255, .96) 44%,
+      rgba(130, 230, 168, .9) 48%,
+      rgba(255, 183, 94, .65) 51%,
+      transparent 59%,
+      transparent 100%
+    ),
     radial-gradient(
-      ellipse at 20% 45%,
+      ellipse 65% 85% at 25% 50%,
       #ff9f0a 0%,
-      rgba(255, 159, 10, .9) 15%,
-      transparent 58%
+      rgba(255, 159, 10, .92) 23%,
+      rgba(255, 159, 10, 0) 72%
     ),
     radial-gradient(
-      ellipse at 80% 35%,
+      ellipse 65% 85% at 75% 35%,
       #7de4ff 0%,
-      rgba(125, 228, 255, .95) 18%,
-      transparent 60%
+      rgba(125, 228, 255, .92) 24%,
+      rgba(125, 228, 255, 0) 72%
     ),
     radial-gradient(
-      ellipse at 50% 95%,
+      ellipse 70% 90% at 50% 80%,
       #82e6a8 0%,
-      rgba(130, 230, 168, .85) 20%,
-      transparent 62%
+      rgba(130, 230, 168, .86) 23%,
+      rgba(130, 230, 168, 0) 72%
     ),
     linear-gradient(
-      115deg,
+      112deg,
       #ff9f0a 0%,
-      #ffd08a 10%,
+      #ffb75e 10%,
       #7de4ff 24%,
-      #82e6a8 38%,
+      #82e6a8 39%,
       #7de4ff 51%,
-      #ffb75e 67%,
-      #ff9f0a 78%,
-      #82e6a8 90%,
+      #ffb75e 64%,
+      #ff9f0a 76%,
+      #82e6a8 89%,
       #7de4ff 100%
     );
 
   background-size:
-    200% 260%,
-    230% 230%,
-    210% 280%,
-    300% 100%;
+    260% 100%,
+    220% 260%,
+    260% 240%,
+    230% 300%,
+    340% 100%;
 
   background-position:
-    0% 45%,
-    100% 35%,
-    50% 100%,
-    0% 50%;
+    200% 50%,
+    12% 35%,
+    90% 30%,
+    45% 100%,
+    38% 50%;
 
   background-repeat: no-repeat;
 
-  /* Coloured neon instead of a pale, washed-out halo */
+  /* Chromatic edge and a strong multicolour inner glow. */
+  -webkit-text-stroke: .4px rgba(125, 228, 255, .55);
+
   text-shadow:
-    0 0 4px rgba(255, 159, 10, .95),
-    0 0 12px rgba(255, 159, 10, .75),
-    0 0 22px rgba(125, 228, 255, .65),
+    0 0 3px rgba(125, 228, 255, .95),
+    0 0 10px rgba(125, 228, 255, .78),
+    0 0 22px rgba(130, 230, 168, .65),
     0 0 42px rgba(125, 228, 255, .42),
-    0 0 65px rgba(130, 230, 168, .28);
-
-  -webkit-text-stroke: .3px rgba(125, 228, 255, .2);
+    0 0 60px rgba(130, 230, 168, .3),
+    -1px 0 0 rgba(255, 159, 10, .55),
+    1px 0 0 rgba(125, 228, 255, .7);
 }
 
-/* The existing scroll observer triggers all three effects */
-.mission-heading.is-visible h2 .resource-highlight {
+/* Start everything with cyan and green light, not yellow. */
+.mission-heading.is-visible h2 .resource-highlight__text {
   animation:
-    resource-liquid-flow 8s linear infinite,
-    resource-neon-pulse 3.8s ease-in-out infinite,
-    resource-liquid-arrive 1.5s cubic-bezier(.16, 1, .3, 1) both;
+    oi-spectrum-flow-v4 11s linear infinite,
+    oi-spectrum-pulse-v4 4.2s ease-in-out infinite;
 }
 
-/* Continuous, overlapping currents of colour */
-@keyframes resource-liquid-flow {
+/* The five backgrounds travel through different paths. */
+@keyframes oi-spectrum-flow-v4 {
   0%, 100% {
     background-position:
-      0% 45%,
-      100% 35%,
-      50% 100%,
-      0% 50%;
-    background-size:
-      200% 260%,
-      230% 230%,
-      210% 280%,
-      300% 100%;
+      200% 50%,
+      12% 35%,
+      90% 30%,
+      45% 100%,
+      38% 50%;
   }
 
   25% {
     background-position:
+      50% 50%,
       100% 5%,
-      0% 90%,
-      100% 20%,
-      35% 50%;
-    background-size:
-      260% 210%,
-      180% 290%,
-      250% 200%,
-      350% 100%;
+      0% 100%,
+      100% 5%,
+      70% 50%;
   }
 
   50% {
     background-position:
-      55% 100%,
+      -100% 50%,
+      60% 100%,
       100% 0%,
-      0% 35%,
-      70% 50%;
-    background-size:
-      180% 300%,
-      260% 190%,
-      190% 300%,
-      300% 100%;
+      5% 40%,
+      100% 50%;
   }
 
   75% {
     background-position:
-      0% 10%,
-      15% 100%,
-      100% 85%,
-      100% 50%;
-    background-size:
-      240% 220%,
-      210% 250%,
-      260% 210%,
-      340% 100%;
+      50% 50%,
+      0% 0%,
+      25% 100%,
+      100% 90%,
+      22% 50%;
   }
 }
 
-/* The glow cycles between amber, cyan and green */
-@keyframes resource-neon-pulse {
+/* The neon shifts through three distinct colour states. */
+@keyframes oi-spectrum-pulse-v4 {
   0%, 100% {
+    -webkit-text-stroke-color: rgba(125, 228, 255, .65);
     text-shadow:
-      0 0 4px rgba(255, 159, 10, .95),
-      0 0 12px rgba(255, 159, 10, .75),
-      0 0 22px rgba(125, 228, 255, .65),
-      0 0 42px rgba(125, 228, 255, .42),
-      0 0 65px rgba(130, 230, 168, .28);
+      0 0 3px rgba(125, 228, 255, 1),
+      0 0 10px rgba(125, 228, 255, .85),
+      0 0 23px rgba(130, 230, 168, .72),
+      0 0 42px rgba(125, 228, 255, .5),
+      0 0 65px rgba(130, 230, 168, .35),
+      -1px 0 0 rgba(255, 159, 10, .55),
+      1px 0 0 rgba(125, 228, 255, .8);
   }
 
   33% {
+    -webkit-text-stroke-color: rgba(130, 230, 168, .8);
     text-shadow:
-      0 0 5px rgba(125, 228, 255, 1),
-      0 0 15px rgba(125, 228, 255, .85),
-      0 0 28px rgba(130, 230, 168, .75),
-      0 0 48px rgba(130, 230, 168, .4),
-      0 0 68px rgba(255, 159, 10, .35);
+      0 0 4px rgba(130, 230, 168, 1),
+      0 0 14px rgba(130, 230, 168, .9),
+      0 0 28px rgba(125, 228, 255, .85),
+      0 0 48px rgba(130, 230, 168, .55),
+      0 0 72px rgba(125, 228, 255, .4),
+      -1px 0 0 rgba(130, 230, 168, .8),
+      1px 0 0 rgba(125, 228, 255, .65);
   }
 
   66% {
+    -webkit-text-stroke-color: rgba(255, 183, 94, .8);
     text-shadow:
-      0 0 5px rgba(130, 230, 168, 1),
-      0 0 15px rgba(130, 230, 168, .82),
-      0 0 28px rgba(255, 159, 10, .75),
-      0 0 48px rgba(255, 159, 10, .4),
-      0 0 70px rgba(125, 228, 255, .4);
+      0 0 4px rgba(255, 183, 94, 1),
+      0 0 13px rgba(255, 159, 10, .9),
+      0 0 27px rgba(125, 228, 255, .8),
+      0 0 48px rgba(255, 159, 10, .5),
+      0 0 72px rgba(130, 230, 168, .4),
+      -1px 0 0 rgba(255, 159, 10, .8),
+      1px 0 0 rgba(125, 228, 255, .7);
   }
 }
 
-/* The initial bloom: blurred colour snaps into focus */
-@keyframes resource-liquid-arrive {
+/* ============================================================
+   ENTRANCE — A BLOOM OF LIGHT THAT SNAPS INTO FOCUS
+   Separate from the ongoing colour and glow animations.
+   ============================================================ */
+
+.mission-heading.is-visible h2 .resource-highlight {
+  animation: oi-spectrum-entry-v4 1.65s cubic-bezier(.16, 1, .3, 1) both;
+}
+
+@keyframes oi-spectrum-entry-v4 {
   0% {
     opacity: 0;
-    filter: blur(14px) saturate(2.5) brightness(1.8);
+    filter:
+      blur(20px)
+      saturate(1.7)
+      drop-shadow(0 0 26px rgba(125, 228, 255, .95))
+      drop-shadow(0 0 50px rgba(130, 230, 168, .8));
   }
 
-  45% {
+  38% {
+    opacity: .8;
+    filter:
+      blur(9px)
+      saturate(1.6)
+      drop-shadow(0 0 20px rgba(125, 228, 255, .9))
+      drop-shadow(0 0 44px rgba(130, 230, 168, .7));
+  }
+
+  72% {
     opacity: 1;
-    filter: blur(5px) saturate(2.2) brightness(1.6);
-  }
-
-  75% {
-    filter: blur(1px) saturate(1.6) brightness(1.2);
+    filter:
+      blur(1.5px)
+      saturate(1.25)
+      drop-shadow(0 0 10px rgba(125, 228, 255, .9))
+      drop-shadow(0 0 25px rgba(130, 230, 168, .55))
+      drop-shadow(0 0 43px rgba(255, 159, 10, .35));
   }
 
   100% {
     opacity: 1;
-    filter: blur(0) saturate(1.25) brightness(1.05);
+    filter:
+      drop-shadow(0 0 5px rgba(125, 228, 255, .9))
+      drop-shadow(0 0 17px rgba(125, 228, 255, .65))
+      drop-shadow(0 0 34px rgba(130, 230, 168, .43))
+      drop-shadow(0 0 55px rgba(255, 159, 10, .3));
   }
 }
 
+/* Reduced-motion support */
 @media (prefers-reduced-motion: reduce) {
-  .mission-heading h2 .resource-highlight {
+  .mission-heading.is-visible h2 .resource-highlight,
+  .mission-heading.is-visible h2 .resource-highlight__text {
     animation: none !important;
-    filter: none !important;
+  }
+
+  .mission-heading h2 .resource-highlight {
     opacity: 1;
+    filter: none;
   }
 }
