@@ -25,7 +25,7 @@
     revealItems.forEach((item) => item.classList.add('is-visible'));
   }
 
-  // Keep offscreen decorative animations paused instead of spending frames on them.
+  // Pause CSS animations only while decorative sections are off-screen.
   if ('IntersectionObserver' in window) {
     const motionTargets = document.querySelectorAll(
       '.hero, .mission-section, .feature-section, .home-coming-soon'
@@ -246,7 +246,7 @@
 
     const resizeFluid = () => {
       const bounds = mission.getBoundingClientRect();
-      const scale = Math.min(window.devicePixelRatio || 1, 1.25);
+      const scale = Math.min(window.devicePixelRatio || 1, 1.5);
       const nextWidth = Math.max(1, Math.floor(bounds.width));
       const nextHeight = Math.max(1, Math.floor(bounds.height));
       if (nextWidth === width && nextHeight === height) return;
@@ -255,10 +255,10 @@
       fluidCanvas.width = Math.floor(width * scale);
       fluidCanvas.height = Math.floor(height * scale);
       context.setTransform(scale, 0, 0, scale, 0, 0);
-      // Keep the fluid field atmospheric without letting particle count dominate
-      // the frame budget, especially on phones and high-density displays.
+      // Cap the field deliberately: additive color creates the dense look much
+      // more cheaply than hundreds of blurred canvas paint operations.
       const mobile = window.matchMedia('(max-width: 760px)').matches;
-      const count = Math.round(Math.min(mobile ? 96 : 180, Math.max(mobile ? 64 : 105, width * height / 2800)));
+      const count = Math.round(Math.min(mobile ? 280 : 520, Math.max(mobile ? 190 : 310, width * height / 1150)));
       particles.length = 0;
       for (let i = 0; i < count; i += 1) {
         const angle = Math.random() * Math.PI * 2;
@@ -280,14 +280,14 @@
       if (event.target.closest('a, button')) return;
       const bounds = mission.getBoundingClientRect();
       ripples.push({ x: event.clientX - bounds.left, y: event.clientY - bounds.top, born: performance.now() });
-      if (ripples.length > 3) ripples.shift();
+      if (ripples.length > 5) ripples.shift();
     };
 
     const drawFluid = (now) => {
       if (!active) return;
       // This ambient layer does not need a 60 FPS budget. Limiting it to ~30 FPS
       // prevents its entrance from competing with the page's scroll/reveal work.
-      if (now - lastDraw < 42) {
+      if (now - lastDraw < 32) {
         frame = requestAnimationFrame(drawFluid);
         return;
       }
@@ -306,15 +306,17 @@
         let y = particle.y + (particle.targetY - particle.y) * ease + swirlY;
         let pushX = 0;
         let pushY = 0;
-        ripples.forEach((ripple) => {
-          const age = (now - ripple.born) / 1000;
-          const dx = x - ripple.x;
-          const dy = y - ripple.y;
-          const distance = Math.hypot(dx, dy) || 1;
-          const wave = Math.sin(distance * .09 - age * 13) * Math.exp(-Math.abs(distance - age * 165) / 48) * Math.max(0, 1 - age / 1.7);
-          pushX += dx / distance * wave * 13;
-          pushY += dy / distance * wave * 13;
-        });
+        if (ripples.length) {
+          ripples.forEach((ripple) => {
+            const age = (now - ripple.born) / 1000;
+            const dx = x - ripple.x;
+            const dy = y - ripple.y;
+            const distance = Math.hypot(dx, dy) || 1;
+            const wave = Math.sin(distance * .09 - age * 13) * Math.exp(-Math.abs(distance - age * 165) / 48) * Math.max(0, 1 - age / 1.7);
+            pushX += dx / distance * wave * 13;
+            pushY += dy / distance * wave * 13;
+          });
+        }
         x += pushX;
         y += pushY;
         const pulse = .5 + .5 * Math.sin(elapsed * .002 + particle.phase * 2);
