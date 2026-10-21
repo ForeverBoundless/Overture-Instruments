@@ -25,6 +25,23 @@
     revealItems.forEach((item) => item.classList.add('is-visible'));
   }
 
+  // Keep offscreen decorative animations paused instead of spending frames on them.
+  if ('IntersectionObserver' in window) {
+    const motionTargets = document.querySelectorAll(
+      '.hero, .mission-section, .feature-section, .home-coming-soon'
+    );
+    const motionObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        entry.target.classList.toggle('motion-paused', !entry.isIntersecting);
+      });
+    }, { rootMargin: '120px 0px' });
+
+    motionTargets.forEach((target) => {
+      target.classList.add('motion-paused');
+      motionObserver.observe(target);
+    });
+  }
+
   // Deep links (#omni etc.): the browser scrolls before fonts/images settle, so
   // re-align to the target once layout is final. Instant on load, smooth after.
   const scrollToHash = (smooth) => {
@@ -229,7 +246,7 @@
 
     const resizeFluid = () => {
       const bounds = mission.getBoundingClientRect();
-      const scale = Math.min(window.devicePixelRatio || 1, 1.5);
+      const scale = Math.min(window.devicePixelRatio || 1, 1.25);
       const nextWidth = Math.max(1, Math.floor(bounds.width));
       const nextHeight = Math.max(1, Math.floor(bounds.height));
       if (nextWidth === width && nextHeight === height) return;
@@ -238,10 +255,10 @@
       fluidCanvas.width = Math.floor(width * scale);
       fluidCanvas.height = Math.floor(height * scale);
       context.setTransform(scale, 0, 0, scale, 0, 0);
-      // Cap the field deliberately: additive color creates the dense look much
-      // more cheaply than hundreds of blurred canvas paint operations.
+      // Keep the fluid field atmospheric without letting particle count dominate
+      // the frame budget, especially on phones and high-density displays.
       const mobile = window.matchMedia('(max-width: 760px)').matches;
-      const count = Math.round(Math.min(mobile ? 280 : 520, Math.max(mobile ? 190 : 310, width * height / 1150)));
+      const count = Math.round(Math.min(mobile ? 96 : 180, Math.max(mobile ? 64 : 105, width * height / 2800)));
       particles.length = 0;
       for (let i = 0; i < count; i += 1) {
         const angle = Math.random() * Math.PI * 2;
@@ -263,14 +280,14 @@
       if (event.target.closest('a, button')) return;
       const bounds = mission.getBoundingClientRect();
       ripples.push({ x: event.clientX - bounds.left, y: event.clientY - bounds.top, born: performance.now() });
-      if (ripples.length > 5) ripples.shift();
+      if (ripples.length > 3) ripples.shift();
     };
 
     const drawFluid = (now) => {
       if (!active) return;
       // This ambient layer does not need a 60 FPS budget. Limiting it to ~30 FPS
       // prevents its entrance from competing with the page's scroll/reveal work.
-      if (now - lastDraw < 32) {
+      if (now - lastDraw < 42) {
         frame = requestAnimationFrame(drawFluid);
         return;
       }
