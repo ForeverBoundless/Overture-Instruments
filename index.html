@@ -216,65 +216,227 @@
             <div class="omni-chips"><span>DRAG & DROP</span><span>MODULAR</span><span>CUSTOMIZABLE</span></div>
             <p class="omni-status"><span class="status-pulse"></span>FIRST RELEASE AVAILABLE /<span class="status-divider"> </span></p>
           </div>
-          <div class="omni-showcase reveal" data-tilt>
-            <div class="omni-circuit omni-circuit--left" aria-hidden="true"></div><div class="omni-circuit omni-circuit--right" aria-hidden="true"></div>
-            <div class="omni-orbit omni-orbit--one" aria-hidden="true"></div><div class="omni-orbit omni-orbit--two" aria-hidden="true"></div>
-            <div class="omni-brand-lockup">
-              <div class="omni-brand-lockup__overline">
-                <span></span>
-                <span></span>
-              </div>
+          <div class="omni-showcase omni-patch-showcase reveal" data-tilt>
+  <div class="omni-patch-heading">
+    <span class="omni-patch-heading__name">
+      <i class="omni-patch-heading__signal"></i>
+      
+    </span>
+    <span class="omni-patch-heading__brand"><img src="/ui/Logos/OvertureLogo.png" alt="Overture Logo" width="20" height="20"></span>
+  </div>
 
-              <p class="omni-workflow">
-                PATCH <span>·</span> PLAY <span>·</span> EXPORT
-                <div class="omni-wordmark"><span>YOUR WAY</span></div>
-              </p>
-            </div>
-            <div class="omni-builder-ui" aria-hidden="true">
-              <div class="builder-ui__head"><span><i></i><i></i><i></i></span><b></b><span> </span></div>
-              <div class="builder-ui__body">
-                <div class="builder-module builder-module--osc"><small>01 / OSCILLATOR</small><div class="mini-wave"></div><span class="mini-dial"></span><span class="mini-dial mini-dial--two"></span></div>
-                <div class="builder-module builder-module--filter"><small>02 / FILTER</small><div class="mini-filter-line"></div><span class="mini-dial"></span></div>
-                <div class="builder-module builder-module--env"><small>03 / ENVELOPE</small><div class="mini-envelope"></div></div>
-              </div>
-              <div class="builder-ui__keys piano-keyboard" aria-hidden="true">
-                <i class="piano-white"></i>
-                <i class="piano-white"></i>
-                <i class="piano-white"></i>
-                <i class="piano-white"></i>
-                <i class="piano-white"></i>
-                <i class="piano-white"></i>
-                <i class="piano-white"></i>
-                <i class="piano-white"></i>
-                <i class="piano-white"></i>
-                <i class="piano-white"></i>
-                <i class="piano-white"></i>
-                <i class="piano-white"></i>
-                <i class="piano-white"></i>
-                <i class="piano-white"></i>
-                <i class="piano-white"></i>
+  <div
+    class="omni-patch-canvas"
+    role="img"
+    aria-label="Illustrative modular patch: a keyboard sends notes to an oscillator and envelope, the oscillator passes audio through a filter to the output, and the envelope controls the filter."
+  >
+    <svg
+      class="omni-patch-wires"
+      viewBox="0 0 600 250"
+      preserveAspectRatio="none"
+      aria-hidden="true"
+    >
+      <!-- Note events: keyboard to oscillator -->
+      <path
+        class="omni-patch-wire omni-patch-wire--notes"
+        d="M144 128 C149 108 151 76 156 52"
+      />
 
-                <i class="piano-black piano-black--1"></i>
-                <i class="piano-black piano-black--2"></i>
-                <i class="piano-black piano-black--3"></i>
-                <i class="piano-black piano-black--4"></i>
-                <i class="piano-black piano-black--5"></i>
-                <i class="piano-black piano-black--6"></i>
-                <i class="piano-black piano-black--7"></i>
-                <i class="piano-black piano-black--8"></i>
-                <i class="piano-black piano-black--9"></i>
-                <i class="piano-black piano-black--10"></i>
-              </div>
-            </div>
-            <a class="showcase-cta omni-access" href="/omni">
-                <span class="showcase-cta__icon" aria-hidden="true"><img src="/ui/Logos/OvertureLogo.png" alt="" width="20" height="20"></span>
-                <span>
-                  <strong>Access OMNI</strong>
-                </span>
-                <span class="showcase-cta__arrow" aria-hidden="true">→</span>
-              </a>
-            <div class="omni-index" aria-hidden="true"><span> </span><span> </span><span> </span></div>
-          </div>
+      <!-- Note events: keyboard to envelope -->
+      <path
+        class="omni-patch-wire omni-patch-wire--notes"
+        d="M144 128 C148 145 151 166 156 183"
+      />
+
+      <!-- Audio: oscillator to filter -->
+      <path
+        class="omni-patch-wire omni-patch-wire--audio"
+        d="M288 52 H300"
+      />
+
+      <!-- Audio: filter to output -->
+      <path
+        class="omni-patch-wire omni-patch-wire--audio"
+        d="M432 52 H444"
+      />
+
+      <!-- Control voltage: envelope to filter -->
+      <path
+        class="omni-patch-wire omni-patch-wire--control"
+        d="M288 212 C296 190 293 91 300 64"
+      />
+    </svg>
+
+    <!-- Keyboard -->
+    <div class="omni-patch-node omni-patch-node--keyboard">
+      <span class="omni-patch-node__title">Keyboard</span>
+
+      <div class="omni-patch-keyboard piano-keyboard" aria-hidden="true">
+        <i class="piano-white"></i>
+        <i class="piano-white"></i>
+        <i class="piano-white"></i>
+        <i class="piano-white"></i>
+        <i class="piano-white"></i>
+        <i class="piano-white"></i>
+        <i class="piano-white"></i>
+        <i class="piano-white"></i>
+        <i class="piano-white"></i>
+        <i class="piano-white"></i>
+        <i class="piano-white"></i>
+        <i class="piano-white"></i>
+        <i class="piano-white"></i>
+        <i class="piano-white"></i>
+        <i class="piano-white"></i>
+
+        <i class="piano-black piano-black--1"></i>
+        <i class="piano-black piano-black--2"></i>
+        <i class="piano-black piano-black--3"></i>
+        <i class="piano-black piano-black--4"></i>
+        <i class="piano-black piano-black--5"></i>
+        <i class="piano-black piano-black--6"></i>
+        <i class="piano-black piano-black--7"></i>
+        <i class="piano-black piano-black--8"></i>
+        <i class="piano-black piano-black--9"></i>
+        <i class="piano-black piano-black--10"></i>
+      </div>
+
+      <i
+        class="omni-patch-port omni-patch-port--out omni-patch-port--notes"
+        aria-hidden="true"
+      ></i>
+    </div>
+
+    <!-- Oscillator -->
+    <div class="omni-patch-node omni-patch-node--oscillator">
+      <span class="omni-patch-node__title">Oscillator</span>
+
+      <svg
+        class="omni-patch-node__graphic"
+        viewBox="0 0 100 22"
+        preserveAspectRatio="none"
+        aria-hidden="true"
+      >
+        <path
+          d="M0 11 C8 -1 17 -1 25 11 S42 23 50 11 S67 -1 75 11 S92 23 100 11"
+        />
+      </svg>
+
+      <i
+        class="omni-patch-port omni-patch-port--in omni-patch-port--notes"
+        aria-hidden="true"
+      ></i>
+      <i
+        class="omni-patch-port omni-patch-port--out omni-patch-port--audio"
+        aria-hidden="true"
+      ></i>
+    </div>
+
+    <!-- Filter -->
+    <div class="omni-patch-node omni-patch-node--filter">
+      <span class="omni-patch-node__title">Filter</span>
+
+      <svg
+        class="omni-patch-node__graphic"
+        viewBox="0 0 100 22"
+        preserveAspectRatio="none"
+        aria-hidden="true"
+      >
+        <path
+          d="M0 19 C23 19 37 18 48 16 S64 2 73 2 S86 19 100 19"
+        />
+      </svg>
+
+      <i
+        class="omni-patch-port omni-patch-port--in omni-patch-port--audio"
+        aria-hidden="true"
+      ></i>
+      <i
+        class="omni-patch-port omni-patch-port--out omni-patch-port--audio"
+        aria-hidden="true"
+      ></i>
+      <i
+        class="omni-patch-port omni-patch-port--in omni-patch-port--control omni-patch-port--control-in"
+        aria-hidden="true"
+      ></i>
+    </div>
+
+    <!-- Envelope -->
+    <div class="omni-patch-node omni-patch-node--envelope">
+      <span class="omni-patch-node__title">Envelope</span>
+
+      <svg
+        class="omni-patch-node__graphic"
+        viewBox="0 0 100 22"
+        preserveAspectRatio="none"
+        aria-hidden="true"
+      >
+        <path d="M0 20 L17 2 L38 13 L66 18 L100 18" />
+      </svg>
+
+      <i
+        class="omni-patch-port omni-patch-port--in omni-patch-port--notes omni-patch-port--note-in"
+        aria-hidden="true"
+      ></i>
+      <i
+        class="omni-patch-port omni-patch-port--out omni-patch-port--control omni-patch-port--control-out"
+        aria-hidden="true"
+      ></i>
+    </div>
+
+    <!-- Output -->
+    <div class="omni-patch-node omni-patch-node--output">
+      <span class="omni-patch-node__title">Output</span>
+
+      <svg
+        class="omni-patch-node__graphic"
+        viewBox="0 0 100 22"
+        preserveAspectRatio="none"
+        aria-hidden="true"
+      >
+        <path d="M0 11 H72" />
+        <circle cx="83" cy="11" r="5" />
+        <circle class="omni-patch-output-core" cx="83" cy="11" r="1.5" />
+      </svg>
+
+      <i
+        class="omni-patch-port omni-patch-port--in omni-patch-port--audio"
+        aria-hidden="true"
+      ></i>
+    </div>
+  </div>
+
+  <!-- Three information panels, styled like the Experiments controls -->
+  <div class="omni-patch-controls">
+    <div class="omni-patch-control">
+      <span>SIGNAL FLOW</span>
+      <b class="omni-patch-control__audio">Audio + CV</b>
+    </div>
+
+    <div class="omni-patch-control">
+      <span>PERFORMANCE</span>
+      <b class="omni-patch-control__midi">MIDI input</b>
+    </div>
+
+    <div class="omni-patch-control">
+      <span>EXPORT</span>
+      <b class="omni-patch-control__export">JSON + SVG</b>
+    </div>
+  </div>
+
+  <div class="omni-patch-footer">
+    <span class="omni-patch-footer__route">
+      PATCH <i>·</i> PLAY <i>·</i> EXPORT
+    </span>
+
+    <a class="omni-patch-link" href="/omni">
+      Open OMNI <span aria-hidden="true">↗</span>
+    </a>
+  </div>
+
+  <!-- Subtle circular accents to echo the Experiments showcase -->
+  <div class="omni-patch-signal omni-patch-signal--one" aria-hidden="true"></div>
+  <div class="omni-patch-signal omni-patch-signal--two" aria-hidden="true"></div>
+</div>
         </div>
       </div>
     </section>
@@ -291,24 +453,165 @@
             <a class="button button--outline button--experiments" href="/experiments"><span>Explore Experiments</span><span class="button-arrow" aria-hidden="true">↗</span></a>
             <span class="placeholder-note">FIRST RELEASE AVAILABLE /</span>
           </div>
-          <div class="experiments-showcase reveal" data-tilt>
-            <div class="experiment-heading"><span></span><span>OSCILLATOR LAB</span></div>
+                    <div
+            class="experiments-showcase reveal"
+            data-tilt
+            role="img"
+            aria-label="Oscillator experiment interface showing a sine wave at 440 hertz and amplitude 0.82"
+          >
+            <div class="experiments-panel-head">
+              <div class="experiments-panel-brand">
+                <span class="experiments-panel-monogram"><img src="/ui/Logos/OvertureLogo.png" alt="Overture Experiments" width="10" height="10"></span>
+                <span> </span>
+              </div>
+
+              <div class="experiments-panel-state">
+                <i></i>
+              </div>
+            </div>
+
+            <div class="experiments-lab-heading">
+              <div class="experiments-lab-title">
+                <span class="experiments-lab-index">EXPERIMENT 01</span>
+                <h3>Oscillator Lab</h3>
+              </div>
+
+              <span class="experiments-lab-tag">SIGNAL GENERATOR</span>
+            </div>
+
             <div class="scope-grid" aria-hidden="true">
-              <svg class="scope-svg" viewBox="0 0 600 250" preserveAspectRatio="none">
-                <defs><linearGradient id="scope-stroke" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#70edb2"/><stop offset=".54" stop-color="#8bf0d8"/><stop offset="1" stop-color="#5bc9f4"/></linearGradient></defs>
-                <path class="scope-wave scope-wave--ghost" d="M0 125 C25 20 50 20 75 125 S125 230 150 125 S200 20 225 125 S275 230 300 125 S350 20 375 125 S425 230 450 125 S500 20 525 125 S575 230 600 125" />
-                <path class="scope-wave" d="M0 125 C25 20 50 20 75 125 S125 230 150 125 S200 20 225 125 S275 230 300 125 S350 20 375 125 S425 230 450 125 S500 20 525 125 S575 230 600 125" />
+              <svg
+                class="scope-svg"
+                viewBox="0 0 600 250"
+                preserveAspectRatio="none"
+              >
+                <defs>
+                  <linearGradient
+                    id="experiments-scope-gradient"
+                    x1="0"
+                    y1="0"
+                    x2="1"
+                    y2="0"
+                  >
+                    <stop offset="0" stop-color="#82e6a8" />
+                    <stop offset=".55" stop-color="#91f0c9" />
+                    <stop offset="1" stop-color="#7de4ff" />
+                  </linearGradient>
+                </defs>
+
+                <path
+                  class="scope-wave scope-wave--ghost"
+                  d="M0 125
+                    C25 125 25 42 50 42
+                    S75 125 100 125
+                    S125 208 150 208
+                    S175 125 200 125
+                    S225 42 250 42
+                    S275 125 300 125
+                    S325 208 350 208
+                    S375 125 400 125
+                    S425 42 450 42
+                    S475 125 500 125
+                    S525 208 550 208
+                    S575 125 600 125"
+                />
+
+                <path
+                  class="scope-wave"
+                  d="M0 125
+                    C25 125 25 42 50 42
+                    S75 125 100 125
+                    S125 208 150 208
+                    S175 125 200 125
+                    S225 42 250 42
+                    S275 125 300 125
+                    S325 208 350 208
+                    S375 125 400 125
+                    S425 42 450 42
+                    S475 125 500 125
+                    S525 208 550 208
+                    S575 125 600 125"
+                />
               </svg>
-              <div class="scope-axis scope-axis--x"></div><div class="scope-axis scope-axis--y"></div>
-              <div class="scope-point scope-point--one"></div><div class="scope-point scope-point--two"></div><span class="scope-axis-label scope-axis-label--x">TIME →</span><span class="scope-axis-label scope-axis-label--y">AMPLITUDE</span>
+
+              <div class="scope-axis scope-axis--x"></div>
+              <div class="scope-axis scope-axis--y"></div>
+
+              <span class="scope-axis-label scope-axis-label--y">
+                
+              </span>
+
+              <span class="scope-axis-label scope-axis-label--x">
+                
+              </span>
+
+              <span class="scope-scanline"></span>
             </div>
+
             <div class="experiment-controls" aria-hidden="true">
-              <div class="experiment-control"><span>WAVEFORM</span><b class="waveform-symbol">SINE</b></div>
-              <div class="experiment-control"><span>FREQUENCY</span><b>440 <small>Hz</small></b><div class="fake-slider"><i></i></div></div>
-              <div class="experiment-control"><span>AMPLITUDE</span><b>0.82</b><div class="fake-slider fake-slider--green"><i></i></div></div>
+              <div class="experiment-control experiment-control--waveform">
+                <span class="experiment-control__label">WAVEFORM</span>
+
+                <div class="experiment-waveform">
+                  <svg viewBox="0 0 48 20" fill="none">
+                    <path
+                      d="M0 10 C4 -0.67 12 -0.67 16 10 S28 20.67 32 10 S44 -0.67 48 10"
+                      stroke="currentColor"
+                      stroke-width="1.7"
+                      stroke-linecap="round"
+                    />
+                  </svg>
+
+                  <b>Sine</b>
+                </div>
+
+                <div class="experiment-control__scale">
+                  <span> </span>
+                </div>
+              </div>
+
+              <div class="experiment-control">
+                <div class="experiment-control__top">
+                  <span>FREQUENCY</span>
+                  <b>440 <small>Hz</small></b>
+                </div>
+
+                <div class="fake-slider">
+                  <i></i>
+                </div>
+
+                <div class="experiment-control__scale">
+                  <span> </span>
+                  <span> </span>
+                </div>
+              </div>
+
+              <div class="experiment-control">
+                <div class="experiment-control__top">
+                  <span> </span>
+                  <b>0. </b>
+                </div>
+
+                <div class="fake-slider fake-slider--green">
+                  <i></i>
+                </div>
+
+                <div class="experiment-control__scale">
+                  <span> </span>
+                  <span> </span>
+                </div>
+              </div>
             </div>
-            <div class="experiments-footer"><span><i class="status-dot status-dot--green"></i><a href="/experiments/oscillator-lab" style="color:inherit"></a></span><span> </span></div>
-            <div class="experiments-signal experiments-signal--one" aria-hidden="true"></div><div class="experiments-signal experiments-signal--two" aria-hidden="true"></div>
+
+            <div class="experiments-footer">
+              <span class="experiments-footer__status">
+                <i class="status-dot status-dot--green"></i>
+              </span>
+
+              <span class="experiments-footer__metrics">
+                
+              </span>
+            </div>
           </div>
         </div>
       </div>

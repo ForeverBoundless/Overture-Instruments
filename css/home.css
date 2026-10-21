@@ -353,6 +353,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
     #05070a 42%,
     #20262e
   );
+
   transform: translateX(-50%);
 }
 
@@ -961,3 +962,1406 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
 @keyframes omni-field-orbit { to { transform: translateY(-50%) rotate(360deg); } }
 @keyframes experiment-signal-drift { to { background-position: 122% 0, 0 44px; } }
 /* Contact */
+/* ==========================================================
+   EXPERIMENTS — OSCILLATOR INTERFACE
+   ========================================================== */
+
+.feature-section--experiments .experiments-showcase {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  padding: 0;
+  border: 1px solid rgba(130, 230, 168, .18);
+  border-radius: 15px;
+  background:
+    linear-gradient(
+      145deg,
+      #121c1c 0%,
+      #0e1519 48%,
+      #0a1115 100%
+    );
+  box-shadow:
+    0 26px 65px rgba(0, 0, 0, .27),
+    inset 0 1px rgba(255, 255, 255, .05);
+  transform-style: preserve-3d;
+  transition:
+    border-color .3s ease,
+    box-shadow .3s ease;
+}
+
+.feature-section--experiments .experiments-showcase::before {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  background:
+    radial-gradient(
+      ellipse at 100% 0%,
+      rgba(130, 230, 168, .075),
+      transparent 42%
+    );
+}
+
+.feature-section--experiments .experiments-showcase::after {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  left: 20px;
+  width: 85px;
+  height: 1px;
+  content: "";
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    rgba(130, 230, 168, .8),
+    rgba(125, 228, 255, .2),
+    transparent
+  );
+}
+
+.experiments-showcase:hover {
+  border-color: rgba(130, 230, 168, .32);
+  box-shadow:
+    0 30px 75px rgba(0, 0, 0, .31),
+    0 0 30px rgba(130, 230, 168, .035),
+    inset 0 1px rgba(255, 255, 255, .06);
+}
+
+.experiments-showcase > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Top identification bar */
+
+.experiments-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 57px;
+  padding: 12px 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, .075);
+  background: rgba(255, 255, 255, .012);
+}
+
+.experiments-panel-brand {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+}
+
+.experiments-panel-monogram {
+  display: grid;
+  flex: 0 0 26px;
+  width: 26px;
+  height: 26px;
+  place-items: center;
+  border: 1px solid rgba(130, 230, 168, .22);
+  border-radius: 7px;
+  color: var(--green);
+  background: rgba(130, 230, 168, .045);
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: -.04em;
+}
+
+.experiments-panel-brand > span:last-child {
+  overflow: hidden;
+  color: #83958e;
+  font-family: var(--font-mono);
+  font-size: 7px;
+  letter-spacing: .1em;
+  white-space: nowrap;
+}
+
+.experiments-panel-state {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 8px;
+  border: 1px solid rgba(130, 230, 168, .16);
+  border-radius: 5px;
+  color: #9bb5a5;
+  background: rgba(130, 230, 168, .035);
+  font-family: var(--font-mono);
+  font-size: 6px;
+  letter-spacing: .1em;
+}
+
+.experiments-panel-state i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 7px rgba(130, 230, 168, .5);
+  animation: experiments-status-pulse 3s ease-in-out infinite;
+}
+
+/* Experiment title */
+
+.experiments-lab-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 23px 19px 16px;
+}
+
+.experiments-lab-title {
+  min-width: 0;
+}
+
+.experiments-lab-index {
+  display: block;
+  color: #849a8d;
+  font-family: var(--font-mono);
+  font-size: 7px;
+  letter-spacing: .15em;
+}
+
+.experiments-lab-title h3 {
+  margin: 7px 0 0;
+  color: #edf4ef;
+  font-family: var(--font-display);
+  font-size: clamp(27px, 3.1vw, 35px);
+  font-weight: 400;
+  letter-spacing: -.055em;
+  line-height: 1;
+}
+
+.experiments-lab-tag {
+  flex: 0 0 auto;
+  margin-bottom: 3px;
+  padding: 6px 8px;
+  border: 1px solid rgba(255, 255, 255, .09);
+  border-radius: 4px;
+  color: #82938c;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: .09em;
+}
+
+/* Oscilloscope */
+
+.feature-section--experiments .scope-grid {
+  position: relative;
+  height: clamp(180px, 22vw, 224px);
+  margin: 0 18px;
+  overflow: hidden;
+  border: 1px solid rgba(130, 230, 168, .13);
+  border-radius: 7px;
+  background-color: #091114;
+  background-image:
+    linear-gradient(
+      rgba(130, 230, 168, .065) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(130, 230, 168, .065) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      rgba(130, 230, 168, .035) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(130, 230, 168, .035) 1px,
+      transparent 1px
+    );
+  background-size:
+    25px 25px,
+    25px 25px,
+    125px 125px,
+    125px 125px;
+  box-shadow: inset 0 0 32px rgba(0, 0, 0, .22);
+}
+
+.feature-section--experiments .scope-svg {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.feature-section--experiments .scope-wave {
+  fill: none;
+  stroke: url(#experiments-scope-gradient);
+  stroke-width: 2.1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+  stroke-dasharray: none;
+  filter: drop-shadow(0 0 4px rgba(130, 230, 168, .22));
+  animation: experiments-wave-glow 5s ease-in-out infinite;
+}
+
+.feature-section--experiments .scope-wave--ghost {
+  stroke: #82e6a8;
+  stroke-width: 9;
+  opacity: .12;
+  filter: blur(5px);
+  animation: none;
+}
+
+.feature-section--experiments .scope-axis {
+  position: absolute;
+  z-index: 1;
+  background: rgba(130, 230, 168, .2);
+  pointer-events: none;
+}
+
+.feature-section--experiments .scope-axis--x {
+  top: 50%;
+  right: 0;
+  left: 0;
+  height: 1px;
+}
+
+.feature-section--experiments .scope-axis--y {
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+}
+
+.feature-section--experiments .scope-axis-label {
+  position: absolute;
+  z-index: 3;
+  color: #6d8980;
+  font-family: var(--font-mono);
+  font-size: 6px;
+  letter-spacing: .12em;
+  pointer-events: none;
+}
+
+.feature-section--experiments .scope-axis-label--y {
+  top: 10px;
+  left: 10px;
+}
+
+.feature-section--experiments .scope-axis-label--x {
+  right: 10px;
+  bottom: 8px;
+}
+
+.scope-scanline {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  bottom: 0;
+  left: 4%;
+  width: 1px;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    rgba(130, 230, 168, .4) 25%,
+    rgba(125, 228, 255, .35) 75%,
+    transparent
+  );
+  box-shadow: 0 0 8px rgba(130, 230, 168, .12);
+  pointer-events: none;
+  animation: experiments-scan 9s linear infinite;
+}
+
+/* Parameter controls */
+
+.feature-section--experiments .experiment-controls {
+  display: grid;
+  grid-template-columns: .86fr 1fr 1fr;
+  gap: 9px;
+  margin: 13px 18px 0;
+}
+
+.feature-section--experiments .experiment-control {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 11px;
+  padding: 12px 11px 10px;
+  border: 1px solid rgba(255, 255, 255, .075);
+  border-radius: 7px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, .032),
+    rgba(255, 255, 255, .012)
+  );
+}
+
+.experiments-showcase .experiment-control__label,
+.experiments-showcase .experiment-control__top > span {
+  display: block;
+  color: #81968b;
+  font-family: var(--font-mono);
+  font-size: 7px;
+  letter-spacing: .08em;
+  white-space: nowrap;
+}
+
+.experiments-showcase .experiment-control__top {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 9px;
+}
+
+.experiments-showcase .experiment-control__top b {
+  color: #e9f2ec;
+  font-family: var(--font-mono);
+  font-size: 19px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -.04em;
+}
+
+.experiments-showcase .experiment-control__top b small {
+  color: #8ca197;
+  font-size: 9px;
+  letter-spacing: 0;
+}
+
+.experiment-waveform {
+  display: flex;
+  min-height: 23px;
+  align-items: center;
+  gap: 6px;
+  color: var(--green);
+}
+
+.experiment-waveform svg {
+  display: block;
+  flex: 0 0 27px;
+  width: 27px;
+  height: 18px;
+}
+
+.experiment-waveform b {
+  color: #e9f2ec;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 400;
+}
+
+.experiments-showcase .experiment-control__scale {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  color: #62796f;
+  font-family: var(--font-mono);
+  font-size: 5px;
+  letter-spacing: .07em;
+}
+
+.experiments-showcase .fake-slider {
+  position: relative;
+  height: 2px;
+  margin: 2px 0;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, .13);
+}
+
+.experiments-showcase .fake-slider i {
+  position: absolute;
+  top: 50%;
+  left: 60%;
+  width: 7px;
+  height: 7px;
+  border: 1px solid #c4efd2;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 7px rgba(130, 230, 168, .4);
+  transform: translate(-50%, -50%);
+}
+
+.experiments-showcase .fake-slider--green i {
+  left: 78%;
+}
+
+/* Status footer */
+
+.feature-section--experiments .experiments-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 13px 19px 15px;
+  border-top: 1px solid rgba(255, 255, 255, .075);
+  color: #82958b;
+  font-family: var(--font-mono);
+  font-size: 6px;
+  letter-spacing: .09em;
+}
+
+.experiments-footer__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.experiments-footer__metrics {
+  color: #697e74;
+  text-align: right;
+  white-space: nowrap;
+}
+
+@keyframes experiments-scan {
+  0% {
+    left: 4%;
+    opacity: 0;
+  }
+  8% {
+    opacity: .8;
+  }
+  90% {
+    opacity: .55;
+  }
+  100% {
+    left: 96%;
+    opacity: 0;
+  }
+}
+
+@keyframes experiments-wave-glow {
+  0%, 100% {
+    opacity: .84;
+    filter: drop-shadow(0 0 3px rgba(130, 230, 168, .18));
+  }
+  50% {
+    opacity: 1;
+    filter: drop-shadow(0 0 6px rgba(130, 230, 168, .3));
+  }
+}
+
+@keyframes experiments-status-pulse {
+  0%, 100% {
+    opacity: .65;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Small screens */
+
+@media (max-width: 600px) {
+  .feature-section--experiments .experiments-panel-head {
+    padding-inline: 13px;
+  }
+
+  .experiments-lab-heading {
+    padding: 21px 14px 15px;
+  }
+
+  .feature-section--experiments .scope-grid {
+    height: 205px;
+    margin-inline: 13px;
+  }
+
+  .feature-section--experiments .experiment-controls {
+    gap: 7px;
+    margin-inline: 13px;
+  }
+
+  .feature-section--experiments .experiment-control {
+    padding: 10px 8px;
+  }
+
+  .feature-section--experiments .experiments-footer {
+    padding-inline: 14px;
+  }
+}
+
+@media (max-width: 440px) {
+  .experiments-lab-tag {
+    display: none;
+  }
+
+  .feature-section--experiments .scope-grid {
+    height: 185px;
+  }
+
+  .experiments-panel-brand {
+    gap: 8px;
+  }
+
+  .experiments-panel-brand > span:last-child {
+    font-size: 6px;
+  }
+
+  .experiments-panel-state {
+    padding: 5px 6px;
+    font-size: 5px;
+  }
+
+  .feature-section--experiments .experiment-controls {
+    grid-template-columns: .86fr 1fr 1fr;
+    gap: 6px;
+  }
+
+  .experiments-showcase .experiment-control__label,
+  .experiments-showcase .experiment-control__top > span {
+    font-size: 6px;
+  }
+
+  .experiments-showcase .experiment-control__top b {
+    font-size: 17px;
+  }
+
+  .experiment-waveform {
+    gap: 4px;
+  }
+
+  .experiment-waveform svg {
+    flex-basis: 23px;
+    width: 23px;
+  }
+
+  .experiment-waveform b {
+    font-size: 9px;
+  }
+
+  .feature-section--experiments .experiments-footer {
+    font-size: 5px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scope-scanline,
+  .feature-section--experiments .scope-wave,
+  .experiments-panel-state i {
+    animation: none;
+  }
+}
+/* =========================================================
+   OMNI PATCH SHOWCASE
+   Designed to share the visual language of Experiments.
+   Retains OMNI's dark navy and cyan palette.
+   ========================================================= */
+
+/* Main panel */
+
+.omni-showcase.omni-patch-showcase {
+  position: relative;
+  display: block;
+  min-width: 0;
+  min-height: 0;
+  height: auto;
+  overflow: hidden;
+  padding: 19px;
+
+  border: 1px solid rgba(125, 228, 255, .20);
+  border-radius: 18px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(23, 35, 44, .90),
+      rgba(10, 17, 24, .98)
+    );
+
+  box-shadow:
+    0 27px 76px rgba(0, 0, 0, .25),
+    inset 0 1px rgba(255, 255, 255, .06);
+
+  transform-style: preserve-3d;
+
+  transition:
+    border-color .3s ease,
+    box-shadow .3s ease;
+}
+
+.omni-showcase.omni-patch-showcase:hover {
+  border-color: rgba(125, 228, 255, .40);
+
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, .28),
+    0 0 30px rgba(125, 228, 255, .035),
+    inset 0 1px rgba(255, 255, 255, .07);
+}
+
+
+/* Heading — same alignment and restraint as OSCILLATOR LAB */
+
+.omni-patch-heading {
+  position: relative;
+  z-index: 2;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  color: #91a6b2;
+
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: .12em;
+  line-height: 1.3;
+}
+
+.omni-patch-heading__name {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.omni-patch-heading__signal {
+  display: inline-block;
+  flex: 0 0 auto;
+
+  width: 6px;
+  height: 6px;
+
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 9px rgba(125, 228, 255, .65);
+}
+
+.omni-patch-heading__brand {
+  color: var(--cyan);
+  font-size: 9px;
+  letter-spacing: .16em;
+}
+
+
+/* Main patch canvas — equivalent to the Experiments scope grid */
+
+.omni-patch-canvas {
+  position: relative;
+  z-index: 1;
+
+  width: 100%;
+  height: clamp(210px, 25vw, 244px);
+  margin-top: 22px;
+
+  overflow: hidden;
+  isolation: isolate;
+
+  border: 1px solid rgba(125, 228, 255, .14);
+  border-radius: 8px;
+
+  background-color: rgba(4, 11, 16, .62);
+
+  background-image:
+    linear-gradient(
+      rgba(125, 228, 255, .055) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(125, 228, 255, .055) 1px,
+      transparent 1px
+    );
+
+  background-size: 25px 25px;
+
+  box-shadow:
+    inset 0 0 30px rgba(0, 0, 0, .22),
+    inset 0 0 0 1px rgba(125, 228, 255, .025);
+}
+
+
+/* Signal connections sit behind every module */
+
+.omni-patch-wires {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+
+  display: block;
+  width: 100%;
+  height: 100%;
+
+  overflow: visible;
+  pointer-events: none;
+}
+
+.omni-patch-wire {
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+
+  stroke-dasharray: 5 7;
+
+  animation: omni-patch-flow 12s linear infinite;
+}
+
+.omni-patch-wire--audio {
+  stroke: var(--cyan);
+  filter: drop-shadow(0 0 3px rgba(125, 228, 255, .25));
+}
+
+.omni-patch-wire--control {
+  stroke: var(--amber);
+  filter: drop-shadow(0 0 3px rgba(255, 183, 94, .18));
+  animation-delay: -3s;
+}
+
+.omni-patch-wire--notes {
+  stroke: var(--green);
+  filter: drop-shadow(0 0 3px rgba(130, 230, 168, .18));
+  animation-delay: -6s;
+}
+
+@keyframes omni-patch-flow {
+  to {
+    stroke-dashoffset: -96;
+  }
+}
+
+
+/* Module cards */
+
+.omni-patch-node {
+  position: absolute;
+  z-index: 2;
+
+  width: 22%;
+  height: 27.2%;
+  padding: 7px;
+
+  overflow: visible;
+
+  border: 1px solid rgba(125, 228, 255, .20);
+  border-radius: 6px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(27, 41, 52, .97),
+      rgba(13, 21, 29, .98)
+    );
+
+  box-shadow:
+    0 7px 18px rgba(0, 0, 0, .20),
+    inset 0 1px rgba(255, 255, 255, .045);
+
+  transition:
+    border-color .25s ease,
+    box-shadow .25s ease;
+}
+
+.omni-patch-node:hover {
+  border-color: rgba(125, 228, 255, .38);
+
+  box-shadow:
+    0 9px 22px rgba(0, 0, 0, .23),
+    0 0 12px rgba(125, 228, 255, .035),
+    inset 0 1px rgba(255, 255, 255, .06);
+}
+
+
+/* Fixed proportional positions keep the SVG paths aligned with the ports */
+
+.omni-patch-node--keyboard {
+  left: 2%;
+  top: 37.5%;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.omni-patch-node--oscillator {
+  left: 26%;
+  top: 7.2%;
+}
+
+.omni-patch-node--filter {
+  left: 50%;
+  top: 7.2%;
+}
+
+.omni-patch-node--envelope {
+  left: 26%;
+  top: 65.6%;
+}
+
+.omni-patch-node--output {
+  left: 74%;
+  top: 7.2%;
+}
+
+
+/* Module names: readable, without tiny decorative sublabels */
+
+.omni-patch-node__title {
+  position: relative;
+  z-index: 2;
+
+  display: block;
+
+  overflow: hidden;
+
+  color: #edf5fa;
+
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: -.025em;
+  line-height: 1.25;
+
+  white-space: nowrap;
+  text-overflow: clip;
+}
+
+
+/* Small signal illustrations */
+
+.omni-patch-node__graphic {
+  position: absolute;
+  right: 9px;
+  bottom: 7px;
+  left: 9px;
+
+  display: block;
+  width: calc(100% - 18px);
+  height: 20px;
+
+  overflow: visible;
+}
+
+.omni-patch-node__graphic path,
+.omni-patch-node__graphic circle {
+  fill: none;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.omni-patch-node--oscillator .omni-patch-node__graphic path {
+  stroke: var(--cyan);
+  filter: drop-shadow(0 0 3px rgba(125, 228, 255, .22));
+}
+
+.omni-patch-node--filter .omni-patch-node__graphic path {
+  stroke: var(--amber);
+  filter: drop-shadow(0 0 3px rgba(255, 183, 94, .15));
+}
+
+.omni-patch-node--envelope .omni-patch-node__graphic path {
+  stroke: var(--green);
+  filter: drop-shadow(0 0 3px rgba(130, 230, 168, .15));
+}
+
+.omni-patch-node--output .omni-patch-node__graphic path,
+.omni-patch-node--output .omni-patch-node__graphic circle {
+  stroke: var(--cyan);
+}
+
+.omni-patch-node--output .omni-patch-node__graphic .omni-patch-output-core {
+  fill: var(--cyan);
+  stroke: none;
+}
+
+
+/* Connection ports */
+
+.omni-patch-port {
+  position: absolute;
+  z-index: 4;
+
+  display: block;
+  width: 7px;
+  height: 7px;
+
+  border: 1px solid currentColor;
+  border-radius: 50%;
+
+  background: #101922;
+  box-shadow: 0 0 7px currentColor;
+
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.omni-patch-port--in {
+  left: -4px;
+}
+
+.omni-patch-port--out {
+  right: -4px;
+}
+
+.omni-patch-port--audio {
+  color: var(--cyan);
+  top: 50%;
+}
+
+.omni-patch-port--notes {
+  color: var(--green);
+  top: 50%;
+}
+
+.omni-patch-port--control {
+  color: var(--amber);
+}
+
+.omni-patch-port--control-in {
+  top: 68%;
+}
+
+.omni-patch-port--note-in {
+  top: 28%;
+}
+
+.omni-patch-port--control-out {
+  top: 70%;
+}
+
+
+/* Piano keys — individual keys with correct two-octave ordering */
+
+.omni-patch-keyboard {
+  position: relative;
+
+  display: grid;
+  grid-template-columns: repeat(15, minmax(0, 1fr));
+  gap: 0;
+
+  width: 100%;
+  height: 18px;
+  margin-top: auto;
+
+  padding: 0;
+  overflow: hidden;
+  isolation: isolate;
+
+  border: 1px solid #05080d;
+  border-radius: 2px;
+
+  background: #070b10;
+
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .025);
+}
+
+.omni-patch-keyboard .piano-white {
+  position: relative;
+  z-index: 1;
+
+  display: block;
+  min-width: 0;
+  height: 100%;
+
+  border-right: 1px solid #aeb8c3;
+
+  background: linear-gradient(
+    180deg,
+    #f8fafc 0%,
+    #e2e7ed 100%
+  );
+}
+
+.omni-patch-keyboard .piano-black {
+  position: absolute;
+  z-index: 3;
+  top: 0;
+
+  width: 4%;
+  height: 64%;
+
+  border: 1px solid #161c24;
+  border-top: 0;
+  border-radius: 0 0 2px 2px;
+
+  background: linear-gradient(
+    90deg,
+    #303b48 0%,
+    #090d13 48%,
+    #202a36 100%
+  );
+
+  transform: translateX(-50%);
+}
+
+/* Black-key centers match the 15 white-key layout */
+
+.omni-patch-keyboard .piano-black--1  { left: 6.6667%; }
+.omni-patch-keyboard .piano-black--2  { left: 13.3333%; }
+.omni-patch-keyboard .piano-black--3  { left: 26.6667%; }
+.omni-patch-keyboard .piano-black--4  { left: 33.3333%; }
+.omni-patch-keyboard .piano-black--5  { left: 40%; }
+.omni-patch-keyboard .piano-black--6  { left: 53.3333%; }
+.omni-patch-keyboard .piano-black--7  { left: 60%; }
+.omni-patch-keyboard .piano-black--8  { left: 73.3333%; }
+.omni-patch-keyboard .piano-black--9  { left: 80%; }
+.omni-patch-keyboard .piano-black--10 { left: 86.6667%; }
+
+
+/* Three compact information panels, matching experiment-control cards */
+
+.omni-patch-controls {
+  position: relative;
+  z-index: 1;
+
+  display: grid;
+  grid-template-columns: .95fr .95fr 1fr;
+  gap: 10px;
+
+  margin-top: 12px;
+}
+
+.omni-patch-control {
+  display: flex;
+  min-width: 0;
+  min-height: 61px;
+  flex-direction: column;
+  justify-content: center;
+  gap: 9px;
+
+  padding: 11px 10px;
+
+  border: 1px solid rgba(255, 255, 255, .075);
+  border-radius: 6px;
+
+  background: rgba(255, 255, 255, .02);
+}
+
+.omni-patch-control > span {
+  color: #8397a3;
+
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: .08em;
+  line-height: 1.2;
+}
+
+.omni-patch-control > b {
+  display: block;
+
+  overflow: hidden;
+
+  color: #e5f0f5;
+
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: -.015em;
+  line-height: 1.2;
+
+  white-space: nowrap;
+}
+
+.omni-patch-control__audio {
+  color: var(--cyan) !important;
+}
+
+.omni-patch-control__midi {
+  color: #b0e9cc !important;
+}
+
+.omni-patch-control__export {
+  color: #e5edf4 !important;
+}
+
+
+/* Footer and action link */
+
+.omni-patch-footer {
+  position: relative;
+  z-index: 1;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  margin-top: 16px;
+  padding-top: 13px;
+
+  border-top: 1px solid rgba(255, 255, 255, .08);
+}
+
+.omni-patch-footer__route {
+  color: #8297a4;
+
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: .075em;
+  line-height: 1.5;
+}
+
+.omni-patch-footer__route i {
+  padding-inline: 2px;
+  color: var(--cyan);
+  font-style: normal;
+}
+
+.omni-patch-link {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 9px;
+
+  color: #dff7ff;
+
+  font-size: 11px;
+  font-weight: 550;
+  text-decoration: none;
+
+  transition:
+    color .2s ease,
+    transform .2s ease;
+}
+
+.omni-patch-link span {
+  color: var(--cyan);
+  font-size: 16px;
+
+  transition: transform .2s ease;
+}
+
+.omni-patch-link:hover {
+  color: #fff;
+}
+
+.omni-patch-link:hover span {
+  transform: translate(2px, -2px);
+}
+
+
+/* Subtle circular accents — comparable to Experiments' signal rings */
+
+.omni-patch-signal {
+  position: absolute;
+  z-index: 0;
+
+  width: 110px;
+  height: 110px;
+
+  border: 1px solid rgba(125, 228, 255, .075);
+  border-radius: 50%;
+
+  pointer-events: none;
+}
+
+.omni-patch-signal::before,
+.omni-patch-signal::after {
+  position: absolute;
+  inset: 10px;
+
+  content: '';
+
+  border: 1px solid rgba(125, 228, 255, .09);
+  border-radius: 50%;
+}
+
+.omni-patch-signal::after {
+  inset: 27px;
+  border-color: rgba(130, 230, 168, .12);
+}
+
+.omni-patch-signal--one {
+  top: 12%;
+  right: -61px;
+}
+
+.omni-patch-signal--two {
+  bottom: 9%;
+  left: -68px;
+}
+
+
+/* Tablet and mobile */
+
+@media (max-width: 760px) {
+  .omni-showcase.omni-patch-showcase {
+    width: 100%;
+    max-width: 620px;
+    margin-inline: auto;
+  }
+
+  .omni-patch-canvas {
+    height: 210px;
+  }
+
+  .omni-patch-node {
+    padding: 6px;
+  }
+
+  .omni-patch-node__title {
+    font-size: 9px;
+  }
+
+  .omni-patch-node__graphic {
+    right: 7px;
+    bottom: 6px;
+    left: 7px;
+
+    width: calc(100% - 14px);
+    height: 16px;
+  }
+
+  .omni-patch-keyboard {
+    height: 16px;
+  }
+
+  .omni-patch-keyboard .piano-black {
+    width: 4.5%;
+  }
+
+  .omni-patch-controls {
+    gap: 8px;
+  }
+}
+
+@media (max-width: 440px) {
+  .omni-showcase.omni-patch-showcase {
+    padding: 12px;
+    border-radius: 16px;
+  }
+
+  .omni-patch-heading {
+    font-size: 8px;
+  }
+
+  .omni-patch-canvas {
+    height: 210px;
+    margin-top: 17px;
+    background-size: 21px 21px;
+  }
+
+  .omni-patch-node {
+    padding: 5px;
+    border-radius: 5px;
+  }
+
+  .omni-patch-node__title {
+    font-size: 8.5px;
+    letter-spacing: -.035em;
+  }
+
+  .omni-patch-node__graphic {
+    right: 5px;
+    bottom: 6px;
+    left: 5px;
+
+    width: calc(100% - 10px);
+    height: 14px;
+  }
+
+  .omni-patch-keyboard {
+    height: 14px;
+  }
+
+  .omni-patch-keyboard .piano-black {
+    width: 4.5%;
+  }
+
+  .omni-patch-port {
+    width: 6px;
+    height: 6px;
+  }
+
+  .omni-patch-controls {
+    grid-template-columns: .95fr .95fr 1fr;
+    gap: 5px;
+    margin-top: 10px;
+  }
+
+  .omni-patch-control {
+    min-height: 57px;
+    gap: 7px;
+    padding: 9px 7px;
+  }
+
+  .omni-patch-control > span {
+    font-size: 8px;
+    letter-spacing: .045em;
+  }
+
+  .omni-patch-control > b {
+    font-size: 10px;
+    letter-spacing: -.025em;
+  }
+
+  .omni-patch-footer {
+    gap: 8px;
+    margin-top: 13px;
+    padding-top: 11px;
+  }
+
+  .omni-patch-footer__route {
+    font-size: 7px;
+    letter-spacing: .025em;
+  }
+
+  .omni-patch-link {
+    gap: 5px;
+    font-size: 10px;
+  }
+}
+
+
+/* Respect reduced-motion preferences */
+
+@media (prefers-reduced-motion: reduce) {
+  .omni-patch-wire {
+    animation: none;
+    stroke-dasharray: none;
+  }
+}
+/* =========================================================
+   BACKGROUND ACCENTS — INCREASED VISIBILITY
+   ========================================================= */
+
+/* Experiments: brighter concentric circular rings */
+
+.experiments-signal {
+  border-color: rgba(130, 230, 168, .20);
+  box-shadow: 0 0 18px rgba(130, 230, 168, .08);
+}
+
+.experiments-signal::before {
+  border-color: rgba(130, 230, 168, .25);
+  box-shadow: 0 0 14px rgba(130, 230, 168, .07);
+}
+
+.experiments-signal::after {
+  border-color: rgba(125, 228, 255, .30);
+  box-shadow: 0 0 14px rgba(125, 228, 255, .11);
+}
+
+
+/* OMNI: brighter rotating oval */
+
+.omni-orbit {
+  border-color: rgba(125, 228, 255, .25);
+  box-shadow:
+    0 0 16px rgba(125, 228, 255, .09),
+    inset 0 0 12px rgba(125, 228, 255, .035);
+}
+
+.omni-orbit--two {
+  border-color: rgba(130, 230, 168, .27);
+  box-shadow:
+    0 0 18px rgba(130, 230, 168, .12),
+    inset 0 0 14px rgba(130, 230, 168, .045);
+
+  /* Keep the oval centred while it rotates */
+  animation: omni-orbit-brighter-rotation 42s linear infinite;
+}
+
+@keyframes omni-orbit-brighter-rotation {
+  from {
+    transform: translateX(-50%) rotate(17deg);
+  }
+
+  to {
+    transform: translateX(-50%) rotate(377deg);
+  }
+}
