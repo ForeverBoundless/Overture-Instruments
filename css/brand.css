@@ -166,13 +166,12 @@
 
 /* Start the effects when the existing reveal observer fires. */
 .mission-heading.is-visible h2 .resource-highlight {
-  animation: resource-halo-breathe 6s ease-in-out infinite;
+  animation: none;
 }
 
 .mission-heading.is-visible h2 .resource-highlight__text {
   animation:
-    resource-kaleidoscope 14s ease-in-out infinite,
-    resource-spectrum-rotate 28s linear infinite,
+    resource-kaleidoscope 30s ease-in-out infinite,
     resource-letter-arrive 1.2s cubic-bezier(.16, 1, .3, 1) both;
 }
 
@@ -183,82 +182,11 @@
  */
 @keyframes resource-kaleidoscope {
   0%, 100% {
-    background-position:
-      50% 50%,
-      0% 50%,
-      100% 50%,
-      50% 50%;
-
-    background-size:
-      160% 180%,
-      150% 170%,
-      150% 170%,
-      240% 220%;
-  }
-
-  25% {
-    background-position:
-      100% 15%,
-      35% 100%,
-      60% 0%,
-      25% 50%;
-
-    background-size:
-      170% 155%,
-      140% 190%,
-      165% 155%,
-      240% 220%;
+    background-position: 50% 50%, 0% 50%, 100% 50%, 50% 50%;
   }
 
   50% {
-    background-position:
-      20% 100%,
-      100% 25%,
-      0% 75%,
-      50% 50%;
-
-    background-size:
-      145% 195%,
-      165% 155%,
-      140% 190%,
-      240% 220%;
-  }
-
-  75% {
-    background-position:
-      0% 20%,
-      55% 0%,
-      100% 100%,
-      75% 50%;
-
-    background-size:
-      165% 165%,
-      150% 185%,
-      155% 165%,
-      240% 220%;
-  }
-}
-
-/* Slow rotation through the kaleidoscopic colour pattern. */
-@keyframes resource-spectrum-rotate {
-  to {
-    --resource-angle: 360deg;
-  }
-}
-
-/* Gentle variation in glow strength; the glow stays restrained. */
-@keyframes resource-halo-breathe {
-  0%, 100% {
-    filter:
-      drop-shadow(0 0 3px rgba(125, 228, 255, .3))
-      drop-shadow(0 0 8px rgba(130, 230, 168, .17));
-  }
-
-  50% {
-    filter:
-      drop-shadow(0 0 4px rgba(130, 230, 168, .36))
-      drop-shadow(0 0 10px rgba(125, 228, 255, .23))
-      drop-shadow(0 0 12px rgba(255, 183, 94, .1));
+    background-position: 72% 35%, 24% 70%, 76% 30%, 50% 50%;
   }
 }
 
