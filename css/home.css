@@ -304,7 +304,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
 .builder-ui__head > span:last-child { color: var(--green); }
 .builder-ui__body { display: grid; grid-template-columns: 1fr 1fr 1.15fr; gap: 7px; padding-top: 8px; }
 .builder-module { position: relative; min-height: 68px; overflow: hidden; padding: 8px 7px; border: 1px solid rgba(255,255,255,.09); border-radius: 4px; background: rgba(3,8,12,.34); }
-.builder-module small { color: #8295a3; font-family: var(--font-mono); font-size: 6px; letter-spacing: .04em; }
+.builder-module small { color: #8295a3; font-family: var(--font-mono); font-size: 10px; letter-spacing: .04em; }
 .mini-wave { height: 17px; margin-top: 9px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 20'%3E%3Cpath d='M0 10 C8 -1 16 -1 25 10 S42 21 50 10 S67 -1 75 10 S92 21 100 10' fill='none' stroke='%2370dcf0' stroke-width='1.5'/%3E%3C/svg%3E") center / 100% 100% no-repeat; }
 .mini-dial { position: absolute; bottom: 5px; left: 8px; width: 12px; height: 12px; border: 1px solid rgba(112,220,240,.7); border-radius: 50%; background: conic-gradient(from 35deg, #70dcf0 0deg, #70dcf0 72deg, #273640 73deg 360deg); box-shadow: inset 0 0 0 3px #111a21; }
 .mini-dial--two { left: 28px; border-color: rgba(255,183,94,.7); background: conic-gradient(from 35deg, #ffb75e 0deg, #ffb75e 100deg, #273640 101deg 360deg); }
@@ -353,7 +353,6 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
     #05070a 42%,
     #20262e
   );
-  box-shadow: 0 2px 4px rgba(0, 0, 0, .45);
   transform: translateX(-50%);
 }
 
@@ -424,7 +423,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
 .scope-axis-label { position: absolute; color: #607970; font-family: var(--font-mono); font-size: 6px; letter-spacing: .12em; }.scope-axis-label--x { right: 9px; bottom: 7px; }.scope-axis-label--y { top: 9px; left: 9px; }
 .experiment-controls { display: grid; grid-template-columns: .8fr 1fr 1fr; gap: 10px; margin-top: 12px; }
 .experiment-control { display: flex; min-width: 0; flex-direction: column; gap: 8px; padding: 11px 10px; border: 1px solid rgba(255,255,255,.075); border-radius: 6px; background: rgba(255,255,255,.02); }
-.experiment-control > span { color: #71867e; font-family: var(--font-mono); font-size: 6px; letter-spacing: .11em; white-space: nowrap; }
+.experiment-control > span { color: #71867e; font-family: var(--font-mono); font-size: 10px; letter-spacing: .11em; white-space: nowrap; }
 .experiment-control b { color: #e4f0e8; font-family: var(--font-mono); font-size: 15px; font-weight: 400; }.experiment-control b small { color: #8a9c92; font-size: 8px; }
 .waveform-symbol { color: var(--green) !important; font-size: 24px !important; line-height: 15px; }
 .experiment-control small { color: #81968b; font-family: var(--font-mono); font-size: 6px; }
