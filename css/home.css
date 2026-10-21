@@ -926,6 +926,13 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
 .feature-section::after { position: absolute; z-index: 0; inset: 0; content: ''; pointer-events: none; opacity: .7; }
 .feature-section--library::after { background: linear-gradient(90deg, transparent 0 18%, rgba(255,183,94,.12) 28%, transparent 38%) -55% 0 / 62% 100% no-repeat, repeating-linear-gradient(0deg, transparent 0 35px, rgba(255,183,94,.045) 36px, transparent 37px); mask-image: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent); animation: library-signal-scan 10s linear infinite; }
 .feature-section--omni::after { top: 50%; right: -18vw; bottom: auto; left: auto; width: min(68vw, 780px); aspect-ratio: 1; border: 1px solid rgba(125,228,255,.12); border-radius: 50%; background: repeating-conic-gradient(from 10deg, rgba(125,228,255,.13) 0 1deg, transparent 1deg 12deg); mask-image: radial-gradient(circle, transparent 0 44%, #000 45% 47%, transparent 48%); transform: translateY(-50%); animation: omni-field-orbit 28s linear infinite; }
+.feature-section--omni::before {
+  opacity: .72;
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%221200%22%20height%3D%22360%22%20viewBox%3D%220%200%201200%20360%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%237de4ff%22%20stroke-linecap%3D%22round%22%3E%3Cpath%20d%3D%22M0%2078%20C50%2038%20100%2038%20150%2078%20S250%20118%20300%2078%20S400%2038%20450%2078%20S550%20118%20600%2078%20S700%2038%20750%2078%20S850%20118%20900%2078%20S1000%2038%201050%2078%20S1150%20118%201200%2078%22%20stroke-opacity%3D%22.38%22%20stroke-width%3D%221.5%22%2F%3E%3Cpath%20d%3D%22M0%20180%20C50%20208%20100%20208%20150%20180%20S250%20152%20300%20180%20S400%20208%20450%20180%20S550%20152%20600%20180%20S700%20208%20750%20180%20S850%20152%20900%20180%20S1000%20208%201050%20180%20S1150%20152%201200%20180%22%20stroke-opacity%3D%22.22%22%20stroke-width%3D%221.2%22%2F%3E%3Cpath%20d%3D%22M0%20292%20C50%20276%20100%20276%20150%20292%20S250%20308%20300%20292%20S400%20276%20450%20292%20S550%20308%20600%20292%20S700%20276%20750%20292%20S850%20308%20900%20292%20S1000%20276%201050%20292%20S1150%20308%201200%20292%22%20stroke-opacity%3D%22.16%22%20stroke-width%3D%221.1%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E"), linear-gradient(rgba(180,202,228,.025) 1px, transparent 1px), linear-gradient(90deg, rgba(180,202,228,.025) 1px, transparent 1px);
+  background-size: 1200px 360px, 54px 54px, 54px 54px;
+  background-repeat: repeat, repeat, repeat;
+  animation: omni-sine-drift 34s linear infinite;
+}
 /* OMNI launch headline: the logo becomes the O */
 .feature-section--omni .feature-copy h2 .omni-title-word {
   display: inline-flex;
@@ -960,6 +967,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
 .feature-section--experiments::after { background: radial-gradient(ellipse at 0% 50%, rgba(130,230,168,.13), transparent 22%) -22% 0 / 52% 100% no-repeat, repeating-radial-gradient(ellipse at 50% 100%, transparent 0 20px, rgba(130,230,168,.06) 21px 22px, transparent 23px 42px); mask-image: linear-gradient(90deg, transparent, #000 18%, #000 83%, transparent); animation: experiment-signal-drift 13s linear infinite; }
 @keyframes library-signal-scan { to { background-position: 155% 0, 0 0; } }
 @keyframes omni-field-orbit { to { transform: translateY(-50%) rotate(360deg); } }
+@keyframes omni-sine-drift { to { background-position: -1200px 0, 0 0, 0 0; } }
 @keyframes experiment-signal-drift { to { background-position: 122% 0, 0 44px; } }
 /* Contact */
 /* ==========================================================
