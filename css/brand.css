@@ -102,54 +102,51 @@
   background-image:
     /* Green: a larger, more prominent central colour field */
     radial-gradient(
-      ellipse 48% 76% at 49% 50%,
+      ellipse 26% 76% at 50% 50%,
       #82e6a8 0%,
-      rgba(130, 230, 168, .9) 18%,
-      rgba(130, 230, 168, .54) 43%,
-      rgba(130, 230, 168, .16) 63%,
-      transparent 80%
+      rgba(130, 230, 168, .98) 20%,
+      rgba(130, 230, 168, .82) 40%,
+      rgba(130, 230, 168, .42) 59%,
+      transparent 78%
     ),
 
     /* Amber: distinct warm field */
     radial-gradient(
-      ellipse 48% 72% at 25% 52%,
+      ellipse 25% 72% at 17% 50%,
       #ff9f0a 0%,
-      rgba(255, 159, 10, .9) 18%,
-      rgba(255, 159, 10, .5) 43%,
-      rgba(255, 159, 10, .14) 64%,
-      transparent 81%
+      rgba(255, 159, 10, .98) 20%,
+      rgba(255, 159, 10, .84) 40%,
+      rgba(255, 159, 10, .42) 59%,
+      transparent 78%
     ),
 
     /* Cyan: distinct cool field */
     radial-gradient(
-      ellipse 48% 72% at 75% 48%,
+      ellipse 25% 72% at 83% 50%,
       #7de4ff 0%,
-      rgba(125, 228, 255, .9) 18%,
-      rgba(125, 228, 255, .5) 43%,
-      rgba(125, 228, 255, .14) 64%,
-      transparent 81%
+      rgba(125, 228, 255, .98) 20%,
+      rgba(125, 228, 255, .82) 40%,
+      rgba(125, 228, 255, .4) 59%,
+      transparent 78%
     ),
 
     /* Rotating base spectrum: green separates amber and cyan */
     conic-gradient(
       from var(--resource-angle) at 50% 50%,
       #ff9f0a 0deg,
-      #ffb75e 35deg,
-      #82e6a8 75deg,
-      #82e6a8 115deg,
-      #7de4ff 155deg,
+      #ffb75e 48deg,
+      #82e6a8 100deg,
+      #7de4ff 165deg,
       #7de4ff 195deg,
-      #82e6a8 235deg,
-      #82e6a8 275deg,
-      #ffb75e 315deg,
-      #ff9f0a 350deg,
+      #82e6a8 242deg,
+      #ffb75e 306deg,
       #ff9f0a 360deg
     );
 
   background-size:
-    160% 180%,
-    150% 170%,
-    150% 170%,
+    130% 190%,
+    130% 190%,
+    130% 190%,
     240% 220%;
 
   background-position:
@@ -187,42 +184,34 @@
 @keyframes resource-kaleidoscope {
   0%, 100% {
     background-position: 50% 50%, 0% 50%, 100% 50%, 50% 50%;
-    background-size: 160% 180%, 150% 170%, 150% 170%, 240% 220%;
   }
 
   12.5% {
-    background-position: 78% 15%, 18% 82%, 86% 28%, 30% 48%;
-    background-size: 172% 164%, 158% 180%, 160% 166%, 240% 220%;
+    background-position: 58% 28%, 7% 76%, 93% 24%, 30% 48%;
   }
 
   25% {
-    background-position: 100% 15%, 35% 100%, 60% 0%, 25% 50%;
-    background-size: 170% 155%, 140% 190%, 165% 155%, 240% 220%;
+    background-position: 64% 68%, 14% 100%, 86% 0%, 25% 50%;
   }
 
   37.5% {
-    background-position: 62% 88%, 84% 24%, 14% 78%, 72% 52%;
-    background-size: 150% 188%, 168% 158%, 154% 184%, 240% 220%;
+    background-position: 55% 86%, 19% 24%, 81% 78%, 72% 52%;
   }
 
   50% {
-    background-position: 20% 100%, 100% 25%, 0% 75%, 50% 50%;
-    background-size: 145% 195%, 165% 155%, 140% 190%, 240% 220%;
+    background-position: 40% 100%, 22% 25%, 78% 75%, 50% 50%;
   }
 
   62.5% {
-    background-position: 12% 34%, 62% 12%, 82% 86%, 28% 48%;
-    background-size: 168% 164%, 154% 184%, 170% 160%, 240% 220%;
+    background-position: 35% 34%, 12% 12%, 88% 86%, 28% 48%;
   }
 
   75% {
-    background-position: 0% 20%, 55% 0%, 100% 100%, 75% 50%;
-    background-size: 165% 165%, 150% 185%, 155% 165%, 240% 220%;
+    background-position: 44% 20%, 4% 0%, 96% 100%, 75% 50%;
   }
 
   87.5% {
-    background-position: 38% 76%, 12% 32%, 70% 18%, 60% 50%;
-    background-size: 152% 190%, 172% 162%, 148% 188%, 240% 220%;
+    background-position: 54% 76%, 0% 32%, 100% 18%, 60% 50%;
   }
 }
 
