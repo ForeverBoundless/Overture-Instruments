@@ -74,8 +74,8 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
 .hero::after { position: absolute; z-index: -1; right: 0; bottom: 0; left: 0; height: 210px; content: ''; background: linear-gradient(transparent, var(--bg)); pointer-events: none; }
 .hero-grid { position: absolute; z-index: -1; inset: 0; pointer-events: none; opacity: .3; background-image: linear-gradient(rgba(199,216,239,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(199,216,239,.035) 1px, transparent 1px); background-size: 66px 66px; mask-image: radial-gradient(ellipse at center, black 0%, transparent 75%); }
 .hero-circuit { position: absolute; z-index: -1; inset: 0; width: 100%; height: 100%; opacity: .95; pointer-events: none; }
-.circuit-lines path { stroke-dasharray: 7 10; animation: trace-flow 12s linear infinite; }
-.circuit-lines path:nth-child(2n) { animation-duration: 18s; animation-direction: reverse; opacity: .8; }
+.circuit-lines path { stroke-dasharray: 7 10; }
+.circuit-lines path:nth-child(2n) { opacity: .8; }
 .circuit-nodes circle { fill: #ffbd67; filter: drop-shadow(0 0 5px rgba(255,159,10,.9)); animation: node-blink 3.2s ease-in-out infinite; }
 .circuit-nodes circle:nth-child(3n) { fill: #77e2e6; filter: drop-shadow(0 0 5px rgba(112,220,240,.8)); animation-delay: -1.5s; }
 .circuit-pulses circle { stroke: #ffbd67; opacity: 0; transform-box: fill-box; transform-origin: center; animation: circuit-ripple 3.5s ease-out infinite; }
@@ -220,7 +220,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
 .stack-meter { display: flex; align-items: flex-end; gap: 3px; height: 10px; margin-top: 8px; }
 .stack-meter i { width: 6px; height: 3px; border-radius: 2px; background: #ffb75e; box-shadow: 0 0 5px rgba(255,183,94,.4); }
 .stack-meter i:nth-child(3n) { height: 8px; background: var(--cyan); box-shadow: 0 0 5px rgba(112,220,240,.5); }
-.floating-readout { position: absolute; z-index: 4; display: grid; gap: 5px; min-width: 106px; padding: 11px 13px; border: 1px solid rgba(255,255,255,.13); border-radius: 7px; background: rgba(12,16,23,.82); box-shadow: 0 9px 25px rgba(0,0,0,.28); backdrop-filter: blur(8px); }
+.floating-readout { position: absolute; z-index: 4; display: grid; gap: 5px; min-width: 106px; padding: 11px 13px; border: 1px solid rgba(255,255,255,.13); border-radius: 7px; background: rgba(12,16,23,.94); box-shadow: 0 9px 25px rgba(0,0,0,.28); }
 .floating-readout span { color: #7b8798; font-family: var(--font-mono); font-size: 7px; letter-spacing: .12em; }
 .floating-readout b { color: #ebeff5; font-family: var(--font-mono); font-size: 9px; font-weight: 400; letter-spacing: .03em; }
 .readout-spark { position: absolute; top: 11px; right: 11px; width: 4px; height: 4px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); }
@@ -415,7 +415,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
 .experiments-showcase { position: relative; min-width: 0; overflow: hidden; padding: 19px; border: 1px solid rgba(130,230,168,.2); border-radius: 18px; background: linear-gradient(145deg, rgba(23,35,35,.9), rgba(10,17,20,.98)); box-shadow: 0 27px 76px rgba(0,0,0,.25), inset 0 1px rgba(255,255,255,.06); transform-style: preserve-3d; transition: border-color .3s ease; }
 .experiments-showcase:hover { border-color: rgba(130,230,168,.4); }
 .experiment-heading, .experiments-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: #83978f; font-family: var(--font-mono); font-size: 7px; letter-spacing: .12em; }
-.scope-grid { position: relative; height: clamp(185px, 24vw, 244px); margin-top: 22px; overflow: hidden; border: 1px solid rgba(130,230,168,.12); border-radius: 8px; background-color: rgba(4,11,12,.55); background-image: linear-gradient(rgba(130,230,168,.075) 1px, transparent 1px), linear-gradient(90deg, rgba(130,230,168,.075) 1px, transparent 1px); background-size: 25px 25px; box-shadow: inset 0 0 30px rgba(0,0,0,.2); }
+.scope-grid { position: relative; container-type: inline-size; height: clamp(185px, 24vw, 244px); margin-top: 22px; overflow: hidden; border: 1px solid rgba(130,230,168,.12); border-radius: 8px; background-color: rgba(4,11,12,.55); background-image: linear-gradient(rgba(130,230,168,.075) 1px, transparent 1px), linear-gradient(90deg, rgba(130,230,168,.075) 1px, transparent 1px); background-size: 25px 25px; box-shadow: inset 0 0 30px rgba(0,0,0,.2); }
 .scope-svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .scope-wave { fill: none; stroke: url(#scope-stroke); stroke-width: 2; vector-effect: non-scaling-stroke; filter: drop-shadow(0 0 5px rgba(130,230,168,.4)); stroke-dasharray: 1000; animation: scope-draw 6s linear infinite; }
 .scope-wave--ghost { stroke: rgba(130,230,168,.13); stroke-width: 10; filter: blur(5px); stroke-dasharray: none; animation: scope-breathe 3s ease-in-out infinite; }
@@ -445,7 +445,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
 @keyframes orbit-rotate { to { transform: rotate(360deg); } }
 @keyframes halo-breathe { 0%,100% { opacity: .55; transform: scale(.92); } 50% { opacity: 1; transform: scale(1.12); } }
 @keyframes logo-float { 0%,100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-7px) rotate(1deg); } }
-@keyframes signal-color { 0%,100% { filter: hue-rotate(0deg); } 33% { filter: hue-rotate(70deg); } 66% { filter: hue-rotate(155deg); } }
+@keyframes signal-color { 0%,100% { opacity: .72; } 50% { opacity: 1; } }
 @keyframes scroll-line { 0%,100% { transform: scaleX(.65); opacity: .4; } 50% { transform: scaleX(1); opacity: 1; } }
 @keyframes float-y { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
 @keyframes equalize { from { height: 3px; opacity: .55; } to { height: 12px; opacity: 1; } }
@@ -521,7 +521,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
   .reveal { opacity: 1; transform: none; }
-  .idea-fluid, .idea-fluid__glow, .feature-section::after { display: none; }
+  .idea-fluid, .idea-fluid__glow, .feature-section::after, .home-signal-field { display: none; }
 }
 
 /* =====================================================================
@@ -923,16 +923,41 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
 
 /* Section-specific ambient motion: each layer remains behind its copy and showcase. */
 .feature-section { isolation: isolate; }
-.feature-section::after { position: absolute; z-index: 0; inset: 0; content: ''; pointer-events: none; opacity: .7; }
-.feature-section--library::after { background: linear-gradient(90deg, transparent 0 18%, rgba(255,183,94,.12) 28%, transparent 38%) -55% 0 / 62% 100% no-repeat, repeating-linear-gradient(0deg, transparent 0 35px, rgba(255,183,94,.045) 36px, transparent 37px); mask-image: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent); animation: library-signal-scan 10s linear infinite; }
-.feature-section--omni::after { top: 50%; right: -18vw; bottom: auto; left: auto; width: min(68vw, 780px); aspect-ratio: 1; border: 1px solid rgba(125,228,255,.12); border-radius: 50%; background: repeating-conic-gradient(from 10deg, rgba(125,228,255,.13) 0 1deg, transparent 1deg 12deg); mask-image: radial-gradient(circle, transparent 0 44%, #000 45% 47%, transparent 48%); transform: translateY(-50%); animation: omni-field-orbit 28s linear infinite; }
-.feature-section--omni::before {
-  opacity: .72;
-  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%221200%22%20height%3D%22360%22%20viewBox%3D%220%200%201200%20360%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%237de4ff%22%20stroke-linecap%3D%22round%22%3E%3Cpath%20d%3D%22M0%2078%20C50%2038%20100%2038%20150%2078%20S250%20118%20300%2078%20S400%2038%20450%2078%20S550%20118%20600%2078%20S700%2038%20750%2078%20S850%20118%20900%2078%20S1000%2038%201050%2078%20S1150%20118%201200%2078%22%20stroke-opacity%3D%22.38%22%20stroke-width%3D%221.5%22%2F%3E%3Cpath%20d%3D%22M0%20180%20C50%20208%20100%20208%20150%20180%20S250%20152%20300%20180%20S400%20208%20450%20180%20S550%20152%20600%20180%20S700%20208%20750%20180%20S850%20152%20900%20180%20S1000%20208%201050%20180%20S1150%20152%201200%20180%22%20stroke-opacity%3D%22.22%22%20stroke-width%3D%221.2%22%2F%3E%3Cpath%20d%3D%22M0%20292%20C50%20276%20100%20276%20150%20292%20S250%20308%20300%20292%20S400%20276%20450%20292%20S550%20308%20600%20292%20S700%20276%20750%20292%20S850%20308%20900%20292%20S1000%20276%201050%20292%20S1150%20308%201200%20292%22%20stroke-opacity%3D%22.16%22%20stroke-width%3D%221.1%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E"), linear-gradient(rgba(180,202,228,.025) 1px, transparent 1px), linear-gradient(90deg, rgba(180,202,228,.025) 1px, transparent 1px);
-  background-size: 1200px 360px, 54px 54px, 54px 54px;
-  background-repeat: repeat, repeat, repeat;
-  animation: omni-sine-drift 34s linear infinite;
+.home-signal-field {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  mask-image: linear-gradient(180deg, transparent 0%, #000 17%, #000 83%, transparent 100%);
 }
+.home-signal-field svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  width: 125%;
+  height: 100%;
+  will-change: transform;
+  animation: home-signal-flow 52s linear infinite;
+}
+.home-signal-field--library { opacity: .92; }
+.home-signal-field--omni { opacity: .86; }
+@keyframes home-signal-flow { to { transform: translate3d(-20%, 0, 0); } }
+
+.motion-paused,
+.motion-paused *,
+.motion-paused::before,
+.motion-paused::after,
+.motion-paused *::before,
+.motion-paused *::after {
+  animation-play-state: paused !important;
+}
+.motion-paused .home-signal-field svg { will-change: auto; }
+.feature-section::after { position: absolute; z-index: 0; inset: 0; content: ''; pointer-events: none; opacity: .7; }
+.feature-section--library::after { background: repeating-linear-gradient(0deg, transparent 0 35px, rgba(255,183,94,.035) 36px, transparent 37px); mask-image: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent); }
+.feature-section--omni::after { top: 50%; right: -18vw; bottom: auto; left: auto; width: min(68vw, 780px); aspect-ratio: 1; border: 1px solid rgba(125,228,255,.12); border-radius: 50%; background: repeating-conic-gradient(from 10deg, rgba(125,228,255,.13) 0 1deg, transparent 1deg 12deg); mask-image: radial-gradient(circle, transparent 0 44%, #000 45% 47%, transparent 48%); transform: translateY(-50%); animation: omni-field-orbit 28s linear infinite; }
+
 /* OMNI launch headline: the logo becomes the O */
 .feature-section--omni .feature-copy h2 .omni-title-word {
   display: inline-flex;
@@ -964,11 +989,8 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
     drop-shadow(0 0 12px rgba(65, 190, 255, .7))
     drop-shadow(0 0 24px rgba(65, 190, 255, .35));
 }
-.feature-section--experiments::after { background: radial-gradient(ellipse at 0% 50%, rgba(130,230,168,.13), transparent 22%) -22% 0 / 52% 100% no-repeat, repeating-radial-gradient(ellipse at 50% 100%, transparent 0 20px, rgba(130,230,168,.06) 21px 22px, transparent 23px 42px); mask-image: linear-gradient(90deg, transparent, #000 18%, #000 83%, transparent); animation: experiment-signal-drift 13s linear infinite; }
-@keyframes library-signal-scan { to { background-position: 155% 0, 0 0; } }
+.feature-section--experiments::after { background: radial-gradient(ellipse at 0% 50%, rgba(130,230,168,.09), transparent 28%), repeating-radial-gradient(ellipse at 50% 100%, transparent 0 20px, rgba(130,230,168,.045) 21px 22px, transparent 23px 42px); mask-image: linear-gradient(90deg, transparent, #000 18%, #000 83%, transparent); }
 @keyframes omni-field-orbit { to { transform: translateY(-50%) rotate(360deg); } }
-@keyframes omni-sine-drift { to { background-position: -1200px 0, 0 0, 0 0; } }
-@keyframes experiment-signal-drift { to { background-position: 122% 0, 0 44px; } }
 /* Contact */
 /* ==========================================================
    EXPERIMENTS — OSCILLATOR INTERFACE
@@ -1208,14 +1230,14 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
   vector-effect: non-scaling-stroke;
   stroke-dasharray: none;
   filter: drop-shadow(0 0 4px rgba(130, 230, 168, .22));
-  animation: experiments-wave-glow 5s ease-in-out infinite;
+  animation: none;
 }
 
 .feature-section--experiments .scope-wave--ghost {
   stroke: #82e6a8;
   stroke-width: 9;
   opacity: .12;
-  filter: blur(5px);
+  filter: none;
   animation: none;
 }
 
@@ -1277,6 +1299,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
   box-shadow: 0 0 8px rgba(130, 230, 168, .12);
   pointer-events: none;
   animation: experiments-scan 9s linear infinite;
+  will-change: transform, opacity;
 }
 
 /* Parameter controls */
@@ -1422,20 +1445,10 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
 }
 
 @keyframes experiments-scan {
-  0% {
-    left: 4%;
-    opacity: 0;
-  }
-  8% {
-    opacity: .8;
-  }
-  90% {
-    opacity: .55;
-  }
-  100% {
-    left: 96%;
-    opacity: 0;
-  }
+  0% { transform: translateX(0); opacity: 0; }
+  8% { opacity: .8; }
+  90% { opacity: .55; }
+  100% { transform: translateX(92cqw); opacity: 0; }
 }
 
 @keyframes experiments-wave-glow {
