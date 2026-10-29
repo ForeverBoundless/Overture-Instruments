@@ -41,8 +41,11 @@ html[data-theme="light"] body {
     radial-gradient(ellipse at 88% 14%, rgba(125,190,220,.13), transparent 35%),
     linear-gradient(140deg, #eff3f7 0%, #e5ebf2 46%, #edf1f6 100%) !important;
 }
-html[data-theme="light"] body :is(h1,h2,h3,h4,h5,h6,p,li,span,small,strong,b,em,label,a,button,output,figcaption,legend,summary,dt,dd,blockquote,cite) {
-  color: var(--theme-ink) !important;
+/* Apply default ink to semantic text blocks only. Do not flatten inline spans,
+   strong/emphasis, links, buttons, or SVG/canvas accents: many are intentionally
+   amber, cyan, green, or gradient-masked brand details. */
+html[data-theme="light"] body :is(h1,h2,h3,h4,h5,h6,p,li,label,figcaption,legend,summary,dt,dd,blockquote,cite) {
+  color: var(--theme-ink);
   -webkit-text-fill-color: currentColor;
 }
 html[data-theme="light"] :is(input,select,textarea) {
@@ -172,14 +175,23 @@ html[data-theme="light"] :is(.hero-scroll,.hero-coordinate,.about-hero__coordina
 
 /* Force the full range of page copy to the light-mode ink colour, then bring
    back only deliberate signal colours and branded gradient lettering. */
-html[data-theme="light"] :is(.hero-title em,.about-hero h1 span,.feature-copy h2 em,.story-heading h2 em,.founder-copy h2 em,.process-heading h2 em,.next-heading h2 em,.ex-page h1 em,.lab-header h1 em) {
-  color: var(--amber-bright) !important; -webkit-text-fill-color: currentColor !important;
+/* Keep semantic and brand accents in their own hue family. All light-mode
+   signal colours are darkened and saturated for contrast, never shifted warm. */
+html[data-theme="light"] :is(.hero-title em,.about-hero h1 span,.story-heading h2 em,.founder-copy h2 em,.process-heading h2 em,.next-heading h2 em) {
+  color: #ad5f00 !important; -webkit-text-fill-color: currentColor !important;
 }
-html[data-theme="light"] :is(.ex-page h1 em,.lab-header h1 em) { color: #16804d !important; }
-html[data-theme="light"] .feature-section--omni .feature-copy h2 .omni-title-word { color: #087caa !important; }
-html[data-theme="light"] :is(.section-index > span:first-child,.eyebrow-dot,.external-arrow,.text-link span,.button-arrow,.footer-github b,.back-to-top:hover,.founder-copy__link span,.ex-card b,.ex-card span.ex-num::after,.omni-param output,.omni-logo-wording strong) { color: #a96508 !important; }
-html[data-theme="light"] :is(.eyebrow-dot--cyan,.omni-logo-wording strong,.omni-param output,.omni-preview-wire) { color: #087caa !important; }
-html[data-theme="light"] .lab-control-head output { color: #087caa !important; }
+html[data-theme="light"] .feature-section--library .feature-copy h2 em { color: #ad5f00 !important; }
+html[data-theme="light"] .feature-section--experiments .feature-copy h2 em { color: #167747 !important; }
+html[data-theme="light"] .feature-section--omni .feature-copy h2 .omni-title-word { color: #087f9f !important; }
+html[data-theme="light"] :is(.ex-page h1 em,.lab-header h1 em) { color: #167747 !important; -webkit-text-fill-color: currentColor !important; }
+html[data-theme="light"] :is(.eyebrow-dot:not(.eyebrow-dot--cyan):not(.eyebrow-dot--green),.section-index > span:first-child,.external-arrow,.text-link span,.footer-github b,.back-to-top:hover) { color: #ad5f00 !important; }
+html[data-theme="light"] .eyebrow-dot:not(.eyebrow-dot--cyan):not(.eyebrow-dot--green) { background-color: #ad5f00 !important; }
+html[data-theme="light"] :is(.eyebrow-dot--cyan,.founder-copy__link span,.omni-param output,.omni-logo-wording strong,.omni-preview-wire,.lab-control-head output) { color: #087f9f !important; }
+html[data-theme="light"] .eyebrow-dot--cyan { background-color: #087f9f !important; }
+html[data-theme="light"] :is(.eyebrow-dot--green,.ex-card b,.status-dot--green,.waveform-symbol) { color: #167747 !important; }
+html[data-theme="light"] :is(.eyebrow-dot--green,.status-dot--green) { background-color: #167747 !important; }
+html[data-theme="light"] .scope-wave { filter: saturate(1.4) contrast(1.25) drop-shadow(0 0 3px rgba(22,119,71,.24)) !important; }
+html[data-theme="light"] .scope-wave--ghost { stroke: rgba(22,119,71,.24) !important; }
 html[data-theme="light"] .omni-port-row { color: #364454 !important; }
 html[data-theme="light"] .omni-port--audio { background: #c87608 !important; }
 html[data-theme="light"] .omni-port--cv { background: #087caa !important; }
@@ -387,10 +399,9 @@ html[data-theme="light"] :is(.builder-ui,.builder-ui__head,.builder-module,.buil
 html[data-theme="light"] :is(.builder-ui__head,.showcase-topline,.showcase-bottomline) { color: #647487 !important; }
 html[data-theme="light"] :is(.builder-module small,.builder-ui__head > span:last-child,.experiments-footer__metrics) { color: #586a7e !important; }
 html[data-theme="light"] :is(.scope-grid,.scope-plot,.experiment-meter,.experiment-control__scale span) { border-color: rgba(43,59,78,.14) !important; }
-html[data-theme="light"] .site-brand__mark img,
-html[data-theme="light"] .footer-brand img,
-html[data-theme="light"] .omni-logo-mark img { filter: brightness(.42) saturate(1.08) drop-shadow(0 0 7px rgba(125,228,255,.16)) !important; }
-html[data-theme="light"] :is(.hero-logo,.omni-wordmark strong img,.home-coming-soon__o-icon,.omni-title-word img) { filter: brightness(.48) saturate(1.08) drop-shadow(0 0 8px rgba(125,228,255,.16)) !important; }
+/* The Overture mark is a brand asset, not a theme tint target. Keep the
+   original logo pixels and colours in both modes. */
+html[data-theme="light"] .feature-section--omni .feature-copy h2 .omni-title-word img { filter: none !important; }
 html[data-theme="light"] .omni-patch-link { color: #075f83 !important; }
 html[data-theme="light"] .lab-plot canvas {
   background: #eef2f6 !important; border-color: rgba(43,59,78,.16) !important;
@@ -473,3 +484,83 @@ html[data-theme="light"] .home-coming-soon__subline { color: #56677a !important;
   .omni-logo-wording strong { font-size: 11px; letter-spacing: .15em; }
   .omni-project { width: max(48px,calc(50vw - 150px)); min-width: 0; flex: 0 1 auto; padding-left: 8px; }
 }
+ 
+
+/* Light mode keeps the decorative signal systems vivid and clearly separated
+   from the pearl-grey surface. The filter changes contrast/saturation, not hue. */
+html[data-theme="light"] .hero-circuit {
+  filter: saturate(1.65) contrast(1.35);
+  opacity: .9 !important;
+}
+html[data-theme="light"] .feature-section--omni::before,
+html[data-theme="light"] .feature-section--omni::after,
+html[data-theme="light"] .feature-section--experiments::after,
+html[data-theme="light"] .feature-section--library::after {
+  filter: saturate(1.6) contrast(1.22);
+  opacity: .92 !important;
+}
+html[data-theme="light"] .experiments-showcase {
+  border-color: rgba(22,119,71,.3) !important;
+  background: linear-gradient(145deg,rgba(229,239,233,.98),rgba(211,229,221,.98)) !important;
+  box-shadow: 0 22px 54px rgba(45,60,81,.13),inset 0 1px rgba(255,255,255,.94) !important;
+}
+html[data-theme="light"] .scope-grid {
+  background-image: linear-gradient(rgba(22,119,71,.21) 1px,transparent 1px),linear-gradient(90deg,rgba(22,119,71,.21) 1px,transparent 1px) !important;
+  box-shadow: inset 0 0 20px rgba(22,119,71,.065) !important;
+}
+html[data-theme="light"] .scope-point {
+  border-color: #176d42 !important;
+  box-shadow: 0 0 10px rgba(22,119,71,.62) !important;
+}
+html[data-theme="light"] .scope-axis { background: rgba(22,119,71,.45) !important; }
+html[data-theme="light"] .experiments-signal { border-color: rgba(22,119,71,.22) !important; }
+html[data-theme="light"] .experiments-signal::before { border-color: rgba(22,119,71,.26) !important; }
+html[data-theme="light"] .experiments-signal::after { border-color: rgba(8,127,159,.3) !important; }
+html[data-theme="light"] .home-coming-soon__signal {
+  border-color: rgba(173,95,0,.72) !important;
+  box-shadow: 0 0 0 7px rgba(173,95,0,.09), inset 0 0 16px rgba(173,95,0,.17) !important;
+}
+html[data-theme="light"] .home-coming-soon__signal::before {
+  border-color: #b36a08 !important;
+  animation-name: home-coming-ring-light !important;
+}
+html[data-theme="light"] .home-coming-soon__signal::after {
+  background: #c47808 !important;
+  box-shadow: 0 0 10px rgba(173,95,0,.82) !important;
+  animation-name: home-coming-dot-light !important;
+}
+@keyframes home-coming-ring-light {
+  0%,100% { opacity:.65; transform:translate(-50%,-50%) scale(.96); border-color:#a95e00; }
+  50% { opacity:1; transform:translate(-50%,-50%) scale(1.08); border-color:#c17708; }
+}
+@keyframes home-coming-dot-light {
+  0%,100% { opacity:.82; box-shadow:0 0 8px rgba(173,95,0,.7); }
+  50% { opacity:1; box-shadow:0 0 13px rgba(173,95,0,.96),0 0 21px rgba(173,95,0,.42); }
+}
+html[data-theme="light"] .omni-patch-node__graphic .omni-patch-wire--audio { stroke: #ad5f00 !important; }
+html[data-theme="light"] .omni-patch-node__graphic .omni-patch-wire--control { stroke: #087f9f !important; }
+html[data-theme="light"] .omni-patch-node__graphic .omni-patch-wire--notes { stroke: #167747 !important; }
+html[data-theme="light"] .omni-launch-overlay.is-loading {
+  background: radial-gradient(ellipse at 50% 50%,rgba(255,255,255,.98),rgba(235,241,247,.98) 43%,#e1e8f0 100%) !important;
+}
+html[data-theme="light"] .omni-launch-overlay.is-loading .omni-launch-kaleido,
+html[data-theme="light"] .omni-launch-overlay.is-loading .omni-launch-electric-grid { opacity: 0 !important; }
+html[data-theme="light"] .omni-launch-logo {
+  filter: drop-shadow(0 0 13px rgba(8,127,159,.2)) !important;
+  animation-name: omni-launch-logo-breathe-light !important;
+}
+html[data-theme="light"] .omni-launch-progress {
+  background: rgba(8,127,159,.18) !important;
+  box-shadow: 0 0 15px rgba(8,127,159,.07) !important;
+}
+html[data-theme="light"] .omni-launch-progress span {
+  background: linear-gradient(90deg,#086b88,#159bbb,#275f8e) !important;
+  box-shadow: 0 0 14px rgba(8,127,159,.46) !important;
+}
+@keyframes omni-launch-logo-breathe-light {
+  to { filter: drop-shadow(0 0 21px rgba(8,127,159,.3)); }
+}
+html[data-theme="light"] .mission-copy p:first-child,
+html[data-theme="light"] .mission-copy strong { color: #263646 !important; }
+html[data-theme="light"] .about-hero__glow--amber { background: #c46f06 !important; opacity: .12 !important; }
+html[data-theme="light"] .about-hero__glow--cyan { background: #0c8eb3 !important; opacity: .13 !important; }
