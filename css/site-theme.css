@@ -493,8 +493,13 @@ html[data-theme="light"] .home-coming-soon__subline { color: #56677a !important;
 /* Light mode keeps the decorative signal systems vivid and clearly separated
    from the pearl-grey surface. The filter changes contrast/saturation, not hue. */
 html[data-theme="light"] .hero-circuit {
-  filter: saturate(1.65) contrast(1.35);
-  opacity: .9 !important;
+  filter: saturate(1.85) contrast(1.42);
+  opacity: .96 !important;
+}
+html[data-theme="light"] .circuit-lines path,
+html[data-theme="light"] .circuit-nodes circle,
+html[data-theme="light"] .circuit-pulses circle {
+  filter: saturate(1.8) contrast(1.25);
 }
 html[data-theme="light"] .feature-section--omni::before,
 html[data-theme="light"] .feature-section--omni::after,
@@ -544,7 +549,10 @@ html[data-theme="light"] .home-coming-soon__signal::after {
 html[data-theme="light"] .omni-patch-node__graphic .omni-patch-wire--audio { stroke: #ad5f00 !important; }
 html[data-theme="light"] .omni-patch-node__graphic .omni-patch-wire--control { stroke: #087f9f !important; }
 html[data-theme="light"] .omni-patch-node__graphic .omni-patch-wire--notes { stroke: #167747 !important; }
-html[data-theme="light"] .feature-section--experiments .scope-wave { stroke: #167747 !important; filter: drop-shadow(0 0 4px rgba(22,119,71,.28)) !important; }
+html[data-theme="light"] #experiments-scope-gradient stop:nth-child(1) { stop-color: #167747 !important; }
+html[data-theme="light"] #experiments-scope-gradient stop:nth-child(2) { stop-color: #16865f !important; }
+html[data-theme="light"] #experiments-scope-gradient stop:nth-child(3) { stop-color: #087f9f !important; }
+html[data-theme="light"] .feature-section--experiments .scope-wave { filter: saturate(1.3) drop-shadow(0 0 4px rgba(22,119,71,.28)) !important; }
 html[data-theme="light"] .feature-section--experiments .scope-wave--ghost { stroke: rgba(22,119,71,.3) !important; }
 html[data-theme="light"] .omni-launch-overlay.is-loading {
   background: radial-gradient(ellipse at 50% 50%,rgba(255,255,255,.98),rgba(235,241,247,.98) 43%,#e1e8f0 100%) !important;
