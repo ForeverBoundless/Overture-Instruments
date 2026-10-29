@@ -2405,7 +2405,8 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
 }
 
 /* =========================================================
-   OMNI SHOWCASE — FULL-SCREEN ELECTRIC LAUNCH
+   OMNI SHOWCASE — ELECTRIC BLUE KALEIDOSCOPE LAUNCH
+   The source artwork remains fixed; independent light layers take over.
    ========================================================= */
 .omni-patch-showcase[data-omni-launch-ready="true"] { cursor: pointer; outline: none; }
 .omni-patch-showcase[data-omni-launch-ready="true"]:focus-visible {
@@ -2416,120 +2417,124 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
 .omni-launch-active { overflow: hidden !important; }
 .omni-launch-overlay {
   position: fixed; inset: 0; z-index: 99999; overflow: hidden;
-  background: rgba(3,6,10,.12); opacity: 1;
-  isolation: isolate; pointer-events: none;
-  transition: background .8s ease, opacity .35s ease;
+  background: #050912; isolation: isolate; pointer-events: none;
+  opacity: 1; transition: background .42s ease;
 }
-.omni-launch-grid {
-  position: absolute; inset: -20%; z-index: 0; opacity: 0;
+.omni-launch-kaleido {
+  position: absolute; inset: -8%; z-index: 0; opacity: 0;
   background:
-    radial-gradient(ellipse at 50% 50%, rgba(125,228,255,.18), transparent 42%),
-    linear-gradient(rgba(125,228,255,.11) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(125,228,255,.11) 1px, transparent 1px);
-  background-size: 100% 100%, 34px 34px, 34px 34px;
-  mask-image: radial-gradient(ellipse at center, #000 8%, transparent 70%);
-  transform: scale(.84) rotate(-5deg);
-  transition: opacity .5s ease, transform 1.1s cubic-bezier(.15,.75,.2,1);
+    repeating-conic-gradient(from 0deg at 50% 50%, rgba(125,228,255,.0) 0deg 4deg, rgba(125,228,255,.24) 4.3deg 5deg, rgba(12,91,255,.0) 5.5deg 11.25deg),
+    conic-gradient(from 45deg at 50% 50%, rgba(3,30,111,.1), rgba(13,94,255,.46), rgba(4,15,71,.08), rgba(48,177,255,.38), rgba(3,30,111,.1));
+  mask-image: radial-gradient(ellipse at center, #000 0%, #000 34%, rgba(0,0,0,.76) 59%, transparent 83%);
+  mix-blend-mode: screen; transform-origin: 50% 50%;
+  transition: opacity .22s ease;
+}
+.omni-launch-kaleido--two {
+  background:
+    repeating-conic-gradient(from 22.5deg at 50% 50%, rgba(125,228,255,.0) 0deg 8deg, rgba(125,228,255,.35) 8.5deg 9deg, transparent 9.5deg 22.5deg),
+    radial-gradient(ellipse at center, transparent 0 20%, rgba(12,91,255,.25) 38%, transparent 68%);
+  mask-image: radial-gradient(circle at center, transparent 0 10%, #000 11% 53%, transparent 82%);
+}
+.omni-launch-kaleido--three {
+  background:
+    repeating-conic-gradient(from 11.25deg at 50% 50%, rgba(8,27,88,.0) 0deg 10.8deg, rgba(125,228,255,.21) 11deg 11.5deg, rgba(22,107,255,.04) 12deg 22.5deg),
+    repeating-radial-gradient(circle at 50% 50%, transparent 0 20px, rgba(125,228,255,.18) 21px 22px, rgba(11,63,208,.1) 23px 25px, transparent 26px 39px);
+  mask-image: radial-gradient(circle at center, #000 0 22%, rgba(0,0,0,.7) 47%, transparent 78%);
+}
+.omni-launch-electric-grid {
+  position: absolute; inset: -8%; z-index: 1; opacity: 0;
+  background:
+    linear-gradient(90deg, transparent 49.85%, rgba(125,228,255,.48) 50%, transparent 50.15%),
+    linear-gradient(0deg, transparent 49.85%, rgba(125,228,255,.34) 50%, transparent 50.15%),
+    repeating-linear-gradient(45deg, transparent 0 44px, rgba(65,160,255,.075) 45px 46px, transparent 47px 90px),
+    radial-gradient(ellipse at center, rgba(16,99,255,.28), transparent 59%);
+  mix-blend-mode: screen; transition: opacity .2s ease;
 }
 .omni-launch-flash {
-  position: absolute; inset: 0; z-index: 3; opacity: 0; pointer-events: none;
-  background: radial-gradient(ellipse at center, rgba(207,249,255,.94) 0%, rgba(125,228,255,.35) 8%, rgba(35,152,205,.12) 24%, transparent 58%);
+  position: absolute; inset: -12%; z-index: 4; opacity: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse at center, rgba(241,253,255,.94) 0%, rgba(125,228,255,.78) 3%, rgba(38,143,255,.36) 13%, transparent 48%),
+    repeating-conic-gradient(from 0deg at 50% 50%, rgba(125,228,255,.0) 0deg 3deg, rgba(125,228,255,.24) 3.3deg 3.7deg, transparent 4deg 15deg);
   mix-blend-mode: screen;
 }
 .omni-launch-stage {
   box-sizing: border-box !important; z-index: 2 !important;
-  overflow: hidden !important; border-color: rgba(125,228,255,.45) !important;
-  border-radius: 18px !important;
-  transition:
-    left 1.04s cubic-bezier(.16,.82,.18,1),
-    top 1.04s cubic-bezier(.16,.82,.18,1),
-    width 1.04s cubic-bezier(.16,.82,.18,1),
-    height 1.04s cubic-bezier(.16,.82,.18,1),
-    border-radius .85s ease,
-    border-color .4s ease,
-    box-shadow .5s ease,
-    opacity .35s ease,
-    transform .55s ease !important;
-  will-change: left, top, width, height, opacity, transform;
+  overflow: hidden !important; border-radius: 18px !important;
+  border-color: rgba(125,228,255,.45) !important;
+  transition: border-color .24s ease, box-shadow .24s ease, filter .3s ease, opacity .3s ease !important;
+  will-change: opacity, filter;
 }
 .omni-launch-stage.is-energized {
-  border-color: rgba(185,247,255,.9) !important;
-  box-shadow: 0 0 0 1px rgba(125,228,255,.48), 0 0 34px rgba(125,228,255,.28), 0 0 110px rgba(35,152,205,.2), inset 0 0 65px rgba(125,228,255,.1) !important;
+  border-color: rgba(185,247,255,.96) !important;
+  box-shadow: 0 0 0 1px rgba(125,228,255,.6), 0 0 26px rgba(25,126,255,.5), 0 0 65px rgba(24,88,255,.27), inset 0 0 46px rgba(125,228,255,.12) !important;
 }
 .omni-launch-stage.is-energized .omni-patch-wire {
-  stroke-dasharray: 7 10 !important;
-  animation: omni-launch-current .44s linear infinite !important;
-  filter: drop-shadow(0 0 4px currentColor);
+  stroke-dasharray: 5 9 !important; animation: omni-launch-current .3s linear infinite !important;
 }
-.omni-launch-stage.is-energized .omni-patch-wire--audio { stroke-width: 2.5; filter: drop-shadow(0 0 6px rgba(255,159,10,.85)); }
-.omni-launch-stage.is-energized .omni-patch-wire--control { filter: drop-shadow(0 0 6px rgba(125,228,255,.95)); }
-.omni-launch-stage.is-energized .omni-patch-wire--notes { filter: drop-shadow(0 0 6px rgba(130,230,168,.95)); }
-.omni-launch-stage.is-energized .omni-patch-port { animation: omni-launch-port 1s ease-in-out infinite alternate; }
-.omni-launch-stage.is-energized .omni-patch-node { box-shadow: 0 0 0 1px rgba(125,228,255,.16), 0 0 21px rgba(125,228,255,.12), inset 0 1px rgba(255,255,255,.12); }
-.omni-launch-stage.is-expanding {
-  left: 0 !important; top: 0 !important; width: 100vw !important; height: 100vh !important;
-  height: 100dvh !important; border-radius: 0 !important;
-  border-color: rgba(125,228,255,.78) !important;
-  box-shadow: 0 0 0 1px rgba(125,228,255,.3), 0 0 90px rgba(35,152,205,.22), inset 0 0 160px rgba(125,228,255,.055) !important;
+.omni-launch-stage.is-energized .omni-patch-wire--audio { filter: drop-shadow(0 0 5px #7de4ff); }
+.omni-launch-stage.is-energized .omni-patch-wire--control { filter: drop-shadow(0 0 6px #7de4ff); }
+.omni-launch-stage.is-energized .omni-patch-wire--notes { filter: drop-shadow(0 0 5px #36a3ff); }
+.omni-launch-stage.is-energized .omni-patch-port { animation: omni-launch-port .28s ease-in-out infinite alternate; }
+.omni-launch-stage.is-energized .omni-patch-node { box-shadow: 0 0 0 1px rgba(125,228,255,.18), 0 0 18px rgba(38,143,255,.2), inset 0 1px rgba(255,255,255,.16); }
+.omni-launch-stage.is-overloaded { filter: brightness(1.75) saturate(.25) contrast(1.18) !important; }
+.omni-launch-stage.is-dissolving {
+  opacity: 0 !important; filter: brightness(4) saturate(0) blur(3px) !important;
+  border-color: rgba(200,248,255,.9) !important;
 }
-.omni-launch-stage.is-expanding .omni-patch-canvas {
-  transform: scale(1.055) translate3d(-.8%, .5%, 0);
-  transition: transform 1s cubic-bezier(.16,.82,.18,1);
-}
-.omni-launch-stage.is-expanding .omni-patch-node { animation: omni-launch-module-arrive .7s ease both; }
-.omni-launch-stage.is-expanding .omni-patch-node:nth-child(2) { animation-delay: .04s; }
-.omni-launch-stage.is-expanding .omni-patch-node:nth-child(3) { animation-delay: .08s; }
-.omni-launch-stage.is-expanding .omni-patch-node:nth-child(4) { animation-delay: .12s; }
-.omni-launch-stage.is-expanding .omni-patch-node:nth-child(5) { animation-delay: .16s; }
-.omni-launch-stage.is-disintegrating {
-  opacity: 0 !important; transform: scale(1.035) !important; border-radius: 24px !important;
-  filter: brightness(2.2) saturate(.3) !important;
-}
-.omni-launch-overlay.is-energized .omni-launch-grid { opacity: .9; transform: scale(1.04) rotate(0); }
-.omni-launch-overlay.is-energized .omni-launch-flash { animation: omni-launch-flash .75s ease-out both; }
-.omni-launch-overlay.is-expanding { background: rgba(3,6,10,.04); }
-.omni-launch-overlay.is-expanding .omni-launch-grid {
-  opacity: .65; background-size: 100% 100%, 24px 24px, 24px 24px;
-  transform: scale(1.28) rotate(2deg);
-}
-.omni-launch-overlay.is-loading { background: #080c12; }
-.omni-launch-overlay.is-loading .omni-launch-grid { opacity: .19; transform: scale(1.1); background-size: 100% 100%, 40px 40px, 40px 40px; }
+.omni-launch-overlay.is-energized .omni-launch-kaleido,
+.omni-launch-overlay.is-energized .omni-launch-electric-grid { opacity: .88; }
+.omni-launch-overlay.is-energized .omni-launch-kaleido--one { animation: omni-kaleido-turn-one 1.45s cubic-bezier(.14,.72,.18,1) both; }
+.omni-launch-overlay.is-energized .omni-launch-kaleido--two { animation: omni-kaleido-turn-two 1.65s cubic-bezier(.16,.8,.2,1) both; }
+.omni-launch-overlay.is-energized .omni-launch-kaleido--three { animation: omni-kaleido-turn-three 1.35s cubic-bezier(.14,.72,.18,1) both; }
+.omni-launch-overlay.is-kaleidoscope .omni-launch-kaleido { opacity: 1; }
+.omni-launch-overlay.is-kaleidoscope .omni-launch-kaleido--one { animation: omni-kaleido-wild-one .85s linear infinite; }
+.omni-launch-overlay.is-kaleidoscope .omni-launch-kaleido--two { animation: omni-kaleido-wild-two 1.15s linear infinite; }
+.omni-launch-overlay.is-kaleidoscope .omni-launch-kaleido--three { animation: omni-kaleido-wild-three .7s linear infinite; }
+.omni-launch-overlay.is-kaleidoscope .omni-launch-electric-grid { opacity: .95; animation: omni-grid-flicker .24s steps(2,end) infinite; }
+.omni-launch-overlay.is-kaleidoscope .omni-launch-flash { animation: omni-launch-flash .78s ease-out both; }
+.omni-launch-overlay.is-loading { background: #050912; }
+.omni-launch-overlay.is-loading .omni-launch-kaleido,
+.omni-launch-overlay.is-loading .omni-launch-electric-grid { opacity: 0; transition: opacity .28s ease; }
+.omni-launch-overlay.is-loading .omni-launch-flash { animation: omni-launch-flash .34s ease-out reverse both; }
 .omni-launch-loader {
   position: absolute; inset: 0; z-index: 5; display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 36px;
-  opacity: 0; transform: scale(.96); transition: opacity .32s ease, transform .48s cubic-bezier(.2,.75,.2,1);
+  align-items: center; justify-content: center; gap: 34px;
+  opacity: 0; transform: translateY(5px); transition: opacity .3s ease, transform .38s cubic-bezier(.2,.75,.2,1);
 }
-.omni-launch-loader.is-visible { opacity: 1; transform: scale(1); }
+.omni-launch-loader.is-visible { opacity: 1; transform: translateY(0); }
 .omni-launch-logo {
   display: block; width: clamp(54px, 6vw, 78px); height: clamp(54px, 6vw, 78px);
-  object-fit: contain; filter: drop-shadow(0 0 16px rgba(125,228,255,.38)) drop-shadow(0 0 42px rgba(35,152,205,.19));
-  animation: omni-launch-logo-breathe 1.5s ease-in-out infinite alternate;
+  object-fit: contain; filter: drop-shadow(0 0 14px rgba(125,228,255,.5)) drop-shadow(0 0 48px rgba(20,103,255,.34));
+  animation: omni-launch-logo-breathe 1.25s ease-in-out infinite alternate;
 }
 .omni-launch-progress {
   width: min(220px, 42vw); height: 2px; overflow: hidden; border-radius: 10px;
-  background: rgba(125,228,255,.12); box-shadow: 0 0 18px rgba(125,228,255,.06);
+  background: rgba(125,228,255,.13); box-shadow: 0 0 18px rgba(125,228,255,.07);
 }
 .omni-launch-progress span {
   display: block; width: 0; height: 100%; border-radius: inherit;
-  background: linear-gradient(90deg, #7de4ff, #effcff);
-  box-shadow: 0 0 14px rgba(125,228,255,.9);
-  animation: omni-launch-progress-fill 1.32s cubic-bezier(.22,.74,.21,1) forwards;
+  background: linear-gradient(90deg, #176cff, #7de4ff, #f1fdff);
+  box-shadow: 0 0 15px rgba(125,228,255,.95);
+  animation: omni-launch-progress-fill 1.36s cubic-bezier(.22,.74,.21,1) forwards;
 }
-@keyframes omni-launch-current { to { stroke-dashoffset: -34; } }
-@keyframes omni-launch-port { to { filter: brightness(1.7); transform: scale(1.35); } }
+@keyframes omni-launch-current { to { stroke-dashoffset: -28; } }
+@keyframes omni-launch-port { to { filter: brightness(2); transform: scale(1.28); } }
+@keyframes omni-kaleido-turn-one { to { transform: rotate(247deg); } }
+@keyframes omni-kaleido-turn-two { to { transform: rotate(-191deg); } }
+@keyframes omni-kaleido-turn-three { to { transform: rotate(319deg); } }
+@keyframes omni-kaleido-wild-one { to { transform: rotate(360deg); } }
+@keyframes omni-kaleido-wild-two { to { transform: rotate(-360deg); } }
+@keyframes omni-kaleido-wild-three { to { transform: rotate(540deg); } }
+@keyframes omni-grid-flicker { 0%, 100% { opacity: .72; } 50% { opacity: 1; } }
 @keyframes omni-launch-flash {
-  0% { opacity: 0; transform: scale(.05); }
-  22% { opacity: .95; }
-  100% { opacity: 0; transform: scale(1.45); }
+  0% { opacity: 0; transform: rotate(0deg); }
+  18% { opacity: .94; }
+  100% { opacity: .08; transform: rotate(40deg); }
 }
-@keyframes omni-launch-module-arrive {
-  0% { filter: brightness(2.5); }
-  100% { filter: brightness(1); }
-}
-@keyframes omni-launch-logo-breathe { to { filter: drop-shadow(0 0 24px rgba(125,228,255,.58)) drop-shadow(0 0 58px rgba(35,152,205,.28)); } }
+@keyframes omni-launch-logo-breathe { to { filter: drop-shadow(0 0 23px rgba(125,228,255,.7)) drop-shadow(0 0 58px rgba(20,103,255,.46)); } }
 @keyframes omni-launch-progress-fill { to { width: 100%; } }
 @media (prefers-reduced-motion: reduce) {
-  .omni-launch-grid, .omni-launch-flash, .omni-launch-stage, .omni-launch-loader { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+  .omni-launch-kaleido, .omni-launch-electric-grid, .omni-launch-flash, .omni-launch-stage, .omni-launch-loader { transition-duration: .01ms !important; animation-duration: .01ms !important; }
   .omni-launch-stage.is-energized .omni-patch-wire, .omni-launch-stage.is-energized .omni-patch-port, .omni-launch-logo, .omni-launch-progress span { animation: none !important; }
   .omni-launch-progress span { width: 100%; }
 }
