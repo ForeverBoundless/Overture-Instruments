@@ -116,11 +116,39 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .omni-library { position: fixed; left: 0; bottom: 96px; z-index: 5; width: 180px; max-height: 40vh; border-top-right-radius: 12px; background: rgba(12,16,23,.96); backdrop-filter: blur(14px); }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
-.omni-templates { width: min(860px, calc(100vw - 32px)); }
-.omni-tpl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; max-height: 60vh; overflow: auto; padding: 4px; }
-.omni-tpl { display: flex; flex-direction: column; gap: 6px; padding: 10px; border: 1px solid var(--line); border-radius: 12px; background: rgba(255,255,255,.03); color: #c6cfdb; font: inherit; text-align: left; cursor: pointer; transition: border-color .2s ease, transform .2s ease, background .2s ease; }
-.omni-tpl:hover, .omni-tpl:focus-visible { transform: translateY(-2px); border-color: rgba(112,220,240,.5); background: rgba(112,220,240,.06); outline: none; }
-.omni-tpl-prev { height: 110px; display: grid; place-items: center; border-radius: 8px; background: #0a0f15; overflow: hidden; }
-.omni-tpl-prev svg { width: 100%; height: 100%; }
-.omni-tpl strong { color: #fff; font-size: 12px; letter-spacing: .04em; }
-.omni-tpl span { font-size: 11px; line-height: 1.45; opacity: .8; }
+.omni-templates { width: min(900px, calc(100vw - 32px)); }
+.omni-tpl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; max-height: 60vh; overflow: auto; padding: 4px; scrollbar-color: rgba(125,228,255,.24) transparent; }
+.omni-guide-card button.omni-tpl {
+  display: flex; flex-direction: column; align-items: stretch; gap: 9px;
+  min-height: 0; margin: 0; padding: 10px;
+  border: 1px solid rgba(224,233,246,.105); border-radius: 13px;
+  color: #c6cfdb; background: linear-gradient(155deg, rgba(24,32,43,.78), rgba(12,17,25,.92));
+  box-shadow: inset 0 1px rgba(255,255,255,.035);
+  font: inherit; text-align: left; cursor: pointer; overflow: hidden;
+  transition: transform .24s ease, border-color .24s ease, background .24s ease, box-shadow .24s ease;
+}
+.omni-guide-card button.omni-tpl:hover,
+.omni-guide-card button.omni-tpl:focus-visible {
+  transform: translateY(-3px); border-color: rgba(125,228,255,.4);
+  color: #eaf5ff; background: linear-gradient(155deg, rgba(28,39,52,.95), rgba(13,19,28,.98));
+  box-shadow: 0 14px 32px rgba(0,0,0,.25), 0 0 0 1px rgba(125,228,255,.045), inset 0 1px rgba(255,255,255,.06);
+  outline: none;
+}
+.omni-tpl-prev {
+  position: relative; height: 118px; display: grid; place-items: center;
+  border: 1px solid rgba(224,233,246,.07); border-radius: 9px;
+  background-color: #0a0f15;
+  background-image: radial-gradient(ellipse at 50% 42%, rgba(125,228,255,.045), transparent 70%), linear-gradient(rgba(199,216,239,.028) 1px, transparent 1px), linear-gradient(90deg, rgba(199,216,239,.028) 1px, transparent 1px);
+  background-size: 100% 100%, 18px 18px, 18px 18px; overflow: hidden;
+}
+.omni-tpl-prev svg { width: 100%; height: 100%; transform: scale(.985); transform-origin: center; transition: transform .45s cubic-bezier(.2,.7,.2,1); }
+.omni-guide-card button.omni-tpl:hover .omni-tpl-prev svg,
+.omni-guide-card button.omni-tpl:focus-visible .omni-tpl-prev svg { transform: scale(1.025); }
+.omni-tpl strong { display: block; color: #f4f7fc; font-size: 12px; font-weight: 650; letter-spacing: .025em; line-height: 1.35; }
+.omni-tpl span { display: block; color: #a6b1c1; font-size: 11px; line-height: 1.5; opacity: .9; }
+.omni-guide-card button.omni-tpl:hover .omni-preview-module,
+.omni-guide-card button.omni-tpl:focus-visible .omni-preview-module { filter: drop-shadow(0 0 3px rgba(125,228,255,.11)); }
+.omni-preview-wire { stroke-linecap: round; transition: opacity .24s ease; }
+.omni-guide-card button.omni-tpl:hover .omni-preview-wire,
+.omni-guide-card button.omni-tpl:focus-visible .omni-preview-wire { stroke-dasharray: 8 10; animation: omni-preview-flow 3.2s linear infinite; opacity: .96; }
+@keyframes omni-preview-flow { to { stroke-dashoffset: -36; } }
