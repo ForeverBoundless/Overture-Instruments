@@ -83,3 +83,10 @@ html[data-theme="light"] .feature-section--omni .feature-copy h2 .omni-title-wor
 
 /* Static marks—including the top-left logo—are deliberately not outlined.
    site-theme.css handles their monochrome light-mode treatment. */
+
+/* OMNI module labels use the same clean Inter typography as the workspace UI.
+   Override the older technical monospace labels only inside synth modules. */
+html body .omni-module,
+html body .omni-module * {
+  font-family: 'Inter Variable', Inter, 'Segoe UI', sans-serif !important;
+}
