@@ -59,9 +59,9 @@ class OmniApp {
     tb('FIT VIEW', () => { this.view = { x: 20, y: 20, scale: 1 }; this.applyView(); }, 'Reset canvas view', viewTools);
 
     const fileTools = group('Import and export');
-    tb('JSON ↓', () => downloadText(`${this.patch.name.replace(/\\W+/g, '-') || 'omni'}.omni.json`, this.store.exportJSON({ name: this.patch.name, data: this.patch })), 'Export patch as JSON', fileTools);
+    tb('JSON ↓', () => downloadText(`${this.patch.name.replace(/\W+/g, '-') || 'omni'}.omni.json`, this.store.exportJSON({ name: this.patch.name, data: this.patch })), 'Export patch as JSON', fileTools);
     tb('JSON ↑', () => pickFile('.json,application/json', (text) => { try { const { data } = this.store.parseImport(text); this.load(data); this.msg('Imported.'); } catch (err) { this.msg(err.message, true); } }), 'Import patch JSON', fileTools);
-    tb('SVG ↓', () => downloadText(`${this.patch.name.replace(/\\W+/g, '-') || 'omni'}.schematic.svg`, patchToSVG(this.patch), 'image/svg+xml'), 'Export patch schematic as SVG', fileTools);
+    tb('SVG ↓', () => downloadText(`${this.patch.name.replace(/\W+/g, '-') || 'omni'}.schematic.svg`, patchToSVG(this.patch), 'image/svg+xml'), 'Export patch schematic as SVG', fileTools);
 
     const helpTools = group('Help');
     tb('GUIDE', () => this.guide(), 'Open the OMNI guide', helpTools);
