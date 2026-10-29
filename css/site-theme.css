@@ -843,13 +843,10 @@ html[data-theme="light"] .story-circuit__pulses circle {
 }
 
 /* ============================================================
-   One consistent light-mode outline for luminous brand treatments.
-   Keep each element's original glow/flicker shadows; only standardize its
-   dark edge. Static logos, including the top-left logo, are not outlined.
+   Light-mode outline for glowing/flickering titles.
+   Keep the outline fine and consistent; preserve each title's own glow.
+   Static Overture logos are black with no edge outline.
    ============================================================ */
-
-/* Text outline: same width and colour for every glowing/flickering heading.
-   Deliberately do not set text-shadow here; each heading keeps its own glow. */
 html[data-theme="light"] :is(
   .hero-title em,
   .about-hero h1 span,
@@ -858,18 +855,18 @@ html[data-theme="light"] :is(
   .process-heading h2 em,
   .next-heading h2 em,
   .feature-section--library .feature-copy h2 em,
-  .feature-section--omni .feature-copy h2 em,
+  .feature-section--omni .feature-copy h2 .omni-title-word,
   .feature-section--experiments .feature-copy h2 em,
   .ex-page h1 em,
   .lab-header h1 em,
   .launcher-hero h1 em,
   .mission-heading h2 .resource-highlight__text
 ) {
-  -webkit-text-stroke: .62px rgba(12,18,25,.94) !important;
+  -webkit-text-stroke: .4px rgba(15,21,29,.86) !important;
   paint-order: stroke fill !important;
 }
 
-/* The animated "shared resource" lettering keeps its masked spectrum. */
+/* Keep the animated "shared resource" gradient transparent to text fill. */
 html[data-theme="light"] .mission-heading h2 .resource-highlight__text {
   color: transparent !important;
   -webkit-text-fill-color: transparent !important;
@@ -877,53 +874,20 @@ html[data-theme="light"] .mission-heading h2 .resource-highlight__text {
   -webkit-background-clip: text !important;
 }
 
-/* Same approximately 0.6 px edge on glowing Overture marks, traced from the
-   transparent PNG silhouette by four close drop-shadows. Keep the original
-   logo filters/glows and leave static brand marks untouched. */
+/* Only Overture marks used as glowing letters in OMNI wordmarks share this
+   edge. The large hero logo, top-left brand mark, footer, CTA and static icons
+   remain plain black in light mode. The edge follows the PNG alpha silhouette. */
 html[data-theme="light"] :is(
-  .hero-logo,
-  .omni-wordmark strong img,
   .feature-section--omni .feature-copy h2 .omni-title-word img,
-  .launcher-hero__o-icon,
-  .home-coming-soon__o-icon,
-  .launcher-coming-soon__o-icon
+  .omni-wordmark strong img
 ) {
-  --logo-edge: rgba(12,18,25,.94);
-}
-
-html[data-theme="light"] .hero-logo {
-  filter:
-    brightness(0) saturate(100%)
-    drop-shadow(.62px 0 0 var(--logo-edge))
-    drop-shadow(-.62px 0 0 var(--logo-edge))
-    drop-shadow(0 .62px 0 var(--logo-edge))
-    drop-shadow(0 -.62px 0 var(--logo-edge))
-    drop-shadow(0 0 18px rgba(255,174,80,.18)) !important;
-}
-
-html[data-theme="light"] :is(
-  .omni-wordmark strong img,
-  .launcher-hero__o-icon,
-  .home-coming-soon__o-icon,
-  .launcher-coming-soon__o-icon
-) {
-  filter:
-    brightness(0) saturate(100%)
-    drop-shadow(.62px 0 0 var(--logo-edge))
-    drop-shadow(-.62px 0 0 var(--logo-edge))
-    drop-shadow(0 .62px 0 var(--logo-edge))
-    drop-shadow(0 -.62px 0 var(--logo-edge)) !important;
-}
-
-/* The O in OMNI remains cyan; only its edge is shared with the other marks. */
-html[data-theme="light"] .feature-section--omni .feature-copy h2 .omni-title-word img {
   filter:
     brightness(0) saturate(100%) invert(86%) sepia(18%) saturate(1722%)
     hue-rotate(163deg) brightness(104%) contrast(103%)
-    drop-shadow(.62px 0 0 var(--logo-edge))
-    drop-shadow(-.62px 0 0 var(--logo-edge))
-    drop-shadow(0 .62px 0 var(--logo-edge))
-    drop-shadow(0 -.62px 0 var(--logo-edge))
+    drop-shadow(.4px 0 0 rgba(15,21,29,.86))
+    drop-shadow(-.4px 0 0 rgba(15,21,29,.86))
+    drop-shadow(0 .4px 0 rgba(15,21,29,.86))
+    drop-shadow(0 -.4px 0 rgba(15,21,29,.86))
     drop-shadow(0 0 4px rgba(125,228,255,.85))
     drop-shadow(0 0 12px rgba(65,190,255,.7))
     drop-shadow(0 0 24px rgba(65,190,255,.35)) !important;
