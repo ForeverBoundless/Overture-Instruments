@@ -1,0 +1,372 @@
+/* Shared Overture theme layer. Loaded on site pages and creative tools only.
+   Instrument emulator documents intentionally do not load this file. */
+:root {
+  --theme-bg: #0b0e13;
+  --theme-surface: #121821;
+  --theme-ink: #f5f7fb;
+  --theme-muted: #a9b2c2;
+  --theme-border: rgba(224,233,246,.13);
+  --theme-sheen: rgba(255,255,255,.055);
+}
+html[data-theme="light"] {
+  color-scheme: light;
+  --bg: #e8edf3;
+  --bg-raised: #f4f6f9;
+  --panel: #eef2f6;
+  --ink: #202b38;
+  --muted: #536172;
+  --faint: #748193;
+  --line: rgba(43,59,78,.15);
+  --line-strong: rgba(43,59,78,.25);
+  --card-bg: linear-gradient(145deg, rgba(250,252,254,.96), rgba(227,233,241,.96));
+  --card-shadow: 0 24px 60px rgba(48,64,84,.12), inset 0 1px rgba(255,255,255,.9);
+  --launcher-ink: #202b38;
+  --launcher-muted: #536172;
+  --text-dark: #202b38;
+  --text-mid: #536172;
+  --md-sys-color-primary: #ffd39a;
+  --md-sys-color-on-primary: #422b00;
+  --theme-bg: #e8edf3;
+  --theme-surface: #f0f4f8;
+  --theme-ink: #202b38;
+  --theme-muted: #536172;
+  --theme-border: rgba(43,59,78,.16);
+  --theme-sheen: rgba(255,255,255,.88);
+  background-color: #e8edf3;
+}
+html[data-theme="light"] body {
+  color: var(--theme-ink) !important;
+  background:
+    radial-gradient(ellipse at 50% -14%, rgba(255,255,255,.96), transparent 43%),
+    radial-gradient(ellipse at 88% 14%, rgba(125,190,220,.13), transparent 35%),
+    linear-gradient(140deg, #eff3f7 0%, #e5ebf2 46%, #edf1f6 100%) !important;
+}
+html[data-theme="light"] body :is(h1,h2,h3,h4,h5,h6,p,li,span,small,strong,b,em,label,a,button,output,figcaption,legend,summary,dt,dd,blockquote,cite) {
+  color: var(--theme-ink) !important;
+  -webkit-text-fill-color: currentColor;
+}
+html[data-theme="light"] :is(input,select,textarea) {
+  color: var(--theme-ink) !important;
+  border-color: rgba(43,59,78,.22) !important;
+  background-color: rgba(249,251,253,.88) !important;
+}
+html[data-theme="light"] :is(input,textarea)::placeholder { color: #7a8796 !important; }
+html[data-theme="light"] ::selection { color: #15202c !important; background: rgba(125,228,255,.56) !important; }
+html[data-theme="light"] :is(button,a,input,select,textarea):focus-visible {
+  outline-color: #168eb7 !important;
+}
+
+/* The single centred theme control. It lives in the page header when one
+   exists, in OMNI's app bar for the workspace, or as a small floating control
+   on standalone sound-lab pages that have no navigation bar. */
+.site-theme-toggle {
+  position: absolute; z-index: 96; top: 50%; left: 50%;
+  display: inline-grid; width: 42px; height: 36px; padding: 0;
+  place-items: center; transform: translate(-50%,-50%);
+  border: 1px solid rgba(125,228,255,.22); border-radius: 11px;
+  color: #d6e9f5; background: linear-gradient(145deg, rgba(24,34,46,.96), rgba(12,18,27,.98));
+  box-shadow: 0 5px 20px rgba(0,0,0,.16), inset 0 1px rgba(255,255,255,.08);
+  cursor: pointer; transition: color .2s ease, background .2s ease, border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.site-theme-toggle:hover { border-color: rgba(125,228,255,.55); color: #fff; box-shadow: 0 6px 24px rgba(0,0,0,.2), 0 0 18px rgba(125,228,255,.11), inset 0 1px rgba(255,255,255,.1); }
+.site-theme-toggle:active { transform: translate(-50%,-50%) scale(.95); }
+.site-theme-toggle svg { display: block; width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.site-theme-toggle--floating { position: fixed; top: 14px; }
+.site-header { isolation: isolate; }
+.site-header .site-theme-toggle { top: 50%; left: 50%; }
+.omni-topbar { position: relative; }
+.omni-topbar .site-theme-toggle { top: 50%; left: 50%; }
+html[data-theme="light"] .site-theme-toggle {
+  color: #36485a; border-color: rgba(43,59,78,.17);
+  background: linear-gradient(145deg, rgba(255,255,255,.96), rgba(225,232,240,.96));
+  box-shadow: 0 5px 19px rgba(45,60,81,.12), inset 0 1px rgba(255,255,255,.98);
+}
+html[data-theme="light"] .site-theme-toggle:hover { color: #075d7b; border-color: rgba(22,142,183,.5); box-shadow: 0 6px 24px rgba(45,60,81,.15), 0 0 18px rgba(22,142,183,.12), inset 0 1px #fff; }
+
+/* Keep a true centre gap between the navigation links for the toggle. */
+.site-header .main-nav {
+  position: absolute; z-index: 60; top: 50%; left: 50%;
+  display: grid; grid-template-columns: minmax(0,1fr) 54px minmax(0,1fr);
+  align-items: center; width: min(660px, 52vw); margin: 0;
+  transform: translate(-50%,-50%);
+}
+.site-nav-side { display: flex; align-items: center; gap: clamp(14px, 2vw, 28px); min-width: 0; }
+.site-nav-side--left { justify-content: flex-end; }
+.site-nav-side--right { justify-content: flex-start; }
+.site-header .main-nav a { white-space: nowrap; }
+.site-header .site-brand, .site-header .header-github, .site-header .menu-toggle { position: relative; z-index: 61; }
+@media (max-width: 980px) {
+  .site-header .main-nav { width: min(620px, 54vw); }
+  .site-nav-side { gap: 13px; }
+}
+@media (max-width: 760px) {
+  .site-header .main-nav {
+    position: absolute; top: calc(100% + 1px); right: 16px; bottom: auto; left: 16px;
+    display: flex; flex-direction: column; align-items: stretch; gap: 0; width: auto;
+    padding: 7px; border: 1px solid rgba(224,233,246,.12); border-radius: 12px;
+    background: rgba(12,16,23,.97); box-shadow: 0 18px 44px rgba(0,0,0,.32);
+    opacity: 0; visibility: hidden; transform: translateY(-6px); backdrop-filter: blur(18px);
+    transition: opacity .2s ease, transform .2s ease, visibility .2s ease;
+  }
+  .site-header .main-nav.is-open { opacity: 1; visibility: visible; transform: translateY(0); }
+  .site-nav-side { display: contents; }
+  .site-header .main-nav a { padding: 13px; border-radius: 7px; }
+  .site-header .main-nav a:hover { background: rgba(255,255,255,.045); }
+  .site-theme-toggle { width: 38px; height: 34px; }
+  html[data-theme="light"] .site-header .main-nav { background: rgba(240,244,248,.98); border-color: rgba(43,59,78,.16); box-shadow: 0 18px 44px rgba(45,60,81,.17); }
+  html[data-theme="light"] .site-header .main-nav a:hover { background: rgba(40,64,86,.055); }
+}
+
+/* Shared brand, navigation, header gloss and focus treatment. */
+html[data-theme="light"] .site-header,
+html[data-theme="light"] .omni-app-header,
+html[data-theme="light"] .omni-commandbar {
+  border-color: rgba(43,59,78,.13) !important;
+  background: linear-gradient(180deg, rgba(247,250,253,.97), rgba(229,235,242,.95)) !important;
+  box-shadow: 0 8px 26px rgba(45,60,81,.07), inset 0 1px rgba(255,255,255,.96) !important;
+  backdrop-filter: blur(18px) saturate(1.15);
+}
+html[data-theme="light"] .site-header { border-bottom-color: rgba(43,59,78,.12) !important; }
+html[data-theme="light"] .site-brand,
+html[data-theme="light"] .site-brand:hover,
+html[data-theme="light"] .site-brand:visited,
+html[data-theme="light"] .site-brand__wordmark,
+html[data-theme="light"] .main-nav a,
+html[data-theme="light"] .header-github { color: #283646 !important; }
+html[data-theme="light"] .main-nav a:hover,
+html[data-theme="light"] .header-github:hover { color: #076c8d !important; }
+html[data-theme="light"] .header-github,
+html[data-theme="light"] .menu-toggle {
+  border-color: rgba(43,59,78,.17) !important;
+  background: linear-gradient(145deg, rgba(255,255,255,.72), rgba(224,231,239,.6)) !important;
+}
+html[data-theme="light"] .menu-toggle { color: #283646 !important; }
+html[data-theme="light"] .menu-toggle span { background: #344557 !important; }
+html[data-theme="light"] .external-arrow { color: #b76b08 !important; }
+html[data-theme="light"] .site-noise { opacity: .026 !important; }
+html[data-theme="light"] .ambient { opacity: .055 !important; }
+html[data-theme="light"] .scroll-progress { opacity: .72; }
+html[data-theme="light"] .scroll-progress span { box-shadow: 0 0 8px rgba(22,142,183,.18) !important; }
+
+/* Main-page backgrounds become a cool, softly illuminated grey instead of
+   flat white; the section grids and brand-colour accents remain visible. */
+html[data-theme="light"] :is(.hero,.mission-section,.feature-section,.about-hero,.story-section,.founder-section,.process-section,.next-section,.launcher-hero,.ex-page) {
+  background: transparent !important;
+}
+html[data-theme="light"] .hero::before {
+  background: radial-gradient(ellipse at 50% 25%, rgba(255,255,255,.8), transparent 43%), linear-gradient(180deg, rgba(229,236,243,.18), rgba(220,228,237,.64)) !important;
+}
+html[data-theme="light"] .hero::after,
+html[data-theme="light"] .about-hero::after { background: linear-gradient(transparent, #e8edf3) !important; }
+html[data-theme="light"] :is(.hero-grid,.about-hero__grid,.feature-section::before,.ex-page::before) {
+  opacity: .42 !important;
+  background-image: linear-gradient(rgba(64,94,125,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(64,94,125,.06) 1px, transparent 1px) !important;
+}
+html[data-theme="light"] :is(.mission-section,.feature-section,.about-hero,.story-section,.founder-section,.process-section,.next-section) { border-color: rgba(43,59,78,.1) !important; }
+html[data-theme="light"] .idea-fluid { mix-blend-mode: multiply; opacity: .46 !important; }
+html[data-theme="light"] .idea-fluid__glow { opacity: .38 !important; }
+html[data-theme="light"] :is(.hero-mark-halo,.about-hero__glow,.ambient) { filter: blur(95px) saturate(.8); }
+html[data-theme="light"] .hero-mark-halo { opacity: .62; }
+html[data-theme="light"] :is(.hero-scroll,.hero-coordinate,.about-hero__coordinate) { color: #687789 !important; }
+
+/* Force the full range of page copy to the light-mode ink colour, then bring
+   back only deliberate signal colours and branded gradient lettering. */
+html[data-theme="light"] :is(.hero-title em,.about-hero h1 span,.feature-copy h2 em,.story-heading h2 em,.founder-copy h2 em,.process-heading h2 em,.next-heading h2 em,.ex-page h1 em,.lab-header h1 em) {
+  color: var(--amber-bright) !important; -webkit-text-fill-color: currentColor !important;
+}
+html[data-theme="light"] :is(.ex-page h1 em,.lab-header h1 em) { color: #16804d !important; }
+html[data-theme="light"] .feature-section--omni .feature-copy h2 .omni-title-word { color: #087caa !important; }
+html[data-theme="light"] :is(.section-index > span:first-child,.eyebrow-dot,.external-arrow,.text-link span,.button-arrow,.footer-github b,.back-to-top:hover,.founder-copy__link span,.ex-card b,.ex-card span.ex-num::after,.omni-param output,.omni-logo-wording strong) { color: #a96508 !important; }
+html[data-theme="light"] :is(.eyebrow-dot--cyan,.omni-logo-wording strong,.omni-param output,.omni-preview-wire) { color: #087caa !important; }
+html[data-theme="light"] .lab-control-head output { color: #087caa !important; }
+html[data-theme="light"] .omni-port-row { color: #364454 !important; }
+html[data-theme="light"] .omni-port--audio { background: #c87608 !important; }
+html[data-theme="light"] .omni-port--cv { background: #087caa !important; }
+html[data-theme="light"] .omni-port--note { background: #18834e !important; }
+
+/* Common content cards, carousels, controls, modal panels and footer. */
+html[data-theme="light"] :is(.library-showcase,.experiments-showcase,.omni-patch-showcase,.about-carousel,.ex-card,.lab-plot,.lab-controls,.lab-explain,.lab-tasks,.lab-diagram,.lab-transport,.omni-guide-card,.omni-tpl,.instrument-tile,.launcher-coming-soon,.contact-modal__panel,.contact-modal__head,.contact-toolbar,.contact-editor__body,.contact-modal__actions) {
+  border-color: rgba(43,59,78,.15) !important;
+  background: linear-gradient(145deg, rgba(250,252,254,.94), rgba(228,234,242,.95)) !important;
+  box-shadow: 0 20px 50px rgba(45,60,81,.095), inset 0 1px rgba(255,255,255,.9) !important;
+}
+html[data-theme="light"] :is(.site-footer,.launcher-footer,.launcher-legal) {
+  color: #687688 !important; border-color: rgba(43,59,78,.13) !important;
+  background: linear-gradient(180deg, rgba(232,237,243,.7), rgba(222,229,237,.92)) !important;
+}
+html[data-theme="light"] .footer-bottom { border-top-color: rgba(43,59,78,.12) !important; }
+html[data-theme="light"] .footer-brand span { color: #283646 !important; }
+html[data-theme="light"] .footer-brand b { color: #6a7788 !important; }
+html[data-theme="light"] .footer-github { color: #46576a !important; }
+html[data-theme="light"] .back-to-top { color: #566579 !important; }
+html[data-theme="light"] .contact-modal { color: #202b38 !important; }
+html[data-theme="light"] .contact-modal__backdrop { background: rgba(50,65,84,.27) !important; }
+html[data-theme="light"] .contact-modal__panel { color: #202b38 !important; }
+html[data-theme="light"] .contact-modal__panel :is(input,textarea,.contact-editor__body) { color: #202b38 !important; background: rgba(250,252,254,.9) !important; }
+html[data-theme="light"] .contact-toolbar button,
+html[data-theme="light"] .contact-modal__close,
+html[data-theme="light"] .contact-cancel { color: #34475b !important; border-color: rgba(43,59,78,.15) !important; background: rgba(255,255,255,.62) !important; }
+
+/* Home feature illustrations: retain the wiring, but put it on the same
+   pearlescent surface as the rest of the light interface. */
+html[data-theme="light"] .omni-showcase.omni-patch-showcase {
+  color: #202b38 !important;
+  border-color: rgba(47,117,150,.24) !important;
+  background: linear-gradient(145deg, rgba(249,252,254,.98), rgba(223,232,240,.98)) !important;
+  box-shadow: 0 26px 70px rgba(45,60,81,.15), inset 0 1px rgba(255,255,255,.95) !important;
+}
+html[data-theme="light"] .omni-patch-heading { border-bottom-color: rgba(43,59,78,.12) !important; }
+html[data-theme="light"] .omni-patch-heading__brand { border-color: rgba(43,59,78,.15) !important; background: rgba(255,255,255,.45) !important; }
+html[data-theme="light"] .omni-patch-canvas {
+  background-color: #e7edf3 !important;
+  background-image: radial-gradient(ellipse at 50% 50%, rgba(56,151,184,.09), transparent 60%), linear-gradient(rgba(64,94,125,.09) 1px, transparent 1px), linear-gradient(90deg, rgba(64,94,125,.09) 1px, transparent 1px) !important;
+}
+html[data-theme="light"] .omni-patch-node {
+  color: #202b38 !important; border-color: rgba(43,59,78,.28) !important;
+  background: linear-gradient(145deg, #f7f9fc, #e3eaf1) !important;
+  box-shadow: 0 7px 20px rgba(45,60,81,.12), inset 0 1px #fff !important;
+}
+html[data-theme="light"] .omni-patch-node__title { color: #273545 !important; }
+html[data-theme="light"] .omni-patch-node__graphic path,
+html[data-theme="light"] .omni-patch-node__graphic circle { stroke: #087caa !important; }
+html[data-theme="light"] .omni-patch-controls .omni-patch-control { border-color: rgba(43,59,78,.14) !important; background: rgba(255,255,255,.5) !important; }
+html[data-theme="light"] .omni-patch-control > span { color: #748194 !important; }
+html[data-theme="light"] .omni-patch-control > b { color: #253545 !important; }
+html[data-theme="light"] .omni-patch-footer { border-top-color: rgba(43,59,78,.13) !important; }
+html[data-theme="light"] .omni-patch-footer__route { color: #687789 !important; }
+html[data-theme="light"] .omni-patch-link { color: #075f83 !important; }
+
+/* Instrument library launcher (not the eight emulator documents). */
+html[data-theme="light"] #launcher-page {
+  color: #202b38 !important;
+  background:
+    radial-gradient(circle at 14% 9%, rgba(125,228,255,.2), transparent 30%),
+    radial-gradient(circle at 87% 78%, rgba(255,183,94,.12), transparent 29%),
+    linear-gradient(145deg,#eef2f6,#e3e9f0 55%,#edf1f6) !important;
+  backdrop-filter: blur(14px) saturate(1.05);
+}
+html[data-theme="light"] :is(.launcher-ambient,.launcher-noise) { opacity: .035 !important; }
+html[data-theme="light"] .launcher-hero__description { color: #536172 !important; }
+html[data-theme="light"] .launcher-hero__description b { color: #263748 !important; }
+html[data-theme="light"] .launcher-brand-slot { border-color: rgba(43,59,78,.12) !important; background: rgba(255,255,255,.33) !important; }
+html[data-theme="light"] .instrument-tile {
+  color: #202b38 !important; border-color: rgba(43,59,78,.14) !important;
+  background: linear-gradient(145deg, rgba(250,252,254,.96), rgba(225,232,240,.96)) !important;
+  box-shadow: 0 18px 46px rgba(45,60,81,.12), inset 0 1px #fff !important;
+}
+html[data-theme="light"] .instrument-tile__visual {
+  background: linear-gradient(145deg, rgba(211,222,233,.95), rgba(237,242,247,.98)) !important;
+  border-color: rgba(43,59,78,.12) !important;
+}
+html[data-theme="light"] .instrument-tile__visual .instrument-tile__icon { color: #3e5b70 !important; }
+html[data-theme="light"] :is(.instrument-tile__content,.instrument-tile__description,.instrument-tile__model,.instrument-tile__eyebrow,.instrument-spec,.instrument-tile__actions) { color: #536172 !important; }
+html[data-theme="light"] .instrument-tile h2 { color: #202b38 !important; }
+html[data-theme="light"] .instrument-spec { border-color: rgba(43,59,78,.1) !important; }
+html[data-theme="light"] .instrument-spec strong { color: #202b38 !important; }
+html[data-theme="light"] .launcher-coming-soon__subline { color: #536172 !important; }
+html[data-theme="light"] .launcher-footer { border-color: rgba(43,59,78,.13) !important; }
+
+/* About page content, galleries and the shared footer use deeper grey ink. */
+html[data-theme="light"] :is(.story-copy p,.founder-copy p,.process-heading > p,.carousel-caption p,.about-hero__body,.about-hero__lede,.story-signoff,.section-index,.eyebrow,.feature-description,.feature-points span,.hero-copy,.hero-kicker,.hero-baseline,.text-link,.omni-status,.ex-eyebrow,.ex-lead,.ex-note,.lab-back,.lab-intro,.lab-hint,.lab-explain p,.lab-tasks ol,.lab-control-head,.lab-plot figcaption,.launcher-overline,.launcher-legal,.launcher-footer) { color: #526174 !important; }
+html[data-theme="light"] :is(.story-copy .story-copy__lead,.founder-copy .founder-copy__lead) { color: #263544 !important; }
+html[data-theme="light"] :is(.about-carousel,.carousel-frame,.carousel-image) { border-color: rgba(43,59,78,.15) !important; background: linear-gradient(145deg,#f8fafc,#e2e9f0) !important; }
+html[data-theme="light"] .carousel-caption p { color: #566477 !important; }
+html[data-theme="light"] .carousel-arrows button { color: #33475b !important; border-color: rgba(43,59,78,.18) !important; background: rgba(255,255,255,.6) !important; }
+
+/* Overture Experiments landing page and labs. */
+html[data-theme="light"] :is(.ex-card,.lab-plot,.lab-controls,.lab-explain,.lab-tasks,.lab-diagram) {
+  border-color: rgba(43,59,78,.15) !important;
+  background: linear-gradient(145deg,rgba(250,252,254,.97),rgba(226,233,241,.96)) !important;
+  box-shadow: 0 17px 42px rgba(45,60,81,.1), inset 0 1px #fff !important;
+}
+html[data-theme="light"] .ex-card::before { opacity: .42; background: radial-gradient(circle at 80% 0%, rgba(130,230,168,.12), transparent 48%), repeating-linear-gradient(135deg, transparent 0 23px, rgba(43,59,78,.025) 24px, transparent 25px); }
+html[data-theme="light"] .ex-card:hover { border-color: rgba(24,128,77,.3) !important; box-shadow: 0 22px 48px rgba(45,60,81,.14) !important; }
+html[data-theme="light"] .ex-card span.ex-num { color: #657488 !important; }
+html[data-theme="light"] .lab-control-head { color: #29394a !important; }
+html[data-theme="light"] .lab-control-head output { color: #087caa !important; }
+html[data-theme="light"] .lab-chip {
+  color: #3b5265 !important; border-color: rgba(8,124,170,.22) !important;
+  background: rgba(8,124,170,.055) !important;
+}
+html[data-theme="light"] .lab-chip:hover { color: #075d7b !important; }
+html[data-theme="light"] .lab-chip[aria-pressed="true"] { color: #fff !important; background: #087caa !important; border-color: #087caa !important; }
+html[data-theme="light"] .lab-play, html[data-theme="light"] .lab-stop {
+  color: #27503e !important; border-color: rgba(24,128,77,.27) !important; background: rgba(24,128,77,.065) !important;
+}
+html[data-theme="light"] .lab-play.is-on { color: #fff !important; background: linear-gradient(135deg,#259d66,#167d51) !important; }
+html[data-theme="light"] .lab-stop { color: #46576a !important; border-color: rgba(43,59,78,.16) !important; background: rgba(255,255,255,.55) !important; }
+html[data-theme="light"] .lab-key { color: #344252 !important; border-color: #bac4d0 !important; background: linear-gradient(180deg,#fff,#e1e7ee) !important; box-shadow: 0 3px 8px rgba(45,60,81,.14) !important; }
+html[data-theme="light"] .lab-key.is-down { color: #39240a !important; background: linear-gradient(180deg,#ffd8a0,#ffb75e) !important; }
+html[data-theme="light"] .lab-box { color: #5b6a7c !important; background: rgba(245,248,251,.92) !important; }
+html[data-theme="light"] .lab-box b { color: #263748 !important; }
+html[data-theme="light"] .lab-tasks li::marker { color: #a96508 !important; }
+
+/* OMNI workspace. Keep modules, labels, inspector controls, and canvas legible. */
+html[data-theme="light"] #omni-root { color: #202b38 !important; background: transparent !important; }
+html[data-theme="light"] .omni-app-header,
+html[data-theme="light"] .omni-topbar,
+html[data-theme="light"] .omni-commandbar,
+html[data-theme="light"] .omni-perf {
+  color: #263646 !important; border-color: rgba(43,59,78,.12) !important;
+  background: linear-gradient(180deg,rgba(247,250,253,.98),rgba(229,235,242,.97)) !important;
+}
+html[data-theme="light"] .omni-library,
+html[data-theme="light"] .omni-inspector {
+  color: #293949 !important; border-color: rgba(43,59,78,.13) !important;
+  background: linear-gradient(180deg,rgba(240,244,248,.97),rgba(225,232,240,.97)) !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.9) !important;
+}
+html[data-theme="light"] :is(.omni-library h2,.omni-inspector h2,.omni-library h3) { color: #607084 !important; }
+html[data-theme="light"] .omni-hint { color: #667588 !important; }
+html[data-theme="light"] .omni-lib-item {
+  color: #293949 !important; border-color: rgba(43,59,78,.14) !important;
+  background: linear-gradient(145deg,rgba(252,253,255,.92),rgba(228,235,242,.95)) !important;
+  box-shadow: 0 3px 10px rgba(45,60,81,.045), inset 0 1px #fff !important;
+}
+html[data-theme="light"] .omni-lib-item:hover { border-color: rgba(8,124,170,.36) !important; }
+html[data-theme="light"] .omni-canvas {
+  background-color: #e9eef4 !important;
+  background-image: radial-gradient(ellipse at 50% 40%, rgba(91,177,203,.12), transparent 55%), linear-gradient(rgba(76,100,128,.09) 1px, transparent 1px), linear-gradient(90deg, rgba(76,100,128,.09) 1px, transparent 1px) !important;
+}
+html[data-theme="light"] .omni-canvas-hud { color: #66778a !important; border-color: rgba(43,59,78,.1) !important; background: linear-gradient(180deg,rgba(241,245,249,.96),rgba(232,238,244,.72)) !important; }
+html[data-theme="light"] .omni-canvas-hud__hint { color: #758395 !important; }
+html[data-theme="light"] .omni-module {
+  color: #243342 !important; border-color: rgba(43,59,78,.22) !important;
+  background: linear-gradient(145deg,rgba(251,252,254,.98),rgba(226,233,241,.98)) !important;
+  box-shadow: 0 10px 24px rgba(45,60,81,.14), inset 0 1px #fff !important;
+}
+html[data-theme="light"] .omni-module-head { color: #243342 !important; background: color-mix(in srgb, var(--c) 13%, #f6f9fc) !important; }
+html[data-theme="light"] .omni-module-head small,.omni-module-summary { color: #647487 !important; }
+html[data-theme="light"] .omni-module-summary { color: #647487 !important; }
+html[data-theme="light"] .omni-module.is-selected { border-color: rgba(8,124,170,.65) !important; box-shadow: 0 0 0 1px rgba(8,124,170,.22), 0 9px 24px rgba(45,60,81,.16) !important; }
+html[data-theme="light"] .omni-port { border-color: #e5ebf2 !important; }
+html[data-theme="light"] .omni-port--audio { background: #bd710b !important; box-shadow: 0 0 7px rgba(189,113,11,.28) !important; }
+html[data-theme="light"] .omni-port--cv { background: #087caa !important; box-shadow: 0 0 7px rgba(8,124,170,.25) !important; }
+html[data-theme="light"] .omni-port--note { background: #21844f !important; box-shadow: 0 0 7px rgba(33,132,79,.25) !important; }
+html[data-theme="light"] .omni-param span { color: #33475b !important; }
+html[data-theme="light"] .omni-param output { color: #087caa !important; }
+html[data-theme="light"] .omni-param select { color: #263646 !important; border-color: rgba(43,59,78,.18) !important; background: #f7f9fc !important; }
+html[data-theme="light"] .omni-tb {
+  color: #46586a !important; border-color: rgba(43,59,78,.16) !important; background: rgba(255,255,255,.45) !important;
+}
+html[data-theme="light"] .omni-tb:hover { color: #075d7b !important; border-color: rgba(8,124,170,.35) !important; background: rgba(8,124,170,.055) !important; }
+html[data-theme="light"] .omni-tb--primary { color: #38240c !important; border-color: rgba(174,111,19,.25) !important; background: linear-gradient(135deg,#ffe0af,#ffc578) !important; }
+html[data-theme="light"] .omni-tb--danger { color: #a44148 !important; }
+html[data-theme="light"] .omni-power { color: #1f6043 !important; border-color: rgba(24,128,77,.28) !important; background: rgba(24,128,77,.06) !important; }
+html[data-theme="light"] .omni-master,.omni-midi { color: #68788b !important; }
+html[data-theme="light"] .omni-canvas-hud__live { background: #087caa !important; }
+html[data-theme="light"] .omni-guide { background: rgba(47,64,83,.25) !important; }
+html[data-theme="light"] .omni-guide-card {
+  color: #283949 !important; border-color: rgba(43,59,78,.17) !important;
+  background: linear-gradient(145deg,rgba(249,252,254,.99),rgba(225,233,241,.99)) !important;
+  box-shadow: 0 28px 80px rgba(45,60,81,.25),inset 0 1px #fff !important;
+}
+html[data-theme="light"] .omni-guide-card h2,html[data-theme="light"] .omni-guide-card strong { color: #202b38 !important; }
+html[data-theme="light"] .omni-guide-card button { color: #38240c !important; }
+
+/* Keep link/button text contrast in the designed amber and green surfaces. */
+html[data-theme="light"] :is(.button--primary,.omni-tb--primary,.lab-key.is-down,.lab-play.is-on,md-filled-button) { -webkit-text-fill-color: currentColor !important; }
+@media (prefers-reduced-motion: reduce) {
+  .site-theme-toggle { transition: none !important; }
+}
