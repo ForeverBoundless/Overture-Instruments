@@ -2462,8 +2462,8 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
   box-sizing: border-box !important; z-index: 2 !important;
   overflow: hidden !important; border-radius: 18px !important;
   border-color: rgba(125,228,255,.45) !important;
-  transition: border-color .24s ease, box-shadow .24s ease, filter .3s ease, opacity .3s ease !important;
-  will-change: opacity, filter;
+  transition: border-color .24s ease, box-shadow .24s ease, filter .3s ease, opacity .3s ease, transform .84s cubic-bezier(.16,.82,.18,1) !important;
+  will-change: opacity, filter, transform;
 }
 .omni-launch-stage.is-energized {
   border-color: rgba(185,247,255,.96) !important;
