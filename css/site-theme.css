@@ -337,7 +337,7 @@ html[data-theme="light"] .omni-module {
   box-shadow: 0 10px 24px rgba(45,60,81,.14), inset 0 1px #fff !important;
 }
 html[data-theme="light"] .omni-module-head { color: #243342 !important; background: color-mix(in srgb, var(--c) 13%, #f6f9fc) !important; }
-html[data-theme="light"] .omni-module-head small,.omni-module-summary { color: #647487 !important; }
+html[data-theme="light"] .omni-module-head small,html[data-theme="light"] .omni-module-summary { color: #647487 !important; }
 html[data-theme="light"] .omni-module-summary { color: #647487 !important; }
 html[data-theme="light"] .omni-module.is-selected { border-color: rgba(8,124,170,.65) !important; box-shadow: 0 0 0 1px rgba(8,124,170,.22), 0 9px 24px rgba(45,60,81,.16) !important; }
 html[data-theme="light"] .omni-port { border-color: #e5ebf2 !important; }
@@ -354,7 +354,7 @@ html[data-theme="light"] .omni-tb:hover { color: #075d7b !important; border-colo
 html[data-theme="light"] .omni-tb--primary { color: #38240c !important; border-color: rgba(174,111,19,.25) !important; background: linear-gradient(135deg,#ffe0af,#ffc578) !important; }
 html[data-theme="light"] .omni-tb--danger { color: #a44148 !important; }
 html[data-theme="light"] .omni-power { color: #1f6043 !important; border-color: rgba(24,128,77,.28) !important; background: rgba(24,128,77,.06) !important; }
-html[data-theme="light"] .omni-master,.omni-midi { color: #68788b !important; }
+html[data-theme="light"] .omni-master,html[data-theme="light"] .omni-midi { color: #68788b !important; }
 html[data-theme="light"] .omni-canvas-hud__live { background: #087caa !important; }
 html[data-theme="light"] .omni-guide { background: rgba(47,64,83,.25) !important; }
 html[data-theme="light"] .omni-guide-card {
@@ -369,4 +369,35 @@ html[data-theme="light"] .omni-guide-card button { color: #38240c !important; }
 html[data-theme="light"] :is(.button--primary,.omni-tb--primary,.lab-key.is-down,.lab-play.is-on,md-filled-button) { -webkit-text-fill-color: currentColor !important; }
 @media (prefers-reduced-motion: reduce) {
   .site-theme-toggle { transition: none !important; }
+}
+
+/* Universal control defaults, followed by component-specific signal treatments. */
+html[data-theme="light"] button {
+  color: #263646;
+  border-color: rgba(43,59,78,.17);
+  background-color: rgba(249,251,253,.58);
+}
+html[data-theme="light"] button:hover { border-color: rgba(22,142,183,.32); }
+html[data-theme="light"] :is(.button--outline,.text-link,.footer-contact,.contact-cancel,.contact-toolbar button) { color: #324458 !important; }
+html[data-theme="light"] :is(.builder-ui,.builder-ui__head,.builder-module,.builder-control,.experiment-control,.experiment-control__scale,.experiments-footer,.showcase-topline,.showcase-bottomline,.omni-patch-control) {
+  color: #2d3e50 !important; border-color: rgba(43,59,78,.14) !important;
+  background: linear-gradient(145deg,rgba(250,252,254,.91),rgba(224,232,240,.9)) !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.9) !important;
+}
+html[data-theme="light"] :is(.builder-ui__head,.showcase-topline,.showcase-bottomline) { color: #647487 !important; }
+html[data-theme="light"] :is(.builder-module small,.builder-ui__head > span:last-child,.experiments-footer__metrics) { color: #586a7e !important; }
+html[data-theme="light"] :is(.scope-grid,.scope-plot,.experiment-meter,.experiment-control__scale span) { border-color: rgba(43,59,78,.14) !important; }
+html[data-theme="light"] .site-brand__mark img,
+html[data-theme="light"] .footer-brand img,
+html[data-theme="light"] .omni-logo-mark img { filter: brightness(.42) saturate(1.08) drop-shadow(0 0 7px rgba(125,228,255,.16)) !important; }
+html[data-theme="light"] :is(.hero-logo,.omni-wordmark strong img,.home-coming-soon__o-icon,.omni-title-word img) { filter: brightness(.48) saturate(1.08) drop-shadow(0 0 8px rgba(125,228,255,.16)) !important; }
+html[data-theme="light"] .omni-patch-link { color: #075f83 !important; }
+html[data-theme="light"] .lab-plot canvas {
+  background: #eef2f6 !important; border-color: rgba(43,59,78,.16) !important;
+}
+html[data-theme="light"] .resource-highlight__text {
+  -webkit-text-fill-color: transparent !important;
+}
+html[data-theme="light"] .site-header .main-nav a[aria-current="page"]::after {
+  background: #c17a17 !important; box-shadow: 0 0 8px rgba(193,122,23,.17) !important;
 }
