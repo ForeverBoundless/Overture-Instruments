@@ -1,4 +1,4 @@
-/* Launch OMNI from its homepage showcase with a short electrical transition. */
+/* Launch OMNI from its homepage showcase with an electric-blue kaleidoscope transition. */
 (() => {
   const init = () => {
     const showcase = document.querySelector('.omni-patch-showcase');
@@ -10,6 +10,16 @@
     showcase.setAttribute('aria-keyshortcuts', 'Enter Space');
 
     let launching = false;
+    const resetLaunchState = () => {
+      document.querySelectorAll('.omni-launch-overlay').forEach((overlay) => overlay.remove());
+      document.body.classList.remove('omni-launch-active');
+      launching = false;
+    };
+
+    // Browsers may restore this page from the back-forward cache with its old
+    // transition DOM intact. Always clear that state when the page is shown.
+    window.addEventListener('pageshow', resetLaunchState);
+
     const launch = (event) => {
       if (event) {
         event.preventDefault();
@@ -18,14 +28,25 @@
       if (launching) return;
       launching = true;
       const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      document.body.classList.add('omni-launch-active');
 
+      // Make the current history entry the intended return destination before
+      // navigating away. Back from /omni therefore returns to /#omni.
+      try {
+        window.history.replaceState(window.history.state, '', '/#omni');
+      } catch (_err) {
+        // The animation still works if history replacement is restricted.
+      }
+
+      document.body.classList.add('omni-launch-active');
       const rect = showcase.getBoundingClientRect();
       const overlay = document.createElement('div');
       overlay.className = 'omni-launch-overlay';
       overlay.setAttribute('aria-hidden', 'true');
-      overlay.innerHTML = '<div class="omni-launch-grid"></div><div class="omni-launch-flash"></div>';
+      overlay.innerHTML = '<div class="omni-launch-kaleido omni-launch-kaleido--one"></div><div class="omni-launch-kaleido omni-launch-kaleido--two"></div><div class="omni-launch-kaleido omni-launch-kaleido--three"></div><div class="omni-launch-electric-grid"></div><div class="omni-launch-flash"></div>';
 
+      // Keep the clicked artwork at its original dimensions and coordinates.
+      // The screen-filling kaleidoscope is an independent overlay; the card
+      // never grows, pans, or reflows.
       const stage = showcase.cloneNode(true);
       stage.classList.remove('reveal');
       stage.removeAttribute('data-tilt');
@@ -47,14 +68,13 @@
         left: `${rect.left}px`, top: `${rect.top}px`,
         width: `${rect.width}px`, height: `${rect.height}px`,
         margin: '0', position: 'fixed', zIndex: '2',
-        transform: 'translate3d(0,0,0) scale(1)',
-        transformOrigin: 'center center'
+        transform: 'none', transformOrigin: 'center center'
       });
       overlay.appendChild(stage);
       document.body.appendChild(overlay);
 
       const showLoader = () => {
-        stage.classList.add('is-disintegrating');
+        stage.classList.add('is-dissolving');
         overlay.classList.add('is-loading');
         window.setTimeout(() => {
           stage.remove();
@@ -63,13 +83,13 @@
           loader.innerHTML = '<img class="omni-launch-logo" src="/ui/Logos/OvertureLogo.png" alt=""><div class="omni-launch-progress" role="presentation"><span></span></div>';
           overlay.appendChild(loader);
           requestAnimationFrame(() => loader.classList.add('is-visible'));
-          window.setTimeout(() => window.location.assign('/omni'), reduced ? 420 : 1380);
-        }, reduced ? 80 : 360);
+          window.setTimeout(() => window.location.assign('/omni'), reduced ? 420 : 1420);
+        }, reduced ? 40 : 300);
       };
 
       if (reduced) {
         overlay.classList.add('is-loading');
-        stage.style.display = 'none';
+        stage.style.opacity = '0';
         showLoader();
         return;
       }
@@ -79,10 +99,10 @@
         stage.classList.add('is-energized');
       });
       window.setTimeout(() => {
-        stage.classList.add('is-expanding');
-        overlay.classList.add('is-expanding');
-      }, 180);
-      window.setTimeout(showLoader, 1260);
+        overlay.classList.add('is-kaleidoscope');
+        stage.classList.add('is-overloaded');
+      }, 140);
+      window.setTimeout(showLoader, 1510);
     };
 
     showcase.addEventListener('click', launch, true);
