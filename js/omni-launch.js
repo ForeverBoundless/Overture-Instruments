@@ -44,9 +44,9 @@
       overlay.setAttribute('aria-hidden', 'true');
       overlay.innerHTML = '<div class="omni-launch-kaleido omni-launch-kaleido--one"></div><div class="omni-launch-kaleido omni-launch-kaleido--two"></div><div class="omni-launch-kaleido omni-launch-kaleido--three"></div><div class="omni-launch-electric-grid"></div><div class="omni-launch-flash"></div>';
 
-      // Keep the clicked artwork at its original dimensions and coordinates.
-      // The screen-filling kaleidoscope is an independent overlay; the card
-      // never grows, pans, or reflows.
+      // Keep the clicked artwork at its original dimensions. The full-screen
+      // kaleidoscope is an independent overlay; the artwork only translates
+      // toward the viewport centre and never grows or reflows.
       const stage = showcase.cloneNode(true);
       stage.classList.remove('reveal');
       stage.removeAttribute('data-tilt');
