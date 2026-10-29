@@ -19,6 +19,7 @@ class OmniApp {
     this.ctx = null; this.live = null; this.selected = null; this.selectedWire = null; this.pending = null;
     this.view = { x: 20, y: 20, scale: 1 }; this.history = []; this.future = []; this.rebuildTimer = null;
     this._build();
+    this.applyView();
     this.render();
     this.pushHistory();
     this._bindMidi();
@@ -202,7 +203,15 @@ class OmniApp {
 
   // ------------------------------------------------------------------ canvas
   toWorld(cx, cy) { const r = this.canvas.getBoundingClientRect(); return { x: (cx - r.left - this.view.x) / this.view.scale, y: (cy - r.top - this.view.y) / this.view.scale }; }
-  applyView() { this.world.style.transform = `translate(${this.view.x}px, ${this.view.y}px) scale(${this.view.scale})`; }
+  applyView() {
+    this.world.style.transform = `translate(${this.view.x}px, ${this.view.y}px) scale(${this.view.scale})`;
+    // The canvas grid is a world-space reference surface: pan and zoom it with
+    // the patch rather than leaving it visually pinned to the viewport.
+    const gridSize = Math.max(12, 28 * this.view.scale);
+    this.canvas.style.setProperty('--omni-grid-x', `${this.view.x}px`);
+    this.canvas.style.setProperty('--omni-grid-y', `${this.view.y}px`);
+    this.canvas.style.setProperty('--omni-grid-size', `${gridSize}px`);
+  }
   zoom(f, cx, cy) { const r = this.canvas.getBoundingClientRect(); const px = cx ?? r.width / 2; const py = cy ?? r.height / 2; const next = Math.min(2.5, Math.max(0.3, this.view.scale * f)); this.view.x = px - (px - this.view.x) * (next / this.view.scale); this.view.y = py - (py - this.view.y) * (next / this.view.scale); this.view.scale = next; this.applyView(); }
 
   _bindCanvas() {
