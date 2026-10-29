@@ -73,7 +73,23 @@ class Plot {
     c.textAlign = 'center'; c.fillStyle = light ? '#405267' : '#c9cfd8'; c.fillText(this.x, (L + R) / 2, H - 3); c.save(); c.translate(10, (T + B) / 2); c.rotate(-Math.PI / 2); c.fillText(this.y, 0, 0); c.restore();
     return this.box;
   }
-  line(points, color, width = 2) { const c = this.ctx; c.strokeStyle = color; c.lineWidth = width; c.beginPath(); points.forEach(([x, y], i) => (i ? c.lineTo(x, y) : c.moveTo(x, y))); c.stroke(); if (!this.replaying) this.lastLines.push({ points, color, width }); }
+  line(points, color, width = 2) {
+    const c = this.ctx;
+    const light = document.documentElement.dataset.theme === 'light';
+    const lightColours = {
+      '#7de4ff': '#087f9f',
+      '#82e6a8': '#167747',
+      '#ff9f0a': '#ad5f00',
+      '#c89bff': '#7040a8'
+    };
+    c.strokeStyle = light ? (lightColours[String(color).toLowerCase()] || color) : color;
+    c.lineWidth = width;
+    c.beginPath();
+    points.forEach(([x, y], i) => (i ? c.lineTo(x, y) : c.moveTo(x, y)));
+    c.stroke();
+    // Store the semantic/source colour; replay() maps it for the current theme.
+    if (!this.replaying) this.lastLines.push({ points, color, width });
+  }
 }
 
 const ACCENT = '#7de4ff', GREEN = '#82e6a8', AMBER = '#ff9f0a';
