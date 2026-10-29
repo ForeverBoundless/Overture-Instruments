@@ -25,6 +25,23 @@
     revealItems.forEach((item) => item.classList.add('is-visible'));
   }
 
+  // Pause CSS animations only while decorative sections are off-screen.
+  if ('IntersectionObserver' in window) {
+    const motionTargets = document.querySelectorAll(
+      '.hero, .mission-section, .feature-section, .home-coming-soon'
+    );
+    const motionObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        entry.target.classList.toggle('motion-paused', !entry.isIntersecting);
+      });
+    }, { rootMargin: '120px 0px' });
+
+    motionTargets.forEach((target) => {
+      target.classList.add('motion-paused');
+      motionObserver.observe(target);
+    });
+  }
+
   // Deep links (#omni etc.): the browser scrolls before fonts/images settle, so
   // re-align to the target once layout is final. Instant on load, smooth after.
   const scrollToHash = (smooth) => {
@@ -216,7 +233,17 @@
 
   if (mission && fluidCanvas && !reduceMotion.matches) {
     const context = fluidCanvas.getContext('2d', { alpha: true });
-    const colors = ['255,183,94', '125,228,255', '130,230,168'];
+    const palettes = {
+      dark: ['255,183,94', '125,228,255', '130,230,168'],
+      // Deeper, more saturated amber / cyan / green for the pearlescent surface.
+      light: ['173,95,0', '8,127,159', '22,119,71']
+    };
+    let colors = palettes.dark;
+    const syncParticlePalette = () => {
+      colors = document.documentElement.dataset.theme === 'light' ? palettes.light : palettes.dark;
+    };
+    syncParticlePalette();
+    window.addEventListener('overture:themechange', syncParticlePalette);
     const particles = [];
     const ripples = [];
     let width = 0;
@@ -289,15 +316,17 @@
         let y = particle.y + (particle.targetY - particle.y) * ease + swirlY;
         let pushX = 0;
         let pushY = 0;
-        ripples.forEach((ripple) => {
-          const age = (now - ripple.born) / 1000;
-          const dx = x - ripple.x;
-          const dy = y - ripple.y;
-          const distance = Math.hypot(dx, dy) || 1;
-          const wave = Math.sin(distance * .09 - age * 13) * Math.exp(-Math.abs(distance - age * 165) / 48) * Math.max(0, 1 - age / 1.7);
-          pushX += dx / distance * wave * 13;
-          pushY += dy / distance * wave * 13;
-        });
+        if (ripples.length) {
+          ripples.forEach((ripple) => {
+            const age = (now - ripple.born) / 1000;
+            const dx = x - ripple.x;
+            const dy = y - ripple.y;
+            const distance = Math.hypot(dx, dy) || 1;
+            const wave = Math.sin(distance * .09 - age * 13) * Math.exp(-Math.abs(distance - age * 165) / 48) * Math.max(0, 1 - age / 1.7);
+            pushX += dx / distance * wave * 13;
+            pushY += dy / distance * wave * 13;
+          });
+        }
         x += pushX;
         y += pushY;
         const pulse = .5 + .5 * Math.sin(elapsed * .002 + particle.phase * 2);
@@ -311,7 +340,8 @@
       ripples.forEach((ripple) => {
         const age = (now - ripple.born) / 1000;
         if (age >= 1.8) return;
-        context.strokeStyle = `rgba(125,228,255,${(1 - age / 1.8) * .2})`;
+        const rippleRGB = document.documentElement.dataset.theme === 'light' ? '8,127,159' : '125,228,255';
+        context.strokeStyle = `rgba(${rippleRGB},${(1 - age / 1.8) * (document.documentElement.dataset.theme === 'light' ? .42 : .2)})`;
         context.lineWidth = 1;
         context.beginPath();
         context.arc(ripple.x, ripple.y, 10 + age * 102, 0, Math.PI * 2);

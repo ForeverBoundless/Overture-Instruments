@@ -47,20 +47,49 @@ class Plot {
     this.canvas = el('canvas', '', wrap); this.canvas.height = height; this.canvas.width = 800;
     this.x = xLabel; this.y = yLabel; this.ctx = this.canvas.getContext('2d');
     this.caption = wrap.querySelector('figcaption');
-    const ro = new ResizeObserver(() => { this.canvas.width = Math.max(300, Math.floor(wrap.clientWidth)); this.redraw?.(); }); ro.observe(wrap);
+    this.lastFrame = null; this.lastLines = []; this.replaying = false;
+    window.addEventListener('overture:themechange', () => {
+      if (!this.lastFrame) return;
+      const { xTicks, yTicks } = this.lastFrame;
+      const lines = this.lastLines.slice();
+      this.replaying = true;
+      this.frame(xTicks, yTicks);
+      lines.forEach((line) => this.line(line.points, line.color, line.width));
+      this.replaying = false;
+    });
+    const ro = new ResizeObserver(() => { this.canvas.width = Math.max(300, Math.floor(wrap.clientWidth)); if (this.lastFrame) { const {xTicks,yTicks}=this.lastFrame; const lines=this.lastLines.slice(); this.replaying=true; this.frame(xTicks,yTicks); lines.forEach((line)=>this.line(line.points,line.color,line.width)); this.replaying=false; } }); ro.observe(wrap);
   }
   frame(xTicks, yTicks) {
+    this.lastFrame = { xTicks, yTicks };
+    if (!this.replaying) this.lastLines = [];
     const c = this.ctx; const W = this.canvas.width; const H = this.canvas.height; c.clearRect(0, 0, W, H);
-    c.fillStyle = '#0b0e13'; c.fillRect(0, 0, W, H);
+    const light = document.documentElement.dataset.theme === 'light';
+    c.fillStyle = light ? '#edf2f7' : '#0b0e13'; c.fillRect(0, 0, W, H);
     const L = 46, B = H - 26, T = 10, R = W - 12; this.box = { L, B, T, R };
-    c.strokeStyle = '#2b3240'; c.lineWidth = 1; c.beginPath(); c.rect(L, T, R - L, B - T); c.stroke();
-    c.fillStyle = '#8f97a3'; c.font = '10px DM Mono, monospace'; c.textAlign = 'center';
-    xTicks.forEach(([t, label]) => { const x = L + t * (R - L); c.strokeStyle = '#1b212b'; c.beginPath(); c.moveTo(x, T); c.lineTo(x, B); c.stroke(); c.fillText(label, x, B + 14); });
-    c.textAlign = 'right'; yTicks.forEach(([t, label]) => { const y = B - t * (B - T); c.strokeStyle = '#1b212b'; c.beginPath(); c.moveTo(L, y); c.lineTo(R, y); c.stroke(); c.fillText(label, L - 4, y + 3); });
-    c.textAlign = 'center'; c.fillStyle = '#c9cfd8'; c.fillText(this.x, (L + R) / 2, H - 3); c.save(); c.translate(10, (T + B) / 2); c.rotate(-Math.PI / 2); c.fillText(this.y, 0, 0); c.restore();
+    c.strokeStyle = light ? '#b8c5d3' : '#2b3240'; c.lineWidth = 1; c.beginPath(); c.rect(L, T, R - L, B - T); c.stroke();
+    c.fillStyle = light ? '#637386' : '#8f97a3'; c.font = '10px DM Mono, monospace'; c.textAlign = 'center';
+    xTicks.forEach(([t, label]) => { const x = L + t * (R - L); c.strokeStyle = light ? '#d9e1e9' : '#1b212b'; c.beginPath(); c.moveTo(x, T); c.lineTo(x, B); c.stroke(); c.fillText(label, x, B + 14); });
+    c.textAlign = 'right'; yTicks.forEach(([t, label]) => { const y = B - t * (B - T); c.strokeStyle = light ? '#d9e1e9' : '#1b212b'; c.beginPath(); c.moveTo(L, y); c.lineTo(R, y); c.stroke(); c.fillText(label, L - 4, y + 3); });
+    c.textAlign = 'center'; c.fillStyle = light ? '#405267' : '#c9cfd8'; c.fillText(this.x, (L + R) / 2, H - 3); c.save(); c.translate(10, (T + B) / 2); c.rotate(-Math.PI / 2); c.fillText(this.y, 0, 0); c.restore();
     return this.box;
   }
-  line(points, color, width = 2) { const c = this.ctx; c.strokeStyle = color; c.lineWidth = width; c.beginPath(); points.forEach(([x, y], i) => (i ? c.lineTo(x, y) : c.moveTo(x, y))); c.stroke(); }
+  line(points, color, width = 2) {
+    const c = this.ctx;
+    const light = document.documentElement.dataset.theme === 'light';
+    const lightColours = {
+      '#7de4ff': '#087f9f',
+      '#82e6a8': '#167747',
+      '#ff9f0a': '#ad5f00',
+      '#c89bff': '#7040a8'
+    };
+    c.strokeStyle = light ? (lightColours[String(color).toLowerCase()] || color) : color;
+    c.lineWidth = width;
+    c.beginPath();
+    points.forEach(([x, y], i) => (i ? c.lineTo(x, y) : c.moveTo(x, y)));
+    c.stroke();
+    // Store the semantic/source colour; replay() maps it for the current theme.
+    if (!this.replaying) this.lastLines.push({ points, color, width });
+  }
 }
 
 const ACCENT = '#7de4ff', GREEN = '#82e6a8', AMBER = '#ff9f0a';

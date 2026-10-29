@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+<script>(function(){try{var t=localStorage.getItem('overture-theme')==='light'?'light':'dark';document.documentElement.dataset.theme=t;document.documentElement.style.colorScheme=t;}catch(e){document.documentElement.dataset.theme='dark';document.documentElement.style.colorScheme='dark';}})();</script>
   <meta name="theme-color" content="#0b0e13">
   <meta name="description" content="Overture Instruments makes expressive electronic instruments and legendary sounds more accessible, with free, open-source emulators for everyone.">
   <title>Overture Instruments</title>
@@ -14,6 +15,7 @@
   <link rel="stylesheet" href="/css/brand.css">
   <link rel="stylesheet" href="/css/site-footer.css">
   <script src="/js/home.js" defer></script>
+  <script src="/js/omni-launch.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@5/dist/email.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js" defer></script>
 <script src="/js/shared/contact.js" defer></script>
@@ -21,6 +23,10 @@
     window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
   </script>
   <script defer src="/_vercel/insights/script.js"></script>
+
+<link rel="stylesheet" href="/css/site-theme.css">
+<link rel="stylesheet" href="/css/site-theme-polish.css?v=20261029-2">
+<script src="/js/shared/site-theme.js" defer></script>
 </head>
 <body>
   <div class="site-noise" aria-hidden="true"></div>
@@ -133,6 +139,19 @@
     </section>
 
     <section class="feature-section feature-section--library" id="library" aria-labelledby="library-title">
+    <div class="home-signal-field home-signal-field--library" aria-hidden="true">
+      <svg viewBox="0 0 1000 420" preserveAspectRatio="none">
+        <defs>
+          <pattern id="library-spectrum-pattern" width="200" height="420" patternUnits="userSpaceOnUse">
+            <path d="M0 210 H200" fill="none" stroke="#ffb75e" stroke-opacity=".08" stroke-width="1"/>
+            <path d="M8 210v-10 M26 210v-24 M44 210v-38 M62 210v-19 M80 210v-48 M98 210v-64 M116 210v-30 M134 210v-15 M152 210v-34 M170 210v-22 M188 210v-9 M8 210v8 M26 210v18 M44 210v29 M62 210v15 M80 210v37 M98 210v48 M116 210v23 M134 210v12 M152 210v28 M170 210v17 M188 210v7" fill="none" stroke="#ffb75e" stroke-opacity=".26" stroke-width="1.4" stroke-linecap="round"/>
+            <path d="M0 210 L12 210 L20 198 L28 222 L36 176 L44 244 L52 202 L60 210 H74 L82 192 L90 228 L98 165 L106 252 L114 203 L122 210 H138 L146 198 L154 222 L162 184 L170 237 L178 205 L186 210 H200" fill="none" stroke="#ffb75e" stroke-opacity=".23" stroke-width="1.1" stroke-linejoin="round"/>
+            <circle cx="98" cy="210" r="2" fill="#ffb75e" fill-opacity=".42"/>
+          </pattern>
+        </defs>
+        <rect width="1000" height="420" fill="url(#library-spectrum-pattern)"/>
+      </svg>
+    </div>
       <div class="feature-shell">
         <div class="section-index reveal"><span> </span><span class="index-rule"></span><span> </span></div>
         <div class="feature-layout feature-layout--library">
@@ -216,7 +235,7 @@
             <div class="omni-chips"><span>DRAG & DROP</span><span>MODULAR</span><span>CUSTOMIZABLE</span></div>
             <p class="omni-status"><span class="status-pulse"></span>FIRST RELEASE AVAILABLE /<span class="status-divider"> </span></p>
           </div>
-          <div class="omni-showcase omni-patch-showcase reveal" data-tilt>
+          <div class="omni-showcase omni-patch-showcase reveal" data-tilt role="button" tabindex="0" aria-label="Launch the OMNI modular synthesis workspace">
   <div class="omni-patch-heading">
     <span class="omni-patch-heading__name">
       <i class="omni-patch-heading__signal"></i>
@@ -428,9 +447,9 @@
       PATCH <i>·</i> PLAY <i>·</i> EXPORT
     </span>
 
-    <a class="omni-patch-link" href="/omni">
+    <span class="omni-patch-link">
       Open OMNI <span aria-hidden="true">↗</span>
-    </a>
+    </span>
   </div>
 
   <!-- Subtle circular accents to echo the Experiments showcase -->
@@ -450,14 +469,13 @@
             <h2 id="experiments-title">Understand sound<br>with <em>Experiments</em></h2>
             <p class="feature-description">Overture Experiments are small, hands-on simulations for the curious, allowing you to explore oscillators, filters, envelopes, modulation, and the building blocks of synthesis by changing things and hearing what happens. These PhET-style mini-programs demonstrate the exact same principles that power the Overture emulators, and they are ideal for both classroom-style education and for self-directed learning.<br><br></p>
             <p class="experiments-note">No musical experience required.</p>
-            <a class="button button--outline button--experiments" href="/experiments"><span>Explore Experiments</span><span class="button-arrow" aria-hidden="true">↗</span></a>
             <span class="placeholder-note">FIRST RELEASE AVAILABLE /</span>
           </div>
-                    <div
+                    <a
             class="experiments-showcase reveal"
+            href="/experiments"
             data-tilt
-            role="img"
-            aria-label="Oscillator experiment interface showing a sine wave at 440 hertz and amplitude 0.82"
+            aria-label="Open Overture Experiments"
           >
             <div class="experiments-panel-head">
               <div class="experiments-panel-brand">
@@ -612,7 +630,7 @@
                 
               </span>
             </div>
-          </div>
+          </a>
         </div>
       </div>
     </section>

@@ -19,6 +19,7 @@ class OmniApp {
     this.ctx = null; this.live = null; this.selected = null; this.selectedWire = null; this.pending = null;
     this.view = { x: 20, y: 20, scale: 1 }; this.history = []; this.future = []; this.rebuildTimer = null;
     this._build();
+    this.applyView();
     this.render();
     this.pushHistory();
     this._bindMidi();
@@ -28,23 +29,43 @@ class OmniApp {
   // ------------------------------------------------------------------ layout
   _build() {
     const root = document.getElementById('omni-root');
-    const bar = el('header', 'omni-toolbar', root);
-    el('div', 'omni-logo', bar).innerHTML = '<a href="/" title="Overture home"><img src="/ui/Logos/OvertureLogo.png" alt="Overture"></a><strong>OMNI</strong>';
-    this.nameInput = el('input', 'omni-name', bar); this.nameInput.value = this.patch.name; this.nameInput.setAttribute('aria-label', 'Instrument name'); this.nameInput.addEventListener('change', () => { this.patch.name = this.nameInput.value.slice(0, 60) || 'Untitled'; this.pushHistory(); });
-    const tb = (label, fn, title) => { const b = el('button', 'omni-tb', bar, label); b.type = 'button'; if (title) b.title = title; b.addEventListener('click', fn); return b; };
-    tb('NEW', () => this.load(defaultPatch()));
-    tb('TEMPLATES', () => this.templates(), 'Load a starter patch');
-    tb('SAVE', () => this.save());
-    this.loadSel = el('select', 'omni-tb omni-load', bar); this.loadSel.setAttribute('aria-label', 'Load saved instrument'); this.loadSel.addEventListener('change', () => { const it = this.store.get(this.loadSel.value); if (it) this.load(JSON.parse(JSON.stringify(it.data)), it.id); this.loadSel.value = ''; });
+    const bar = el('header', 'omni-app-header', root);
+    const topbar = el('div', 'omni-topbar', bar);
+    const brand = el('div', 'omni-logo', topbar);
+    brand.innerHTML = '<a class="omni-logo-mark" href="/#omni" title="Back to Overture OMNI"><img src="/ui/Logos/OvertureLogo.png" alt="Overture"></a><span class="omni-logo-wording"><strong>OMNI</strong><small>MODULAR SYNTHESIS WORKSPACE</small></span>';
+    const project = el('label', 'omni-project', topbar);
+    el('span', 'omni-project-label', project, 'INSTRUMENT');
+    this.nameInput = el('input', 'omni-name', project); this.nameInput.value = this.patch.name; this.nameInput.placeholder = 'Untitled instrument'; this.nameInput.setAttribute('aria-label', 'Instrument name'); this.nameInput.addEventListener('change', () => { this.patch.name = this.nameInput.value.slice(0, 60) || 'Untitled'; this.nameInput.value = this.patch.name; this.pushHistory(); });
+    this.status = el('div', 'omni-status', topbar, 'Ready. Power on the audio to hear the instrument.');
+
+    const commandbar = el('div', 'omni-commandbar', bar);
+    const group = (label) => { const g = el('div', 'omni-tool-group', commandbar); g.setAttribute('role', 'group'); g.setAttribute('aria-label', label); return g; };
+    const tb = (label, fn, title, parent, variant = '') => { const b = el('button', `omni-tb${variant ? ` ${variant}` : ''}`, parent, label); b.type = 'button'; if (title) b.title = title; b.addEventListener('click', fn); return b; };
+
+    const patchTools = group('Instrument');
+    tb('NEW', () => this.load(defaultPatch()), 'New instrument', patchTools);
+    tb('TEMPLATES', () => this.templates(), 'Load a starter patch', patchTools);
+    tb('SAVE', () => this.save(), 'Save instrument in this browser', patchTools, 'omni-tb--primary');
+    this.loadSel = el('select', 'omni-tb omni-load', patchTools); this.loadSel.setAttribute('aria-label', 'Load saved instrument'); this.loadSel.title = 'Load saved instrument'; this.loadSel.addEventListener('change', () => { const it = this.store.get(this.loadSel.value); if (it) this.load(JSON.parse(JSON.stringify(it.data)), it.id); this.loadSel.value = ''; });
     this.refreshLoadList();
-    tb('DELETE', () => { if (!this.currentId) { this.msg('This instrument is not saved yet.'); return; } if (confirm('Delete the saved instrument?')) { this.store.remove(this.currentId); this.currentId = null; this.refreshLoadList(); this.msg('Deleted.'); } });
-    this.undoBtn = tb('UNDO', () => this.undo()); this.redoBtn = tb('REDO', () => this.redo());
-    tb('−', () => this.zoom(0.8), 'Zoom out'); tb('+', () => this.zoom(1.25), 'Zoom in'); tb('RESET VIEW', () => { this.view = { x: 20, y: 20, scale: 1 }; this.applyView(); });
-    tb('EXPORT JSON', () => downloadText(`${this.patch.name.replace(/\W+/g, '-') || 'omni'}.omni.json`, this.store.exportJSON({ name: this.patch.name, data: this.patch })));
-    tb('IMPORT JSON', () => pickFile('.json,application/json', (text) => { try { const { data } = this.store.parseImport(text); this.load(data); this.msg('Imported.'); } catch (err) { this.msg(err.message, true); } }));
-    tb('EXPORT SVG', () => downloadText(`${this.patch.name.replace(/\W+/g, '-') || 'omni'}.schematic.svg`, patchToSVG(this.patch), 'image/svg+xml'));
-    tb('GUIDE', () => this.guide());
-    this.status = el('div', 'omni-status', bar, 'Ready. Power on the audio to hear the instrument.');
+    tb('DELETE', () => { if (!this.currentId) { this.msg('This instrument is not saved yet.'); return; } if (confirm('Delete the saved instrument?')) { this.store.remove(this.currentId); this.currentId = null; this.refreshLoadList(); this.msg('Deleted.'); } }, 'Delete current saved instrument', patchTools, 'omni-tb--danger');
+
+    const historyTools = group('History');
+    this.undoBtn = tb('UNDO', () => this.undo(), 'Undo (Ctrl+Z)', historyTools);
+    this.redoBtn = tb('REDO', () => this.redo(), 'Redo (Ctrl+Shift+Z)', historyTools);
+
+    const viewTools = group('Canvas view');
+    tb('−', () => this.zoom(0.8), 'Zoom out', viewTools);
+    tb('+', () => this.zoom(1.25), 'Zoom in', viewTools);
+    tb('FIT VIEW', () => { this.view = { x: 20, y: 20, scale: 1 }; this.applyView(); }, 'Reset canvas view', viewTools);
+
+    const fileTools = group('Import and export');
+    tb('JSON ↓', () => downloadText(`${this.patch.name.replace(/\W+/g, '-') || 'omni'}.omni.json`, this.store.exportJSON({ name: this.patch.name, data: this.patch })), 'Export patch as JSON', fileTools);
+    tb('JSON ↑', () => pickFile('.json,application/json', (text) => { try { const { data } = this.store.parseImport(text); this.load(data); this.msg('Imported.'); } catch (err) { this.msg(err.message, true); } }), 'Import patch JSON', fileTools);
+    tb('SVG ↓', () => downloadText(`${this.patch.name.replace(/\W+/g, '-') || 'omni'}.schematic.svg`, patchToSVG(this.patch), 'image/svg+xml'), 'Export patch schematic as SVG', fileTools);
+
+    const helpTools = group('Help');
+    tb('GUIDE', () => this.guide(), 'Open the OMNI guide', helpTools);
     const main = el('div', 'omni-main', root);
     // Library
     const lib = el('aside', 'omni-library', main);
@@ -60,9 +81,15 @@ class OmniApp {
     });
     // Canvas
     this.canvas = el('div', 'omni-canvas', main); this.canvas.tabIndex = 0; this.canvas.setAttribute('aria-label', 'Patch canvas');
+    const canvasHud = el('div', 'omni-canvas-hud', this.canvas);
+    const canvasTitle = el('div', 'omni-canvas-hud__title', canvasHud);
+    el('span', 'omni-canvas-hud__live', canvasTitle);
+    el('span', '', canvasTitle, 'PATCH CANVAS');
+    el('span', 'omni-canvas-hud__hint', canvasHud, 'DRAG TO PAN  ·  SCROLL TO ZOOM');
     this.world = el('div', 'omni-world', this.canvas);
-    this.wires = document.createElementNS(NS, 'svg'); this.wires.classList.add('omni-wires'); this.world.appendChild(this.wires);
-    this.cards = el('div', 'omni-cards', this.world);
+    this.worldContent = el('div', 'omni-world-content', this.world);
+    this.wires = document.createElementNS(NS, 'svg'); this.wires.classList.add('omni-wires'); this.worldContent.appendChild(this.wires);
+    this.cards = el('div', 'omni-cards', this.worldContent);
     this.canvas.addEventListener('dragover', (e) => { if (e.dataTransfer.types.includes('text/omni-module')) { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; } });
     this.canvas.addEventListener('drop', (e) => { const type = e.dataTransfer.getData('text/omni-module'); if (!type) return; e.preventDefault(); const p = this.toWorld(e.clientX, e.clientY); this.addModule(type, p.x - 90, p.y - 20); });
     this._bindCanvas();
@@ -177,7 +204,22 @@ class OmniApp {
 
   // ------------------------------------------------------------------ canvas
   toWorld(cx, cy) { const r = this.canvas.getBoundingClientRect(); return { x: (cx - r.left - this.view.x) / this.view.scale, y: (cy - r.top - this.view.y) / this.view.scale }; }
-  applyView() { this.world.style.transform = `translate(${this.view.x}px, ${this.view.y}px) scale(${this.view.scale})`; }
+  applyView() {
+    // Pan with layout positioning rather than a transformed compositing layer.
+    // Zoom is applied as layout zoom to the inner world so text, borders, ports,
+    // and SVG wires are re-rasterized sharply at the current scale instead of
+    // being enlarged from a cached texture.
+    this.world.style.left = `${this.view.x}px`;
+    this.world.style.top = `${this.view.y}px`;
+    this.world.style.transform = 'none';
+    this.worldContent.style.zoom = String(this.view.scale);
+
+    // Keep the canvas grid aligned with the same world-space pan and zoom.
+    const gridSize = Math.max(12, 28 * this.view.scale);
+    this.canvas.style.setProperty('--omni-grid-x', `${this.view.x}px`);
+    this.canvas.style.setProperty('--omni-grid-y', `${this.view.y}px`);
+    this.canvas.style.setProperty('--omni-grid-size', `${gridSize}px`);
+  }
   zoom(f, cx, cy) { const r = this.canvas.getBoundingClientRect(); const px = cx ?? r.width / 2; const py = cy ?? r.height / 2; const next = Math.min(2.5, Math.max(0.3, this.view.scale * f)); this.view.x = px - (px - this.view.x) * (next / this.view.scale); this.view.y = py - (py - this.view.y) * (next / this.view.scale); this.view.scale = next; this.applyView(); }
 
   _bindCanvas() {

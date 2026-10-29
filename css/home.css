@@ -412,7 +412,8 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
 .feature-section--experiments .feature-copy h2 em { color: var(--green); }
 .experiments-note { margin: auto 0 13px; color: #dce5e3; font-size: 12px; }
 .button--experiments { margin-top: 20px; }
-.experiments-showcase { position: relative; min-width: 0; overflow: hidden; padding: 19px; border: 1px solid rgba(130,230,168,.2); border-radius: 18px; background: linear-gradient(145deg, rgba(23,35,35,.9), rgba(10,17,20,.98)); box-shadow: 0 27px 76px rgba(0,0,0,.25), inset 0 1px rgba(255,255,255,.06); transform-style: preserve-3d; transition: border-color .3s ease; }
+.experiments-showcase { position: relative; display: block; min-width: 0; overflow: hidden; padding: 19px; border: 1px solid rgba(130,230,168,.2); border-radius: 18px; color: inherit; text-decoration: none; cursor: pointer; background: linear-gradient(145deg, rgba(23,35,35,.9), rgba(10,17,20,.98)); box-shadow: 0 27px 76px rgba(0,0,0,.25), inset 0 1px rgba(255,255,255,.06); transform-style: preserve-3d; transition: border-color .3s ease, box-shadow .3s ease; }
+.experiments-showcase:focus-visible { outline: 2px solid var(--green); outline-offset: 5px; border-color: rgba(130,230,168,.72); box-shadow: 0 0 0 4px rgba(130,230,168,.12), 0 27px 76px rgba(0,0,0,.25); }
 .experiments-showcase:hover { border-color: rgba(130,230,168,.4); }
 .experiment-heading, .experiments-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: #83978f; font-family: var(--font-mono); font-size: 7px; letter-spacing: .12em; }
 .scope-grid { position: relative; height: clamp(185px, 24vw, 244px); margin-top: 22px; overflow: hidden; border: 1px solid rgba(130,230,168,.12); border-radius: 8px; background-color: rgba(4,11,12,.55); background-image: linear-gradient(rgba(130,230,168,.075) 1px, transparent 1px), linear-gradient(90deg, rgba(130,230,168,.075) 1px, transparent 1px); background-size: 25px 25px; box-shadow: inset 0 0 30px rgba(0,0,0,.2); }
@@ -521,7 +522,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
   .reveal { opacity: 1; transform: none; }
-  .idea-fluid, .idea-fluid__glow, .feature-section::after { display: none; }
+  .idea-fluid, .idea-fluid__glow, .feature-section::after, .home-signal-field { display: none; }
 }
 
 /* =====================================================================
@@ -921,11 +922,48 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
   padding-bottom: 50px;
 }
 
+.home-signal-field {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  mask-image: linear-gradient(180deg, transparent 0%, #000 17%, #000 83%, transparent 100%);
+}
+.home-signal-field svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  width: 125%;
+  height: 100%;
+  animation: home-signal-flow 52s linear infinite;
+}
+.home-signal-field--library { opacity: .92; }
+@keyframes home-signal-flow { to { transform: translate3d(-20%, 0, 0); } }
+
+/* Pause decorative work only while its section is out of view. */
+.motion-paused,
+.motion-paused *,
+.motion-paused::before,
+.motion-paused::after,
+.motion-paused *::before,
+.motion-paused *::after {
+  animation-play-state: paused !important;
+}
+
 /* Section-specific ambient motion: each layer remains behind its copy and showcase. */
 .feature-section { isolation: isolate; }
 .feature-section::after { position: absolute; z-index: 0; inset: 0; content: ''; pointer-events: none; opacity: .7; }
 .feature-section--library::after { background: linear-gradient(90deg, transparent 0 18%, rgba(255,183,94,.12) 28%, transparent 38%) -55% 0 / 62% 100% no-repeat, repeating-linear-gradient(0deg, transparent 0 35px, rgba(255,183,94,.045) 36px, transparent 37px); mask-image: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent); animation: library-signal-scan 10s linear infinite; }
 .feature-section--omni::after { top: 50%; right: -18vw; bottom: auto; left: auto; width: min(68vw, 780px); aspect-ratio: 1; border: 1px solid rgba(125,228,255,.12); border-radius: 50%; background: repeating-conic-gradient(from 10deg, rgba(125,228,255,.13) 0 1deg, transparent 1deg 12deg); mask-image: radial-gradient(circle, transparent 0 44%, #000 45% 47%, transparent 48%); transform: translateY(-50%); animation: omni-field-orbit 28s linear infinite; }
+.feature-section--omni::before {
+  opacity: .72;
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%221200%22%20height%3D%22360%22%20viewBox%3D%220%200%201200%20360%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%237de4ff%22%20stroke-linecap%3D%22round%22%3E%3Cpath%20d%3D%22M0%2078%20C50%2038%20100%2038%20150%2078%20S250%20118%20300%2078%20S400%2038%20450%2078%20S550%20118%20600%2078%20S700%2038%20750%2078%20S850%20118%20900%2078%20S1000%2038%201050%2078%20S1150%20118%201200%2078%22%20stroke-opacity%3D%22.38%22%20stroke-width%3D%221.5%22%2F%3E%3Cpath%20d%3D%22M0%20180%20C50%20208%20100%20208%20150%20180%20S250%20152%20300%20180%20S400%20208%20450%20180%20S550%20152%20600%20180%20S700%20208%20750%20180%20S850%20152%20900%20180%20S1000%20208%201050%20180%20S1150%20152%201200%20180%22%20stroke-opacity%3D%22.22%22%20stroke-width%3D%221.2%22%2F%3E%3Cpath%20d%3D%22M0%20292%20C50%20276%20100%20276%20150%20292%20S250%20308%20300%20292%20S400%20276%20450%20292%20S550%20308%20600%20292%20S700%20276%20750%20292%20S850%20308%20900%20292%20S1000%20276%201050%20292%20S1150%20308%201200%20292%22%20stroke-opacity%3D%22.16%22%20stroke-width%3D%221.1%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E"), linear-gradient(rgba(180,202,228,.025) 1px, transparent 1px), linear-gradient(90deg, rgba(180,202,228,.025) 1px, transparent 1px);
+  background-size: 1200px 360px, 54px 54px, 54px 54px;
+  background-repeat: repeat, repeat, repeat;
+  animation: omni-sine-drift 34s linear infinite;
+}
 /* OMNI launch headline: the logo becomes the O */
 .feature-section--omni .feature-copy h2 .omni-title-word {
   display: inline-flex;
@@ -960,6 +998,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
 .feature-section--experiments::after { background: radial-gradient(ellipse at 0% 50%, rgba(130,230,168,.13), transparent 22%) -22% 0 / 52% 100% no-repeat, repeating-radial-gradient(ellipse at 50% 100%, transparent 0 20px, rgba(130,230,168,.06) 21px 22px, transparent 23px 42px); mask-image: linear-gradient(90deg, transparent, #000 18%, #000 83%, transparent); animation: experiment-signal-drift 13s linear infinite; }
 @keyframes library-signal-scan { to { background-position: 155% 0, 0 0; } }
 @keyframes omni-field-orbit { to { transform: translateY(-50%) rotate(360deg); } }
+@keyframes omni-sine-drift { to { background-position: -1200px 0, 0 0, 0 0; } }
 @keyframes experiment-signal-drift { to { background-position: 122% 0, 0 44px; } }
 /* Contact */
 /* ==========================================================
@@ -2364,4 +2403,139 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
   to {
     transform: translateX(-50%) rotate(377deg);
   }
+}
+
+/* =========================================================
+   OMNI SHOWCASE — ELECTRIC BLUE KALEIDOSCOPE LAUNCH
+   The source artwork remains fixed; independent light layers take over.
+   ========================================================= */
+.omni-patch-showcase[data-omni-launch-ready="true"] { cursor: pointer; outline: none; }
+.omni-patch-showcase[data-omni-launch-ready="true"]:focus-visible {
+  border-color: rgba(125,228,255,.75);
+  box-shadow: 0 0 0 3px rgba(125,228,255,.12), 0 30px 80px rgba(0,0,0,.28);
+}
+.omni-patch-showcase[data-omni-launch-ready="true"] .omni-patch-link { pointer-events: none; }
+.omni-launch-active { overflow: hidden !important; }
+.omni-launch-overlay {
+  position: fixed; inset: 0; z-index: 99999; overflow: hidden;
+  background: #050912; isolation: isolate; pointer-events: none;
+  opacity: 1; transition: background .42s ease;
+}
+.omni-launch-kaleido {
+  position: absolute; inset: -8%; z-index: 0; opacity: 0;
+  background:
+    repeating-conic-gradient(from 0deg at 50% 50%, rgba(125,228,255,.0) 0deg 4deg, rgba(125,228,255,.24) 4.3deg 5deg, rgba(12,91,255,.0) 5.5deg 11.25deg),
+    conic-gradient(from 45deg at 50% 50%, rgba(3,30,111,.1), rgba(13,94,255,.46), rgba(4,15,71,.08), rgba(48,177,255,.38), rgba(3,30,111,.1));
+  mask-image: radial-gradient(ellipse at center, #000 0%, #000 34%, rgba(0,0,0,.76) 59%, transparent 83%);
+  mix-blend-mode: screen; transform-origin: 50% 50%;
+  transition: opacity .22s ease;
+}
+.omni-launch-kaleido--two {
+  background:
+    repeating-conic-gradient(from 22.5deg at 50% 50%, rgba(125,228,255,.0) 0deg 8deg, rgba(125,228,255,.35) 8.5deg 9deg, transparent 9.5deg 22.5deg),
+    radial-gradient(ellipse at center, transparent 0 20%, rgba(12,91,255,.25) 38%, transparent 68%);
+  mask-image: radial-gradient(circle at center, transparent 0 10%, #000 11% 53%, transparent 82%);
+}
+.omni-launch-kaleido--three {
+  background:
+    repeating-conic-gradient(from 11.25deg at 50% 50%, rgba(8,27,88,.0) 0deg 10.8deg, rgba(125,228,255,.21) 11deg 11.5deg, rgba(22,107,255,.04) 12deg 22.5deg),
+    repeating-radial-gradient(circle at 50% 50%, transparent 0 20px, rgba(125,228,255,.18) 21px 22px, rgba(11,63,208,.1) 23px 25px, transparent 26px 39px);
+  mask-image: radial-gradient(circle at center, #000 0 22%, rgba(0,0,0,.7) 47%, transparent 78%);
+}
+.omni-launch-electric-grid {
+  position: absolute; inset: -8%; z-index: 1; opacity: 0;
+  background:
+    linear-gradient(90deg, transparent 49.85%, rgba(125,228,255,.48) 50%, transparent 50.15%),
+    linear-gradient(0deg, transparent 49.85%, rgba(125,228,255,.34) 50%, transparent 50.15%),
+    repeating-linear-gradient(45deg, transparent 0 44px, rgba(65,160,255,.075) 45px 46px, transparent 47px 90px),
+    radial-gradient(ellipse at center, rgba(16,99,255,.28), transparent 59%);
+  mix-blend-mode: screen; transition: opacity .2s ease;
+}
+.omni-launch-flash {
+  position: absolute; inset: -12%; z-index: 4; opacity: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse at center, rgba(241,253,255,.94) 0%, rgba(125,228,255,.78) 3%, rgba(38,143,255,.36) 13%, transparent 48%),
+    repeating-conic-gradient(from 0deg at 50% 50%, rgba(125,228,255,.0) 0deg 3deg, rgba(125,228,255,.24) 3.3deg 3.7deg, transparent 4deg 15deg);
+  mix-blend-mode: screen;
+}
+.omni-launch-stage {
+  box-sizing: border-box !important; z-index: 2 !important;
+  overflow: hidden !important; border-radius: 18px !important;
+  border-color: rgba(125,228,255,.45) !important;
+  transition: border-color .24s ease, box-shadow .24s ease, filter .3s ease, opacity .3s ease, transform .84s cubic-bezier(.16,.82,.18,1) !important;
+  will-change: opacity, filter, transform;
+}
+.omni-launch-stage.is-energized {
+  border-color: rgba(185,247,255,.96) !important;
+  box-shadow: 0 0 0 1px rgba(125,228,255,.6), 0 0 26px rgba(25,126,255,.5), 0 0 65px rgba(24,88,255,.27), inset 0 0 46px rgba(125,228,255,.12) !important;
+}
+.omni-launch-stage.is-energized .omni-patch-wire {
+  stroke-dasharray: 5 9 !important; animation: omni-launch-current .3s linear infinite !important;
+}
+.omni-launch-stage.is-energized .omni-patch-wire--audio { filter: drop-shadow(0 0 5px #7de4ff); }
+.omni-launch-stage.is-energized .omni-patch-wire--control { filter: drop-shadow(0 0 6px #7de4ff); }
+.omni-launch-stage.is-energized .omni-patch-wire--notes { filter: drop-shadow(0 0 5px #36a3ff); }
+.omni-launch-stage.is-energized .omni-patch-port { animation: omni-launch-port .28s ease-in-out infinite alternate; }
+.omni-launch-stage.is-energized .omni-patch-node { box-shadow: 0 0 0 1px rgba(125,228,255,.18), 0 0 18px rgba(38,143,255,.2), inset 0 1px rgba(255,255,255,.16); }
+.omni-launch-stage.is-overloaded { filter: brightness(1.75) saturate(.25) contrast(1.18) !important; }
+.omni-launch-stage.is-dissolving {
+  opacity: 0 !important; filter: brightness(4) saturate(0) blur(3px) !important;
+  border-color: rgba(200,248,255,.9) !important;
+}
+.omni-launch-overlay.is-energized .omni-launch-kaleido,
+.omni-launch-overlay.is-energized .omni-launch-electric-grid { opacity: .88; }
+.omni-launch-overlay.is-energized .omni-launch-kaleido--one { animation: omni-kaleido-turn-one 1.45s cubic-bezier(.14,.72,.18,1) both; }
+.omni-launch-overlay.is-energized .omni-launch-kaleido--two { animation: omni-kaleido-turn-two 1.65s cubic-bezier(.16,.8,.2,1) both; }
+.omni-launch-overlay.is-energized .omni-launch-kaleido--three { animation: omni-kaleido-turn-three 1.35s cubic-bezier(.14,.72,.18,1) both; }
+.omni-launch-overlay.is-kaleidoscope .omni-launch-kaleido { opacity: 1; }
+.omni-launch-overlay.is-kaleidoscope .omni-launch-kaleido--one { animation: omni-kaleido-wild-one .85s linear infinite; }
+.omni-launch-overlay.is-kaleidoscope .omni-launch-kaleido--two { animation: omni-kaleido-wild-two 1.15s linear infinite; }
+.omni-launch-overlay.is-kaleidoscope .omni-launch-kaleido--three { animation: omni-kaleido-wild-three .7s linear infinite; }
+.omni-launch-overlay.is-kaleidoscope .omni-launch-electric-grid { opacity: .95; animation: omni-grid-flicker .24s steps(2,end) infinite; }
+.omni-launch-overlay.is-kaleidoscope .omni-launch-flash { animation: omni-launch-flash .78s ease-out both; }
+.omni-launch-overlay.is-loading { background: #050912; }
+.omni-launch-overlay.is-loading .omni-launch-kaleido,
+.omni-launch-overlay.is-loading .omni-launch-electric-grid { opacity: 0; transition: opacity .28s ease; }
+.omni-launch-overlay.is-loading .omni-launch-flash { animation: omni-launch-flash .34s ease-out reverse both; }
+.omni-launch-loader {
+  position: absolute; inset: 0; z-index: 5; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 34px;
+  opacity: 0; transform: translateY(5px); transition: opacity .3s ease, transform .38s cubic-bezier(.2,.75,.2,1);
+}
+.omni-launch-loader.is-visible { opacity: 1; transform: translateY(0); }
+.omni-launch-logo {
+  display: block; width: clamp(54px, 6vw, 78px); height: clamp(54px, 6vw, 78px);
+  object-fit: contain; filter: drop-shadow(0 0 14px rgba(125,228,255,.5)) drop-shadow(0 0 48px rgba(20,103,255,.34));
+  animation: omni-launch-logo-breathe 1.25s ease-in-out infinite alternate;
+}
+.omni-launch-progress {
+  width: min(220px, 42vw); height: 2px; overflow: hidden; border-radius: 10px;
+  background: rgba(125,228,255,.13); box-shadow: 0 0 18px rgba(125,228,255,.07);
+}
+.omni-launch-progress span {
+  display: block; width: 0; height: 100%; border-radius: inherit;
+  background: linear-gradient(90deg, #176cff, #7de4ff, #f1fdff);
+  box-shadow: 0 0 15px rgba(125,228,255,.95);
+  animation: omni-launch-progress-fill 1.36s cubic-bezier(.22,.74,.21,1) forwards;
+}
+@keyframes omni-launch-current { to { stroke-dashoffset: -28; } }
+@keyframes omni-launch-port { to { filter: brightness(2); transform: scale(1.28); } }
+@keyframes omni-kaleido-turn-one { to { transform: rotate(247deg); } }
+@keyframes omni-kaleido-turn-two { to { transform: rotate(-191deg); } }
+@keyframes omni-kaleido-turn-three { to { transform: rotate(319deg); } }
+@keyframes omni-kaleido-wild-one { to { transform: rotate(360deg); } }
+@keyframes omni-kaleido-wild-two { to { transform: rotate(-360deg); } }
+@keyframes omni-kaleido-wild-three { to { transform: rotate(540deg); } }
+@keyframes omni-grid-flicker { 0%, 100% { opacity: .72; } 50% { opacity: 1; } }
+@keyframes omni-launch-flash {
+  0% { opacity: 0; transform: rotate(0deg); }
+  18% { opacity: .94; }
+  100% { opacity: .08; transform: rotate(40deg); }
+}
+@keyframes omni-launch-logo-breathe { to { filter: drop-shadow(0 0 23px rgba(125,228,255,.7)) drop-shadow(0 0 58px rgba(20,103,255,.46)); } }
+@keyframes omni-launch-progress-fill { to { width: 100%; } }
+@media (prefers-reduced-motion: reduce) {
+  .omni-launch-kaleido, .omni-launch-electric-grid, .omni-launch-flash, .omni-launch-stage, .omni-launch-loader { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+  .omni-launch-stage.is-energized .omni-patch-wire, .omni-launch-stage.is-energized .omni-patch-port, .omni-launch-logo, .omni-launch-progress span { animation: none !important; }
+  .omni-launch-progress span { width: 100%; }
 }
