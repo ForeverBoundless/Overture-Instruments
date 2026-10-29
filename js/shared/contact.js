@@ -82,56 +82,81 @@
 
       let lastFocus = null;
       let emailjsInitialized = false;
-      let lockedScrollY = 0;
-      let savedBodyStyles = null;
+      let scrollLocks = null;
 
       const setStatus = (message, kind = '') => {
         status.textContent = message;
         status.dataset.kind = kind;
       };
 
-      // Fix the body in place instead of toggling overflow alone. Some browsers
-      // jump the document to scrollY=0 when overflow is hidden and a modal field
-      // receives focus. A fixed body preserves the visible background position.
+      // Lock whichever element actually scrolls on the current page. The
+      // Library uses #launcher-page as its own scroll container; other pages
+      // scroll the document. Keep the modal outside that container so its
+      // backdrop and fixed positioning always cover the full viewport.
       const lockBackgroundScroll = () => {
+        const root = document.getElementById('launcher-page');
+        const useLauncherScroller = root && root.scrollHeight > root.clientHeight;
+        const scroller = useLauncherScroller ? root : document.scrollingElement;
         const bodyEl = document.body;
-        lockedScrollY = window.scrollY || window.pageYOffset || 0;
-        savedBodyStyles = {
-          position: bodyEl.style.position,
-          top: bodyEl.style.top,
-          left: bodyEl.style.left,
-          right: bodyEl.style.right,
-          width: bodyEl.style.width,
-          overflow: bodyEl.style.overflow,
-          paddingRight: bodyEl.style.paddingRight
+
+        scrollLocks = {
+          scroller,
+          scrollTop: scroller ? scroller.scrollTop : window.scrollY || window.pageYOffset || 0,
+          body: {
+            position: bodyEl.style.position,
+            top: bodyEl.style.top,
+            left: bodyEl.style.left,
+            right: bodyEl.style.right,
+            width: bodyEl.style.width,
+            overflow: bodyEl.style.overflow,
+            paddingRight: bodyEl.style.paddingRight
+          },
+          scrollerOverflow: scroller && scroller !== document.scrollingElement
+            ? scroller.style.overflow
+            : null,
+          htmlScrollBehavior: document.documentElement.style.scrollBehavior
         };
 
-        const scrollbarGap = Math.max(0, window.innerWidth - document.documentElement.clientWidth);
-        bodyEl.style.position = 'fixed';
-        bodyEl.style.top = `-${lockedScrollY}px`;
-        bodyEl.style.left = '0';
-        bodyEl.style.right = '0';
-        bodyEl.style.width = 'auto';
-        bodyEl.style.overflow = 'hidden';
-        if (scrollbarGap) bodyEl.style.paddingRight = `${scrollbarGap}px`;
+        if (scroller && scroller !== document.scrollingElement) {
+          scroller.style.overflow = 'hidden';
+        } else {
+          const scrollbarGap = Math.max(0, window.innerWidth - document.documentElement.clientWidth);
+          bodyEl.style.position = 'fixed';
+          bodyEl.style.top = `-${scrollLocks.scrollTop}px`;
+          bodyEl.style.left = '0';
+          bodyEl.style.right = '0';
+          bodyEl.style.width = 'auto';
+          bodyEl.style.overflow = 'hidden';
+          if (scrollbarGap) bodyEl.style.paddingRight = `${scrollbarGap}px`;
+        }
       };
 
       const unlockBackgroundScroll = () => {
-        if (!savedBodyStyles) return;
+        if (!scrollLocks) return;
+        const saved = scrollLocks;
         const bodyEl = document.body;
-        const restore = savedBodyStyles;
-        bodyEl.style.position = restore.position;
-        bodyEl.style.top = restore.top;
-        bodyEl.style.left = restore.left;
-        bodyEl.style.right = restore.right;
-        bodyEl.style.width = restore.width;
-        bodyEl.style.overflow = restore.overflow;
-        bodyEl.style.paddingRight = restore.paddingRight;
-        savedBodyStyles = null;
 
-        // Restore the same document position, and avoid focus restoration
-        // causing another browser-managed scroll adjustment.
-        window.scrollTo(0, lockedScrollY);
+        // Turn off smooth scrolling before restoring any scroll offsets; this
+        // prevents a jump to zero followed by an animated trip back down.
+        document.documentElement.style.scrollBehavior = 'auto';
+
+        bodyEl.style.position = saved.body.position;
+        bodyEl.style.top = saved.body.top;
+        bodyEl.style.left = saved.body.left;
+        bodyEl.style.right = saved.body.right;
+        bodyEl.style.width = saved.body.width;
+        bodyEl.style.overflow = saved.body.overflow;
+        bodyEl.style.paddingRight = saved.body.paddingRight;
+
+        if (saved.scroller && saved.scroller !== document.scrollingElement) {
+          saved.scroller.style.overflow = saved.scrollerOverflow || '';
+          saved.scroller.scrollTop = saved.scrollTop;
+        } else {
+          window.scrollTo({ top: saved.scrollTop, left: 0, behavior: 'auto' });
+        }
+
+        document.documentElement.style.scrollBehavior = saved.htmlScrollBehavior;
+        scrollLocks = null;
       };
 
       const open = () => {
