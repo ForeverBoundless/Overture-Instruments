@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="/css/brand.css">
   <link rel="stylesheet" href="/css/site-footer.css">
   <script src="/js/home.js" defer></script>
+  <script src="/js/omni-launch.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@5/dist/email.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js" defer></script>
 <script src="/js/shared/contact.js" defer></script>
@@ -229,7 +230,7 @@
             <div class="omni-chips"><span>DRAG & DROP</span><span>MODULAR</span><span>CUSTOMIZABLE</span></div>
             <p class="omni-status"><span class="status-pulse"></span>FIRST RELEASE AVAILABLE /<span class="status-divider"> </span></p>
           </div>
-          <div class="omni-showcase omni-patch-showcase reveal" data-tilt>
+          <div class="omni-showcase omni-patch-showcase reveal" data-tilt role="button" tabindex="0" aria-label="Launch the OMNI modular synthesis workspace">
   <div class="omni-patch-heading">
     <span class="omni-patch-heading__name">
       <i class="omni-patch-heading__signal"></i>
@@ -441,9 +442,9 @@
       PATCH <i>·</i> PLAY <i>·</i> EXPORT
     </span>
 
-    <a class="omni-patch-link" href="/omni">
+    <span class="omni-patch-link">
       Open OMNI <span aria-hidden="true">↗</span>
-    </a>
+    </span>
   </div>
 
   <!-- Subtle circular accents to echo the Experiments showcase -->
