@@ -1,0 +1,87 @@
+/*
+ * Overture Instruments — shared luminous title treatment.
+ * Loaded after site-theme.css to make the reference treatment consistent
+ * across the homepage, About, Library, Experiments, and standalone labs.
+ * This file deliberately excludes static Overture logos.
+ */
+html[data-theme="light"] {
+  --oi-glow-outline: rgba(49, 62, 57, .9);
+  --oi-glow-outline-width: .72px;
+}
+
+/* Restore the same luminous brand fills used by the dark theme. The outline
+   supplies contrast on pearl-grey without desaturating the accent colours. */
+html[data-theme="light"] :is(
+  .hero-title em,
+  .about-hero h1 span,
+  .story-heading h2 em,
+  .founder-copy h2 em,
+  .process-heading h2 em,
+  .next-heading h2 em,
+  .feature-section--library .feature-copy h2 em,
+  .launcher-hero h1 em
+) {
+  color: var(--amber-bright, #ffb75e) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+html[data-theme="light"] :is(
+  .feature-section--experiments .feature-copy h2 em,
+  .ex-page h1 em,
+  .lab-header h1 em
+) {
+  color: var(--green, #82e6a8) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+html[data-theme="light"] :is(
+  .feature-section--omni .feature-copy h2 .omni-title-word,
+  .omni-logo-wording strong
+) {
+  color: var(--cyan, #7de4ff) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+/* One edge recipe for all luminous/flickering text. Do not alter text-shadow:
+   each site section keeps its existing coloured glow and flicker timing. */
+html[data-theme="light"] :is(
+  .hero-title em,
+  .about-hero h1 span,
+  .story-heading h2 em,
+  .founder-copy h2 em,
+  .process-heading h2 em,
+  .next-heading h2 em,
+  .feature-copy h2 em,
+  .feature-section--omni .feature-copy h2 .omni-title-word,
+  .ex-page h1 em,
+  .lab-header h1 em,
+  .launcher-hero h1 em
+) {
+  -webkit-text-stroke: var(--oi-glow-outline-width) var(--oi-glow-outline) !important;
+  paint-order: stroke fill !important;
+}
+
+/* Preserve the animated gradient inside "a shared resource". Its edge uses
+   the exact same stroke and paint order as all other glowing headings. */
+html[data-theme="light"] .mission-heading h2 .resource-highlight__text {
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+  background-clip: text !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-stroke: var(--oi-glow-outline-width) var(--oi-glow-outline) !important;
+  paint-order: stroke fill !important;
+}
+
+/* Only logo artwork that is literally used as a glowing letter gets an edge.
+   Four tiny alpha-aware shadows echo the shared text stroke; all static OI
+   marks (including the top-left nav logo and the large hero emblem) are omitted. */
+html[data-theme="light"] .feature-section--omni .feature-copy h2 .omni-title-word img {
+  filter:
+    brightness(0) saturate(100%) invert(86%) sepia(18%) saturate(1722%)
+    hue-rotate(163deg) brightness(104%) contrast(103%)
+    drop-shadow(.42px 0 0 var(--oi-glow-outline))
+    drop-shadow(-.42px 0 0 var(--oi-glow-outline))
+    drop-shadow(0 .42px 0 var(--oi-glow-outline))
+    drop-shadow(0 -.42px 0 var(--oi-glow-outline))
+    drop-shadow(0 0 4px rgba(125,228,255,.85))
+    drop-shadow(0 0 12px rgba(65,190,255,.7))
+    drop-shadow(0 0 24px rgba(65,190,255,.35)) !important;
+}
