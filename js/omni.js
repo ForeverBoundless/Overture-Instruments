@@ -87,8 +87,9 @@ class OmniApp {
     el('span', '', canvasTitle, 'PATCH CANVAS');
     el('span', 'omni-canvas-hud__hint', canvasHud, 'DRAG TO PAN  ·  SCROLL TO ZOOM');
     this.world = el('div', 'omni-world', this.canvas);
-    this.wires = document.createElementNS(NS, 'svg'); this.wires.classList.add('omni-wires'); this.world.appendChild(this.wires);
-    this.cards = el('div', 'omni-cards', this.world);
+    this.worldContent = el('div', 'omni-world-content', this.world);
+    this.wires = document.createElementNS(NS, 'svg'); this.wires.classList.add('omni-wires'); this.worldContent.appendChild(this.wires);
+    this.cards = el('div', 'omni-cards', this.worldContent);
     this.canvas.addEventListener('dragover', (e) => { if (e.dataTransfer.types.includes('text/omni-module')) { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; } });
     this.canvas.addEventListener('drop', (e) => { const type = e.dataTransfer.getData('text/omni-module'); if (!type) return; e.preventDefault(); const p = this.toWorld(e.clientX, e.clientY); this.addModule(type, p.x - 90, p.y - 20); });
     this._bindCanvas();
@@ -204,9 +205,16 @@ class OmniApp {
   // ------------------------------------------------------------------ canvas
   toWorld(cx, cy) { const r = this.canvas.getBoundingClientRect(); return { x: (cx - r.left - this.view.x) / this.view.scale, y: (cy - r.top - this.view.y) / this.view.scale }; }
   applyView() {
-    this.world.style.transform = `translate(${this.view.x}px, ${this.view.y}px) scale(${this.view.scale})`;
-    // The canvas grid is a world-space reference surface: pan and zoom it with
-    // the patch rather than leaving it visually pinned to the viewport.
+    // Pan with layout positioning rather than a transformed compositing layer.
+    // Zoom is applied as layout zoom to the inner world so text, borders, ports,
+    // and SVG wires are re-rasterized sharply at the current scale instead of
+    // being enlarged from a cached texture.
+    this.world.style.left = `${this.view.x}px`;
+    this.world.style.top = `${this.view.y}px`;
+    this.world.style.transform = 'none';
+    this.worldContent.style.zoom = String(this.view.scale);
+
+    // Keep the canvas grid aligned with the same world-space pan and zoom.
     const gridSize = Math.max(12, 28 * this.view.scale);
     this.canvas.style.setProperty('--omni-grid-x', `${this.view.x}px`);
     this.canvas.style.setProperty('--omni-grid-y', `${this.view.y}px`);
