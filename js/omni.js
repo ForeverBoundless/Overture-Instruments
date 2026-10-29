@@ -28,23 +28,43 @@ class OmniApp {
   // ------------------------------------------------------------------ layout
   _build() {
     const root = document.getElementById('omni-root');
-    const bar = el('header', 'omni-toolbar', root);
-    el('div', 'omni-logo', bar).innerHTML = '<a href="/" title="Overture home"><img src="/ui/Logos/OvertureLogo.png" alt="Overture"></a><strong>OMNI</strong>';
-    this.nameInput = el('input', 'omni-name', bar); this.nameInput.value = this.patch.name; this.nameInput.setAttribute('aria-label', 'Instrument name'); this.nameInput.addEventListener('change', () => { this.patch.name = this.nameInput.value.slice(0, 60) || 'Untitled'; this.pushHistory(); });
-    const tb = (label, fn, title) => { const b = el('button', 'omni-tb', bar, label); b.type = 'button'; if (title) b.title = title; b.addEventListener('click', fn); return b; };
-    tb('NEW', () => this.load(defaultPatch()));
-    tb('TEMPLATES', () => this.templates(), 'Load a starter patch');
-    tb('SAVE', () => this.save());
-    this.loadSel = el('select', 'omni-tb omni-load', bar); this.loadSel.setAttribute('aria-label', 'Load saved instrument'); this.loadSel.addEventListener('change', () => { const it = this.store.get(this.loadSel.value); if (it) this.load(JSON.parse(JSON.stringify(it.data)), it.id); this.loadSel.value = ''; });
+    const bar = el('header', 'omni-app-header', root);
+    const topbar = el('div', 'omni-topbar', bar);
+    const brand = el('div', 'omni-logo', topbar);
+    brand.innerHTML = '<a class="omni-logo-mark" href="/" title="Overture home"><img src="/ui/Logos/OvertureLogo.png" alt="Overture"></a><span class="omni-logo-wording"><strong>OMNI</strong><small>MODULAR SYNTHESIS WORKSPACE</small></span>';
+    const project = el('label', 'omni-project', topbar);
+    el('span', 'omni-project-label', project, 'INSTRUMENT');
+    this.nameInput = el('input', 'omni-name', project); this.nameInput.value = this.patch.name; this.nameInput.placeholder = 'Untitled instrument'; this.nameInput.setAttribute('aria-label', 'Instrument name'); this.nameInput.addEventListener('change', () => { this.patch.name = this.nameInput.value.slice(0, 60) || 'Untitled'; this.nameInput.value = this.patch.name; this.pushHistory(); });
+    this.status = el('div', 'omni-status', topbar, 'Ready. Power on the audio to hear the instrument.');
+
+    const commandbar = el('div', 'omni-commandbar', bar);
+    const group = (label) => { const g = el('div', 'omni-tool-group', commandbar); g.setAttribute('role', 'group'); g.setAttribute('aria-label', label); return g; };
+    const tb = (label, fn, title, parent, variant = '') => { const b = el('button', `omni-tb${variant ? ` ${variant}` : ''}`, parent, label); b.type = 'button'; if (title) b.title = title; b.addEventListener('click', fn); return b; };
+
+    const patchTools = group('Instrument');
+    tb('NEW', () => this.load(defaultPatch()), 'New instrument', patchTools);
+    tb('TEMPLATES', () => this.templates(), 'Load a starter patch', patchTools);
+    tb('SAVE', () => this.save(), 'Save instrument in this browser', patchTools, 'omni-tb--primary');
+    this.loadSel = el('select', 'omni-tb omni-load', patchTools); this.loadSel.setAttribute('aria-label', 'Load saved instrument'); this.loadSel.title = 'Load saved instrument'; this.loadSel.addEventListener('change', () => { const it = this.store.get(this.loadSel.value); if (it) this.load(JSON.parse(JSON.stringify(it.data)), it.id); this.loadSel.value = ''; });
     this.refreshLoadList();
-    tb('DELETE', () => { if (!this.currentId) { this.msg('This instrument is not saved yet.'); return; } if (confirm('Delete the saved instrument?')) { this.store.remove(this.currentId); this.currentId = null; this.refreshLoadList(); this.msg('Deleted.'); } });
-    this.undoBtn = tb('UNDO', () => this.undo()); this.redoBtn = tb('REDO', () => this.redo());
-    tb('−', () => this.zoom(0.8), 'Zoom out'); tb('+', () => this.zoom(1.25), 'Zoom in'); tb('RESET VIEW', () => { this.view = { x: 20, y: 20, scale: 1 }; this.applyView(); });
-    tb('EXPORT JSON', () => downloadText(`${this.patch.name.replace(/\W+/g, '-') || 'omni'}.omni.json`, this.store.exportJSON({ name: this.patch.name, data: this.patch })));
-    tb('IMPORT JSON', () => pickFile('.json,application/json', (text) => { try { const { data } = this.store.parseImport(text); this.load(data); this.msg('Imported.'); } catch (err) { this.msg(err.message, true); } }));
-    tb('EXPORT SVG', () => downloadText(`${this.patch.name.replace(/\W+/g, '-') || 'omni'}.schematic.svg`, patchToSVG(this.patch), 'image/svg+xml'));
-    tb('GUIDE', () => this.guide());
-    this.status = el('div', 'omni-status', bar, 'Ready. Power on the audio to hear the instrument.');
+    tb('DELETE', () => { if (!this.currentId) { this.msg('This instrument is not saved yet.'); return; } if (confirm('Delete the saved instrument?')) { this.store.remove(this.currentId); this.currentId = null; this.refreshLoadList(); this.msg('Deleted.'); } }, 'Delete current saved instrument', patchTools, 'omni-tb--danger');
+
+    const historyTools = group('History');
+    this.undoBtn = tb('UNDO', () => this.undo(), 'Undo (Ctrl+Z)', historyTools);
+    this.redoBtn = tb('REDO', () => this.redo(), 'Redo (Ctrl+Shift+Z)', historyTools);
+
+    const viewTools = group('Canvas view');
+    tb('−', () => this.zoom(0.8), 'Zoom out', viewTools);
+    tb('+', () => this.zoom(1.25), 'Zoom in', viewTools);
+    tb('FIT VIEW', () => { this.view = { x: 20, y: 20, scale: 1 }; this.applyView(); }, 'Reset canvas view', viewTools);
+
+    const fileTools = group('Import and export');
+    tb('JSON ↓', () => downloadText(`${this.patch.name.replace(/\\W+/g, '-') || 'omni'}.omni.json`, this.store.exportJSON({ name: this.patch.name, data: this.patch })), 'Export patch as JSON', fileTools);
+    tb('JSON ↑', () => pickFile('.json,application/json', (text) => { try { const { data } = this.store.parseImport(text); this.load(data); this.msg('Imported.'); } catch (err) { this.msg(err.message, true); } }), 'Import patch JSON', fileTools);
+    tb('SVG ↓', () => downloadText(`${this.patch.name.replace(/\\W+/g, '-') || 'omni'}.schematic.svg`, patchToSVG(this.patch), 'image/svg+xml'), 'Export patch schematic as SVG', fileTools);
+
+    const helpTools = group('Help');
+    tb('GUIDE', () => this.guide(), 'Open the OMNI guide', helpTools);
     const main = el('div', 'omni-main', root);
     // Library
     const lib = el('aside', 'omni-library', main);
