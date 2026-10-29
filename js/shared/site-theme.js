@@ -14,7 +14,12 @@
     const next = theme === 'light' ? 'light' : 'dark';
     document.documentElement.dataset.theme = next;
     document.documentElement.style.colorScheme = next;
-    const meta = document.querySelector('meta[name="theme-color"]');
+    let meta = document.querySelector('meta[name="theme-color"]');
+    if (!meta && document.head) {
+      meta = document.createElement('meta');
+      meta.name = 'theme-color';
+      document.head.appendChild(meta);
+    }
     if (meta) meta.setAttribute('content', next === 'light' ? '#e8edf3' : '#0b0e13');
     if (persist) {
       try { localStorage.setItem(KEY, next); } catch (_err) { /* Keep this session usable if storage is blocked. */ }
