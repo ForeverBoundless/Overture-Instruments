@@ -152,3 +152,117 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .omni-guide-card button.omni-tpl:hover .omni-preview-wire,
 .omni-guide-card button.omni-tpl:focus-visible .omni-preview-wire { stroke-dasharray: 8 10; animation: omni-preview-flow 3.2s linear infinite; opacity: .96; }
 @keyframes omni-preview-flow { to { stroke-dashoffset: -36; } }
+
+
+/* =========================================================
+   OMNI DESKTOP WORKSPACE REFINEMENT
+   Compact command hierarchy, quieter panels, and a framed patch canvas.
+   ========================================================= */
+#omni-root { min-height: 0; grid-template-rows: auto minmax(0, 1fr) auto; }
+.omni-app-header {
+  position: relative; z-index: 8; display: grid; grid-template-rows: auto auto;
+  min-width: 0; border-bottom: 1px solid rgba(224,233,246,.09);
+  background: linear-gradient(180deg, rgba(17,22,30,.98), rgba(11,14,19,.97));
+  box-shadow: 0 8px 28px rgba(0,0,0,.12);
+}
+.omni-topbar {
+  display: flex; align-items: center; gap: 20px; min-width: 0;
+  min-height: 61px; padding: 9px 18px;
+}
+.omni-logo { flex: 0 0 auto; align-items: center; gap: 10px; margin: 0; }
+.omni-logo-mark { display: grid; place-items: center; width: 33px; height: 33px; border: 1px solid rgba(125,228,255,.17); border-radius: 10px; background: rgba(125,228,255,.035); }
+.omni-logo img { display: block; width: 22px; height: 22px; filter: drop-shadow(0 0 7px rgba(125,228,255,.18)); }
+.omni-logo-wording { display: grid; gap: 3px; }
+.omni-logo-wording strong { color: var(--cyan); font-size: 13px; font-weight: 750; letter-spacing: .23em; text-shadow: 0 0 16px rgba(125,228,255,.12); animation: none; }
+.omni-logo-wording small { color: #788596; font-family: var(--font-mono); font-size: 7px; letter-spacing: .1em; white-space: nowrap; }
+.omni-project { display: grid; gap: 3px; min-width: 160px; width: min(290px, 25vw); padding-left: 19px; border-left: 1px solid var(--line); }
+.omni-project-label { color: #6f7e90; font-family: var(--font-mono); font-size: 7px; letter-spacing: .13em; }
+.omni-name { width: 100%; min-width: 0; min-height: 25px; padding: 2px 0 3px; border: 0; border-bottom: 1px solid rgba(224,233,246,.11); border-radius: 0; background: transparent; color: #edf3fa; font-size: 12px; font-weight: 550; letter-spacing: -.015em; }
+.omni-name:hover, .omni-name:focus { border-color: rgba(125,228,255,.48); background: transparent; outline: none; }
+.omni-status { margin-left: auto; max-width: min(34vw, 430px); color: #7e8b9c; font-size: 9px; letter-spacing: .01em; text-transform: none; }
+.omni-status:not(.is-error)::before { display: inline-block; width: 5px; height: 5px; margin: 0 8px 1px 0; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px rgba(130,230,168,.4); content: ''; }
+.omni-commandbar {
+  display: flex; align-items: center; gap: 9px; min-width: 0; min-height: 44px;
+  padding: 5px 18px 8px; overflow-x: auto; overscroll-behavior-inline: contain;
+  border-top: 1px solid rgba(224,233,246,.045); scrollbar-width: thin;
+  scrollbar-color: rgba(125,228,255,.14) transparent;
+}
+.omni-tool-group { display: flex; flex: 0 0 auto; align-items: center; gap: 4px; padding-right: 9px; border-right: 1px solid rgba(224,233,246,.09); }
+.omni-tool-group:last-child { padding-right: 0; border-right: 0; margin-left: auto; }
+.omni-tb { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; min-height: 29px; padding: 0 10px; border-color: rgba(224,233,246,.105); border-radius: 6px; color: #aeb8c7; background: rgba(255,255,255,.018); font-size: 8px; font-weight: 700; letter-spacing: .065em; }
+.omni-tb:hover { transform: translateY(-1px); border-color: rgba(125,228,255,.3); color: #eef8ff; background: rgba(125,228,255,.045); box-shadow: 0 4px 12px rgba(0,0,0,.15); }
+.omni-tb--primary { color: #20170a; border-color: rgba(255,183,94,.65); background: linear-gradient(135deg, #ffd08b, #ffb75e); box-shadow: inset 0 1px rgba(255,255,255,.5); }
+.omni-tb--primary:hover { color: #20170a; border-color: #ffe0af; background: linear-gradient(135deg, #ffdda6, #ffc578); }
+.omni-tb--danger { color: #bc9295; }
+.omni-tb--danger:hover { border-color: rgba(248,113,113,.35); color: #ffb3b3; background: rgba(248,113,113,.07); }
+.omni-load { max-width: 132px; min-width: 105px; }
+.omni-main { grid-template-columns: clamp(200px, 18vw, 248px) minmax(0, 1fr) clamp(252px, 22vw, 310px); min-height: 0; }
+.omni-library, .omni-inspector { min-height: 0; padding: 17px 14px; border-color: rgba(224,233,246,.075); background: linear-gradient(180deg, rgba(16,21,29,.85), rgba(10,13,18,.88)); scrollbar-width: thin; scrollbar-color: rgba(125,228,255,.16) transparent; }
+.omni-library h2, .omni-inspector h2 { margin-bottom: 13px; color: #b5c0ce; font-size: 8px; letter-spacing: .16em; }
+.omni-library h2::before { width: 5px; height: 5px; box-shadow: 0 0 9px rgba(125,228,255,.5); }
+.omni-inspector h2::before { width: 5px; height: 5px; box-shadow: 0 0 9px rgba(255,183,94,.5); }
+.omni-hint { color: #7f8b9c; font-size: 10px; line-height: 1.6; }
+.omni-library h3 { margin-top: 19px; margin-bottom: 8px; font-size: 7px; }
+.omni-lib-item { margin: 3px 0; padding: 8px 9px 8px 11px; border-radius: 6px; background: rgba(255,255,255,.018); font-size: 10px; font-weight: 550; }
+.omni-lib-item:hover { transform: translateX(2px); box-shadow: 0 6px 16px rgba(0,0,0,.2); }
+.omni-canvas { isolation: isolate; background-color: #0a0d12; background-image: radial-gradient(ellipse at 50% 38%, rgba(57,178,198,.065), transparent 58%), linear-gradient(rgba(199,216,239,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(199,216,239,.035) 1px, transparent 1px); background-size: 100% 100%, 28px 28px, 28px 28px; }
+.omni-canvas-hud { position: absolute; z-index: 2; top: 0; right: 0; left: 0; display: flex; align-items: center; justify-content: space-between; gap: 14px; min-height: 34px; padding: 0 14px; border-bottom: 1px solid rgba(224,233,246,.055); color: #647286; background: linear-gradient(180deg, rgba(8,11,16,.76), rgba(8,11,16,.28)); font-family: var(--font-mono); font-size: 7px; letter-spacing: .11em; pointer-events: none; }
+.omni-canvas-hud__title { display: flex; align-items: center; gap: 8px; }
+.omni-canvas-hud__live { width: 5px; height: 5px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 7px rgba(125,228,255,.48); }
+.omni-canvas-hud__hint { color: #596779; font-size: 6px; }
+.omni-world { will-change: transform; }
+.omni-module { border-color: rgba(224,233,246,.14); border-radius: 7px; background: linear-gradient(145deg, rgba(25,32,42,.98), rgba(12,16,23,.99)); box-shadow: 0 12px 27px rgba(0,0,0,.32), inset 0 1px rgba(255,255,255,.045); }
+.omni-module-head { padding: 7px 9px; font-weight: 650; }
+.omni-module.is-selected { border-color: rgba(125,228,255,.65); box-shadow: 0 0 0 1px rgba(125,228,255,.28), 0 0 22px rgba(125,228,255,.08), 0 12px 30px rgba(0,0,0,.4); }
+.omni-port { width: 12px; height: 12px; }
+.omni-param { gap: 5px 8px; margin: 15px 0; }
+.omni-param span { color: #bdc8d7; font-size: 9px; }
+.omni-param input[type=range], .omni-master input { accent-color: var(--cyan); }
+.omni-param select { background: #111720; }
+.omni-insp-buttons { gap: 5px; margin-top: 18px; }
+.omni-perf { grid-template-columns: auto auto minmax(110px, 1fr) auto minmax(140px, 28%); gap: 13px; min-width: 0; padding: 10px 17px; border-top-color: rgba(224,233,246,.09); background: rgba(8,11,16,.98); }
+.omni-power { min-height: 32px; padding-inline: 13px; }
+.omni-master { white-space: nowrap; }
+.omni-master input { width: clamp(70px, 9vw, 120px); }
+.omni-midi { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.omni-keys { min-width: 0; }
+.omni-keys .lp-keyboard { height: 64px; }
+@media (max-width: 1180px) {
+  .omni-topbar { gap: 14px; padding-inline: 13px; }
+  .omni-commandbar { padding-inline: 13px; }
+  .omni-status { max-width: 210px; font-size: 8px; }
+  .omni-main { grid-template-columns: 200px minmax(0, 1fr) 250px; }
+  .omni-perf { grid-template-columns: auto auto minmax(90px, 1fr) auto minmax(120px, 25%); gap: 9px; }
+}
+@media (max-width: 960px) {
+  .omni-topbar { min-height: 56px; }
+  .omni-project { width: min(240px, 33vw); min-width: 130px; }
+  .omni-status { display: none; }
+  .omni-main { grid-template-columns: 176px minmax(0, 1fr); }
+  .omni-library { position: relative; inset: auto; width: auto; max-height: none; border-radius: 0; }
+  .omni-inspector { position: fixed; top: 118px; right: 10px; bottom: 102px; z-index: 6; width: 260px; max-height: none; border: 1px solid rgba(224,233,246,.12); border-radius: 10px; background: rgba(12,16,23,.97); backdrop-filter: blur(16px); box-shadow: 0 16px 48px rgba(0,0,0,.34); }
+  .omni-perf { grid-template-columns: auto auto minmax(75px, 1fr) auto; gap: 9px; }
+  .omni-keys { grid-column: 1 / -1; }
+  .omni-keys .lp-keyboard { height: 60px; }
+}
+@media (max-width: 600px) {
+  .omni-topbar { gap: 10px; padding: 8px 10px; }
+  .omni-logo-wording small { display: none; }
+  .omni-project { min-width: 0; width: auto; flex: 1; padding-left: 10px; }
+  .omni-name { font-size: 11px; }
+  .omni-commandbar { gap: 6px; padding: 5px 10px 7px; }
+  .omni-tool-group { gap: 3px; padding-right: 6px; }
+  .omni-tb { min-height: 28px; padding-inline: 8px; font-size: 7px; }
+  .omni-main { grid-template-columns: minmax(0, 1fr); }
+  .omni-library { position: fixed; left: 8px; bottom: 154px; z-index: 7; width: 168px; max-height: 34vh; overflow: auto; border: 1px solid rgba(224,233,246,.12); border-radius: 9px; background: rgba(12,16,23,.97); backdrop-filter: blur(14px); }
+  .omni-inspector { top: auto; right: 8px; bottom: 154px; width: min(230px, calc(100vw - 192px)); max-height: 38vh; padding: 12px; }
+  .omni-canvas-hud { min-height: 29px; padding-inline: 9px; font-size: 6px; }
+  .omni-canvas-hud__hint { max-width: 48%; text-align: right; line-height: 1.4; }
+  .omni-perf { grid-template-columns: auto auto minmax(65px, 1fr) auto; padding: 7px 9px; gap: 7px; }
+  .omni-master { gap: 4px; font-size: 7px; }
+  .omni-master input { width: 65px; }
+  .omni-keys .lp-keyboard { height: 50px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .omni-tb, .omni-lib-item, .omni-module, .omni-name { transition: none !important; }
+}
