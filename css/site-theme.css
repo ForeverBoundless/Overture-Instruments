@@ -578,3 +578,71 @@ html[data-theme="light"] .mission-copy p:first-child,
 html[data-theme="light"] .mission-copy strong { color: #263646 !important; }
 html[data-theme="light"] .about-hero__glow--amber { background: #c46f06 !important; opacity: .12 !important; }
 html[data-theme="light"] .about-hero__glow--cyan { background: #0c8eb3 !important; opacity: .13 !important; }
+
+
+/* Preserve actual Overture mark colours in both "coming soon" treatments. */
+html[data-theme="light"] .home-coming-soon__o-icon,
+html[data-theme="light"] .launcher-coming-soon__o-icon { filter: none !important; }
+html[data-theme="light"] .home-coming-soon__copy strong,
+html[data-theme="light"] .launcher-coming-soon__copy strong { color: #253648 !important; }
+html[data-theme="light"] .launcher-coming-soon__eyebrow,
+html[data-theme="light"] .launcher-coming-soon__arrow { color: #ad5f00 !important; }
+html[data-theme="light"] .launcher-coming-soon__signal {
+  border-color: rgba(173,95,0,.72) !important;
+  box-shadow: 0 0 0 7px rgba(173,95,0,.1), inset 0 0 16px rgba(173,95,0,.18) !important;
+  animation-name: launcher-coming-soon-pulse-light !important;
+}
+html[data-theme="light"] .launcher-coming-soon__signal::before {
+  border-color: #b36a08 !important;
+  animation-name: home-coming-ring-light !important;
+}
+html[data-theme="light"] .launcher-coming-soon__signal::after {
+  border-color: #ad5f00 !important;
+  background: #c47808 !important;
+  box-shadow: 0 0 10px rgba(173,95,0,.82) !important;
+  animation-name: home-coming-dot-light !important;
+}
+html[data-theme="light"] .launcher-coming-soon__arrow:hover {
+  color: #8a4e00 !important;
+  background: rgba(173,95,0,.08) !important;
+  border-color: rgba(173,95,0,.28) !important;
+}
+html[data-theme="light"] .launcher-coming-soon::before {
+  background: radial-gradient(circle at 16% 50%,rgba(173,95,0,.12),transparent 30%),repeating-linear-gradient(115deg,transparent 0 17px,rgba(43,59,78,.025) 18px,transparent 19px) !important;
+}
+@keyframes launcher-coming-soon-pulse-light {
+  0%,100% { opacity:.86; box-shadow:0 0 0 7px rgba(173,95,0,.08),inset 0 0 13px rgba(173,95,0,.14); }
+  50% { opacity:1; box-shadow:0 0 0 9px rgba(173,95,0,.13),inset 0 0 20px rgba(173,95,0,.24),0 0 13px rgba(173,95,0,.17); }
+}
+html[data-theme="light"] .ex-card span.ex-num::after {
+  background: linear-gradient(90deg,#087f9f,rgba(8,127,159,0)) !important;
+}
+html[data-theme="light"] .experiments-panel-head {
+  border-bottom-color: rgba(22,119,71,.17) !important;
+  background: rgba(255,255,255,.24) !important;
+}
+html[data-theme="light"] .experiments-panel-monogram {
+  color: #167747 !important; border-color: rgba(22,119,71,.23) !important;
+  background: rgba(22,119,71,.055) !important;
+}
+html[data-theme="light"] .experiments-panel-brand > span:last-child,
+html[data-theme="light"] .experiments-panel-state { color: #526174 !important; }
+html[data-theme="light"] .experiments-panel-state {
+  border-color: rgba(22,119,71,.22) !important; background: rgba(22,119,71,.045) !important;
+}
+html[data-theme="light"] .experiments-panel-state i,
+html[data-theme="light"] .status-dot--green { background: #167747 !important; box-shadow: 0 0 8px rgba(22,119,71,.42) !important; }
+html[data-theme="light"] :is(.experiments-lab-index,.experiments-lab-tag,.experiments-showcase .experiment-control__label,.experiments-showcase .experiment-control__top > span,.experiments-showcase .experiment-control__scale,.experiments-footer__metrics) { color: #526174 !important; }
+html[data-theme="light"] .experiments-lab-title h3,
+html[data-theme="light"] .experiment-waveform b,
+html[data-theme="light"] .experiments-showcase .experiment-control__top b { color: #263646 !important; }
+html[data-theme="light"] .experiments-showcase .experiment-control__top b small { color: #647487 !important; }
+html[data-theme="light"] .experiments-showcase .experiment-control {
+  border-color: rgba(43,59,78,.12) !important;
+  background: linear-gradient(180deg,rgba(255,255,255,.5),rgba(220,230,238,.42)) !important;
+}
+html[data-theme="light"] .experiments-showcase .fake-slider { background: rgba(43,59,78,.2) !important; }
+html[data-theme="light"] .experiments-showcase .fake-slider i {
+  border-color: #167747 !important; background: #167747 !important;
+  box-shadow: 0 0 8px rgba(22,119,71,.45) !important;
+}
