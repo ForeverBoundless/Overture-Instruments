@@ -864,12 +864,21 @@ html[data-theme="light"] :is(
 /* PNGs have transparent backgrounds, so several tiny dark drop-shadows build
    an outline around the actual Overture mark's alpha silhouette, not its box.
    Keep the cyan headline O cyan; make monochrome logo marks slightly bolder. */
+/* Static monochrome Overture marks are simply black in light mode.
+   Never outline the persistent top-left brand mark or other non-glowing logos. */
 html[data-theme="light"] :is(
   .site-header .site-brand__mark img,
   .footer-brand img,
-  .hero-logo,
   .showcase-cta__icon img,
-  .omni-patch-heading__brand img,
+  .omni-patch-heading__brand img
+) {
+  filter: brightness(0) saturate(100%) !important;
+}
+
+/* Only the luminous homepage/library brand treatments receive an outline.
+   Drop shadows follow the transparent image's alpha silhouette, not its box. */
+html[data-theme="light"] :is(
+  .hero-logo,
   .home-coming-soon__o-icon,
   .launcher-hero__o-icon,
   .launcher-coming-soon__o-icon
