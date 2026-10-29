@@ -834,3 +834,76 @@ html[data-theme="light"] .launcher-coming-soon__signal::after {
   0%,100% { opacity:.8; box-shadow:0 0 7px rgba(38,49,61,.45); }
   50% { opacity:1; box-shadow:0 0 12px rgba(38,49,61,.75),0 0 19px rgba(38,49,61,.34); }
 }
+
+
+/* About-page story circuits: graphite traces, nodes, and pulses in light mode. */
+html[data-theme="light"] .story-circuit__lines path {
+  stroke: #26313d !important;
+  filter: none !important;
+}
+html[data-theme="light"] .story-circuit__nodes circle {
+  fill: #26313d !important;
+  filter: drop-shadow(0 0 2px rgba(38,49,61,.25)) !important;
+}
+html[data-theme="light"] .story-circuit__pulses circle {
+  stroke: #26313d !important;
+  filter: none !important;
+}
+
+/* Slightly heavier edge-following keylines for luminous homepage/library text.
+   The stroke follows each glyph, unlike a box-shadow around its container. */
+html[data-theme="light"] :is(
+  .hero-title em,
+  .feature-section--library .feature-copy h2 em,
+  .launcher-hero h1 em
+) {
+  -webkit-text-stroke: .68px rgba(12,18,25,.9) !important;
+  paint-order: stroke fill;
+}
+
+/* PNGs have transparent backgrounds, so several tiny dark drop-shadows build
+   an outline around the actual Overture mark's alpha silhouette, not its box.
+   Keep the cyan headline O cyan; make monochrome logo marks slightly bolder. */
+html[data-theme="light"] :is(
+  .site-header .site-brand__mark img,
+  .footer-brand img,
+  .hero-logo,
+  .showcase-cta__icon img,
+  .omni-patch-heading__brand img,
+  .home-coming-soon__o-icon,
+  .launcher-hero__o-icon,
+  .launcher-coming-soon__o-icon
+) {
+  filter:
+    brightness(0) saturate(100%)
+    drop-shadow(1px 0 0 #111820)
+    drop-shadow(-1px 0 0 #111820)
+    drop-shadow(0 1px 0 #111820)
+    drop-shadow(0 -1px 0 #111820)
+    drop-shadow(0 0 1px rgba(17,24,32,.85)) !important;
+}
+html[data-theme="light"] .hero-logo {
+  filter:
+    brightness(0) saturate(100%)
+    drop-shadow(1px 0 0 #111820)
+    drop-shadow(-1px 0 0 #111820)
+    drop-shadow(0 1px 0 #111820)
+    drop-shadow(0 -1px 0 #111820)
+    drop-shadow(0 0 1px rgba(17,24,32,.85))
+    drop-shadow(0 0 18px rgba(255,174,80,.18)) !important;
+}
+
+/* The O inserted into "OMNI" intentionally remains cyan, but gets the same
+   silhouette-following outline so its shape reads clearly on pale grey. */
+html[data-theme="light"] .feature-section--omni .feature-copy h2 .omni-title-word img {
+  filter:
+    brightness(0) saturate(100%) invert(86%) sepia(18%) saturate(1722%)
+    hue-rotate(163deg) brightness(104%) contrast(103%)
+    drop-shadow(1px 0 0 #111820)
+    drop-shadow(-1px 0 0 #111820)
+    drop-shadow(0 1px 0 #111820)
+    drop-shadow(0 -1px 0 #111820)
+    drop-shadow(0 0 4px rgba(125,228,255,.85))
+    drop-shadow(0 0 12px rgba(65,190,255,.7))
+    drop-shadow(0 0 24px rgba(65,190,255,.35)) !important;
+}
