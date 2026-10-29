@@ -80,6 +80,11 @@ class OmniApp {
     });
     // Canvas
     this.canvas = el('div', 'omni-canvas', main); this.canvas.tabIndex = 0; this.canvas.setAttribute('aria-label', 'Patch canvas');
+    const canvasHud = el('div', 'omni-canvas-hud', this.canvas);
+    const canvasTitle = el('div', 'omni-canvas-hud__title', canvasHud);
+    el('span', 'omni-canvas-hud__live', canvasTitle);
+    el('span', '', canvasTitle, 'PATCH CANVAS');
+    el('span', 'omni-canvas-hud__hint', canvasHud, 'DRAG TO PAN  ·  SCROLL TO ZOOM');
     this.world = el('div', 'omni-world', this.canvas);
     this.wires = document.createElementNS(NS, 'svg'); this.wires.classList.add('omni-wires'); this.world.appendChild(this.wires);
     this.cards = el('div', 'omni-cards', this.world);
