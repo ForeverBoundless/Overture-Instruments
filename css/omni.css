@@ -220,7 +220,6 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .omni-canvas-hud__title { display: flex; align-items: center; gap: 8px; }
 .omni-canvas-hud__live { width: 5px; height: 5px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 7px rgba(125,228,255,.48); }
 .omni-canvas-hud__hint { color: #596779; font-size: 6px; }
-.omni-world { will-change: transform; }
 .omni-module { border-color: rgba(224,233,246,.14); border-radius: 7px; background: linear-gradient(145deg, rgba(25,32,42,.98), rgba(12,16,23,.99)); box-shadow: 0 12px 27px rgba(0,0,0,.32), inset 0 1px rgba(255,255,255,.045); }
 .omni-module-head { padding: 7px 9px; font-weight: 650; }
 .omni-module.is-selected { border-color: rgba(125,228,255,.65); box-shadow: 0 0 0 1px rgba(125,228,255,.28), 0 0 22px rgba(125,228,255,.08), 0 12px 30px rgba(0,0,0,.4); }
