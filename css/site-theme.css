@@ -92,8 +92,8 @@ html[data-theme="light"] .site-theme-toggle:hover { color: #075d7b; border-color
   transform: translate(-50%,-50%);
 }
 .site-nav-side { display: flex; align-items: center; gap: clamp(14px, 2vw, 28px); min-width: 0; }
-.site-nav-side--left { justify-content: flex-end; }
-.site-nav-side--right { justify-content: flex-start; }
+.site-nav-side--left { grid-column: 1; justify-content: flex-end; }
+.site-nav-side--right { grid-column: 3; justify-content: flex-start; }
 .site-header .main-nav a { white-space: nowrap; }
 .site-header .site-brand, .site-header .header-github, .site-header .menu-toggle { position: relative; z-index: 61; }
 @media (max-width: 980px) {
