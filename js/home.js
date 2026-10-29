@@ -233,7 +233,17 @@
 
   if (mission && fluidCanvas && !reduceMotion.matches) {
     const context = fluidCanvas.getContext('2d', { alpha: true });
-    const colors = ['255,183,94', '125,228,255', '130,230,168'];
+    const palettes = {
+      dark: ['255,183,94', '125,228,255', '130,230,168'],
+      // Deeper, more saturated amber / cyan / green for the pearlescent surface.
+      light: ['173,95,0', '8,127,159', '22,119,71']
+    };
+    let colors = palettes.dark;
+    const syncParticlePalette = () => {
+      colors = document.documentElement.dataset.theme === 'light' ? palettes.light : palettes.dark;
+    };
+    syncParticlePalette();
+    window.addEventListener('overture:themechange', syncParticlePalette);
     const particles = [];
     const ripples = [];
     let width = 0;
@@ -330,7 +340,8 @@
       ripples.forEach((ripple) => {
         const age = (now - ripple.born) / 1000;
         if (age >= 1.8) return;
-        context.strokeStyle = `rgba(125,228,255,${(1 - age / 1.8) * .2})`;
+        const rippleRGB = document.documentElement.dataset.theme === 'light' ? '8,127,159' : '125,228,255';
+        context.strokeStyle = `rgba(${rippleRGB},${(1 - age / 1.8) * (document.documentElement.dataset.theme === 'light' ? .42 : .2)})`;
         context.lineWidth = 1;
         context.beginPath();
         context.arc(ripple.x, ripple.y, 10 + age * 102, 0, Math.PI * 2);
