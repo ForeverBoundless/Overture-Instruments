@@ -401,3 +401,58 @@ html[data-theme="light"] .resource-highlight__text {
 html[data-theme="light"] .site-header .main-nav a[aria-current="page"]::after {
   background: #c17a17 !important; box-shadow: 0 0 8px rgba(193,122,23,.17) !important;
 }
+
+/* Additional nested surfaces that used the original dark palette. */
+html[data-theme="light"] :is(.stack-card--back,.stack-card--mid,.stack-card--front) {
+  border-color: rgba(43,59,78,.2) !important;
+  background: linear-gradient(145deg,#f5f7fa,#dce4ec 76%,#cbd6e1) !important;
+  box-shadow: 0 16px 34px rgba(45,60,81,.2),inset 0 1px #fff !important;
+}
+html[data-theme="light"] .stack-card__brand { color: #293949 !important; }
+html[data-theme="light"] .stack-card__lines { opacity: .55; background-image: repeating-linear-gradient(90deg,#6b7a8b 0 2px,transparent 2px 9px),linear-gradient(180deg,transparent,rgba(43,59,78,.04)); }
+html[data-theme="light"] .stack-card__display { background: #172532 !important; }
+html[data-theme="light"] .floating-readout {
+  color: #253648 !important; border-color: rgba(43,59,78,.17) !important;
+  background: linear-gradient(145deg,rgba(250,252,254,.97),rgba(226,233,241,.98)) !important;
+  box-shadow: 0 9px 25px rgba(45,60,81,.13),inset 0 1px #fff !important;
+}
+html[data-theme="light"] .floating-readout span { color: #627287 !important; }
+html[data-theme="light"] .floating-readout b { color: #253648 !important; }
+html[data-theme="light"] .showcase-cta {
+  color: #263646 !important; border-color: rgba(174,111,19,.24) !important;
+  background: linear-gradient(105deg,rgba(255,224,175,.65),rgba(248,250,252,.96) 46%,rgba(222,232,240,.96)) !important;
+  box-shadow: 0 7px 22px rgba(45,60,81,.07),inset 0 1px #fff !important;
+}
+html[data-theme="light"] .showcase-cta small { color: #69788a !important; }
+html[data-theme="light"] .showcase-cta .showcase-cta__icon { background: rgba(8,124,170,.08) !important; border-color: rgba(8,124,170,.18) !important; }
+html[data-theme="light"] .experiments-note { color: #43566a !important; }
+html[data-theme="light"] .scope-grid {
+  border-color: rgba(43,59,78,.15) !important; background-color: #e6edf3 !important;
+  background-image: linear-gradient(rgba(65,96,127,.1) 1px,transparent 1px),linear-gradient(90deg,rgba(65,96,127,.1) 1px,transparent 1px) !important;
+}
+html[data-theme="light"] .experiment-control__scale span { background-color: rgba(43,59,78,.17) !important; }
+html[data-theme="light"] .toast {
+  color: #263646 !important; border-color: rgba(43,59,78,.18) !important;
+  background: rgba(245,248,251,.97) !important; box-shadow: 0 14px 36px rgba(45,60,81,.17) !important;
+}
+html[data-theme="light"] :is(.next-card,.about-cta,.hero-stat) {
+  color: #263646 !important; border-color: rgba(43,59,78,.15) !important;
+  background: linear-gradient(145deg,rgba(250,252,254,.97),rgba(226,233,241,.97)) !important;
+  box-shadow: 0 18px 42px rgba(45,60,81,.1),inset 0 1px #fff !important;
+}
+html[data-theme="light"] .next-card:hover { background: linear-gradient(145deg,#f8fbfd,#dce6ef) !important; }
+html[data-theme="light"] .hero-stat__text,html[data-theme="light"] .next-card__index { color: #647487 !important; }
+html[data-theme="light"] .next-card h3,html[data-theme="light"] .about-cta h2 { color: #202b38 !important; }
+html[data-theme="light"] .about-cta > div > p:last-child { color: #596a7d !important; }
+html[data-theme="light"] .hero-stat__source { color: #344a5e !important; border-color: rgba(43,59,78,.16) !important; background: rgba(255,255,255,.6) !important; }
+html[data-theme="light"] .hero-stat__source:hover { color: #fff !important; background: var(--accent) !important; }
+html[data-theme="light"] #power-overlay-inner {
+  color: #263646 !important; border-color: rgba(43,59,78,.17) !important;
+  background: linear-gradient(145deg,rgba(249,252,254,.98),rgba(225,233,241,.98)) !important;
+  box-shadow: 0 32px 90px rgba(45,60,81,.24),inset 0 1px #fff !important;
+}
+html[data-theme="light"] #power-overlay-title { color: #202b38 !important; }
+html[data-theme="light"] .power-launcher-copy { color: #586a7d !important; }
+html[data-theme="light"] .power-launcher-footer { color: #68788a !important; }
+html[data-theme="light"] .power-orbit { border-color: rgba(43,59,78,.1) !important; }
+html[data-theme="light"] .site-theme-generated-header { position: absolute; }
