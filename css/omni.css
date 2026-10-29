@@ -266,3 +266,17 @@ button, a { -webkit-tap-highlight-color: transparent; }
 @media (prefers-reduced-motion: reduce) {
   .omni-tb, .omni-lib-item, .omni-module, .omni-name { transition: none !important; }
 }
+
+
+/* Pan the reference grid with the patch world so the canvas feels like a
+   continuous workspace, not a fixed website background. */
+.omni-canvas {
+  background-position:
+    0 0,
+    var(--omni-grid-x, 0px) var(--omni-grid-y, 0px),
+    var(--omni-grid-x, 0px) var(--omni-grid-y, 0px);
+  background-size:
+    100% 100%,
+    var(--omni-grid-size, 28px) var(--omni-grid-size, 28px),
+    var(--omni-grid-size, 28px) var(--omni-grid-size, 28px);
+}
