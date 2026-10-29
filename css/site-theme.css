@@ -445,7 +445,7 @@ html[data-theme="light"] .hero-stat__text,html[data-theme="light"] .next-card__i
 html[data-theme="light"] .next-card h3,html[data-theme="light"] .about-cta h2 { color: #202b38 !important; }
 html[data-theme="light"] .about-cta > div > p:last-child { color: #596a7d !important; }
 html[data-theme="light"] .hero-stat__source { color: #344a5e !important; border-color: rgba(43,59,78,.16) !important; background: rgba(255,255,255,.6) !important; }
-html[data-theme="light"] .hero-stat__source:hover { color: #fff !important; background: var(--accent) !important; }
+html[data-theme="light"] .hero-stat__source:hover { color: #202b38 !important; background: var(--accent) !important; }
 html[data-theme="light"] #power-overlay-inner {
   color: #263646 !important; border-color: rgba(43,59,78,.17) !important;
   background: linear-gradient(145deg,rgba(249,252,254,.98),rgba(225,233,241,.98)) !important;
@@ -456,3 +456,20 @@ html[data-theme="light"] .power-launcher-copy { color: #586a7d !important; }
 html[data-theme="light"] .power-launcher-footer { color: #68788a !important; }
 html[data-theme="light"] .power-orbit { border-color: rgba(43,59,78,.1) !important; }
 html[data-theme="light"] .site-theme-generated-header { position: absolute; }
+
+html[data-theme="light"] .home-coming-soon {
+  color: #253648 !important; border-color: rgba(43,59,78,.16) !important;
+  background: linear-gradient(115deg,rgba(246,249,252,.97),rgba(224,232,240,.97)) !important;
+  box-shadow: 0 18px 48px rgba(45,60,81,.1),inset 0 1px #fff !important;
+}
+html[data-theme="light"] .home-coming-soon__subline { color: #56677a !important; }
+.site-theme-toggle--floating { top: 24px; }
+@media (max-width: 960px) {
+  .omni-logo-wording small { display: none; }
+  .omni-project { width: min(190px,22vw); min-width: 120px; }
+}
+@media (max-width: 600px) {
+  .omni-topbar { gap: 10px; padding-inline: 10px; }
+  .omni-logo-wording strong { font-size: 11px; letter-spacing: .15em; }
+  .omni-project { width: max(48px,calc(50vw - 150px)); min-width: 0; flex: 0 1 auto; padding-left: 8px; }
+}
