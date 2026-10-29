@@ -1,16 +1,13 @@
 /*
- * Overture Instruments — shared luminous title treatment.
- * Loaded after site-theme.css to make the reference treatment consistent
- * across the homepage, About, Library, Experiments, and standalone labs.
- * This file deliberately excludes static Overture logos.
+ * Overture Instruments — one shared luminous title treatment.
+ * Loaded after site-theme.css on all non-emulator site pages.
  */
 html[data-theme="light"] {
   --oi-glow-outline: rgba(49, 62, 57, .9);
-  --oi-glow-outline-width: .72px;
+  --oi-glow-outline-width: 1.05px;
 }
 
-/* Restore the same luminous brand fills used by the dark theme. The outline
-   supplies contrast on pearl-grey without desaturating the accent colours. */
+/* Restore the original luminous brand fills in light mode. */
 html[data-theme="light"] :is(
   .hero-title em,
   .about-hero h1 span,
@@ -40,8 +37,8 @@ html[data-theme="light"] :is(
   -webkit-text-fill-color: currentColor !important;
 }
 
-/* One edge recipe for all luminous/flickering text. Do not alter text-shadow:
-   each site section keeps its existing coloured glow and flicker timing. */
+/* One stronger but still fine graphite outline for all luminous text. Existing
+   text-shadow and animation declarations are deliberately left untouched. */
 html[data-theme="light"] :is(
   .hero-title em,
   .about-hero h1 span,
@@ -53,14 +50,15 @@ html[data-theme="light"] :is(
   .feature-section--omni .feature-copy h2 .omni-title-word,
   .ex-page h1 em,
   .lab-header h1 em,
-  .launcher-hero h1 em
+  .launcher-hero h1 em,
+  .omni-guide-card h2 em
 ) {
   -webkit-text-stroke: var(--oi-glow-outline-width) var(--oi-glow-outline) !important;
   paint-order: stroke fill !important;
 }
 
-/* Preserve the animated gradient inside "a shared resource". Its edge uses
-   the exact same stroke and paint order as all other glowing headings. */
+/* Preserve the spectrum fill inside "a shared resource", with the exact same
+   stroke width and colour as the other glowing headings. */
 html[data-theme="light"] .mission-heading h2 .resource-highlight__text {
   color: transparent !important;
   -webkit-text-fill-color: transparent !important;
@@ -70,18 +68,18 @@ html[data-theme="light"] .mission-heading h2 .resource-highlight__text {
   paint-order: stroke fill !important;
 }
 
-/* Only logo artwork that is literally used as a glowing letter gets an edge.
-   Four tiny alpha-aware shadows echo the shared text stroke; all static OI
-   marks (including the top-left nav logo and the large hero emblem) are omitted. */
+/* The inline O in OMNI is an image rather than text. One soft alpha-aware
+   edge approximates the same 1.05px stroke without the four directional
+   shadows that made its outline look heavier than the MNI lettering. */
 html[data-theme="light"] .feature-section--omni .feature-copy h2 .omni-title-word img {
   filter:
     brightness(0) saturate(100%) invert(86%) sepia(18%) saturate(1722%)
     hue-rotate(163deg) brightness(104%) contrast(103%)
-    drop-shadow(.42px 0 0 var(--oi-glow-outline))
-    drop-shadow(-.42px 0 0 var(--oi-glow-outline))
-    drop-shadow(0 .42px 0 var(--oi-glow-outline))
-    drop-shadow(0 -.42px 0 var(--oi-glow-outline))
+    drop-shadow(0 0 .72px var(--oi-glow-outline))
     drop-shadow(0 0 4px rgba(125,228,255,.85))
     drop-shadow(0 0 12px rgba(65,190,255,.7))
     drop-shadow(0 0 24px rgba(65,190,255,.35)) !important;
 }
+
+/* Static marks—including the top-left logo—are deliberately not outlined.
+   site-theme.css handles their monochrome light-mode treatment. */
