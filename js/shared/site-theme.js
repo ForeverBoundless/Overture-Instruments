@@ -46,7 +46,36 @@
     nav.dataset.themeSplit = 'true';
   };
 
+  const ensureLabNavigation = () => {
+    if (!document.body?.dataset.lab || document.querySelector('.site-header')) return;
+    const root = document.getElementById('lab-root');
+    if (!root) return;
+    const header = document.createElement('header');
+    header.className = 'site-header site-theme-generated-header';
+    header.innerHTML = `
+      <a class="site-brand" href="/" aria-label="Overture Instruments home">
+        <span class="site-brand__mark"><img src="/ui/Logos/OvertureLogo.png" alt="" width="24" height="24"></span>
+        <span class="site-brand__wordmark">OVERTURE INSTRUMENTS</span>
+      </a>
+      <nav class="main-nav" id="main-nav" aria-label="Main navigation">
+        <a href="/about">About</a><a href="/library">Instrument library</a><a href="/#omni">OMNI</a><a href="/experiments" aria-current="page">Experiments</a>
+      </nav>
+      <a class="header-github" href="https://github.com/ForeverBoundless/Overture-Instruments" target="_blank" rel="noopener noreferrer"><span>GitHub</span><span class="external-arrow" aria-hidden="true">↗</span></a>
+      <button class="menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="main-nav"><span></span><span></span></button>`;
+    const nav = header.querySelector('.main-nav');
+    const menu = header.querySelector('.menu-toggle');
+    menu.addEventListener('click', () => {
+      const opening = menu.getAttribute('aria-expanded') !== 'true';
+      menu.setAttribute('aria-expanded', String(opening));
+      menu.setAttribute('aria-label', opening ? 'Close navigation' : 'Open navigation');
+      nav.classList.toggle('is-open', opening);
+    });
+    root.classList.add('ex-page--site');
+    root.before(header);
+  };
+
   const placeToggle = () => {
+    ensureLabNavigation();
     if (!toggle) return;
     const appBar = document.querySelector('.omni-topbar');
     const siteHeader = document.querySelector('.site-header');
@@ -84,9 +113,15 @@
     setTheme(getTheme(), false);
 
     if (document.body && typeof MutationObserver !== 'undefined') {
+      let placementQueued = false;
       observer = new MutationObserver(() => {
-        if (toggle && !toggle.isConnected) document.body.appendChild(toggle);
-        placeToggle();
+        if (placementQueued) return;
+        placementQueued = true;
+        requestAnimationFrame(() => {
+          placementQueued = false;
+          if (toggle && !toggle.isConnected) document.body.appendChild(toggle);
+          placeToggle();
+        });
       });
       observer.observe(document.body, { childList: true, subtree: true });
     }
