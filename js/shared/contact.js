@@ -8,6 +8,29 @@
 
   updateCopyrightYear();
 
+  // Footer "Back to top" controls should work regardless of the current hash
+  // or whether the page's header is rendered statically or by JavaScript.
+  document.addEventListener('click', (event) => {
+    const link = event.target.closest('a.back-to-top');
+    if (!link || event.defaultPrevented || event.button !== 0 ||
+        event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+
+    event.preventDefault();
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // Keep the URL in sync without adding a new history entry. Unlike a plain
+    // same-hash anchor, this always performs the scroll even if the hash is
+    // already #top or the page has no element with that ID.
+    try {
+      const topUrl = `${window.location.pathname}${window.location.search}#top`;
+      window.history.replaceState(window.history.state, '', topUrl);
+    } catch (_error) {
+      // Scrolling should still work if history updates are unavailable.
+    }
+
+    window.scrollTo({ top: 0, left: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
+  }, false);
+
   // Contact modal
   (() => {
     let observer = null;
