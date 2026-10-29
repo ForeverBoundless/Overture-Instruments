@@ -68,7 +68,7 @@
         left: `${rect.left}px`, top: `${rect.top}px`,
         width: `${rect.width}px`, height: `${rect.height}px`,
         margin: '0', position: 'fixed', zIndex: '2',
-        transform: 'none', transformOrigin: 'center center'
+        transform: 'translate3d(0px, 0px, 0px)', transformOrigin: 'center center'
       });
       overlay.appendChild(stage);
       document.body.appendChild(overlay);
@@ -98,9 +98,14 @@
         overlay.classList.add('is-energized');
         stage.classList.add('is-energized');
       });
+      const panX = window.innerWidth / 2 - (rect.left + rect.width / 2);
+      const panY = window.innerHeight / 2 - (rect.top + rect.height / 2);
       window.setTimeout(() => {
         overlay.classList.add('is-kaleidoscope');
         stage.classList.add('is-overloaded');
+        // Glide the unchanged artwork into the centre while the kaleidoscope
+        // takes over the screen. Its width and height are deliberately fixed.
+        stage.style.transform = `translate3d(${panX}px, ${panY}px, 0px)`;
       }, 140);
       window.setTimeout(showLoader, 1510);
     };
