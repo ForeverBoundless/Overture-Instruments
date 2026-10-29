@@ -162,7 +162,7 @@ html[data-theme="light"] .hero::before {
 }
 html[data-theme="light"] .hero::after,
 html[data-theme="light"] .about-hero::after { background: linear-gradient(transparent, #e8edf3) !important; }
-html[data-theme="light"] :is(.hero-grid,.about-hero__grid,.feature-section::before,.ex-page::before) {
+html[data-theme="light"] :is(.hero-grid,.about-hero__grid,.ex-page::before) {
   opacity: .42 !important;
   background-image: linear-gradient(rgba(64,94,125,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(64,94,125,.06) 1px, transparent 1px) !important;
 }
@@ -240,8 +240,12 @@ html[data-theme="light"] .omni-patch-node {
   box-shadow: 0 7px 20px rgba(45,60,81,.12), inset 0 1px #fff !important;
 }
 html[data-theme="light"] .omni-patch-node__title { color: #273545 !important; }
-html[data-theme="light"] .omni-patch-node__graphic path,
-html[data-theme="light"] .omni-patch-node__graphic circle { stroke: #087caa !important; }
+html[data-theme="light"] .omni-patch-node--oscillator .omni-patch-node__graphic path { stroke: #087f9f !important; }
+html[data-theme="light"] .omni-patch-node--filter .omni-patch-node__graphic path { stroke: #ad5f00 !important; }
+html[data-theme="light"] .omni-patch-node--envelope .omni-patch-node__graphic path { stroke: #167747 !important; }
+html[data-theme="light"] .omni-patch-node--output .omni-patch-node__graphic path,
+html[data-theme="light"] .omni-patch-node--output .omni-patch-node__graphic circle { stroke: #ad5f00 !important; }
+html[data-theme="light"] .omni-patch-node--output .omni-patch-output-core { fill: #ad5f00 !important; }
 html[data-theme="light"] .omni-patch-controls .omni-patch-control { border-color: rgba(43,59,78,.14) !important; background: rgba(255,255,255,.5) !important; }
 html[data-theme="light"] .omni-patch-control > span { color: #748194 !important; }
 html[data-theme="light"] .omni-patch-control > b { color: #253545 !important; }
@@ -540,6 +544,8 @@ html[data-theme="light"] .home-coming-soon__signal::after {
 html[data-theme="light"] .omni-patch-node__graphic .omni-patch-wire--audio { stroke: #ad5f00 !important; }
 html[data-theme="light"] .omni-patch-node__graphic .omni-patch-wire--control { stroke: #087f9f !important; }
 html[data-theme="light"] .omni-patch-node__graphic .omni-patch-wire--notes { stroke: #167747 !important; }
+html[data-theme="light"] .feature-section--experiments .scope-wave { stroke: #167747 !important; filter: drop-shadow(0 0 4px rgba(22,119,71,.28)) !important; }
+html[data-theme="light"] .feature-section--experiments .scope-wave--ghost { stroke: rgba(22,119,71,.3) !important; }
 html[data-theme="light"] .omni-launch-overlay.is-loading {
   background: radial-gradient(ellipse at 50% 50%,rgba(255,255,255,.98),rgba(235,241,247,.98) 43%,#e1e8f0 100%) !important;
 }
