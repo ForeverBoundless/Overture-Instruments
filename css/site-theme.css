@@ -646,3 +646,191 @@ html[data-theme="light"] .experiments-showcase .fake-slider i {
   border-color: #167747 !important; background: #167747 !important;
   box-shadow: 0 0 8px rgba(22,119,71,.45) !important;
 }
+
+
+/* ============================================================
+   LIGHT THEME FINISH: monochrome marks, vivid text, readable
+   decorative signals. These rules intentionally do not touch
+   instrument-emulator pages or OMNI's functional colour-coded
+   audio/CV/note wiring.
+   ============================================================ */
+
+/* PNG marks that are white silhouettes on the dark site become black on
+   pearlescent surfaces. Keep intentionally cyan/amber logo treatments below. */
+html[data-theme="light"] :is(
+  .site-brand__mark img,
+  .footer-brand img,
+  .omni-logo-mark img,
+  .omni-patch-heading__brand img,
+  .experiments-panel-monogram img,
+  .launcher-brand-slot img,
+  .launcher-hero__o-icon,
+  .home-coming-soon__o-icon,
+  .launcher-coming-soon__o-icon
+) {
+  filter: brightness(0) saturate(100%) !important;
+}
+
+/* The main hero logo stays black but retains its restrained amber halo. */
+html[data-theme="light"] .hero-logo {
+  filter: brightness(0) saturate(100%) drop-shadow(0 0 18px rgba(255,174,80,.18)) !important;
+}
+
+/* The OMNI loading mark is black on grey, with its blue electrical glow intact. */
+html[data-theme="light"] .omni-launch-logo {
+  filter: brightness(0) saturate(100%) drop-shadow(0 0 13px rgba(8,127,159,.28)) !important;
+  animation-name: omni-launch-logo-breathe-light !important;
+}
+@keyframes omni-launch-logo-breathe-light {
+  to { filter: brightness(0) saturate(100%) drop-shadow(0 0 21px rgba(8,127,159,.42)); }
+}
+
+/* This particular O is deliberately cyan in the OMNI headline; restore its
+   filter treatment instead of converting it to the generic black logo. */
+html[data-theme="light"] .feature-section--omni .feature-copy h2 .omni-title-word img {
+  filter:
+    brightness(0) saturate(100%) invert(86%) sepia(18%) saturate(1722%)
+    hue-rotate(163deg) brightness(104%) contrast(103%)
+    drop-shadow(0 0 4px rgba(125,228,255,.85))
+    drop-shadow(0 0 12px rgba(65,190,255,.7))
+    drop-shadow(0 0 24px rgba(65,190,255,.35)) !important;
+}
+
+/* Keep the original bright amber / cyan / green text. Add only a very fine
+   charcoal keyline, so the glow stays luminous without disappearing into grey. */
+html[data-theme="light"] :is(
+  .hero-title em,
+  .about-hero h1 span,
+  .story-heading h2 em,
+  .founder-copy h2 em,
+  .process-heading h2 em,
+  .next-heading h2 em,
+  .feature-section--library .feature-copy h2 em
+) {
+  color: var(--amber-bright) !important;
+  -webkit-text-fill-color: currentColor !important;
+  -webkit-text-stroke: .38px rgba(20,27,35,.78);
+  paint-order: stroke fill;
+}
+html[data-theme="light"] :is(
+  .feature-section--experiments .feature-copy h2 em,
+  .ex-page h1 em,
+  .lab-header h1 em
+) {
+  color: var(--green) !important;
+  -webkit-text-fill-color: currentColor !important;
+  -webkit-text-stroke: .38px rgba(20,27,35,.78);
+  paint-order: stroke fill;
+}
+html[data-theme="light"] :is(
+  .feature-section--omni .feature-copy h2 .omni-title-word,
+  .omni-logo-wording strong
+) {
+  color: var(--cyan) !important;
+  -webkit-text-fill-color: currentColor !important;
+  -webkit-text-stroke: .38px rgba(20,27,35,.78);
+  paint-order: stroke fill;
+}
+/* Keep the animated three-colour gradient in "a shared resource". */
+html[data-theme="light"] .mission-heading h2 .resource-highlight__text {
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+  -webkit-text-stroke: .38px rgba(20,27,35,.78);
+  paint-order: stroke fill;
+}
+
+/* Decorative circuits and particles only: render as dark graphite in light
+   mode for contrast. Functional OMNI patch cables retain their semantic hues. */
+html[data-theme="light"] .hero-circuit .circuit-lines path {
+  stroke: rgba(35,43,53,.58) !important;
+  filter: none !important;
+}
+html[data-theme="light"] .hero-circuit .circuit-nodes circle {
+  fill: #26313d !important;
+  filter: drop-shadow(0 0 3px rgba(38,49,61,.4)) !important;
+}
+html[data-theme="light"] .hero-circuit .circuit-pulses circle {
+  stroke: #26313d !important;
+  filter: none !important;
+}
+html[data-theme="light"] .feature-section--omni::before,
+html[data-theme="light"] .feature-section--omni::after,
+html[data-theme="light"] .feature-section--library::after,
+html[data-theme="light"] .feature-section--experiments::after {
+  filter: grayscale(1) brightness(.52) contrast(1.25) !important;
+  opacity: .92 !important;
+}
+
+/* Homepage OMNI illustration wires and ports are decorative too; keep the
+   real workspace's colour-coded patch cables untouched. */
+html[data-theme="light"] .omni-patch-wires .omni-patch-wire {
+  stroke: #26313d !important;
+  filter: none !important;
+}
+html[data-theme="light"] .omni-patch-port {
+  background: #26313d !important;
+  border-color: #26313d !important;
+  box-shadow: 0 0 3px rgba(38,49,61,.22) !important;
+}
+
+/* Lab oscilloscope-style artwork on the homepage: dark graphite grid and trace. */
+html[data-theme="light"] .feature-section--experiments .scope-grid {
+  background-image:
+    linear-gradient(rgba(38,49,61,.17) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(38,49,61,.17) 1px, transparent 1px),
+    linear-gradient(rgba(38,49,61,.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(38,49,61,.05) 1px, transparent 1px) !important;
+  border-color: rgba(38,49,61,.24) !important;
+}
+html[data-theme="light"] #experiments-scope-gradient stop { stop-color: #26313d !important; }
+html[data-theme="light"] .feature-section--experiments .scope-wave {
+  stroke: #26313d !important;
+  filter: drop-shadow(0 0 2px rgba(38,49,61,.24)) !important;
+}
+html[data-theme="light"] .feature-section--experiments .scope-wave--ghost {
+  stroke: rgba(38,49,61,.22) !important;
+}
+html[data-theme="light"] .feature-section--experiments .scope-axis {
+  background: rgba(38,49,61,.35) !important;
+}
+html[data-theme="light"] .feature-section--experiments .scope-axis-label {
+  color: #3a4653 !important;
+}
+html[data-theme="light"] .experiments-signal,
+html[data-theme="light"] .experiments-signal::before,
+html[data-theme="light"] .experiments-signal::after {
+  border-color: rgba(38,49,61,.3) !important;
+}
+
+/* The "More is coming soon" circles remain animated, but pulse in graphite
+   instead of switching between low-contrast amber/cyan on a light surface. */
+html[data-theme="light"] .home-coming-soon__signal,
+html[data-theme="light"] .launcher-coming-soon__signal {
+  border-color: #2d3743 !important;
+  box-shadow: 0 0 0 7px rgba(38,49,61,.1), inset 0 0 16px rgba(38,49,61,.16) !important;
+  animation: coming-soon-graphite-pulse 2.6s ease-in-out infinite !important;
+}
+html[data-theme="light"] .home-coming-soon__signal::before,
+html[data-theme="light"] .launcher-coming-soon__signal::before {
+  border-color: #303b47 !important;
+  animation: coming-soon-graphite-ring 3.8s ease-in-out infinite !important;
+}
+html[data-theme="light"] .home-coming-soon__signal::after,
+html[data-theme="light"] .launcher-coming-soon__signal::after {
+  border-color: #202a35 !important;
+  background: #26313d !important;
+  box-shadow: 0 0 8px rgba(38,49,61,.5) !important;
+  animation: coming-soon-graphite-dot 2.2s ease-in-out infinite !important;
+}
+@keyframes coming-soon-graphite-pulse {
+  0%,100% { opacity:.82; box-shadow:0 0 0 7px rgba(38,49,61,.08),inset 0 0 13px rgba(38,49,61,.12); }
+  50% { opacity:1; box-shadow:0 0 0 9px rgba(38,49,61,.14),inset 0 0 20px rgba(38,49,61,.23),0 0 14px rgba(38,49,61,.2); }
+}
+@keyframes coming-soon-graphite-ring {
+  0%,100% { opacity:.55; transform:translate(-50%,-50%) scale(.96); border-color:#303b47; }
+  50% { opacity:1; transform:translate(-50%,-50%) scale(1.08); border-color:#1e2833; }
+}
+@keyframes coming-soon-graphite-dot {
+  0%,100% { opacity:.8; box-shadow:0 0 7px rgba(38,49,61,.45); }
+  50% { opacity:1; box-shadow:0 0 12px rgba(38,49,61,.75),0 0 19px rgba(38,49,61,.34); }
+}
