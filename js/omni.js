@@ -32,7 +32,7 @@ class OmniApp {
     const bar = el('header', 'omni-app-header', root);
     const topbar = el('div', 'omni-topbar', bar);
     const brand = el('div', 'omni-logo', topbar);
-    brand.innerHTML = '<a class="omni-logo-mark" href="/#omni" title="Back to Overture OMNI"><img src="/ui/Logos/OvertureLogo.png" alt="Overture"></a><span class="omni-logo-wording"><strong>OMNI</strong><small>MODULAR SYNTHESIS WORKSPACE</small></span>';
+    brand.innerHTML = '<a class="omni-logo-mark" href="/#omni" title="Back to Overture OMNI"><img src="/ui/Logos/OvertureLogo.png" alt="Overture"></a><span class="omni-logo-wording"><strong>OMNI</strong></span>';
     const project = el('label', 'omni-project', topbar);
     el('span', 'omni-project-label', project, 'INSTRUMENT');
     this.nameInput = el('input', 'omni-name', project); this.nameInput.value = this.patch.name; this.nameInput.placeholder = 'Untitled instrument'; this.nameInput.setAttribute('aria-label', 'Instrument name'); this.nameInput.addEventListener('change', () => { this.patch.name = this.nameInput.value.slice(0, 60) || 'Untitled'; this.nameInput.value = this.patch.name; this.pushHistory(); });
