@@ -59,23 +59,73 @@
 
       let lastFocus = null;
       let emailjsInitialized = false;
+      let lockedScrollY = 0;
+      let savedBodyStyles = null;
 
       const setStatus = (message, kind = '') => {
         status.textContent = message;
         status.dataset.kind = kind;
       };
 
+      // Fix the body in place instead of toggling overflow alone. Some browsers
+      // jump the document to scrollY=0 when overflow is hidden and a modal field
+      // receives focus. A fixed body preserves the visible background position.
+      const lockBackgroundScroll = () => {
+        const bodyEl = document.body;
+        lockedScrollY = window.scrollY || window.pageYOffset || 0;
+        savedBodyStyles = {
+          position: bodyEl.style.position,
+          top: bodyEl.style.top,
+          left: bodyEl.style.left,
+          right: bodyEl.style.right,
+          width: bodyEl.style.width,
+          overflow: bodyEl.style.overflow,
+          paddingRight: bodyEl.style.paddingRight
+        };
+
+        const scrollbarGap = Math.max(0, window.innerWidth - document.documentElement.clientWidth);
+        bodyEl.style.position = 'fixed';
+        bodyEl.style.top = `-${lockedScrollY}px`;
+        bodyEl.style.left = '0';
+        bodyEl.style.right = '0';
+        bodyEl.style.width = 'auto';
+        bodyEl.style.overflow = 'hidden';
+        if (scrollbarGap) bodyEl.style.paddingRight = `${scrollbarGap}px`;
+      };
+
+      const unlockBackgroundScroll = () => {
+        if (!savedBodyStyles) return;
+        const bodyEl = document.body;
+        const restore = savedBodyStyles;
+        bodyEl.style.position = restore.position;
+        bodyEl.style.top = restore.top;
+        bodyEl.style.left = restore.left;
+        bodyEl.style.right = restore.right;
+        bodyEl.style.width = restore.width;
+        bodyEl.style.overflow = restore.overflow;
+        bodyEl.style.paddingRight = restore.paddingRight;
+        savedBodyStyles = null;
+
+        // Restore the same document position, and avoid focus restoration
+        // causing another browser-managed scroll adjustment.
+        window.scrollTo(0, lockedScrollY);
+      };
+
       const open = () => {
+        if (!modal.hidden) return;
         lastFocus = document.activeElement;
+        lockBackgroundScroll();
         modal.hidden = false;
-        document.body.style.overflow = 'hidden';
-        form.elements.name.focus();
+        form.elements.name.focus({ preventScroll: true });
       };
 
       const close = () => {
+        if (modal.hidden) return;
         modal.hidden = true;
-        document.body.style.overflow = '';
-        if (lastFocus) lastFocus.focus();
+        unlockBackgroundScroll();
+        if (lastFocus && typeof lastFocus.focus === 'function') {
+          lastFocus.focus({ preventScroll: true });
+        }
       };
 
       openBtn.addEventListener('click', open);
