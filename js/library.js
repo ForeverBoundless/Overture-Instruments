@@ -76,7 +76,7 @@ page.innerHTML = `<div class="launcher-ambient launcher-ambient--one" aria-hidde
   </a>
   <nav class="main-nav" id="main-nav" aria-label="Main navigation">
     <a href="/about">About</a>
-    <a href="/library" aria-current="page">Instrument library</a>
+    <a href="/library" aria-current="page">Library</a>
     <a href="/#omni">OMNI</a>
     <a href="/experiments">Experiments</a>
   </nav>
