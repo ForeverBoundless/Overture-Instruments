@@ -551,6 +551,11 @@ html[data-theme="light"] #experiments-scope-gradient stop:nth-child(2) { stop-co
 html[data-theme="light"] #experiments-scope-gradient stop:nth-child(3) { stop-color: #087f9f !important; }
 html[data-theme="light"] .feature-section--experiments .scope-wave { filter: saturate(1.3) drop-shadow(0 0 4px rgba(22,119,71,.28)) !important; }
 html[data-theme="light"] .feature-section--experiments .scope-wave--ghost { stroke: rgba(22,119,71,.3) !important; }
+/* Only the kaleidoscope transition follows the active page theme.
+   The loading state keeps its existing dedicated treatment below. */
+html[data-theme="light"] .omni-launch-overlay:not(.is-loading) {
+  background: radial-gradient(ellipse at 50% 50%,rgba(255,255,255,.98),rgba(235,241,247,.98) 43%,#e1e8f0 100%) !important;
+}
 html[data-theme="light"] .omni-launch-overlay.is-loading {
   background: radial-gradient(ellipse at 50% 50%,rgba(255,255,255,.98),rgba(235,241,247,.98) 43%,#e1e8f0 100%) !important;
 }
