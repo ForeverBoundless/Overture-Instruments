@@ -81,6 +81,19 @@ html[data-theme="light"] .feature-section--omni .feature-copy h2 .omni-title-wor
     drop-shadow(0 0 24px rgba(65,190,255,.35)) !important;
 }
 
+
+
+/* Match the Library's amber glow and flicker on the homepage, in light mode
+   only. The existing shared fill and graphite outline remain unchanged. */
+html[data-theme="light"] .hero-title em {
+  text-shadow:
+    0 0 .05em rgba(255, 159, 10, .85),
+    0 0 .16em rgba(255, 159, 10, .85),
+    0 0 .4em rgba(255, 138, 0, .55),
+    0 0 .7em rgba(255, 94, 0, .3) !important;
+  animation: instrument-flicker 4.6s ease-in-out infinite !important;
+}
+
 /* Static marks—including the top-left logo—are deliberately not outlined.
    site-theme.css handles their monochrome light-mode treatment. */
 
