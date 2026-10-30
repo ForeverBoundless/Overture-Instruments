@@ -69,7 +69,7 @@ function buildTile(instrument) {
 }
 
 const page = document.getElementById('launcher-page');
-page.innerHTML = `<div class="launcher-ambient launcher-ambient--one" aria-hidden="true"></div><div class="launcher-ambient launcher-ambient--two" aria-hidden="true"></div><div class="launcher-noise" aria-hidden="true"></div><header class="site-header">
+page.innerHTML = `<div class="launcher-ambient launcher-ambient--one" aria-hidden="true"></div><div class="launcher-ambient launcher-ambient--two" aria-hidden="true"></div><div class="launcher-noise" aria-hidden="true"></div><header class="site-header" id="top">
   <a class="site-brand" href="/" aria-label="Overture Instruments home">
     <span class="site-brand__mark"><img src="/ui/Logos/OvertureLogo.png" alt="" width="24" height="24"></span>
     <span class="site-brand__wordmark">OVERTURE INSTRUMENTS</span>
@@ -155,6 +155,19 @@ if (count) {
   count.textContent = `${amount} AVAILABLE INSTRUMENT${INSTRUMENTS.length === 1 ? '' : 'S'}`;
 }
 
-// Shared site footer + contact modal (markup lives in library.html; #launcher-page is the scroll container).
+// Shared footer markup belongs inside the Library scroll container, but the
+// contact dialog must be a direct child of <body>. #launcher-page is a fixed,
+// scrollable element with backdrop-filter; a fixed modal nested inside it is
+// positioned/blurred relative to that element instead of the viewport.
 const footerTemplate = document.getElementById('site-footer-template');
-if (footerTemplate) page.append(footerTemplate.content.cloneNode(true));
+if (footerTemplate) {
+  const footerContent = footerTemplate.content.cloneNode(true);
+  const contactModal = footerContent.querySelector('#contact-modal');
+  if (contactModal) contactModal.remove();
+
+  page.append(footerContent);
+
+  if (contactModal) {
+    document.body.append(contactModal);
+  }
+}

@@ -25,7 +25,7 @@
 .contact-modal .button:hover { transform: translateY(-3px); }
 .contact-modal .button--primary { color: #241808; background: linear-gradient(135deg, #ffd18a, #ffad4a); box-shadow: 0 7px 28px rgba(255,159,10,.14), inset 0 1px rgba(255,255,255,.52); }
 .contact-modal .button--primary:hover { box-shadow: 0 10px 35px rgba(255,159,10,.25), inset 0 1px rgba(255,255,255,.52); }
-.contact-modal { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 20px; }
+.contact-modal { position: fixed; inset: 0; z-index: 10000; display: grid; place-items: center; padding: 20px; }
 .contact-modal[hidden] { display: none; }
 .contact-modal__backdrop { position: absolute; inset: 0; background: rgba(5,7,11,.72); backdrop-filter: blur(6px); }
 .contact-modal__panel { position: relative; width: min(480px, 100%); max-height: calc(100vh - 40px); overflow: auto; display: grid; gap: 16px; padding: 24px; border: 1px solid rgba(255,255,255,.1); border-radius: 14px; background: linear-gradient(160deg, rgba(22,26,34,.98), rgba(10,12,17,.98)); box-shadow: 0 30px 80px rgba(0,0,0,.6), inset 0 1px rgba(255,255,255,.06); animation: contact-in .25s ease; }

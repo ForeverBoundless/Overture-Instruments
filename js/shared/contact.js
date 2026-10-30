@@ -8,6 +8,29 @@
 
   updateCopyrightYear();
 
+  // Footer "Back to top" controls should work regardless of the current hash
+  // or whether the page's header is rendered statically or by JavaScript.
+  document.addEventListener('click', (event) => {
+    const link = event.target.closest('a.back-to-top');
+    if (!link || event.defaultPrevented || event.button !== 0 ||
+        event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+
+    event.preventDefault();
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // Keep the URL in sync without adding a new history entry. Unlike a plain
+    // same-hash anchor, this always performs the scroll even if the hash is
+    // already #top or the page has no element with that ID.
+    try {
+      const topUrl = `${window.location.pathname}${window.location.search}#top`;
+      window.history.replaceState(window.history.state, '', topUrl);
+    } catch (_error) {
+      // Scrolling should still work if history updates are unavailable.
+    }
+
+    window.scrollTo({ top: 0, left: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
+  }, false);
+
   // Contact modal
   (() => {
     let observer = null;
@@ -59,23 +82,98 @@
 
       let lastFocus = null;
       let emailjsInitialized = false;
+      let scrollLocks = null;
 
       const setStatus = (message, kind = '') => {
         status.textContent = message;
         status.dataset.kind = kind;
       };
 
+      // Lock whichever element actually scrolls on the current page. The
+      // Library uses #launcher-page as its own scroll container; other pages
+      // scroll the document. Keep the modal outside that container so its
+      // backdrop and fixed positioning always cover the full viewport.
+      const lockBackgroundScroll = () => {
+        const root = document.getElementById('launcher-page');
+        const useLauncherScroller = root && root.scrollHeight > root.clientHeight;
+        const scroller = useLauncherScroller ? root : document.scrollingElement;
+        const bodyEl = document.body;
+
+        scrollLocks = {
+          scroller,
+          scrollTop: scroller ? scroller.scrollTop : window.scrollY || window.pageYOffset || 0,
+          body: {
+            position: bodyEl.style.position,
+            top: bodyEl.style.top,
+            left: bodyEl.style.left,
+            right: bodyEl.style.right,
+            width: bodyEl.style.width,
+            overflow: bodyEl.style.overflow,
+            paddingRight: bodyEl.style.paddingRight
+          },
+          scrollerOverflow: scroller && scroller !== document.scrollingElement
+            ? scroller.style.overflow
+            : null,
+          htmlScrollBehavior: document.documentElement.style.scrollBehavior
+        };
+
+        if (scroller && scroller !== document.scrollingElement) {
+          scroller.style.overflow = 'hidden';
+        } else {
+          const scrollbarGap = Math.max(0, window.innerWidth - document.documentElement.clientWidth);
+          bodyEl.style.position = 'fixed';
+          bodyEl.style.top = `-${scrollLocks.scrollTop}px`;
+          bodyEl.style.left = '0';
+          bodyEl.style.right = '0';
+          bodyEl.style.width = 'auto';
+          bodyEl.style.overflow = 'hidden';
+          if (scrollbarGap) bodyEl.style.paddingRight = `${scrollbarGap}px`;
+        }
+      };
+
+      const unlockBackgroundScroll = () => {
+        if (!scrollLocks) return;
+        const saved = scrollLocks;
+        const bodyEl = document.body;
+
+        // Turn off smooth scrolling before restoring any scroll offsets; this
+        // prevents a jump to zero followed by an animated trip back down.
+        document.documentElement.style.scrollBehavior = 'auto';
+
+        bodyEl.style.position = saved.body.position;
+        bodyEl.style.top = saved.body.top;
+        bodyEl.style.left = saved.body.left;
+        bodyEl.style.right = saved.body.right;
+        bodyEl.style.width = saved.body.width;
+        bodyEl.style.overflow = saved.body.overflow;
+        bodyEl.style.paddingRight = saved.body.paddingRight;
+
+        if (saved.scroller && saved.scroller !== document.scrollingElement) {
+          saved.scroller.style.overflow = saved.scrollerOverflow || '';
+          saved.scroller.scrollTop = saved.scrollTop;
+        } else {
+          window.scrollTo({ top: saved.scrollTop, left: 0, behavior: 'auto' });
+        }
+
+        document.documentElement.style.scrollBehavior = saved.htmlScrollBehavior;
+        scrollLocks = null;
+      };
+
       const open = () => {
+        if (!modal.hidden) return;
         lastFocus = document.activeElement;
+        lockBackgroundScroll();
         modal.hidden = false;
-        document.body.style.overflow = 'hidden';
-        form.elements.name.focus();
+        form.elements.name.focus({ preventScroll: true });
       };
 
       const close = () => {
+        if (modal.hidden) return;
         modal.hidden = true;
-        document.body.style.overflow = '';
-        if (lastFocus) lastFocus.focus();
+        unlockBackgroundScroll();
+        if (lastFocus && typeof lastFocus.focus === 'function') {
+          lastFocus.focus({ preventScroll: true });
+        }
       };
 
       openBtn.addEventListener('click', open);

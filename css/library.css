@@ -3466,3 +3466,44 @@ body {
 /* The Yamaha asset is a square canvas with the wordmark occupying only the middle ~22%,
    so size it by the wordmark rather than the canvas to match the other brand logos. */
 .launcher-brand-slot img[alt="Yamaha"] { width: 165px; max-width: none; max-height: none; margin: -52px 0; }
+
+/* Material Web is enhanced from a CDN. If that import is unavailable, keep
+   the unupgraded <md-filled-button> looking and behaving like the same
+   amber Launch button instead of exposing only its bare icon and label. */
+.instrument-launch-button:not(:defined) {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 14px;
+  border: 1px solid rgba(255, 211, 154, .72);
+  border-radius: 999px;
+  color: #422b00;
+  background: #ffd39a;
+  box-shadow: 0 2px 7px rgba(0, 0, 0, .16), inset 0 1px rgba(255, 255, 255, .62);
+  font-family: 'Inter Variable', 'Inter', 'Segoe UI', sans-serif;
+  font-size: 11px;
+  font-weight: 750;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.instrument-tile.is-selected .instrument-launch-button:not(:defined) {
+  display: inline-flex;
+}
+.instrument-launch-button:not(:defined):hover {
+  background: #ffc878;
+  box-shadow: 0 3px 10px rgba(255, 159, 10, .22), inset 0 1px rgba(255, 255, 255, .68);
+}
+.instrument-launch-button:not(:defined):focus-visible {
+  outline: 2px solid #ff9f0a;
+  outline-offset: 3px;
+}
+.instrument-launch-button:not(:defined) .material-symbols-rounded {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  line-height: 1;
+}
