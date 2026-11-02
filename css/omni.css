@@ -289,3 +289,12 @@ button, a { -webkit-tap-highlight-color: transparent; }
     var(--omni-grid-size, 28px) var(--omni-grid-size, 28px),
     var(--omni-grid-size, 28px) var(--omni-grid-size, 28px);
 }
+
+
+/* Recording and advanced patch editing */
+.omni-tb.is-recording { color: #ffe0e0; border-color: rgba(248,113,113,.62); background: rgba(248,113,113,.12); box-shadow: 0 0 0 1px rgba(248,113,113,.12), 0 0 16px rgba(248,113,113,.12); }
+.omni-module.is-multi-selected { border-color: rgba(255,183,94,.8); box-shadow: 0 0 0 1px rgba(255,183,94,.48), 0 0 24px rgba(255,183,94,.12), 0 12px 30px rgba(0,0,0,.4); }
+.omni-selection-rect { position: absolute; z-index: 5; display: none; border: 1px solid rgba(125,228,255,.8); background: rgba(125,228,255,.09); pointer-events: none; }
+.omni-module-search { display: block; width: 100%; min-height: 32px; margin: 10px 0 12px; padding: 0 9px; border: 1px solid rgba(224,233,246,.12); border-radius: 6px; color: #e8edf5; background: rgba(255,255,255,.035); font: 10px var(--font-mono); }
+.omni-module-search:focus { border-color: rgba(125,228,255,.48); outline: 0; box-shadow: 0 0 0 2px rgba(125,228,255,.08); }
+.omni-library [hidden] { display: none !important; }
