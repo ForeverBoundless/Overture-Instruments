@@ -40,10 +40,23 @@ class DX7Processor extends AudioWorkletProcessor {
     this.bend = 0; this.mod = 0; this.at = 0; this.sustain = false; this.held = [];
     this.lfoPhase = 0; this.lfoDelay = 0; this.lfoSH = 0; this.lfoLast = 0;
     this.volume = 0.7; this.gain = 0;
+    this.scheduled = [];
     this.port.onmessage = (e) => this._msg(e.data);
   }
 
   _msg(m) {
+    // The main thread may send note events ahead of time. Keep them in the
+    // worklet until their target sample frame instead of triggering them when
+    // a JavaScript timer happens to wake up.
+    if ((m.t === 'noteOn' || m.t === 'noteOff') && Number.isFinite(m.frame) && m.frame > currentFrame) {
+      this.scheduled.push(m);
+      this.scheduled.sort((a, b) => a.frame - b.frame);
+      return;
+    }
+    this._dispatch(m);
+  }
+
+  _dispatch(m) {
     switch (m.t) {
       case 'patch': this.patch = m.patch; this.alg = ALGORITHMS[clamp((m.patch.algorithm | 0) - 1, 0, 31)]; break;
       case 'noteOn': this._noteOn(m.note | 0, clamp(m.vel, 0.01, 1)); break;
@@ -147,6 +160,7 @@ class DX7Processor extends AudioWorkletProcessor {
       }
     }
     for (let n = 0; n < L.length; n += 1) {
+      while (this.scheduled.length && this.scheduled[0].frame <= currentFrame + n) this._dispatch(this.scheduled.shift());
       const lfo = this._lfo();
       this.lfoLast = lfo;
       const ampModDepth = (patch.lfo.amd / 99) + this.mod * (patch.wheelAmp ?? 0);

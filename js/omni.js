@@ -14,7 +14,7 @@ const NS = 'http://www.w3.org/2000/svg';
 
 class OmniApp {
   constructor() {
-    this.store = new PresetStore({ key: 'overture.omni.patches', version: 1, validate: validatePatch });
+    this.store = new PresetStore({ key: 'overture.omni.patches', version: 2, validate: validatePatch, migrations: { 1: (stored) => ({ ...stored, version: 2 }) } });
     this.patch = defaultPatch();
     this.ctx = null; this.live = null; this.selected = null; this.selectedWire = null; this.pending = null;
     this.view = { x: 20, y: 20, scale: 1 }; this.history = []; this.future = []; this.rebuildTimer = null;
@@ -62,6 +62,8 @@ class OmniApp {
     const fileTools = group('Import and export');
     tb('JSON ↓', () => downloadText(`${this.patch.name.replace(/\W+/g, '-') || 'omni'}.omni.json`, this.store.exportJSON({ name: this.patch.name, data: this.patch })), 'Export patch as JSON', fileTools);
     tb('JSON ↑', () => pickFile('.json,application/json', (text) => { try { const { data } = this.store.parseImport(text); this.load(data); this.msg('Imported.'); } catch (err) { this.msg(err.message, true); } }), 'Import patch JSON', fileTools);
+    tb('LIBRARY ↓', () => downloadText('omni-library.json', this.store.exportAllJSON()), 'Export every saved OMNI patch', fileTools);
+    tb('LIBRARY ↑', () => pickFile('.json,application/json', (text) => { try { const items = this.store.importAll(text); this.refreshLoadList(); this.msg(`Imported ${items.length} saved patch${items.length === 1 ? '' : 'es'}.`); } catch (err) { this.msg(err.message, true); } }), 'Import an OMNI library backup', fileTools);
     tb('SVG ↓', () => downloadText(`${this.patch.name.replace(/\W+/g, '-') || 'omni'}.schematic.svg`, patchToSVG(this.patch), 'image/svg+xml'), 'Export patch schematic as SVG', fileTools);
 
     const helpTools = group('Help');
@@ -141,7 +143,14 @@ class OmniApp {
       this.powerBtn.textContent = 'POWER OFF'; this.powerBtn.classList.add('lit'); this.msg('Audio running - play the keyboard or your MIDI controller.');
     } catch (err) { this.msg(`Audio could not start: ${err.message}`, true); }
   }
-  scheduleRebuild() { if (!this.live) return; clearTimeout(this.rebuildTimer); this.rebuildTimer = setTimeout(async () => { try { await this.live.build(this.patch); } catch (err) { this.msg(`Graph error: ${err.message}`, true); } }, 60); }
+  scheduleRebuild() {
+    if (!this.live) return;
+    clearTimeout(this.rebuildTimer);
+    this.rebuildTimer = setTimeout(async () => {
+      try { await this.live.build(this.patch); }
+      catch (err) { this.msg(`Graph error: ${err.message}`, true); }
+    }, 60);
+  }
   noteOn(midi, vel) { this.keyboard.setKeyActive(midiNoteName(midi), true); this.live?.noteOn(midi, vel); }
   noteOff(midi) { this.keyboard.setKeyActive(midiNoteName(midi), false); this.live?.noteOff(midi); }
   allOff() { this.live?.allOff(); this.keyboard.el.querySelectorAll('.lp-key.active').forEach((k) => k.classList.remove('active')); }

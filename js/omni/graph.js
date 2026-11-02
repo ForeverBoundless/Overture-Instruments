@@ -86,18 +86,50 @@ export function connectionError(byId, from, to, existing) {
 
 /** Builds and maintains the live Web Audio graph for a patch. */
 export class LiveGraph {
-  constructor(ctx, master) { this.ctx = ctx; this.bus = { master, algorithms: ALGORITHMS }; this.instances = new Map(); this.unsubs = []; }
+  constructor(ctx, master) {
+    this.ctx = ctx; this.bus = { master, algorithms: ALGORITHMS };
+    this.instances = new Map(); this.unsubs = [];
+    // Builds can await AudioWorklet loading.  Serialising them, and ignoring
+    // superseded requests, prevents an older asynchronous build from taking
+    // ownership of the live graph after a newer edit has been requested.
+    this._requestedGeneration = 0;
+    this._buildChain = Promise.resolve();
+  }
 
   async build(patch) {
-    this.teardown();
-    for (const m of patch.modules) {
-      const def = MODULES[m.type];
-      const inst = await def.create(this.ctx, this.bus);
-      inst.id = m.id; inst.params = { ...m.params };
-      inst.apply?.();
-      this.instances.set(m.id, inst);
+    const generation = ++this._requestedGeneration;
+    // Callers continue editing the same patch object, so take an immutable
+    // snapshot before this request enters the asynchronous queue.
+    const snapshot = JSON.parse(JSON.stringify(patch));
+    this._buildChain = this._buildChain.catch(() => {}).then(() => this._replace(snapshot, generation));
+    return this._buildChain;
+  }
+
+  async _replace(patch, generation) {
+    if (generation !== this._requestedGeneration) return false;
+    const next = new Map();
+    const disposeNext = () => next.forEach((inst) => { try { inst.allOff?.(); inst.dispose?.(); } catch { /* best effort */ } });
+    try {
+      for (const m of patch.modules) {
+        const def = MODULES[m.type];
+        const inst = await def.create(this.ctx, this.bus);
+        if (generation !== this._requestedGeneration) { try { inst.dispose?.(); } catch { /* */ } disposeNext(); return false; }
+        inst.id = m.id; inst.params = { ...m.params };
+        inst.apply?.();
+        next.set(m.id, inst);
+      }
+    } catch (err) {
+      disposeNext();
+      throw err;
     }
+    if (generation !== this._requestedGeneration) { disposeNext(); return false; }
+
+    // Only replace a complete, current graph.  This keeps the prior graph
+    // alive while an asynchronous module is being prepared.
+    this.teardown(false);
+    this.instances = next;
     patch.connections.forEach((c) => this.connect(c));
+    return true;
   }
 
   connect(c) {
@@ -112,7 +144,8 @@ export class LiveGraph {
 
   setParam(id, key, value) { const inst = this.instances.get(id); if (!inst) return false; inst.params[key] = value; inst.apply?.(); return !inst.needsRebuild; }
 
-  teardown() {
+  teardown(cancelBuilds = true) {
+    if (cancelBuilds) this._requestedGeneration += 1;
     this.unsubs.forEach((u) => u()); this.unsubs = [];
     this.instances.forEach((i) => { try { i.allOff?.(); } catch { /* */ } i.dispose(); });
     this.instances.clear();

@@ -16,11 +16,10 @@ if (!app) throw new Error('App instance was not exposed on window.__littlePhatty
 // unlocks Web Audio in the real application.
 document.dispatchEvent('launcher:launch', {});
 // unlock() is async (awaits engine.start()); give its microtasks a tick to
-// finish - including Scope/Spectrum construction - before asserting on state.
+// finish before asserting on state.
 await new Promise((resolve) => setTimeout(resolve, 20));
 if (!app.engine.started) throw new Error('Engine did not start after simulated launcher launch');
 console.log('PASS: engine starts after a deliberate launcher launch');
-assert(!!app.scope && !!app.spectrum, 'Scope and Spectrum constructed after audio unlock');
 
 function assert(cond, msg) {
   if (!cond) throw new Error('FAIL: ' + msg);

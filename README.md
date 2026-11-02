@@ -139,7 +139,7 @@ A shared MIDI mapping interface lets users assign compatible physical MIDI CCs t
 
 ### Presets and saved data
 
-Reusable preset storage is built around browser `localStorage`. Supported pages can save, load, rename, delete, import, or export patches and patterns, depending on the instrument. OMNI patches, TR-808 patterns, and shared MIDI assignments also use browser-local storage. The exact controls differ between pages.
+Reusable preset storage is built around browser `localStorage`. Supported pages can save, load, rename, delete, import, or export patches and patterns, depending on the instrument. OMNI patches, TR-808 patterns, and shared MIDI assignments also use browser-local storage. OMNI uses versioned migrations and creates a browser-local raw backup before it changes an older saved-data version; it can also export or import its whole saved library. The exact controls differ between pages.
 
 ### Visual and site layer
 
@@ -204,6 +204,10 @@ The repository includes a `vercel.json` configuration with `cleanUrls` enabled. 
 ```
 
 The root also contains browser-interaction and harness scripts used for development workflows. They are not needed to serve the site as a static application.
+
+## Testing and contributions
+
+Run `npm test` to execute unit tests, browser-facing static contracts, and the existing interaction smoke harness. GitHub Actions runs the same command on pushes and pull requests. See [CONTRIBUTING.md](CONTRIBUTING.md) for manual audio/MIDI checks and [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for OMNI, persistence, and offline-system design notes.
 
 ## Browser support and practical notes
 

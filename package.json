@@ -1,0 +1,11 @@
+{
+  "name": "overture-instruments",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "npm run test:unit && npm run test:browser && npm run test:smoke",
+    "test:unit": "node --test test/graph.test.mjs test/preset-store.test.mjs",
+    "test:browser": "node --test test/browser-contract.test.mjs",
+    "test:smoke": "node interact.mjs"
+  }
+}

@@ -1,36 +1,4 @@
-const INSTRUMENTS = [{
-  id: 'little-phatty', name: 'Little Phatty', model: 'Stage Edition', manufacturer: 'Moog Music',
-  voiceMode: 'Monophonic', presets: 100, keys: 37, icon: 'graphic_eq',
-  description: 'A compact, muscular analog voice: dual VCO weight, singing resonance, and the unmistakable sweep of a Moog ladder filter, featuring an oscilloscope/spectrum analyzer for visual feedback. Programmed with the Stage Factory preset bank.',
-}, {
-  id: 'sub-37', name: 'Sub 37', model: 'Bob Moog Tribute Edition', manufacturer: 'Moog Music',
-  voiceMode: 'Mono / 2-note paraphonic', presets: 256, keys: 37, icon: 'tune',
-  description: 'A forceful performance synth with two modulation busses, dual DAHDSR envelopes, MultiDrive, arpeggiator, and an intuitive 64-step sequencer. Programmed with the Sub 37 Factory preset bank.',
-}, {
-  id: 'prophet-10', name: 'Prophet-10', model: 'Rev4', manufacturer: 'Sequential Circuits',
-  voiceMode: '10-voice polyphonic', presets: 400, keys: 61, icon: 'piano',
-  description: 'A ten-voice analog polyphonic classic with dual oscillators, Poly-Mod, Wheel Mod, vintage voice variation, and classic Prophet architecture. Includes Chord Memory functionality and customizable aftertouch. Programmed with the expansive Prophet-10 Factory preset bank.',
-}, {
-  id: 'nord-c2d', name: 'Nord C2D', model: 'Combo organ', manufacturer: 'Nord',
-  voiceMode: 'Dual manual', presets: "4 models", keys: '2 x 37', icon: 'piano',
-  description: 'A stage-ready dual-manual organ layout with complete drawbar racks and Leslie-inspired vibrato, with a red Nord finish. Features a full selection of pipe organ stops alongside classic Hammond, VX, and Farfisa tones.',
-}, {
-  id: 'yamaha-dx7', name: 'DX7', model: 'Six-operator FM', manufacturer: 'Yamaha', route: '/html/yamaha-dx7',
-  voiceMode: '16-voice polyphonic', presets: '11 original voices', keys: 61, icon: 'auto_awesome',
-  description: 'Powered not by filters, but frequency modulation:  six sine operators, all 32 algorithm topologies with a live algorithm diagram, four-rate/four-level envelopes per operator, feedback, LFO and velocity. Glassy keys, bells, basses and metallic pads from an independent FM engine.',
-}, {
-  id: 'roland-juno-106', name: 'Juno-106', model: 'DCO polysynth', manufacturer: 'Roland', route: '/html/roland-juno-106',
-  voiceMode: '6-voice polyphonic', presets: '11 original patches', keys: 61, icon: 'waves',
-  description: 'Six DCO voices with saw, PWM pulse, sub-oscillator and noise, the four-position HPF, a resonant 24 dB low-pass, ADSR for filter and amp, and the gorgeous stereo chorus I/II that made the instrument famous.',
-}, {
-  id: 'roland-tr-808', name: 'TR-808', model: 'Rhythm Composer', manufacturer: 'Roland', route: '/html/roland-tr-808',
-  voiceMode: 'Percussion', presets: '7 patterns', keys: 'N/A', icon: 'grid_on',
-  description: 'A full digital kit is synthesized live: bass drum, snare, toms or congas, rim shot or claves, clap or maracas, cowbell, cymbal and hats. All with the original tone, decay and tuning controls, and accent, plus a 16/32-step sequencer scheduled on the audio clock (40-300 BPM).',
-}, {
-  id: 'korg-ms-20', name: 'MS-20', model: 'Semi-modular', manufacturer: 'Korg', route: '/html/korg-ms-20',
-  voiceMode: 'Monophonic', presets: '10 original patches', keys: 37, icon: 'cable',
-  description: 'Two VCOs with ring modulation, the aggressive high-pass and low-pass filter pair that self-oscillates at full peak, two envelope generators, a modulation generator, sample & hold, an external signal processor, and a patch panel whose cables actually re-route the signals. Includes ESP processing capabilities.',
-}];
+import { INSTRUMENTS } from './data/instruments.js';
 
 const spec = (label, value, icon) => `<div class="instrument-spec"><span class="material-symbols-rounded">${icon}</span><span>${label}</span><strong>${value}</strong></div>`;
 

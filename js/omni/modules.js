@@ -36,14 +36,20 @@ const noiseBuf = (ctx, secs = 1) => { const b = ctx.createBuffer(1, Math.floor(c
 const noteIn = (fn) => ({ kind: 'note', handle: fn });
 const A = (id, label) => ({ id, label, type: 'audio' }); const C = (id, label) => ({ id, label, type: 'cv' }); const N = (id, label) => ({ id, label, type: 'note' });
 const SRC = { category: 'Sources', color: '#ff9f0a' }, PROC = { category: 'Processing', color: '#7de4ff' }, MOD = { category: 'Modulation', color: '#c89bff' }, PERF = { category: 'Performance', color: '#82e6a8' };
+// A note event may be delivered ahead of time. Native Web Audio modules use
+// this absolute clock time instead of waiting for a JavaScript timer to fire.
+const eventTime = (ctx, ev) => Math.max(now(ctx), Number.isFinite(ev?.time) ? ev.time : now(ctx));
 /** Adds timer bookkeeping (cleared on dispose) to an instance. */
 const timed = (inst) => { inst.timers = new Set(); const d = inst.dispose.bind(inst); inst.dispose = () => { inst.timers.forEach((t) => { clearTimeout(t); clearInterval(t); }); d(); }; inst.after = (ms, fn) => { const t = setTimeout(() => { inst.timers.delete(t); fn(); }, Math.max(0, ms)); inst.timers.add(t); return t; }; inst.every = (ms, fn) => { const t = setInterval(fn, ms); inst.timers.add(t); return t; }; inst.clear = (t) => { clearTimeout(t); clearInterval(t); inst.timers.delete(t); }; return inst; };
-/** Emits a note on/off pair on `port` after whenMs, lasting lenMs. */
-const fireNote = (inst, note, vel, whenMs, lenMs, port = 'note') => { inst.after(whenMs, () => inst.emit(port, { note, velocity: vel, on: true })); inst.after(whenMs + lenMs, () => inst.emit(port, { note, velocity: 0, on: false })); };
-/** Look-ahead clock: step(i, whenMs) schedules events for step i and returns its duration in seconds. */
+/** Emits a note pair immediately, tagged with its absolute AudioContext time. */
+const fireNote = (inst, note, vel, startTime, lengthSeconds, port = 'note') => {
+  inst.emit(port, { note, velocity: vel, on: true, time: startTime });
+  inst.emit(port, { note, velocity: 0, on: false, time: startTime + lengthSeconds });
+};
+/** Look-ahead clock: step(i, audioTime) schedules events for step i and returns its duration in seconds. */
 const clocked = (inst, step) => {
   timed(inst); const ctx = inst.ctx;
-  const tick = () => { const ahead = ctx.currentTime + 0.1; while (inst.next < ahead) { const dur = step(inst.i, (inst.next - ctx.currentTime) * 1000); inst.next += Math.max(0.01, dur); inst.i += 1; } };
+  const tick = () => { const ahead = ctx.currentTime + 0.1; while (inst.next < ahead) { const dur = step(inst.i, inst.next); inst.next += Math.max(0.01, dur); inst.i += 1; } };
   inst.setRunning = (run) => { if (run && !inst.clk) { inst.next = ctx.currentTime + 0.05; inst.i = 0; inst.clk = inst.every(25, tick); } if (!run && inst.clk) { inst.clear(inst.clk); inst.clk = null; inst.emit('note', { note: 60, velocity: 0, on: false }); } };
   return inst;
 };
@@ -83,15 +89,15 @@ export const MODULES = {
       osc.start(); osc2.start();
       inst.outputs.out = level; inst.inputs.pitchMod = modGain;
       inst.freq = 110;
-      const apply = () => {
+      const apply = (t = now(ctx)) => {
         const p = inst.params; const pulse = p.wave === 3;
-        osc.type = pulse ? 'sawtooth' : WAVES[p.wave]; mainGain.gain.setTargetAtTime(pulse ? 0 : 1, now(ctx), 0.01); pulseGain.gain.setTargetAtTime(pulse ? 1 : 0, now(ctx), 0.01);
-        const hz = inst.freq * Math.pow(2, p.octave); const t = now(ctx);
+        osc.type = pulse ? 'sawtooth' : WAVES[p.wave]; mainGain.gain.setTargetAtTime(pulse ? 0 : 1, t, 0.01); pulseGain.gain.setTargetAtTime(pulse ? 1 : 0, t, 0.01);
+        const hz = inst.freq * Math.pow(2, p.octave);
         [osc, osc2].forEach((o) => { o.frequency.cancelScheduledValues(t); if (p.glide > 0) o.frequency.setTargetAtTime(hz, t, p.glide / 4); else o.frequency.setValueAtTime(hz, t); o.detune.value = p.detune; });
         delay.delayTime.setTargetAtTime(Math.min(0.05, p.pulseWidth / Math.max(20, hz)), t, 0.005);
         modGain.gain.value = p.modDepth * 100; level.gain.setTargetAtTime(p.level * 0.5, t, 0.01);
       };
-      inst.inputs.pitch = { kind: 'note', handle: (ev) => { if (ev.on) { inst.freq = midiHz(ev.note); apply(); } } };
+      inst.inputs.pitch = { kind: 'note', handle: (ev) => { if (ev.on) { inst.freq = midiHz(ev.note); apply(eventTime(ctx, ev)); } } };
       inst.apply = apply;
       return inst;
     },
@@ -143,7 +149,7 @@ export const MODULES = {
     create(ctx) {
       const inst = new Instance(this, ctx); const cs = inst.track(ctx.createConstantSource()); cs.offset.value = 0; cs.start(); inst.outputs.out = cs;
       inst.inputs.gate = { kind: 'note', handle: (ev) => {
-        const p = inst.params; const t = now(ctx); const o = cs.offset;
+        const p = inst.params; const t = eventTime(ctx, ev); const o = cs.offset;
         if (ev.on) { if (ev.legato && inst.gateOn) return; inst.gateOn = true; o.cancelScheduledValues(t); o.setValueAtTime(o.value, t); o.linearRampToValueAtTime(p.amount, t + p.attack); o.setTargetAtTime(p.sustain * p.amount, t + p.attack, p.decay / 3); }
         else { inst.gateOn = false; o.cancelScheduledValues(t); o.setValueAtTime(o.value, t); o.setTargetAtTime(0, t, p.release / 4); }
       } };
@@ -190,17 +196,12 @@ export const MODULES = {
       ...[1, 2, 3, 4, 5, 6, 7, 8].map((i) => P(`step${i}`, `Step ${i} (-1 = rest)`, -1, 24, [0, 3, 7, 12, 0, 3, 7, 10][i - 1], { step: 1 }))],
     inputs: [], outputs: [{ id: 'note', label: 'Note', type: 'note' }],
     create(ctx) {
-      const inst = new Instance(this, ctx); inst.step = 0; inst.next = 0; inst.timer = null;
-      const tick = () => {
-        const p = inst.params; const ahead = ctx.currentTime + 0.1;
-        while (inst.next < ahead) {
-          const dur = 60 / p.tempo / 2; const v = p[`step${(inst.step % 8) + 1}`]; const when = Math.max(0, inst.next - ctx.currentTime) * 1000;
-          if (v >= 0) { const note = p.root + v; setTimeout(() => inst.emit('note', { note, velocity: 0.9, on: true }), when); setTimeout(() => inst.emit('note', { note, velocity: 0, on: false }), when + dur * p.gate * 1000); }
-          inst.next += dur; inst.step = (inst.step + 1) % 8;
-        }
-      };
-      inst.apply = () => { const run = inst.params.running === 1; if (run && !inst.timer) { inst.next = ctx.currentTime + 0.05; inst.step = 0; inst.timer = setInterval(tick, 25); } if (!run && inst.timer) { clearInterval(inst.timer); inst.timer = null; inst.emit('note', { note: 60, velocity: 0, on: false }); } };
-      const dispose = inst.dispose.bind(inst); inst.dispose = () => { clearInterval(inst.timer); inst.timer = null; dispose(); };
+      const inst = clocked(new Instance(this, ctx), (i, at) => {
+        const p = inst.params; const dur = 60 / p.tempo / 2; const v = p[`step${(i % 8) + 1}`];
+        if (v >= 0) fireNote(inst, p.root + v, 0.9, at, dur * p.gate);
+        return dur;
+      });
+      inst.apply = () => inst.setRunning(inst.params.running === 1);
       return inst;
     },
   },
@@ -251,7 +252,10 @@ export const MODULES = {
       if (!bus.dx7Loaded) { await ctx.audioWorklet.addModule(DX7_URL); bus.dx7Loaded = true; }
       const node = new AudioWorkletNode(ctx, 'dx7-processor', { numberOfInputs: 0, numberOfOutputs: 1, outputChannelCount: [2] });
       const level = inst.track(ctx.createGain()); node.connect(level); inst.track(node); inst.outputs.out = level;
-      inst.inputs.note = { kind: 'note', handle: (ev) => node.port.postMessage(ev.on ? { t: 'noteOn', note: ev.note, vel: ev.velocity } : { t: 'noteOff', note: ev.note }) };
+      inst.inputs.note = { kind: 'note', handle: (ev) => {
+        const frame = Math.round(eventTime(ctx, ev) * ctx.sampleRate);
+        node.port.postMessage(ev.on ? { t: 'noteOn', note: ev.note, vel: ev.velocity, frame } : { t: 'noteOff', note: ev.note, frame });
+      } };
       inst.apply = () => {
         const p = inst.params; const base = JSON.parse(JSON.stringify(DX7_PRESETS[p.preset].data));
         if (inst.lastPreset !== p.preset) { inst.lastPreset = p.preset; p.algorithm = base.algorithm; p.feedback = base.feedback; }
@@ -309,7 +313,7 @@ export const MODULES = {
     create(ctx) {
       const inst = new Instance(this, ctx); const d = inst.track(ctx.createDelay(1)); const fb = gain(inst, 0.99); const lp = biq(inst, 'lowpass', 5000, 0.5); const out = gain(inst, 0.8); const burst = noiseBuf(ctx, 0.05);
       d.connect(lp); lp.connect(fb); fb.connect(d); d.connect(out); inst.outputs.out = out;
-      inst.inputs.pitch = noteIn((ev) => { if (!ev.on) return; const hz = midiHz(ev.note); const t = now(ctx); d.delayTime.setValueAtTime(1 / hz, t); const s = ctx.createBufferSource(); s.buffer = burst; const g = ctx.createGain(); g.gain.value = ev.velocity; s.connect(g); g.connect(d); s.start(t); s.stop(t + 1 / hz); s.onended = () => { s.disconnect(); g.disconnect(); }; });
+      inst.inputs.pitch = noteIn((ev) => { if (!ev.on) return; const hz = midiHz(ev.note); const t = eventTime(ctx, ev); d.delayTime.setValueAtTime(1 / hz, t); const s = ctx.createBufferSource(); s.buffer = burst; const g = ctx.createGain(); g.gain.value = ev.velocity; s.connect(g); g.connect(d); s.start(t); s.stop(t + 1 / hz); s.onended = () => { s.disconnect(); g.disconnect(); }; });
       inst.apply = () => { fb.gain.value = inst.params.sustain; lp.frequency.value = inst.params.brightness; out.gain.setTargetAtTime(inst.params.level, now(ctx), 0.01); };
       return inst;
     },
@@ -324,7 +328,7 @@ export const MODULES = {
       const tone = (type, f0, f1, t, dec, peak) => { const o = ctx.createOscillator(); o.type = type; const g = ctx.createGain(); o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + Math.min(dec, 0.08)); env(g, peak, t, dec); o.connect(g); g.connect(out); o.start(t); o.stop(t + dec + 0.05); o.onended = () => { o.disconnect(); g.disconnect(); }; };
       const hiss = (hp, t, dec, peak) => { const s = ctx.createBufferSource(); s.buffer = noise; const f = ctx.createBiquadFilter(); f.type = 'highpass'; f.frequency.value = hp; const g = ctx.createGain(); env(g, peak, t, dec); s.connect(f); f.connect(g); g.connect(out); s.start(t); s.stop(t + dec + 0.05); s.onended = () => { s.disconnect(); f.disconnect(); g.disconnect(); }; };
       inst.inputs.trigger = noteIn((ev) => {
-        if (!ev.on) return; const p = inst.params; const t = now(ctx); const k = Math.pow(2, p.tune / 12); const v = ev.velocity;
+        if (!ev.on) return; const p = inst.params; const t = eventTime(ctx, ev); const k = Math.pow(2, p.tune / 12); const v = ev.velocity;
         if (p.type === 0) tone('sine', 160 * k, 45 * k, t, p.decay, v);
         else if (p.type === 1) { tone('triangle', 220 * k, 170 * k, t, p.decay * 0.4, v * 0.6); hiss(1200, t, p.decay, v * 0.8); }
         else if (p.type === 2) hiss(7000 * k, t, p.decay * 0.4, v * 0.6);
@@ -569,7 +573,7 @@ export const MODULES = {
     params: [P('running', 'Running', 0, 1, 0, { options: ['stopped', 'running'] }), P('tempo', 'Tempo (BPM)', 40, 240, 120, { step: 1 }), P('division', 'Division', 0, 4, 1, { options: DIVS }), P('note', 'Note (MIDI)', 24, 96, 60, { step: 1 }), P('gate', 'Gate length', 0.05, 1, 0.5)],
     inputs: [], outputs: [N('note', 'Trigger')],
     create(ctx) {
-      const inst = clocked(new Instance(this, ctx), (i, when) => { const p = inst.params; const dur = (60 / p.tempo) * DIV_BEATS[p.division]; fireNote(inst, p.note, 0.9, when, dur * p.gate * 1000); return dur; });
+      const inst = clocked(new Instance(this, ctx), (i, when) => { const p = inst.params; const dur = (60 / p.tempo) * DIV_BEATS[p.division]; fireNote(inst, p.note, 0.9, when, dur * p.gate); return dur; });
       inst.apply = () => inst.setRunning(inst.params.running === 1);
       return inst;
     },
@@ -579,7 +583,7 @@ export const MODULES = {
     params: [P('running', 'Running', 0, 1, 0, { options: ['stopped', 'running'] }), P('tempo', 'Tempo (BPM)', 40, 240, 120, { step: 1 }), P('steps', 'Steps', 1, 16, 8, { step: 1 }), P('hits', 'Hits', 0, 16, 3, { step: 1 }), P('rotate', 'Rotate', 0, 15, 0, { step: 1 }), P('note', 'Note (MIDI)', 24, 96, 36, { step: 1 }), P('gate', 'Gate length', 0.05, 1, 0.5)],
     inputs: [], outputs: [N('note', 'Trigger')],
     create(ctx) {
-      const inst = clocked(new Instance(this, ctx), (i, when) => { const p = inst.params; const dur = 60 / p.tempo / 4; const k = (i + p.rotate) % p.steps; const h = Math.min(p.hits, p.steps); if (h && ((k * h) % p.steps) < h) fireNote(inst, p.note, 0.9, when, dur * p.gate * 1000); return dur; });
+      const inst = clocked(new Instance(this, ctx), (i, when) => { const p = inst.params; const dur = 60 / p.tempo / 4; const k = (i + p.rotate) % p.steps; const h = Math.min(p.hits, p.steps); if (h && ((k * h) % p.steps) < h) fireNote(inst, p.note, 0.9, when, dur * p.gate); return dur; });
       inst.apply = () => inst.setRunning(inst.params.running === 1);
       return inst;
     },
@@ -589,7 +593,7 @@ export const MODULES = {
     params: [P('running', 'Running', 0, 1, 0, { options: ['stopped', 'running'] }), P('tempo', 'Tempo (BPM)', 40, 240, 110, { step: 1 }), P('scale', 'Scale', 0, 5, 2, { options: SCALES.names }), P('root', 'Root (MIDI)', 24, 84, 48, { step: 1 }), P('range', 'Range (octaves)', 1, 4, 2, { step: 1 }), P('density', 'Density', 0, 1, 0.7), P('gate', 'Gate length', 0.05, 1, 0.5)],
     inputs: [], outputs: [N('note', 'Note')],
     create(ctx) {
-      const inst = clocked(new Instance(this, ctx), (i, when) => { const p = inst.params; const dur = 60 / p.tempo / 2; if (Math.random() < p.density) { const sc = SCALES.steps[p.scale]; const deg = Math.floor(Math.random() * sc.length * p.range); fireNote(inst, p.root + Math.floor(deg / sc.length) * 12 + sc[deg % sc.length], 0.5 + Math.random() * 0.5, when, dur * p.gate * 1000); } return dur; });
+      const inst = clocked(new Instance(this, ctx), (i, when) => { const p = inst.params; const dur = 60 / p.tempo / 2; if (Math.random() < p.density) { const sc = SCALES.steps[p.scale]; const deg = Math.floor(Math.random() * sc.length * p.range); fireNote(inst, p.root + Math.floor(deg / sc.length) * 12 + sc[deg % sc.length], 0.5 + Math.random() * 0.5, when, dur * p.gate); } return dur; });
       inst.apply = () => inst.setRunning(inst.params.running === 1);
       return inst;
     },
@@ -600,7 +604,7 @@ export const MODULES = {
     inputs: [N('in', 'Notes (held)')], outputs: [N('note', 'Note')],
     create(ctx) {
       const held = new Set();
-      const inst = clocked(new Instance(this, ctx), (i, when) => { const p = inst.params; const dur = (60 / p.tempo) * DIV_BEATS[p.division]; const base = [...held].sort((a, b) => a - b); const pool = []; for (let o = 0; o < p.octaves; o += 1) base.forEach((n) => pool.push(n + o * 12)); if (!pool.length) return dur; let n; if (p.mode === 3) n = pool[Math.floor(Math.random() * pool.length)]; else if (p.mode === 2 && pool.length > 1) { const cyc = pool.concat(pool.slice(1, -1).reverse()); n = cyc[i % cyc.length]; } else n = pool[p.mode === 1 ? pool.length - 1 - (i % pool.length) : i % pool.length]; fireNote(inst, n, 0.9, when, dur * p.gate * 1000); return dur; });
+      const inst = clocked(new Instance(this, ctx), (i, at) => { const p = inst.params; const dur = (60 / p.tempo) * DIV_BEATS[p.division]; const base = [...held].sort((a, b) => a - b); const pool = []; for (let o = 0; o < p.octaves; o += 1) base.forEach((n) => pool.push(n + o * 12)); if (!pool.length) return dur; let n; if (p.mode === 3) n = pool[Math.floor(Math.random() * pool.length)]; else if (p.mode === 2 && pool.length > 1) { const cyc = pool.concat(pool.slice(1, -1).reverse()); n = cyc[i % cyc.length]; } else n = pool[p.mode === 1 ? pool.length - 1 - (i % pool.length) : i % pool.length]; fireNote(inst, n, 0.9, at, dur * p.gate); return dur; });
       inst.inputs.in = noteIn((ev) => { if (ev.on) { held.add(ev.note); inst.setRunning(true); } else { held.clear(); inst.setRunning(false); } });
       inst.apply = () => {};
       return inst;
@@ -634,7 +638,7 @@ export const MODULES = {
     inputs: [N('in', 'Note')], outputs: [N('note', 'Note')],
     create(ctx) {
       const inst = timed(new Instance(this, ctx));
-      inst.inputs.in = noteIn((ev) => { if (!ev.on) return; const p = inst.params; for (let k = 0; k <= p.repeats; k += 1) fireNote(inst, ev.note + k * p.transpose, ev.velocity * Math.pow(p.decay, k), k * p.time * 1000, p.time * 500); });
+      inst.inputs.in = noteIn((ev) => { if (!ev.on) return; const p = inst.params; const start = eventTime(ctx, ev); for (let k = 0; k <= p.repeats; k += 1) fireNote(inst, ev.note + k * p.transpose, ev.velocity * Math.pow(p.decay, k), start + k * p.time, p.time * 0.5); });
       inst.apply = () => {};
       return inst;
     },

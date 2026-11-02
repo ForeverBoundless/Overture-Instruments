@@ -1,0 +1,19 @@
+/**
+ * Canonical public metadata for the instrument library.
+ *
+ * Keep claims about preset provenance here so cards, documentation and future
+ * discovery views do not accidentally describe generated Overture programs as
+ * manufacturer factory banks.
+ */
+export const INSTRUMENTS = [
+  { id: 'little-phatty', name: 'Little Phatty', model: 'Stage Edition', manufacturer: 'Moog Music', voiceMode: 'Monophonic', presets: 100, keys: 37, icon: 'graphic_eq', presetProvenance: 'Stage Factory collection', description: 'A compact, muscular analog voice: dual VCO weight, singing resonance, and a Moog-style ladder-filter sweep, with oscilloscope and spectrum feedback.' },
+  { id: 'sub-37', name: 'Sub 37', model: 'Bob Moog Tribute Edition', manufacturer: 'Moog Music', voiceMode: 'Mono / 2-note paraphonic', presets: 256, keys: 37, icon: 'tune', presetProvenance: 'Overture program recipes', description: 'A forceful performance synth with two modulation busses, dual DAHDSR envelopes, MultiDrive, arpeggiator, and a 64-step sequencer. Its 256 program slots contain Overture parameter recipes.' },
+  { id: 'prophet-10', name: 'Prophet-10', model: 'Rev4', manufacturer: 'Sequential Circuits', voiceMode: '10-voice polyphonic', presets: 400, keys: 61, icon: 'piano', presetProvenance: 'Overture program collection', description: 'A ten-voice analog polyphonic instrument with dual oscillators, Poly-Mod, Wheel Mod, vintage voice variation, Chord Memory, and customizable aftertouch. The 400 slots are an Overture collection, not authenticated factory programs.' },
+  { id: 'nord-c2d', name: 'Nord C2D', model: 'Combo organ', manufacturer: 'Nord', voiceMode: 'Dual manual', presets: '4 models', keys: '2 x 37', icon: 'piano', presetProvenance: 'Model registrations', description: 'A dual-manual organ layout with drawbar racks, Leslie-inspired vibrato, pipe-organ stops, and Hammond, VX, Farfisa, and pipe-organ models.' },
+  { id: 'yamaha-dx7', name: 'DX7', model: 'Six-operator FM', manufacturer: 'Yamaha', route: '/html/yamaha-dx7', voiceMode: '16-voice polyphonic', presets: '11 original voices', keys: 61, icon: 'auto_awesome', presetProvenance: 'Original Overture voices', description: 'Six sine operators, all 32 algorithm topologies, four-rate/four-level envelopes, feedback, LFO, and velocity in an independent FM engine.' },
+  { id: 'roland-juno-106', name: 'Juno-106', model: 'DCO polysynth', manufacturer: 'Roland', route: '/html/roland-juno-106', voiceMode: '6-voice polyphonic', presets: '11 original patches', keys: 61, icon: 'waves', presetProvenance: 'Original Overture patches', description: 'Six DCO voices with saw, PWM pulse, sub-oscillator and noise, HPF, resonant low-pass filter, ADSR, and stereo chorus I/II.' },
+  { id: 'roland-tr-808', name: 'TR-808', model: 'Rhythm Composer', manufacturer: 'Roland', route: '/html/roland-tr-808', voiceMode: 'Percussion', presets: '7 patterns', keys: 'N/A', icon: 'grid_on', presetProvenance: 'Original Overture patterns', description: 'A synthesized live drum kit with tone, decay, tuning and accent controls plus a 16/32-step sequencer scheduled against the audio clock.' },
+  { id: 'korg-ms-20', name: 'MS-20', model: 'Semi-modular', manufacturer: 'Korg', route: '/html/korg-ms-20', voiceMode: 'Monophonic', presets: '10 original patches', keys: 37, icon: 'cable', presetProvenance: 'Original Overture patches', description: 'Two VCOs, ring modulation, self-oscillating high- and low-pass filters, envelopes, modulation, sample & hold, external-signal processing, and a functional patch panel.' },
+];
+
+export const INSTRUMENT_BY_ID = Object.fromEntries(INSTRUMENTS.map((instrument) => [instrument.id, instrument]));
