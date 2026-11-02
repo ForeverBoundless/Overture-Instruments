@@ -67,13 +67,14 @@ export const MODULES = {
       const vel = inst.track(ctx.createConstantSource()); vel.offset.value = 0; vel.start();
       inst.outputs.velocity = vel;
       inst.held = [];
-      inst.noteOn = (note, velocity) => { const n = note + inst.params.octave * 12; inst.held = inst.held.filter((h) => h.note !== n); inst.held.push({ note: n, velocity }); vel.offset.setTargetAtTime(velocity, now(ctx), 0.005); inst.emit('note', { note: n, velocity, on: true, legato: inst.held.length > 1 }); };
-      inst.noteOff = (note) => { const n = note + inst.params.octave * 12; const was = inst.held.length; inst.held = inst.held.filter((h) => h.note !== n); if (!was) return; if (inst.held.length) { const top = inst.held[inst.held.length - 1]; inst.emit('note', { note: top.note, velocity: top.velocity, on: true, legato: true }); } else inst.emit('note', { note: n, velocity: 0, on: false }); };
-      inst.allOff = () => { inst.held = []; inst.emit('note', { note: 60, velocity: 0, on: false }); };
+      inst.noteOn = (note, velocity, channel = 1) => { const n = note + inst.params.octave * 12; inst.held = inst.held.filter((h) => h.note !== n); inst.held.push({ note: n, velocity, channel }); vel.offset.setTargetAtTime(velocity, now(ctx), 0.005); inst.emit('note', { note: n, velocity, channel, on: true, legato: inst.held.length > 1, time: now(ctx) }); };
+      inst.noteOff = (note, channel = 1) => { const n = note + inst.params.octave * 12; const was = inst.held.length; inst.held = inst.held.filter((h) => !(h.note === n && h.channel === channel)); if (!was || inst.held.length === was) return; if (inst.held.length) { const top = inst.held[inst.held.length - 1]; inst.emit('note', { note: top.note, velocity: top.velocity, channel: top.channel, on: true, legato: true, time: now(ctx) }); } else inst.emit('note', { note: n, velocity: 0, channel, on: false, time: now(ctx) }); };
+      inst.allOff = () => { const held = [...inst.held]; inst.held = []; held.forEach((h) => inst.emit('note', { note: h.note, velocity: 0, channel: h.channel || 1, on: false, time: now(ctx) })); };
       return inst;
     },
   },
   oscillator: {
+    recordNotes: true,
     name: 'Oscillator', category: 'Sources', color: '#ff9f0a',
     params: [P('wave', 'Waveform', 0, 3, 2, { options: WAVES }), P('octave', 'Octave', -3, 3, 0, { step: 1 }), P('detune', 'Detune (cents)', -100, 100, 0), P('pulseWidth', 'Pulse width (square)', 0.05, 0.95, 0.5), P('glide', 'Glide (s)', 0, 2, 0), P('modDepth', 'Pitch mod depth (semitones)', 0, 48, 2), P('level', 'Level', 0, 1, 0.8)],
     inputs: [{ id: 'pitch', label: 'Pitch', type: 'note' }, { id: 'pitchMod', label: 'Pitch mod', type: 'cv' }],
@@ -244,6 +245,7 @@ export const MODULES = {
     },
   },
   fmVoice: {
+    recordNotes: true,
     name: 'DX7 FM Voice', category: 'Instrument modules', color: '#5fd3c4', async: true,
     params: [P('preset', 'Voice', 0, DX7_PRESETS.length - 1, 0, { options: DX7_PRESETS.map((p) => p.name) }), P('algorithm', 'Algorithm', 1, 32, 5, { step: 1 }), P('feedback', 'Feedback', 0, 7, 5, { step: 1 }), P('brightness', 'Modulator level scale', 0, 1.5, 1), P('level', 'Level', 0, 1, 0.8)],
     inputs: [{ id: 'note', label: 'Note', type: 'note' }], outputs: [{ id: 'out', label: 'Audio', type: 'audio' }],
@@ -272,6 +274,7 @@ export const MODULES = {
 
   // ======================================================================== extended sources
   subOsc: {
+    recordNotes: true,
     name: 'Sub Oscillator', ...SRC,
     params: [P('wave', 'Waveform', 0, 1, 1, { options: ['sine', 'square'] }), P('octave', 'Octaves below', 1, 2, 1, { step: 1 }), P('level', 'Level', 0, 1, 0.7)],
     inputs: [N('pitch', 'Pitch')], outputs: [A('out', 'Audio')],
@@ -283,6 +286,7 @@ export const MODULES = {
     },
   },
   supersaw: {
+    recordNotes: true,
     name: 'Supersaw', ...SRC,
     params: [P('voices', 'Voices', 1, 7, 7, { step: 1 }), P('detune', 'Detune (cents)', 0, 100, 25), P('octave', 'Octave', -3, 3, 0, { step: 1 }), P('modDepth', 'Pitch mod depth (semitones)', 0, 48, 2), P('level', 'Level', 0, 1, 0.7)],
     inputs: [N('pitch', 'Pitch'), C('pitchMod', 'Pitch mod')], outputs: [A('out', 'Stereo')],
@@ -296,6 +300,7 @@ export const MODULES = {
     },
   },
   additive: {
+    recordNotes: true,
     name: 'Additive Oscillator', ...SRC,
     params: [...[1, 2, 3, 4, 5, 6, 7, 8].map((i) => P(`h${i}`, `Harmonic ${i}`, 0, 1, +(1 / i).toFixed(2))), P('octave', 'Octave', -3, 3, 0, { step: 1 }), P('modDepth', 'Pitch mod depth (semitones)', 0, 48, 2), P('level', 'Level', 0, 1, 0.7)],
     inputs: [N('pitch', 'Pitch'), C('pitchMod', 'Pitch mod')], outputs: [A('out', 'Audio')],
@@ -307,6 +312,7 @@ export const MODULES = {
     },
   },
   pluck: {
+    recordNotes: true,
     name: 'Plucked String', ...SRC,
     params: [P('sustain', 'Sustain (feedback)', 0.8, 0.999, 0.99), P('brightness', 'Brightness (Hz)', 500, 12000, 5000, { log: true }), P('level', 'Level', 0, 1, 0.8)],
     inputs: [N('pitch', 'Pluck')], outputs: [A('out', 'Audio')],
@@ -319,6 +325,7 @@ export const MODULES = {
     },
   },
   drum: {
+    recordNotes: true,
     name: 'Drum Voice', ...SRC,
     params: [P('type', 'Type', 0, 3, 0, { options: ['kick', 'snare', 'hi-hat', 'tom'] }), P('tune', 'Tune (semitones)', -12, 12, 0), P('decay', 'Decay (s)', 0.02, 2, 0.4), P('level', 'Level', 0, 1, 0.8)],
     inputs: [N('trigger', 'Trigger')], outputs: [A('out', 'Audio')],
@@ -339,6 +346,7 @@ export const MODULES = {
     },
   },
   fmPair: {
+    recordNotes: true,
     name: '2-Op FM', ...SRC,
     params: [P('ratio', 'Modulator ratio', 0.25, 12, 2, { step: 0.25 }), P('index', 'Mod depth (index)', 0, 20, 3), P('octave', 'Octave', -3, 3, 0, { step: 1 }), P('level', 'Level', 0, 1, 0.8)],
     inputs: [N('pitch', 'Pitch'), C('indexMod', 'Index mod')], outputs: [A('out', 'Audio')],
