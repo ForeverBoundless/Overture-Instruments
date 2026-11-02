@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b0e13">
+  <title>Community Patch Library | Overture Instruments</title>
+  <meta name="description" content="Discover, audition, download and share community-made Overture OMNI instruments and patches.">
+  <link rel="icon" href="/ui/Logos/OvertureLogo.png">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="stylesheet" href="/css/site-theme.css">
+  <link rel="stylesheet" href="/css/site-theme-polish.css">
+  <link rel="stylesheet" href="/css/community.css">
+  <script src="/js/shared/site-theme.js" defer></script>
+  <script src="/js/shared/pwa.js" defer></script>
+  <script src="/js/shared/supabase-config.js"></script>
+</head>
+<body>
+  <div class="site-noise" aria-hidden="true"></div>
+  <header class="site-header" id="top">
+    <a class="site-brand" href="/" aria-label="Overture Instruments home">
+      <span class="site-brand__mark"><img src="/ui/Logos/OvertureLogo.png" alt="" width="24" height="24"></span>
+      <span class="site-brand__wordmark">OVERTURE INSTRUMENTS</span>
+    </a>
+    <nav class="main-nav" id="main-nav" aria-label="Main navigation">
+      <a href="/about">About</a>
+      <a href="/library">Library</a>
+      <a href="/omni">OMNI</a>
+      <a href="/community" aria-current="page">Community</a>
+      <a href="/experiments">Experiments</a>
+    </nav>
+    <a class="header-github" href="https://github.com/ForeverBoundless/Overture-Instruments" target="_blank" rel="noopener noreferrer"><span>GitHub</span><span class="external-arrow" aria-hidden="true">↗</span></a>
+    <button class="menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="main-nav"><span></span><span></span></button>
+  </header>
+
+  <main id="community-root" class="community-shell">
+    <section class="community-hero">
+      <p class="community-overline">OVERTURE COMMUNITY</p>
+      <h1>Sounds made <em>together.</em></h1>
+      <p>Browse OMNI instruments made by other users, audition them in your browser, and publish patches of your own.</p>
+    </section>
+
+    <section class="community-toolbar" aria-label="Community controls">
+      <label class="community-search"><span>SEARCH PATCHES</span><input id="community-search" type="search" placeholder="Name, description or tag"></label>
+      <label><span>SORT BY</span><select id="community-sort"><option value="created_at">Newest</option><option value="downloads">Most downloaded</option></select></label>
+      <button class="community-button community-button--primary" id="community-publish-open" type="button">PUBLISH A PATCH</button>
+    </section>
+
+    <section id="community-setup" class="community-setup" hidden>
+      <h2>Connect the community library</h2>
+      <p>This prototype uses Supabase for accounts, patch records and optional audio previews. Add your Supabase project URL and publishable/anon key to <code>js/shared/supabase-config.js</code>, then apply the SQL migration at <code>supabase/migrations/20261102000000_community_patches.sql</code> in the Supabase SQL editor.</p>
+      <p>The browser key is public by design. The migration enables Row Level Security; never use a service-role key in frontend code.</p>
+      <a href="https://supabase.com/dashboard" target="_blank" rel="noopener noreferrer">Open Supabase dashboard ↗</a>
+    </section>
+
+    <section class="community-account" id="community-account" aria-label="Community account">
+      <div id="community-account-status">Checking community connection…</div>
+      <form id="community-auth-form" class="community-auth" hidden>
+        <label><span>EMAIL ADDRESS</span><input type="email" id="community-email" autocomplete="email" required placeholder="you@example.com"></label>
+        <button class="community-button" type="submit">EMAIL ME A SIGN-IN LINK</button>
+      </form>
+      <button class="community-button community-button--quiet" id="community-signout" type="button" hidden>Sign out</button>
+    </section>
+
+    <section class="community-publish-panel" id="community-publish-panel" hidden>
+      <div class="community-section-heading">
+        <div><p class="community-overline">YOUR PATCH</p><h2>Publish to the library</h2></div>
+        <button class="community-close" id="community-publish-close" type="button" aria-label="Close publishing form">×</button>
+      </div>
+      <form id="community-publish-form">
+        <label><span>PATCH FILE</span><input type="file" id="community-patch-file" accept=".json,application/json"><small id="community-draft-status">No OMNI patch selected. Open this page from OMNI's COMMUNITY button or choose a .omni.json file.</small></label>
+        <div class="community-form-grid">
+          <label><span>TITLE</span><input id="community-title" maxlength="80" required placeholder="e.g. Glass Sequence"></label>
+          <label><span>TAGS</span><input id="community-tags" maxlength="160" placeholder="ambient, FM, evolving"></label>
+        </div>
+        <label><span>DESCRIPTION</span><textarea id="community-description" maxlength="600" rows="3" placeholder="Describe the sound and how the patch is built."></textarea></label>
+        <div class="community-form-grid">
+          <label><span>VISIBILITY</span><select id="community-visibility"><option value="public">Public — appears in discovery</option><option value="unlisted">Unlisted — accessible by direct link</option></select></label>
+          <label><span>AUDIO PREVIEW (OPTIONAL, 8 MB MAX)</span><input type="file" id="community-audio-file" accept="audio/webm,audio/ogg,audio/mp4,audio/mpeg,audio/wav"></label>
+        </div>
+        <div class="community-form-actions"><p id="community-publish-status" role="status" aria-live="polite"></p><button class="community-button community-button--primary" type="submit">PUBLISH PATCH</button></div>
+      </form>
+    </section>
+
+    <section class="community-results">
+      <div class="community-section-heading"><div><p class="community-overline">THE PATCH LIBRARY</p><h2>Community patches</h2></div><span id="community-result-count"></span></div>
+      <div id="community-grid" class="community-grid" aria-live="polite"></div>
+      <p id="community-empty" class="community-empty" hidden>No patches found. Try a different search, or publish the first one.</p>
+      <button class="community-button community-load-more" id="community-load-more" type="button" hidden>LOAD MORE</button>
+    </section>
+  </main>
+
+  <script type="module" src="/js/community.js"></script>
+</body>
+</html>
