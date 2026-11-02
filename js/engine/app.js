@@ -21,6 +21,7 @@ import { PitchWheel, ModWheel } from '../../ui/Wheel.js';
 import { Keyboard } from '../../ui/Keyboard.js';
 import { OLEDDisplay } from '../../ui/OLEDDisplay.js';
 import { PRESETS } from '../data/presets.js';
+import { consumeCommunityInstrumentPreset } from '../shared/communityPreset.js';
 
 const MIDI_NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 function midiNoteToName(midi) {
@@ -40,6 +41,12 @@ class App {
   constructor() {
     this.engine = new AudioEngine();
     this.presetManager = new PresetManager(this.engine, (patch) => this._syncKnobsToPatch(patch));
+    this.communityPreset = consumeCommunityInstrumentPreset('little-phatty', (patch) => {
+      const required = ['osc1Shape', 'osc2Shape', 'osc1Level', 'osc2Level', 'noiseLevel', 'cutoff', 'resonance', 'drive', 'keyTrack', 'filterEnvAmount', 'ampEnv', 'filterEnv', 'lfoRate', 'lfoWaveform', 'glideTime'];
+      if (!patch || typeof patch !== 'object' || required.some((key) => !(key in patch))) throw new Error('This is not a Little Phatty preset.');
+      ['ampEnv', 'filterEnv'].forEach((key) => { if (!patch[key] || ['attack', 'decay', 'sustain', 'release'].some((part) => !Number.isFinite(Number(patch[key][part])))) throw new Error('The envelope data is incomplete.'); });
+      return JSON.parse(JSON.stringify(patch));
+    });
     // MIDI notes that arrive before the audio context is unlocked are held
     // here and sounded as soon as a real user gesture starts audio. (MIDI
     // input is not a user activation, so it must never try to start audio.)
@@ -75,7 +82,10 @@ class App {
     // Show the stored patch on the panel (knob positions, LED rings, preset
     // name) immediately - the engine applies it later, at audio unlock.
     const initial = this.presetManager.peekLastSession();
-    if (initial?.patch) {
+    if (this.communityPreset?.data) {
+      this._syncKnobsToPatch(this.communityPreset.data);
+      this.oled?.showParameter('PRESET', 'COMMUNITY', 1600);
+    } else if (initial?.patch) {
       this._syncKnobsToPatch(initial.patch);
       if (initial.source === 'factory' && this._presetSelect) { this._presetSelect.value = initial.presetId; this.oled?.showPreset(initial.presetId, initial.patch.name); }
     }
@@ -545,7 +555,12 @@ class App {
       if (this._unlockPromise) return this._unlockPromise;
       this._unlockPromise = (async () => {
         await this.engine.start();
-        this.presetManager.restoreLastSession();
+        if (this.communityPreset?.data) {
+          this.presetManager.userPresets.push({ ...this.communityPreset.data, name: this.communityPreset.title });
+          this.presetManager._saveUserPresets();
+          this.presetManager.loadUser(this.presetManager.userPresets.length - 1);
+          this.communityPreset = null;
+        } else this.presetManager.restoreLastSession();
         this._flushPendingMidiNotes();
         document.removeEventListener('launcher:launch', unlock);
         document.removeEventListener('pointerdown', this._standaloneUnlock);
