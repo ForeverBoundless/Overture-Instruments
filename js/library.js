@@ -36,6 +36,9 @@ function buildTile(instrument) {
   return tile;
 }
 
+import './shared/supabase-config.js';
+import './shared/account-shell.js';
+
 const page = document.getElementById('launcher-page');
 page.innerHTML = `<div class="launcher-ambient launcher-ambient--one" aria-hidden="true"></div><div class="launcher-ambient launcher-ambient--two" aria-hidden="true"></div><div class="launcher-noise" aria-hidden="true"></div><header class="site-header" id="top">
   <a class="site-brand" href="/" aria-label="Overture Instruments home">
@@ -49,7 +52,7 @@ page.innerHTML = `<div class="launcher-ambient launcher-ambient--one" aria-hidde
     <a href="/community">Community</a>
     <a href="/experiments">Experiments</a>
   </nav>
-  <a class="header-github" href="https://github.com/ForeverBoundless/Overture-Instruments" target="_blank" rel="noopener noreferrer"><span>GitHub</span><span class="external-arrow" aria-hidden="true">↗</span></a>
+  <a class="header-account" href="/account" aria-label="Log in to your Overture account"><span class="header-account__label">LOG IN</span></a>
   <button class="menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="main-nav"><span></span><span></span></button>
 </header><section class="launcher-hero" aria-labelledby="launcher-title">
   <div class="launcher-hero__copy">
