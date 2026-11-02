@@ -363,7 +363,10 @@ async function loadPatches({ append = false } = {}) {
     if (state.mine && state.user) query = query.eq('owner_id', state.user.id);
     else query = query.eq('visibility', 'public');
     const search = byId('community-search').value.trim().toLowerCase().replace(/[^a-z0-9\s-]/g, '').slice(0, 50);
-    if (search) query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%`);
+    if (search) {
+      const tagTerms = [...new Set(search.split(/\\s+/).filter(Boolean))].map((term) => `tags.cs.{${term}}`);
+      query = query.or([`title.ilike.%${search}%`, `description.ilike.%${search}%`, ...tagTerms].join(','));
+    }
     const type = byId('community-filter-type').value;
     if (type !== 'all') query = query.eq('record_type', type);
     query = query.order(byId('community-sort').value, { ascending: false }).range(state.offset, state.offset + state.pageSize);
