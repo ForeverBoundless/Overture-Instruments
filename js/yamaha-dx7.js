@@ -7,6 +7,7 @@ import { PresetStore, num } from './shared/presetStore.js';
 import { el, section, knob, button, toggle, select, display, performance, power, presetBar, footer, clamp } from './shared/panel.js';
 import { ALGORITHMS } from './data/dx7Algorithms.js';
 import { DX7_PRESETS, DX7_INIT } from './data/dx7Presets.js';
+import { consumeCommunityInstrumentPreset } from './shared/communityPreset.js';
 
 const LFO_WAVES = ['tri', 'saw', 'sqr', 'sine', 'sh'];
 function validateDX7(d) {
@@ -46,6 +47,8 @@ class DX7App {
     footer(this.shell, '6-OPERATOR FM • 32 ALGORITHMS • 16 VOICES • KEYS: A–\' PLAY, -/= OCTAVE, TAB/SHIFT BEND, ↑/↓ MOD, ESC PANIC');
     power('dx7-power', () => this.engine.start(), () => { this.send(); this.engine.setVolume(this.knobs.volume.value); this.perf.flushPending(); this.disp.flash('AUDIO READY'); });
     this.presets.load('f:0');
+    const community = consumeCommunityInstrumentPreset('dx7', validateDX7);
+    if (community) { this.patch = community.data; this.disp.set(`VOICE  ${community.title}`, `ALG ${this.patch.algorithm} · COMMUNITY`); this.refresh(); }
   }
 
   send() { this.engine.post({ t: 'patch', patch: JSON.parse(JSON.stringify(this.patch)) }); }
