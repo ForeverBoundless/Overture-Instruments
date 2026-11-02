@@ -62,6 +62,8 @@ test('Community library has an optional Supabase setup and owner-scoped schema m
   assert.equal(config.split('\\n').some((line) => line.trim().startsWith('service_role:')), false);
   assert.match(client, /createClient/);
   assert.match(migration, /enable row level security/i);
+  assert.match(migration, /get_community_patch_by_id/);
+  assert.match(migration, /using \(visibility = 'public' or owner_id/);
   assert.ok(migration.includes('owner_id = (select auth.uid())'));
   assert.match(app, /signInWithOtp/);
   assert.match(app, /increment_community_patch_downloads/);
