@@ -65,7 +65,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .community-shell {
   position: relative;
   z-index: 1;
-  width: min(var(--page-width), calc(100% - 2 * var(--gutter)));
+  width: min(var(--page-width), calc(100% - var(--gutter) - var(--gutter)));
   margin: 0 auto;
   padding: clamp(126px, 14vw, 174px) 0 112px;
 }
