@@ -4,6 +4,7 @@ import { PresetStore, num } from './shared/presetStore.js';
 import { MidiManager } from './engine/MidiManager.js';
 import { el, section, knob, button, toggle, display, presetBar, footer, clamp } from './shared/panel.js';
 import { TR808_PATTERNS } from './data/tr808Patterns.js';
+import { consumeCommunityInstrumentPreset } from './shared/communityPreset.js';
 
 function validatePattern(d) {
   if (!d || typeof d !== 'object') throw new Error('Not a TR-808 pattern.');
@@ -31,6 +32,8 @@ class TR808App {
     });
     this.midi.init().then((ok) => { if (!ok) this.midiEl.textContent = this.midi.supported ? 'MIDI: permission not granted' : 'MIDI: not supported'; });
     this.presets.load('f:0');
+    const community = consumeCommunityInstrumentPreset('tr-808', validatePattern);
+    if (community) this.loadPattern(community.data, community.title);
     const powerEl = document.getElementById('tr808-power');
     const start = async () => { try { await this.engine.start(); } catch (e) { powerEl.querySelector('small').textContent = e.message; return; } powerEl.classList.add('is-off'); this.disp.flash('AUDIO READY'); };
     powerEl.addEventListener('click', start);

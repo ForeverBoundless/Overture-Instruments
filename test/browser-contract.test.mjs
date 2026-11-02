@@ -47,3 +47,52 @@ test('offline shell precaches the synthesis engines and OMNI dependencies', asyn
     assert.ok(worker.includes(asset), `offline shell should include ${asset}`);
   }
 });
+
+
+test('Community library has an optional Supabase setup and owner-scoped schema migration', async () => {
+  const [page, config, client, migration, app] = await Promise.all([
+    readFile(new URL('../community.html', import.meta.url), 'utf8'),
+    readFile(new URL('../js/shared/supabase-config.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/shared/supabaseClient.js', import.meta.url), 'utf8'),
+    readFile(new URL('../supabase/migrations/20261102000000_community_patches.sql', import.meta.url), 'utf8'),
+    readFile(new URL('../js/community.js', import.meta.url), 'utf8'),
+  ]);
+  assert.ok(page.includes('supabase-config.js'));
+  assert.match(config, /anonKey/);
+  assert.equal(config.split('\\n').some((line) => line.trim().startsWith('service_role:')), false);
+  assert.match(client, /createClient/);
+  assert.match(migration, /enable row level security/i);
+  assert.match(migration, /get_community_patch_by_id/);
+  assert.match(migration, /using \(visibility = 'public' or owner_id/);
+  assert.ok(migration.includes('owner_id = (select auth.uid())'));
+  assert.match(app, /signInWithOtp/);
+  assert.match(app, /increment_community_patch_downloads/);
+  assert.match(app, /OPEN IN OMNI/);
+});
+
+
+test('Community preset exchange covers supported instruments and protects download counters', async () => {
+  const [page, app, helper, migration, instrumentSources] = await Promise.all([
+    readFile(new URL('../community.html', import.meta.url), 'utf8'),
+    readFile(new URL('../js/community.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/shared/communityPreset.js', import.meta.url), 'utf8'),
+    readFile(new URL('../supabase/migrations/20261102000000_community_patches.sql', import.meta.url), 'utf8'),
+    Promise.all([
+      '../js/engine/app.js', '../js/korg-ms-20.js', '../js/roland-juno-106.js',
+      '../js/yamaha-dx7.js', '../js/roland-tr-808.js',
+    ].map((path) => readFile(new URL(path, import.meta.url), 'utf8'))),
+  ]);
+  assert.match(page, /community-record-type/);
+  assert.match(page, /community-instrument/);
+  assert.match(app, /instrument_preset/);
+  assert.match(app, /extractInstrumentPreset/);
+  assert.match(app, /MY ITEMS/);
+  assert.match(helper, /consumeCommunityInstrumentPreset/);
+  assert.match(migration, /record_type/);
+  assert.equal(migration.split(String.fromCharCode(10)).filter((line) => line.trim() === 'as ' + '$$').length, 3);
+  assert.equal(migration.split(String.fromCharCode(10)).filter((line) => line.trim() === '$$;').length, 3);
+  assert.match(app, /reloadPending/);
+  assert.match(migration, /grant update \(record_type, instrument_id/);
+  assert.doesNotMatch(migration, /grant update on public\.community_patches to authenticated/i);
+  for (const source of instrumentSources) assert.match(source, /consumeCommunityInstrumentPreset/);
+});

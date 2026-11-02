@@ -3,6 +3,7 @@ import { WorkletEngine } from './shared/workletEngine.js';
 import { PresetStore, num } from './shared/presetStore.js';
 import { el, section, knob, toggle, select, display, performance, power, presetBar, footer } from './shared/panel.js';
 import { JUNO_PRESETS } from './data/junoPresets.js';
+import { consumeCommunityInstrumentPreset } from './shared/communityPreset.js';
 
 const DEF = { lfoRate: 0.4, lfoDelay: 0, dcoLfo: 0, pwm: 0.3, pwmMode: 'man', range: 8, saw: true, pulse: false, sub: 0, noise: 0, hpf: 1, cutoff: 0.7, res: 0.1, envAmt: 0.3, envPolarity: 1, vcfLfo: 0, kbd: 0.5, vcaMode: 'env', vcaLevel: 0.8, attack: 0.05, decay: 0.3, sustain: 0.7, release: 0.3, chorus: 0, portamento: 0, bendRange: 2, benderLfo: 0.1 };
 function validate(d) {
@@ -41,6 +42,8 @@ class JunoApp {
     footer(this.shell, '6-VOICE DCO POLYSYNTH • STEREO CHORUS I / II • KEYS: A–\' PLAY, -/= OCTAVE, TAB/SHIFT BEND, ↑/↓ MOD, ESC PANIC');
     power('juno-power', () => this.engine.start(), () => { this.send(); this.engine.setVolume(this.ui.volume.value); this.perf.flushPending(); this.disp.flash('AUDIO READY'); });
     this.presets.load('f:0');
+    const community = consumeCommunityInstrumentPreset('juno-106', validate);
+    if (community) { this.patch = community.data; this.disp.set(`PATCH  ${community.title}`, 'COMMUNITY PRESET'); this.refresh(); }
   }
 
   send() { this.engine.post({ t: 'patch', patch: this.patch }); }

@@ -18,6 +18,17 @@ class OmniApp {
   constructor() {
     this.store = new PresetStore({ key: 'overture.omni.patches', version: 2, validate: validatePatch, migrations: { 1: (stored) => ({ ...stored, version: 2 }) } });
     this.patch = defaultPatch();
+    try {
+      const communityImport = sessionStorage.getItem('overture.community.import');
+      if (communityImport) {
+        sessionStorage.removeItem('overture.community.import');
+        this.patch = validatePatch(JSON.parse(communityImport));
+        this.msgOnLoad = `Loaded "${this.patch.name}" from the community library.`;
+      }
+    } catch (error) {
+      try { sessionStorage.removeItem('overture.community.import'); } catch { /* storage may be unavailable */ }
+      console.warn('Could not open the community patch.', error);
+    }
     this.ctx = null; this.live = null; this.selected = null; this.selectedWire = null; this.pending = null;
     this.selectedModules = new Set(); this.clipboard = null; this.snapEnabled = true;
     this.audioRecorder = null; this.midiRecorder = new MidiRecorder();
@@ -26,6 +37,7 @@ class OmniApp {
     this.applyView();
     this.render();
     this.pushHistory();
+    if (this.msgOnLoad) this.msg(this.msgOnLoad);
     this._bindMidi();
     this._bindKeys();
   }
@@ -53,6 +65,8 @@ class OmniApp {
     this.loadSel = el('select', 'omni-tb omni-load', patchTools); this.loadSel.setAttribute('aria-label', 'Load saved instrument'); this.loadSel.title = 'Load saved instrument'; this.loadSel.addEventListener('change', () => { const it = this.store.get(this.loadSel.value); if (it) this.load(JSON.parse(JSON.stringify(it.data)), it.id); this.loadSel.value = ''; });
     this.refreshLoadList();
     tb('DELETE', () => { if (!this.currentId) { this.msg('This instrument is not saved yet.'); return; } if (confirm('Delete the saved instrument?')) { this.store.remove(this.currentId); this.currentId = null; this.refreshLoadList(); this.msg('Deleted.'); } }, 'Delete current saved instrument', patchTools, 'omni-tb--danger');
+    tb('MACROS', () => this.openMacros(), 'Create and edit assignable macro controls', patchTools);
+    tb('COMMUNITY', () => this.publishToCommunity(), 'Publish this patch to the community library', patchTools);
 
     const historyTools = group('History');
     this.undoBtn = tb('UNDO', () => this.undo(), 'Undo (Ctrl+Z)', historyTools);
@@ -136,6 +150,22 @@ class OmniApp {
           out.push({ id: `omni::${m.id}::${p.key}`, label: p.label, group: `${def.name} (${m.id})`, el: document.getElementById(`p-${m.id}-${p.key}`),
             get: () => norm(m.params[p.key]),
             set: (t) => { const v = denorm(t); this.setParam(m.id, p.key, v, false); const inp = document.getElementById(`p-${m.id}-${p.key}`); if (inp) { inp.value = log ? Math.log(v) : v; const o = inp.parentElement?.querySelector('output'); if (o) o.textContent = v.toFixed(p.step === 1 ? 0 : 2); } } });
+        });
+      });
+      this.patch.macros.forEach((macro) => {
+        out.push({
+          id: `omni::macro::${macro.id}`, label: macro.name, group: 'MACROS',
+          get: () => macro.value,
+          set: (value) => {
+            macro.value = Math.min(1, Math.max(0, value));
+            this.applyMacro(macro);
+            const input = document.getElementById(`macro-${macro.id}`);
+            if (input) {
+              input.value = macro.value;
+              const output = input.parentElement?.querySelector('output');
+              if (output) output.textContent = Math.round(macro.value * 100).toString();
+            }
+          },
         });
       });
       return out;
@@ -263,10 +293,121 @@ class OmniApp {
       this.msg('MIDI performance exported.');
       return;
     }
+    if (this.ctx) this.midiRecorder.clock = () => this.ctx?.currentTime ?? performance.now() / 1000;
+    if (!this.ctx || !this.live) { this.msg('Power on audio before recording MIDI so note timing uses the audio clock.', true); return; }
+    this.midiRecorder.clock = () => this.ctx?.currentTime ?? 0;
     this.midiRecorder.start();
     this.midiRecordBtn.textContent = 'SAVE MIDI';
     this.midiRecordBtn.classList.add('is-recording');
     this.msg('Recording keyboard and MIDI input…');
+  }
+
+  publishToCommunity() {
+    try {
+      sessionStorage.setItem('overture.community.draft', JSON.stringify(this.patch));
+      window.location.assign('/community?publish=1');
+    } catch (error) {
+      this.msg(`Could not prepare this patch for publishing: ${error.message}`, true);
+    }
+  }
+
+  applyMacro(macro) {
+    const value = Math.min(1, Math.max(0, Number(macro.value) || 0));
+    macro.bindings.forEach((binding) => {
+      const module = this.patch.modules.find((item) => item.id === binding.moduleId);
+      if (!module) return;
+      const parameter = MODULES[module.type].params.find((item) => item.key === binding.paramKey);
+      if (!parameter) return;
+      const next = parameter.log
+        ? Math.exp(Math.log(binding.min) + value * (Math.log(binding.max) - Math.log(binding.min)))
+        : binding.min + value * (binding.max - binding.min);
+      this.setParam(module.id, binding.paramKey, next, false);
+      const input = document.getElementById(`p-${module.id}-${binding.paramKey}`);
+      if (input) {
+        input.value = parameter.log ? Math.log(next) : next;
+        const output = input.parentElement?.querySelector('output');
+        if (output) output.textContent = Number(next).toFixed(parameter.step === 1 ? 0 : 2);
+      }
+    });
+  }
+
+  openMacros() {
+    const overlay = el('div', 'omni-guide', document.body);
+    const card = el('div', 'omni-guide-card omni-macros', overlay);
+    el('h2', '', card, 'Macro controls');
+    el('p', 'omni-hint', card, 'A macro can control several numeric parameters at once. Bind a target, then move its slider or assign that macro to a MIDI CC.');
+    const list = el('div', 'omni-macro-list', card);
+    const render = () => {
+      list.replaceChildren();
+      this.patch.macros.forEach((macro, index) => {
+        const row = el('section', 'omni-macro', list);
+        const head = el('div', 'omni-macro__head', row);
+        const name = el('input', 'omni-module-search', head);
+        name.value = macro.name; name.maxLength = 32; name.setAttribute('aria-label', 'Macro name');
+        name.addEventListener('change', () => { macro.name = name.value.trim().slice(0, 32) || `Macro ${index + 1}`; this.pushHistory(); });
+        const remove = el('button', 'omni-tb omni-tb--danger', head, 'REMOVE');
+        remove.type = 'button'; remove.addEventListener('click', () => {
+          this.patch.macros = this.patch.macros.filter((item) => item.id !== macro.id);
+          this.pushHistory(); render();
+        });
+        const control = el('label', 'omni-macro__control', row);
+        const slider = el('input', '', control); slider.type = 'range'; slider.min = 0; slider.max = 1; slider.step = 0.001;
+        slider.value = macro.value; slider.id = `macro-${macro.id}`;
+        const value = el('output', '', control, Math.round(macro.value * 100).toString());
+        slider.addEventListener('input', () => {
+          macro.value = Number(slider.value);
+          value.textContent = Math.round(macro.value * 100).toString();
+          this.applyMacro(macro);
+        });
+        slider.addEventListener('change', () => this.pushHistory());
+
+        const bindings = el('div', 'omni-macro__bindings', row);
+        macro.bindings.forEach((binding) => {
+          const targetModule = this.patch.modules.find((item) => item.id === binding.moduleId);
+          const definition = targetModule && MODULES[targetModule.type];
+          const parameter = definition?.params.find((item) => item.key === binding.paramKey);
+          const chip = el('span', 'omni-macro__chip', bindings, `${definition?.name || targetModule?.type || 'Missing'} · ${parameter?.label || binding.paramKey}`);
+          const unbind = el('button', '', chip, '×'); unbind.type = 'button';
+          unbind.setAttribute('aria-label', 'Remove macro binding');
+          unbind.addEventListener('click', () => {
+            macro.bindings = macro.bindings.filter((item) => item !== binding);
+            this.pushHistory(); render();
+          });
+        });
+
+        const bindRow = el('div', 'omni-macro__bind', row);
+        const select = el('select', '', bindRow);
+        const placeholder = el('option', '', select, 'Choose a parameter…'); placeholder.value = '';
+        this.patch.modules.forEach((module) => {
+          const definition = MODULES[module.type];
+          definition.params.filter((parameter) => !parameter.options).forEach((parameter) => {
+            const option = el('option', '', select, `${definition.name} · ${parameter.label}`);
+            option.value = `${module.id}::${parameter.key}`;
+          });
+        });
+        const bind = el('button', 'omni-tb', bindRow, 'BIND');
+        bind.type = 'button';
+        bind.addEventListener('click', () => {
+          const [moduleId, paramKey] = select.value.split('::');
+          const module = this.patch.modules.find((item) => item.id === moduleId);
+          const parameter = module && MODULES[module.type].params.find((item) => item.key === paramKey);
+          if (!module || !parameter || macro.bindings.some((item) => item.moduleId === moduleId && item.paramKey === paramKey)) return;
+          macro.bindings.push({ moduleId, paramKey, min: parameter.min, max: parameter.max });
+          this.pushHistory(); render();
+          this.msg(`Bound ${parameter.label} to ${macro.name}.`);
+        });
+      });
+    };
+    const add = el('button', 'omni-tb omni-tb--primary', card, 'ADD MACRO');
+    add.type = 'button';
+    add.disabled = this.patch.macros.length >= 8;
+    add.addEventListener('click', () => {
+      this.patch.macros.push({ id: uid('macro'), name: `Macro ${this.patch.macros.length + 1}`, value: 0, bindings: [] });
+      this.pushHistory(); render();
+    });
+    render();
+    const close = el('button', '', card, 'CLOSE'); close.type = 'button'; close.addEventListener('click', () => overlay.remove());
+    overlay.addEventListener('click', (event) => { if (event.target === overlay) overlay.remove(); });
   }
 
   refreshLoadList() { this.loadSel.replaceChildren(); const o = el('option', '', this.loadSel, 'LOAD…'); o.value = ''; this.store.items.forEach((it) => { const op = el('option', '', this.loadSel, it.name); op.value = it.id; }); }
@@ -275,6 +416,7 @@ class OmniApp {
   async power() {
     if (this.ctx) {
       await this.stopAudioRecording();
+      if (this.midiRecorder.recording) this.toggleMidiRecording();
       clearTimeout(this.rebuildTimer);
       this.live?.teardown(); this.live = null;
       const oldContext = this.ctx; this.ctx = null; this.master = null;
@@ -284,7 +426,7 @@ class OmniApp {
     try {
       const AC = window.AudioContext || window.webkitAudioContext; this.ctx = new AC({ latencyHint: 'interactive' }); await this.ctx.resume();
       this.master = this.ctx.createGain(); this.master.gain.value = this.patch.global.master; this.master.connect(this.ctx.destination);
-      this.live = new LiveGraph(this.ctx, this.master);
+      this.live = new LiveGraph(this.ctx, this.master, { onNoteEvent: (event) => this._recordGraphNote(event) });
       await this.live.build(this.patch);
       this.powerBtn.textContent = 'POWER OFF'; this.powerBtn.classList.add('lit'); this.msg('Audio running - play the keyboard or your MIDI controller.');
     } catch (err) { this.msg(`Audio could not start: ${err.message}`, true); }
@@ -297,13 +439,34 @@ class OmniApp {
       catch (err) { this.msg(`Graph error: ${err.message}`, true); }
     }, 60);
   }
-  noteOn(midi, vel) { this.keyboard.setKeyActive(midiNoteName(midi), true); this.midiRecorder.noteOn(midi, vel); this.live?.noteOn(midi, vel); }
-  noteOff(midi) { this.keyboard.setKeyActive(midiNoteName(midi), false); this.midiRecorder.noteOff(midi); this.live?.noteOff(midi); }
+  _recordGraphNote(event) {
+    if (!this.midiRecorder.recording || !event || !Number.isFinite(event.note)) return;
+    const options = { time: Number.isFinite(event.time) ? event.time : this.ctx?.currentTime, channel: event.channel || 1 };
+    if (event.on) this.midiRecorder.noteOn(event.note, event.velocity ?? 0.8, options);
+    else this.midiRecorder.noteOff(event.note, options);
+  }
+
+  noteOn(midi, vel, channel = 1) {
+    this.keyboard.setKeyActive(midiNoteName(midi), true);
+    this.live?.noteOn(midi, vel, channel);
+  }
+
+  noteOff(midi, channel = 1) {
+    this.keyboard.setKeyActive(midiNoteName(midi), false);
+    this.live?.noteOff(midi, channel);
+  }
   allOff() { this.live?.allOff(); this.keyboard.el.querySelectorAll('.lp-key.active').forEach((k) => k.classList.remove('active')); }
 
   _bindMidi() {
     this.midi = new MidiManager({
-      onNoteOn: (n, v) => this.noteOn(n, v), onNoteOff: (n) => this.noteOff(n), onAllNotesOff: () => this.allOff(), onAllSoundOff: () => this.allOff(),
+      onNoteOn: (n, v, channel) => this.noteOn(n, v, channel),
+      onNoteOff: (n, channel) => this.noteOff(n, channel),
+      onAllNotesOff: () => this.allOff(), onAllSoundOff: () => this.allOff(),
+      onControlChange: (controller, value, channel) => this.midiRecorder.controlChange(controller, value, { channel, time: this.ctx?.currentTime }),
+      onPitchBend: (_range, _normalized, channel, raw) => this.midiRecorder.pitchBend(raw, { channel, time: this.ctx?.currentTime }),
+      onAftertouch: (value, channel) => this.midiRecorder.aftertouch(Math.round(value * 127), { channel, time: this.ctx?.currentTime }),
+      onPolyAftertouch: (note, value, channel) => this.midiRecorder.polyAftertouch(note, Math.round(value * 127), { channel, time: this.ctx?.currentTime }),
+      onProgramChange: (program, channel) => this.midiRecorder.programChange(program, { channel, time: this.ctx?.currentTime }),
       onConnectionChange: (c, _n, names) => { this.midiEl.textContent = c ? `MIDI: ${names.join(', ')}` : 'MIDI: no device'; },
     });
     this.midi.init().then((ok) => { if (!ok) this.midiEl.textContent = this.midi.supported ? 'MIDI: permission not granted' : 'MIDI: not supported'; else if (!this.midi.isConnected) this.midiEl.textContent = 'MIDI: no device'; });

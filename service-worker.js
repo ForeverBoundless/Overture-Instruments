@@ -1,5 +1,11 @@
-const CACHE = 'overture-shell-v2';
+const CACHE = 'overture-shell-v4';
 const APP_SHELL = [
+  '/community',
+  '/css/community.css',
+  '/js/community.js',
+  '/js/shared/supabase-config.js',
+  '/js/shared/supabaseClient.js',
+  '/js/shared/communityPreset.js',
   '/',
   '/about',
   '/css/about.css',

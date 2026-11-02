@@ -298,3 +298,20 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .omni-module-search { display: block; width: 100%; min-height: 32px; margin: 10px 0 12px; padding: 0 9px; border: 1px solid rgba(224,233,246,.12); border-radius: 6px; color: #e8edf5; background: rgba(255,255,255,.035); font: 10px var(--font-mono); }
 .omni-module-search:focus { border-color: rgba(125,228,255,.48); outline: 0; box-shadow: 0 0 0 2px rgba(125,228,255,.08); }
 .omni-library [hidden] { display: none !important; }
+
+
+/* Macro editor */
+.omni-macros { width: min(760px, calc(100vw - 32px)); }
+.omni-macro-list { display: grid; gap: 12px; max-height: 56vh; overflow: auto; }
+.omni-macro { padding: 13px; border: 1px solid rgba(224,233,246,.11); border-radius: 9px; background: rgba(255,255,255,.025); }
+.omni-macro__head, .omni-macro__control, .omni-macro__bind { display: flex; align-items: center; gap: 9px; }
+.omni-macro__head { justify-content: space-between; }
+.omni-macro__head input { max-width: 250px; }
+.omni-macro__control { margin: 10px 0; color: #cbd4e0; font: 9px var(--font-mono); }
+.omni-macro__control input { flex: 1; accent-color: var(--amber-bright); }
+.omni-macro__control output { width: 34px; text-align: right; color: var(--cyan); }
+.omni-macro__bindings { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 9px; }
+.omni-macro__chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 8px; border: 1px solid rgba(125,228,255,.18); border-radius: 20px; color: #aab9c8; font-size: 9px; }
+.omni-macro__chip button { border: 0; color: #ffb75e; background: none; cursor: pointer; font-size: 14px; line-height: 1; }
+.omni-macro__bind select { flex: 1; min-width: 0; min-height: 31px; padding: 5px 8px; border: 1px solid var(--line); border-radius: 6px; color: var(--ink); background: var(--bg-raised); font-size: 9px; }
+.omni-macros > .omni-tb { margin-top: 13px; }
