@@ -666,10 +666,10 @@ async function initialise() {
   if (requestedPatch) {
     const existing = state.items.find((item) => item.id === requestedPatch);
     if (!existing) {
-      const { data, error } = await supabase.from('community_patches')
-        .select('id,owner_id,record_type,instrument_id,title,description,author_name,tags,visibility,patch_data,preview_path,downloads,created_at')
-        .eq('id', requestedPatch).maybeSingle();
-      if (!error && data) byId('community-grid').prepend(renderCard(data));
+      const { data, error } = await supabase.rpc('get_community_patch_by_id', { p_patch_id: requestedPatch });
+      const item = Array.isArray(data) ? data[0] : data;
+      if (!error && item) byId('community-grid').prepend(renderCard(item));
+      else if (error) message('community-result-count', error.message || 'The shared item could not be opened.', true);
     }
   }
 }
