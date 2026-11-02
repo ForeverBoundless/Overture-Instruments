@@ -98,13 +98,7 @@
 
     <section class="community-account" id="community-account" aria-label="Community account">
       <div id="community-account-status" role="status" aria-live="polite">Checking community connection…</div>
-      <form id="community-auth-form" class="community-auth" hidden>
-        <label>
-          <span>EMAIL ADDRESS</span>
-          <input type="email" id="community-email" autocomplete="email" required placeholder="you@example.com">
-        </label>
-        <button class="community-button" type="submit">EMAIL ME A SIGN-IN LINK</button>
-      </form>
+      <a class="community-button community-button--primary" id="community-account-link" href="/account?returnTo=%2Fcommunity">LOG IN TO PUBLISH</a>
       <button class="community-button community-button--quiet" id="community-my-items" type="button" hidden>MY ITEMS</button>
       <button class="community-button community-button--quiet" id="community-signout" type="button" hidden>Sign out</button>
     </section>
