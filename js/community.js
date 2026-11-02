@@ -462,8 +462,8 @@ async function publishItem(event) {
       if (!allowed.includes(mime)) throw new Error('Choose a WebM, Ogg, MP4, MP3 or WAV audio preview.');
       const itemId = state.editingId || crypto.randomUUID();
       const extension = ({ 'audio/webm': 'webm', 'audio/ogg': 'ogg', 'audio/mp4': 'm4a', 'audio/mpeg': 'mp3', 'audio/wav': 'wav', 'audio/x-wav': 'wav' })[mime];
-      previewPath = `${state.user.id}/${itemId}/preview.${extension}`;
-      const { error: uploadError } = await supabase.storage.from('community-previews').upload(previewPath, previewFile, { contentType: mime, upsert: true });
+      previewPath = `${state.user.id}/${itemId}/preview-${Date.now()}-${Math.random().toString(36).slice(2, 7)}.${extension}`;
+      const { error: uploadError } = await supabase.storage.from('community-previews').upload(previewPath, previewFile, { contentType: mime });
       if (uploadError) throw uploadError;
       uploadedPath = previewPath;
     }
