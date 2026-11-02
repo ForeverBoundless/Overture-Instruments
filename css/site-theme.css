@@ -972,3 +972,17 @@ html[data-theme="light"] .feature-section--omni .feature-copy h2 .omni-title-wor
 @media (max-width:360px) {
   .site-header > .site-theme-toggle { left:38%; }
 }
+
+/* Preserve a clear gap between the centred theme control and the account chip
+   on phones where the right-hand header group can approach the midline. */
+@media (max-width:560px) {
+  .site-header > .site-theme-toggle { left:43%; }
+}
+@media (max-width:440px) {
+  .site-header > .site-theme-toggle { left:40%; }
+}
+@media (min-width:761px) and (max-width:900px) {
+  .site-header .main-nav { width:min(420px,42vw); }
+  .site-nav-side { gap:10px; }
+  .site-header .main-nav a { font-size:9px; }
+}
