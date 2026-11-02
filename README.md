@@ -92,7 +92,9 @@ The current catalogue contains more than 40 module types grouped around performa
 
 OMNI distinguishes between **audio**, **CV (control-voltage/audio-rate control)**, and **note-event** connections. Connection checks prevent incompatible port types and block unsupported audio/CV feedback loops. The live graph is built with the Web Audio API, while selected instrument-derived modules reuse Overture's audio engines.
 
-You can add, move, duplicate, and remove modules; connect or disconnect ports; edit module parameters; play the patch from the on-screen keyboard or a compatible MIDI controller; and map MIDI CCs to available controls. OMNI also includes starter patches and a preset store.
+You can add, move, duplicate, and remove modules; connect or disconnect ports; edit module parameters; play the patch from the on-screen keyboard or a compatible MIDI controller; and map MIDI CCs to available controls. The editor supports module search, grid snapping, fit-to-view, shift-click and box multi-selection, group movement, and copy/paste of selected modules with their internal connections.
+
+OMNI can record its live master output to a browser-supported audio file. Its MIDI recorder captures notes played through the on-screen/computer keyboard or an incoming MIDI controller and exports a standard MIDI file at 120 BPM; sequencer-generated note events and controller automation are not included in that MIDI take. The workspace also includes starter patches and a preset store.
 
 Patches can be saved in the browser, imported or exported as JSON, and exported as an SVG schematic. **Native CAD export is a future development goal, not a current feature.** The SVG schematic export is an early step toward making patch designs easier to document and potentially use in other tools.
 
@@ -211,7 +213,7 @@ Run `npm test` to execute unit tests, browser-facing static contracts, and the e
 
 ## Browser support and practical notes
 
-Use a recent desktop version of **Chrome or Microsoft Edge** for the most complete experience, particularly for Web MIDI and AudioWorklet features. Other modern browsers may support much of the Web Audio functionality, but MIDI support varies by browser, operating system, and device.
+Use a recent desktop version of **Chrome or Microsoft Edge** for the most complete experience, particularly for Web MIDI and AudioWorklet features. Other modern browsers may support much of the Web Audio functionality, but MIDI support varies by browser, operating system, and device. Overture can be installed as a PWA; its service worker precaches the main instrument, OMNI, and experiment assets for offline use after installation.
 
 - **Start audio with a user gesture.** Browsers commonly prevent audio from starting until you press an instrument's power control or interact with its keyboard.
 - **Grant permissions when prompted.** External MIDI access and the MS-20 microphone input require explicit browser permission.

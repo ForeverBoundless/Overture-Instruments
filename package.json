@@ -4,8 +4,8 @@
   "type": "module",
   "scripts": {
     "test": "npm run test:unit && npm run test:browser && npm run test:smoke",
-    "test:unit": "node --test test/graph.test.mjs test/preset-store.test.mjs",
-    "test:browser": "node --test test/browser-contract.test.mjs",
+    "test:unit": "node --test test/graph.test.mjs test/preset-store.test.mjs test/audio-recorder.test.mjs test/midi-recorder.test.mjs",
+    "test:browser": "node --test test/browser-contract.test.mjs test/omni-features.test.mjs",
     "test:smoke": "node interact.mjs"
   }
 }
