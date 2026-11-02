@@ -109,3 +109,27 @@ test('Community preset exchange covers supported instruments and protects downlo
   assert.doesNotMatch(migration, /grant update on public\.community_patches to authenticated/i);
   for (const source of instrumentSources) assert.match(source, /consumeCommunityInstrumentPreset/);
 });
+
+
+test('Account and Community use the shared Overture CSS design system', async () => {
+  const [theme, accountCss, communityCss, accountPage, communityPage, communityApp] = await Promise.all([
+    readFile(new URL('../css/site-theme.css', import.meta.url), 'utf8'),
+    readFile(new URL('../css/account.css', import.meta.url), 'utf8'),
+    readFile(new URL('../css/community.css', import.meta.url), 'utf8'),
+    readFile(new URL('../account.html', import.meta.url), 'utf8'),
+    readFile(new URL('../community.html', import.meta.url), 'utf8'),
+    readFile(new URL('../js/community.js', import.meta.url), 'utf8'),
+  ]);
+  assert.match(theme, /--oi-panel-background:/);
+  assert.match(theme, /--oi-primary-background:/);
+  assert.match(theme, /\.account-button,\.community-button/);
+  assert.doesNotMatch(accountCss, /:root\s*\{|@font-face/);
+  assert.doesNotMatch(communityCss, /:root\s*\{|@font-face/);
+  assert.match(accountPage, /\/css\/site-theme\.css/);
+  assert.match(communityPage, /\/css\/site-theme\.css/);
+  assert.match(accountPage, /\/js\/shared\/site-nav\.js/);
+  assert.match(communityPage, /\/js\/shared\/site-nav\.js/);
+  assert.match(communityPage, /community-account__actions/);
+  assert.doesNotMatch(communityApp, /initialiseNavigation/);
+  assert.doesNotMatch(communityCss, /\.contact-modal\s*\{\s*position\s*:\s*relative/i);
+});

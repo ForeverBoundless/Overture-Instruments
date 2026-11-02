@@ -1,16 +1,4 @@
 /* omni.css - OMNI modular instrument designer workspace (homepage design language, cyan accent). */
-@font-face { font-family: 'Futura Book'; src: url('/ui/Futura-Book.ttf') format('truetype'); font-display: swap; }
-@font-face { font-family: 'Inter Variable'; src: url('/ui/Inter-Variable.ttf') format('truetype'); font-weight: 100 900; font-display: swap; }
-:root {
-  color-scheme: dark;
-  --bg: #0b0e13; --bg-raised: #10151d; --panel: #121821;
-  --ink: #f5f7fb; --muted: #a9b2c2; --faint: #6f7989;
-  --amber: #ffb75e; --amber-bright: #ff9f0a; --cyan: #7de4ff; --green: #82e6a8;
-  --line: rgba(224,233,246,.13); --line-strong: rgba(224,233,246,.22);
-  --font-display: 'Futura Book', 'Figtree', 'Inter Variable', sans-serif;
-  --font-body: 'Inter Variable', 'Figtree', 'Segoe UI', sans-serif;
-  --font-mono: 'DM Mono', 'Courier New', monospace;
-}
 *, *::before, *::after { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; overflow: hidden; color: var(--ink); background: radial-gradient(ellipse at 50% -12%, rgba(64,77,95,.23), transparent 38%), var(--bg); font-family: var(--font-body); -webkit-font-smoothing: antialiased; }
 button, input, select { font: inherit; }

@@ -568,24 +568,7 @@ async function updateAccount() {
   renderAccount(data?.session || null);
 }
 
-function initialiseNavigation() {
-  const nav = byId('main-nav');
-  const toggle = document.querySelector('.menu-toggle');
-  if (!nav || !toggle) return;
-  toggle.addEventListener('click', () => {
-    const opening = toggle.getAttribute('aria-expanded') !== 'true';
-    toggle.setAttribute('aria-expanded', String(opening));
-    toggle.setAttribute('aria-label', opening ? 'Close navigation' : 'Open navigation');
-    nav.classList.toggle('is-open', opening);
-  });
-  nav.querySelectorAll('a').forEach((link) => link.addEventListener('click', () => {
-    nav.classList.remove('is-open');
-    toggle.setAttribute('aria-expanded', 'false');
-  }));
-}
-
 async function initialise() {
-  initialiseNavigation();
   if (!supabaseConfigured) {
     renderAccount(null);
     return;

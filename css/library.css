@@ -8,21 +8,6 @@
    fit inside a 1366x768 viewport including the full keyboard.
    ===================================================================== */
 
-@font-face {
-  font-family: 'Futura Book';
-  src: url('/ui/Futura-Book.ttf') format('truetype');
-  font-weight: 400;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Inter Variable';
-  src: url('/ui/Inter-Variable.ttf') format('truetype');
-  font-weight: 100 900;
-  font-style: normal;
-  font-display: swap;
-}
-
 #launcher-page {
   font-family: var(--font-body);
 }
@@ -58,9 +43,9 @@
   --wheel-blue-glow: rgba(70, 130, 255, 0.9);
   --accent-red: #b3271a;
 
-  --font-display: 'Futura Book', 'Arial Narrow', Arial, Helvetica, sans-serif;
-  --font-body: 'Inter Variable', 'Inter', 'Segoe UI', Helvetica, sans-serif;
-  --font-mono: 'DM Mono', 'Courier New', Courier, monospace;
+  
+  
+  
 }
 
 * {

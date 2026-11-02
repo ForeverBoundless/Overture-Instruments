@@ -1,13 +1,59 @@
-/* Shared Overture theme layer. Loaded on site pages and creative tools only.
-   Instrument emulator documents intentionally do not load this file. */
-:root {
-  --theme-bg: #0b0e13;
-  --theme-surface: #121821;
-  --theme-ink: #f5f7fb;
-  --theme-muted: #a9b2c2;
-  --theme-border: rgba(224,233,246,.13);
-  --theme-sheen: rgba(255,255,255,.055);
+@font-face {
+  font-family: 'Futura Book';
+  src: url('/ui/Futura-Book.ttf') format('truetype');
+  font-display: swap;
 }
+@font-face {
+  font-family: 'Inter Variable';
+  src: url('/ui/Inter-Variable.ttf') format('truetype');
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: dark;
+  --bg: #0b0e13;
+  --bg-raised: #10151d;
+  --panel: #121821;
+  --ink: #f5f7fb;
+  --muted: #a9b2c2;
+  --faint: #6f7989;
+  --amber: #ffb75e;
+  --amber-bright: #ff9f0a;
+  --cyan: #7de4ff;
+  --green: #82e6a8;
+  --line: rgba(224,233,246,.13);
+  --line-strong: rgba(224,233,246,.22);
+  --font-display: 'Futura Book', 'Figtree', 'Inter Variable', sans-serif;
+  --font-body: 'Inter Variable', 'Figtree', 'Segoe UI', sans-serif;
+  --font-mono: 'DM Mono', 'Courier New', monospace;
+  --page-width: 1180px;
+  --gutter: clamp(22px, 5.4vw, 82px);
+  --card-bg: linear-gradient(145deg, rgba(27,34,45,.86), rgba(11,15,21,.97));
+  --card-shadow: 0 28px 80px rgba(0,0,0,.22), inset 0 1px rgba(255,255,255,.06);
+
+  /* Shared component tokens. New pages should consume these rather than
+     defining another palette, surface, field or button system. */
+  --oi-panel-background: linear-gradient(145deg, rgba(18,24,33,.96), rgba(14,19,27,.98));
+  --oi-panel-background-soft: linear-gradient(145deg, rgba(18,24,33,.94), rgba(14,19,27,.97));
+  --oi-panel-border: var(--line);
+  --oi-panel-shadow: 0 20px 50px rgba(0,0,0,.13), inset 0 1px rgba(255,255,255,.025);
+  --oi-panel-shadow-soft: 0 16px 42px rgba(0,0,0,.12), inset 0 1px rgba(255,255,255,.025);
+  --oi-panel-radius: 14px;
+  --oi-control-background: #0f141c;
+  --oi-control-border: var(--line-strong);
+  --oi-control-radius: 8px;
+  --oi-button-radius: 9px;
+  --oi-button-background: rgba(255,255,255,.035);
+  --oi-button-ink: #e9eef6;
+  --oi-button-hover-background: rgba(255,183,94,.075);
+  --oi-primary-border: #ffc477;
+  --oi-primary-ink: #241809;
+  --oi-primary-background: linear-gradient(180deg, #ffc77f, #ffb75e);
+  --oi-primary-hover-background: linear-gradient(180deg, #ffd194, #ffbf70);
+  --oi-focus: var(--cyan);
+}
+
 html[data-theme="light"] {
   color-scheme: light;
   --bg: #e8edf3;
@@ -16,8 +62,12 @@ html[data-theme="light"] {
   --ink: #333333;
   --muted: #536172;
   --faint: #748193;
+  --amber: #ad5f00;
+  --amber-bright: #ad5f00;
+  --cyan: #087f9f;
+  --green: #167747;
   --line: rgba(43,59,78,.15);
-  --line-strong: rgba(43,59,78,.25);
+  --line-strong: rgba(43,59,78,.24);
   --card-bg: linear-gradient(145deg, rgba(250,252,254,.96), rgba(227,233,241,.96));
   --card-shadow: 0 24px 60px rgba(48,64,84,.12), inset 0 1px rgba(255,255,255,.9);
   --launcher-ink: #333333;
@@ -32,6 +82,21 @@ html[data-theme="light"] {
   --theme-muted: #536172;
   --theme-border: rgba(43,59,78,.16);
   --theme-sheen: rgba(255,255,255,.88);
+  --oi-panel-background: linear-gradient(145deg, rgba(250,252,254,.96), rgba(228,234,242,.96));
+  --oi-panel-background-soft: linear-gradient(145deg, rgba(250,252,254,.94), rgba(228,234,242,.95));
+  --oi-panel-border: rgba(43,59,78,.15);
+  --oi-panel-shadow: 0 18px 42px rgba(45,60,81,.095), inset 0 1px rgba(255,255,255,.9);
+  --oi-panel-shadow-soft: 0 16px 36px rgba(45,60,81,.08), inset 0 1px rgba(255,255,255,.9);
+  --oi-control-background: rgba(249,251,253,.92);
+  --oi-control-border: rgba(43,59,78,.2);
+  --oi-button-background: rgba(255,255,255,.52);
+  --oi-button-ink: #34475b;
+  --oi-button-hover-background: rgba(22,142,183,.055);
+  --oi-primary-border: #e9ad59;
+  --oi-primary-ink: #382407;
+  --oi-primary-background: linear-gradient(180deg, #ffd39a, #ffbd70);
+  --oi-primary-hover-background: linear-gradient(180deg, #ffdda9, #ffc681);
+  --oi-focus: #168eb7;
   background-color: #e8edf3;
 }
 html[data-theme="light"] body {
@@ -986,3 +1051,249 @@ html[data-theme="light"] .feature-section--omni .feature-copy h2 .omni-title-wor
   .site-nav-side { gap:10px; }
   .site-header .main-nav a { font-size:9px; }
 }
+
+/* ============================================================
+   OVERTURE DESIGN SYSTEM — shared page components
+   The account and community pages use these same surfaces,
+   fields and button states. Keep page CSS focused on layout.
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+.account-panel,
+.community-toolbar,
+.community-setup,
+.community-publish-panel,
+.community-card {
+  border: 1px solid var(--oi-panel-border);
+  border-radius: var(--oi-panel-radius);
+  background: var(--oi-panel-background);
+  box-shadow: var(--oi-panel-shadow);
+}
+
+.account-button,
+.community-button {
+  display: inline-flex;
+  min-height: 40px;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 0 15px;
+  border: 1px solid var(--oi-control-border);
+  border-radius: var(--oi-button-radius);
+  color: var(--oi-button-ink);
+  background: var(--oi-button-background);
+  font: 650 9px/1.2 var(--font-body);
+  letter-spacing: .055em;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color .18s ease, background .18s ease, border-color .18s ease,
+    transform .18s ease, box-shadow .18s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.account-button:hover:not(:disabled),
+.community-button:hover:not(:disabled) {
+  border-color: rgba(255,183,94,.5);
+  color: var(--ink);
+  background: var(--oi-button-hover-background);
+}
+.account-button:active:not(:disabled),
+.community-button:active:not(:disabled) { transform: translateY(1px); }
+.account-button:disabled,
+.community-button:disabled { opacity: .45; cursor: not-allowed; }
+.account-button--primary,
+.community-button--primary {
+  min-height: 42px;
+  padding-inline: 20px;
+  border-color: var(--oi-primary-border);
+  color: var(--oi-primary-ink);
+  background: var(--oi-primary-background);
+  box-shadow: 0 5px 16px rgba(255,159,10,.11), inset 0 1px rgba(255,255,255,.42);
+}
+.account-button--primary:hover:not(:disabled),
+.community-button--primary:hover:not(:disabled) {
+  border-color: #ffd49b;
+  color: #1e160d;
+  background: var(--oi-primary-hover-background);
+  box-shadow: 0 7px 20px rgba(255,159,10,.17), inset 0 1px rgba(255,255,255,.5);
+}
+.account-button--quiet,
+.community-button--quiet {
+  min-height: 34px;
+  padding-inline: 12px;
+  color: var(--muted);
+  background: transparent;
+}
+.account-button--quiet:hover:not(:disabled),
+.community-button--quiet:hover:not(:disabled) { color: var(--ink); }
+
+.account-form label,
+.account-avatar-upload,
+.community-toolbar label,
+.community-auth label,
+.community-publish-panel label {
+  display: grid;
+  min-width: 0;
+  gap: 8px;
+  color: var(--muted);
+  font: 500 8px/1.5 var(--font-mono);
+  letter-spacing: .13em;
+}
+.account-form label i { color: var(--faint); font-style: normal; }
+
+.account-form input,
+.community-toolbar input,
+.community-toolbar select,
+.community-auth input,
+.community-publish-panel input,
+.community-publish-panel select,
+.community-publish-panel textarea {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 43px;
+  padding: 10px 12px;
+  border: 1px solid var(--oi-control-border);
+  border-radius: var(--oi-control-radius);
+  color: var(--ink);
+  background: var(--oi-control-background);
+  font: 400 12px/1.4 var(--font-body);
+  letter-spacing: 0;
+  transition: border-color .18s ease, background .18s ease, box-shadow .18s ease;
+}
+.account-form input:hover,
+.community-toolbar input:hover,
+.community-toolbar select:hover,
+.community-auth input:hover,
+.community-publish-panel input:hover,
+.community-publish-panel select:hover,
+.community-publish-panel textarea:hover { border-color: rgba(125,228,255,.32); }
+.account-form input:focus,
+.community-toolbar input:focus,
+.community-toolbar select:focus,
+.community-auth input:focus,
+.community-publish-panel input:focus,
+.community-publish-panel select:focus,
+.community-publish-panel textarea:focus {
+  border-color: rgba(125,228,255,.62);
+  box-shadow: 0 0 0 3px rgba(125,228,255,.08);
+  outline: 0;
+}
+.account-form input::placeholder,
+.community-toolbar input::placeholder,
+.community-auth input::placeholder,
+.community-publish-panel input::placeholder,
+.community-publish-panel textarea::placeholder { color: #788597; opacity: 1; }
+.account-form input:disabled { color: var(--muted); opacity: .8; }
+
+.account-overline,
+.community-overline {
+  margin: 0 0 11px;
+  color: var(--cyan);
+  font: 500 9px/1.4 var(--font-mono);
+  letter-spacing: .19em;
+}
+.account-hero h1,
+.community-hero h1 {
+  margin: 0;
+  color: var(--ink);
+  font: 500 clamp(34px,5.35vw,66px)/1.04 var(--font-body);
+  letter-spacing: -.065em;
+}
+.account-hero h1 em,
+.community-hero h1 em {
+  color: var(--amber-bright);
+  font: 400 1em var(--font-display);
+  font-style: normal;
+  font-weight: 400;
+  text-shadow: 0 0 22px rgba(255,159,10,.17);
+}
+
+/* Shared ambient field and fine grid behind secondary page heroes. */
+.account-shell,
+.community-shell { isolation: isolate; }
+.account-shell::before,
+.community-shell::before {
+  position: absolute;
+  z-index: -1;
+  top: 44px;
+  left: 50%;
+  width: min(100vw, 1440px);
+  height: 460px;
+  content: '';
+  pointer-events: none;
+  transform: translateX(-50%);
+  background:
+    radial-gradient(ellipse at 22% 30%, rgba(255,159,10,.095), transparent 36%),
+    radial-gradient(ellipse at 78% 24%, rgba(125,228,255,.085), transparent 38%),
+    radial-gradient(ellipse at 50% 76%, rgba(130,230,168,.035), transparent 46%);
+}
+.account-shell::after,
+.community-shell::after {
+  position: absolute;
+  z-index: -1;
+  top: 42px;
+  right: 0;
+  left: 0;
+  height: 460px;
+  content: '';
+  pointer-events: none;
+  opacity: .22;
+  background-image:
+    linear-gradient(rgba(199,216,239,.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(199,216,239,.045) 1px, transparent 1px);
+  background-size: 66px 66px;
+  mask-image: radial-gradient(ellipse at 50% 35%, #000 0%, transparent 76%);
+}
+html[data-theme="light"] .account-shell::before,
+html[data-theme="light"] .community-shell::before { opacity: .48; }
+html[data-theme="light"] .account-shell::after,
+html[data-theme="light"] .community-shell::after {
+  opacity: .38;
+  background-image:
+    linear-gradient(rgba(64,94,125,.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(64,94,125,.06) 1px, transparent 1px);
+}
+
+/* Light-mode semantic defaults should retain each page's secondary ink and
+   signal labels instead of flattening every paragraph and form label. */
+html[data-theme="light"] body :is(.account-overline,.community-overline) {
+  color: var(--cyan) !important;
+  -webkit-text-fill-color: currentColor;
+}
+html[data-theme="light"] body :is(
+  .account-form label,.account-avatar-upload,
+  .community-toolbar label,.community-auth label,.community-publish-panel label
+) { color: var(--muted) !important; }
+html[data-theme="light"] body :is(
+  .account-hero > p:last-child,.account-auth-heading > p:last-child,
+  .account-profile-heading > div > p:last-child,.account-panel-heading > p:last-child,
+  .account-hint,.account-legal,.account-status,
+  .community-hero > p:last-child,.community-setup p,
+  .community-card__description,.community-empty
+) { color: var(--muted) !important; }
+html[data-theme="light"] body :is(.account-panel,.community-toolbar,.community-setup,.community-publish-panel,.community-card) {
+  border-color: var(--oi-panel-border);
+  background: var(--oi-panel-background);
+  box-shadow: var(--oi-panel-shadow);
+}
+html[data-theme="light"] body :is(.account-button,.community-button):not(.account-button--primary):not(.community-button--primary) {
+  border-color: rgba(43,59,78,.2);
+  color: #34475b;
+  background: rgba(255,255,255,.52);
+}
+html[data-theme="light"] body :is(.account-button,.community-button):not(.account-button--primary):not(.community-button--primary):hover:not(:disabled) {
+  border-color: rgba(22,142,183,.38);
+  color: #075d7b;
+  background: rgba(22,142,183,.055);
+}
+html[data-theme="light"] body :is(.account-button--primary,.community-button--primary) {
+  border-color: #e9ad59;
+  color: #382407;
+  background: linear-gradient(180deg,#ffd39a,#ffbd70);
+  box-shadow: 0 5px 15px rgba(170,105,25,.1), inset 0 1px rgba(255,255,255,.8);
+}
+

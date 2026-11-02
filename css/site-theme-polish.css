@@ -10,6 +10,8 @@ html[data-theme="light"] {
 /* Restore the original luminous brand fills in light mode. */
 html[data-theme="light"] :is(
   .hero-title em,
+  .account-hero h1 em,
+  .community-hero h1 em,
   .about-hero h1 span,
   .story-heading h2 em,
   .founder-copy h2 em,
@@ -41,6 +43,8 @@ html[data-theme="light"] :is(
    text-shadow and animation declarations are deliberately left untouched. */
 html[data-theme="light"] :is(
   .hero-title em,
+  .account-hero h1 em,
+  .community-hero h1 em,
   .about-hero h1 span,
   .story-heading h2 em,
   .founder-copy h2 em,
