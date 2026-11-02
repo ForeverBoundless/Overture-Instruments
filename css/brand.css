@@ -289,4 +289,6 @@ html[data-theme="light"] .header-account { border-color:rgba(43,59,78,.2); color
 html[data-theme="light"] .header-account:hover { border-color:rgba(173,95,0,.4); color:#81500f; background:rgba(255,183,94,.13); }
 html[data-theme="light"] .header-account__avatar--initials { border-color:rgba(8,127,159,.24); color:#176b80; background:linear-gradient(145deg,#e1eff2,#d5e0e9); }
 @media (max-width:760px) { .header-account { min-height:36px; padding:5px 9px; } .header-account__label { max-width:105px; } }
+.omni-topbar .omni-account { flex:0 0 auto; min-height:32px; margin-left:auto; padding:3px 8px; }
+.omni-topbar .omni-account .header-account__avatar { width:24px; height:24px; }
 @media (max-width:440px) { .header-account:not(.is-signed-in) { padding:8px 9px; font-size:8px; } .header-account__label { max-width:94px; } }
