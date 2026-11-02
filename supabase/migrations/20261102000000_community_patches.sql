@@ -58,7 +58,7 @@ drop policy if exists "Public and unlisted patches can be read" on public.commun
 create policy "Public and unlisted patches can be read"
   on public.community_patches for select
   to anon, authenticated
-  using (visibility in ('public', 'unlisted') or owner_id = (select auth.uid()));
+  using (visibility = 'public' or owner_id = (select auth.uid()));
 
 drop policy if exists "Users can publish their own patches" on public.community_patches;
 create policy "Users can publish their own patches"
@@ -94,6 +94,24 @@ drop trigger if exists community_patches_touch_updated_at on public.community_pa
 create trigger community_patches_touch_updated_at
   before update on public.community_patches
   for each row execute function public.community_patch_touch_updated_at();
+
+-- An unlisted item can be opened only when its UUID is already known.
+-- Direct table reads remain limited to public items and the signed-in owner.
+create or replace function public.get_community_patch_by_id(p_patch_id uuid)
+returns setof public.community_patches
+language sql
+security definer
+set search_path = ''
+as $
+  select patch.*
+    from public.community_patches as patch
+   where patch.id = p_patch_id
+     and (patch.visibility in ('public', 'unlisted')
+       or patch.owner_id = (select auth.uid()));
+$;
+
+revoke all on function public.get_community_patch_by_id(uuid) from public;
+grant execute on function public.get_community_patch_by_id(uuid) to anon, authenticated;
 
 create or replace function public.increment_community_patch_downloads(p_patch_id uuid)
 returns bigint
