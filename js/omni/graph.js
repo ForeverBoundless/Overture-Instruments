@@ -170,8 +170,8 @@ export class LiveGraph {
         instance.recordNotes = Boolean(definition.recordNotes);
         instance.params = { ...module.params };
         instance.needsRebuild = false;
-        instance.apply?.();
         prepared.set(module.id, instance);
+        instance.apply?.();
         next.set(module.id, instance);
       }
     } catch (error) {
