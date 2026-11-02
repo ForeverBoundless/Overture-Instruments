@@ -98,7 +98,7 @@ html[data-theme="light"] .site-theme-toggle:hover { color: #075d7b; border-color
 .site-nav-side--left { grid-column: 1; justify-content: flex-end; }
 .site-nav-side--right { grid-column: 3; justify-content: flex-start; }
 .site-header .main-nav a { white-space: nowrap; }
-.site-header .site-brand, .site-header .header-github, .site-header .menu-toggle { position: relative; z-index: 61; }
+.site-header .site-brand, .site-header .header-account, .site-header .menu-toggle { position: relative; z-index: 61; }
 @media (max-width: 980px) {
   .site-header .main-nav { width: min(620px, 54vw); }
   .site-nav-side { gap: 13px; }
@@ -903,9 +903,7 @@ html[data-theme="light"] .feature-section--omni .feature-copy h2 .omni-title-wor
    is defined separately above and is not affected by this glow-outline rule. */
 
 
-/* Mobile-only shared header alignment.
-   The theme toggle stays mathematically centred; the brand mark sits left,
-   while GitHub and the menu occupy compact right-hand slots. */
+/* Mobile-only shared header alignment. The theme toggle stays centred; the brand sits left, while the account control and menu occupy compact right-hand slots. */
 @media (max-width: 760px) {
   .site-header {
     display: grid !important;
@@ -930,7 +928,7 @@ html[data-theme="light"] .feature-section--omni .feature-copy h2 .omni-title-wor
     width: 27px;
     height: 27px;
   }
-  .site-header > .header-github {
+  .site-header > .header-account {
     grid-column: 2;
     grid-row: 1;
     justify-self: end;
