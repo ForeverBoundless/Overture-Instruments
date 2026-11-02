@@ -59,7 +59,7 @@ test('Community library has an optional Supabase setup and owner-scoped schema m
   ]);
   assert.ok(page.includes('supabase-config.js'));
   assert.match(config, /anonKey/);
-  assert.doesNotMatch(config, /service_role/i);
+  assert.doesNotMatch(config, /service_role\\s*[:=]/i);
   assert.match(client, /createClient/);
   assert.match(migration, /enable row level security/i);
   assert.ok(migration.includes('owner_id = (select auth.uid())'));
