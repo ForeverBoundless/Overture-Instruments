@@ -241,7 +241,8 @@ class OmniApp {
     try {
       const blob = await recorder.stop();
       if (!blob?.size) { this.msg('The audio recording was empty.', true); return; }
-      const extension = blob.type.includes('ogg') ? 'ogg' : 'webm';
+      const mime = (blob.type || '').toLowerCase();
+      const extension = mime.includes('ogg') ? 'ogg' : mime.includes('webm') ? 'webm' : mime.includes('mp4') ? 'm4a' : 'dat';
       this.downloadBlob(blob, this.recordingName(extension));
       this.msg(`Audio recording saved (${(blob.size / (1024 * 1024)).toFixed(2)} MB).`);
     } catch (error) {
@@ -684,9 +685,10 @@ class OmniApp {
     o.innerHTML = `<div class="omni-guide-card"><h2>OMNI guide</h2>
 <p><b>Build:</b> click a module in the library (or drag it onto the canvas). Drag a module by its header. Scroll to zoom, drag empty space to pan.</p>
 <p><b>Connect:</b> drag from an output port (right edge) to an input port (left edge), or click an output then a highlighted input. Colours: <span style="color:#ff9f0a">audio</span>, <span style="color:#7de4ff">control voltage</span>, <span style="color:#82e6a8">note/gate events</span>. Audio feeds audio inputs; CV feeds modulation inputs (filter cutoff, VCA gain, oscillator pitch mod); note ports carry key presses from the keyboard, sequencer, clock, arpeggiator or rhythm generators to oscillators, drums, envelopes and the FM voice. Note utilities (Chord, Transpose, Echo) sit between a note source and its destination.</p>
-<p><b>Edit:</b> select a module to change its parameters in the inspector. Delete / Backspace removes the selected module or wire. Ctrl+Z / Ctrl+Shift+Z undo and redo.</p>
+<p><b>Edit:</b> select a module to change its parameters. Shift-click modules or Shift-drag on empty canvas to select a group; drag any selected header to move the group. Ctrl/Cmd+A selects all; Ctrl/Cmd+C/V copies and pastes; Ctrl/Cmd+D duplicates; Delete removes the selection. SNAP aligns modules to the grid and FIT VIEW frames the whole patch. Ctrl/Cmd+Z and Ctrl/Cmd+Shift+Z undo and redo.</p>
 <p><b>Play:</b> press POWER ON AUDIO, then play the on-screen keys, your computer keys (A–') or a MIDI controller. Notes are monophonic per keyboard module (last note wins).</p>
-<p><b>Keep:</b> SAVE stores the instrument in this browser; EXPORT/IMPORT JSON moves it between browsers; EXPORT SVG produces a schematic drawing of the patch. Structural changes rebuild the audio graph (a brief gap in sound is expected); parameter changes are live.</p>
+<p><b>Record:</b> AUDIO REC captures the live master output after you power on audio and downloads a browser-supported audio file. MIDI REC records notes played on the on-screen/computer keyboard or an incoming MIDI controller, then exports a standard MIDI file at 120 BPM. It records note events, not sequencer-generated notes or controller automation.</p>
+<p><b>Keep:</b> SAVE stores the instrument in this browser; EXPORT/IMPORT JSON moves it between browsers; LIBRARY export backs up all saved patches; EXPORT SVG produces a schematic drawing. Structural changes rebuild the audio graph (a brief gap in sound is expected); parameter changes are live.</p>
 <button type="button">CLOSE</button></div>`;
     o.querySelector('button').addEventListener('click', () => o.remove()); o.addEventListener('click', (e) => { if (e.target === o) o.remove(); });
   }
