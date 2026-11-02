@@ -50,12 +50,15 @@ test('offline shell precaches the synthesis engines and OMNI dependencies', asyn
 
 
 test('Community library has an optional Supabase setup and owner-scoped schema migration', async () => {
-  const [page, config, client, migration, app] = await Promise.all([
+  const [page, config, client, migration, app, accountPage, accountApp, accountMigration] = await Promise.all([
     readFile(new URL('../community.html', import.meta.url), 'utf8'),
     readFile(new URL('../js/shared/supabase-config.js', import.meta.url), 'utf8'),
     readFile(new URL('../js/shared/supabaseClient.js', import.meta.url), 'utf8'),
     readFile(new URL('../supabase/migrations/20261102000000_community_patches.sql', import.meta.url), 'utf8'),
     readFile(new URL('../js/community.js', import.meta.url), 'utf8'),
+    readFile(new URL('../account.html', import.meta.url), 'utf8'),
+    readFile(new URL('../js/account.js', import.meta.url), 'utf8'),
+    readFile(new URL('../supabase/migrations/20261103000000_overture_accounts.sql', import.meta.url), 'utf8'),
   ]);
   assert.ok(page.includes('supabase-config.js'));
   assert.match(config, /anonKey/);
@@ -65,8 +68,18 @@ test('Community library has an optional Supabase setup and owner-scoped schema m
   assert.match(migration, /get_community_patch_by_id/);
   assert.match(migration, /using \(visibility = 'public' or owner_id/);
   assert.ok(migration.includes('owner_id = (select auth.uid())'));
-  assert.match(app, /signInWithOtp/);
+  assert.match(page, /community-account-link/);
+  assert.doesNotMatch(page, /community-auth-form/);
   assert.match(app, /increment_community_patch_downloads/);
+  assert.match(accountPage, /account-signup-form/);
+  assert.match(accountPage, /account-google/);
+  assert.match(accountPage, /account-profile-form/);
+  assert.match(accountApp, /signInWithPassword/);
+  assert.match(accountApp, /signInWithOAuth/);
+  assert.match(accountApp, /updateUser/);
+  assert.match(accountMigration, /create table if not exists public\.profiles/);
+  assert.match(accountMigration, /on_auth_user_created_overture_profile/);
+  assert.match(accountMigration, /profile-avatars/);
   assert.match(app, /OPEN IN OMNI/);
 });
 
