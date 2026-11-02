@@ -4,7 +4,7 @@
 
 **Free, browser-based instrument emulators and creative tools for anyone who wants to explore sound.**
 
-[Open Overture Instruments](https://overture-instruments.vercel.app/) · [Instrument library](https://overture-instruments.vercel.app/library) · [OMNI](https://overture-instruments.vercel.app/omni) · [Experiments](https://overture-instruments.vercel.app/experiments) · [Source code](https://github.com/ForeverBoundless/Overture-Instruments)
+[Open Overture Instruments](https://overture-instruments.vercel.app/) · [Instrument library](https://overture-instruments.vercel.app/library) · [OMNI](https://overture-instruments.vercel.app/omni) · [Community](https://overture-instruments.vercel.app/community) · [Experiments](https://overture-instruments.vercel.app/experiments) · [Account](https://overture-instruments.vercel.app/account) · [Source code](https://github.com/ForeverBoundless/Overture-Instruments)
 
 ---
 
@@ -31,6 +31,9 @@ Overture is a work in progress. Its models are independently implemented in soft
 | **Instrument library** | Eight browser-based instruments, each with its own interface and sound engine. |
 | **OMNI** | A modular workspace for assembling an instrument from sound sources, processors, modulation, and performance modules. Patches can be played, saved locally, and exported as JSON or SVG schematics. |
 | **Experiments** | Eight interactive laboratories for learning about waveforms, filters, envelopes, FM, harmonics, beats, time-based effects, and modulation. |
+| **Community** | A searchable library of public OMNI patches and supported instrument presets, with in-browser auditioning, downloads, sharing, and owner publishing tools. |
+| **Overture Accounts** | Optional email/password or Google sign-in, with profile settings for usernames, display names, and profile pictures. An account is only needed to publish or manage Community items. |
+| **Site appearance** | A persistent light/dark theme switcher on pages using the shared site theme. |
 | **Performance input** | On-screen keyboards and computer-keyboard controls where implemented, plus Web MIDI input for compatible controllers. MIDI features differ by instrument. |
 | **Sound design** | Oscillators, filters, envelopes, LFOs, modulation, instrument-specific processing, and preset or pattern management where supported. |
 
@@ -123,6 +126,26 @@ The labs run directly in the browser. Audio starts in response to a user action 
 
 ---
 
+## Community patch library
+
+The Community page is a shared catalogue for OMNI patches and supported instrument presets. Anyone can browse public submissions without signing in. The page supports search across titles, descriptions and tags; filtering by OMNI patches or instrument presets; and sorting by newest or download count. Each item shows its author and download count, with an optional audio preview.
+
+OMNI patches can be auditioned directly in the browser when they contain a keyboard or running sequencer, opened in the OMNI workspace, downloaded as JSON, and shared through a direct link. Instrument presets can be opened in their corresponding emulator, downloaded, and shared. An uploaded audio preview can be played when one is available.
+
+Publishing requires an Overture account. Owners can publish, edit, or delete their own items, choose public or unlisted visibility, and attach an optional audio preview of up to 8 MB. Public items appear in discovery; unlisted items are reached through their direct links.
+
+The current instrument-preset importers accept **Little Phatty user-preset JSON, Korg MS-20 JSON, Roland Juno-106 JSON, Yamaha DX7 JSON, and Roland TR-808 JSON**. Each format is validated and loaded through the corresponding emulator's existing preset code. Prophet-10 SysEx files, Sub 37 panel snapshots, and Nord C2D registrations are not supported by the Community importer yet.
+
+Community data and preview uploads use Supabase. See [the Supabase setup guide](supabase/README.md) for the database migrations, authentication providers, storage policies, and browser configuration. Never put a service-role key in client-side code or publish private recordings as public audio previews.
+
+## Overture Accounts
+
+Accounts are optional for using the instrument library, OMNI, and Experiments. They are used for publishing and managing Community items. Users can create an account or sign in with an email address and password, or continue with Google. The account page also supports password reset, password changes, and sign-out.
+
+A profile can have a unique username, an optional display name, and a profile picture. The picture can be a PNG, JPG, or WebP file up to 3 MB. When signed in, the shared site header displays the account identity; Community submissions show the author's profile name. Email addresses are used for authentication and are not displayed on public profiles or Community items.
+
+Overture Accounts use Supabase Authentication and a public profile table. The Community and account migrations must be applied to the same Supabase project; setup instructions are in [supabase/README.md](supabase/README.md).
+
 ## Technical architecture
 
 Overture is a static front-end web application built mainly with **HTML, CSS, and native JavaScript ES modules**. There is no framework build step or package installation required for the current site structure.
@@ -141,11 +164,11 @@ A shared MIDI mapping interface lets users assign compatible physical MIDI CCs t
 
 ### Presets and saved data
 
-Reusable preset storage is built around browser `localStorage`. Supported pages can save, load, rename, delete, import, or export patches and patterns, depending on the instrument. OMNI patches, TR-808 patterns, and shared MIDI assignments also use browser-local storage. OMNI uses versioned migrations and creates a browser-local raw backup before it changes an older saved-data version; it can also export or import its whole saved library. The exact controls differ between pages.
+Reusable preset storage is built around browser `localStorage`. Supported pages can save, load, rename, delete, import, or export patches and patterns, depending on the instrument. OMNI patches, TR-808 patterns, and shared MIDI assignments also use browser-local storage. OMNI uses versioned migrations and creates a browser-local raw backup before it changes an older saved-data version; it can also export or import its whole saved library. Community submissions, account profiles, and optional audio previews are stored through Supabase. The exact controls differ between pages.
 
 ### Visual and site layer
 
-The main pages use hand-authored HTML and CSS, with module scripts for page behaviour. Shared CSS and JavaScript provide site navigation, contact UI, performance controls, MIDI mapping, and preset utilities. Some typography is loaded from Google Fonts, and the deployed pages include Vercel Web Analytics scripts.
+The main pages use hand-authored HTML and CSS, with module scripts for page behaviour. Shared CSS and JavaScript provide site navigation, contact UI, performance controls, MIDI mapping, preset utilities, account-session display, and the light/dark theme switcher. The theme preference is stored in browser `localStorage`. Some typography is loaded from Google Fonts, and the deployed pages include Vercel Web Analytics scripts.
 
 ---
 
@@ -189,17 +212,20 @@ The repository includes a `vercel.json` configuration with `cleanUrls` enabled. 
 ├── library.html               # Instrument library shell
 ├── omni.html                  # OMNI modular workspace shell
 ├── experiments.html           # Experiments index
+├── community.html              # Community patch library
+├── account.html                # Account and profile settings
 ├── html/                      # Individual instrument page documents
 ├── experiments/               # Individual experiment route documents
 ├── css/                       # Site, library, instrument, OMNI and lab styles
 ├── js/
 │   ├── engine/                # Audio engines, processors, MIDI and envelopes
 │   ├── data/                  # Presets, programs, patterns, tuning and algorithms
-│   ├── shared/                # Shared panel, MIDI map, storage, navigation utilities
+│   ├── shared/                # Shared panel, MIDI map, storage, navigation, theme and account utilities
 │   ├── omni/                  # OMNI module catalogue, graph and templates
 │   ├── experiments/           # Shared implementation for the eight sound labs
 │   └── *.js                   # Page-level instrument and site controllers
 ├── ui/                        # Reusable controls, fonts, logos and images
+├── supabase/                  # Community/account setup guide and SQL migrations
 ├── LICENSE                    # MIT license with third-party-materials scope notes
 ├── README.md
 └── vercel.json                # Clean URL configuration
@@ -213,7 +239,7 @@ Run `npm test` to execute unit tests, browser-facing static contracts, and the e
 
 ## Browser support and practical notes
 
-Use a recent desktop version of **Chrome or Microsoft Edge** for the most complete experience, particularly for Web MIDI and AudioWorklet features. Other modern browsers may support much of the Web Audio functionality, but MIDI support varies by browser, operating system, and device. Overture can be installed as a PWA; its service worker precaches the main instrument, OMNI, and experiment assets for offline use after installation.
+Use a recent desktop version of **Chrome or Microsoft Edge** for the most complete experience, particularly for Web MIDI and AudioWorklet features. Other modern browsers may support much of the Web Audio functionality, but MIDI support varies by browser, operating system, and device. Overture can be installed as a PWA; its service worker precaches the main instrument, OMNI, experiment, and Community application assets for offline use after installation. The cached Community page shell may open offline, but loading patches, signing in, and publishing require a network connection.
 
 - **Start audio with a user gesture.** Browsers commonly prevent audio from starting until you press an instrument's power control or interact with its keyboard.
 - **Grant permissions when prompted.** External MIDI access and the MS-20 microphone input require explicit browser permission.
@@ -223,15 +249,17 @@ Use a recent desktop version of **Chrome or Microsoft Edge** for the most comple
 
 ## Privacy and local data
 
-Instrument sound generation, MIDI handling, and the storage mechanisms described above run in the browser. Overture does not require an account to use the library. Saved patches, patterns, and MIDI assignments that use `localStorage` remain in that browser profile unless you export them or clear the site's data.
+Instrument sound generation and MIDI handling run in the browser. An account is not required to use the instrument library, OMNI, or Experiments, or to browse and download public Community items. Signing in is only needed to publish or manage Community submissions. Saved patches, patterns, and MIDI assignments that use `localStorage` remain in that browser profile unless you export them or clear the site's data.
+
+Account profiles and Community items are stored through Supabase. Usernames, optional display names, and profile pictures can appear with public Community submissions; email addresses are used for authentication and are not displayed publicly. Public patches and uploaded audio previews are readable by anyone. Unlisted items are omitted from public discovery but remain accessible to people with the direct link, so they should not be treated as private. Do not upload private recordings as Community previews.
 
 The MS-20's microphone function is opt-in and requests access only when enabled. The input is connected to the in-browser audio engine for external-signal processing and pitch tracking; the instrument implementation does not include an upload step for the microphone signal. As noted above, the public site also loads external fonts and includes Vercel Web Analytics, so this should not be read as a claim that every network request made while visiting the website is local.
 
 ## Current limitations and future work
 
-Overture is an evolving project, and its instruments do not all have identical feature sets. Sound engines are approximations, MIDI messages and preset controls differ by page, and browser behaviour affects latency and device access. Overture is currently a browser application, not a native desktop instrument or a VST/AU plug-in.
+Overture is an evolving project, and its instruments do not all have identical feature sets. Sound engines are approximations, MIDI messages and preset controls differ by page, and browser behaviour affects latency and device access. Community preset importing is currently limited to the five formats listed above. Overture is a browser application, not a native desktop instrument or a VST/AU plug-in.
 
-Areas for continued development include refining the sound and response of existing emulators, expanding the instrument library, growing OMNI's catalogue and patching workflow, and adding more learning experiments. Native CAD export for OMNI is a longer-term goal; current exports are JSON patches and SVG schematics.
+Areas for continued development include refining the sound and response of existing emulators, expanding the instrument library, and extending OMNI's module catalogue and patching workflow. Native CAD export for OMNI is a longer-term goal; current exports are JSON patches and SVG schematics.
 
 ## Contributing and feedback
 
@@ -250,10 +278,3 @@ Overture Instruments is independent and unofficial. It is not affiliated with, e
 ---
 
 **Built by Michael Carpiano.** Sound without limits.
-
-
-## Community patch library
-
-The Community page provides public discovery, search and sorting for OMNI patches and supported emulator presets. Signed-out visitors can browse, listen to OMNI patches (or uploaded instrument audio previews), download JSON and share direct links. Email-link sign-in is required to publish, edit or delete your own items. Owners can keep an item public or unlisted, and can upload an optional audio preview.
-
-The first instrument-preset importers support Little Phatty user-preset JSON, MS-20, Juno-106, DX7 and TR-808 preset JSON. Each emulator runs its own validator and applies the imported data through its existing preset code. Prophet-10 SysEx, Sub 37 panel snapshots and Nord C2D registrations are not yet accepted by the community publisher; their native-format adapters still need to be implemented. The community library uses Supabase; see [the setup guide](supabase/README.md). Do not publish private recordings or add a service-role key to browser code.
