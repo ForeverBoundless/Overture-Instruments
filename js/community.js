@@ -524,6 +524,7 @@ function renderAccount(session) {
     byId('community-auth-form').hidden = true;
     byId('community-publish-open').disabled = true;
     byId('community-my-items').hidden = true;
+    byId('community-my-items').textContent = 'MY ITEMS';
     return;
   }
   byId('community-setup').hidden = true;
@@ -645,7 +646,7 @@ async function initialise() {
   // state changes and recursive auth calls can deadlock its internal lock.
   supabase.auth.onAuthStateChange((_event, session) => {
     renderAccount(session);
-    if (!state.mine) loadPatches();
+    if (!state.mine) setTimeout(() => loadPatches(), 0);
   });
 
   await updateAccount();
