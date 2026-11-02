@@ -594,7 +594,6 @@ async function initialise() {
   } catch (error) {
     byId('community-setup').hidden = false;
     byId('community-account-status').textContent = `Supabase could not be loaded: ${error.message || error}`;
-    byId('community-auth-form').hidden = true;
     byId('community-publish-open').disabled = true;
     byId('community-my-items').hidden = true;
     return;
