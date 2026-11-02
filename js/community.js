@@ -107,6 +107,7 @@ function syncContentType() {
   const type = byId('community-record-type').value;
   const instrument = byId('community-instrument');
   instrument.hidden = type !== 'instrument_preset';
+  byId('community-instrument-wrap').hidden = type !== 'instrument_preset';
   if (type === 'omni_patch') {
     state.draftType = 'omni_patch';
     state.draftInstrument = null;
