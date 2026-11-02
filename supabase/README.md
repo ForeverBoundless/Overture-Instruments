@@ -12,3 +12,10 @@
 7. Deploy the site. Visit `/community`, request an email sign-in link, and verify that a signed-in user can publish, edit/delete only their own patches, and that a signed-out visitor can discover and download public patches.
 
 The browser only uses the publishable/anon key. Never place a service-role key in a page, JavaScript file, Vercel public variable, or repository. The migration creates RLS policies for public patch reads, owner-only publishing/editing/deletion, and owner-scoped audio uploads. Public audio preview URLs are readable by anyone because the bucket is intentionally public; do not upload private recordings.
+
+
+## Supported shared content
+
+The current one-click instrument preset handoff supports Little Phatty user-preset JSON, MS-20, Juno-106, DX7 and TR-808 preset JSON. These are the models with a usable JSON export/import path in the current emulator build. Prophet-10 SysEx, Sub 37 panel states and Nord C2D drawbar/register snapshots are not yet handled by the one-click importer; keep those in their native files until their exporters/importers are added. OMNI patches use OMNI's validated patch schema and are imported directly into the workspace.
+
+Public items can be unlisted for direct-link sharing. Public audio previews are intentionally readable by anyone with the item link. The database counter is updated through an RPC; authenticated users do not receive direct write permission to the `downloads` or `updated_at` columns.
