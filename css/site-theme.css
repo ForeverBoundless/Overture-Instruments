@@ -24,6 +24,12 @@
   --green: #82e6a8;
   --line: rgba(224,233,246,.13);
   --line-strong: rgba(224,233,246,.22);
+  --theme-bg: #0b0e13;
+  --theme-surface: #121821;
+  --theme-ink: #f5f7fb;
+  --theme-muted: #a9b2c2;
+  --theme-border: rgba(224,233,246,.13);
+  --theme-sheen: rgba(255,255,255,.055);
   --font-display: 'Futura Book', 'Figtree', 'Inter Variable', sans-serif;
   --font-body: 'Inter Variable', 'Figtree', 'Segoe UI', sans-serif;
   --font-mono: 'DM Mono', 'Courier New', monospace;
