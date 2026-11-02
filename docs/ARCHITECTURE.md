@@ -42,3 +42,6 @@ The editor's group selection/copy/move operations work on module ids and preserv
 ## Community library and trust boundary
 
 The community prototype uses Supabase Auth (email OTP), a `community_patches` table, and the `community-previews` Storage bucket. The browser contains only the publishable/anon key; the SQL migration enables RLS, limits write/delete access to each authenticated owner, restricts writable columns so download counts and timestamps cannot be changed by clients, and increments download counts through a narrowly scoped security-definer function. Instrument data is stored with a record type and instrument identifier; instrument pages still validate imported JSON with their own schemas. Audio previews are public by design and should not be used for private recordings.
+
+
+Unlisted records are excluded from ordinary anonymous table reads. Direct-link access uses the narrowly scoped `get_community_patch_by_id(uuid)` function, which returns only the item matching the supplied UUID when it is public/unlisted or owned by the current user. The discovery feed queries public rows only.
