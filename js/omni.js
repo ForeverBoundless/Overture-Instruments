@@ -294,6 +294,8 @@ class OmniApp {
       return;
     }
     if (this.ctx) this.midiRecorder.clock = () => this.ctx?.currentTime ?? performance.now() / 1000;
+    if (!this.ctx || !this.live) { this.msg('Power on audio before recording MIDI so note timing uses the audio clock.', true); return; }
+    this.midiRecorder.clock = () => this.ctx?.currentTime ?? 0;
     this.midiRecorder.start();
     this.midiRecordBtn.textContent = 'SAVE MIDI';
     this.midiRecordBtn.classList.add('is-recording');
@@ -316,7 +318,9 @@ class OmniApp {
       if (!module) return;
       const parameter = MODULES[module.type].params.find((item) => item.key === binding.paramKey);
       if (!parameter) return;
-      const next = binding.min + value * (binding.max - binding.min);
+      const next = parameter.log
+        ? Math.exp(Math.log(binding.min) + value * (Math.log(binding.max) - Math.log(binding.min)))
+        : binding.min + value * (binding.max - binding.min);
       this.setParam(module.id, binding.paramKey, next, false);
       const input = document.getElementById(`p-${module.id}-${binding.paramKey}`);
       if (input) {
@@ -412,6 +416,7 @@ class OmniApp {
   async power() {
     if (this.ctx) {
       await this.stopAudioRecording();
+      if (this.midiRecorder.recording) this.toggleMidiRecording();
       clearTimeout(this.rebuildTimer);
       this.live?.teardown(); this.live = null;
       const oldContext = this.ctx; this.ctx = null; this.master = null;
@@ -461,12 +466,7 @@ class OmniApp {
       onPitchBend: (_range, _normalized, channel, raw) => this.midiRecorder.pitchBend(raw, { channel, time: this.ctx?.currentTime }),
       onAftertouch: (value, channel) => this.midiRecorder.aftertouch(Math.round(value * 127), { channel, time: this.ctx?.currentTime }),
       onPolyAftertouch: (note, value, channel) => this.midiRecorder.polyAftertouch(note, Math.round(value * 127), { channel, time: this.ctx?.currentTime }),
-      onSustain: (down, channel, value) => this.midiRecorder.controlChange(64, value ?? (down ? 127 : 0), { channel, time: this.ctx?.currentTime }),
-      onProgramChange: (program, channel, bank) => {
-        this.midiRecorder.controlChange(0, bank.msb, { channel, time: this.ctx?.currentTime });
-        this.midiRecorder.controlChange(32, bank.lsb, { channel, time: this.ctx?.currentTime });
-        this.midiRecorder.programChange(program, { channel, time: this.ctx?.currentTime });
-      },
+      onProgramChange: (program, channel) => this.midiRecorder.programChange(program, { channel, time: this.ctx?.currentTime }),
       onConnectionChange: (c, _n, names) => { this.midiEl.textContent = c ? `MIDI: ${names.join(', ')}` : 'MIDI: no device'; },
     });
     this.midi.init().then((ok) => { if (!ok) this.midiEl.textContent = this.midi.supported ? 'MIDI: permission not granted' : 'MIDI: not supported'; else if (!this.midi.isConnected) this.midiEl.textContent = 'MIDI: no device'; });
