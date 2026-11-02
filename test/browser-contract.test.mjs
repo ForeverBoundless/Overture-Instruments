@@ -64,3 +64,27 @@ test('Community library has an optional Supabase setup and owner-scoped schema m
   assert.match(app, /increment_community_patch_downloads/);
   assert.match(app, /OPEN IN OMNI/);
 });
+
+
+test('Community preset exchange covers supported instruments and protects download counters', async () => {
+  const [page, app, helper, migration, instrumentSources] = await Promise.all([
+    readFile(new URL('../community.html', import.meta.url), 'utf8'),
+    readFile(new URL('../js/community.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/shared/communityPreset.js', import.meta.url), 'utf8'),
+    readFile(new URL('../supabase/migrations/20261102000000_community_patches.sql', import.meta.url), 'utf8'),
+    Promise.all([
+      '../js/engine/app.js', '../js/korg-ms-20.js', '../js/roland-juno-106.js',
+      '../js/yamaha-dx7.js', '../js/roland-tr-808.js',
+    ].map((path) => readFile(new URL(path, import.meta.url), 'utf8'))),
+  ]);
+  assert.match(page, /community-record-type/);
+  assert.match(page, /community-instrument/);
+  assert.match(app, /instrument_preset/);
+  assert.match(app, /extractInstrumentPreset/);
+  assert.match(app, /MY ITEMS/);
+  assert.match(helper, /consumeCommunityInstrumentPreset/);
+  assert.match(migration, /record_type/);
+  assert.match(migration, /grant update \(record_type, instrument_id/);
+  assert.doesNotMatch(migration, /grant update on public\.community_patches to authenticated/i);
+  for (const source of instrumentSources) assert.match(source, /consumeCommunityInstrumentPreset/);
+});
