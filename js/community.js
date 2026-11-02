@@ -1,5 +1,5 @@
 import { validatePatch, LiveGraph } from './omni/graph.js';
-import { supabase, supabaseConfigured, previewPublicUrl } from './shared/supabaseClient.js';
+import { supabase, supabaseConfigured, configureSupabase, previewPublicUrl } from './shared/supabaseClient.js';
 
 const byId = (id) => document.getElementById(id);
 const INSTRUMENTS = {
@@ -592,6 +592,16 @@ async function initialise() {
   initialiseNavigation();
   if (!supabaseConfigured) {
     renderAccount(null);
+    return;
+  }
+  try {
+    await configureSupabase();
+  } catch (error) {
+    byId('community-setup').hidden = false;
+    byId('community-account-status').textContent = `Supabase could not be loaded: ${error.message || error}`;
+    byId('community-auth-form').hidden = true;
+    byId('community-publish-open').disabled = true;
+    byId('community-my-items').hidden = true;
     return;
   }
 
