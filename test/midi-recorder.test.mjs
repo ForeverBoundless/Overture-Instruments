@@ -46,3 +46,29 @@ test('MIDI note-off events at a shared tick are ordered before retriggers', () =
   assert.equal(noteOffOffsets.length, 1);
   assert.ok(noteOffOffsets[0] < noteOnOffsets[1]);
 });
+
+
+test('MIDI takes retain channel data and export controller automation', () => {
+  let now = 30;
+  const recorder = new MidiRecorder({ clock: () => now });
+  recorder.start();
+  now = 30.1;
+  recorder.noteOn(60, 0.8, { channel: 2 });
+  recorder.noteOn(60, 0.6, { channel: 3 });
+  recorder.controlChange(1, 64, { channel: 3, time: 30.2 });
+  recorder.pitchBend(8192, { channel: 1, time: 30.3 });
+  recorder.aftertouch(50, { channel: 2, time: 30.4 });
+  recorder.polyAftertouch(60, 70, { channel: 2, time: 30.5 });
+  recorder.programChange(11, { channel: 4, time: 30.6 });
+  recorder.controlChange(64, 127, { channel: 3, time: 30.7 });
+  now = 31;
+  const file = recorder.stop();
+  const bytes = [...file];
+  for (const message of [
+    [0x91, 60], [0x92, 60], [0xb2, 1, 64], [0xe0, 0, 64],
+    [0xd1, 50], [0xa1, 60, 70], [0xc3, 11], [0xb2, 64, 127],
+  ]) {
+    const found = bytes.some((value, index) => message.every((part, offset) => bytes[index + offset] === part));
+    assert.equal(found, true, `expected MIDI bytes ${message.join(',')}`);
+  }
+});
