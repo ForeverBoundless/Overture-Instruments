@@ -3,7 +3,7 @@
 @font-face { font-family: 'Inter Variable'; src: url('/ui/Inter-Variable.ttf') format('truetype'); font-weight: 100 900; font-display: swap; }
 :root {
   color-scheme: dark; --bg:#0b0e13; --bg-raised:#10151d; --panel:#121821;
-  --ink:#f5f7fb; --muted:#a9b2c2; --faint:#748092; --amber:#ffb75e;
+  --ink:#f5f7fb; --muted:#a9b2c2; --faint:#6f7989; --amber:#ffb75e; --amber-bright:#ff9f0a;
   --cyan:#7de4ff; --green:#82e6a8; --line:rgba(224,233,246,.13);
   --line-strong:rgba(224,233,246,.22);
   --font-display:'Futura Book','Figtree','Inter Variable',sans-serif;
@@ -19,8 +19,8 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 .account-shell{position:relative;z-index:1;width:min(920px,calc(100% - clamp(34px,8vw,100px)));margin:0 auto;padding:152px 0 108px}
 .account-hero{max-width:690px;margin-bottom:34px}
 .account-overline{margin:0 0 11px;color:var(--cyan);font:500 9px/1.4 var(--font-mono);letter-spacing:.18em}
-.account-hero h1{margin:0;color:var(--ink);font:400 clamp(42px,6.5vw,66px)/1.02 var(--font-display);letter-spacing:-.06em}
-.account-hero h1 em{color:var(--amber-bright,#ff9f0a);font-style:italic;font-weight:400;text-shadow:0 0 18px rgba(255,159,10,.18)}
+.account-hero h1{margin:0;color:var(--ink);font:500 clamp(34px,5.35vw,66px)/1.04 var(--font-body);letter-spacing:-.065em}
+.account-hero h1 em{color:var(--amber-bright);font:400 1em var(--font-display);font-style:normal;font-weight:400;text-shadow:0 0 22px rgba(255,159,10,.17)}
 .account-hero>p:last-child{max-width:550px;margin:17px 0 0;color:var(--muted);font-size:13px;line-height:1.8}
 .account-status{min-height:22px;margin:0 0 14px;color:var(--muted);font-size:11px;line-height:1.7}
 .account-status.is-error{color:#ff9a9a}
@@ -83,11 +83,11 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(-
 @media(max-width:560px){.account-shell{width:calc(100% - 34px);padding-top:102px}.account-hero h1{font-size:clamp(38px,10vw,50px)}.account-profile-heading{align-items:flex-start;flex-direction:column}.account-profile-heading>.account-button{align-self:flex-start}.account-form-grid,.account-password-form{grid-template-columns:1fr}.account-password-form .account-form-row{grid-column:auto}.account-avatar-field{grid-template-columns:1fr}.account-form-row{align-items:stretch;flex-direction:column}.account-form-row .account-button{width:100%}.account-text-button{align-self:flex-start}}
 html[data-theme="light"]{
  color-scheme:light;--bg:#e8edf3;--bg-raised:#f4f6f9;--panel:#eef2f6;--ink:#333;--muted:#536172;--faint:#748193;
- --amber:#ad5f00;--cyan:#087f9f;--green:#167747;--line:rgba(43,59,78,.15);--line-strong:rgba(43,59,78,.24)
+ --amber:#ad5f00;--amber-bright:#ad5f00;--cyan:#087f9f;--green:#167747;--line:rgba(43,59,78,.15);--line-strong:rgba(43,59,78,.24)
 }
 html[data-theme="light"] body{background:radial-gradient(ellipse at 50% -14%,rgba(255,255,255,.96),transparent 43%),radial-gradient(ellipse at 88% 14%,rgba(125,190,220,.13),transparent 35%),linear-gradient(140deg,#eff3f7 0%,#e5ebf2 46%,#edf1f6 100%)}
 html[data-theme="light"] .account-hero h1 em{color:#ad5f00;-webkit-text-fill-color:currentColor;-webkit-text-stroke:1.05px rgba(49,62,57,.9);paint-order:stroke fill;text-shadow:0 0 18px rgba(255,159,10,.2)}
-html[data-theme="light"] .account-panel{border-color:rgba(43,59,78,.15);background:linear-gradient(145deg,rgba(250,252,254,.96),rgba(228,234,242,.96));box-shadow:0 18px 42px rgba(45,60,81,.075),inset 0 1px rgba(255,255,255,.9)}
+html[data-theme="light"] .account-panel{border-color:rgba(43,59,78,.15);background:linear-gradient(145deg,rgba(250,252,254,.94),rgba(228,234,242,.95));box-shadow:0 20px 50px rgba(45,60,81,.095),inset 0 1px rgba(255,255,255,.9)}
 html[data-theme="light"] .account-auth-tabs{border-color:rgba(43,59,78,.12);background:rgba(43,59,78,.045)}
 html[data-theme="light"] .account-auth-tabs button.is-active{border-color:rgba(173,95,0,.2);color:#8b520c;background:rgba(255,183,94,.18)}
 html[data-theme="light"] .account-form input{border-color:rgba(43,59,78,.2);color:#333;background:rgba(249,251,253,.92)}

@@ -2,15 +2,30 @@ import { supabaseConfigured, configureSupabase } from './supabaseClient.js';
 
 const initials = (value) => String(value || 'OI').trim().split(/[\s._-]+/).filter(Boolean).slice(0, 2).map(part => part[0]).join('').toUpperCase() || 'OI';
 
+function safeAvatarUrl(value) {
+  if (typeof value !== 'string' || !value.trim()) return '';
+  try {
+    const url = new URL(value, window.location.origin);
+    return url.protocol === 'https:' || url.protocol === 'http:' ? url.href : '';
+  } catch {
+    return '';
+  }
+}
+
+function initialsAvatar(label) {
+  const avatar = document.createElement('span');
+  avatar.className = 'header-account__avatar header-account__avatar--initials';
+  avatar.textContent = initials(label);
+  return avatar;
+}
+
 function setHeaderAccount(anchor, user, profile) {
   if (!anchor) return;
-  anchor.href = user
-    ? '/account'
-    : `/account?returnTo=${encodeURIComponent(window.location.pathname + window.location.search + window.location.hash)}`;
-  anchor.classList.toggle('is-signed-in', Boolean(user));
-  anchor.replaceChildren();
 
+  anchor.replaceChildren();
   if (!user) {
+    anchor.href = `/account?returnTo=${encodeURIComponent(window.location.pathname + window.location.search + window.location.hash)}`;
+    anchor.classList.remove('is-signed-in');
     const label = document.createElement('span');
     label.className = 'header-account__label';
     label.textContent = 'LOG IN';
@@ -20,29 +35,41 @@ function setHeaderAccount(anchor, user, profile) {
     return;
   }
 
-  const name = profile?.username || user.user_metadata?.user_name || user.email?.split('@')[0] || 'Account';
-  const avatarUrl = profile?.avatar_url || user.user_metadata?.avatar_url || user.user_metadata?.picture || '';
+  const username = String(
+    profile?.username || user.user_metadata?.user_name || user.email?.split('@')[0] || 'Account'
+  ).trim().replace(/^@+/, '') || 'Account';
+  const displayName = profile?.display_name || username;
+  const avatarUrl = safeAvatarUrl(
+    profile?.avatar_url || user.user_metadata?.avatar_url || user.user_metadata?.picture || ''
+  );
+
+  anchor.href = '/account';
+  anchor.classList.add('is-signed-in');
+
   if (avatarUrl) {
     const avatar = document.createElement('img');
     avatar.className = 'header-account__avatar';
     avatar.src = avatarUrl;
     avatar.alt = '';
+    avatar.width = 27;
+    avatar.height = 27;
+    avatar.decoding = 'async';
     avatar.referrerPolicy = 'no-referrer';
-    avatar.addEventListener('error', () => avatar.remove(), { once: true });
+    avatar.addEventListener('error', () => {
+      if (avatar.isConnected) avatar.replaceWith(initialsAvatar(displayName));
+    }, { once: true });
     anchor.append(avatar);
   } else {
-    const avatar = document.createElement('span');
-    avatar.className = 'header-account__avatar header-account__avatar--initials';
-    avatar.textContent = initials(profile?.display_name || name);
-    anchor.append(avatar);
+    anchor.append(initialsAvatar(displayName));
   }
 
   const label = document.createElement('span');
   label.className = 'header-account__label';
-  label.textContent = `@${name}`;
+  label.textContent = `@${username}`;
+  label.title = `@${username}`;
   anchor.append(label);
-  anchor.setAttribute('aria-label', `Account settings for ${name}`);
-  anchor.title = 'Account settings';
+  anchor.setAttribute('aria-label', `Account settings for @${username}`);
+  anchor.title = `Account settings for @${username}`;
 }
 
 async function loadProfile(user) {

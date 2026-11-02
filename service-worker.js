@@ -1,5 +1,10 @@
-const CACHE = 'overture-shell-v4';
+const CACHE = 'overture-shell-v5';
 const APP_SHELL = [
+  '/account',
+  '/css/account.css?v=20261102-account-theme',
+  '/js/account.js?v=20261101-accounts',
+  '/js/shared/account-shell.js',
+  '/js/shared/account-shell.js?v=20261102-account-header',
   '/community',
   '/css/community.css',
   '/js/community.js',

@@ -37,7 +37,7 @@ function buildTile(instrument) {
 }
 
 import './shared/supabase-config.js';
-import './shared/account-shell.js';
+import './shared/account-shell.js?v=20261102-account-header';
 
 const page = document.getElementById('launcher-page');
 page.innerHTML = `<div class="launcher-ambient launcher-ambient--one" aria-hidden="true"></div><div class="launcher-ambient launcher-ambient--two" aria-hidden="true"></div><div class="launcher-noise" aria-hidden="true"></div><header class="site-header" id="top">
