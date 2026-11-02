@@ -53,6 +53,9 @@ class OmniApp {
     el('span', 'omni-project-label', project, 'INSTRUMENT');
     this.nameInput = el('input', 'omni-name', project); this.nameInput.value = this.patch.name; this.nameInput.placeholder = 'Untitled instrument'; this.nameInput.setAttribute('aria-label', 'Instrument name'); this.nameInput.addEventListener('change', () => { this.patch.name = this.nameInput.value.slice(0, 60) || 'Untitled'; this.nameInput.value = this.patch.name; this.pushHistory(); });
     this.status = el('div', 'omni-status', topbar, 'Ready. Power on the audio to hear the instrument.');
+    const account = el('a', 'header-account omni-account', topbar);
+    account.href = '/account'; account.setAttribute('aria-label', 'Log in to your Overture account');
+    const accountLabel = el('span', 'header-account__label', account, 'LOG IN');
 
     const commandbar = el('div', 'omni-commandbar', bar);
     const group = (label) => { const g = el('div', 'omni-tool-group', commandbar); g.setAttribute('role', 'group'); g.setAttribute('aria-label', label); return g; };
