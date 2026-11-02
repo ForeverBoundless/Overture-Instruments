@@ -3,6 +3,8 @@ import { MODULES, CATEGORIES, SIGNAL_COLORS } from './omni/modules.js';
 import { defaultPatch, validatePatch, connectionError, LiveGraph, patchToSVG, defaultParams } from './omni/graph.js';
 import { TEMPLATES, templatePreview } from './omni/templates.js';
 import { PresetStore, downloadText, pickFile } from './shared/presetStore.js';
+import { AudioRecorder } from './shared/audioRecorder.js';
+import { MidiRecorder } from './shared/midiRecorder.js';
 import { Keyboard } from '../ui/Keyboard.js';
 import { MidiManager, midiNoteName } from './engine/MidiManager.js';
 import { noteToMidi, KEY_TO_SEMI } from './shared/panel.js';
@@ -17,6 +19,8 @@ class OmniApp {
     this.store = new PresetStore({ key: 'overture.omni.patches', version: 2, validate: validatePatch, migrations: { 1: (stored) => ({ ...stored, version: 2 }) } });
     this.patch = defaultPatch();
     this.ctx = null; this.live = null; this.selected = null; this.selectedWire = null; this.pending = null;
+    this.selectedModules = new Set(); this.clipboard = null; this.snapEnabled = true;
+    this.audioRecorder = null; this.midiRecorder = new MidiRecorder();
     this.view = { x: 20, y: 20, scale: 1 }; this.history = []; this.future = []; this.rebuildTimer = null;
     this._build();
     this.applyView();
@@ -57,7 +61,8 @@ class OmniApp {
     const viewTools = group('Canvas view');
     tb('−', () => this.zoom(0.8), 'Zoom out', viewTools);
     tb('+', () => this.zoom(1.25), 'Zoom in', viewTools);
-    tb('FIT VIEW', () => { this.view = { x: 20, y: 20, scale: 1 }; this.applyView(); }, 'Reset canvas view', viewTools);
+    tb('FIT VIEW', () => this.fitView(), 'Fit all modules into the canvas', viewTools);
+    this.snapBtn = tb('SNAP: ON', () => this.toggleSnap(), 'Toggle 28-pixel module snapping', viewTools);
 
     const fileTools = group('Import and export');
     tb('JSON ↓', () => downloadText(`${this.patch.name.replace(/\W+/g, '-') || 'omni'}.omni.json`, this.store.exportJSON({ name: this.patch.name, data: this.patch })), 'Export patch as JSON', fileTools);
@@ -65,6 +70,9 @@ class OmniApp {
     tb('LIBRARY ↓', () => downloadText('omni-library.json', this.store.exportAllJSON()), 'Export every saved OMNI patch', fileTools);
     tb('LIBRARY ↑', () => pickFile('.json,application/json', (text) => { try { const items = this.store.importAll(text); this.refreshLoadList(); this.msg(`Imported ${items.length} saved patch${items.length === 1 ? '' : 'es'}.`); } catch (err) { this.msg(err.message, true); } }), 'Import an OMNI library backup', fileTools);
     tb('SVG ↓', () => downloadText(`${this.patch.name.replace(/\W+/g, '-') || 'omni'}.schematic.svg`, patchToSVG(this.patch), 'image/svg+xml'), 'Export patch schematic as SVG', fileTools);
+    const recordTools = group('Recording');
+    this.audioRecordBtn = tb('AUDIO REC', () => this.toggleAudioRecording(), 'Record the live OMNI audio output', recordTools);
+    this.midiRecordBtn = tb('MIDI REC', () => this.toggleMidiRecording(), 'Record keyboard and controller notes, then export a MIDI file', recordTools);
 
     const helpTools = group('Help');
     tb('GUIDE', () => this.guide(), 'Open the OMNI guide', helpTools);
@@ -73,14 +81,23 @@ class OmniApp {
     const lib = el('aside', 'omni-library', main);
     el('h2', '', lib, 'MODULES');
     el('p', 'omni-hint', lib, 'Click to add at the centre, or drag onto the canvas.');
+    this.moduleSearch = el('input', 'omni-module-search', lib);
+    this.moduleSearch.type = 'search'; this.moduleSearch.placeholder = 'Search modules…';
+    this.moduleSearch.setAttribute('aria-label', 'Search OMNI modules');
+    this.moduleGroups = [];
     CATEGORIES.forEach((cat) => {
-      el('h3', '', lib, cat.toUpperCase());
+      const heading = el('h3', '', lib, cat.toUpperCase());
+      const buttons = [];
       Object.entries(MODULES).filter(([, d]) => d.category === cat).forEach(([type, d]) => {
         const b = el('button', 'omni-lib-item', lib, d.name); b.type = 'button'; b.style.setProperty('--c', d.color); b.draggable = true;
+        b.dataset.moduleName = d.name.toLowerCase();
         b.addEventListener('click', () => this.addModule(type));
         b.addEventListener('dragstart', (e) => { e.dataTransfer.setData('text/omni-module', type); e.dataTransfer.effectAllowed = 'copy'; });
+        buttons.push(b);
       });
+      this.moduleGroups.push({ heading, buttons });
     });
+    this.moduleSearch.addEventListener('input', () => this.filterModules());
     // Canvas
     this.canvas = el('div', 'omni-canvas', main); this.canvas.tabIndex = 0; this.canvas.setAttribute('aria-label', 'Patch canvas');
     const canvasHud = el('div', 'omni-canvas-hud', this.canvas);
@@ -90,6 +107,7 @@ class OmniApp {
     el('span', 'omni-canvas-hud__hint', canvasHud, 'DRAG TO PAN  ·  SCROLL TO ZOOM');
     this.world = el('div', 'omni-world', this.canvas);
     this.worldContent = el('div', 'omni-world-content', this.world);
+    this.selectionRect = el('div', 'omni-selection-rect', this.canvas);
     this.wires = document.createElementNS(NS, 'svg'); this.wires.classList.add('omni-wires'); this.worldContent.appendChild(this.wires);
     this.cards = el('div', 'omni-cards', this.worldContent);
     this.canvas.addEventListener('dragover', (e) => { if (e.dataTransfer.types.includes('text/omni-module')) { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; } });
@@ -130,11 +148,138 @@ class OmniApp {
   }
 
   msg(text, error = false) { this.status.textContent = text; this.status.classList.toggle('is-error', error); }
+
+  filterModules() {
+    const query = this.moduleSearch.value.trim().toLowerCase();
+    this.moduleGroups.forEach(({ heading, buttons }) => {
+      let visible = 0;
+      buttons.forEach((button) => {
+        const match = !query || button.dataset.moduleName.includes(query);
+        button.hidden = !match;
+        if (match) visible += 1;
+      });
+      heading.hidden = visible === 0;
+    });
+  }
+
+  toggleSnap() {
+    this.snapEnabled = !this.snapEnabled;
+    this.snapBtn.textContent = this.snapEnabled ? 'SNAP: ON' : 'SNAP: OFF';
+    this.msg(this.snapEnabled ? 'Module snapping enabled.' : 'Module snapping disabled.');
+  }
+
+  snapCoordinate(value) {
+    return this.snapEnabled ? Math.round(value / 28) * 28 : value;
+  }
+
+  fitView() {
+    const modules = [...this.cards.querySelectorAll('.omni-module')];
+    if (!modules.length) {
+      this.view = { x: 20, y: 20, scale: 1 };
+      this.applyView();
+      return;
+    }
+    const bounds = modules.map((card) => ({
+      x: Number.parseFloat(card.style.left) || 0,
+      y: Number.parseFloat(card.style.top) || 0,
+      width: card.offsetWidth || 180,
+      height: card.offsetHeight || 100,
+    }));
+    const minX = Math.min(...bounds.map((item) => item.x));
+    const minY = Math.min(...bounds.map((item) => item.y));
+    const maxX = Math.max(...bounds.map((item) => item.x + item.width));
+    const maxY = Math.max(...bounds.map((item) => item.y + item.height));
+    const width = Math.max(1, maxX - minX), height = Math.max(1, maxY - minY);
+    const availableWidth = Math.max(120, this.canvas.clientWidth - 72);
+    const availableHeight = Math.max(100, this.canvas.clientHeight - 72);
+    const scale = Math.min(2.5, Math.max(0.3, Math.min(availableWidth / width, availableHeight / height)));
+    this.view = {
+      scale,
+      x: (this.canvas.clientWidth - width * scale) / 2 - minX * scale,
+      y: (this.canvas.clientHeight - height * scale) / 2 - minY * scale,
+    };
+    this.applyView();
+  }
+
+  recordingName(extension) {
+    const stem = (this.patch.name || 'overture-patch').trim().toLowerCase()
+      .replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '') || 'overture-patch';
+    const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+    return `${stem}-${stamp}.${extension}`;
+  }
+
+  downloadBlob(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const link = el('a', '', document.body);
+    link.href = url; link.download = filename; link.click(); link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 30000);
+  }
+
+  async toggleAudioRecording() {
+    if (this.audioRecorder?.recording) { await this.stopAudioRecording(); return; }
+    if (!this.ctx || !this.master || !this.live) {
+      this.msg('Power on OMNI audio before recording.', true); return;
+    }
+    try {
+      this.audioRecorder = new AudioRecorder(this.ctx, this.master);
+      this.audioRecorder.start();
+      this.audioRecordBtn.textContent = 'STOP AUDIO';
+      this.audioRecordBtn.classList.add('is-recording');
+      this.msg('Recording OMNI audio output…');
+    } catch (error) {
+      this.audioRecorder = null;
+      this.audioRecordBtn.textContent = 'AUDIO REC';
+      this.audioRecordBtn.classList.remove('is-recording');
+      this.msg(error.message || 'Audio recording could not start.', true);
+    }
+  }
+
+  async stopAudioRecording() {
+    const recorder = this.audioRecorder;
+    if (!recorder) return;
+    this.audioRecorder = null;
+    try {
+      const blob = await recorder.stop();
+      if (!blob?.size) { this.msg('The audio recording was empty.', true); return; }
+      const extension = blob.type.includes('ogg') ? 'ogg' : 'webm';
+      this.downloadBlob(blob, this.recordingName(extension));
+      this.msg(`Audio recording saved (${(blob.size / (1024 * 1024)).toFixed(2)} MB).`);
+    } catch (error) {
+      this.msg(error.message || 'Audio recording could not be finalised.', true);
+    } finally {
+      this.audioRecordBtn.textContent = 'AUDIO REC';
+      this.audioRecordBtn.classList.remove('is-recording');
+    }
+  }
+
+  toggleMidiRecording() {
+    if (this.midiRecorder.recording) {
+      const bytes = this.midiRecorder.stop();
+      this.midiRecordBtn.textContent = 'MIDI REC';
+      this.midiRecordBtn.classList.remove('is-recording');
+      if (!bytes) { this.msg('No MIDI notes were recorded.'); return; }
+      this.downloadBlob(new Blob([bytes], { type: 'audio/midi' }), this.recordingName('mid'));
+      this.msg('MIDI performance exported.');
+      return;
+    }
+    this.midiRecorder.start();
+    this.midiRecordBtn.textContent = 'SAVE MIDI';
+    this.midiRecordBtn.classList.add('is-recording');
+    this.msg('Recording keyboard and MIDI input…');
+  }
+
   refreshLoadList() { this.loadSel.replaceChildren(); const o = el('option', '', this.loadSel, 'LOAD…'); o.value = ''; this.store.items.forEach((it) => { const op = el('option', '', this.loadSel, it.name); op.value = it.id; }); }
 
   // ------------------------------------------------------------------ audio
   async power() {
-    if (this.ctx) { this.ctx.close(); this.ctx = null; this.live?.teardown(); this.live = null; this.powerBtn.textContent = 'POWER ON AUDIO'; this.powerBtn.classList.remove('lit'); this.msg('Audio off.'); return; }
+    if (this.ctx) {
+      await this.stopAudioRecording();
+      clearTimeout(this.rebuildTimer);
+      this.live?.teardown(); this.live = null;
+      const oldContext = this.ctx; this.ctx = null; this.master = null;
+      await oldContext.close();
+      this.powerBtn.textContent = 'POWER ON AUDIO'; this.powerBtn.classList.remove('lit'); this.msg('Audio off.'); return;
+    }
     try {
       const AC = window.AudioContext || window.webkitAudioContext; this.ctx = new AC({ latencyHint: 'interactive' }); await this.ctx.resume();
       this.master = this.ctx.createGain(); this.master.gain.value = this.patch.global.master; this.master.connect(this.ctx.destination);
@@ -151,8 +296,8 @@ class OmniApp {
       catch (err) { this.msg(`Graph error: ${err.message}`, true); }
     }, 60);
   }
-  noteOn(midi, vel) { this.keyboard.setKeyActive(midiNoteName(midi), true); this.live?.noteOn(midi, vel); }
-  noteOff(midi) { this.keyboard.setKeyActive(midiNoteName(midi), false); this.live?.noteOff(midi); }
+  noteOn(midi, vel) { this.keyboard.setKeyActive(midiNoteName(midi), true); this.midiRecorder.noteOn(midi, vel); this.live?.noteOn(midi, vel); }
+  noteOff(midi) { this.keyboard.setKeyActive(midiNoteName(midi), false); this.midiRecorder.noteOff(midi); this.live?.noteOff(midi); }
   allOff() { this.live?.allOff(); this.keyboard.el.querySelectorAll('.lp-key.active').forEach((k) => k.classList.remove('active')); }
 
   _bindMidi() {
@@ -166,18 +311,36 @@ class OmniApp {
   _bindKeys() {
     const held = new Map();
     window.addEventListener('keydown', (e) => {
-      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target?.tagName) || e.ctrlKey || e.metaKey) {
-        if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !['INPUT', 'TEXTAREA'].includes(e.target?.tagName)) { e.preventDefault(); if (e.shiftKey) this.redo(); else this.undo(); }
+      const typing = ['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target?.tagName) || e.target?.isContentEditable;
+      if ((e.ctrlKey || e.metaKey) && !typing) {
+        const key = e.key.toLowerCase();
+        if (key === 'z') { e.preventDefault(); if (e.shiftKey) this.redo(); else this.undo(); return; }
+        if (key === 'a') { e.preventDefault(); this.selectAllModules(); return; }
+        if (key === 'c' && (this.selectedModules.size || this.selected)) { e.preventDefault(); this.copySelection(); return; }
+        if (key === 'v' && this.clipboard) { e.preventDefault(); this.pasteSelection(); return; }
+        if (key === 'd' && (this.selectedModules.size || this.selected)) { e.preventDefault(); this.duplicateSelection(); return; }
+      }
+      if (typing || e.ctrlKey || e.metaKey) return;
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        if (this.selectedWire) this.removeConnection(this.selectedWire);
+        else if (this.selectedModules.size || this.selected) this.deleteSelection();
         return;
       }
-      if (e.key === 'Delete' || e.key === 'Backspace') { if (this.selectedWire) this.removeConnection(this.selectedWire); else if (this.selected) this.removeModule(this.selected); return; }
       if (e.key === 'Escape') { this.pending = null; this.renderWires(); this.allOff(); return; }
       if (e.repeat) return;
-      const semi = KEY_TO_SEMI[e.key.toLowerCase()]; if (semi === undefined || held.has(e.key)) return;
+      const semi = KEY_TO_SEMI[e.key.toLowerCase()];
+      if (semi === undefined || held.has(e.key)) return;
       const midi = 48 + semi; held.set(e.key, midi); this.noteOn(midi, 0.8);
     });
-    window.addEventListener('keyup', (e) => { const m = held.get(e.key); if (m === undefined) return; held.delete(e.key); this.noteOff(m); });
-    window.addEventListener('blur', () => { held.forEach((m) => this.noteOff(m)); held.clear(); });
+    window.addEventListener('keyup', (e) => {
+      const midi = held.get(e.key);
+      if (midi === undefined) return;
+      held.delete(e.key); this.noteOff(midi);
+    });
+    window.addEventListener('blur', () => {
+      held.forEach((midi) => this.noteOff(midi));
+      held.clear();
+    });
   }
 
   // ------------------------------------------------------------------ patch editing
@@ -185,7 +348,7 @@ class OmniApp {
   refreshHistoryButtons() { this.undoBtn.disabled = this.history.length <= 1; this.redoBtn.disabled = !this.future.length; }
   undo() { if (this.history.length <= 1) return; this.future.push(this.history.pop()); this.patch = JSON.parse(this.history[this.history.length - 1]); this.afterLoad(); }
   redo() { if (!this.future.length) return; const s = this.future.pop(); this.history.push(s); this.patch = JSON.parse(s); this.afterLoad(); }
-  afterLoad() { this.selected = null; this.selectedWire = null; this.nameInput.value = this.patch.name; this.masterInput.value = this.patch.global.master; this.render(); this.scheduleRebuild(); this.refreshHistoryButtons(); }
+  afterLoad() { this.selected = null; this.selectedModules.clear(); this.selectedWire = null; this.nameInput.value = this.patch.name; this.masterInput.value = this.patch.global.master; this.render(); this.scheduleRebuild(); this.refreshHistoryButtons(); }
   load(patch, id = null) { try { this.patch = validatePatch(patch); this.currentId = id; this.afterLoad(); this.pushHistory(); } catch (err) { this.msg(err.message, true); } }
   save() { const existing = this.currentId ? this.store.get(this.currentId) : null; const name = prompt('Instrument name', existing?.name || this.patch.name); if (name === null) return; this.patch.name = name.slice(0, 60) || 'Untitled'; this.nameInput.value = this.patch.name; const it = this.store.save(this.patch.name, this.patch, existing?.id); this.currentId = it.id; this.refreshLoadList(); this.msg(`Saved "${it.name}".`); }
 
@@ -193,18 +356,88 @@ class OmniApp {
     const def = MODULES[type];
     if (def.single && this.patch.modules.some((m) => m.type === type)) { this.msg('Only one Audio Output per instrument.', true); return; }
     const centre = this.toWorld(this.canvas.clientWidth / 2 + this.canvas.getBoundingClientRect().left, this.canvas.clientHeight / 2 + this.canvas.getBoundingClientRect().top);
-    const m = { id: uid(type.slice(0, 3)), type, x: x ?? centre.x - 90 + (this.patch.modules.length % 4) * 18, y: y ?? centre.y - 40 + (this.patch.modules.length % 4) * 18, params: defaultParams(type) };
-    this.patch.modules.push(m); this.selected = m.id; this.render(); this.scheduleRebuild(); this.pushHistory(); this.msg(`Added ${def.name}.`);
+    const rawX = x ?? centre.x - 90 + (this.patch.modules.length % 4) * 18;
+    const rawY = y ?? centre.y - 40 + (this.patch.modules.length % 4) * 18;
+    const m = { id: uid(type.slice(0, 3)), type, x: this.snapCoordinate(rawX), y: this.snapCoordinate(rawY), params: defaultParams(type) };
+    this.patch.modules.push(m); this.selected = m.id; this.selectedModules = new Set([m.id]); this.render(); this.scheduleRebuild(); this.pushHistory(); this.msg(`Added ${def.name}.`);
   }
-  removeModule(id) { this.patch.modules = this.patch.modules.filter((m) => m.id !== id); this.patch.connections = this.patch.connections.filter((c) => c.from.module !== id && c.to.module !== id); this.selected = null; this.render(); this.scheduleRebuild(); this.pushHistory(); }
-  duplicateModule(id) { const m = this.patch.modules.find((x) => x.id === id); if (!m || MODULES[m.type].single) return; const copy = { ...m, id: uid(m.type.slice(0, 3)), x: m.x + 30, y: m.y + 30, params: { ...m.params } }; this.patch.modules.push(copy); this.selected = copy.id; this.render(); this.scheduleRebuild(); this.pushHistory(); }
+  removeModule(id) {
+    this.patch.modules = this.patch.modules.filter((m) => m.id !== id);
+    this.patch.connections = this.patch.connections.filter((c) => c.from.module !== id && c.to.module !== id);
+    this.selected = null; this.selectedModules.delete(id);
+    this.render(); this.scheduleRebuild(); this.pushHistory();
+  }
+
+  copySelection() {
+    const ids = this.selectedModules.size ? this.selectedModules : (this.selected ? new Set([this.selected]) : new Set());
+    if (!ids.size) return false;
+    this.clipboard = {
+      modules: this.patch.modules.filter((m) => ids.has(m.id)).map((m) => JSON.parse(JSON.stringify(m))),
+      connections: this.patch.connections.filter((c) => ids.has(c.from.module) && ids.has(c.to.module)).map((c) => JSON.parse(JSON.stringify(c))),
+    };
+    this.msg(`Copied ${this.clipboard.modules.length} modules.`);
+    return true;
+  }
+
+  pasteSelection() {
+    if (!this.clipboard?.modules?.length) return false;
+    const copied = this.clipboard.modules.filter((m) => !MODULES[m.type].single);
+    if (!copied.length) { this.msg('The Audio Output module cannot be duplicated.', true); return false; }
+    const idMap = new Map(copied.map((m) => [m.id, uid(m.type.slice(0, 3))]));
+    const modules = copied.map((m) => ({
+      ...JSON.parse(JSON.stringify(m)), id: idMap.get(m.id),
+      x: m.x + 28, y: m.y + 28, params: { ...m.params },
+    }));
+    const connections = this.clipboard.connections
+      .filter((c) => idMap.has(c.from.module) && idMap.has(c.to.module))
+      .map((c) => ({ id: uid('c'), from: { module: idMap.get(c.from.module), port: c.from.port }, to: { module: idMap.get(c.to.module), port: c.to.port } }));
+    this.patch.modules.push(...modules);
+    this.patch.connections.push(...connections);
+    this.selectedModules = new Set(modules.map((m) => m.id));
+    this.selected = modules.length === 1 ? modules[0].id : null;
+    this.selectedWire = null;
+    this.render(); this.scheduleRebuild(); this.pushHistory();
+    this.msg(`Pasted ${modules.length} modules.`);
+    return true;
+  }
+
+  duplicateSelection() {
+    if (!this.copySelection()) return false;
+    return this.pasteSelection();
+  }
+
+  deleteSelection() {
+    const ids = new Set(this.selectedModules);
+    if (!ids.size && this.selected) ids.add(this.selected);
+    if (!ids.size) return false;
+    this.patch.modules = this.patch.modules.filter((m) => !ids.has(m.id));
+    this.patch.connections = this.patch.connections.filter((c) => !ids.has(c.from.module) && !ids.has(c.to.module));
+    this.selectedModules.clear(); this.selected = null; this.selectedWire = null;
+    this.render(); this.scheduleRebuild(); this.pushHistory();
+    this.msg(`Deleted ${ids.size} modules.`);
+    return true;
+  }
+
+  selectAllModules() {
+    this.selectedModules = new Set(this.patch.modules.map((m) => m.id));
+    this.selected = this.selectedModules.size === 1 ? [...this.selectedModules][0] : null;
+    this.selectedWire = null;
+    this.renderSelection(); this.renderInspector();
+  }
+
+  duplicateModule(id) {
+    const m = this.patch.modules.find((item) => item.id === id);
+    if (!m || MODULES[m.type].single) return;
+    this.selectedModules = new Set([id]); this.selected = id;
+    this.duplicateSelection();
+  }
   tryConnect(from, to) {
     const byId = Object.fromEntries(this.patch.modules.map((m) => [m.id, m]));
     const err = connectionError(byId, from, to, this.patch.connections);
     if (err) { this.msg(`Cannot connect: ${err}`, true); return false; }
     this.patch.connections.push({ id: uid('c'), from, to }); this.render(); this.scheduleRebuild(); this.pushHistory(); this.msg('Connected.'); return true;
   }
-  removeConnection(id) { this.patch.connections = this.patch.connections.filter((c) => c.id !== id); this.selectedWire = null; this.render(); this.scheduleRebuild(); this.pushHistory(); }
+  removeConnection(id) { this.patch.connections = this.patch.connections.filter((c) => c.id !== id); this.selectedWire = null; this.selected = null; this.selectedModules.clear(); this.render(); this.scheduleRebuild(); this.pushHistory(); }
   setParam(id, key, value, commit) {
     const m = this.patch.modules.find((x) => x.id === id); if (!m) return; m.params[key] = value;
     if (this.live) { const ok = this.live.setParam(id, key, value); if (!ok) this.scheduleRebuild(); }
@@ -234,47 +467,112 @@ class OmniApp {
   _bindCanvas() {
     let drag = null;
     this.canvas.addEventListener('pointerdown', (e) => {
-      const port = e.target.closest('.omni-port'); const card = e.target.closest('.omni-module'); const wire = e.target.closest('.omni-wire');
+      const port = e.target.closest('.omni-port'), card = e.target.closest('.omni-module'), wire = e.target.closest('.omni-wire');
       if (port) {
         e.preventDefault();
         const ref = { module: port.dataset.module, port: port.dataset.port };
-        if (port.dataset.dir === 'out') { drag = { kind: 'wire', from: ref, x: e.clientX, y: e.clientY }; this.pending = ref; this.highlightTargets(ref); this.canvas.setPointerCapture(e.pointerId); }
-        else if (this.pending) { this.tryConnect(this.pending, ref); this.pending = null; this.highlightTargets(null); }
-        else this.msg('Drag from an output port (right side) to an input port, or click an output first.');
+        if (port.dataset.dir === 'out') {
+          drag = { kind: 'wire', from: ref, x: e.clientX, y: e.clientY };
+          this.pending = ref; this.highlightTargets(ref); this.canvas.setPointerCapture(e.pointerId);
+        } else if (this.pending) {
+          this.tryConnect(this.pending, ref); this.pending = null; this.highlightTargets(null);
+        } else this.msg('Drag from an output port to an input port, or click an output first.');
         return;
       }
-      if (wire) { this.selectedWire = wire.dataset.id; this.selected = null; this.renderWires(); this.renderInspector(); this.msg('Wire selected - press Delete to remove it.'); return; }
+      if (wire) {
+        this.selectedWire = wire.dataset.id; this.selected = null; this.selectedModules.clear();
+        this.renderWires(); this.renderInspector(); return;
+      }
       if (card) {
-        const m = this.patch.modules.find((x) => x.id === card.dataset.id);
-        this.selected = m.id; this.selectedWire = null; this.renderSelection(); this.renderInspector();
-        if (e.target.closest('.omni-module-head')) { e.preventDefault(); drag = { kind: 'move', m, ox: e.clientX, oy: e.clientY, sx: m.x, sy: m.y }; this.canvas.setPointerCapture(e.pointerId); }
+        const module = this.patch.modules.find((item) => item.id === card.dataset.id);
+        if (e.shiftKey) {
+          const ids = new Set(this.selectedModules);
+          if (ids.has(module.id)) ids.delete(module.id); else ids.add(module.id);
+          this.selectedModules = ids;
+          this.selected = ids.size === 1 ? [...ids][0] : null;
+        } else if (!this.selectedModules.has(module.id)) {
+          this.selectedModules = new Set([module.id]); this.selected = module.id;
+        } else this.selected = this.selectedModules.size === 1 ? module.id : null;
+        this.selectedWire = null;
+        this.renderSelection(); this.renderInspector();
+        if (e.target.closest('.omni-module-head') && this.selectedModules.has(module.id)) {
+          e.preventDefault();
+          const items = [...this.selectedModules].map((id) => this.patch.modules.find((item) => item.id === id))
+            .filter(Boolean).map((item) => ({ module: item, x: item.x, y: item.y }));
+          drag = { kind: 'move', items, ox: e.clientX, oy: e.clientY };
+          this.canvas.setPointerCapture(e.pointerId);
+        }
         return;
       }
       if (e.pointerType === 'mouse' && e.button !== 0) return;
       e.preventDefault(); window.getSelection?.()?.removeAllRanges?.();
-      drag = { kind: 'pan', ox: e.clientX, oy: e.clientY, sx: this.view.x, sy: this.view.y }; this.canvas.setPointerCapture(e.pointerId); this.canvas.classList.add('is-panning');
-      this.selected = null; this.selectedWire = null; this.renderSelection(); this.renderInspector();
+      if (e.shiftKey) {
+        const rect = this.canvas.getBoundingClientRect();
+        drag = { kind: 'select', x: e.clientX, y: e.clientY, rect };
+        Object.assign(this.selectionRect.style, { display: 'block', left: `${e.clientX - rect.left}px`, top: `${e.clientY - rect.top}px`, width: '0px', height: '0px' });
+        this.canvas.setPointerCapture(e.pointerId);
+      } else {
+        drag = { kind: 'pan', ox: e.clientX, oy: e.clientY, sx: this.view.x, sy: this.view.y };
+        this.canvas.setPointerCapture(e.pointerId); this.canvas.classList.add('is-panning');
+        this.selected = null; this.selectedModules.clear(); this.selectedWire = null;
+        this.renderSelection(); this.renderInspector();
+      }
     });
     this.canvas.addEventListener('pointermove', (e) => {
       if (!drag) return;
-      if (drag.kind === 'move') { drag.m.x = drag.sx + (e.clientX - drag.ox) / this.view.scale; drag.m.y = drag.sy + (e.clientY - drag.oy) / this.view.scale; this.positionCard(drag.m); this.renderWires(); }
-      else if (drag.kind === 'pan') { this.view.x = drag.sx + e.clientX - drag.ox; this.view.y = drag.sy + e.clientY - drag.oy; this.applyView(); }
-      else if (drag.kind === 'wire') { const p = this.toWorld(e.clientX, e.clientY); this.renderWires({ from: drag.from, to: p }); }
+      if (drag.kind === 'move') {
+        const dx = (e.clientX - drag.ox) / this.view.scale, dy = (e.clientY - drag.oy) / this.view.scale;
+        drag.items.forEach(({ module, x, y }) => { module.x = x + dx; module.y = y + dy; this.positionCard(module); });
+        this.renderWires();
+      } else if (drag.kind === 'pan') {
+        this.view.x = drag.sx + e.clientX - drag.ox; this.view.y = drag.sy + e.clientY - drag.oy; this.applyView();
+      } else if (drag.kind === 'wire') {
+        this.renderWires({ from: drag.from, to: this.toWorld(e.clientX, e.clientY) });
+      } else if (drag.kind === 'select') {
+        const left = Math.min(drag.x, e.clientX) - drag.rect.left;
+        const top = Math.min(drag.y, e.clientY) - drag.rect.top;
+        Object.assign(this.selectionRect.style, {
+          left: `${left}px`, top: `${top}px`,
+          width: `${Math.abs(e.clientX - drag.x)}px`, height: `${Math.abs(e.clientY - drag.y)}px`,
+        });
+      }
     });
     const up = (e) => {
       if (!drag) return;
       if (drag.kind === 'wire') {
         const target = document.elementFromPoint(e.clientX, e.clientY)?.closest?.('.omni-port[data-dir="in"]');
-        if (target) { this.tryConnect(drag.from, { module: target.dataset.module, port: target.dataset.port }); this.pending = null; this.highlightTargets(null); }
-        else if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) > 6) { this.pending = null; this.highlightTargets(null); this.msg('Released away from an input - cable dropped.'); }
-        else this.msg(`${drag.from.port} selected - now click a highlighted input.`);
+        if (target) {
+          this.tryConnect(drag.from, { module: target.dataset.module, port: target.dataset.port });
+          this.pending = null; this.highlightTargets(null);
+        } else if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) > 6) {
+          this.pending = null; this.highlightTargets(null); this.msg('Released away from an input - cable dropped.');
+        } else this.msg(`${drag.from.port} selected - now click a highlighted input.`);
         this.renderWires();
-      } else if (drag.kind === 'move') this.pushHistory();
-      this.canvas.classList.remove('is-panning');
-      drag = null;
+      } else if (drag.kind === 'move') {
+        drag.items.forEach(({ module }) => {
+          module.x = this.snapCoordinate(module.x); module.y = this.snapCoordinate(module.y);
+          this.positionCard(module);
+        });
+        this.renderWires(); this.pushHistory();
+      } else if (drag.kind === 'select') {
+        const left = Math.min(drag.x, e.clientX), right = Math.max(drag.x, e.clientX);
+        const top = Math.min(drag.y, e.clientY), bottom = Math.max(drag.y, e.clientY);
+        const selected = [...this.cards.querySelectorAll('.omni-module')].filter((item) => {
+          const box = item.getBoundingClientRect();
+          return box.right >= left && box.left <= right && box.bottom >= top && box.top <= bottom;
+        }).map((item) => item.dataset.id);
+        this.selectedModules = new Set(selected); this.selected = selected.length === 1 ? selected[0] : null;
+        this.selectedWire = null; this.selectionRect.style.display = 'none';
+        this.renderSelection(); this.renderInspector();
+      }
+      this.selectionRect.style.display = 'none'; this.canvas.classList.remove('is-panning'); drag = null;
     };
-    this.canvas.addEventListener('pointerup', up); this.canvas.addEventListener('pointercancel', up);
-    this.canvas.addEventListener('wheel', (e) => { e.preventDefault(); const r = this.canvas.getBoundingClientRect(); this.zoom(e.deltaY < 0 ? 1.1 : 0.9, e.clientX - r.left, e.clientY - r.top); }, { passive: false });
+    this.canvas.addEventListener('pointerup', up);
+    this.canvas.addEventListener('pointercancel', up);
+    this.canvas.addEventListener('wheel', (e) => {
+      e.preventDefault(); const rect = this.canvas.getBoundingClientRect();
+      this.zoom(e.deltaY < 0 ? 1.1 : 0.9, e.clientX - rect.left, e.clientY - rect.top);
+    }, { passive: false });
   }
 
   highlightTargets(ref) {
@@ -303,7 +601,7 @@ class OmniApp {
     });
     this.renderSelection();
   }
-  renderSelection() { this.cards.querySelectorAll('.omni-module').forEach((c) => c.classList.toggle('is-selected', c.dataset.id === this.selected)); }
+  renderSelection() { this.cards.querySelectorAll('.omni-module').forEach((c) => { c.classList.toggle('is-selected', this.selectedModules.has(c.dataset.id) && this.selectedModules.size === 1); c.classList.toggle('is-multi-selected', this.selectedModules.has(c.dataset.id) && this.selectedModules.size > 1); }); }
   portPos(ref, dir) {
     const dot = this.cards.querySelector(`.omni-port[data-dir="${dir}"][data-module="${ref.module}"][data-port="${ref.port}"]`); if (!dot) return null;
     const r = dot.getBoundingClientRect(); const w = this.world.getBoundingClientRect();
@@ -325,6 +623,14 @@ class OmniApp {
     const body = this.inspBody; body.replaceChildren();
     if (this.selectedWire) { const c = this.patch.connections.find((x) => x.id === this.selectedWire); if (c) { el('p', 'omni-hint', body, `${c.from.module}.${c.from.port} → ${c.to.module}.${c.to.port}`); const b = el('button', 'omni-tb', body, 'REMOVE WIRE'); b.type = 'button'; b.addEventListener('click', () => this.removeConnection(c.id)); } return; }
     const m = this.patch.modules.find((x) => x.id === this.selected);
+    if (this.selectedModules.size > 1) {
+      el('h3', '', body, `${this.selectedModules.size} modules selected`);
+      el('p', 'omni-hint', body, 'Drag any selected module header to move the group. Copy, paste, duplicate and delete operate on the whole selection. Internal connections are preserved when duplicated.');
+      const actions = el('div', 'omni-insp-buttons', body);
+      const duplicate = el('button', 'omni-tb', actions, 'DUPLICATE GROUP'); duplicate.type = 'button'; duplicate.addEventListener('click', () => this.duplicateSelection());
+      const remove = el('button', 'omni-tb omni-tb--danger', actions, 'DELETE GROUP'); remove.type = 'button'; remove.addEventListener('click', () => this.deleteSelection());
+      return;
+    }
     if (!m) { el('p', 'omni-hint', body, 'Select a module to edit its parameters. Drag module headers to move them; drag from a right-hand port to a left-hand port to connect.'); const miss = this.missingReport(); if (miss) el('p', 'omni-warn', body, miss); return; }
     const def = MODULES[m.type];
     el('h3', '', body, def.name); el('p', 'omni-hint', body, `${m.id} · ${def.category}`);
