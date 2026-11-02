@@ -34,6 +34,7 @@ export function defaultPatch() {
       { id: uid('c'), from: { module: 'vca1', port: 'out' }, to: { module: 'out1', port: 'in' } },
     ],
     global: { master: 0.8 },
+    macros: [],
   };
 }
 
@@ -61,7 +62,31 @@ export function validatePatch(raw) {
     if (check) throw new Error(`Invalid connection: ${check}`);
     connections.push({ id: String(c.id || uid('c')), from: { module: c.from.module, port: c.from.port }, to: { module: c.to.module, port: c.to.port } });
   });
-  return { schema: SCHEMA, name: typeof raw.name === 'string' ? raw.name.slice(0, 60) : 'Untitled', modules, connections, global: { master: Math.min(1, Math.max(0, Number(raw.global?.master) || 0.8)) } };
+  const macros = Array.isArray(raw.macros) ? raw.macros.slice(0, 8).map((macro, index) => {
+    const bindings = Array.isArray(macro?.bindings) ? macro.bindings.slice(0, 16).map((binding) => {
+      const targetModule = byId[binding?.moduleId];
+      if (!targetModule) return null;
+      const parameter = MODULES[targetModule.type].params.find((item) => item.key === binding?.paramKey);
+      if (!parameter || parameter.options) return null;
+      const min = Math.min(parameter.max, Math.max(parameter.min, Number.isFinite(Number(binding.min)) ? Number(binding.min) : parameter.min));
+      const max = Math.min(parameter.max, Math.max(min, Number.isFinite(Number(binding.max)) ? Number(binding.max) : parameter.max));
+      if (max <= min) return null;
+      return { moduleId: targetModule.id, paramKey: parameter.key, min, max };
+    }).filter(Boolean) : [];
+    return {
+      id: String(macro?.id || uid('macro')).slice(0, 60),
+      name: String(macro?.name || `Macro ${index + 1}`).slice(0, 32),
+      value: Math.min(1, Math.max(0, Number.isFinite(Number(macro?.value)) ? Number(macro.value) : 0)),
+      bindings,
+    };
+  }) : [];
+  return {
+    schema: SCHEMA,
+    name: typeof raw.name === 'string' ? raw.name.slice(0, 60) : 'Untitled',
+    modules, connections,
+    global: { master: Math.min(1, Math.max(0, Number(raw.global?.master) || 0.8)) },
+    macros,
+  };
 }
 
 function portDef(byId, ref, dir) { const m = byId[ref?.module]; if (!m) return null; return MODULES[m.type][dir].find((p) => p.id === ref.port) || null; }
