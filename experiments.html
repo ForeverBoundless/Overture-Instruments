@@ -25,6 +25,8 @@
 <script src="/js/shared/site-theme.js" defer></script>
 <link rel="manifest" href="/manifest.webmanifest">
 <script src="/js/shared/pwa.js" defer></script>
+  <script src="/js/shared/supabase-config.js"></script>
+  <script type="module" src="/js/shared/account-shell.js?v=20261101-accounts"></script>
 </head>
 <body>
 <header class="site-header" id="top">
@@ -36,11 +38,10 @@
     <a href="/about">About</a>
     <a href="/library">Library</a>
     <a href="/#omni">OMNI</a>
+    <a href="/community">Community</a>
     <a href="/experiments" aria-current="page">Experiments</a>
   </nav>
-  <a class="header-github" href="https://github.com/ForeverBoundless/Overture-Instruments" target="_blank" rel="noopener noreferrer">
-    <span>GitHub</span><span class="external-arrow" aria-hidden="true">↗</span>
-  </a>
+  <a class="header-account" href="/account" aria-label="Log in to your Overture account"><span class="header-account__label">LOG IN</span></a>
   <button class="menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="main-nav">
     <span></span><span></span>
   </button>
