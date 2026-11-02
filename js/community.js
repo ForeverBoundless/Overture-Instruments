@@ -552,7 +552,7 @@ function renderAccount(session) {
     byId('community-publish-open').disabled = false;
   } else {
     status.textContent = 'Sign in to publish and manage your items. Browsing and downloading public items does not require an account.';
-    byId('community-auth-form').hidden = false;
+    byId('community-account-link').hidden = false;
     byId('community-signout').hidden = true;
     byId('community-my-items').hidden = true;
     byId('community-publish-open').disabled = true;
@@ -565,26 +565,6 @@ async function updateAccount() {
   const { data, error } = await supabase.auth.getSession();
   if (error) message('community-account-status', error.message, true);
   renderAccount(data?.session || null);
-}
-
-async function signIn(event) {
-  event.preventDefault();
-  const email = byId('community-email').value.trim();
-  if (!email) return;
-  const button = byId('community-auth-form').querySelector('button');
-  button.disabled = true;
-  try {
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: `${window.location.origin}/community` },
-    });
-    if (error) throw error;
-    message('community-account-status', 'Sign-in link sent. Check your email and open the link in this browser.');
-  } catch (error) {
-    message('community-account-status', error.message || 'Could not send the sign-in link.', true);
-  } finally {
-    button.disabled = false;
-  }
 }
 
 function initialiseNavigation() {
