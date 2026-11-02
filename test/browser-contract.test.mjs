@@ -32,3 +32,18 @@ test('instrument and experiment pages register the shared offline app shell', as
     assert.ok(page.includes('/js/shared/pwa.js'));
   }
 });
+
+
+test('offline shell precaches the synthesis engines and OMNI dependencies', async () => {
+  const worker = await readFile(new URL('../service-worker.js', import.meta.url), 'utf8');
+  for (const asset of [
+    '/js/engine/Prophet10Processor.js',
+    '/js/engine/DX7Processor.js',
+    '/js/omni/modules.js',
+    '/js/shared/audioRecorder.js',
+    '/js/shared/midiRecorder.js',
+    '/experiments/filter-lab',
+  ]) {
+    assert.ok(worker.includes(asset), `offline shell should include ${asset}`);
+  }
+});
