@@ -437,7 +437,7 @@ async function publishItem(event) {
   event.preventDefault();
   if (!state.user) {
     message('community-publish-status', 'Sign in with your email before publishing.', true);
-    byId('community-auth-form').hidden = false;
+    byId('community-account-link').hidden = false;
     return;
   }
   const submit = byId('community-publish-form').querySelector('[type="submit"]');
@@ -537,7 +537,6 @@ function renderAccount(session) {
   if (!supabaseConfigured) {
     status.textContent = 'Community backend not configured.';
     byId('community-setup').hidden = false;
-    byId('community-auth-form').hidden = true;
     byId('community-publish-open').disabled = true;
     byId('community-my-items').hidden = true;
     byId('community-my-items').textContent = 'MY ITEMS';
@@ -546,8 +545,8 @@ function renderAccount(session) {
   byId('community-setup').hidden = true;
   state.user = session?.user || null;
   if (state.user) {
-    status.textContent = `SIGNED IN AS ${state.user.email || 'OVERTURE USER'}`;
-    byId('community-auth-form').hidden = true;
+    status.textContent = 'You are signed in to Overture. You can publish and manage your community patches.';
+    byId('community-account-link').hidden = true;
     byId('community-signout').hidden = false;
     byId('community-my-items').hidden = false;
     byId('community-publish-open').disabled = false;
@@ -648,7 +647,6 @@ async function initialise() {
       byId('community-draft-status').textContent = 'The selected file could not be validated for this content type.';
     }
   });
-  byId('community-auth-form').addEventListener('submit', signIn);
   byId('community-signout').addEventListener('click', async () => {
     const { error } = await supabase.auth.signOut();
     if (error) message('community-account-status', error.message, true);
