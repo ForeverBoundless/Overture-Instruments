@@ -29,6 +29,6 @@ test('instrument and experiment pages register the shared offline app shell', as
   const pages = await Promise.all(paths.map((path) => readFile(new URL(path, import.meta.url), 'utf8')));
   for (const page of pages) {
     assert.match(page, /rel="manifest"/);
-    assert.match(page, /js\\/shared\\/pwa\\.js/);
+    assert.ok(page.includes('/js/shared/pwa.js'));
   }
 });
