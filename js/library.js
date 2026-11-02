@@ -46,6 +46,7 @@ page.innerHTML = `<div class="launcher-ambient launcher-ambient--one" aria-hidde
     <a href="/about">About</a>
     <a href="/library" aria-current="page">Library</a>
     <a href="/#omni">OMNI</a>
+    <a href="/community">Community</a>
     <a href="/experiments">Experiments</a>
   </nav>
   <a class="header-github" href="https://github.com/ForeverBoundless/Overture-Instruments" target="_blank" rel="noopener noreferrer"><span>GitHub</span><span class="external-arrow" aria-hidden="true">↗</span></a>
