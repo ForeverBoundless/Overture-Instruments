@@ -47,3 +47,20 @@ test('offline shell precaches the synthesis engines and OMNI dependencies', asyn
     assert.ok(worker.includes(asset), `offline shell should include ${asset}`);
   }
 });
+
+
+test('Community library has an optional Supabase setup and owner-scoped schema migration', async () => {
+  const [page, client, migration, app] = await Promise.all([
+    readFile(new URL('../community.html', import.meta.url), 'utf8'),
+    readFile(new URL('../js/shared/supabaseClient.js', import.meta.url), 'utf8'),
+    readFile(new URL('../supabase/migrations/20261102000000_community_patches.sql', import.meta.url), 'utf8'),
+    readFile(new URL('../js/community.js', import.meta.url), 'utf8'),
+  ]);
+  assert.match(page, /supabase-config\.js/);
+  assert.match(client, /service_role/);
+  assert.match(migration, /enable row level security/i);
+  assert.match(migration, /owner_id = \(select auth\.uid\(\)\)/);
+  assert.match(app, /signInWithOtp/);
+  assert.match(app, /increment_community_patch_downloads/);
+  assert.match(app, /OPEN IN OMNI/);
+});
