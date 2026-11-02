@@ -1,3 +1,6 @@
+import '../shared/supabase-config.js';
+import '../shared/account-shell.js';
+
 /**
  * experiments/labs.js - Overture Experiments: four interactive sound labs sharing
  * one audio/visualisation kit. The lab is chosen by <body data-lab="...">.
