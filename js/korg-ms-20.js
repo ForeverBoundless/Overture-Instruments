@@ -4,6 +4,7 @@ import { PresetStore, num } from './shared/presetStore.js';
 import { el, section, knob, button, toggle, select, display, performance, power, presetBar, footer } from './shared/panel.js';
 import { MS20_DEFAULT as DEF, MS20_JACKS as JACKS } from './data/ms20Jacks.js';
 import { MS20_PRESETS } from './data/ms20Presets.js';
+import { consumeCommunityInstrumentPreset } from './shared/communityPreset.js';
 
 const ENUMS = { vco1Wave: ['tri', 'saw', 'pulse', 'noise'], vco2Wave: ['saw', 'sqr', 'pulse', 'ring'], vco1Scale: [32, 16, 8, 4], vco2Scale: [16, 8, 4, 2] };
 export function validateCables(list) {
@@ -47,6 +48,8 @@ class MS20App {
     footer(this.shell, 'MONOPHONIC SEMI-MODULAR • HPF → LPF • PATCHABLE MG / EG / S&H / ESP • LOW-NOTE PRIORITY • KEYS: A–\' PLAY, -/= OCTAVE, ESC PANIC');
     power('ms20-power', () => this.engine.start(), () => { this.send(); this.perf.flushPending(); this.disp.flash('AUDIO READY'); });
     this.presets.load('f:0');
+    const community = consumeCommunityInstrumentPreset('ms-20', validate);
+    if (community) { this.patch = community.data; this.disp.set(`PATCH  ${community.title}`, `${this.patch.cables.length} CABLES · COMMUNITY`); this.refresh(); }
     window.addEventListener('resize', () => this.drawCables());
   }
 
