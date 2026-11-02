@@ -20,6 +20,8 @@ const state = {
   pageSize: 24,
   hasMore: false,
   loading: false,
+  reloadPending: false,
+  pendingAppend: false,
   mine: false,
   editingId: null,
   editingOriginalPreviewPath: null,
@@ -346,7 +348,12 @@ function renderCard(item) {
 }
 
 async function loadPatches({ append = false } = {}) {
-  if (!supabase || state.loading) return;
+  if (!supabase) return;
+  if (state.loading) {
+    state.pendingAppend = state.reloadPending ? state.pendingAppend && append : append;
+    state.reloadPending = true;
+    return;
+  }
   state.loading = true;
   const grid = byId('community-grid');
   if (!append) {
@@ -386,6 +393,12 @@ async function loadPatches({ append = false } = {}) {
     message('community-result-count', error.message || 'Could not load community items.', true);
   } finally {
     state.loading = false;
+    if (state.reloadPending) {
+      const nextAppend = state.pendingAppend;
+      state.reloadPending = false;
+      state.pendingAppend = false;
+      void loadPatches({ append: nextAppend });
+    }
   }
 }
 
