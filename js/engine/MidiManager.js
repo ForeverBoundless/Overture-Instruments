@@ -215,10 +215,12 @@ export class MidiManager {
   _handleCC(controller, value, channel, deviceName = '') {
     const cb = this.callbacks;
     const state = this._channels[channel - 1];
+    // Recording observes the raw controller stream even when a shared MIDI
+    // mapping consumes the message for a bound macro/parameter.
+    cb.onControlChange?.(controller, value, channel);
     let consumed = false;
     for (const fn of MidiManager.ccListeners) { if (fn(controller, value, channel, deviceName)) consumed = true; }
     if (consumed) return;
-    cb.onControlChange?.(controller, value, channel);
     switch (controller) {
       case CC.BANK_MSB:
         state.bankMsb = value;
