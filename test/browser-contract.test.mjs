@@ -6,7 +6,7 @@ import { INSTRUMENTS } from '../js/data/instruments.js';
 test('PWA shell exposes a manifest and worker registration', async () => {
   const [manifest, worker, home] = await Promise.all(['../manifest.webmanifest', '../service-worker.js', '../index.html'].map((file) => readFile(new URL(file, import.meta.url), 'utf8')));
   assert.match(manifest, /"display": "standalone"/);
-  assert.match(worker, /overture-shell-v\\d+/);
+  assert.match(worker, /overture-shell-v\d+/);
   assert.match(home, /manifest\.webmanifest/);
 });
 
