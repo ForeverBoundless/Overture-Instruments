@@ -84,76 +84,194 @@ export function connectionError(byId, from, to, existing) {
   return null;
 }
 
-/** Builds and maintains the live Web Audio graph for a patch. */
+/**
+ * Incremental live graph. Unchanged module instances survive edits; only
+ * changed modules and changed edges are replaced. Async module creation is
+ * prepared before the active graph is touched.
+ */
 export class LiveGraph {
-  constructor(ctx, master) {
-    this.ctx = ctx; this.bus = { master, algorithms: ALGORITHMS };
-    this.instances = new Map(); this.unsubs = [];
-    // Builds can await AudioWorklet loading.  Serialising them, and ignoring
-    // superseded requests, prevents an older asynchronous build from taking
-    // ownership of the live graph after a newer edit has been requested.
+  constructor(ctx, master, { onNoteEvent = null } = {}) {
+    this.ctx = ctx;
+    this.bus = { master, algorithms: ALGORITHMS };
+    this.instances = new Map();
+    this.connectionCleanups = new Map();
+    this.onNoteEvent = onNoteEvent;
+    this._recordedEvents = new WeakSet();
     this._requestedGeneration = 0;
     this._buildChain = Promise.resolve();
   }
 
   async build(patch) {
     const generation = ++this._requestedGeneration;
-    // Callers continue editing the same patch object, so take an immutable
-    // snapshot before this request enters the asynchronous queue.
     const snapshot = JSON.parse(JSON.stringify(patch));
-    this._buildChain = this._buildChain.catch(() => {}).then(() => this._replace(snapshot, generation));
+    this._buildChain = this._buildChain
+      .catch(() => {})
+      .then(() => this._replace(snapshot, generation));
     return this._buildChain;
   }
 
   async _replace(patch, generation) {
     if (generation !== this._requestedGeneration) return false;
+    const desired = new Map(patch.modules.map((module) => [module.id, module]));
     const next = new Map();
-    const disposeNext = () => next.forEach((inst) => { try { inst.allOff?.(); inst.dispose?.(); } catch { /* best effort */ } });
-    try {
-      for (const m of patch.modules) {
-        const def = MODULES[m.type];
-        const inst = await def.create(this.ctx, this.bus);
-        if (generation !== this._requestedGeneration) { try { inst.dispose?.(); } catch { /* */ } disposeNext(); return false; }
-        inst.id = m.id; inst.params = { ...m.params };
-        inst.apply?.();
-        next.set(m.id, inst);
-      }
-    } catch (err) {
-      disposeNext();
-      throw err;
-    }
-    if (generation !== this._requestedGeneration) { disposeNext(); return false; }
+    const prepared = new Map();
+    const disposePrepared = () => prepared.forEach((instance) => {
+      try { instance.allOff?.(); } catch { /* best effort */ }
+      try { instance.dispose?.(); } catch { /* best effort */ }
+    });
 
-    // Only replace a complete, current graph.  This keeps the prior graph
-    // alive while an asynchronous module is being prepared.
-    this.teardown(false);
+    try {
+      for (const module of patch.modules) {
+        const existing = this.instances.get(module.id);
+        const unchanged = existing
+          && existing.type === module.type
+          && !existing.needsRebuild
+          && JSON.stringify(existing.params) === JSON.stringify(module.params);
+
+        if (unchanged) {
+          next.set(module.id, existing);
+          continue;
+        }
+
+        const definition = MODULES[module.type];
+        const instance = await definition.create(this.ctx, this.bus);
+        if (generation !== this._requestedGeneration) {
+          try { instance.dispose?.(); } catch { /* best effort */ }
+          disposePrepared();
+          return false;
+        }
+        instance.id = module.id;
+        instance.type = module.type;
+        instance.recordNotes = Boolean(definition.recordNotes);
+        instance.params = { ...module.params };
+        instance.needsRebuild = false;
+        instance.apply?.();
+        prepared.set(module.id, instance);
+        next.set(module.id, instance);
+      }
+    } catch (error) {
+      disposePrepared();
+      throw error;
+    }
+
+    if (generation !== this._requestedGeneration) {
+      disposePrepared();
+      return false;
+    }
+
+    // Preserve an existing edge only when its endpoints are the same live
+    // instances. Module replacement therefore changes only adjacent edges.
+    const desiredEdges = new Map(patch.connections.map((connection) => [
+      connection.id,
+      connection,
+    ]));
+    for (const [id, edge] of this.connectionCleanups) {
+      const nextEdge = desiredEdges.get(id);
+      const sameEndpoints = nextEdge
+        && nextEdge.from.module === edge.from.module
+        && nextEdge.from.port === edge.from.port
+        && nextEdge.to.module === edge.to.module
+        && nextEdge.to.port === edge.to.port;
+      const sameInstances = sameEndpoints
+        && edge.fromInstance === next.get(nextEdge.from.module)
+        && edge.toInstance === next.get(nextEdge.to.module);
+      if (!sameInstances) {
+        try { edge.dispose(); } catch { /* disconnected nodes are harmless */ }
+        this.connectionCleanups.delete(id);
+      }
+    }
+
+    // Stop and dispose only modules that were removed or explicitly replaced.
+    for (const [id, instance] of this.instances) {
+      if (next.get(id) === instance) continue;
+      try { instance.allOff?.(); } catch { /* best effort */ }
+      try { instance.dispose?.(); } catch { /* best effort */ }
+    }
     this.instances = next;
-    patch.connections.forEach((c) => this.connect(c));
+
+    for (const connection of patch.connections) {
+      if (this.connectionCleanups.has(connection.id)) continue;
+      const cleanup = this.connect(connection);
+      if (cleanup) this.connectionCleanups.set(connection.id, cleanup);
+    }
     return true;
   }
 
-  connect(c) {
-    const a = this.instances.get(c.from.module); const b = this.instances.get(c.to.module);
-    if (!a || !b) return;
-    const src = a.outputs[c.from.port]; const dst = b.inputs[c.to.port];
-    if (!dst) return;
-    if (dst.kind === 'note') { this.unsubs.push(a.on(c.from.port, (ev) => dst.handle(ev))); return; } // event port: no AudioNode
-    if (!src) return;
-    try { src.connect(dst instanceof AudioNode ? dst : dst); } catch (err) { console.warn('OMNI connect failed', c, err); }
+  connect(connection) {
+    const fromInstance = this.instances.get(connection.from.module);
+    const toInstance = this.instances.get(connection.to.module);
+    if (!fromInstance || !toInstance) return null;
+
+    const source = fromInstance.outputs?.[connection.from.port];
+    const destination = toInstance.inputs?.[connection.to.port];
+    if (!destination) return null;
+
+    if (destination.kind === 'note') {
+      const unsubscribe = fromInstance.on(connection.from.port, (event) => {
+        if (toInstance.recordNotes && event && typeof event === 'object'
+          && !this._recordedEvents.has(event)) {
+          this._recordedEvents.add(event);
+          this.onNoteEvent?.(event, {
+            sourceModule: fromInstance.id,
+            destinationModule: toInstance.id,
+            destinationPort: connection.to.port,
+          });
+        }
+        destination.handle(event);
+      });
+      return {
+        from: connection.from, to: connection.to,
+        fromInstance, toInstance,
+        dispose: unsubscribe,
+      };
+    }
+
+    if (!source) return null;
+    try {
+      source.connect(destination);
+    } catch (error) {
+      console.warn('OMNI connect failed', connection, error);
+      return null;
+    }
+    return {
+      from: connection.from, to: connection.to,
+      fromInstance, toInstance,
+      dispose: () => { try { source.disconnect(destination); } catch { /* already disconnected */ } },
+    };
   }
 
-  setParam(id, key, value) { const inst = this.instances.get(id); if (!inst) return false; inst.params[key] = value; inst.apply?.(); return !inst.needsRebuild; }
+  setParam(id, key, value) {
+    const instance = this.instances.get(id);
+    if (!instance) return false;
+    instance.params[key] = value;
+    instance.apply?.();
+    return !instance.needsRebuild;
+  }
 
   teardown(cancelBuilds = true) {
     if (cancelBuilds) this._requestedGeneration += 1;
-    this.unsubs.forEach((u) => u()); this.unsubs = [];
-    this.instances.forEach((i) => { try { i.allOff?.(); } catch { /* */ } i.dispose(); });
+    this.connectionCleanups.forEach((edge) => {
+      try { edge.dispose(); } catch { /* best effort */ }
+    });
+    this.connectionCleanups.clear();
+    this.instances.forEach((instance) => {
+      try { instance.allOff?.(); } catch { /* best effort */ }
+      try { instance.dispose?.(); } catch { /* best effort */ }
+    });
     this.instances.clear();
   }
 
-  noteOn(note, vel) { this.instances.forEach((i) => i.noteOn?.(note, vel)); }
-  noteOff(note) { this.instances.forEach((i) => i.noteOff?.(note)); }
-  allOff() { this.instances.forEach((i) => i.allOff?.()); }
+  noteOn(note, velocity, channel = 1) {
+    this.instances.forEach((instance) => instance.noteOn?.(note, velocity, channel));
+  }
+
+  noteOff(note, channel = 1) {
+    this.instances.forEach((instance) => instance.noteOff?.(note, channel));
+  }
+
+  allOff() {
+    this.instances.forEach((instance) => instance.allOff?.());
+  }
 }
 
 /** SVG schematic export: modules as boxes with labelled ports, connections as curves. */
