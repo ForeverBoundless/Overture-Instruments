@@ -271,3 +271,22 @@
     filter: none;
   }
 }
+
+/* Shared Overture account control (replaces the old GitHub header button). */
+.header-account {
+  display:inline-flex; flex:0 0 auto; min-height:38px; align-items:center; justify-content:center;
+  gap:9px; padding:5px 12px; border:1px solid rgba(224,233,246,.16); border-radius:9px;
+  color:#e9eef6; background:rgba(255,255,255,.035); font:600 9px/1 'Inter Variable','Inter','Segoe UI',sans-serif;
+  letter-spacing:.08em; text-decoration:none; white-space:nowrap;
+  transition:background .18s ease,border-color .18s ease,color .18s ease,transform .18s ease;
+}
+.header-account:hover { border-color:rgba(255,183,94,.5); color:#fff; background:rgba(255,183,94,.08); }
+.header-account.is-signed-in { padding:4px 11px 4px 5px; letter-spacing:.025em; }
+.header-account__label { max-width:150px; overflow:hidden; text-overflow:ellipsis; }
+.header-account__avatar { display:block; width:27px; height:27px; flex:0 0 auto; border:1px solid rgba(125,228,255,.28); border-radius:50%; object-fit:cover; }
+.header-account__avatar--initials { display:grid; place-items:center; color:#d7f5ff; background:linear-gradient(145deg,#1d3440,#121b27); font:600 9px 'Inter Variable','Inter',sans-serif; letter-spacing:.02em; }
+html[data-theme="light"] .header-account { border-color:rgba(43,59,78,.2); color:#34475b; background:rgba(255,255,255,.55); }
+html[data-theme="light"] .header-account:hover { border-color:rgba(173,95,0,.4); color:#81500f; background:rgba(255,183,94,.13); }
+html[data-theme="light"] .header-account__avatar--initials { border-color:rgba(8,127,159,.24); color:#176b80; background:linear-gradient(145deg,#e1eff2,#d5e0e9); }
+@media (max-width:760px) { .header-account { min-height:36px; padding:5px 9px; } .header-account__label { max-width:105px; } }
+@media (max-width:440px) { .header-account:not(.is-signed-in) { padding:8px 9px; font-size:8px; } .header-account__label { max-width:94px; } }
