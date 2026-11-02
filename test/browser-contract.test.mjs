@@ -89,8 +89,8 @@ test('Community preset exchange covers supported instruments and protects downlo
   assert.match(app, /MY ITEMS/);
   assert.match(helper, /consumeCommunityInstrumentPreset/);
   assert.match(migration, /record_type/);
-  assert.equal(migration.split('\n').filter((line) => line.trim() === 'as $').length, 3);
-  assert.equal(migration.split('\n').filter((line) => line.trim() === '$;').length, 3);
+  assert.equal(migration.split(String.fromCharCode(10)).filter((line) => line.trim() === 'as ' + '$$').length, 3);
+  assert.equal(migration.split(String.fromCharCode(10)).filter((line) => line.trim() === '$$;').length, 3);
   assert.match(app, /reloadPending/);
   assert.match(migration, /grant update \(record_type, instrument_id/);
   assert.doesNotMatch(migration, /grant update on public\.community_patches to authenticated/i);
