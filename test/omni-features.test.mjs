@@ -21,7 +21,7 @@ test('OMNI styles include recording, selection and library search states', async
 });
 
 test('OMNI and recording modules pass the Node JavaScript syntax parser', () => {
-  for (const file of ['../js/omni.js', '../js/shared/audioRecorder.js', '../js/shared/midiRecorder.js']) {
+  for (const file of ['../js/omni.js', '../js/shared/audioRecorder.js', '../js/shared/midiRecorder.js', '../js/community.js', '../js/shared/communityPreset.js', '../js/shared/supabaseClient.js']) {
     const path = fileURLToPath(new URL(file, import.meta.url));
     execFileSync(process.execPath, ['--check', path], { stdio: 'pipe' });
   }
