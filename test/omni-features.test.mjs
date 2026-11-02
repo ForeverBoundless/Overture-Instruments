@@ -26,3 +26,14 @@ test('OMNI and recording modules pass the Node JavaScript syntax parser', () => 
     execFileSync(process.execPath, ['--check', path], { stdio: 'pipe' });
   }
 });
+
+
+test('OMNI exposes macro editing, MIDI automation and community publishing hooks', async () => {
+  const source = await readFile(new URL('../js/omni.js', import.meta.url), 'utf8');
+  assert.match(source, /openMacros/);
+  assert.match(source, /applyMacro/);
+  assert.match(source, /publishToCommunity/);
+  assert.match(source, /_recordGraphNote/);
+  assert.match(source, /onPitchBend/);
+  assert.match(source, /onControlChange/);
+});
