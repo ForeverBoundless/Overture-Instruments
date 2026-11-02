@@ -484,7 +484,8 @@ async function publishItem(event) {
       uploadedPath = previewPath;
     }
 
-    const userName = state.user.user_metadata?.display_name || state.user.email?.split('@')[0] || 'Overture user';
+    const { data: authorProfile } = await supabase.from('profiles').select('username,display_name').eq('id', state.user.id).maybeSingle();
+    const userName = authorProfile?.display_name || authorProfile?.username || 'Overture user';
     const record = {
       record_type: recordType,
       instrument_id: instrumentId,
