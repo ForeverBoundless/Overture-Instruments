@@ -57,12 +57,12 @@ test('Community library has an optional Supabase setup and owner-scoped schema m
     readFile(new URL('../supabase/migrations/20261102000000_community_patches.sql', import.meta.url), 'utf8'),
     readFile(new URL('../js/community.js', import.meta.url), 'utf8'),
   ]);
-  assert.match(page, /supabase-config\\.js/);
+  assert.ok(page.includes('supabase-config.js'));
   assert.match(config, /anonKey/);
   assert.doesNotMatch(config, /service_role/i);
   assert.match(client, /createClient/);
   assert.match(migration, /enable row level security/i);
-  assert.match(migration, /owner_id = \\(select auth\\.uid\\(\\)\\)/);
+  assert.ok(migration.includes('owner_id = (select auth.uid())'));
   assert.match(app, /signInWithOtp/);
   assert.match(app, /increment_community_patch_downloads/);
   assert.match(app, /OPEN IN OMNI/);
