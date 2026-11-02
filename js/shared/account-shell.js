@@ -71,7 +71,9 @@ async function init() {
   window.__overtureSupabase = supabase;
 
   let generation = 0;
+  let currentSession = (await supabase.auth.getSession()).data?.session || null;
   const update = async (session) => {
+    currentSession = session;
     const current = ++generation;
     const user = session?.user || null;
     const profile = user ? await loadProfile(user) : null;
@@ -79,7 +81,7 @@ async function init() {
     document.querySelectorAll('.header-account').forEach(anchor => setHeaderAccount(anchor, user, profile));
   };
 
-  await update((await supabase.auth.getSession()).data?.session || null);
+  await update(currentSession);
   supabase.auth.onAuthStateChange((_event, session) => {
     window.setTimeout(() => { void update(session); }, 0);
   });
@@ -88,14 +90,13 @@ async function init() {
   });
 
   const observer = new MutationObserver(() => {
-    const anchors = document.querySelectorAll('.header-account');
-    if (anchors.length) void update((awaitSession ||= null));
+    document.querySelectorAll('.header-account:not([data-account-ready])').forEach(anchor => {
+      anchor.dataset.accountReady = 'true';
+      void update(currentSession);
+    });
   });
-  let awaitSession = null;
+  document.querySelectorAll('.header-account').forEach(anchor => { anchor.dataset.accountReady = 'true'; });
   observer.observe(document.body, { childList: true, subtree: true });
-  const sessionResult = await supabase.auth.getSession();
-  awaitSession = sessionResult.data?.session || null;
-  await update(awaitSession);
   window.addEventListener('pageshow', () => { void supabase.auth.getSession().then(({ data }) => update(data?.session || null)); });
 }
 
