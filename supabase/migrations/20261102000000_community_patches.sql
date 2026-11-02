@@ -102,13 +102,13 @@ returns setof public.community_patches
 language sql
 security definer
 set search_path = ''
-as $
+as $$
   select patch.*
     from public.community_patches as patch
    where patch.id = p_patch_id
      and (patch.visibility in ('public', 'unlisted')
        or patch.owner_id = (select auth.uid()));
-$;
+$$;
 
 revoke all on function public.get_community_patch_by_id(uuid) from public;
 grant execute on function public.get_community_patch_by_id(uuid) to anon, authenticated;
