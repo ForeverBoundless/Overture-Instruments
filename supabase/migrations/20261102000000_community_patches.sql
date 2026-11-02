@@ -4,6 +4,8 @@
 create table if not exists public.community_patches (
   id uuid primary key default gen_random_uuid(),
   owner_id uuid not null references auth.users(id) on delete cascade,
+  record_type text not null default 'omni_patch' check (record_type in ('omni_patch', 'instrument_preset')),
+  instrument_id text check (instrument_id in ('little-phatty', 'sub-37', 'prophet-10', 'nord-c2d', 'ms-20', 'juno-106', 'tr-808', 'dx7')),
   title text not null check (char_length(title) between 3 and 80),
   description text not null default '' check (char_length(description) <= 600),
   author_name text not null default 'Overture user' check (char_length(author_name) <= 48),
@@ -16,7 +18,22 @@ create table if not exists public.community_patches (
   preview_path text,
   downloads bigint not null default 0 check (downloads >= 0),
   created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+  updated_at timestamptz not null default now(),
+  constraint community_record_instrument_consistency check (
+    (record_type = 'omni_patch' and instrument_id is null)
+    or (record_type = 'instrument_preset' and instrument_id is not null)
+  )
+);
+
+-- Also supports upgrading a project where an earlier version of this table
+-- was created before instrument presets were introduced.
+alter table public.community_patches add column if not exists record_type text not null default 'omni_patch';
+alter table public.community_patches add column if not exists instrument_id text;
+alter table public.community_patches drop constraint if exists community_record_instrument_consistency;
+alter table public.community_patches add constraint community_record_instrument_consistency check (
+  record_type in ('omni_patch', 'instrument_preset')
+  and (instrument_id is null or instrument_id in ('little-phatty', 'sub-37', 'prophet-10', 'nord-c2d', 'ms-20', 'juno-106', 'tr-808', 'dx7'))
+  and ((record_type = 'omni_patch' and instrument_id is null) or (record_type = 'instrument_preset' and instrument_id is not null))
 );
 
 create index if not exists community_patches_public_created_idx
@@ -105,7 +122,12 @@ revoke all on function public.increment_community_patch_downloads(uuid) from pub
 grant execute on function public.increment_community_patch_downloads(uuid) to anon, authenticated;
 
 grant select on public.community_patches to anon, authenticated;
-grant insert, update, delete on public.community_patches to authenticated;
+revoke insert, update, delete on public.community_patches from authenticated;
+grant insert (owner_id, record_type, instrument_id, title, description, author_name, tags, visibility, patch_data, preview_path)
+  on public.community_patches to authenticated;
+grant update (record_type, instrument_id, title, description, author_name, tags, visibility, patch_data, preview_path)
+  on public.community_patches to authenticated;
+grant delete on public.community_patches to authenticated;
 
 -- Optional uploaded audio previews. Files are public-read but only the
 -- authenticated owner can create or delete objects inside their own folder.
