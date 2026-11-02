@@ -1,12 +1,20 @@
 import { validatePatch, LiveGraph } from './omni/graph.js';
-import { MODULES } from './omni/modules.js';
 import { supabase, supabaseConfigured, previewPublicUrl } from './shared/supabaseClient.js';
 
 const byId = (id) => document.getElementById(id);
-const root = byId('community-root');
+const INSTRUMENTS = {
+  'little-phatty': { name: 'Moog Little Phatty', route: '/html/little-phatty' },
+  'ms-20': { name: 'Korg MS-20', route: '/html/korg-ms-20' },
+  'juno-106': { name: 'Roland Juno-106', route: '/html/roland-juno-106' },
+  'dx7': { name: 'Yamaha DX7', route: '/html/yamaha-dx7' },
+  'tr-808': { name: 'Roland TR-808', route: '/html/roland-tr-808' },
+};
+
 const state = {
   user: null,
   draft: null,
+  draftType: 'omni_patch',
+  draftInstrument: null,
   items: [],
   offset: 0,
   pageSize: 24,
@@ -14,6 +22,7 @@ const state = {
   loading: false,
   mine: false,
   editingId: null,
+  editingOriginalPreviewPath: null,
   activePreview: null,
   searchTimer: null,
 };
@@ -25,22 +34,101 @@ function message(id, text, error = false) {
   node.classList.toggle('is-error', error);
 }
 
-function extractPatch(raw) {
-  const object = typeof raw === 'string' ? JSON.parse(raw) : raw;
-  return validatePatch(object?.data || object?.patch || object);
+function safeJsonCopy(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+
+function parseJsonFileObject(raw) {
+  const value = typeof raw === 'string' ? JSON.parse(raw) : raw;
+  if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('The file must contain a JSON object.');
+  return value;
+}
+
+function extractOmniPatch(raw) {
+  const object = parseJsonFileObject(raw);
+  return validatePatch(object.data ?? object.patch ?? object);
+}
+
+function extractInstrumentPreset(raw, instrumentId) {
+  if (!INSTRUMENTS[instrumentId]) throw new Error('Choose a supported instrument.');
+  const object = parseJsonFileObject(raw);
+  let data = object.data ?? object.patch ?? object;
+  if (Array.isArray(object.presets)) data = object.presets[0];
+  if (Array.isArray(object.items)) data = object.items[0]?.data;
+  if (data && Array.isArray(data.presets)) data = data.presets[0];
+
+  if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('No instrument preset was found in that file.');
+
+  switch (instrumentId) {
+    case 'little-phatty': {
+      const required = ['osc1Shape', 'osc2Shape', 'osc1Level', 'osc2Level', 'noiseLevel', 'cutoff', 'resonance', 'drive', 'keyTrack', 'filterEnvAmount', 'ampEnv', 'filterEnv', 'lfoRate', 'lfoWaveform', 'glideTime'];
+      if (required.some((key) => !(key in data))) throw new Error('This is not a Little Phatty user preset.');
+      for (const env of ['ampEnv', 'filterEnv']) {
+        if (!data[env] || ['attack', 'decay', 'sustain', 'release'].some((key) => !Number.isFinite(Number(data[env][key])))) {
+          throw new Error('The Little Phatty envelope data is incomplete.');
+        }
+      }
+      break;
+    }
+    case 'ms-20':
+      if (!data.params || typeof data.params !== 'object' || !Array.isArray(data.cables)) throw new Error('This is not an MS-20 patch (expected parameters and patch cables).');
+      break;
+    case 'juno-106':
+      if (!['cutoff', 'res', 'lfoRate', 'vcaLevel', 'chorus'].some((key) => key in data)) throw new Error('This does not look like a Juno-106 patch.');
+      break;
+    case 'dx7':
+      if (!Array.isArray(data.ops) || data.ops.length !== 6) throw new Error('A DX7 voice must contain six operators.');
+      break;
+    case 'tr-808':
+      if (!data.lanes || typeof data.lanes !== 'object' || !Number.isFinite(Number(data.tempo))) throw new Error('This is not a TR-808 pattern.');
+      break;
+    default:
+      throw new Error('This instrument preset format is not supported yet.');
+  }
+  return safeJsonCopy(data);
 }
 
 function readDraft() {
   try {
     const raw = sessionStorage.getItem('overture.community.draft');
     if (!raw) return null;
-    const patch = extractPatch(raw);
+    const patch = extractOmniPatch(raw);
+    state.draftType = 'omni_patch';
+    state.draftInstrument = null;
     byId('community-draft-status').textContent = `Attached from OMNI: ${patch.name} (${patch.modules.length} modules).`;
     return patch;
   } catch (error) {
     byId('community-draft-status').textContent = `The OMNI draft could not be read: ${error.message}`;
     return null;
   }
+}
+
+function syncContentType() {
+  const type = byId('community-record-type').value;
+  const instrument = byId('community-instrument');
+  instrument.hidden = type !== 'instrument_preset';
+  if (type === 'omni_patch') {
+    state.draftType = 'omni_patch';
+    state.draftInstrument = null;
+    if (state.draft) byId('community-draft-status').textContent = `OMNI patch ready: ${state.draft.name || 'Untitled'}.`;
+  } else {
+    state.draftType = 'instrument_preset';
+    state.draftInstrument = instrument.value;
+    byId('community-draft-status').textContent = 'Choose a supported instrument and upload its exported preset JSON file.';
+  }
+}
+
+function setDraft(data, type, instrumentId = null, title = '') {
+  state.draft = data;
+  state.draftType = type;
+  state.draftInstrument = instrumentId;
+  byId('community-record-type').value = type;
+  byId('community-instrument').value = instrumentId || 'little-phatty';
+  syncContentType();
+  byId('community-draft-status').textContent = type === 'omni_patch'
+    ? `OMNI patch ready: ${data.name || title || 'Untitled'} · ${data.modules.length} modules.`
+    : `${INSTRUMENTS[instrumentId]?.name || 'Instrument'} preset ready.`;
+  if (!byId('community-title').value) byId('community-title').value = title || data.name || '';
 }
 
 function setPublishOpen(open) {
@@ -61,16 +149,20 @@ function safeFilename(value) {
 }
 
 function downloadJSON(item) {
-  const blob = new Blob([JSON.stringify({ format: 'overture-omni-patch', version: 1, data: item.patch_data }, null, 2)], { type: 'application/json' });
+  const instrument = item.record_type === 'instrument_preset';
+  const contents = instrument
+    ? { format: 'overture-community-instrument-preset', version: 1, instrumentId: item.instrument_id, name: item.title, data: item.patch_data }
+    : { format: 'overture-omni-patch', version: 1, data: item.patch_data };
+  const blob = new Blob([JSON.stringify(contents, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
   link.href = url;
-  link.download = `${safeFilename(item.title)}.omni.json`;
+  link.download = `${safeFilename(item.title)}.${instrument ? 'preset' : 'omni'}.json`;
   document.body.append(link);
   link.click();
   link.remove();
   setTimeout(() => URL.revokeObjectURL(url), 15000);
-  supabase.rpc('increment_community_patch_downloads', { p_patch_id: item.id }).catch(() => {});
+  void supabase.rpc('increment_community_patch_downloads', { p_patch_id: item.id });
 }
 
 async function stopPreview() {
@@ -88,7 +180,7 @@ async function stopPreview() {
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-async function auditionPatch(item, button) {
+async function auditionOmniPatch(item, button) {
   if (state.activePreview?.patchId === item.id) {
     await stopPreview();
     return;
@@ -108,17 +200,16 @@ async function auditionPatch(item, button) {
     master.gain.value = Math.min(0.9, patch.global.master);
     master.connect(context.destination);
     graph = new LiveGraph(context, master);
-    const built = await graph.build(patch);
-    if (!built) throw new Error('The patch could not be prepared for preview.');
+    if (!await graph.build(patch)) throw new Error('The patch could not be prepared for preview.');
 
     const active = { patchId: item.id, context, graph, stopped: false };
     state.activePreview = active;
     button.textContent = 'STOP';
     button.disabled = false;
 
-    const keyboard = [...graph.instances.values()].find((instance) => typeof instance.noteOn === 'function');
-    const runningGenerators = [...graph.instances.values()].filter((instance) => typeof instance.setRunning === 'function');
-    if (keyboard) {
+    const hasKeyboard = [...graph.instances.values()].some((instance) => typeof instance.noteOn === 'function');
+    const generators = [...graph.instances.values()].filter((instance) => typeof instance.setRunning === 'function');
+    if (hasKeyboard) {
       const notes = [60, 64, 67, 72, 69, 67, 64, 62, 60, 64, 67, 72];
       for (const note of notes) {
         if (active.stopped) break;
@@ -127,12 +218,12 @@ async function auditionPatch(item, button) {
         graph.noteOff(note, 1);
         await wait(80);
       }
-    } else if (runningGenerators.length) {
-      runningGenerators.forEach((instance) => instance.setRunning(true));
+    } else if (generators.length) {
+      generators.forEach((instance) => instance.setRunning(true));
       await wait(6000);
-      runningGenerators.forEach((instance) => instance.setRunning(false));
+      generators.forEach((instance) => instance.setRunning(false));
     } else {
-      throw new Error('This patch has no connected keyboard or running sequencer to audition. You can still download and open it in OMNI.');
+      throw new Error('This patch has no keyboard or running sequencer to audition. Add an audio preview or open it in OMNI.');
     }
     if (!active.stopped) await stopPreview();
   } catch (error) {
@@ -150,20 +241,30 @@ async function auditionPatch(item, button) {
   }
 }
 
-function openInOmni(item) {
+function openItem(item) {
   try {
-    sessionStorage.setItem('overture.community.import', JSON.stringify(item.patch_data));
-    window.location.assign('/omni');
+    if (item.record_type === 'instrument_preset') {
+      if (!INSTRUMENTS[item.instrument_id]) throw new Error('This instrument preset is not supported by the current prototype.');
+      sessionStorage.setItem('overture.community.instrument-import', JSON.stringify({
+        instrumentId: item.instrument_id,
+        title: item.title,
+        data: item.patch_data,
+      }));
+      window.location.assign(INSTRUMENTS[item.instrument_id].route);
+    } else {
+      sessionStorage.setItem('overture.community.import', JSON.stringify(item.patch_data));
+      window.location.assign('/omni');
+    }
   } catch (error) {
-    message('community-result-count', `Could not prepare this patch: ${error.message}`, true);
+    message('community-result-count', `Could not prepare this item: ${error.message}`, true);
   }
 }
 
-async function sharePatch(item) {
+async function shareItem(item) {
   const url = new URL('/community', window.location.origin);
   url.searchParams.set('patch', item.id);
   try {
-    if (navigator.share) await navigator.share({ title: item.title, text: item.description || 'Community patch from Overture Instruments', url: url.href });
+    if (navigator.share) await navigator.share({ title: item.title, text: item.description || 'Community item from Overture Instruments', url: url.href });
     else {
       await navigator.clipboard.writeText(url.href);
       message('community-result-count', 'Share link copied.');
@@ -184,13 +285,13 @@ function addText(parent, tag, className, value) {
 function renderCard(item) {
   const card = document.createElement('article');
   card.className = 'community-card';
-
-  const top = addText(card, 'div', 'community-card__top', state.mine && item.visibility === 'unlisted' ? 'UNLISTED PATCH' : 'OMNI PATCH');
-  const date = addText(top, 'span', '', friendlyDate(item.created_at));
-  date.setAttribute('aria-label', `Published ${friendlyDate(item.created_at)}`);
-
+  const isInstrument = item.record_type === 'instrument_preset';
+  const instrumentName = INSTRUMENTS[item.instrument_id]?.name || 'Instrument preset';
+  const top = addText(card, 'div', 'community-card__top', isInstrument ? instrumentName : 'OMNI PATCH');
+  addText(top, 'span', '', friendlyDate(item.created_at));
   addText(card, 'h3', '', item.title);
   addText(card, 'p', 'community-card__description', item.description || 'No description provided.');
+
   const meta = addText(card, 'div', 'community-card__meta', '');
   addText(meta, 'span', '', `BY ${item.author_name || 'OVERTURE USER'}`);
   addText(meta, 'span', '', `${Number(item.downloads || 0).toLocaleString()} DOWNLOADS`);
@@ -199,8 +300,9 @@ function renderCard(item) {
   (Array.isArray(item.tags) ? item.tags : []).slice(0, 8).forEach((tag) => addText(tags, 'span', 'community-tag', tag));
 
   const previewUrl = previewPublicUrl(item.preview_path);
+  let audio = null;
   if (previewUrl) {
-    const audio = document.createElement('audio');
+    audio = document.createElement('audio');
     audio.controls = true;
     audio.preload = 'none';
     audio.src = previewUrl;
@@ -209,22 +311,35 @@ function renderCard(item) {
   }
 
   const actions = addText(card, 'div', 'community-card__actions', '');
-  const listen = addText(actions, 'button', 'community-button', 'LISTEN');
+  const listen = addText(actions, 'button', 'community-button', isInstrument ? (audio ? 'PLAY PREVIEW' : 'NO AUDIO PREVIEW') : 'LISTEN');
   listen.type = 'button';
   listen.dataset.previewButton = item.id;
-  listen.addEventListener('click', () => auditionPatch(item, listen));
-  const open = addText(actions, 'button', 'community-button', 'OPEN IN OMNI');
-  open.type = 'button'; open.addEventListener('click', () => openInOmni(item));
+  if (isInstrument) {
+    listen.disabled = !audio;
+    listen.addEventListener('click', async () => {
+      if (!audio) return;
+      try {
+        if (audio.paused) await audio.play();
+        else audio.pause();
+      } catch (error) { message('community-result-count', error.message, true); }
+    });
+  } else listen.addEventListener('click', () => auditionOmniPatch(item, listen));
+
+  const open = addText(actions, 'button', 'community-button', isInstrument ? 'OPEN IN INSTRUMENT' : 'OPEN IN OMNI');
+  open.type = 'button';
+  open.addEventListener('click', () => openItem(item));
   const download = addText(actions, 'button', 'community-button', 'DOWNLOAD');
-  download.type = 'button'; download.addEventListener('click', () => downloadJSON(item));
+  download.type = 'button';
+  download.addEventListener('click', () => downloadJSON(item));
   const share = addText(actions, 'button', 'community-button', 'SHARE');
-  share.type = 'button'; share.addEventListener('click', () => sharePatch(item));
+  share.type = 'button';
+  share.addEventListener('click', () => shareItem(item));
 
   if (state.user?.id && item.owner_id === state.user.id) {
     const edit = addText(actions, 'button', 'community-button', 'EDIT');
     edit.type = 'button'; edit.addEventListener('click', () => beginEdit(item));
     const remove = addText(actions, 'button', 'community-button', 'DELETE');
-    remove.type = 'button'; remove.addEventListener('click', () => deletePatch(item));
+    remove.type = 'button'; remove.addEventListener('click', () => deleteItem(item));
   }
   return card;
 }
@@ -240,16 +355,17 @@ async function loadPatches({ append = false } = {}) {
   }
   byId('community-load-more').hidden = true;
   byId('community-empty').hidden = true;
-  message('community-result-count', 'Loading patches…');
+  message('community-result-count', 'Loading community items…');
   try {
     let query = supabase.from('community_patches')
-      .select('id,owner_id,title,description,author_name,tags,visibility,patch_data,preview_path,downloads,created_at');
+      .select('id,owner_id,record_type,instrument_id,title,description,author_name,tags,visibility,patch_data,preview_path,downloads,created_at');
     if (state.mine && state.user) query = query.eq('owner_id', state.user.id);
     else query = query.eq('visibility', 'public');
-    const search = byId('community-search').value.trim().replace(/[%_]/g, '');
-    if (search) query = query.ilike('title', `%${search}%`);
-    const order = byId('community-sort').value;
-    query = query.order(order, { ascending: false }).range(state.offset, state.offset + state.pageSize);
+    const search = byId('community-search').value.trim().toLowerCase().replace(/[^a-z0-9\s-]/g, '').slice(0, 50);
+    if (search) query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%`);
+    const type = byId('community-filter-type').value;
+    if (type !== 'all') query = query.eq('record_type', type);
+    query = query.order(byId('community-sort').value, { ascending: false }).range(state.offset, state.offset + state.pageSize);
     const { data, error } = await query;
     if (error) throw error;
 
@@ -259,74 +375,79 @@ async function loadPatches({ append = false } = {}) {
     state.offset += page.length;
     state.hasMore = rows.length > state.pageSize;
     page.forEach((item) => grid.append(renderCard(item)));
-    byId('community-result-count').textContent = `${state.items.length}${state.hasMore ? '+' : ''} PATCHES`;
+    byId('community-result-count').textContent = `${state.items.length}${state.hasMore ? '+' : ''} ITEMS`;
     byId('community-empty').hidden = state.items.length !== 0;
     byId('community-load-more').hidden = !state.hasMore;
   } catch (error) {
-    message('community-result-count', error.message || 'Could not load community patches.', true);
+    message('community-result-count', error.message || 'Could not load community items.', true);
   } finally {
     state.loading = false;
   }
 }
 
-function applyDraft(patch) {
-  state.draft = patch;
-  byId('community-draft-status').textContent = patch
-    ? `Patch ready: ${patch.name} · ${patch.modules.length} modules.`
-    : 'No OMNI patch selected. Open this page from OMNI or choose a .omni.json file.';
-  if (patch && !byId('community-title').value) byId('community-title').value = patch.name.slice(0, 80);
-}
-
 function beginEdit(item) {
   state.editingId = item.id;
-  applyDraft(item.patch_data);
+  state.editingOriginalPreviewPath = item.preview_path || null;
+  const type = item.record_type || 'omni_patch';
+  setDraft(item.patch_data, type, item.instrument_id, item.title);
   byId('community-title').value = item.title;
   byId('community-description').value = item.description || '';
   byId('community-tags').value = (item.tags || []).join(', ');
   byId('community-visibility').value = item.visibility;
   byId('community-audio-file').value = '';
-  byId('community-publish-status').textContent = 'Editing your published patch. The current audio preview is kept unless you upload a replacement.';
-  byId('community-publish-form').querySelector('[type="submit"]').textContent = 'UPDATE PATCH';
+  byId('community-publish-form').querySelector('[type="submit"]').textContent = 'UPDATE ITEM';
+  byId('community-publish-status').textContent = 'Editing your published item. Its current audio preview is retained unless replaced.';
   setPublishOpen(true);
 }
 
-async function deletePatch(item) {
+async function deleteItem(item) {
   if (!confirm(`Delete "${item.title}" from the community library? This cannot be undone.`)) return;
   try {
-    if (item.preview_path) await supabase.storage.from('community-previews').remove([item.preview_path]);
     const { error } = await supabase.from('community_patches').delete().eq('id', item.id);
     if (error) throw error;
-    message('community-result-count', 'Patch deleted.');
+    if (item.preview_path) {
+      const { error: storageError } = await supabase.storage.from('community-previews').remove([item.preview_path]);
+      if (storageError) console.warn('Community preview could not be removed:', storageError.message);
+    }
+    message('community-result-count', 'Item deleted.');
     await loadPatches();
   } catch (error) {
-    message('community-result-count', error.message || 'Could not delete this patch.', true);
+    message('community-result-count', error.message || 'Could not delete this item.', true);
   }
 }
 
-async function publishPatch(event) {
+async function publishItem(event) {
   event.preventDefault();
   if (!state.user) {
     message('community-publish-status', 'Sign in with your email before publishing.', true);
     byId('community-auth-form').hidden = false;
     return;
   }
-
   const submit = byId('community-publish-form').querySelector('[type="submit"]');
   submit.disabled = true;
   message('community-publish-status', 'Publishing…');
   let uploadedPath = null;
   try {
-    let patch = state.draft;
-    const file = byId('community-patch-file').files?.[0];
+    const recordType = byId('community-record-type').value;
+    const instrumentId = recordType === 'instrument_preset' ? byId('community-instrument').value : null;
+    let data = state.draft;
+    let file = byId('community-patch-file').files?.[0];
     if (file) {
-      if (file.size > 524288) throw new Error('OMNI patch files must be 512 KB or smaller.');
+      if (file.size > 524288) throw new Error('Preset files must be 512 KB or smaller.');
       const parsed = JSON.parse(await file.text());
-      patch = extractPatch(parsed);
+      data = recordType === 'omni_patch'
+        ? extractOmniPatch(parsed)
+        : extractInstrumentPreset(parsed, instrumentId);
+    } else if (state.draftType !== recordType || (recordType === 'instrument_preset' && state.draftInstrument !== instrumentId)) {
+      data = null;
     }
-    if (!patch) throw new Error('Choose an OMNI patch file or open this page using OMNI’s COMMUNITY button.');
-    patch = validatePatch(patch);
-    const patchJson = JSON.stringify(patch);
-    if (new TextEncoder().encode(patchJson).byteLength > 500000) throw new Error('This patch is too large to publish (maximum 500 KB).');
+    if (!data) throw new Error(recordType === 'omni_patch'
+      ? 'Choose an OMNI patch file or use OMNI’s COMMUNITY button.'
+      : 'Choose an exported instrument preset JSON file.');
+    if (recordType === 'omni_patch') data = validatePatch(data);
+    else data = extractInstrumentPreset(data, instrumentId);
+    const bytes = new TextEncoder().encode(JSON.stringify(data)).byteLength;
+    if (bytes > 500000) throw new Error('This preset is too large to publish (maximum 500 KB).');
 
     const title = byId('community-title').value.trim();
     if (title.length < 3 || title.length > 80) throw new Error('The title must be between 3 and 80 characters.');
@@ -338,80 +459,95 @@ async function publishPatch(event) {
       const mime = (previewFile.type || '').split(';')[0].toLowerCase();
       const allowed = ['audio/webm', 'audio/ogg', 'audio/mp4', 'audio/mpeg', 'audio/wav', 'audio/x-wav'];
       if (!allowed.includes(mime)) throw new Error('Choose a WebM, Ogg, MP4, MP3 or WAV audio preview.');
-      const patchId = state.editingId || crypto.randomUUID();
+      const itemId = state.editingId || crypto.randomUUID();
       const extension = ({ 'audio/webm': 'webm', 'audio/ogg': 'ogg', 'audio/mp4': 'm4a', 'audio/mpeg': 'mp3', 'audio/wav': 'wav', 'audio/x-wav': 'wav' })[mime];
-      previewPath = `${state.user.id}/${patchId}/preview.${extension}`;
+      previewPath = `${state.user.id}/${itemId}/preview.${extension}`;
       const { error: uploadError } = await supabase.storage.from('community-previews').upload(previewPath, previewFile, { contentType: mime, upsert: true });
       if (uploadError) throw uploadError;
       uploadedPath = previewPath;
     }
 
-    const userName = state.user.user_metadata?.display_name
-      || state.user.email?.split('@')[0]
-      || 'Overture user';
+    const userName = state.user.user_metadata?.display_name || state.user.email?.split('@')[0] || 'Overture user';
     const record = {
-      owner_id: state.user.id,
+      record_type: recordType,
+      instrument_id: instrumentId,
       title,
       description: byId('community-description').value.trim().slice(0, 600),
       author_name: String(userName).slice(0, 48),
       tags,
       visibility: byId('community-visibility').value,
-      patch_data: patch,
+      patch_data: data,
     };
     if (previewPath) record.preview_path = previewPath;
-    if (!state.editingId && !previewPath) record.preview_path = null;
+    else if (!state.editingId) record.preview_path = null;
 
     let result;
     if (state.editingId) {
       result = await supabase.from('community_patches').update(record).eq('id', state.editingId).select('id').single();
     } else {
-      result = await supabase.from('community_patches').insert(record).select('id').single();
+      result = await supabase.from('community_patches').insert({ ...record, owner_id: state.user.id }).select('id').single();
     }
     if (result.error) throw result.error;
 
-    state.draft = patch;
-    try { sessionStorage.removeItem('overture.community.draft'); } catch { /* optional draft */ }
+    if (previewPath && state.editingOriginalPreviewPath && previewPath !== state.editingOriginalPreviewPath) {
+      await supabase.storage.from('community-previews').remove([state.editingOriginalPreviewPath]);
+    }
     state.editingId = null;
+    state.editingOriginalPreviewPath = null;
+    state.draft = data;
+    state.draftType = recordType;
+    state.draftInstrument = instrumentId;
+    try { sessionStorage.removeItem('overture.community.draft'); } catch { /* optional draft */ }
     byId('community-patch-file').value = '';
     byId('community-audio-file').value = '';
-    byId('community-publish-form').querySelector('[type="submit"]').textContent = 'PUBLISH PATCH';
-    message('community-publish-status', 'Patch published. It is now available in the community library.');
+    byId('community-publish-form').querySelector('[type="submit"]').textContent = 'PUBLISH ITEM';
+    message('community-publish-status', 'Published. Your item is now available in the community library.');
     state.mine = false;
+    byId('community-my-items').textContent = 'MY ITEMS';
     await loadPatches();
   } catch (error) {
-    if (uploadedPath && !state.editingId) {
+    if (uploadedPath) {
       try { await supabase.storage.from('community-previews').remove([uploadedPath]); } catch { /* best effort cleanup */ }
     }
-    message('community-publish-status', error.message || 'Could not publish this patch.', true);
+    message('community-publish-status', error.message || 'Could not publish this item.', true);
   } finally {
     submit.disabled = false;
   }
 }
 
-async function updateAccount() {
+function renderAccount(session) {
   const status = byId('community-account-status');
   if (!supabaseConfigured) {
     status.textContent = 'Community backend not configured.';
     byId('community-setup').hidden = false;
     byId('community-auth-form').hidden = true;
     byId('community-publish-open').disabled = true;
+    byId('community-my-items').hidden = true;
     return;
   }
   byId('community-setup').hidden = true;
-  const { data, error } = await supabase.auth.getSession();
-  if (error) status.textContent = error.message;
-  state.user = data?.session?.user || null;
+  state.user = session?.user || null;
   if (state.user) {
     status.textContent = `SIGNED IN AS ${state.user.email || 'OVERTURE USER'}`;
     byId('community-auth-form').hidden = true;
     byId('community-signout').hidden = false;
+    byId('community-my-items').hidden = false;
     byId('community-publish-open').disabled = false;
   } else {
-    status.textContent = 'Sign in to publish and manage your patches. Browsing and downloading public patches does not require an account.';
+    status.textContent = 'Sign in to publish and manage your items. Browsing and downloading public items does not require an account.';
     byId('community-auth-form').hidden = false;
     byId('community-signout').hidden = true;
+    byId('community-my-items').hidden = true;
     byId('community-publish-open').disabled = true;
+    state.mine = false;
   }
+}
+
+async function updateAccount() {
+  if (!supabaseConfigured) { renderAccount(null); return; }
+  const { data, error } = await supabase.auth.getSession();
+  if (error) message('community-account-status', error.message, true);
+  renderAccount(data?.session || null);
 }
 
 async function signIn(event) {
@@ -450,62 +586,80 @@ function initialiseNavigation() {
   }));
 }
 
-function initialise() {
+async function initialise() {
   initialiseNavigation();
   if (!supabaseConfigured) {
-    updateAccount();
+    renderAccount(null);
     return;
   }
 
   state.draft = readDraft();
+  if (state.draft) setDraft(state.draft, 'omni_patch', null);
   if (new URLSearchParams(window.location.search).get('publish') === '1' && state.draft) setPublishOpen(true);
   byId('community-publish-open').addEventListener('click', () => setPublishOpen(true));
   byId('community-publish-close').addEventListener('click', () => setPublishOpen(false));
-  byId('community-publish-form').addEventListener('submit', publishPatch);
+  byId('community-publish-form').addEventListener('submit', publishItem);
+  byId('community-record-type').addEventListener('change', syncContentType);
+  byId('community-instrument').addEventListener('change', () => {
+    state.draftType = 'instrument_preset';
+    state.draftInstrument = byId('community-instrument').value;
+  });
   byId('community-patch-file').addEventListener('change', async (event) => {
     const file = event.target.files?.[0];
     if (!file) return;
     try {
-      if (file.size > 524288) throw new Error('OMNI patch files must be 512 KB or smaller.');
-      const patch = extractPatch(JSON.parse(await file.text()));
-      applyDraft(patch);
+      if (file.size > 524288) throw new Error('Preset files must be 512 KB or smaller.');
+      const parsed = JSON.parse(await file.text());
+      const type = byId('community-record-type').value;
+      const instrumentId = type === 'instrument_preset' ? byId('community-instrument').value : null;
+      const data = type === 'omni_patch' ? extractOmniPatch(parsed) : extractInstrumentPreset(parsed, instrumentId);
+      setDraft(data, type, instrumentId, parsed.name || file.name.replace(/\.json$/i, ''));
     } catch (error) {
-      applyDraft(null);
-      message('community-publish-status', error.message || 'Invalid OMNI patch file.', true);
+      state.draft = null;
+      message('community-publish-status', error.message || 'Invalid preset file.', true);
+      byId('community-draft-status').textContent = 'The selected file could not be validated for this content type.';
     }
   });
   byId('community-auth-form').addEventListener('submit', signIn);
   byId('community-signout').addEventListener('click', async () => {
     const { error } = await supabase.auth.signOut();
     if (error) message('community-account-status', error.message, true);
-    await updateAccount();
+    renderAccount(null);
+    await loadPatches();
+  });
+  byId('community-my-items').addEventListener('click', () => {
+    state.mine = !state.mine;
+    byId('community-my-items').textContent = state.mine ? 'PUBLIC LIBRARY' : 'MY ITEMS';
+    loadPatches();
   });
   byId('community-sort').addEventListener('change', () => loadPatches());
+  byId('community-filter-type').addEventListener('change', () => loadPatches());
   byId('community-search').addEventListener('input', () => {
     clearTimeout(state.searchTimer);
     state.searchTimer = setTimeout(() => loadPatches(), 250);
   });
   byId('community-load-more').addEventListener('click', () => loadPatches({ append: true }));
 
+  // Do not call auth methods inside this callback: Supabase serializes auth
+  // state changes and recursive auth calls can deadlock its internal lock.
   supabase.auth.onAuthStateChange((_event, session) => {
-    state.user = session?.user || null;
-    updateAccount();
+    renderAccount(session);
     if (!state.mine) loadPatches();
   });
-  updateAccount().then(() => {
-    const requestedPatch = new URLSearchParams(window.location.search).get('patch');
-    if (requestedPatch) {
-      supabase.from('community_patches')
-        .select('id,owner_id,title,description,author_name,tags,visibility,patch_data,preview_path,downloads,created_at')
-        .eq('id', requestedPatch).maybeSingle()
-        .then(({ data }) => {
-          if (!data) return;
-          byId('community-grid').prepend(renderCard(data));
-          message('community-result-count', 'Shared patch loaded.');
-        });
+
+  await updateAccount();
+  await loadPatches();
+
+  const requestedPatch = new URLSearchParams(window.location.search).get('patch');
+  if (requestedPatch) {
+    const existing = state.items.find((item) => item.id === requestedPatch);
+    if (!existing) {
+      const { data, error } = await supabase.from('community_patches')
+        .select('id,owner_id,record_type,instrument_id,title,description,author_name,tags,visibility,patch_data,preview_path,downloads,created_at')
+        .eq('id', requestedPatch).maybeSingle();
+      if (!error && data) byId('community-grid').prepend(renderCard(data));
     }
-    loadPatches();
-  });
+  }
 }
 
 initialise();
