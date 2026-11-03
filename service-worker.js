@@ -1,16 +1,19 @@
-const CACHE = 'overture-shell-v9';
+const CACHE = 'overture-shell-v10';
 const APP_SHELL = [
   '/account',
-  '/css/account.css?v=20261103-account-menu',
+  '/css/account.css?v=20261102-contributions-menu',
   '/js/account.js?v=20261102-account-layout',
   '/js/shared/account-shell.js',
-  '/js/shared/account-shell.js?v=20261103-account-menu',
+  '/js/shared/account-shell.js?v=20261102-contributions-menu',
   '/community',
+  '/contributions',
+  '/css/contributions.css?v=20261102-profile',
+  '/js/contributions.js?v=20261102-profile',
   '/css/community.css?v=20261102-design-system',
   '/css/community.css',
   '/js/community.js',
   '/js/shared/supabase-config.js',
-  '/js/shared/account-shell.js?v=20261103-account-menu',
+  '/js/shared/account-shell.js?v=20261102-contributions-menu',
   '/js/shared/supabaseClient.js',
   '/js/shared/communityPreset.js',
   '/',

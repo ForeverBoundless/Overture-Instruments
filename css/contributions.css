@@ -1,0 +1,147 @@
+/* Contributions page: the shared Community card system supplies cards,
+   controls, typography and surfaces. This file adds only profile-page layout. */
+.contributions-shell { padding-top:clamp(112px,12vw,148px); }
+.contributions-profile {
+  display:flex;
+  min-width:0;
+  align-items:center;
+  justify-content:space-between;
+  gap:24px;
+  margin-bottom:26px;
+  padding:22px 24px;
+}
+.contributions-profile__identity {
+  display:flex;
+  min-width:0;
+  align-items:center;
+  gap:18px;
+}
+.contributions-profile__avatar {
+  display:grid;
+  width:68px;
+  height:68px;
+  flex:0 0 68px;
+  overflow:hidden;
+  place-items:center;
+  border:1px solid rgba(125,228,255,.26);
+  border-radius:50%;
+  color:#d7f5ff;
+  background:linear-gradient(145deg,#1d3440,#121b27);
+  font:600 18px/1 var(--font-body);
+}
+.contributions-profile__avatar img { display:block;width:100%;height:100%;object-fit:cover; }
+.contributions-profile__copy { min-width:0; }
+.contributions-profile__copy .community-overline { margin-bottom:7px; }
+.contributions-profile__copy h1 {
+  margin:0;
+  color:var(--ink);
+  font:400 clamp(25px,3.4vw,38px)/1.1 var(--font-display);
+  letter-spacing:-.045em;
+  overflow-wrap:anywhere;
+}
+.contributions-profile__username {
+  display:block;
+  margin-top:7px;
+  color:var(--muted);
+  font:10px/1.4 var(--font-mono);
+  letter-spacing:.04em;
+  overflow-wrap:anywhere;
+}
+.contributions-profile__summary {
+  display:grid;
+  flex:0 0 auto;
+  gap:5px;
+  justify-items:end;
+  color:var(--faint);
+  font:8px/1.4 var(--font-mono);
+  letter-spacing:.13em;
+  text-align:right;
+}
+.contributions-profile__summary strong {
+  color:var(--cyan);
+  font:500 27px/1 var(--font-body);
+  letter-spacing:-.04em;
+}
+.contributions-toolbar {
+  grid-template-columns:minmax(0,1fr) minmax(145px,165px) minmax(145px,165px) auto;
+}
+.contributions-status {
+  min-height:20px;
+  margin:14px 2px 18px;
+  color:var(--muted);
+  font:10px/1.6 var(--font-mono);
+}
+.contributions-status.is-error { color:#ff9a9a; }
+.contributions-results { padding-top:12px; }
+.contributions-results .community-section-heading { margin-bottom:20px; }
+.contributions-card__visibility {
+  margin-left:7px;
+  padding:3px 6px;
+  border:1px solid rgba(255,183,94,.2);
+  border-radius:4px;
+  color:var(--amber);
+  font:7px/1.3 var(--font-mono);
+  letter-spacing:.08em;
+}
+.contributions-card__actions {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+  margin-top:auto;
+  padding-top:14px;
+}
+.contributions-card__actions .community-button {
+  width:100%;
+  min-width:0;
+  min-height:34px;
+  padding:7px 8px;
+  font-size:8px;
+  line-height:1.3;
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+.contributions-card__actions .community-button--danger {
+  border-color:rgba(248,113,113,.28);
+  color:#e7a1a1;
+}
+.contributions-card__actions .community-button--danger:hover {
+  border-color:rgba(248,113,113,.55);
+  color:#ffb3b3;
+  background:rgba(248,113,113,.08);
+}
+.contributions-prompt {
+  width:min(560px,100%);
+  margin:24px auto 0;
+  padding:clamp(24px,4vw,38px);
+  text-align:center;
+}
+.contributions-prompt h1 {
+  margin:0 0 10px;
+  color:var(--ink);
+  font:400 clamp(25px,4vw,36px)/1.15 var(--font-display);
+  letter-spacing:-.04em;
+}
+.contributions-prompt p {
+  margin:0 0 20px;
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.75;
+}
+.contributions-prompt .community-button { min-width:160px; }
+@media (max-width:1020px) {
+  .contributions-toolbar { grid-template-columns:minmax(0,1fr) minmax(145px,165px) minmax(145px,165px); }
+}
+@media (max-width:760px) {
+  .contributions-shell { width:calc(100% - 40px);padding-top:104px;padding-bottom:76px; }
+  .contributions-profile { gap:14px;padding:18px; }
+  .contributions-profile__avatar { width:58px;height:58px;flex-basis:58px; }
+  .contributions-toolbar { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .contributions-toolbar .community-search { grid-column:1/-1; }
+}
+@media (max-width:560px) {
+  .contributions-shell { width:calc(100% - 34px);padding-top:94px; }
+  .contributions-profile { align-items:flex-start;flex-direction:column; }
+  .contributions-profile__summary { justify-items:start;text-align:left; }
+  .contributions-toolbar { grid-template-columns:1fr; }
+  .contributions-toolbar .community-search { grid-column:1; }
+}

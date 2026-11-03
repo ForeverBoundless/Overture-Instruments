@@ -1,5 +1,7 @@
 import { supabaseConfigured, configureSupabase } from './supabaseClient.js';
 
+let accountMenuSequence = 0;
+
 const initials = (value) => String(value || 'OI').trim().split(/[\\s._-]+/).filter(Boolean).slice(0, 2).map(part => part[0]).join('').toUpperCase() || 'OI';
 
 function safeAvatarUrl(value) {
@@ -38,10 +40,12 @@ function ensureAccountMenu(anchor, supabase) {
 
   let toggle = wrapper.querySelector('.header-account-menu-toggle');
   let menu = wrapper.querySelector('.header-account-menu');
+  let accountSettings = wrapper.querySelector('.header-account-menu__link--settings');
+  let contributions = wrapper.querySelector('.header-account-menu__link--contributions');
   let logout = wrapper.querySelector('.header-account-logout');
   let status = wrapper.querySelector('.header-account-menu__status');
 
-  if (!toggle || !menu || !logout || !status) {
+  if (!toggle || !menu || !accountSettings || !contributions || !logout || !status) {
     toggle = document.createElement('button');
     toggle.type = 'button';
     toggle.className = 'header-account-menu-toggle';
@@ -51,7 +55,7 @@ function ensureAccountMenu(anchor, supabase) {
 
     menu = document.createElement('div');
     menu.className = 'header-account-menu';
-    menu.id = 'header-account-menu';
+    menu.id = `header-account-menu-${++accountMenuSequence}`;
     menu.setAttribute('role', 'group');
     menu.setAttribute('aria-label', 'Account options');
     toggle.setAttribute('aria-controls', menu.id);
@@ -60,17 +64,27 @@ function ensureAccountMenu(anchor, supabase) {
     const panel = document.createElement('div');
     panel.className = 'header-account-menu__panel';
 
+    accountSettings = document.createElement('a');
+    accountSettings.className = 'header-account-menu__link header-account-menu__link--settings';
+    accountSettings.href = '/account';
+    accountSettings.textContent = 'Account Settings';
+
+    contributions = document.createElement('a');
+    contributions.className = 'header-account-menu__link header-account-menu__link--contributions';
+    contributions.href = '/contributions';
+    contributions.textContent = 'My Contributions';
+
     logout = document.createElement('button');
     logout.type = 'button';
     logout.className = 'header-account-logout';
-    logout.textContent = 'LOG OUT';
+    logout.textContent = 'Log Out';
 
     status = document.createElement('p');
     status.className = 'header-account-menu__status';
     status.setAttribute('role', 'status');
     status.setAttribute('aria-live', 'polite');
 
-    panel.append(logout, status);
+    panel.append(accountSettings, contributions, logout, status);
     menu.append(panel);
     wrapper.append(toggle, menu);
 
@@ -106,7 +120,7 @@ function ensureAccountMenu(anchor, supabase) {
 
     logout.addEventListener('click', async () => {
       logout.disabled = true;
-      logout.textContent = 'SIGNING OUT…';
+      logout.textContent = 'Signing out…';
       status.textContent = '';
       try {
         const { error } = await supabase.auth.signOut();
@@ -116,7 +130,7 @@ function ensureAccountMenu(anchor, supabase) {
         status.textContent = error?.message || 'Could not sign out. Please try again.';
       } finally {
         logout.disabled = false;
-        logout.textContent = 'LOG OUT';
+        logout.textContent = 'Log Out';
       }
     });
   }
@@ -157,7 +171,7 @@ function setHeaderAccount(anchor, user, profile, supabase) {
   toggle.hidden = false;
   menu.hidden = false;
   logout.disabled = false;
-  logout.textContent = 'LOG OUT';
+  logout.textContent = 'Log Out';
   status.textContent = '';
   anchor.href = '/account';
   anchor.classList.add('is-signed-in');

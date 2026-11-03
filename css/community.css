@@ -421,3 +421,19 @@ html[data-theme="light"] .community-publish-panel input[type=file]::file-selecto
     animation-iteration-count:1 !important;
   }
 }
+
+
+/* Author links point to the contributor's public profile page. */
+.community-card__author {
+  color:inherit;
+  text-decoration:none;
+  text-underline-offset:3px;
+  transition:color .16s ease;
+}
+.community-card__author:hover,
+.community-card__author:focus-visible {
+  color:var(--cyan);
+  text-decoration:underline;
+}
+html[data-theme="light"] .community-card__author:hover,
+html[data-theme="light"] .community-card__author:focus-visible { color:#087f9f; }

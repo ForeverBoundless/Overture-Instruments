@@ -167,3 +167,43 @@ test('The shared account menu works across site, OMNI, Library and all experimen
     assert.ok(html.includes('account-shell.js?v=20261103-account-menu'), `${page} should load the shared account controller`);
   }
 });
+
+
+test('Account menu contains Settings, Contributions and Log Out in the requested order', async () => {
+  const [shell, theme] = await Promise.all([
+    readFile(new URL('../js/shared/account-shell.js', import.meta.url), 'utf8'),
+    readFile(new URL('../css/site-theme.css', import.meta.url), 'utf8'),
+  ]);
+  const settings = shell.indexOf("accountSettings = document.createElement('a')");
+  const contributions = shell.indexOf("contributions = document.createElement('a')");
+  const logout = shell.indexOf("logout = document.createElement('button')");
+  assert.ok(settings >= 0 && settings < contributions && contributions < logout);
+  assert.ok(shell.includes("accountSettings.href = '/account'"));
+  assert.ok(shell.includes("contributions.href = '/contributions'"));
+  assert.ok(shell.includes("logout.textContent = 'Log Out'"));
+  assert.ok(theme.includes('.header-account-menu__link'));
+});
+
+test('Contribution profiles respect profile ownership and expose edit actions only to the owner', async () => {
+  const [page, app, community, css, worker] = await Promise.all([
+    readFile(new URL('../contributions.html', import.meta.url), 'utf8'),
+    readFile(new URL('../js/contributions.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/community.js', import.meta.url), 'utf8'),
+    readFile(new URL('../css/contributions.css', import.meta.url), 'utf8'),
+    readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
+  ]);
+  assert.ok(page.includes('contributions-profile'));
+  assert.ok(page.includes('site-theme.css'));
+  assert.ok(app.includes("query.get('username')"));
+  assert.ok(app.includes("state.user.id === state.profile.id"));
+  assert.ok(app.includes(".eq('owner_id', state.profile.id)"));
+  assert.ok(app.includes("query.eq('visibility', 'public')"));
+  assert.ok(app.includes("if (state.isOwner && item.owner_id === state.profile.id)"));
+  assert.ok(app.includes("item.owner_id !== state.profile.id"));
+  assert.ok(app.includes("url.searchParams.set('edit', '1')"));
+  assert.ok(community.includes('community-card__author'));
+  assert.ok(community.includes('/contributions?username='));
+  assert.ok(css.includes('.contributions-profile'));
+  assert.ok(worker.includes("'/contributions'"));
+  assert.ok(worker.includes('/js/contributions.js?v=20261102-profile'));
+});

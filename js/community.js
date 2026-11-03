@@ -27,6 +27,7 @@ const state = {
   editingOriginalPreviewPath: null,
   activePreview: null,
   searchTimer: null,
+  authorProfiles: new Map(),
 };
 
 function message(id, text, error = false) {
@@ -285,6 +286,20 @@ function addText(parent, tag, className, value) {
   return node;
 }
 
+async function loadAuthorProfiles(items) {
+  const ids = [...new Set(items.map((item) => item.owner_id).filter(Boolean))]
+    .filter((id) => !state.authorProfiles.has(id));
+  if (!ids.length) return;
+  const { data, error } = await supabase.from('profiles')
+    .select('id,username,display_name')
+    .in('id', ids);
+  if (error) {
+    console.warn('Could not load community author profiles:', error.message);
+    return;
+  }
+  (data || []).forEach((profile) => state.authorProfiles.set(profile.id, profile));
+}
+
 function renderCard(item) {
   const card = document.createElement('article');
   card.className = 'community-card';
@@ -296,7 +311,15 @@ function renderCard(item) {
   addText(card, 'p', 'community-card__description', item.description || 'No description provided.');
 
   const meta = addText(card, 'div', 'community-card__meta', '');
-  addText(meta, 'span', '', `BY ${item.author_name || 'OVERTURE USER'}`);
+  const by = addText(meta, 'span', '', 'BY ');
+  const authorProfile = state.authorProfiles.get(item.owner_id);
+  if (authorProfile?.username) {
+    const authorLink = addText(by, 'a', 'community-card__author', item.author_name || authorProfile.display_name || `@${authorProfile.username}`);
+    authorLink.href = `/contributions?username=${encodeURIComponent(authorProfile.username)}`;
+    authorLink.title = `View @${authorProfile.username}'s contributions`;
+  } else {
+    by.append(document.createTextNode(item.author_name || 'OVERTURE USER'));
+  }
   addText(meta, 'span', '', `${Number(item.downloads || 0).toLocaleString()} DOWNLOADS`);
 
   const tags = addText(card, 'div', 'community-tags', '');
@@ -382,6 +405,7 @@ async function loadPatches({ append = false } = {}) {
 
     const rows = data || [];
     const page = rows.slice(0, state.pageSize);
+    await loadAuthorProfiles(page);
     state.items = append ? [...state.items, ...page] : page;
     state.offset += page.length;
     state.hasMore = rows.length > state.pageSize;
@@ -585,7 +609,7 @@ async function initialise() {
 
   state.draft = readDraft();
   if (state.draft) setDraft(state.draft, 'omni_patch', null);
-  if (new URLSearchParams(window.location.search).get('publish') === '1' && state.draft) setPublishOpen(true);
+  if (new URLSearchParams(window.location.search).get('publish') === '1') setPublishOpen(true);
   byId('community-publish-open').addEventListener('click', () => setPublishOpen(true));
   byId('community-publish-close').addEventListener('click', () => setPublishOpen(false));
   byId('community-publish-form').addEventListener('submit', publishItem);
@@ -639,14 +663,24 @@ async function initialise() {
   await updateAccount();
   await loadPatches();
 
-  const requestedPatch = new URLSearchParams(window.location.search).get('patch');
+  const params = new URLSearchParams(window.location.search);
+  const requestedPatch = params.get('patch');
+  const editRequested = params.get('edit') === '1';
   if (requestedPatch) {
-    const existing = state.items.find((item) => item.id === requestedPatch);
-    if (!existing) {
+    let item = state.items.find((entry) => entry.id === requestedPatch);
+    if (!item) {
       const { data, error } = await supabase.rpc('get_community_patch_by_id', { p_patch_id: requestedPatch });
-      const item = Array.isArray(data) ? data[0] : data;
-      if (!error && item) byId('community-grid').prepend(renderCard(item));
-      else if (error) message('community-result-count', error.message || 'The shared item could not be opened.', true);
+      item = Array.isArray(data) ? data[0] : data;
+      if (error) {
+        message('community-result-count', error.message || 'The shared item could not be opened.', true);
+      } else if (item) {
+        await loadAuthorProfiles([item]);
+        byId('community-grid').prepend(renderCard(item));
+      }
+    }
+    if (item && editRequested) {
+      if (state.user?.id && item.owner_id === state.user.id) beginEdit(item);
+      else message('community-result-count', 'Only the owner can edit this contribution.', true);
     }
   }
 }
