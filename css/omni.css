@@ -1223,3 +1223,12 @@ html[data-theme="light"] .omni-commandbar > .omni-status:not(.is-error)::before 
   background:#82e6a8;
   box-shadow:0 0 9px rgba(130,230,168,.7);
 }
+
+
+/* Use the same variable Inter face as the workspace controls for the
+   top-left OMNI wordmark. Theme-specific colour rules remain independent. */
+#omni-root .omni-logo-wording strong {
+  font-family:'Inter Variable','Inter','Segoe UI',sans-serif !important;
+  font-feature-settings:'kern' 1, 'liga' 1;
+  font-variation-settings:'wght' 750;
+}

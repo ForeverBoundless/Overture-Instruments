@@ -134,3 +134,21 @@ test('OMNI wordmark is black in light mode and hero accent tracking inherits the
   assert.match(page, /site-theme-polish\.css\?v=20261103-accent-spacing/);
   assert.match(worker, /overture-shell-v16/);
 });
+
+
+test('OMNI measures wire ports only after applying the current world zoom', async () => {
+  const source = await readFile(new URL('../js/omni.js', import.meta.url), 'utf8');
+  const render = source.slice(source.indexOf('  render() {'), source.indexOf('  positionCard('));
+  assert.ok(render.indexOf('this.applyView();') < render.indexOf('this.renderWires();'));
+  assert.match(source, /new ResizeObserver\(\(\) => this\.renderWires\(\)\)/);
+  assert.match(source, /this\.cards\.querySelectorAll\('\.omni-module'\)\.forEach\(\(card\) => this\._wireResizeObserver\?\.observe\(card\)\)/);
+});
+
+test('OMNI wordmark explicitly uses Inter Variable', async () => {
+  const css = await readFile(new URL('../css/omni.css', import.meta.url), 'utf8');
+  const page = await readFile(new URL('../omni.html', import.meta.url), 'utf8');
+  const worker = await readFile(new URL('../service-worker.js', import.meta.url), 'utf8');
+  assert.match(css, /\.omni-logo-wording strong\s*\{[^}]*font-family:\s*'Inter Variable'/s);
+  assert.match(page, /omni\.css\?v=20261103-wire-font/);
+  assert.match(worker, /overture-shell-v17/);
+});

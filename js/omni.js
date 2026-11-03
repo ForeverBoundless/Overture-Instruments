@@ -32,6 +32,7 @@ class OmniApp {
     }
     this.octaveShift = 0; this.keyboardPointerNotes = new Map();
     this.pitchBend = 0; this.modWheelValue = 0; this._modKeyDirection = 0; this._modRampRAF = null;
+    this._wireResizeObserver = typeof ResizeObserver === 'function' ? new ResizeObserver(() => this.renderWires()) : null;
     this.ctx = null; this.live = null; this.selected = null; this.selectedWire = null; this.pending = null;
     this.selectedModules = new Set(); this.clipboard = null; this.snapEnabled = true;
     this.audioRecorder = null; this.midiRecorder = new MidiRecorder();
@@ -381,6 +382,7 @@ class OmniApp {
     if (!modules.length) {
       this.view = { x: 20, y: 20, scale: 0.66 };
       this.applyView();
+      this.renderWires();
       return;
     }
     const bounds = modules.map((card) => ({
@@ -400,6 +402,7 @@ class OmniApp {
       y: (this.canvas.clientHeight - (maxY - minY) * scale) / 2 - minY * scale,
     };
     this.applyView();
+    this.renderWires();
   }
 
   fitView() {
@@ -1008,9 +1011,17 @@ class OmniApp {
   }
 
   // ------------------------------------------------------------------ rendering
-  render() { this.renderCards(); this.renderWires(); this.renderInspector(); this.applyView(); }
+  render() {
+    this.renderCards();
+    // Apply layout zoom before measuring ports. Otherwise initial SVG paths
+    // are calculated at 1× while the module layer is subsequently scaled.
+    this.applyView();
+    this.renderWires();
+    this.renderInspector();
+  }
   positionCard(m) { const c = this.cards.querySelector(`[data-id="${m.id}"]`); if (c) { c.style.left = `${m.x}px`; c.style.top = `${m.y}px`; } }
   renderCards() {
+    this._wireResizeObserver?.disconnect();
     this.cards.replaceChildren();
     this.patch.modules.forEach((m) => {
       const def = MODULES[m.type];
@@ -1023,6 +1034,8 @@ class OmniApp {
       const sum = def.params.slice(0, 2).map((p) => `${p.label.split(' (')[0]} ${p.options ? p.options[Math.round(m.params[p.key])] : +Number(m.params[p.key]).toFixed(2)}`).join(' · ');
       el('div', 'omni-module-summary', card, sum);
     });
+    this._wireResizeObserver?.disconnect();
+    this.cards.querySelectorAll('.omni-module').forEach((card) => this._wireResizeObserver?.observe(card));
     this.renderSelection();
   }
   renderSelection() { this.cards.querySelectorAll('.omni-module').forEach((c) => { c.classList.toggle('is-selected', this.selectedModules.has(c.dataset.id) && this.selectedModules.size === 1); c.classList.toggle('is-multi-selected', this.selectedModules.has(c.dataset.id) && this.selectedModules.size > 1); }); }
