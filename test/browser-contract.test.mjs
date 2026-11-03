@@ -149,20 +149,21 @@ test('The shared account menu works across site, OMNI, Library and all experimen
     readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
     readFile(new URL('../js/library.js', import.meta.url), 'utf8'),
   ]);
-  assert.doesNotMatch(account, /account-hero|Your place in/);
-  assert.match(shell, /header-account-logout/);
-  assert.match(shell, /supabase\\.auth\\.signOut\\(\\)/);
-  assert.match(theme, /header-account-wrap\\.is-signed-in:hover \\.header-account-menu/);
-  assert.match(theme, /header-account-wrap\\.is-signed-in:focus-within \\.header-account-menu/);
-  assert.doesNotMatch(brand, /Shared Overture account control/);
-  assert.match(omni, /\\/css\\/site-theme\\.css/);
-  assert.match(omni, /account-shell\\.js\\?v=20261103-account-menu/);
-  assert.match(library, /account-shell\\.js\\?v=20261103-account-menu/);
-  assert.match(worker, /overture-shell-v9/);
-  assert.match(worker, /account-shell\\.js\\?v=20261103-account-menu/);
+  assert.equal(account.includes('account-hero'), false);
+  assert.equal(account.includes('Your place in'), false);
+  assert.ok(shell.includes('header-account-logout'));
+  assert.ok(shell.includes('await supabase.auth.signOut()'));
+  assert.ok(theme.includes('.header-account-wrap.is-signed-in:hover .header-account-menu'));
+  assert.ok(theme.includes('.header-account-wrap.is-signed-in:focus-within .header-account-menu'));
+  assert.equal(brand.includes('Shared Overture account control'), false);
+  assert.ok(omni.includes('/css/site-theme.css'));
+  assert.ok(omni.includes('account-shell.js?v=20261103-account-menu'));
+  assert.ok(library.includes('account-shell.js?v=20261103-account-menu'));
+  assert.ok(worker.includes('overture-shell-v9'));
+  assert.ok(worker.includes('account-shell.js?v=20261103-account-menu'));
   for (const page of experimentPages) {
     const html = await readFile(new URL(`../experiments/${page}.html`, import.meta.url), 'utf8');
-    assert.match(html, /supabase-config\\.js/);
-    assert.match(html, /account-shell\\.js\\?v=20261103-account-menu/);
+    assert.ok(html.includes('supabase-config.js'), `${page} should load the Supabase config`);
+    assert.ok(html.includes('account-shell.js?v=20261103-account-menu'), `${page} should load the shared account controller`);
   }
 });

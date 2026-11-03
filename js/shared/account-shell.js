@@ -121,12 +121,12 @@ function ensureAccountMenu(anchor, supabase) {
     });
   }
 
-  return { wrapper, toggle, menu, logout };
+  return { wrapper, toggle, menu, logout, status };
 }
 
 function setHeaderAccount(anchor, user, profile, supabase) {
   if (!anchor) return;
-  const { wrapper, toggle, menu, logout } = ensureAccountMenu(anchor, supabase);
+  const { wrapper, toggle, menu, logout, status } = ensureAccountMenu(anchor, supabase);
   anchor.replaceChildren();
 
   if (!user) {
@@ -158,6 +158,7 @@ function setHeaderAccount(anchor, user, profile, supabase) {
   menu.hidden = false;
   logout.disabled = false;
   logout.textContent = 'LOG OUT';
+  status.textContent = '';
   anchor.href = '/account';
   anchor.classList.add('is-signed-in');
 
