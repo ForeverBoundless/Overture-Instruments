@@ -94,6 +94,7 @@ function setProfileHeader(profile) {
   $('contributions-toolbar').hidden = false;
   $('contributions-results').hidden = false;
   $('contributions-publish').hidden = !state.isOwner;
+  $('contributions-toolbar').classList.toggle('is-owner', state.isOwner);
   document.title = `${name} (@${profile.username}) | Contributions | Overture Instruments`;
 }
 

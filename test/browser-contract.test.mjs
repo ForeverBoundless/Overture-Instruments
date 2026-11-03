@@ -159,7 +159,7 @@ test('The shared account menu works across site, OMNI, Library and all experimen
   assert.ok(omni.includes('/css/site-theme.css'));
   assert.ok(omni.includes('account-shell.js?v=20261102-contributions-menu'));
   assert.ok(library.includes('account-shell.js?v=20261102-contributions-menu'));
-  assert.ok(worker.includes('overture-shell-v11'));
+  assert.ok(worker.includes('overture-shell-v12'));
   assert.ok(worker.includes('account-shell.js?v=20261102-contributions-menu'));
   for (const page of experimentPages) {
     const html = await readFile(new URL(`../experiments/${page}.html`, import.meta.url), 'utf8');
@@ -205,7 +205,7 @@ test('Contribution profiles respect profile ownership and expose edit actions on
   assert.ok(community.includes('/contributions?username='));
   assert.ok(css.includes('.contributions-profile'));
   assert.ok(worker.includes("'/contributions'"));
-  assert.ok(worker.includes('/js/contributions.js?v=20261102-profile-2'));
+  assert.ok(worker.includes('/js/contributions.js?v=20261102-profile-3'));
 });
 
 
@@ -214,4 +214,21 @@ test('Contribution search includes tags as well as titles and descriptions', asy
   assert.ok(app.includes('tags.cs.{'));
   assert.ok(app.includes('title.ilike.%'));
   assert.ok(app.includes('description.ilike.%'));
+});
+
+
+test('Contribution page profile, toolbar and result counts have responsive alignment rules', async () => {
+  const [page, css, app, worker] = await Promise.all([
+    readFile(new URL('../contributions.html', import.meta.url), 'utf8'),
+    readFile(new URL('../css/contributions.css', import.meta.url), 'utf8'),
+    readFile(new URL('../js/contributions.js', import.meta.url), 'utf8'),
+    readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
+  ]);
+  assert.ok(page.includes('contributions.css?v=20261102-profile-3'));
+  assert.ok(page.includes('contributions.js?v=20261102-profile-3'));
+  assert.ok(css.includes('#contributions-count'));
+  assert.ok(css.includes('.contributions-toolbar.is-owner'));
+  assert.ok(css.includes('@media (max-width:380px)'));
+  assert.ok(app.includes("classList.toggle('is-owner', state.isOwner)"));
+  assert.ok(worker.includes('overture-shell-v12'));
 });

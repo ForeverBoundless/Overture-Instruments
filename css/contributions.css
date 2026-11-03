@@ -161,3 +161,182 @@ html[data-theme="light"] .contributions-card__actions .community-button--danger:
   color:#842323;
   background:rgba(164,47,47,.075);
 }
+
+
+/* Contributions layout refinements */
+.contributions-profile {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  min-height:112px;
+}
+.contributions-profile__identity {
+  width:100%;
+  align-items:center;
+}
+.contributions-profile__copy {
+  display:grid;
+  align-content:center;
+  gap:0;
+}
+.contributions-profile__copy .community-overline { line-height:1.35; }
+.contributions-profile__copy h1 {
+  max-width:100%;
+  line-height:1.08;
+  text-wrap:balance;
+}
+.contributions-profile__username {
+  margin-top:6px;
+  line-height:1.35;
+}
+.contributions-profile__summary {
+  min-width:100px;
+  align-self:center;
+  justify-items:end;
+  gap:7px;
+}
+.contributions-profile__summary strong {
+  display:block;
+  line-height:1;
+  font-variant-numeric:tabular-nums;
+}
+.contributions-toolbar {
+  min-width:0;
+  grid-template-columns:minmax(0,1fr) minmax(155px,185px) minmax(155px,185px);
+  align-items:end;
+}
+.contributions-toolbar.is-owner {
+  grid-template-columns:minmax(0,1fr) minmax(150px,175px) minmax(150px,175px) auto;
+}
+.contributions-toolbar > * { min-width:0; }
+.contributions-toolbar .community-button--primary {
+  min-width:116px;
+  min-height:43px;
+  align-self:end;
+  justify-self:stretch;
+  width:100%;
+  white-space:nowrap;
+}
+.contributions-status {
+  display:block;
+  min-width:0;
+  min-height:18px;
+  margin:15px 2px 20px;
+  overflow-wrap:anywhere;
+}
+.contributions-results { min-width:0; padding-top:10px; }
+.contributions-results .community-section-heading {
+  align-items:flex-end;
+  margin-bottom:20px;
+}
+#contributions-count {
+  flex:0 0 auto;
+  padding-bottom:3px;
+  color:var(--faint);
+  font:9px/1.4 var(--font-mono);
+  letter-spacing:.08em;
+  text-align:right;
+  white-space:nowrap;
+  font-variant-numeric:tabular-nums;
+}
+.contributions-results .community-grid { min-width:0; }
+.contributions-card { min-width:0; }
+.contributions-card__actions { align-items:stretch; }
+.contributions-card__actions > * { min-width:0; }
+.contributions-card__actions a.community-button {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.contributions-card__actions .community-button {
+  min-height:36px;
+  line-height:1.25;
+  overflow-wrap:anywhere;
+  text-align:center;
+}
+.contributions-empty { margin-top:0; }
+.contributions-load-more { margin:24px auto 0; }
+
+@media (max-width:1120px) {
+  .contributions-toolbar,
+  .contributions-toolbar.is-owner {
+    grid-template-columns:minmax(0,1fr) minmax(150px,190px);
+  }
+  .contributions-toolbar .community-search { grid-column:1/-1; }
+  .contributions-toolbar.is-owner .community-button--primary {
+    grid-column:1/-1;
+    justify-self:end;
+    width:auto;
+    min-width:150px;
+  }
+}
+@media (max-width:760px) {
+  .contributions-shell {
+    width:calc(100% - 40px);
+    padding-top:108px;
+    padding-bottom:80px;
+  }
+  .contributions-profile {
+    grid-template-columns:minmax(0,1fr) auto;
+    padding:18px;
+    margin-bottom:20px;
+  }
+  .contributions-profile__identity { gap:13px; }
+  .contributions-profile__avatar { width:58px;height:58px;flex-basis:58px; }
+  .contributions-profile__summary { min-width:84px; }
+  .contributions-toolbar,
+  .contributions-toolbar.is-owner {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:12px;
+    padding:14px;
+  }
+  .contributions-toolbar .community-search { grid-column:1/-1; }
+  .contributions-toolbar.is-owner .community-button--primary {
+    grid-column:1/-1;
+    justify-self:stretch;
+    width:100%;
+  }
+}
+@media (max-width:560px) {
+  .contributions-shell { width:calc(100% - 34px);padding-top:98px; }
+  .contributions-profile {
+    grid-template-columns:minmax(0,1fr);
+    gap:14px;
+    padding:16px;
+  }
+  .contributions-profile__identity { gap:12px; }
+  .contributions-profile__avatar { width:52px;height:52px;flex-basis:52px; }
+  .contributions-profile__copy h1 { font-size:clamp(23px,7vw,30px); }
+  .contributions-profile__summary {
+    display:flex;
+    min-width:0;
+    align-items:baseline;
+    justify-items:start;
+    gap:9px;
+    text-align:left;
+  }
+  .contributions-profile__summary strong { font-size:23px; }
+  .contributions-profile__summary span { font-size:7px; }
+  .contributions-toolbar,
+  .contributions-toolbar.is-owner { grid-template-columns:minmax(0,1fr); }
+  .contributions-toolbar .community-search { grid-column:1; }
+  .contributions-toolbar.is-owner .community-button--primary {
+    grid-column:1;
+    justify-self:stretch;
+    width:100%;
+  }
+  .contributions-results .community-section-heading {
+    align-items:flex-end;
+    gap:12px;
+  }
+  #contributions-count { font-size:8px; }
+}
+@media (max-width:380px) {
+  .contributions-shell { width:calc(100% - 28px); }
+  .contributions-profile { padding:14px; }
+  .contributions-profile__identity { gap:10px; }
+  .contributions-profile__avatar { width:46px;height:46px;flex-basis:46px; }
+  .contributions-profile__copy h1 { font-size:22px; }
+  .contributions-card__actions { grid-template-columns:minmax(0,1fr); }
+}
+html[data-theme="light"] #contributions-count { color:#748193; }
