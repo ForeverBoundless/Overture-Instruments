@@ -26,7 +26,7 @@ body {
   z-index:1;
   width:min(var(--page-width),calc(100% - var(--gutter) - var(--gutter)));
   margin:0 auto;
-  padding:clamp(126px,14vw,174px) 0 112px;
+  padding:clamp(106px,10.5vw,136px) 0 112px;
 }
 .account-hero { max-width:860px; margin:0 0 34px; }
 .account-hero > p:last-child {
@@ -283,13 +283,13 @@ html[data-theme="light"] .account-avatar-upload input[type=file]::file-selector-
 @media (max-width:760px) {
   .account-shell {
     width:calc(100% - 40px);
-    padding-top:112px;
+    padding-top:96px;
     padding-bottom:78px;
   }
   .account-hero { margin-bottom:27px; }
 }
 @media (max-width:640px) {
-  .account-shell { width:calc(100% - 34px); padding-top:102px; }
+  .account-shell { width:calc(100% - 34px); padding-top:88px; }
   .account-profile-heading { align-items:flex-start; flex-direction:column; }
   .account-profile-heading > .account-button { align-self:flex-start; }
   .account-form-grid,

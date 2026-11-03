@@ -133,3 +133,36 @@ test('Account and Community use the shared Overture CSS design system', async ()
   assert.doesNotMatch(communityApp, /initialiseNavigation/);
   assert.doesNotMatch(communityCss, /\.contact-modal\s*\{\s*position\s*:\s*relative/i);
 });
+
+
+test('The shared account menu works across site, OMNI, Library and all experiment headers', async () => {
+  const experimentPages = [
+    'beats-lab', 'envelope-lab', 'filter-lab', 'fm-lab',
+    'harmonics-lab', 'modulation-lab', 'oscillator-lab', 'space-lab',
+  ];
+  const [account, omni, shell, theme, brand, worker, library] = await Promise.all([
+    readFile(new URL('../account.html', import.meta.url), 'utf8'),
+    readFile(new URL('../omni.html', import.meta.url), 'utf8'),
+    readFile(new URL('../js/shared/account-shell.js', import.meta.url), 'utf8'),
+    readFile(new URL('../css/site-theme.css', import.meta.url), 'utf8'),
+    readFile(new URL('../css/brand.css', import.meta.url), 'utf8'),
+    readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/library.js', import.meta.url), 'utf8'),
+  ]);
+  assert.doesNotMatch(account, /account-hero|Your place in/);
+  assert.match(shell, /header-account-logout/);
+  assert.match(shell, /supabase\\.auth\\.signOut\\(\\)/);
+  assert.match(theme, /header-account-wrap\\.is-signed-in:hover \\.header-account-menu/);
+  assert.match(theme, /header-account-wrap\\.is-signed-in:focus-within \\.header-account-menu/);
+  assert.doesNotMatch(brand, /Shared Overture account control/);
+  assert.match(omni, /\\/css\\/site-theme\\.css/);
+  assert.match(omni, /account-shell\\.js\\?v=20261103-account-menu/);
+  assert.match(library, /account-shell\\.js\\?v=20261103-account-menu/);
+  assert.match(worker, /overture-shell-v9/);
+  assert.match(worker, /account-shell\\.js\\?v=20261103-account-menu/);
+  for (const page of experimentPages) {
+    const html = await readFile(new URL(`../experiments/${page}.html`, import.meta.url), 'utf8');
+    assert.match(html, /supabase-config\\.js/);
+    assert.match(html, /account-shell\\.js\\?v=20261103-account-menu/);
+  }
+});
