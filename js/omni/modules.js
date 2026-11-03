@@ -637,7 +637,7 @@ export const MODULES = {
   },
   chord: {
     name: 'Chord Generator (2–8 voices)', ...PERF,
-    params: [P('voices', 'Number of voices', 2, 8, 4, { step: 1 }), P('v2', 'Voice 2 interval (semitones)', -24, 24, 3, { step: 1 }), P('v3', 'Voice 3 interval (semitones)', -24, 24, 7, { step: 1 }), P('v4', 'Voice 4 interval (semitones)', -24, 24, 10, { step: 1 }), P('v5', 'Voice 5 interval (semitones)', -24, 24, 14, { step: 1 }), P('v6', 'Voice 6 interval (semitones)', -24, 24, 17, { step: 1 }), P('v7', 'Voice 7 interval (semitones)', -24, 24, 21, { step: 1 }), P('v8', 'Voice 8 interval (semitones)', -24, 24, 24, { step: 1 })],
+    params: [P('voices', 'Number of voices', 2, 8, 4, { step: 1 }), P('v2', 'Voice 2 interval (semitones)', -32, 32, 3, { step: 1 }), P('v3', 'Voice 3 interval (semitones)', -32, 32, 7, { step: 1 }), P('v4', 'Voice 4 interval (semitones)', -32, 32, 10, { step: 1 }), P('v5', 'Voice 5 interval (semitones)', -32, 32, 14, { step: 1 }), P('v6', 'Voice 6 interval (semitones)', -32, 32, 17, { step: 1 }), P('v7', 'Voice 7 interval (semitones)', -32, 32, 21, { step: 1 }), P('v8', 'Voice 8 interval (semitones)', -32, 32, 24, { step: 1 })],
     inputs: [N('in', 'Note')], outputs: [],
     getOutputs(params = {}) { const count = Math.max(2, Math.min(8, Math.round(Number(params.voices) || 4))); return Array.from({ length: count }, (_, i) => N(`n${i + 1}`, i === 0 ? 'Root' : `Voice ${i + 1}`)); },
     getVisibleParams(params = {}) { const count = Math.max(2, Math.min(8, Math.round(Number(params.voices) || 4))); return this.params.filter((parameter) => parameter.key === 'voices' || !/^v[2-8]$/.test(parameter.key) || Number(parameter.key.slice(1)) <= count); },
