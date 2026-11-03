@@ -277,11 +277,11 @@ class OmniApp {
     const keyboardMeta = el('div', 'omni-key-group__head', keyboardGroup);
     const keyboardIdentity = el('div', 'omni-key-group__identity', keyboardMeta);
     el('span', 'omni-key-group__title', keyboardIdentity, 'BUILT-IN KEYBOARD');
-    el('span', 'omni-key-group__hint', keyboardIdentity, 'C2 – C5');
+    el('span', 'omni-key-group__hint', keyboardIdentity, 'C2 – C6');
     const kbWrap = el('div', 'omni-keys', keyboardGroup);
     this.keyboard = new Keyboard({
       startOctave: 2,
-      octaves: 3,
+      octaves: 4,
       onNoteOn: (note, velocity) => {
         const midi = noteToMidi(note) + this.octaveShift * 12;
         this.keyboardPointerNotes.set(note, midi);

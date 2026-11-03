@@ -78,3 +78,36 @@ test('OMNI performance deck keeps octave controls in the keyboard header and giv
   assert.match(worker, /omni\.css\?v=20261103-studio-2/);
   assert.match(worker, /omni\.js\?v=20261103-studio-2/);
 });
+
+
+test('OMNI keyboard spans four octaves and status text avoids the centered theme toggle', async () => {
+  const [source, css, page, worker] = await Promise.all([
+    readFile(new URL('../js/omni.js', import.meta.url), 'utf8'),
+    readFile(new URL('../css/omni.css', import.meta.url), 'utf8'),
+    readFile(new URL('../omni.html', import.meta.url), 'utf8'),
+    readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
+  ]);
+  assert.match(source, /octaves:\s*4/);
+  assert.match(source, /C2 – C6/);
+  assert.match(css, /\.omni-topbar \.omni-status[\s\S]*margin-right:clamp\(58px,6vw,82px\)/);
+  assert.match(page, /omni\.js\?v=20261103-four-octaves/);
+  assert.match(worker, /overture-shell-v15/);
+});
+
+test('community publish login link honours Supabase hidden state in every responsive layout', async () => {
+  const [css, page, worker] = await Promise.all([
+    readFile(new URL('../css/community.css', import.meta.url), 'utf8'),
+    readFile(new URL('../community.html', import.meta.url), 'utf8'),
+    readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
+  ]);
+  assert.match(css, /#community-account-link\[hidden\][\s\S]*display:none !important/);
+  assert.match(page, /community\.css\?v=20261103-auth-hidden/);
+  assert.match(worker, /community\.css\?v=20261103-auth-hidden/);
+});
+
+test('light-mode accent effects retain the original luminous brand colours', async () => {
+  const css = await readFile(new URL('../css/site-theme-polish.css', import.meta.url), 'utf8');
+  assert.match(css, /color:#ffb75e !important/);
+  assert.match(css, /color:#7de4ff !important/);
+  assert.match(css, /color:#82e6a8 !important/);
+});

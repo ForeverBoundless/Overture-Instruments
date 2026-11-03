@@ -1159,3 +1159,30 @@ html[data-theme="light"] .omni-octave__title { color:#5a6c81; }
 html[data-theme="light"] .omni-octave__hint { color:#687a90; }
 html[data-theme="light"] .omni-perf__tools .omni-master { color:#475c72; }
 html[data-theme="light"] .omni-key-group__identity { color:#445970; }
+
+
+/* Keep the live engine status clear of the theme switch, which is centred
+   over the top bar by the shared site-theme stylesheet. */
+.omni-topbar .omni-status {
+  flex:0 1  min(34vw,420px);
+  width:auto;
+  min-width:0;
+  max-width:min(34vw,420px);
+  margin-left:auto;
+  margin-right:clamp(58px,6vw,82px);
+  text-align:right;
+  line-height:1.45;
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+@media (max-width:1180px) {
+  .omni-topbar .omni-status {
+    flex-basis:min(27vw,300px);
+    max-width:min(27vw,300px);
+    margin-right:58px;
+    font-size:9px;
+  }
+}
+@media (max-width:960px) {
+  .omni-topbar .omni-status {display:none;}
+}

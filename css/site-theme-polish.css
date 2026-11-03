@@ -113,3 +113,66 @@ html body .omni-module,
 html body .omni-module * {
   font-family: 'Inter Variable', Inter, 'Segoe UI', sans-serif !important;
 }
+
+
+/* Keep the brand's luminous accent spectrum luminous in light mode.
+   The darker semantic text tokens above remain in place for body copy; these
+   overrides are limited to the glowing/illustrative accent treatments. */
+html[data-theme="light"] :is(
+  .hero-title em,
+  .account-hero h1 em,
+  .community-hero h1 em,
+  .about-hero h1 span,
+  .story-heading h2 em,
+  .founder-copy h2 em,
+  .process-heading h2 em,
+  .next-heading h2 em,
+  .feature-section--library .feature-copy h2 em,
+  .launcher-hero h1 em,
+  .section-index > span:first-child,
+  .external-arrow,
+  .text-link span,
+  .footer-github b,
+  .back-to-top:hover
+) {
+  color:#ffb75e !important;
+  -webkit-text-fill-color:#ffb75e !important;
+}
+html[data-theme="light"] :is(
+  .feature-section--experiments .feature-copy h2 em,
+  .ex-page h1 em,
+  .lab-header h1 em,
+  .eyebrow-dot--green,
+  .status-dot--green,
+  .waveform-symbol
+) {
+  color:#82e6a8 !important;
+  -webkit-text-fill-color:#82e6a8 !important;
+}
+html[data-theme="light"] :is(
+  .feature-section--omni .feature-copy h2 .omni-title-word,
+  .omni-logo-wording strong,
+  .eyebrow-dot--cyan,
+  .founder-copy__link span,
+  .omni-param output,
+  .omni-preview-wire,
+  .lab-control-head output
+) {
+  color:#7de4ff !important;
+  -webkit-text-fill-color:#7de4ff !important;
+}
+html[data-theme="light"] .eyebrow-dot:not(.eyebrow-dot--cyan):not(.eyebrow-dot--green) {
+  background-color:#ffb75e !important;
+  box-shadow:0 0 12px rgba(255,183,94,.8) !important;
+}
+html[data-theme="light"] .eyebrow-dot--cyan {
+  background-color:#7de4ff !important;
+  box-shadow:0 0 12px rgba(125,228,255,.85) !important;
+}
+html[data-theme="light"] :is(.eyebrow-dot--green,.status-dot--green) {
+  background-color:#82e6a8 !important;
+  box-shadow:0 0 12px rgba(130,230,168,.85) !important;
+}
+html[data-theme="light"] :is(.hero-title em,.feature-copy h2 em,.ex-page h1 em,.lab-header h1 em) {
+  text-shadow:0 0 10px currentColor,0 0 22px color-mix(in srgb,currentColor 60%,transparent) !important;
+}

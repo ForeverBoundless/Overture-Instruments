@@ -437,3 +437,14 @@ html[data-theme="light"] .community-publish-panel input[type=file]::file-selecto
 }
 html[data-theme="light"] .community-card__author:hover,
 html[data-theme="light"] .community-card__author:focus-visible { color:#087f9f; }
+
+
+/* The authoring CTA is toggled by Supabase auth state. Several action rows
+   deliberately use display:flex/grid, so explicitly honour the hidden state. */
+#community-account-link[hidden],
+#community-my-items[hidden],
+#community-signout[hidden],
+#community-setup[hidden],
+#community-publish-panel[hidden] {
+  display:none !important;
+}
