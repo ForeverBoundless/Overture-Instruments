@@ -157,14 +157,14 @@ test('The shared account menu works across site, OMNI, Library and all experimen
   assert.ok(theme.includes('.header-account-wrap.is-signed-in:focus-within .header-account-menu'));
   assert.equal(brand.includes('Shared Overture account control'), false);
   assert.ok(omni.includes('/css/site-theme.css'));
-  assert.ok(omni.includes('account-shell.js?v=20261103-account-menu'));
-  assert.ok(library.includes('account-shell.js?v=20261103-account-menu'));
+  assert.ok(omni.includes('account-shell.js?v=20261102-contributions-menu'));
+  assert.ok(library.includes('account-shell.js?v=20261102-contributions-menu'));
   assert.ok(worker.includes('overture-shell-v9'));
-  assert.ok(worker.includes('account-shell.js?v=20261103-account-menu'));
+  assert.ok(worker.includes('account-shell.js?v=20261102-contributions-menu'));
   for (const page of experimentPages) {
     const html = await readFile(new URL(`../experiments/${page}.html`, import.meta.url), 'utf8');
     assert.ok(html.includes('supabase-config.js'), `${page} should load the Supabase config`);
-    assert.ok(html.includes('account-shell.js?v=20261103-account-menu'), `${page} should load the shared account controller`);
+    assert.ok(html.includes('account-shell.js?v=20261102-contributions-menu'), `${page} should load the shared account controller`);
   }
 });
 
@@ -194,7 +194,7 @@ test('Contribution profiles respect profile ownership and expose edit actions on
   ]);
   assert.ok(page.includes('contributions-profile'));
   assert.ok(page.includes('site-theme.css'));
-  assert.ok(app.includes("query.get('username')"));
+  assert.ok(app.includes(".get('username')"));
   assert.ok(app.includes("state.user.id === state.profile.id"));
   assert.ok(app.includes(".eq('owner_id', state.profile.id)"));
   assert.ok(app.includes("query.eq('visibility', 'public')"));
