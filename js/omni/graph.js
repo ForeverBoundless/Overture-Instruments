@@ -5,7 +5,7 @@
  * Patch JSON (schema 1):
  * { schema: 1, name, modules: [{ id, type, x, y, params }], connections: [{ id, from: {module, port}, to: {module, port} }], global: { master } }
  */
-import { MODULES, modulePorts } from './modules.js';
+import { MODULES, modulePorts } from './modules.js?v=20261103-chord-sliders-32';
 import { ALGORITHMS } from '../data/dx7Algorithms.js';
 
 export const SCHEMA = 1;
