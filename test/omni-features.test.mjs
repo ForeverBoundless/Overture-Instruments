@@ -21,6 +21,11 @@ test('OMNI chord interval sliders expose the complete ±32-semitone range', asyn
   assert.ok(source.includes("inp.setAttribute('aria-valuemax', String(p.max));"));
   assert.ok(source.includes("el('div', 'omni-param__bounds', row)"));
   assert.ok(css.includes('.omni-param__bounds'));
+  assert.ok(source.includes(`from './omni/modules.js?v=20261103-chord-sliders-32'`));
+  assert.ok(source.includes(`from './omni/graph.js?v=20261103-chord-sliders-32'`));
+  assert.ok((await readFile(new URL('../js/omni/graph.js', import.meta.url), 'utf8')).includes(`from './modules.js?v=20261103-chord-sliders-32'`));
+  assert.ok(worker.includes(`/js/omni/graph.js?v=20261103-chord-sliders-32`));
+  assert.ok(worker.includes(`/js/omni/modules.js?v=20261103-chord-sliders-32`));
   assert.ok(page.includes('omni.css?v=20261103-chord-sliders-32'));
   assert.ok(page.includes('omni.js?v=20261103-chord-sliders-32'));
   assert.ok(worker.includes("const CACHE = 'overture-shell-v20';"));
