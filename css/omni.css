@@ -1232,3 +1232,8 @@ html[data-theme="light"] .omni-commandbar > .omni-status:not(.is-error)::before 
   font-feature-settings:'kern' 1, 'liga' 1;
   font-variation-settings:'wght' 750;
 }
+
+
+/* Collapsed Performance Pane: keep the hidden attribute authoritative over
+   the dock's flex layout so the canvas takes the freed vertical space. */
+#omni-root > .omni-perf[hidden] { display:none !important; }

@@ -1,5 +1,5 @@
 /** omni.js - OMNI modular instrument designer: library, canvas, inspector, toolbar, performance input. */
-import { MODULES, CATEGORIES, SIGNAL_COLORS } from './omni/modules.js';
+import { MODULES, CATEGORIES, SIGNAL_COLORS, modulePorts } from './omni/modules.js';
 import { defaultPatch, validatePatch, connectionError, LiveGraph, patchToSVG, defaultParams } from './omni/graph.js';
 import { TEMPLATES, templatePreview } from './omni/templates.js';
 import { PresetStore, downloadText, pickFile } from './shared/presetStore.js';
@@ -30,6 +30,8 @@ class OmniApp {
       try { sessionStorage.removeItem('overture.community.import'); } catch { /* storage may be unavailable */ }
       console.warn('Could not open the community patch.', error);
     }
+    try { this.performanceVisible = localStorage.getItem('overture.omni.performance-visible') !== 'false'; }
+    catch { this.performanceVisible = true; }
     this.octaveShift = 0; this.keyboardPointerNotes = new Map();
     this.pitchBend = 0; this.modWheelValue = 0; this._modKeyDirection = 0; this._modRampRAF = null;
     this._wireResizeObserver = typeof ResizeObserver === 'function' ? new ResizeObserver(() => this.renderWires()) : null;
@@ -148,6 +150,8 @@ class OmniApp {
     action(viewMenu, 'Zoom out', () => this.zoom(0.8), 'Zoom out');
     action(viewMenu, 'Fit patch to canvas', () => this.fitView(), 'Fit all modules in the canvas');
     this.snapBtn = action(viewMenu, 'Snap to grid: ON', () => this.toggleSnap(), 'Toggle module snapping');
+    this.performanceToggleBtn = action(viewMenu, this.performanceVisible ? 'Hide Performance Pane' : 'Show Performance Pane', () => this.togglePerformancePane(), 'Show or hide the keyboard, pitch wheel, mod wheel and performance controls');
+    this.performanceToggleBtn.setAttribute('aria-pressed', String(this.performanceVisible));
 
     const audioMenu = group('Audio');
     this.audioRecordBtn = action(audioMenu, 'Record audio…', () => this.toggleAudioRecording(), 'Record the live OMNI output');
@@ -220,6 +224,8 @@ class OmniApp {
     this.inspBody = el('div', '', this.inspector);
     // Performance deck: compact transport, tactile wheels and a full-width keybed.
     const perf = el('section', 'omni-perf', root);
+    this.performancePane = perf;
+    perf.hidden = !this.performanceVisible;
     const perfTop = el('div', 'omni-perf__top', perf);
     const perfTitle = el('div', 'omni-perf__title', perfTop);
     el('span', 'omni-perf__live', perfTitle);
@@ -329,7 +335,7 @@ class OmniApp {
           const denorm = (t) => { let v = log ? Math.exp(Math.log(p.min) + t * (Math.log(p.max) - Math.log(p.min))) : p.min + t * (p.max - p.min); if (p.step) v = Math.round(v / p.step) * p.step; return Math.min(p.max, Math.max(p.min, v)); };
           out.push({ id: `omni::${m.id}::${p.key}`, label: p.label, group: `${def.name} (${m.id})`, el: document.getElementById(`p-${m.id}-${p.key}`),
             get: () => norm(m.params[p.key]),
-            set: (t) => { const v = denorm(t); this.setParam(m.id, p.key, v, false); const inp = document.getElementById(`p-${m.id}-${p.key}`); if (inp) { inp.value = log ? Math.log(v) : v; const o = inp.parentElement?.querySelector('output'); if (o) o.textContent = v.toFixed(p.step === 1 ? 0 : 2); } } });
+            set: (t) => { const v = denorm(t); this.setParam(m.id, p.key, v, false); if (m.type === 'chord' && p.key === 'voices') this.syncChordPorts(m.id); const inp = document.getElementById(`p-${m.id}-${p.key}`); if (inp) { inp.value = log ? Math.log(v) : v; const o = inp.parentElement?.querySelector('output'); if (o) o.textContent = v.toFixed(p.step === 1 ? 0 : 2); } } });
         });
       });
       this.patch.macros.forEach((macro) => {
@@ -365,6 +371,16 @@ class OmniApp {
       });
       heading.hidden = visible === 0;
     });
+  }
+
+  togglePerformancePane() {
+    this.performanceVisible = !this.performanceVisible;
+    this.performancePane.hidden = !this.performanceVisible;
+    this.performanceToggleBtn.textContent = this.performanceVisible ? 'Hide Performance Pane' : 'Show Performance Pane';
+    this.performanceToggleBtn.setAttribute('aria-pressed', String(this.performanceVisible));
+    try { localStorage.setItem('overture.omni.performance-visible', String(this.performanceVisible)); }
+    catch { /* UI toggle works even when local storage is unavailable */ }
+    requestAnimationFrame(() => { this.applyView(); this.renderWires(); });
   }
 
   toggleSnap() {
@@ -865,9 +881,26 @@ class OmniApp {
     this.patch.connections.push({ id: uid('c'), from, to }); this.render(); this.scheduleRebuild(); this.pushHistory(); this.msg('Connected.'); return true;
   }
   removeConnection(id) { this.patch.connections = this.patch.connections.filter((c) => c.id !== id); this.selectedWire = null; this.selected = null; this.selectedModules.clear(); this.render(); this.scheduleRebuild(); this.pushHistory(); }
+  syncChordPorts(id) {
+    const module = this.patch.modules.find((item) => item.id === id);
+    if (!module || module.type !== 'chord') return;
+    const validOutputs = new Set(modulePorts(module, 'outputs').map((port) => port.id));
+    const previousLength = this.patch.connections.length;
+    this.patch.connections = this.patch.connections.filter((connection) => connection.from.module !== id || validOutputs.has(connection.from.port));
+    if (this.patch.connections.length !== previousLength) {
+      this.scheduleRebuild();
+      this.msg('Removed connections to chord voices that are no longer active.');
+    }
+    this.renderCards();
+    this.renderWires();
+    this.renderInspector();
+  }
+
   setParam(id, key, value, commit) {
-    const m = this.patch.modules.find((x) => x.id === id); if (!m) return; m.params[key] = value;
+    const m = this.patch.modules.find((x) => x.id === id); if (!m) return;
+    m.params[key] = value;
     if (this.live) { const ok = this.live.setParam(id, key, value); if (!ok) this.scheduleRebuild(); }
+    if (commit && m.type === 'chord' && key === 'voices') this.syncChordPorts(id);
     if (commit) this.pushHistory();
   }
 
@@ -1029,8 +1062,8 @@ class OmniApp {
       const head = el('div', 'omni-module-head', card); el('span', '', head, def.name); el('small', '', head, m.id);
       const ports = el('div', 'omni-ports', card);
       const inCol = el('div', 'omni-port-col', ports); const outCol = el('div', 'omni-port-col omni-port-col--out', ports);
-      def.inputs.forEach((p) => { const row = el('div', 'omni-port-row', inCol); const dot = el('button', `omni-port omni-port--${p.type}`, row); dot.type = 'button'; dot.dataset.dir = 'in'; dot.dataset.module = m.id; dot.dataset.port = p.id; dot.title = `${p.label} (${p.type} in)`; dot.setAttribute('aria-label', `${def.name} ${p.label} input`); el('span', '', row, p.label); });
-      def.outputs.forEach((p) => { const row = el('div', 'omni-port-row', outCol); el('span', '', row, p.label); const dot = el('button', `omni-port omni-port--${p.type}`, row); dot.type = 'button'; dot.dataset.dir = 'out'; dot.dataset.module = m.id; dot.dataset.port = p.id; dot.title = `${p.label} (${p.type} out)`; dot.setAttribute('aria-label', `${def.name} ${p.label} output`); });
+      modulePorts(m, 'inputs').forEach((p) => { const row = el('div', 'omni-port-row', inCol); const dot = el('button', `omni-port omni-port--${p.type}`, row); dot.type = 'button'; dot.dataset.dir = 'in'; dot.dataset.module = m.id; dot.dataset.port = p.id; dot.title = `${p.label} (${p.type} in)`; dot.setAttribute('aria-label', `${def.name} ${p.label} input`); el('span', '', row, p.label); });
+      modulePorts(m, 'outputs').forEach((p) => { const row = el('div', 'omni-port-row', outCol); el('span', '', row, p.label); const dot = el('button', `omni-port omni-port--${p.type}`, row); dot.type = 'button'; dot.dataset.dir = 'out'; dot.dataset.module = m.id; dot.dataset.port = p.id; dot.title = `${p.label} (${p.type} out)`; dot.setAttribute('aria-label', `${def.name} ${p.label} output`); });
       const sum = def.params.slice(0, 2).map((p) => `${p.label.split(' (')[0]} ${p.options ? p.options[Math.round(m.params[p.key])] : +Number(m.params[p.key]).toFixed(2)}`).join(' · ');
       el('div', 'omni-module-summary', card, sum);
     });
@@ -1054,7 +1087,7 @@ class OmniApp {
       if (id) { path.dataset.id = id; if (id === this.selectedWire) path.classList.add('is-selected'); } else path.classList.add('is-temp');
       this.wires.appendChild(path);
     };
-    this.patch.connections.forEach((c) => { const a = this.portPos(c.from, 'out'); const b = this.portPos(c.to, 'in'); if (!a || !b) return; const type = MODULES[byId[c.from.module].type].outputs.find((p) => p.id === c.from.port)?.type; draw(a, b, SIGNAL_COLORS[type], c.id, type); });
+    this.patch.connections.forEach((c) => { const a = this.portPos(c.from, 'out'); const b = this.portPos(c.to, 'in'); if (!a || !b) return; const type = modulePorts(byId[c.from.module], 'outputs').find((p) => p.id === c.from.port)?.type; draw(a, b, SIGNAL_COLORS[type], c.id, type); });
     if (temp) { const a = this.portPos(temp.from, 'out'); if (a) draw(a, temp.to, '#fff', null); }
   }
   renderInspector() {
@@ -1072,7 +1105,7 @@ class OmniApp {
     if (!m) { el('p', 'omni-hint', body, 'Select a module to edit its parameters. Drag module headers to move them; drag from a right-hand port to a left-hand port to connect.'); const miss = this.missingReport(); if (miss) el('p', 'omni-warn', body, miss); return; }
     const def = MODULES[m.type];
     el('h3', '', body, def.name); el('p', 'omni-hint', body, `${m.id} · ${def.category}`);
-    def.params.forEach((p) => {
+    (def.getVisibleParams ? def.getVisibleParams(m.params) : def.params).forEach((p) => {
       const row = el('label', 'omni-param', body); const lab = el('span', '', row, p.label);
       if (p.options) {
         const s = el('select', '', row); p.options.forEach((o, i) => { const op = el('option', '', s, o); op.value = i; }); s.value = Math.round(m.params[p.key]);
@@ -1100,7 +1133,7 @@ class OmniApp {
     if (!this.patch.connections.some((c) => c.to.module === out.id)) return 'The Audio Output has nothing connected to it.';
     const reaches = new Set([out.id]); let grew = true;
     while (grew) { grew = false; this.patch.connections.forEach((c) => { if (reaches.has(c.to.module) && !reaches.has(c.from.module)) { reaches.add(c.from.module); grew = true; } }); }
-    const unheard = this.patch.modules.filter((m) => !reaches.has(m.id) && MODULES[m.type].outputs.length);
+    const unheard = this.patch.modules.filter((m) => !reaches.has(m.id) && modulePorts(m, 'outputs').length);
     return unheard.length ? `Not reaching the output: ${unheard.map((m) => m.id).join(', ')}.` : '';
   }
   templates() {

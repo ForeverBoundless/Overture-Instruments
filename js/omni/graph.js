@@ -5,7 +5,7 @@
  * Patch JSON (schema 1):
  * { schema: 1, name, modules: [{ id, type, x, y, params }], connections: [{ id, from: {module, port}, to: {module, port} }], global: { master } }
  */
-import { MODULES } from './modules.js';
+import { MODULES, modulePorts } from './modules.js';
 import { ALGORITHMS } from '../data/dx7Algorithms.js';
 
 export const SCHEMA = 1;
@@ -89,7 +89,7 @@ export function validatePatch(raw) {
   };
 }
 
-function portDef(byId, ref, dir) { const m = byId[ref?.module]; if (!m) return null; return MODULES[m.type][dir].find((p) => p.id === ref.port) || null; }
+function portDef(byId, ref, dir) { const m = byId[ref?.module]; if (!m) return null; return modulePorts(m, dir).find((p) => p.id === ref.port) || null; }
 
 /** Returns null if the connection is allowed, otherwise a message. */
 export function connectionError(byId, from, to, existing) {
@@ -102,7 +102,7 @@ export function connectionError(byId, from, to, existing) {
   if (dst.type === 'note' && existing.some((c) => c.to.module === to.module && c.to.port === to.port)) return 'a note input accepts one source at a time.';
   if (src.type !== 'note') {
     // Web Audio cannot run feedback loops without a delay: reject audio/cv cycles.
-    const edges = existing.filter((c) => MODULES[byId[c.from.module].type].outputs.find((p) => p.id === c.from.port).type !== 'note');
+    const edges = existing.filter((c) => modulePorts(byId[c.from.module], 'outputs').find((p) => p.id === c.from.port)?.type !== 'note');
     const reach = (start, target, seen = new Set()) => { if (start === target) return true; if (seen.has(start)) return false; seen.add(start); return edges.filter((e) => e.from.module === start).some((e) => reach(e.to.module, target, seen)); };
     if (reach(to.module, from.module)) return 'that would create a feedback loop, which the audio engine cannot run safely.';
   }
@@ -311,25 +311,25 @@ export class LiveGraph {
 
 /** SVG schematic export: modules as boxes with labelled ports, connections as curves. */
 export function patchToSVG(patch) {
-  const W = 180; const H = (m) => 40 + Math.max(MODULES[m.type].inputs.length, MODULES[m.type].outputs.length) * 18 + 12;
+  const W = 180; const H = (m) => 40 + Math.max(modulePorts(m, 'inputs').length, modulePorts(m, 'outputs').length) * 18 + 12;
   const xs = patch.modules.map((m) => m.x); const ys = patch.modules.map((m) => m.y);
   const minX = Math.min(...xs, 0) - 40, minY = Math.min(...ys, 0) - 60, maxX = Math.max(...xs.map((x) => x + W), 400) + 40, maxY = Math.max(...patch.modules.map((m) => m.y + H(m)), 200) + 40;
   const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
-  const portPos = (m, port, dir) => { const list = MODULES[m.type][dir]; const i = list.findIndex((p) => p.id === port); return [m.x + (dir === 'inputs' ? 0 : W), m.y + 40 + i * 18]; };
+  const portPos = (m, port, dir) => { const list = modulePorts(m, dir); const i = list.findIndex((p) => p.id === port); return [m.x + (dir === 'inputs' ? 0 : W), m.y + 40 + i * 18]; };
   const byId = Object.fromEntries(patch.modules.map((m) => [m.id, m]));
   const colors = { audio: '#c8701a', cv: '#2a8fb5', note: '#3f9b60' };
   let out = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${minX} ${minY} ${maxX - minX} ${maxY - minY}" width="${maxX - minX}" height="${maxY - minY}" font-family="Helvetica, Arial, sans-serif" font-size="11">\n<rect x="${minX}" y="${minY}" width="${maxX - minX}" height="${maxY - minY}" fill="#fff"/>\n<text x="${minX + 16}" y="${minY + 28}" font-size="18" font-weight="bold">${esc(patch.name)} - OMNI schematic (schema ${SCHEMA})</text>\n<text x="${minX + 16}" y="${minY + 44}" fill="#555">Orange = audio, blue = control voltage, green = note/gate events.</text>\n`;
   patch.connections.forEach((c) => {
     const a = byId[c.from.module], b = byId[c.to.module]; if (!a || !b) return;
     const [x1, y1] = portPos(a, c.from.port, 'outputs'); const [x2, y2] = portPos(b, c.to.port, 'inputs');
-    const type = MODULES[a.type].outputs.find((p) => p.id === c.from.port)?.type || 'audio';
+    const type = modulePorts(a, 'outputs').find((p) => p.id === c.from.port)?.type || 'audio';
     out += `<path d="M${x1} ${y1} C ${x1 + 60} ${y1}, ${x2 - 60} ${y2}, ${x2} ${y2}" fill="none" stroke="${colors[type]}" stroke-width="2"/>\n`;
   });
   patch.modules.forEach((m) => {
     const def = MODULES[m.type]; const h = H(m);
     out += `<g><rect x="${m.x}" y="${m.y}" width="${W}" height="${h}" rx="6" fill="#f6f6f6" stroke="#333" stroke-width="1.5"/>\n<rect x="${m.x}" y="${m.y}" width="${W}" height="24" rx="6" fill="#333"/><text x="${m.x + 8}" y="${m.y + 16}" fill="#fff" font-weight="bold">${esc(def.name)}</text>\n<text x="${m.x + W - 6}" y="${m.y + 16}" fill="#bbb" text-anchor="end" font-size="9">${esc(m.id)}</text>\n`;
-    def.inputs.forEach((p, i) => { out += `<circle cx="${m.x}" cy="${m.y + 40 + i * 18}" r="4" fill="${colors[p.type]}"/><text x="${m.x + 8}" y="${m.y + 44 + i * 18}">${esc(p.label)}</text>\n`; });
-    def.outputs.forEach((p, i) => { out += `<circle cx="${m.x + W}" cy="${m.y + 40 + i * 18}" r="4" fill="${colors[p.type]}"/><text x="${m.x + W - 8}" y="${m.y + 44 + i * 18}" text-anchor="end">${esc(p.label)}</text>\n`; });
+    modulePorts(m, 'inputs').forEach((p, i) => { out += `<circle cx="${m.x}" cy="${m.y + 40 + i * 18}" r="4" fill="${colors[p.type]}"/><text x="${m.x + 8}" y="${m.y + 44 + i * 18}">${esc(p.label)}</text>\n`; });
+    modulePorts(m, 'outputs').forEach((p, i) => { out += `<circle cx="${m.x + W}" cy="${m.y + 40 + i * 18}" r="4" fill="${colors[p.type]}"/><text x="${m.x + W - 8}" y="${m.y + 44 + i * 18}" text-anchor="end">${esc(p.label)}</text>\n`; });
     const summary = def.params.slice(0, 3).map((p) => `${p.label.split(' (')[0]}: ${p.options ? p.options[Math.round(m.params[p.key])] : +Number(m.params[p.key]).toFixed(2)}`).join(' · ');
     out += `<text x="${m.x + 8}" y="${m.y + h - 6}" fill="#666" font-size="9">${esc(summary)}</text></g>\n`;
   });

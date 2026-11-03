@@ -137,7 +137,7 @@ export const MODULES = {
   },
   filter: {
     name: 'Filter', category: 'Processing', color: '#7de4ff',
-    params: [P('type', 'Mode', 0, 2, 0, { options: ['lowpass', 'highpass', 'bandpass'] }), P('cutoff', 'Cutoff (Hz)', 20, 18000, 1200, { log: true }), P('resonance', 'Resonance (Q)', 0.1, 20, 1), P('modDepth', 'Cutoff mod depth (octaves)', 0, 8, 2)],
+    params: [P('type', 'Mode', 0, 2, 0, { options: ['lowpass', 'highpass', 'bandpass'] }), P('cutoff', 'Cutoff (Hz)', 20, 16000, 1200, { log: true }), P('resonance', 'Resonance (Q)', 0.1, 8, 1), P('modDepth', 'Cutoff mod depth (octaves)', 0, 4, 2)],
     inputs: [{ id: 'in', label: 'Audio', type: 'audio' }, { id: 'cutoffMod', label: 'Cutoff mod', type: 'cv' }], outputs: [{ id: 'out', label: 'Audio', type: 'audio' }],
     create(ctx) {
       const inst = new Instance(this, ctx); const f = inst.track(ctx.createBiquadFilter()); const mod = inst.track(ctx.createGain()); mod.connect(f.detune);
@@ -187,9 +187,11 @@ export const MODULES = {
     params: [P('level', 'Level', 0, 1, 0.8)],
     inputs: [{ id: 'in', label: 'Audio', type: 'audio' }], outputs: [],
     create(ctx, bus) {
-      const inst = new Instance(this, ctx); const g = inst.track(ctx.createGain()); const clip = inst.track(ctx.createWaveShaper());
+      const inst = new Instance(this, ctx); const g = inst.track(ctx.createGain()); const limiter = inst.track(ctx.createDynamicsCompressor()); const clip = inst.track(ctx.createWaveShaper()); const highCut = inst.track(ctx.createBiquadFilter());
+      limiter.threshold.value = -8; limiter.knee.value = 2; limiter.ratio.value = 16; limiter.attack.value = 0.003; limiter.release.value = 0.14;
+      highCut.type = 'lowpass'; highCut.frequency.value = Math.min(17000, ctx.sampleRate * 0.42); highCut.Q.value = 0.707;
       const curve = new Float32Array(1024); for (let i = 0; i < 1024; i += 1) { const x = (i / 511.5) - 1; curve[i] = Math.tanh(x * 1.5) / Math.tanh(1.5); } clip.curve = curve; clip.oversample = '2x';
-      g.connect(clip); clip.connect(bus.master); inst.inputs.in = g; inst.meterNode = clip;
+      g.connect(limiter); limiter.connect(clip); clip.connect(highCut); highCut.connect(bus.master); inst.inputs.in = g; inst.meterNode = clip;
       inst.apply = () => g.gain.setTargetAtTime(inst.params.level, now(ctx), 0.01);
       return inst;
     },
@@ -211,7 +213,7 @@ export const MODULES = {
   },
   ladder: {
     name: 'Moog Ladder Filter', category: 'Instrument modules', color: '#ffb75e',
-    params: [P('cutoff', 'Cutoff (Hz)', 20, 12000, 1500, { log: true }), P('resonance', 'Resonance', 0, 1, 0.3), P('drive', 'Drive', 0, 1, 0.2), P('slope', 'Slope (dB/oct)', 0, 3, 3, { options: ['6', '12', '18', '24'] }), P('modDepth', 'Cutoff mod depth (Hz)', 0, 8000, 2000)],
+    params: [P('cutoff', 'Cutoff (Hz)', 20, 12000, 1500, { log: true }), P('resonance', 'Resonance', 0, 0.65, 0.3), P('drive', 'Drive', 0, 1, 0.2), P('slope', 'Slope (dB/oct)', 0, 3, 3, { options: ['6', '12', '18', '24'] }), P('modDepth', 'Cutoff mod depth (Hz)', 0, 6000, 2000)],
     inputs: [{ id: 'in', label: 'Audio', type: 'audio' }, { id: 'cutoffMod', label: 'Cutoff mod', type: 'cv' }], outputs: [{ id: 'out', label: 'Audio', type: 'audio' }],
     create(ctx) {
       const inst = new Instance(this, ctx); const f = new LadderFilter(ctx); const mod = inst.track(ctx.createGain()); f.poles.forEach((p) => mod.connect(p.frequency));
@@ -222,7 +224,7 @@ export const MODULES = {
   },
   ms20filter: {
     name: 'MS-20 Dual Filter', category: 'Instrument modules', color: '#ffd36b',
-    params: [P('hpCutoff', 'HPF cutoff (Hz)', 20, 10000, 80, { log: true }), P('hpPeak', 'HPF peak', 0.5, 25, 1), P('lpCutoff', 'LPF cutoff (Hz)', 20, 18000, 2500, { log: true }), P('lpPeak', 'LPF peak', 0.5, 25, 3), P('modDepth', 'Cutoff mod depth (octaves)', 0, 8, 2)],
+    params: [P('hpCutoff', 'HPF cutoff (Hz)', 20, 9000, 80, { log: true }), P('hpPeak', 'HPF peak', 0.5, 8, 1), P('lpCutoff', 'LPF cutoff (Hz)', 20, 16000, 2500, { log: true }), P('lpPeak', 'LPF peak', 0.5, 8, 3), P('modDepth', 'Cutoff mod depth (octaves)', 0, 4, 2)],
     inputs: [{ id: 'in', label: 'Audio', type: 'audio' }, { id: 'cutoffMod', label: 'Cutoff mod', type: 'cv' }], outputs: [{ id: 'out', label: 'Audio', type: 'audio' }],
     create(ctx) {
       const inst = new Instance(this, ctx); const hp = inst.track(ctx.createBiquadFilter()); const lp = inst.track(ctx.createBiquadFilter()); const mod = inst.track(ctx.createGain()); const sat = inst.track(ctx.createWaveShaper());
@@ -317,7 +319,7 @@ export const MODULES = {
   pluck: {
     recordNotes: true,
     name: 'Plucked String', ...SRC,
-    params: [P('sustain', 'Sustain (feedback)', 0.8, 0.999, 0.99), P('brightness', 'Brightness (Hz)', 500, 12000, 5000, { log: true }), P('level', 'Level', 0, 1, 0.8)],
+    params: [P('sustain', 'Sustain (feedback)', 0.8, 0.965, 0.94), P('brightness', 'Brightness (Hz)', 500, 9000, 4500, { log: true }), P('level', 'Level', 0, 1, 0.8)],
     inputs: [N('pitch', 'Pluck')], outputs: [A('out', 'Audio')],
     create(ctx) {
       const inst = new Instance(this, ctx); const d = inst.track(ctx.createDelay(1)); const fb = gain(inst, 0.99); const lp = biq(inst, 'lowpass', 5000, 0.5); const out = gain(inst, 0.8); const burst = noiseBuf(ctx, 0.05);
@@ -444,11 +446,11 @@ export const MODULES = {
   },
   formant: {
     name: 'Formant (Vowel) Filter', ...PROC,
-    params: [P('vowel', 'Vowel', 0, 4, 0, { options: VOWELS.names }), P('resonance', 'Resonance (Q)', 1, 30, 8), P('level', 'Level', 0, 2, 1)],
+    params: [P('vowel', 'Vowel', 0, 4, 0, { options: VOWELS.names }), P('resonance', 'Resonance (Q)', 1, 10, 7), P('level', 'Level', 0, 1.5, 1)],
     inputs: [A('in', 'Audio'), C('vowelMod', 'Vowel mod')], outputs: [A('out', 'Audio')],
     create(ctx) {
-      const inst = new Instance(this, ctx); const inp = gain(inst); const out = gain(inst); const mod = gain(inst, 1200);
-      const bands = [1, 0.5, 0.25].map((g) => { const f = biq(inst, 'bandpass', 800, 8); const fg = gain(inst, g); inp.connect(f); f.connect(fg); fg.connect(out); mod.connect(f.detune); return f; });
+      const inst = new Instance(this, ctx); const inp = gain(inst); const out = gain(inst); const mod = gain(inst, 900);
+      const bands = [1, 0.5, 0.25].map((g) => { const f = biq(inst, 'bandpass', 800, 7); const fg = gain(inst, g); inp.connect(f); f.connect(fg); fg.connect(out); mod.connect(f.detune); return f; });
       inst.inputs.in = inp; inst.inputs.vowelMod = mod; inst.outputs.out = out;
       inst.apply = () => { const p = inst.params; const t = now(ctx); bands.forEach((f, i) => { f.frequency.setTargetAtTime(VOWELS.f[p.vowel][i], t, 0.03); f.Q.setTargetAtTime(p.resonance, t, 0.01); }); out.gain.setTargetAtTime(p.level, t, 0.01); };
       return inst;
@@ -489,7 +491,7 @@ export const MODULES = {
   },
   comb: {
     name: 'Comb Resonator', ...PROC,
-    params: [P('freq', 'Frequency (Hz)', 20, 5000, 220, { log: true }), P('feedback', 'Feedback', 0, 0.98, 0.85), P('damping', 'Damping (Hz)', 500, 15000, 6000, { log: true }), P('mix', 'Mix', 0, 1, 0.6)],
+    params: [P('freq', 'Frequency (Hz)', 30, 4000, 220, { log: true }), P('feedback', 'Feedback', 0, 0.9, 0.75), P('damping', 'Damping (Hz)', 500, 10000, 5000, { log: true }), P('mix', 'Mix', 0, 1, 0.6)],
     inputs: [A('in', 'Audio'), N('pitch', 'Tune to note')], outputs: [A('out', 'Audio')],
     create(ctx) {
       const inst = new Instance(this, ctx); const inp = gain(inst); const dry = gain(inst); const wet = gain(inst); const out = gain(inst); const d = inst.track(ctx.createDelay(1)); const fb = gain(inst, 0.85); const lp = biq(inst, 'lowpass', 6000, 0.5);
@@ -622,12 +624,14 @@ export const MODULES = {
     },
   },
   chord: {
-    name: 'Chord (4 voices)', ...PERF,
-    params: [P('v2', 'Voice 2 (semitones)', -24, 24, 4, { step: 1 }), P('v3', 'Voice 3 (semitones)', -24, 24, 7, { step: 1 }), P('v4', 'Voice 4 (semitones)', -24, 24, 12, { step: 1 })],
-    inputs: [N('in', 'Note')], outputs: [N('n1', 'Root'), N('n2', 'Voice 2'), N('n3', 'Voice 3'), N('n4', 'Voice 4')],
+    name: 'Chord Generator (2–8 voices)', ...PERF,
+    params: [P('voices', 'Number of voices', 2, 8, 4, { step: 1 }), P('v2', 'Voice 2 interval (semitones)', -24, 24, 3, { step: 1 }), P('v3', 'Voice 3 interval (semitones)', -24, 24, 7, { step: 1 }), P('v4', 'Voice 4 interval (semitones)', -24, 24, 10, { step: 1 }), P('v5', 'Voice 5 interval (semitones)', -24, 24, 14, { step: 1 }), P('v6', 'Voice 6 interval (semitones)', -24, 24, 17, { step: 1 }), P('v7', 'Voice 7 interval (semitones)', -24, 24, 21, { step: 1 }), P('v8', 'Voice 8 interval (semitones)', -24, 24, 24, { step: 1 })],
+    inputs: [N('in', 'Note')], outputs: [],
+    getOutputs(params = {}) { const count = Math.max(2, Math.min(8, Math.round(Number(params.voices) || 4))); return Array.from({ length: count }, (_, i) => N(`n${i + 1}`, i === 0 ? 'Root' : `Voice ${i + 1}`)); },
+    getVisibleParams(params = {}) { const count = Math.max(2, Math.min(8, Math.round(Number(params.voices) || 4))); return this.params.filter((parameter) => parameter.key === 'voices' || !/^v[2-8]$/.test(parameter.key) || Number(parameter.key.slice(1)) <= count); },
     create(ctx) {
       const inst = new Instance(this, ctx);
-      inst.inputs.in = noteIn((ev) => { const p = inst.params; [0, p.v2, p.v3, p.v4].forEach((s, i) => inst.emit(`n${i + 1}`, { ...ev, note: ev.note + s })); });
+      inst.inputs.in = noteIn((ev) => { const p = inst.params; const intervals = [0, p.v2, p.v3, p.v4, p.v5, p.v6, p.v7, p.v8]; intervals.slice(0, Math.max(2, Math.min(8, Math.round(p.voices || 4)))).forEach((semitones, i) => inst.emit(`n${i + 1}`, { ...ev, note: ev.note + semitones })); });
       inst.apply = () => {};
       return inst;
     },
@@ -655,6 +659,13 @@ export const MODULES = {
     },
   },
 };
+
+export function modulePorts(module, direction) {
+  const definition = MODULES[module?.type];
+  if (!definition) return [];
+  if (direction === 'outputs' && typeof definition.getOutputs === 'function') return definition.getOutputs(module.params || {});
+  return definition[direction] || [];
+}
 
 export const CATEGORIES = ['Performance', 'Sources', 'Processing', 'Modulation', 'Instrument modules', 'Output'];
 export const SIGNAL_COLORS = { audio: '#ff9f0a', cv: '#7de4ff', note: '#82e6a8' };

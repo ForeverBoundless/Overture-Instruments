@@ -1,5 +1,5 @@
 /** omni/templates.js - starter patches. Compact DSL: modules [id,type,col,row,params?], wires 'a.port>b.port'. */
-import { MODULES, SIGNAL_COLORS } from './modules.js';
+import { MODULES, modulePorts, SIGNAL_COLORS } from './modules.js';
 import { defaultParams, SCHEMA } from './graph.js';
 
 const CX = 260, CY = 210;
@@ -21,10 +21,10 @@ const DEFS = [
     [['kb', 'keyboard', 0, 0], ['fm', 'fmVoice', 1, 0, { preset: 0 }], ['cho', 'junoChorus', 2, 0, { mode: 1 }], ['rev', 'reverb', 3, 0, { size: 2.5, mix: 0.25 }], ['out', 'output', 4, 0]],
     ['kb.note>fm.note', 'fm.out>cho.in', 'cho.out>rev.in', 'rev.out>out.in']),
   T('Plucked String', 'Damped Karplus-Strong pluck through a gentle string filter, dotted delay and dark hall.',
-    [['kb', 'keyboard', 0, 0], ['plk', 'pluck', 1, 0, { sustain: 0.975, brightness: 2400, level: 0.55 }], ['tone', 'filter', 2, 0, { cutoff: 3200, resonance: 0.7 }], ['dly', 'delay', 3, 0, { time: 0.375, feedback: 0.28, tone: 2600, mix: 0.2 }], ['rev', 'reverb', 4, 0, { size: 2.5, damping: 0.75, mix: 0.25 }], ['out', 'output', 5, 0]],
+    [['kb', 'keyboard', 0, 0], ['plk', 'pluck', 1, 0, { sustain: 0.94, brightness: 2400, level: 0.55 }], ['tone', 'filter', 2, 0, { cutoff: 3200, resonance: 0.7 }], ['dly', 'delay', 3, 0, { time: 0.375, feedback: 0.28, tone: 2600, mix: 0.2 }], ['rev', 'reverb', 4, 0, { size: 2.5, damping: 0.75, mix: 0.25 }], ['out', 'output', 5, 0]],
     ['kb.note>plk.pitch', 'plk.out>tone.in', 'tone.out>dly.in', 'dly.out>rev.in', 'rev.out>out.in'], 0.65),
   T('Acid Sequence', 'Running step sequencer → saw → MS-20 filter with snappy envelope, drive and delay.',
-    [['seq', 'sequencer', 0, 1, { running: 1, tempo: 130, gate: 0.4, root: 36, step1: 0, step2: 0, step3: 12, step4: 0, step5: 3, step6: 0, step7: 10, step8: 12 }], ['osc', 'oscillator', 1, 0, { wave: 2, glide: 0.04 }], ['fenv', 'envelope', 1, 1, env(0.003, 0.2, 0, 0.1)], ['env', 'envelope', 1, 2, env(0.003, 0.25, 0.3, 0.1)], ['ms', 'ms20filter', 2, 0, { lpCutoff: 500, lpPeak: 8, hpCutoff: 60, modDepth: 3 }], ['vca', 'vca', 3, 0], ['dst', 'distortion', 3, 1, { type: 0, drive: 4, mix: 0.4 }], ['dly', 'delay', 4, 1, { time: 0.23, feedback: 0.35, mix: 0.25 }], ['out', 'output', 5, 1]],
+    [['seq', 'sequencer', 0, 1, { running: 1, tempo: 130, gate: 0.4, root: 36, step1: 0, step2: 0, step3: 12, step4: 0, step5: 3, step6: 0, step7: 10, step8: 12 }], ['osc', 'oscillator', 1, 0, { wave: 2, glide: 0.04 }], ['fenv', 'envelope', 1, 1, env(0.003, 0.2, 0, 0.1)], ['env', 'envelope', 1, 2, env(0.003, 0.25, 0.3, 0.1)], ['ms', 'ms20filter', 2, 0, { lpCutoff: 500, lpPeak: 4.5, hpCutoff: 60, modDepth: 3 }], ['vca', 'vca', 3, 0], ['dst', 'distortion', 3, 1, { type: 0, drive: 4, mix: 0.4 }], ['dly', 'delay', 4, 1, { time: 0.23, feedback: 0.35, mix: 0.25 }], ['out', 'output', 5, 1]],
     ['seq.note>osc.pitch', 'seq.note>fenv.gate', 'seq.note>env.gate', 'osc.out>ms.in', 'fenv.out>ms.cutoffMod', 'ms.out>vca.in', 'env.out>vca.gain', 'vca.out>dst.in', 'dst.out>dly.in', 'dly.out>out.in']),
   T('Drum Machine', 'Euclidean kick and snare, clocked hats, mixed and compressed.',
     [['ek', 'euclid', 0, 0, { running: 1, tempo: 120, steps: 8, hits: 4 }], ['es', 'euclid', 0, 1, { running: 1, tempo: 120, steps: 8, hits: 2, rotate: 2 }], ['ch', 'clock', 0, 2, { running: 1, tempo: 120, division: 2, gate: 0.3 }], ['et', 'euclid', 0, 3, { running: 1, tempo: 120, steps: 16, hits: 3, rotate: 5 }], ['kick', 'drum', 1, 0, { type: 0, decay: 0.5 }], ['snr', 'drum', 1, 1, { type: 1, decay: 0.3 }], ['hat', 'drum', 1, 2, { type: 2, decay: 0.08, level: 0.5 }], ['tom', 'drum', 1, 3, { type: 3, tune: -3, decay: 0.4 }], ['mix', 'mixer', 2, 1], ['cmp', 'compressor', 3, 1, { threshold: -18, ratio: 4 }], ['out', 'output', 4, 1]],
@@ -39,10 +39,10 @@ const DEFS = [
     [['rnd', 'randomNotes', 0, 0, { running: 1, tempo: 90, scale: 2, root: 60, range: 2, density: 0.5 }], ['echo', 'noteEcho', 1, 0, { time: 0.333, repeats: 2, decay: 0.5, transpose: 12 }], ['fm', 'fmPair', 2, 0, { ratio: 3.5, index: 2 }], ['env', 'envelope', 2, 1, env(0.002, 0.8, 0, 0.6)], ['vca', 'vca', 3, 0], ['lfo', 'lfo', 3, 1, lfo(1, 0.2, 0.8)], ['pan', 'panner', 4, 0], ['dly', 'delay', 5, 0, { time: 0.5, feedback: 0.4, mix: 0.3 }], ['rev', 'reverb', 6, 0, { size: 4, mix: 0.5 }], ['out', 'output', 7, 0]],
     ['rnd.note>echo.in', 'echo.note>fm.pitch', 'echo.note>env.gate', 'fm.out>vca.in', 'env.out>vca.gain', 'vca.out>pan.in', 'lfo.out>pan.panMod', 'pan.out>dly.in', 'dly.out>rev.in', 'rev.out>out.in']),
   T('Wind & Rain', 'Self-playing noise drone: S&H and slow LFOs sweep a resonant band-pass.',
-    [['nz', 'noise', 0, 0, { color: 1 }], ['sh', 'sampleHold', 0, 1, { rate: 0.5, depth: 0.6, smooth: 0.8 }], ['lfo', 'lfo', 0, 2, lfo(0, 0.07, 0.6)], ['flt', 'filter', 1, 0, { type: 2, cutoff: 800, resonance: 12, modDepth: 2.5 }], ['sum', 'cvUtil', 1, 1, { offset: 0.5 }], ['vca', 'vca', 2, 0, { initial: 0.2 }], ['rev', 'reverb', 3, 0, { size: 5, mix: 0.5 }], ['out', 'output', 4, 0]],
+    [['nz', 'noise', 0, 0, { color: 1 }], ['sh', 'sampleHold', 0, 1, { rate: 0.5, depth: 0.6, smooth: 0.8 }], ['lfo', 'lfo', 0, 2, lfo(0, 0.07, 0.6)], ['flt', 'filter', 1, 0, { type: 2, cutoff: 800, resonance: 4.5, modDepth: 1.7 }], ['sum', 'cvUtil', 1, 1, { offset: 0.5 }], ['vca', 'vca', 2, 0, { initial: 0.2 }], ['rev', 'reverb', 3, 0, { size: 5, mix: 0.5 }], ['out', 'output', 4, 0]],
     ['nz.out>flt.in', 'sh.out>flt.cutoffMod', 'lfo.out>sum.in1', 'sum.out>vca.gain', 'flt.out>vca.in', 'vca.out>rev.in', 'rev.out>out.in'], 0.6),
   T('Vowel Synth', 'Saw through a formant filter whose vowel is swept by an LFO.',
-    [['kb', 'keyboard', 0, 1], ['osc', 'oscillator', 1, 0, { wave: 2 }], ['env', 'envelope', 1, 1, env(0.05, 0.3, 0.8, 0.4)], ['lfo', 'lfo', 1, 2, lfo(1, 0.3, 1)], ['fmt', 'formant', 2, 0, { vowel: 0, resonance: 10 }], ['vca', 'vca', 3, 0], ['rev', 'reverb', 4, 0, { mix: 0.25 }], ['out', 'output', 5, 0]],
+    [['kb', 'keyboard', 0, 1], ['osc', 'oscillator', 1, 0, { wave: 2 }], ['env', 'envelope', 1, 1, env(0.05, 0.3, 0.8, 0.4)], ['lfo', 'lfo', 1, 2, lfo(1, 0.3, 1)], ['fmt', 'formant', 2, 0, { vowel: 0, resonance: 7 }], ['vca', 'vca', 3, 0], ['rev', 'reverb', 4, 0, { mix: 0.25 }], ['out', 'output', 5, 0]],
     ['kb.note>osc.pitch', 'kb.note>env.gate', 'osc.out>fmt.in', 'lfo.out>fmt.vowelMod', 'fmt.out>vca.in', 'env.out>vca.gain', 'vca.out>rev.in', 'rev.out>out.in']),
   T('Wobble Bass', 'Two detuned oscillators, ladder filter wobbled by a tempo-ish square LFO.',
     [['kb', 'keyboard', 0, 1], ['o1', 'oscillator', 1, 0, { wave: 2, octave: -1 }], ['o2', 'oscillator', 1, 1, { wave: 3, octave: -1, detune: 12 }], ['env', 'envelope', 1, 2, env(0.01, 0.2, 0.9, 0.2)], ['mix', 'mixer', 2, 0], ['lfo', 'lfo2', 2, 2, { wave: 1, rate: 3, depth: 1, fade: 0.1 }], ['lad', 'ladder', 3, 0, { cutoff: 300, resonance: 0.6, drive: 0.4, modDepth: 2500 }], ['vca', 'vca', 4, 0], ['dst', 'distortion', 5, 0, { type: 0, drive: 3, mix: 0.3 }], ['out', 'output', 6, 0]],
@@ -57,7 +57,7 @@ const DEFS = [
     [['kb', 'keyboard', 0, 0], ['osc', 'oscillator', 1, 0, { wave: 0 }], ['env', 'envelope', 1, 1, env(0.002, 1.5, 0, 1.2)], ['rm', 'ringMod', 2, 0, { freq: 311 }], ['vca', 'vca', 3, 0], ['dly', 'delay', 4, 0, { time: 0.4, feedback: 0.4, mix: 0.3 }], ['rev', 'reverb', 5, 0, { size: 4, mix: 0.4 }], ['out', 'output', 6, 0]],
     ['kb.note>osc.pitch', 'kb.note>env.gate', 'osc.out>rm.in', 'rm.out>vca.in', 'env.out>vca.gain', 'vca.out>dly.in', 'dly.out>rev.in', 'rev.out>out.in']),
   T('Noise Burst Resonator', 'Short noise bursts excite a comb filter tuned to the played note.',
-    [['kb', 'keyboard', 0, 1], ['nz', 'noise', 1, 0], ['ar', 'arEnv', 1, 1, { attack: 0.001, release: 0.03 }], ['vca', 'vca', 2, 0], ['cmb', 'comb', 3, 0, { feedback: 0.97, damping: 5000, mix: 1 }], ['rev', 'reverb', 4, 0, { mix: 0.3 }], ['out', 'output', 5, 0]],
+    [['kb', 'keyboard', 0, 1], ['nz', 'noise', 1, 0], ['ar', 'arEnv', 1, 1, { attack: 0.001, release: 0.03 }], ['vca', 'vca', 2, 0], ['cmb', 'comb', 3, 0, { feedback: 0.88, damping: 4200, mix: 1 }], ['rev', 'reverb', 4, 0, { mix: 0.3 }], ['out', 'output', 5, 0]],
     ['kb.note>ar.gate', 'kb.note>cmb.pitch', 'nz.out>vca.in', 'ar.out>vca.gain', 'vca.out>cmb.in', 'cmb.out>rev.in', 'rev.out>out.in']),
   T('Sidechain Pump', 'Four-on-the-floor kick ducks a supersaw pad via envelope follower → inverted CV.',
     [['ek', 'euclid', 0, 0, { running: 1, tempo: 124, steps: 4, hits: 4 }], ['kick', 'drum', 1, 0, { type: 0, decay: 0.4 }], ['flw', 'envFollower', 2, 0, { sensitivity: 4, speed: 0.08 }], ['inv', 'cvUtil', 3, 0, { amt1: -1, offset: 1 }], ['kb', 'keyboard', 0, 2], ['ss', 'supersaw', 1, 2, { detune: 20 }], ['env', 'envelope', 1, 3, env(0.3, 0.5, 0.9, 0.8)], ['flt', 'filter', 2, 2, { cutoff: 1800 }], ['v1', 'vca', 3, 2], ['duck', 'vca', 4, 1], ['mix', 'mixer', 5, 0], ['out', 'output', 6, 0]],
@@ -91,12 +91,12 @@ export const TEMPLATES = DEFS.map((d) => ({ name: d.name, desc: d.desc, patch: b
 
 /** Small dark-theme SVG preview of a patch (modules as colour blocks, wires as curves). */
 export function templatePreview(patch, W = 240, H = 120) {
-  const BW = 180, BH = (m) => 52 + Math.max(MODULES[m.type].inputs.length, MODULES[m.type].outputs.length) * 18;
+  const BW = 180, BH = (m) => 52 + Math.max(modulePorts(m, 'inputs').length, modulePorts(m, 'outputs').length) * 18;
   const maxX = Math.max(...patch.modules.map((m) => m.x + BW)) + 40, maxY = Math.max(...patch.modules.map((m) => m.y + BH(m))) + 40;
   const byId = Object.fromEntries(patch.modules.map((m) => [m.id, m]));
-  const port = (m, id, dir) => { const i = MODULES[m.type][dir].findIndex((p) => p.id === id); return [m.x + (dir === 'inputs' ? 0 : BW), m.y + 40 + i * 18]; };
+  const port = (m, id, dir) => { const i = modulePorts(m, dir).findIndex((p) => p.id === id); return [m.x + (dir === 'inputs' ? 0 : BW), m.y + 40 + i * 18]; };
   let s = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${maxX} ${maxY}" width="${W}" height="${H}" preserveAspectRatio="xMidYMid meet">`;
-  patch.connections.forEach((c) => { const a = byId[c.from.module], b = byId[c.to.module]; const [x1, y1] = port(a, c.from.port, 'outputs'); const [x2, y2] = port(b, c.to.port, 'inputs'); const t = MODULES[a.type].outputs.find((p) => p.id === c.from.port).type; s += `<path class="omni-preview-wire" d="M${x1} ${y1} C ${x1 + 70} ${y1}, ${x2 - 70} ${y2}, ${x2} ${y2}" fill="none" stroke="${SIGNAL_COLORS[t]}" stroke-width="3.5" stroke-linecap="round" opacity=".78"/>`; });
+  patch.connections.forEach((c) => { const a = byId[c.from.module], b = byId[c.to.module]; const [x1, y1] = port(a, c.from.port, 'outputs'); const [x2, y2] = port(b, c.to.port, 'inputs'); const t = modulePorts(a, 'outputs').find((p) => p.id === c.from.port).type; s += `<path class="omni-preview-wire" d="M${x1} ${y1} C ${x1 + 70} ${y1}, ${x2 - 70} ${y2}, ${x2} ${y2}" fill="none" stroke="${SIGNAL_COLORS[t]}" stroke-width="3.5" stroke-linecap="round" opacity=".78"/>`; });
   patch.modules.forEach((m) => { const color = MODULES[m.type].color; s += `<g class="omni-preview-module"><rect x="${m.x}" y="${m.y}" width="${BW}" height="${BH(m)}" rx="9" fill="#121a24" stroke="${color}" stroke-width="2"/><rect x="${m.x + 2}" y="${m.y + 2}" width="${BW - 4}" height="5" rx="2.5" fill="${color}" opacity=".92"/><path d="M${m.x + 8} ${m.y + 17} H${m.x + BW - 8}" fill="none" stroke="#dfe7f1" stroke-width="1" opacity=".08"/></g>`; });
   return `${s}</svg>`;
 }

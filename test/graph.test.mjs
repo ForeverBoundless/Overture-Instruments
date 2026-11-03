@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { LiveGraph, connectionError, defaultPatch, validatePatch } from '../js/omni/graph.js';
-import { MODULES } from '../js/omni/modules.js';
+import { MODULES, modulePorts } from '../js/omni/modules.js';
 import { TEMPLATES } from '../js/omni/templates.js';
 
 test('default OMNI patch validates and rejects audio feedback', () => {
@@ -168,4 +168,59 @@ test('patch macro bindings are validated and remain backward-compatible', () => 
   assert.equal(validated.macros[0].bindings.length, 1);
   assert.equal(validated.macros[0].bindings[0].paramKey, 'cutoff');
   assert.equal(validated.macros[0].value, 0.5);
+});
+
+
+test('patch validation rejects chord wires to ports above the selected voice count', () => {
+  const chord = {
+    schema: 1, name: 'Two voices',
+    modules: [
+      { id: 'chd', type: 'chord', x: 0, y: 0, params: { voices: 2 } },
+      { id: 'osc', type: 'oscillator', x: 200, y: 0, params: {} },
+    ],
+    connections: [{ id: 'inactive', from: { module: 'chd', port: 'n3' }, to: { module: 'osc', port: 'pitch' } }],
+    global: { master: 0.8 },
+  };
+  assert.throws(() => validatePatch(chord), /source port does not exist/);
+});
+
+
+test('Chord Generator has 2–8 dynamic outputs and preserves the existing four-note minor seventh template', () => {
+  const chord = MODULES.chord;
+  assert.equal(chord.name, 'Chord Generator (2–8 voices)');
+  assert.deepEqual(chord.getOutputs({ voices: 2 }).map((port) => port.id), ['n1', 'n2']);
+  assert.equal(modulePorts({ type: 'chord', params: { voices: 2 } }, 'outputs').length, 2);
+  assert.equal(modulePorts({ type: 'chord', params: { voices: 8 } }, 'outputs').length, 8);
+  const defaults = Object.fromEntries(chord.params.map((parameter) => [parameter.key, parameter.default]));
+  assert.equal(defaults.voices, 4);
+  assert.deepEqual([defaults.v2, defaults.v3, defaults.v4], [3, 7, 10]);
+  assert.equal(chord.getVisibleParams(defaults).some((parameter) => parameter.key === 'v5'), false);
+  assert.equal(chord.getVisibleParams({ ...defaults, voices: 5 }).some((parameter) => parameter.key === 'v5'), true);
+  const minorSeven = TEMPLATES.find((template) => template.name === 'Four-Voice Chord').patch;
+  const templateChord = minorSeven.modules.find((module) => module.type === 'chord');
+  assert.equal(templateChord.params.voices, 4);
+  assert.deepEqual([templateChord.params.v2, templateChord.params.v3, templateChord.params.v4], [3, 7, 10]);
+  assert.equal(minorSeven.connections.filter((connection) => connection.from.module === templateChord.id).length, 4);
+});
+
+test('patch validation rejects chord wires to outputs above the selected voice count', () => {
+  const patch = {
+    schema: 1, name: 'Two voices',
+    modules: [
+      { id: 'chd', type: 'chord', x: 0, y: 0, params: { voices: 2 } },
+      { id: 'osc', type: 'oscillator', x: 200, y: 0, params: {} },
+    ],
+    connections: [{ id: 'inactive', from: { module: 'chd', port: 'n3' }, to: { module: 'osc', port: 'pitch' } }],
+    global: { master: 0.8 },
+  };
+  assert.throws(() => validatePatch(patch), /source port does not exist/);
+});
+
+test('OMNI resonant and feedback modules have bounded parameter ranges', () => {
+  assert.ok(MODULES.filter.params.find((parameter) => parameter.key === 'resonance').max <= 8);
+  assert.ok(MODULES.ladder.params.find((parameter) => parameter.key === 'resonance').max <= 0.65);
+  assert.ok(MODULES.ms20filter.params.find((parameter) => parameter.key === 'lpPeak').max <= 8);
+  assert.ok(MODULES.formant.params.find((parameter) => parameter.key === 'resonance').max <= 10);
+  assert.ok(MODULES.comb.params.find((parameter) => parameter.key === 'feedback').max <= 0.9);
+  assert.ok(MODULES.pluck.params.find((parameter) => parameter.key === 'sustain').max <= 0.965);
 });
