@@ -224,3 +224,46 @@ test('OMNI resonant and feedback modules have bounded parameter ranges', () => {
   assert.ok(MODULES.comb.params.find((parameter) => parameter.key === 'feedback').max <= 0.9);
   assert.ok(MODULES.pluck.params.find((parameter) => parameter.key === 'sustain').max <= 0.965);
 });
+
+
+test('Mixer exposes two to eight audio inputs and retains independent gain controls', () => {
+  const mixer = MODULES.mixer;
+  assert.equal(mixer.name, 'Mixer (2–8 inputs)');
+  assert.deepEqual(mixer.getInputs({ channels: 2 }).map((port) => port.id), ['in1', 'in2']);
+  assert.equal(modulePorts({ type: 'mixer', params: { channels: 8 } }, 'inputs').length, 8);
+  const defaults = Object.fromEntries(mixer.params.map((parameter) => [parameter.key, parameter.default]));
+  assert.equal(defaults.channels, 4);
+  assert.equal(mixer.getVisibleParams(defaults).some((parameter) => parameter.key === 'level5'), false);
+  assert.equal(mixer.getVisibleParams({ ...defaults, channels: 8 }).some((parameter) => parameter.key === 'level8'), true);
+});
+
+test('an eight-voice chord can route eight oscillator outputs into all eight mixer inputs', () => {
+  const modules = [
+    { id: 'chd', type: 'chord', x: 0, y: 0, params: { voices: 8 } },
+    ...Array.from({ length: 8 }, (_, i) => ({ id: 'osc' + (i + 1), type: 'oscillator', x: 200, y: i * 80, params: {} })),
+    { id: 'mix', type: 'mixer', x: 500, y: 0, params: { channels: 8 } },
+    { id: 'out', type: 'output', x: 800, y: 0, params: {} },
+  ];
+  const connections = [];
+  for (let i = 0; i < 8; i += 1) {
+    connections.push({ id: 'note' + (i + 1), from: { module: 'chd', port: 'n' + (i + 1) }, to: { module: 'osc' + (i + 1), port: 'pitch' } });
+    connections.push({ id: 'audio' + (i + 1), from: { module: 'osc' + (i + 1), port: 'out' }, to: { module: 'mix', port: 'in' + (i + 1) } });
+  }
+  connections.push({ id: 'mix-out', from: { module: 'mix', port: 'out' }, to: { module: 'out', port: 'in' } });
+  const patch = validatePatch({ schema: 1, name: 'Eight voice chord', modules, connections, global: { master: 0.8 } });
+  assert.equal(patch.connections.length, 17);
+  assert.equal(modulePorts(patch.modules.find((module) => module.id === 'mix'), 'inputs').length, 8);
+});
+
+test('mixer validation rejects input sockets above its selected channel count', () => {
+  const patch = {
+    schema: 1, name: 'Four input mixer',
+    modules: [
+      { id: 'osc', type: 'oscillator', x: 0, y: 0, params: {} },
+      { id: 'mix', type: 'mixer', x: 200, y: 0, params: { channels: 4 } },
+    ],
+    connections: [{ id: 'extra', from: { module: 'osc', port: 'out' }, to: { module: 'mix', port: 'in5' } }],
+    global: { master: 0.8 },
+  };
+  assert.throws(() => validatePatch(patch), /destination port does not exist/);
+});

@@ -124,14 +124,26 @@ export const MODULES = {
     },
   },
   mixer: {
-    name: 'Mixer', category: 'Processing', color: '#7de4ff',
-    params: [P('level1', 'Input 1 level', 0, 1, 0.8), P('level2', 'Input 2 level', 0, 1, 0.8), P('level3', 'Input 3 level', 0, 1, 0.8), P('level4', 'Input 4 level', 0, 1, 0.8)],
-    inputs: [1, 2, 3, 4].map((i) => ({ id: `in${i}`, label: `In ${i}`, type: 'audio' })), outputs: [{ id: 'out', label: 'Mix', type: 'audio' }],
+    name: 'Mixer (2–8 inputs)', category: 'Processing', color: '#7de4ff',
+    params: [P('channels', 'Number of inputs', 2, 8, 4, { step: 1 }), ...Array.from({ length: 8 }, (_, i) => P(`level${i + 1}`, `Input ${i + 1} level`, 0, 1, 0.8))],
+    inputs: [], outputs: [{ id: 'out', label: 'Mix', type: 'audio' }],
+    getInputs(params = {}) { const count = Math.max(2, Math.min(8, Math.round(Number(params.channels) || 4))); return Array.from({ length: count }, (_, i) => A(`in${i + 1}`, `In ${i + 1}`)); },
+    getVisibleParams(params = {}) { const count = Math.max(2, Math.min(8, Math.round(Number(params.channels) || 4))); return this.params.filter((parameter) => parameter.key === 'channels' || !/^level[1-8]$/.test(parameter.key) || Number(parameter.key.slice(5)) <= count); },
     create(ctx) {
       const inst = new Instance(this, ctx); const out = inst.track(ctx.createGain()); out.gain.value = 0.5;
-      const gains = [1, 2, 3, 4].map((i) => { const g = inst.track(ctx.createGain()); g.connect(out); inst.inputs[`in${i}`] = g; return g; });
+      // Keep all eight input nodes live. The patch model exposes only the
+      // selected number of sockets, so increasing the count needs no graph rebuild.
+      const gains = Array.from({ length: 8 }, (_, i) => {
+        const g = inst.track(ctx.createGain()); g.connect(out); inst.inputs[`in${i + 1}`] = g; return g;
+      });
       inst.outputs.out = out;
-      inst.apply = () => gains.forEach((g, i) => g.gain.setTargetAtTime(inst.params[`level${i + 1}`], now(ctx), 0.01));
+      inst.apply = () => {
+        const channels = Math.max(2, Math.min(8, Math.round(Number(inst.params.channels) || 4)));
+        const t = now(ctx);
+        // Keep perceived aggregate level broadly consistent as channels are added.
+        out.gain.setTargetAtTime(0.5 * Math.sqrt(4 / channels), t, 0.01);
+        gains.forEach((g, i) => g.gain.setTargetAtTime(inst.params[`level${i + 1}`] ?? 0.8, t, 0.01));
+      };
       return inst;
     },
   },
@@ -663,6 +675,7 @@ export const MODULES = {
 export function modulePorts(module, direction) {
   const definition = MODULES[module?.type];
   if (!definition) return [];
+  if (direction === 'inputs' && typeof definition.getInputs === 'function') return definition.getInputs(module.params || {});
   if (direction === 'outputs' && typeof definition.getOutputs === 'function') return definition.getOutputs(module.params || {});
   return definition[direction] || [];
 }

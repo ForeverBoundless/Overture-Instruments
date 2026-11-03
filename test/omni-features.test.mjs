@@ -175,7 +175,7 @@ test('OMNI renders voice-dependent ports, prunes removed wires, and applies MIDI
   const modules = await readFile(new URL('../js/omni/modules.js', import.meta.url), 'utf8');
   assert.match(source, /modulePorts\(m, 'outputs'\)/);
   assert.match(source, /modulePorts\(byId\[c\.from\.module\], 'outputs'\)/);
-  assert.match(source, /syncChordPorts\(m\.id\)/);
+  assert.match(source, /syncModulePorts\(m\.id\)/);
   assert.match(source, /Removed connections to chord voices that are no longer active/);
   assert.match(modules, /getOutputs\(params = \{\}\)/);
 });
@@ -185,4 +185,23 @@ test('OMNI output includes peak control and a high-frequency guard', async () =>
   assert.match(modules, /createDynamicsCompressor\(\)/);
   assert.match(modules, /highCut\.type = 'lowpass'/);
   assert.match(modules, /Math\.min\(17000, ctx\.sampleRate \* 0\.42\)/);
+});
+
+
+test('OMNI mixer exposes dynamic 2–8 inputs and MIDI controls follow the active channel count', async () => {
+  const [modules, graph, source, worker] = await Promise.all([
+    readFile(new URL('../js/omni/modules.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/omni/graph.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/omni.js', import.meta.url), 'utf8'),
+    readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
+  ]);
+  assert.match(modules, /name: 'Mixer \(2–8 inputs\)'/);
+  assert.match(modules, /getInputs\(params = \{\}\)/);
+  assert.match(modules, /Array\.from\(\{ length: 8 \}/);
+  assert.match(modules, /if \(direction === 'inputs' && typeof definition\.getInputs/);
+  assert.match(graph, /modulePorts\(m, dir\)/);
+  assert.match(source, /m\.type === 'mixer' && key === 'channels'/);
+  assert.match(source, /this\.syncModulePorts\(m\.id\)/);
+  assert.match(modules, /Math\.sqrt\(4 \/ channels\)/);
+  assert.match(worker, /overture-shell-v19/);
 });

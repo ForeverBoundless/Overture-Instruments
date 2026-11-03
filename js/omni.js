@@ -328,14 +328,14 @@ class OmniApp {
       const out = [];
       this.patch.modules.forEach((m) => {
         const def = MODULES[m.type]; if (!def) return;
-        def.params.forEach((p) => {
+        (def.getVisibleParams ? def.getVisibleParams(m.params) : def.params).forEach((p) => {
           if (p.options) return;
           const log = !!p.log;
           const norm = (v) => (log ? (Math.log(v) - Math.log(p.min)) / (Math.log(p.max) - Math.log(p.min)) : (v - p.min) / (p.max - p.min));
           const denorm = (t) => { let v = log ? Math.exp(Math.log(p.min) + t * (Math.log(p.max) - Math.log(p.min))) : p.min + t * (p.max - p.min); if (p.step) v = Math.round(v / p.step) * p.step; return Math.min(p.max, Math.max(p.min, v)); };
           out.push({ id: `omni::${m.id}::${p.key}`, label: p.label, group: `${def.name} (${m.id})`, el: document.getElementById(`p-${m.id}-${p.key}`),
             get: () => norm(m.params[p.key]),
-            set: (t) => { const v = denorm(t); this.setParam(m.id, p.key, v, false); if (m.type === 'chord' && p.key === 'voices') this.syncChordPorts(m.id); const inp = document.getElementById(`p-${m.id}-${p.key}`); if (inp) { inp.value = log ? Math.log(v) : v; const o = inp.parentElement?.querySelector('output'); if (o) o.textContent = v.toFixed(p.step === 1 ? 0 : 2); } } });
+            set: (t) => { const previous = m.params[p.key]; const v = denorm(t); this.setParam(m.id, p.key, v, false); if (v !== previous && ((m.type === 'chord' && p.key === 'voices') || (m.type === 'mixer' && p.key === 'channels'))) this.syncModulePorts(m.id); const inp = document.getElementById(`p-${m.id}-${p.key}`); if (inp) { inp.value = log ? Math.log(v) : v; const o = inp.parentElement?.querySelector('output'); if (o) o.textContent = v.toFixed(p.step === 1 ? 0 : 2); } } });
         });
       });
       this.patch.macros.forEach((macro) => {
@@ -881,15 +881,20 @@ class OmniApp {
     this.patch.connections.push({ id: uid('c'), from, to }); this.render(); this.scheduleRebuild(); this.pushHistory(); this.msg('Connected.'); return true;
   }
   removeConnection(id) { this.patch.connections = this.patch.connections.filter((c) => c.id !== id); this.selectedWire = null; this.selected = null; this.selectedModules.clear(); this.render(); this.scheduleRebuild(); this.pushHistory(); }
-  syncChordPorts(id) {
+  syncModulePorts(id) {
     const module = this.patch.modules.find((item) => item.id === id);
-    if (!module || module.type !== 'chord') return;
+    if (!module || !['chord', 'mixer'].includes(module.type)) return;
+    const validInputs = new Set(modulePorts(module, 'inputs').map((port) => port.id));
     const validOutputs = new Set(modulePorts(module, 'outputs').map((port) => port.id));
     const previousLength = this.patch.connections.length;
-    this.patch.connections = this.patch.connections.filter((connection) => connection.from.module !== id || validOutputs.has(connection.from.port));
+    this.patch.connections = this.patch.connections.filter((connection) => {
+      if (connection.from.module === id && !validOutputs.has(connection.from.port)) return false;
+      if (connection.to.module === id && !validInputs.has(connection.to.port)) return false;
+      return true;
+    });
     if (this.patch.connections.length !== previousLength) {
       this.scheduleRebuild();
-      this.msg('Removed connections to chord voices that are no longer active.');
+      this.msg(`Removed connections to inactive ${module.type === 'chord' ? 'chord voices' : 'mixer inputs'}.`);
     }
     this.renderCards();
     this.renderWires();
@@ -900,7 +905,8 @@ class OmniApp {
     const m = this.patch.modules.find((x) => x.id === id); if (!m) return;
     m.params[key] = value;
     if (this.live) { const ok = this.live.setParam(id, key, value); if (!ok) this.scheduleRebuild(); }
-    if (commit && m.type === 'chord' && key === 'voices') this.syncChordPorts(id);
+    const portCountChanged = (m.type === 'chord' && key === 'voices') || (m.type === 'mixer' && key === 'channels');
+    if (commit && portCountChanged) this.syncModulePorts(id);
     if (commit) this.pushHistory();
   }
 
