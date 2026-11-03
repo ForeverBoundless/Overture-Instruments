@@ -95,7 +95,7 @@ html[data-theme="light"] .hero-title em {
   font-family: 'Inter Variable', 'Inter', 'Segoe UI', sans-serif !important;
   font-weight: 400 !important;
   font-style: normal !important;
-  letter-spacing: -.075em !important;
+  letter-spacing: inherit !important;
   text-shadow:
     0 0 .05em rgba(255, 159, 10, .85),
     0 0 .16em rgba(255, 159, 10, .85),
@@ -175,4 +175,13 @@ html[data-theme="light"] :is(.eyebrow-dot--green,.status-dot--green) {
 }
 html[data-theme="light"] :is(.hero-title em,.feature-copy h2 em,.ex-page h1 em,.lab-header h1 em) {
   text-shadow:0 0 10px currentColor,0 0 22px color-mix(in srgb,currentColor 60%,transparent) !important;
+}
+
+
+/* The OMNI wordmark is a static brand label, not a cyan instrument highlight.
+   Keep it black in light mode while preserving the dark-mode cyan wordmark. */
+html[data-theme="light"] .omni-logo-wording strong {
+  color:#111820 !important;
+  -webkit-text-fill-color:#111820 !important;
+  text-shadow:none !important;
 }

@@ -62,3 +62,138 @@ html::-webkit-scrollbar, body::-webkit-scrollbar, body *:not(.oi-midi-pane)::-we
 .oi-midi-pane { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.18) transparent; }
 .oi-midi-pane::-webkit-scrollbar { width: 6px; }
 .oi-midi-pane::-webkit-scrollbar-thumb { background: rgba(255,255,255,.18); border-radius: 3px; }
+
+
+/* Shared MIDI map: explicit light-theme surface and control tokens. The panel
+   is mounted directly under body on every emulator, so theme it independently
+   of each instrument's local component stylesheet. */
+html[data-theme="light"] {
+  --oi-midi-panel-bg:linear-gradient(180deg,#fbfcfe,#e8eef5);
+  --oi-midi-panel-ink:#26374a;
+  --oi-midi-muted:#596b80;
+  --oi-midi-faint:#718197;
+  --oi-midi-border:rgba(43,59,78,.17);
+  --oi-midi-border-strong:rgba(43,59,78,.26);
+  --oi-midi-row-bg:rgba(255,255,255,.64);
+  --oi-midi-field-bg:#f8fafc;
+  --oi-midi-field-ink:#26374a;
+  --oi-midi-shadow:-20px 0 54px rgba(45,60,81,.2);
+}
+html[data-theme="light"] .oi-midi-tab {
+  color:#34485e;
+  border-color:rgba(43,59,78,.2);
+  background:rgba(245,248,251,.97);
+  box-shadow:0 8px 24px rgba(45,60,81,.12);
+}
+html[data-theme="light"] .oi-midi-tab:hover,
+html[data-theme="light"] .oi-midi-tab.is-open {
+  color:#18364d;
+  border-color:rgba(8,127,159,.4);
+  background:#e9f4f8;
+}
+html[data-theme="light"] .oi-midi-pane {
+  color:var(--oi-midi-panel-ink);
+  border-left-color:var(--oi-midi-border);
+  background:var(--oi-midi-panel-bg);
+  box-shadow:var(--oi-midi-shadow);
+  color-scheme:light;
+}
+html[data-theme="light"] .oi-midi-head h2 {color:#25384d}
+html[data-theme="light"] .oi-midi-device {color:var(--oi-midi-muted)}
+html[data-theme="light"] .oi-midi-device.is-on {color:#267b4b}
+html[data-theme="light"] .oi-midi-close {
+  color:#53667c;
+  border-color:var(--oi-midi-border);
+  background:rgba(255,255,255,.55);
+}
+html[data-theme="light"] .oi-midi-close:hover {
+  color:#1e3449;
+  border-color:var(--oi-midi-border-strong);
+  background:#fff;
+}
+html[data-theme="light"] .oi-midi-count {color:#536579}
+html[data-theme="light"] .oi-midi-btn {
+  color:#34495f;
+  border-color:var(--oi-midi-border);
+  background:rgba(255,255,255,.55);
+}
+html[data-theme="light"] .oi-midi-btn:hover:not(:disabled) {
+  color:#1c3b51;
+  border-color:rgba(8,127,159,.38);
+  background:#fff;
+}
+html[data-theme="light"] .oi-midi-btn--primary {
+  color:#382407;
+  border-color:#e9ad59;
+  background:linear-gradient(135deg,#ffd39a,#ffbd70);
+}
+html[data-theme="light"] .oi-midi-btn--primary:hover:not(:disabled) {
+  color:#382407;
+  background:linear-gradient(135deg,#ffdda9,#ffc681);
+}
+html[data-theme="light"] .oi-midi-btn--danger:hover:not(:disabled) {
+  color:#a33f43;
+  border-color:rgba(190,76,78,.4);
+  background:rgba(190,76,78,.06);
+}
+html[data-theme="light"] .oi-midi-learn {
+  border-color:rgba(189,119,36,.28);
+  background:rgba(255,183,94,.12);
+}
+html[data-theme="light"] .oi-midi-learn h3 {color:#9b5a0b}
+html[data-theme="light"] .oi-midi-step p {color:#536579}
+html[data-theme="light"] .oi-midi-step__n {
+  color:#465b70;
+  background:rgba(43,59,78,.09);
+}
+html[data-theme="light"] .oi-midi-step.is-current .oi-midi-step__n {
+  color:#382407;
+  background:#ffbf70;
+}
+html[data-theme="light"] .oi-midi-step.is-done .oi-midi-step__n {
+  color:#124b2e;
+  background:#9ae3b5;
+}
+html[data-theme="light"] .oi-midi-source {color:#087f9f}
+html[data-theme="light"] .oi-midi-link {color:#a45c08}
+html[data-theme="light"] .oi-midi-select {
+  color:var(--oi-midi-field-ink);
+  border-color:var(--oi-midi-border-strong);
+  background:var(--oi-midi-field-bg);
+  color-scheme:light;
+}
+html[data-theme="light"] .oi-midi-check {color:#46596f}
+html[data-theme="light"] .oi-midi-check input {accent-color:#b87518}
+html[data-theme="light"] .oi-midi-warn {color:#99550b}
+html[data-theme="light"] .oi-midi-empty {
+  color:#65768a;
+  border-color:var(--oi-midi-border-strong);
+  background:rgba(255,255,255,.46);
+}
+html[data-theme="light"] .oi-midi-row {
+  border-color:var(--oi-midi-border);
+  background:var(--oi-midi-row-bg);
+}
+html[data-theme="light"] .oi-midi-row.is-active {
+  border-color:#168db2;
+  background:rgba(22,142,183,.09);
+}
+html[data-theme="light"] .oi-midi-row.is-editing {
+  border-color:rgba(185,113,26,.5);
+  background:rgba(255,183,94,.09);
+}
+html[data-theme="light"] .oi-midi-row__info strong {color:#273b50}
+html[data-theme="light"] .oi-midi-row__info small {color:#65768a}
+html[data-theme="light"] .oi-midi-help {color:#68798c}
+html[data-theme="light"] .oi-midi-active {
+  outline-color:#168db2 !important;
+  box-shadow:0 0 0 3px rgba(22,141,178,.12);
+}
+html[data-theme="light"] body.oi-midi-learning [data-oi-midi] {
+  outline-color:rgba(184,112,25,.88) !important;
+}
+html[data-theme="light"] body.oi-midi-learning [data-oi-midi][data-oi-midi-assigned] {
+  outline-color:rgba(8,127,159,.82) !important;
+}
+html[data-theme="light"] .oi-midi-pane {scrollbar-color:rgba(43,59,78,.25) transparent}
+html[data-theme="light"] .oi-midi-pane::-webkit-scrollbar-thumb {background:rgba(43,59,78,.25)}

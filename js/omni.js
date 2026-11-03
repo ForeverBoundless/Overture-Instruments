@@ -165,6 +165,8 @@ class OmniApp {
     action(helpMenu, 'Keyboard shortcuts', () => this.showShortcuts(), 'View performance and editing shortcuts');
 
     this.menuDetails = [...commandbar.querySelectorAll('.omni-menu')];
+    this.status.classList.add('omni-status--command');
+    commandbar.appendChild(this.status);
     document.addEventListener('pointerdown', (event) => {
       if (event.target?.closest?.('.omni-menu')) return;
       this.menuDetails.forEach((menu) => { menu.open = false; });

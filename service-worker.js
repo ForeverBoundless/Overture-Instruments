@@ -1,4 +1,4 @@
-const CACHE = 'overture-shell-v15';
+const CACHE = 'overture-shell-v16';
 const APP_SHELL = [
   '/account',
   '/css/account.css?v=20261102-contributions-menu',
@@ -27,17 +27,17 @@ const APP_SHELL = [
   '/css/korg-ms-20.css',
   '/css/library.css',
   '/css/little-phatty.css',
-  '/css/midi-map.css',
+  '/css/midi-map.css?v=20261103-theme',
   '/css/nord-c2d.css',
   '/css/omni.css',
-  '/css/omni.css?v=20261103-status-layout',
+  '/css/omni.css?v=20261103-command-status',
   '/css/knobs.css',
   '/css/panel.css',
   '/css/prophet10.css',
   '/css/roland-juno-106.css',
   '/css/roland-tr-808.css',
   '/css/site-footer.css',
-  '/css/site-theme-polish.css?v=20261103-luminous',
+  '/css/site-theme-polish.css?v=20261103-accent-spacing',
   '/css/site-theme.css',
   '/css/sub37.css',
   '/css/yamaha-dx7.css',

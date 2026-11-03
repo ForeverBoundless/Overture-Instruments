@@ -72,10 +72,10 @@ test('OMNI performance deck keeps octave controls in the keyboard header and giv
   assert.match(css, /grid-template-columns:88px minmax\(0,1fr\)/);
   assert.match(css, /\.omni-keys \.lp-keyboard[^}]*width:100%/);
   assert.match(css, /\.omni-keys \.lp-keyboard[^}]*min-width:520px/);
-  assert.match(page, /omni\.css\?v=20261103-status-layout/);
+  assert.match(page, /omni\.css\?v=20261103-command-status/);
   assert.match(page, /omni\.js\?v=20261103-four-octaves/);
-  assert.match(worker, /overture-shell-v15/);
-  assert.match(worker, /omni\.css\?v=20261103-status-layout/);
+  assert.match(worker, /overture-shell-v16/);
+  assert.match(worker, /omni\.css\?v=20261103-command-status/);
   assert.match(worker, /omni\.js\?v=20261103-four-octaves/);
 });
 
@@ -89,9 +89,10 @@ test('OMNI keyboard spans four octaves and status text avoids the centered theme
   ]);
   assert.match(source, /octaves:\s*4/);
   assert.match(source, /C2 – C6/);
-  assert.match(css, /\.omni-topbar \.omni-status[\s\S]*margin-right:clamp\(58px,6vw,82px\)/);
+  assert.match(css, /\.omni-commandbar > \.omni-status[\s\S]*text-align:right/);
+  assert.match(source, /commandbar\.appendChild\(this\.status\)/);
   assert.match(page, /omni\.js\?v=20261103-four-octaves/);
-  assert.match(worker, /overture-shell-v15/);
+  assert.match(worker, /overture-shell-v16/);
 });
 
 test('community publish login link honours Supabase hidden state in every responsive layout', async () => {
@@ -110,4 +111,26 @@ test('light-mode accent effects retain the original luminous brand colours', asy
   assert.match(css, /color:#ffb75e !important/);
   assert.match(css, /color:#7de4ff !important/);
   assert.match(css, /color:#82e6a8 !important/);
+});
+
+
+test('shared MIDI map panel has a complete light-mode skin without changing dark mode', async () => {
+  const css = await readFile(new URL('../css/midi-map.css', import.meta.url), 'utf8');
+  assert.match(css, /html\[data-theme="light"\] \.oi-midi-pane/);
+  assert.match(css, /html\[data-theme="light"\] \.oi-midi-tab/);
+  assert.match(css, /html\[data-theme="light"\] \.oi-midi-select/);
+  assert.match(css, /html\[data-theme="light"\] \.oi-midi-row/);
+  assert.match(css, /\.oi-midi-pane \{[\s\S]*background: linear-gradient\(180deg, rgba\(16,19,26/);
+});
+
+test('OMNI wordmark is black in light mode and hero accent tracking inherits the same value in both themes', async () => {
+  const [theme, page, worker] = await Promise.all([
+    readFile(new URL('../css/site-theme-polish.css', import.meta.url), 'utf8'),
+    readFile(new URL('../omni.html', import.meta.url), 'utf8'),
+    readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
+  ]);
+  assert.match(theme, /html\[data-theme="light"\] \.omni-logo-wording strong[\s\S]*color:#111820 !important/);
+  assert.match(theme, /letter-spacing: inherit !important/);
+  assert.match(page, /site-theme-polish\.css\?v=20261103-accent-spacing/);
+  assert.match(worker, /overture-shell-v16/);
 });
