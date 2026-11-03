@@ -301,7 +301,15 @@ async function loadItems({ append = false } = {}) {
 
     const search = $('contributions-search').value.trim()
       .toLowerCase().replace(/[^a-z0-9\s-]/g, '').slice(0, 50);
-    if (search) query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%`);
+    if (search) {
+      const tagTerms = [...new Set(search.split(/\s+/).filter(Boolean))]
+        .map((term) => 'tags.cs.{' + term + '}');
+      query = query.or([
+        'title.ilike.%' + search + '%',
+        'description.ilike.%' + search + '%',
+        ...tagTerms,
+      ].join(','));
+    }
 
     const type = $('contributions-filter-type').value;
     if (type !== 'all') query = query.eq('record_type', type);

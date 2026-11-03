@@ -159,7 +159,7 @@ test('The shared account menu works across site, OMNI, Library and all experimen
   assert.ok(omni.includes('/css/site-theme.css'));
   assert.ok(omni.includes('account-shell.js?v=20261102-contributions-menu'));
   assert.ok(library.includes('account-shell.js?v=20261102-contributions-menu'));
-  assert.ok(worker.includes('overture-shell-v10'));
+  assert.ok(worker.includes('overture-shell-v11'));
   assert.ok(worker.includes('account-shell.js?v=20261102-contributions-menu'));
   for (const page of experimentPages) {
     const html = await readFile(new URL(`../experiments/${page}.html`, import.meta.url), 'utf8');
@@ -205,5 +205,13 @@ test('Contribution profiles respect profile ownership and expose edit actions on
   assert.ok(community.includes('/contributions?username='));
   assert.ok(css.includes('.contributions-profile'));
   assert.ok(worker.includes("'/contributions'"));
-  assert.ok(worker.includes('/js/contributions.js?v=20261102-profile'));
+  assert.ok(worker.includes('/js/contributions.js?v=20261102-profile-2'));
+});
+
+
+test('Contribution search includes tags as well as titles and descriptions', async () => {
+  const app = await readFile(new URL('../js/contributions.js', import.meta.url), 'utf8');
+  assert.ok(app.includes('tags.cs.{'));
+  assert.ok(app.includes('title.ilike.%'));
+  assert.ok(app.includes('description.ilike.%'));
 });
