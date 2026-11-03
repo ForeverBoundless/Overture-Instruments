@@ -4,6 +4,29 @@ import { readFile } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
+test('OMNI chord interval sliders expose the complete ±32-semitone range', async () => {
+  const [modules, source, css, page, worker] = await Promise.all([
+    readFile(new URL('../js/omni/modules.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/omni.js', import.meta.url), 'utf8'),
+    readFile(new URL('../css/omni.css', import.meta.url), 'utf8'),
+    readFile(new URL('../omni.html', import.meta.url), 'utf8'),
+    readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
+  ]);
+  const chord = modules.slice(modules.indexOf('  chord: {'), modules.indexOf('  noteUtil:', modules.indexOf('  chord: {')));
+  assert.equal((chord.match(/P\('v[2-8]', 'Voice [2-8] interval \\(semitones\\)', -32, 32,/g) || []).length, 7);
+  assert.match(source, /inp\.min = log \? Math\.log\(p\.min\) : p\.min; inp\.max = log \? Math\.log\(p\.max\) : p\.max;/);
+  assert.match(source, /const chordInterval = m\.type === 'chord' && \/\^v\[2-8\]\$\/\.test\(p\.key\)/);
+  assert.match(source, /aria-valuemin', String\(p\.min\)/);
+  assert.match(source, /aria-valuemax', String\(p\.max\)/);
+  assert.match(source, /omni-param__bounds/);
+  assert.match(css, /\.omni-param__bounds/);
+  assert.match(page, /omni\.css\?v=20261103-chord-sliders-32/);
+  assert.match(page, /omni\.js\?v=20261103-chord-sliders-32/);
+  assert.match(worker, /overture-shell-v20/);
+  assert.match(worker, /omni\.css\?v=20261103-chord-sliders-32/);
+  assert.match(worker, /omni\.js\?v=20261103-chord-sliders-32/);
+});
+
 test('OMNI exposes recording, searchable modules and editing shortcuts', async () => {
   const source = await readFile(new URL('../js/omni.js', import.meta.url), 'utf8');
   assert.match(source, /toggleAudioRecording/);
