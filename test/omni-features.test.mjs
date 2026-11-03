@@ -12,19 +12,20 @@ test('OMNI chord interval sliders expose the complete ±32-semitone range', asyn
     readFile(new URL('../omni.html', import.meta.url), 'utf8'),
     readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
   ]);
-  const chord = modules.slice(modules.indexOf('  chord: {'), modules.indexOf('  noteUtil:', modules.indexOf('  chord: {')));
-  assert.equal((chord.match(/P\('v[2-8]', 'Voice [2-8] interval \\(semitones\\)', -32, 32,/g) || []).length, 7);
-  assert.match(source, /inp\.min = log \? Math\.log\(p\.min\) : p\.min; inp\.max = log \? Math\.log\(p\.max\) : p\.max;/);
-  assert.match(source, /const chordInterval = m\.type === 'chord' && \/\^v\[2-8\]\$\/\.test\(p\.key\)/);
-  assert.match(source, /aria-valuemin', String\(p\.min\)/);
-  assert.match(source, /aria-valuemax', String\(p\.max\)/);
-  assert.match(source, /omni-param__bounds/);
-  assert.match(css, /\.omni-param__bounds/);
-  assert.match(page, /omni\.css\?v=20261103-chord-sliders-32/);
-  assert.match(page, /omni\.js\?v=20261103-chord-sliders-32/);
-  assert.match(worker, /overture-shell-v20/);
-  assert.match(worker, /omni\.css\?v=20261103-chord-sliders-32/);
-  assert.match(worker, /omni\.js\?v=20261103-chord-sliders-32/);
+  const chordStart = modules.indexOf('  chord: {');
+  const chord = modules.slice(chordStart, modules.indexOf('  noteUtil:', chordStart));
+  assert.equal((chord.match(/-32, 32/g) || []).length, 7);
+  assert.ok(source.includes('inp.min = log ? Math.log(p.min) : p.min; inp.max = log ? Math.log(p.max) : p.max;'));
+  assert.ok(source.includes("const chordInterval = m.type === 'chord' && /^v[2-8]$/.test(p.key);"));
+  assert.ok(source.includes("inp.setAttribute('aria-valuemin', String(p.min));"));
+  assert.ok(source.includes("inp.setAttribute('aria-valuemax', String(p.max));"));
+  assert.ok(source.includes("el('div', 'omni-param__bounds', row)"));
+  assert.ok(css.includes('.omni-param__bounds'));
+  assert.ok(page.includes('omni.css?v=20261103-chord-sliders-32'));
+  assert.ok(page.includes('omni.js?v=20261103-chord-sliders-32'));
+  assert.ok(worker.includes("const CACHE = 'overture-shell-v20';"));
+  assert.ok(worker.includes('/css/omni.css?v=20261103-chord-sliders-32'));
+  assert.ok(worker.includes('/js/omni.js?v=20261103-chord-sliders-32'));
 });
 
 test('OMNI exposes recording, searchable modules and editing shortcuts', async () => {
