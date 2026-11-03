@@ -37,3 +37,23 @@ test('OMNI exposes macro editing, MIDI automation and community publishing hooks
   assert.match(source, /onPitchBend/);
   assert.match(source, /onControlChange/);
 });
+
+
+test('OMNI studio menus and performance controls are wired to the live graph', async () => {
+  const source = await readFile(new URL('../js/omni.js', import.meta.url), 'utf8');
+  const graph = await readFile(new URL('../js/omni/graph.js', import.meta.url), 'utf8');
+  const modules = await readFile(new URL('../js/omni/modules.js', import.meta.url), 'utf8');
+  const css = await readFile(new URL('../css/omni.css', import.meta.url), 'utf8');
+  assert.match(source, /const fileMenu = group\('File'\)/);
+  assert.match(source, /const editMenu = group\('Edit'\)/);
+  assert.match(source, /new PitchWheel/);
+  assert.match(source, /new ModWheel/);
+  assert.match(source, /omni::keyboard-octave/);
+  assert.match(source, /setKeyboardOctave\(value\)/);
+  assert.match(graph, /setPitchBend\(semitones\)/);
+  assert.match(graph, /setModWheel\(value\)/);
+  assert.match(modules, /inst\.setPitchBend/);
+  assert.match(modules, /inst\.setModWheel/);
+  assert.match(css, /omni-perf__deck/);
+  assert.match(css, /html\[data-theme="light"\] \.omni-perf/);
+});

@@ -90,15 +90,18 @@ export const MODULES = {
       osc.start(); osc2.start();
       inst.outputs.out = level; inst.inputs.pitchMod = modGain;
       inst.freq = 110;
+      inst.pitchBend = 0; inst.modWheel = 0;
       const apply = (t = now(ctx)) => {
         const p = inst.params; const pulse = p.wave === 3;
         osc.type = pulse ? 'sawtooth' : WAVES[p.wave]; mainGain.gain.setTargetAtTime(pulse ? 0 : 1, t, 0.01); pulseGain.gain.setTargetAtTime(pulse ? 1 : 0, t, 0.01);
-        const hz = inst.freq * Math.pow(2, p.octave);
+        const hz = inst.freq * Math.pow(2, p.octave + inst.pitchBend / 12);
         [osc, osc2].forEach((o) => { o.frequency.cancelScheduledValues(t); if (p.glide > 0) o.frequency.setTargetAtTime(hz, t, p.glide / 4); else o.frequency.setValueAtTime(hz, t); o.detune.value = p.detune; });
         delay.delayTime.setTargetAtTime(Math.min(0.05, p.pulseWidth / Math.max(20, hz)), t, 0.005);
-        modGain.gain.value = p.modDepth * 100; level.gain.setTargetAtTime(p.level * 0.5, t, 0.01);
+        modGain.gain.value = p.modDepth * 100 * inst.modWheel; level.gain.setTargetAtTime(p.level * 0.5, t, 0.01);
       };
       inst.inputs.pitch = { kind: 'note', handle: (ev) => { if (ev.on) { inst.freq = midiHz(ev.note); apply(eventTime(ctx, ev)); } } };
+      inst.setPitchBend = (semitones) => { inst.pitchBend = semitones; apply(); };
+      inst.setModWheel = (value) => { inst.modWheel = value; apply(); };
       inst.apply = apply;
       return inst;
     },

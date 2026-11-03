@@ -286,6 +286,16 @@ export class LiveGraph {
     this.instances.clear();
   }
 
+  setPitchBend(semitones) {
+    const value = Math.max(-2, Math.min(2, Number(semitones) || 0));
+    this.instances.forEach((instance) => instance.setPitchBend?.(value));
+  }
+
+  setModWheel(value) {
+    const normalized = Math.max(0, Math.min(1, Number(value) || 0));
+    this.instances.forEach((instance) => instance.setModWheel?.(normalized));
+  }
+
   noteOn(note, velocity, channel = 1) {
     this.instances.forEach((instance) => instance.noteOn?.(note, velocity, channel));
   }

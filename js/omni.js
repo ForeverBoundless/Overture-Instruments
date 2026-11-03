@@ -6,6 +6,7 @@ import { PresetStore, downloadText, pickFile } from './shared/presetStore.js';
 import { AudioRecorder } from './shared/audioRecorder.js';
 import { MidiRecorder } from './shared/midiRecorder.js';
 import { Keyboard } from '../ui/Keyboard.js';
+import { PitchWheel, ModWheel } from '../ui/Wheel.js';
 import { MidiManager, midiNoteName } from './engine/MidiManager.js';
 import { noteToMidi, KEY_TO_SEMI } from './shared/panel.js';
 import { registerMidiTarget, registerMidiTargetProvider } from './shared/midiMap.js';
@@ -29,6 +30,8 @@ class OmniApp {
       try { sessionStorage.removeItem('overture.community.import'); } catch { /* storage may be unavailable */ }
       console.warn('Could not open the community patch.', error);
     }
+    this.octaveShift = 0; this.keyboardPointerNotes = new Map();
+    this.pitchBend = 0; this.modWheelValue = 0; this._modKeyDirection = 0; this._modRampRAF = null;
     this.ctx = null; this.live = null; this.selected = null; this.selectedWire = null; this.pending = null;
     this.selectedModules = new Set(); this.clipboard = null; this.snapEnabled = true;
     this.audioRecorder = null; this.midiRecorder = new MidiRecorder();
@@ -57,42 +60,120 @@ class OmniApp {
     account.href = '/account'; account.setAttribute('aria-label', 'Log in to your Overture account');
     const accountLabel = el('span', 'header-account__label', account, 'LOG IN');
 
-    const commandbar = el('div', 'omni-commandbar', bar);
-    const group = (label) => { const g = el('div', 'omni-tool-group', commandbar); g.setAttribute('role', 'group'); g.setAttribute('aria-label', label); return g; };
-    const tb = (label, fn, title, parent, variant = '') => { const b = el('button', `omni-tb${variant ? ` ${variant}` : ''}`, parent, label); b.type = 'button'; if (title) b.title = title; b.addEventListener('click', fn); return b; };
+    const commandbar = el('nav', 'omni-commandbar', bar);
+    commandbar.setAttribute('aria-label', 'OMNI menus');
+    const group = (label) => {
+      const details = el('details', 'omni-menu', commandbar);
+      const summary = el('summary', 'omni-menu__trigger', details, label);
+      summary.setAttribute('aria-label', `${label} menu`);
+      const panel = el('div', 'omni-menu__panel', details);
+      panel.setAttribute('role', 'group');
+      panel.setAttribute('aria-label', `${label} commands`);
+      return { details, panel };
+    };
+    const tb = (label, fn, title, parent, variant = '') => {
+      const button = el('button', `omni-tb${variant ? ` ${variant}` : ''}`, parent, label);
+      button.type = 'button';
+      if (title) button.title = title;
+      button.addEventListener('click', fn);
+      return button;
+    };
+    const action = (menu, label, fn, title, variant = '') => {
+      const button = tb(label, () => { menu.details.open = false; fn(); }, title, menu.panel, variant);
+      button.classList.add('omni-menu__item');
+      button.setAttribute('role', 'menuitem');
+      return button;
+    };
+    const separator = (menu) => el('div', 'omni-menu__separator', menu.panel);
 
-    const patchTools = group('Instrument');
-    tb('NEW', () => this.load(defaultPatch()), 'New instrument', patchTools);
-    tb('TEMPLATES', () => this.templates(), 'Load a starter patch', patchTools);
-    tb('SAVE', () => this.save(), 'Save instrument in this browser', patchTools, 'omni-tb--primary');
-    this.loadSel = el('select', 'omni-tb omni-load', patchTools); this.loadSel.setAttribute('aria-label', 'Load saved instrument'); this.loadSel.title = 'Load saved instrument'; this.loadSel.addEventListener('change', () => { const it = this.store.get(this.loadSel.value); if (it) this.load(JSON.parse(JSON.stringify(it.data)), it.id); this.loadSel.value = ''; });
+    const fileMenu = group('File');
+    action(fileMenu, 'New patch', () => this.load(defaultPatch()), 'Create a new instrument');
+    action(fileMenu, 'Templates…', () => this.templates(), 'Open the starter patch library');
+    action(fileMenu, 'Save patch…', () => this.save(), 'Save this instrument in this browser', 'omni-menu__item--primary');
+    const loadField = el('label', 'omni-menu__field', fileMenu.panel);
+    el('span', '', loadField, 'OPEN SAVED PATCH');
+    this.loadSel = el('select', 'omni-menu__select', loadField);
+    this.loadSel.setAttribute('aria-label', 'Open saved instrument');
+    this.loadSel.title = 'Open a saved instrument';
+    this.loadSel.addEventListener('change', () => {
+      const item = this.store.get(this.loadSel.value);
+      if (item) this.load(JSON.parse(JSON.stringify(item.data)), item.id);
+      this.loadSel.value = '';
+      fileMenu.details.open = false;
+    });
     this.refreshLoadList();
-    tb('DELETE', () => { if (!this.currentId) { this.msg('This instrument is not saved yet.'); return; } if (confirm('Delete the saved instrument?')) { this.store.remove(this.currentId); this.currentId = null; this.refreshLoadList(); this.msg('Deleted.'); } }, 'Delete current saved instrument', patchTools, 'omni-tb--danger');
-    tb('MACROS', () => this.openMacros(), 'Create and edit assignable macro controls', patchTools);
-    tb('COMMUNITY', () => this.publishToCommunity(), 'Publish this patch to the community library', patchTools);
+    action(fileMenu, 'Delete saved patch…', () => {
+      if (!this.currentId) { this.msg('This patch has not been saved yet.'); return; }
+      if (confirm('Delete the saved patch?')) {
+        this.store.remove(this.currentId);
+        this.currentId = null;
+        this.refreshLoadList();
+        this.msg('Saved patch deleted.');
+      }
+    }, 'Delete the current saved patch', 'omni-menu__item--danger');
+    separator(fileMenu);
+    action(fileMenu, 'Publish to Community…', () => this.publishToCommunity(), 'Publish this patch to the Overture community');
+    action(fileMenu, 'Import patch JSON…', () => pickFile('.json,application/json', (text) => {
+      try { const { data } = this.store.parseImport(text); this.load(data); this.msg('Patch imported.'); }
+      catch (error) { this.msg(error.message, true); }
+    }), 'Import an OMNI patch');
+    action(fileMenu, 'Export patch JSON', () => downloadText(
+      `${this.patch.name.replace(/\W+/g, '-') || 'omni'}.omni.json`,
+      this.store.exportJSON({ name: this.patch.name, data: this.patch }),
+    ), 'Export the current patch');
+    action(fileMenu, 'Import library backup…', () => pickFile('.json,application/json', (text) => {
+      try { const items = this.store.importAll(text); this.refreshLoadList(); this.msg(`Imported ${items.length} saved patch${items.length === 1 ? '' : 'es'}.`); }
+      catch (error) { this.msg(error.message, true); }
+    }), 'Import an OMNI library backup');
+    action(fileMenu, 'Export library backup', () => downloadText('omni-library.json', this.store.exportAllJSON()), 'Export every saved OMNI patch');
+    action(fileMenu, 'Export SVG schematic', () => downloadText(
+      `${this.patch.name.replace(/\W+/g, '-') || 'omni'}.schematic.svg`,
+      patchToSVG(this.patch),
+      'image/svg+xml',
+    ), 'Export the current patch as an SVG schematic');
 
-    const historyTools = group('History');
-    this.undoBtn = tb('UNDO', () => this.undo(), 'Undo (Ctrl+Z)', historyTools);
-    this.redoBtn = tb('REDO', () => this.redo(), 'Redo (Ctrl+Shift+Z)', historyTools);
+    const editMenu = group('Edit');
+    this.undoBtn = action(editMenu, 'Undo', () => this.undo(), 'Undo · Ctrl/⌘ Z');
+    this.redoBtn = action(editMenu, 'Redo', () => this.redo(), 'Redo · Ctrl/⌘ Shift Z');
+    separator(editMenu);
+    action(editMenu, 'Select all modules', () => this.selectAllModules(), 'Select all · Ctrl/⌘ A');
+    action(editMenu, 'Copy selection', () => this.copySelection(), 'Copy · Ctrl/⌘ C');
+    action(editMenu, 'Paste selection', () => this.pasteSelection(), 'Paste · Ctrl/⌘ V');
+    action(editMenu, 'Duplicate selection', () => this.duplicateSelection(), 'Duplicate · Ctrl/⌘ D');
+    action(editMenu, 'Delete selection', () => this.deleteSelection(), 'Delete or Backspace', 'omni-menu__item--danger');
 
-    const viewTools = group('Canvas view');
-    tb('−', () => this.zoom(0.8), 'Zoom out', viewTools);
-    tb('+', () => this.zoom(1.25), 'Zoom in', viewTools);
-    tb('FIT VIEW', () => this.fitView(), 'Fit all modules into the canvas', viewTools);
-    this.snapBtn = tb('SNAP: ON', () => this.toggleSnap(), 'Toggle 28-pixel module snapping', viewTools);
+    const viewMenu = group('View');
+    action(viewMenu, 'Zoom in', () => this.zoom(1.25), 'Zoom in');
+    action(viewMenu, 'Zoom out', () => this.zoom(0.8), 'Zoom out');
+    action(viewMenu, 'Fit patch to canvas', () => this.fitView(), 'Fit all modules in the canvas');
+    this.snapBtn = action(viewMenu, 'Snap to grid: ON', () => this.toggleSnap(), 'Toggle module snapping');
 
-    const fileTools = group('Import and export');
-    tb('JSON ↓', () => downloadText(`${this.patch.name.replace(/\W+/g, '-') || 'omni'}.omni.json`, this.store.exportJSON({ name: this.patch.name, data: this.patch })), 'Export patch as JSON', fileTools);
-    tb('JSON ↑', () => pickFile('.json,application/json', (text) => { try { const { data } = this.store.parseImport(text); this.load(data); this.msg('Imported.'); } catch (err) { this.msg(err.message, true); } }), 'Import patch JSON', fileTools);
-    tb('LIBRARY ↓', () => downloadText('omni-library.json', this.store.exportAllJSON()), 'Export every saved OMNI patch', fileTools);
-    tb('LIBRARY ↑', () => pickFile('.json,application/json', (text) => { try { const items = this.store.importAll(text); this.refreshLoadList(); this.msg(`Imported ${items.length} saved patch${items.length === 1 ? '' : 'es'}.`); } catch (err) { this.msg(err.message, true); } }), 'Import an OMNI library backup', fileTools);
-    tb('SVG ↓', () => downloadText(`${this.patch.name.replace(/\W+/g, '-') || 'omni'}.schematic.svg`, patchToSVG(this.patch), 'image/svg+xml'), 'Export patch schematic as SVG', fileTools);
-    const recordTools = group('Recording');
-    this.audioRecordBtn = tb('AUDIO REC', () => this.toggleAudioRecording(), 'Record the live OMNI audio output', recordTools);
-    this.midiRecordBtn = tb('MIDI REC', () => this.toggleMidiRecording(), 'Record keyboard and controller notes, then export a MIDI file', recordTools);
+    const audioMenu = group('Audio');
+    this.audioRecordBtn = action(audioMenu, 'Record audio…', () => this.toggleAudioRecording(), 'Record the live OMNI output');
+    this.midiRecordBtn = action(audioMenu, 'Record MIDI…', () => this.toggleMidiRecording(), 'Record keyboard and controller performance');
+    separator(audioMenu);
+    action(audioMenu, 'Panic · All notes off', () => this.allOff(), 'Stop all currently held notes');
 
-    const helpTools = group('Help');
-    tb('GUIDE', () => this.guide(), 'Open the OMNI guide', helpTools);
+    const midiMenu = group('MIDI');
+    action(midiMenu, 'MIDI assignments…', () => document.querySelector('.oi-midi-tab')?.click(), 'Assign physical MIDI controls');
+    action(midiMenu, 'Request MIDI access', () => this.midi?.init().then((ok) => {
+      this.midiEl.textContent = ok ? (this.midi.isConnected ? `MIDI: ${this.midi.deviceNames.join(', ')}` : 'MIDI: no device') : 'MIDI: permission not granted';
+    }), 'Connect a MIDI controller');
+
+    const helpMenu = group('Help');
+    action(helpMenu, 'OMNI guide…', () => this.guide(), 'Open the OMNI guide');
+    action(helpMenu, 'Keyboard shortcuts', () => this.showShortcuts(), 'View performance and editing shortcuts');
+
+    this.menuDetails = [...commandbar.querySelectorAll('.omni-menu')];
+    document.addEventListener('pointerdown', (event) => {
+      if (event.target?.closest?.('.omni-menu')) return;
+      this.menuDetails.forEach((menu) => { menu.open = false; });
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape') return;
+      const openMenu = this.menuDetails.find((menu) => menu.open);
+      if (openMenu) { openMenu.open = false; openMenu.querySelector('summary')?.focus(); }
+    });
     const main = el('div', 'omni-main', root);
     // Library
     const lib = el('aside', 'omni-library', main);
@@ -134,12 +215,104 @@ class OmniApp {
     this.inspector = el('aside', 'omni-inspector', main);
     el('h2', '', this.inspector, 'INSPECTOR');
     this.inspBody = el('div', '', this.inspector);
-    // Performance
+    // Performance deck: compact transport, tactile wheels and a full-width keybed.
     const perf = el('section', 'omni-perf', root);
-    this.powerBtn = el('button', 'omni-tb omni-power', perf, 'POWER ON AUDIO'); this.powerBtn.type = 'button'; this.powerBtn.addEventListener('click', () => this.power());
-    const master = el('label', 'omni-master', perf); el('span', '', master, 'MASTER'); this.masterInput = el('input', '', master); this.masterInput.type = 'range'; this.masterInput.min = 0; this.masterInput.max = 1; this.masterInput.step = 0.01; this.masterInput.value = this.patch.global.master;
-    this.masterInput.addEventListener('input', () => { this.patch.global.master = Number(this.masterInput.value); if (this.master) this.master.gain.setTargetAtTime(this.patch.global.master, this.ctx.currentTime, 0.01); });
-    registerMidiTarget(this.masterInput, { id: 'omni::master', label: 'MASTER', group: 'OUTPUT', get: () => Number(this.masterInput.value), set: (t) => { this.masterInput.value = t; this.masterInput.dispatchEvent(new Event('input')); } });
+    const perfTop = el('div', 'omni-perf__top', perf);
+    const perfTitle = el('div', 'omni-perf__title', perfTop);
+    el('span', 'omni-perf__live', perfTitle);
+    el('span', '', perfTitle, 'PERFORMANCE');
+    const perfTools = el('div', 'omni-perf__tools', perfTop);
+    this.powerBtn = el('button', 'omni-tb omni-power', perfTools, 'POWER ON');
+    this.powerBtn.type = 'button';
+    this.powerBtn.addEventListener('click', () => this.power());
+    const master = el('label', 'omni-master', perfTools);
+    el('span', '', master, 'MASTER');
+    this.masterInput = el('input', '', master);
+    this.masterInput.type = 'range';
+    this.masterInput.min = 0; this.masterInput.max = 1; this.masterInput.step = 0.01;
+    this.masterInput.value = this.patch.global.master;
+    this.masterInput.setAttribute('aria-label', 'Master output level');
+    this.masterInput.addEventListener('input', () => {
+      this.patch.global.master = Number(this.masterInput.value);
+      if (this.master && this.ctx) this.master.gain.setTargetAtTime(this.patch.global.master, this.ctx.currentTime, 0.01);
+    });
+    registerMidiTarget(this.masterInput, {
+      id: 'omni::master', label: 'MASTER', group: 'OUTPUT',
+      get: () => Number(this.masterInput.value),
+      set: (value) => { this.masterInput.value = value; this.masterInput.dispatchEvent(new Event('input')); },
+    });
+    const panic = el('button', 'omni-tb omni-panic', perfTools, 'PANIC');
+    panic.type = 'button';
+    panic.addEventListener('click', () => this.allOff());
+    this.midiEl = el('span', 'omni-midi', perfTop, 'MIDI: searching…');
+
+    const perfDeck = el('div', 'omni-perf__deck', perf);
+    const wheelBank = el('div', 'omni-wheel-bank', perfDeck);
+    const pitchWrap = el('div', 'omni-wheel-control', wheelBank);
+    el('span', 'omni-wheel-control__title', pitchWrap, 'PITCH');
+    this.pitchWheel = new PitchWheel({ onChange: (value) => {
+      this.pitchBend = value;
+      this.live?.setPitchBend(value * 200);
+    } });
+    pitchWrap.append(this.pitchWheel.el);
+    const modWrap = el('div', 'omni-wheel-control', wheelBank);
+    el('span', 'omni-wheel-control__title', modWrap, 'MOD');
+    this.modWheel = new ModWheel({ onChange: (value) => {
+      this.modWheelValue = value;
+      this.live?.setModWheel(value);
+    } });
+    modWrap.append(this.modWheel.el);
+    registerMidiTarget(this.pitchWheel.el, {
+      id: 'omni::pitch-bend', label: 'PITCH BEND', group: 'PERFORMANCE',
+      get: () => (this.pitchWheel.value + 1) / 2,
+      set: (value) => this.pitchWheel.setExternalValue(value * 2 - 1),
+    });
+    registerMidiTarget(this.modWheel.el, {
+      id: 'omni::mod-wheel', label: 'MOD WHEEL', group: 'PERFORMANCE',
+      get: () => this.modWheel.value,
+      set: (value) => this.modWheel.setExternalValue(value),
+    });
+
+    const keyboardGroup = el('div', 'omni-key-group', perfDeck);
+    const keyboardMeta = el('div', 'omni-key-group__head', keyboardGroup);
+    el('span', 'omni-key-group__title', keyboardMeta, 'BUILT-IN KEYBOARD');
+    el('span', 'omni-key-group__hint', keyboardMeta, 'C2 – C5');
+    const kbWrap = el('div', 'omni-keys', keyboardGroup);
+    this.keyboard = new Keyboard({
+      startOctave: 2,
+      octaves: 3,
+      onNoteOn: (note, velocity) => {
+        const midi = noteToMidi(note) + this.octaveShift * 12;
+        this.keyboardPointerNotes.set(note, midi);
+        this.noteOn(midi, velocity, 1, note);
+      },
+      onNoteOff: (note) => {
+        const midi = this.keyboardPointerNotes.get(note) ?? (noteToMidi(note) + this.octaveShift * 12);
+        this.keyboardPointerNotes.delete(note);
+        this.noteOff(midi, 1, note);
+      },
+    });
+    kbWrap.appendChild(this.keyboard.el);
+
+    const octavePanel = el('div', 'omni-octave', perfDeck);
+    el('span', 'omni-octave__title', octavePanel, 'KEYBOARD OCTAVE');
+    const octaveButtons = el('div', 'omni-octave__buttons', octavePanel);
+    this.octaveDownBtn = el('button', 'omni-octave__step', octaveButtons, '−');
+    this.octaveDownBtn.type = 'button';
+    this.octaveDownBtn.setAttribute('aria-label', 'Shift keyboard down one octave');
+    this.octaveDownBtn.addEventListener('click', () => this.setKeyboardOctave(this.octaveShift - 1));
+    this.octaveReadout = el('output', 'omni-octave__readout', octaveButtons, '0');
+    this.octaveUpBtn = el('button', 'omni-octave__step', octaveButtons, '+');
+    this.octaveUpBtn.type = 'button';
+    this.octaveUpBtn.setAttribute('aria-label', 'Shift keyboard up one octave');
+    this.octaveUpBtn.addEventListener('click', () => this.setKeyboardOctave(this.octaveShift + 1));
+    el('span', 'omni-octave__hint', octavePanel, '− / + keys');
+    this.setKeyboardOctave(0);
+    registerMidiTargetProvider(() => [{
+      id: 'omni::keyboard-octave', label: 'KEYBOARD OCTAVE', group: 'PERFORMANCE',
+      get: () => (this.octaveShift + 3) / 6,
+      set: (value) => this.setKeyboardOctave(Math.round(value * 6) - 3),
+    }]);
     // Every numeric module parameter is assignable, even when its module is not in the inspector.
     registerMidiTargetProvider(() => {
       const out = [];
@@ -177,10 +350,9 @@ class OmniApp {
     this.midiEl = el('span', 'omni-midi', perf, 'MIDI: searching…');
     const kbWrap = el('div', 'omni-keys', perf);
     this.keyboard = new Keyboard({ startOctave: 2, octaves: 3, onNoteOn: (n, v) => this.noteOn(noteToMidi(n), v), onNoteOff: (n) => this.noteOff(noteToMidi(n)) });
-    kbWrap.appendChild(this.keyboard.el);
-  }
+    kbWrap.appendChild(this.keyboard.el);  }
 
-  msg(text, error = false) { this.status.textContent = text; this.status.classList.toggle('is-error', error); }
+  msg((text, error = false) { this.status.textContent = text; this.status.classList.toggle('is-error', error); }
 
   filterModules() {
     const query = this.moduleSearch.value.trim().toLowerCase();
@@ -197,7 +369,7 @@ class OmniApp {
 
   toggleSnap() {
     this.snapEnabled = !this.snapEnabled;
-    this.snapBtn.textContent = this.snapEnabled ? 'SNAP: ON' : 'SNAP: OFF';
+    this.snapBtn.textContent = `Snap to grid: ${this.snapEnabled ? 'ON' : 'OFF'}`;
     this.msg(this.snapEnabled ? 'Module snapping enabled.' : 'Module snapping disabled.');
   }
 
@@ -424,13 +596,15 @@ class OmniApp {
       this.live?.teardown(); this.live = null;
       const oldContext = this.ctx; this.ctx = null; this.master = null;
       await oldContext.close();
-      this.powerBtn.textContent = 'POWER ON AUDIO'; this.powerBtn.classList.remove('lit'); this.msg('Audio off.'); return;
+      this.powerBtn.textContent = 'POWER ON'; this.powerBtn.classList.remove('lit'); this.msg('Audio off.'); return;
     }
     try {
       const AC = window.AudioContext || window.webkitAudioContext; this.ctx = new AC({ latencyHint: 'interactive' }); await this.ctx.resume();
       this.master = this.ctx.createGain(); this.master.gain.value = this.patch.global.master; this.master.connect(this.ctx.destination);
       this.live = new LiveGraph(this.ctx, this.master, { onNoteEvent: (event) => this._recordGraphNote(event) });
       await this.live.build(this.patch);
+      this.live.setPitchBend(this.pitchBend * 200);
+      this.live.setModWheel(this.modWheelValue);
       this.powerBtn.textContent = 'POWER OFF'; this.powerBtn.classList.add('lit'); this.msg('Audio running - play the keyboard or your MIDI controller.');
     } catch (err) { this.msg(`Audio could not start: ${err.message}`, true); }
   }
@@ -449,16 +623,16 @@ class OmniApp {
     else this.midiRecorder.noteOff(event.note, options);
   }
 
-  noteOn(midi, vel, channel = 1) {
-    this.keyboard.setKeyActive(midiNoteName(midi), true);
+  noteOn(midi, vel, channel = 1, visualNote = null) {
+    this.keyboard.setKeyActive(visualNote || midiNoteName(midi), true);
     this.live?.noteOn(midi, vel, channel);
   }
 
-  noteOff(midi, channel = 1) {
-    this.keyboard.setKeyActive(midiNoteName(midi), false);
+  noteOff(midi, channel = 1, visualNote = null) {
+    this.keyboard.setKeyActive(visualNote || midiNoteName(midi), false);
     this.live?.noteOff(midi, channel);
   }
-  allOff() { this.live?.allOff(); this.keyboard.el.querySelectorAll('.lp-key.active').forEach((k) => k.classList.remove('active')); }
+  allOff() { this.live?.allOff(); this.keyboardPointerNotes.clear(); this._stopModWheelRamp(); this.keyboard.el.querySelectorAll('.lp-key.active').forEach((k) => k.classList.remove('active')); }
 
   _bindMidi() {
     this.midi = new MidiManager({
@@ -466,7 +640,8 @@ class OmniApp {
       onNoteOff: (n, channel) => this.noteOff(n, channel),
       onAllNotesOff: () => this.allOff(), onAllSoundOff: () => this.allOff(),
       onControlChange: (controller, value, channel) => this.midiRecorder.controlChange(controller, value, { channel, time: this.ctx?.currentTime }),
-      onPitchBend: (_range, _normalized, channel, raw) => this.midiRecorder.pitchBend(raw, { channel, time: this.ctx?.currentTime }),
+      onPitchBend: (_range, normalized, channel, raw) => { this.pitchWheel.setExternalValue(normalized); this.midiRecorder.pitchBend(raw, { channel, time: this.ctx?.currentTime }); },
+      onModWheel: (value) => this.modWheel.setExternalValue(value),
       onAftertouch: (value, channel) => this.midiRecorder.aftertouch(Math.round(value * 127), { channel, time: this.ctx?.currentTime }),
       onPolyAftertouch: (note, value, channel) => this.midiRecorder.polyAftertouch(note, Math.round(value * 127), { channel, time: this.ctx?.currentTime }),
       onProgramChange: (program, channel) => this.midiRecorder.programChange(program, { channel, time: this.ctx?.currentTime }),
@@ -475,10 +650,39 @@ class OmniApp {
     this.midi.init().then((ok) => { if (!ok) this.midiEl.textContent = this.midi.supported ? 'MIDI: permission not granted' : 'MIDI: not supported'; else if (!this.midi.isConnected) this.midiEl.textContent = 'MIDI: no device'; });
   }
 
+  setKeyboardOctave(value) {
+    this.octaveShift = Math.max(-3, Math.min(3, Math.round(Number(value) || 0)));
+    if (this.octaveReadout) this.octaveReadout.textContent = this.octaveShift > 0 ? `+${this.octaveShift}` : String(this.octaveShift);
+    if (this.octaveDownBtn) this.octaveDownBtn.disabled = this.octaveShift <= -3;
+    if (this.octaveUpBtn) this.octaveUpBtn.disabled = this.octaveShift >= 3;
+    if (this.octaveReadout) this.octaveReadout.title = `Keyboard octave shift: ${this.octaveShift > 0 ? '+' : ''}${this.octaveShift}`;
+  }
+
+  _startModWheelRamp(direction) {
+    this._modKeyDirection = direction;
+    if (this._modRampRAF) return;
+    let previous = performance.now();
+    const step = (now) => {
+      if (!this._modKeyDirection) { this._modRampRAF = null; return; }
+      const elapsed = Math.min(0.05, Math.max(0, (now - previous) / 1000));
+      previous = now;
+      this.modWheel.setExternalValue(this.modWheel.value + this._modKeyDirection * elapsed * 1.4);
+      this._modRampRAF = requestAnimationFrame(step);
+    };
+    this._modRampRAF = requestAnimationFrame(step);
+  }
+
+  _stopModWheelRamp() {
+    this._modKeyDirection = 0;
+    if (this._modRampRAF) cancelAnimationFrame(this._modRampRAF);
+    this._modRampRAF = null;
+  }
+
   _bindKeys() {
     const held = new Map();
+    const isTyping = (target) => ['INPUT', 'TEXTAREA', 'SELECT'].includes(target?.tagName) || target?.isContentEditable;
     window.addEventListener('keydown', (e) => {
-      const typing = ['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target?.tagName) || e.target?.isContentEditable;
+      const typing = isTyping(e.target);
       if ((e.ctrlKey || e.metaKey) && !typing) {
         const key = e.key.toLowerCase();
         if (key === 'z') { e.preventDefault(); if (e.shiftKey) this.redo(); else this.undo(); return; }
@@ -487,26 +691,54 @@ class OmniApp {
         if (key === 'v' && this.clipboard) { e.preventDefault(); this.pasteSelection(); return; }
         if (key === 'd' && (this.selectedModules.size || this.selected)) { e.preventDefault(); this.duplicateSelection(); return; }
       }
-      if (typing || e.ctrlKey || e.metaKey) return;
+      if (typing || e.ctrlKey || e.metaKey || e.altKey) return;
+      if (e.key === 'Tab' && !e.repeat) { e.preventDefault(); this.pitchWheel.setExternalValue(1); return; }
+      if (e.key === 'Shift' && e.location === KeyboardEvent.DOM_KEY_LOCATION_LEFT && !e.repeat) {
+        e.preventDefault(); this.pitchWheel.setExternalValue(-1); return;
+      }
+      if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (!e.repeat) this._startModWheelRamp(e.key === 'ArrowUp' ? 1 : -1);
+        return;
+      }
+      if (e.repeat) return;
+      if (e.key === '-' || e.key === '_') { this.setKeyboardOctave(this.octaveShift - 1); return; }
+      if (e.key === '=' || e.key === '+') { this.setKeyboardOctave(this.octaveShift + 1); return; }
+      if (e.target?.closest?.('button, a, summary, select, [role="menuitem"]')) return;
       if (e.key === 'Delete' || e.key === 'Backspace') {
         if (this.selectedWire) this.removeConnection(this.selectedWire);
         else if (this.selectedModules.size || this.selected) this.deleteSelection();
         return;
       }
       if (e.key === 'Escape') { this.pending = null; this.renderWires(); this.allOff(); return; }
-      if (e.repeat) return;
       const semi = KEY_TO_SEMI[e.key.toLowerCase()];
-      if (semi === undefined || held.has(e.key)) return;
-      const midi = 48 + semi; held.set(e.key, midi); this.noteOn(midi, 0.8);
+      if (semi === undefined || held.has(e.code || e.key)) return;
+      const baseNote = 48 + semi;
+      const midi = baseNote + this.octaveShift * 12;
+      const visualNote = midiNoteName(baseNote);
+      held.set(e.code || e.key, { midi, visualNote });
+      this.noteOn(midi, 0.8, 1, visualNote);
     });
     window.addEventListener('keyup', (e) => {
-      const midi = held.get(e.key);
-      if (midi === undefined) return;
-      held.delete(e.key); this.noteOff(midi);
+      const key = e.code || e.key;
+      const heldNote = held.get(key);
+      if (heldNote) {
+        held.delete(key);
+        this.noteOff(heldNote.midi, 1, heldNote.visualNote);
+      }
+      if (e.key === 'Tab' || (e.key === 'Shift' && e.location === KeyboardEvent.DOM_KEY_LOCATION_LEFT)) {
+        this.pitchWheel.springReturnToCenter();
+      }
+      if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+        if ((e.key === 'ArrowUp' && this._modKeyDirection === 1) || (e.key === 'ArrowDown' && this._modKeyDirection === -1)) this._stopModWheelRamp();
+      }
     });
     window.addEventListener('blur', () => {
-      held.forEach((midi) => this.noteOff(midi));
+      held.forEach(({ midi, visualNote }) => this.noteOff(midi, 1, visualNote));
       held.clear();
+      this.pitchWheel.springReturnToCenter();
+      this._stopModWheelRamp();
+      this.allOff();
     });
   }
 
@@ -777,13 +1009,14 @@ class OmniApp {
   renderWires(temp = null) {
     this.wires.replaceChildren();
     const byId = Object.fromEntries(this.patch.modules.map((m) => [m.id, m]));
-    const draw = (a, b, color, id) => {
+    const draw = (a, b, color, id, type = '') => {
       const path = document.createElementNS(NS, 'path'); const dx = Math.max(40, Math.abs(b.x - a.x) * 0.5);
       path.setAttribute('d', `M${a.x} ${a.y} C ${a.x + dx} ${a.y}, ${b.x - dx} ${b.y}, ${b.x} ${b.y}`); path.setAttribute('stroke', color); path.classList.add('omni-wire');
+      if (type) path.classList.add(`omni-wire--${type}`);
       if (id) { path.dataset.id = id; if (id === this.selectedWire) path.classList.add('is-selected'); } else path.classList.add('is-temp');
       this.wires.appendChild(path);
     };
-    this.patch.connections.forEach((c) => { const a = this.portPos(c.from, 'out'); const b = this.portPos(c.to, 'in'); if (!a || !b) return; const type = MODULES[byId[c.from.module].type].outputs.find((p) => p.id === c.from.port)?.type; draw(a, b, SIGNAL_COLORS[type], c.id); });
+    this.patch.connections.forEach((c) => { const a = this.portPos(c.from, 'out'); const b = this.portPos(c.to, 'in'); if (!a || !b) return; const type = MODULES[byId[c.from.module].type].outputs.find((p) => p.id === c.from.port)?.type; draw(a, b, SIGNAL_COLORS[type], c.id, type); });
     if (temp) { const a = this.portPos(temp.from, 'out'); if (a) draw(a, temp.to, '#fff', null); }
   }
   renderInspector() {
@@ -846,13 +1079,40 @@ class OmniApp {
     const close = el('button', '', card, 'CLOSE'); close.type = 'button'; close.addEventListener('click', () => o.remove());
     o.addEventListener('click', (e) => { if (e.target === o) o.remove(); });
   }
+  showShortcuts() {
+    const overlay = el('div', 'omni-guide', document.body);
+    const card = el('div', 'omni-guide-card omni-shortcuts', overlay);
+    el('h2', '', card, 'Keyboard shortcuts');
+    const rows = [
+      ['Play notes', 'A–; and W/E/T/Y/U/O/P note keys'],
+      ['Pitch bend up / down', 'Tab / Left Shift (release to centre)'],
+      ['Mod wheel', 'Hold Arrow Up / Arrow Down'],
+      ['Keyboard octave', '− / +'],
+      ['Undo / Redo', 'Ctrl/⌘ Z / Ctrl/⌘ Shift Z'],
+      ['Select all / Copy / Paste', 'Ctrl/⌘ A / C / V'],
+      ['Duplicate / Delete', 'Ctrl/⌘ D / Delete'],
+      ['Canvas', 'Drag to pan · Scroll to zoom · Fit in View menu'],
+    ];
+    const list = el('dl', 'omni-shortcuts__list', card);
+    rows.forEach(([label, value]) => {
+      el('dt', '', list, label);
+      el('dd', '', list, value);
+    });
+    const close = el('button', 'omni-shortcuts__close', card, 'CLOSE');
+    close.type = 'button';
+    close.addEventListener('click', () => overlay.remove());
+    overlay.addEventListener('click', (event) => { if (event.target === overlay) overlay.remove(); });
+    overlay.addEventListener('keydown', (event) => { if (event.key === 'Escape') overlay.remove(); });
+    close.focus();
+  }
+
   guide() {
     const o = el('div', 'omni-guide', document.body);
     o.innerHTML = `<div class="omni-guide-card"><h2>OMNI guide</h2>
 <p><b>Build:</b> click a module in the library (or drag it onto the canvas). Drag a module by its header. Scroll to zoom, drag empty space to pan.</p>
 <p><b>Connect:</b> drag from an output port (right edge) to an input port (left edge), or click an output then a highlighted input. Colours: <span style="color:#ff9f0a">audio</span>, <span style="color:#7de4ff">control voltage</span>, <span style="color:#82e6a8">note/gate events</span>. Audio feeds audio inputs; CV feeds modulation inputs (filter cutoff, VCA gain, oscillator pitch mod); note ports carry key presses from the keyboard, sequencer, clock, arpeggiator or rhythm generators to oscillators, drums, envelopes and the FM voice. Note utilities (Chord, Transpose, Echo) sit between a note source and its destination.</p>
 <p><b>Edit:</b> select a module to change its parameters. Shift-click modules or Shift-drag on empty canvas to select a group; drag any selected header to move the group. Ctrl/Cmd+A selects all; Ctrl/Cmd+C/V copies and pastes; Ctrl/Cmd+D duplicates; Delete removes the selection. SNAP aligns modules to the grid and FIT VIEW frames the whole patch. Ctrl/Cmd+Z and Ctrl/Cmd+Shift+Z undo and redo.</p>
-<p><b>Play:</b> press POWER ON AUDIO, then play the on-screen keys, your computer keys (A–') or a MIDI controller. Notes are monophonic per keyboard module (last note wins).</p>
+<p><b>Play:</b> press POWER ON, then play the on-screen keys, your computer keys (A–') or a MIDI controller. Notes are monophonic per keyboard module (last note wins).</p>
 <p><b>Record:</b> AUDIO REC captures the live master output after you power on audio and downloads a browser-supported audio file. MIDI REC records notes played on the on-screen/computer keyboard or an incoming MIDI controller, then exports a standard MIDI file at 120 BPM. It records note events, not sequencer-generated notes or controller automation.</p>
 <p><b>Keep:</b> SAVE stores the instrument in this browser; EXPORT/IMPORT JSON moves it between browsers; LIBRARY export backs up all saved patches; EXPORT SVG produces a schematic drawing. Structural changes rebuild the audio graph (a brief gap in sound is expected); parameter changes are live.</p>
 <button type="button">CLOSE</button></div>`;
