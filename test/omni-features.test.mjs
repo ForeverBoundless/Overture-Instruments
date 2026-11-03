@@ -21,16 +21,16 @@ test('OMNI chord interval sliders expose the complete ±32-semitone range', asyn
   assert.ok(source.includes("inp.setAttribute('aria-valuemax', String(p.max));"));
   assert.ok(source.includes("el('div', 'omni-param__bounds', row)"));
   assert.ok(css.includes('.omni-param__bounds'));
-  assert.ok(source.includes(`from './omni/modules.js?v=20261103-chord-sliders-32'`));
-  assert.ok(source.includes(`from './omni/graph.js?v=20261103-chord-sliders-32'`));
-  assert.ok((await readFile(new URL('../js/omni/graph.js', import.meta.url), 'utf8')).includes(`from './modules.js?v=20261103-chord-sliders-32'`));
-  assert.ok(worker.includes(`/js/omni/graph.js?v=20261103-chord-sliders-32`));
-  assert.ok(worker.includes(`/js/omni/modules.js?v=20261103-chord-sliders-32`));
+  assert.ok(source.includes(`from './omni/modules.js?v=20261103-chord-sliders-32b'`));
+  assert.ok(source.includes(`from './omni/graph.js?v=20261103-chord-sliders-32b'`));
+  assert.ok((await readFile(new URL('../js/omni/graph.js', import.meta.url), 'utf8')).includes(`from './modules.js?v=20261103-chord-sliders-32b'`));
+  assert.ok(worker.includes(`/js/omni/graph.js?v=20261103-chord-sliders-32b`));
+  assert.ok(worker.includes(`/js/omni/modules.js?v=20261103-chord-sliders-32b`));
   assert.ok(page.includes('omni.css?v=20261103-chord-sliders-32'));
-  assert.ok(page.includes('omni.js?v=20261103-chord-sliders-32'));
-  assert.ok(worker.includes("const CACHE = 'overture-shell-v20';"));
+  assert.ok(page.includes('omni.js?v=20261103-chord-sliders-32b'));
+  assert.ok(worker.includes("const CACHE = 'overture-shell-v21';"));
   assert.ok(worker.includes('/css/omni.css?v=20261103-chord-sliders-32'));
-  assert.ok(worker.includes('/js/omni.js?v=20261103-chord-sliders-32'));
+  assert.ok(worker.includes('/js/omni.js?v=20261103-chord-sliders-32b'));
 });
 
 test('OMNI exposes recording, searchable modules and editing shortcuts', async () => {
@@ -103,7 +103,7 @@ test('OMNI performance deck keeps octave controls in the keyboard header and giv
   assert.match(css, /\.omni-keys \.lp-keyboard[^}]*min-width:520px/);
   assert.match(page, /omni\.css\?v=20261103-chord-sliders-32/);
   assert.match(page, /omni\.js\?v=20261103-chord-sliders-32/);
-  assert.match(worker, /overture-shell-v20/);
+  assert.match(worker, /overture-shell-v21/);
   assert.match(worker, /omni\.css\?v=20261103-chord-sliders-32/);
   assert.match(worker, /omni\.js\?v=20261103-chord-sliders-32/);
 });
@@ -121,7 +121,7 @@ test('OMNI keyboard spans four octaves and status text avoids the centered theme
   assert.match(css, /\.omni-commandbar > \.omni-status[\s\S]*text-align:right/);
   assert.match(source, /commandbar\.appendChild\(this\.status\)/);
   assert.match(page, /omni\.js\?v=20261103-chord-sliders-32/);
-  assert.match(worker, /overture-shell-v20/);
+  assert.match(worker, /overture-shell-v21/);
 });
 
 test('community publish login link honours Supabase hidden state in every responsive layout', async () => {
@@ -161,7 +161,7 @@ test('OMNI wordmark is black in light mode and hero accent tracking inherits the
   assert.match(theme, /html\[data-theme="light"\] \.omni-logo-wording strong[\s\S]*color:#111820 !important/);
   assert.match(theme, /letter-spacing: inherit !important/);
   assert.match(page, /site-theme-polish\.css\?v=20261103-accent-spacing/);
-  assert.match(worker, /overture-shell-v20/);
+  assert.match(worker, /overture-shell-v21/);
 });
 
 
@@ -179,7 +179,7 @@ test('OMNI wordmark explicitly uses Inter Variable', async () => {
   const worker = await readFile(new URL('../service-worker.js', import.meta.url), 'utf8');
   assert.match(css, /\.omni-logo-wording strong\s*\{[^}]*font-family:\s*'Inter Variable'/s);
   assert.match(page, /omni\.css\?v=20261103-chord-sliders-32/);
-  assert.match(worker, /overture-shell-v20/);
+  assert.match(worker, /overture-shell-v21/);
 });
 
 
@@ -196,7 +196,7 @@ test('OMNI performance pane can be shown/hidden from View and remembers its stat
   assert.match(source, /this\.performanceToggleBtn\.setAttribute\('aria-pressed'/);
   assert.match(css, /#omni-root > \.omni-perf\[hidden\]\s*\{\s*display:none !important/);
   assert.match(page, /omni\.js\?v=20261103-chord-sliders-32/);
-  assert.match(worker, /overture-shell-v20/);
+  assert.match(worker, /overture-shell-v21/);
 });
 
 test('OMNI renders voice-dependent ports, prunes removed wires, and applies MIDI voice-count changes', async () => {
@@ -232,5 +232,5 @@ test('OMNI mixer exposes dynamic 2–8 inputs and MIDI controls follow the activ
   assert.match(source, /m\.type === 'mixer' && key === 'channels'/);
   assert.match(source, /this\.syncModulePorts\(m\.id\)/);
   assert.match(modules, /Math\.sqrt\(4 \/ channels\)/);
-  assert.match(worker, /overture-shell-v20/);
+  assert.match(worker, /overture-shell-v21/);
 });
