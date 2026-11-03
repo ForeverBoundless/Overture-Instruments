@@ -73,10 +73,10 @@ test('OMNI performance deck keeps octave controls in the keyboard header and giv
   assert.match(css, /\.omni-keys \.lp-keyboard[^}]*width:100%/);
   assert.match(css, /\.omni-keys \.lp-keyboard[^}]*min-width:520px/);
   assert.match(page, /omni\.css\?v=20261103-status-layout/);
-  assert.match(page, /omni\.js\?v=20261103-status-layout/);
+  assert.match(page, /omni\.js\?v=20261103-four-octaves/);
   assert.match(worker, /overture-shell-v15/);
   assert.match(worker, /omni\.css\?v=20261103-status-layout/);
-  assert.match(worker, /omni\.js\?v=20261103-status-layout/);
+  assert.match(worker, /omni\.js\?v=20261103-four-octaves/);
 });
 
 
