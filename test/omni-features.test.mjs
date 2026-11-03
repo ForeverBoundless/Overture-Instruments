@@ -74,7 +74,7 @@ test('OMNI performance deck keeps octave controls in the keyboard header and giv
   assert.match(css, /\.omni-keys \.lp-keyboard[^}]*min-width:520px/);
   assert.match(page, /omni\.css\?v=20261103-command-status/);
   assert.match(page, /omni\.js\?v=20261103-four-octaves/);
-  assert.match(worker, /overture-shell-v16/);
+  assert.match(worker, /overture-shell-v17/);
   assert.match(worker, /omni\.css\?v=20261103-command-status/);
   assert.match(worker, /omni\.js\?v=20261103-four-octaves/);
 });
@@ -92,7 +92,7 @@ test('OMNI keyboard spans four octaves and status text avoids the centered theme
   assert.match(css, /\.omni-commandbar > \.omni-status[\s\S]*text-align:right/);
   assert.match(source, /commandbar\.appendChild\(this\.status\)/);
   assert.match(page, /omni\.js\?v=20261103-four-octaves/);
-  assert.match(worker, /overture-shell-v16/);
+  assert.match(worker, /overture-shell-v17/);
 });
 
 test('community publish login link honours Supabase hidden state in every responsive layout', async () => {
@@ -132,7 +132,7 @@ test('OMNI wordmark is black in light mode and hero accent tracking inherits the
   assert.match(theme, /html\[data-theme="light"\] \.omni-logo-wording strong[\s\S]*color:#111820 !important/);
   assert.match(theme, /letter-spacing: inherit !important/);
   assert.match(page, /site-theme-polish\.css\?v=20261103-accent-spacing/);
-  assert.match(worker, /overture-shell-v16/);
+  assert.match(worker, /overture-shell-v17/);
 });
 
 
