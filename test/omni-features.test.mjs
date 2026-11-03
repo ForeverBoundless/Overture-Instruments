@@ -72,11 +72,11 @@ test('OMNI performance deck keeps octave controls in the keyboard header and giv
   assert.match(css, /grid-template-columns:88px minmax\(0,1fr\)/);
   assert.match(css, /\.omni-keys \.lp-keyboard[^}]*width:100%/);
   assert.match(css, /\.omni-keys \.lp-keyboard[^}]*min-width:520px/);
-  assert.match(page, /omni\.css\?v=20261103-performance-chords/);
-  assert.match(page, /omni\.js\?v=20261103-mixer-eight/);
-  assert.match(worker, /overture-shell-v19/);
-  assert.match(worker, /omni\.css\?v=20261103-performance-chords/);
-  assert.match(worker, /omni\.js\?v=20261103-mixer-eight/);
+  assert.match(page, /omni\.css\?v=20261103-chord-sliders-32/);
+  assert.match(page, /omni\.js\?v=20261103-chord-sliders-32/);
+  assert.match(worker, /overture-shell-v20/);
+  assert.match(worker, /omni\.css\?v=20261103-chord-sliders-32/);
+  assert.match(worker, /omni\.js\?v=20261103-chord-sliders-32/);
 });
 
 
@@ -91,8 +91,8 @@ test('OMNI keyboard spans four octaves and status text avoids the centered theme
   assert.match(source, /C2 – C6/);
   assert.match(css, /\.omni-commandbar > \.omni-status[\s\S]*text-align:right/);
   assert.match(source, /commandbar\.appendChild\(this\.status\)/);
-  assert.match(page, /omni\.js\?v=20261103-mixer-eight/);
-  assert.match(worker, /overture-shell-v19/);
+  assert.match(page, /omni\.js\?v=20261103-chord-sliders-32/);
+  assert.match(worker, /overture-shell-v20/);
 });
 
 test('community publish login link honours Supabase hidden state in every responsive layout', async () => {
@@ -132,7 +132,7 @@ test('OMNI wordmark is black in light mode and hero accent tracking inherits the
   assert.match(theme, /html\[data-theme="light"\] \.omni-logo-wording strong[\s\S]*color:#111820 !important/);
   assert.match(theme, /letter-spacing: inherit !important/);
   assert.match(page, /site-theme-polish\.css\?v=20261103-accent-spacing/);
-  assert.match(worker, /overture-shell-v19/);
+  assert.match(worker, /overture-shell-v20/);
 });
 
 
@@ -149,8 +149,8 @@ test('OMNI wordmark explicitly uses Inter Variable', async () => {
   const page = await readFile(new URL('../omni.html', import.meta.url), 'utf8');
   const worker = await readFile(new URL('../service-worker.js', import.meta.url), 'utf8');
   assert.match(css, /\.omni-logo-wording strong\s*\{[^}]*font-family:\s*'Inter Variable'/s);
-  assert.match(page, /omni\.css\?v=20261103-performance-chords/);
-  assert.match(worker, /overture-shell-v19/);
+  assert.match(page, /omni\.css\?v=20261103-chord-sliders-32/);
+  assert.match(worker, /overture-shell-v20/);
 });
 
 
@@ -166,8 +166,8 @@ test('OMNI performance pane can be shown/hidden from View and remembers its stat
   assert.match(source, /localStorage\.setItem\('overture\.omni\.performance-visible'/);
   assert.match(source, /this\.performanceToggleBtn\.setAttribute\('aria-pressed'/);
   assert.match(css, /#omni-root > \.omni-perf\[hidden\]\s*\{\s*display:none !important/);
-  assert.match(page, /omni\.js\?v=20261103-mixer-eight/);
-  assert.match(worker, /overture-shell-v19/);
+  assert.match(page, /omni\.js\?v=20261103-chord-sliders-32/);
+  assert.match(worker, /overture-shell-v20/);
 });
 
 test('OMNI renders voice-dependent ports, prunes removed wires, and applies MIDI voice-count changes', async () => {
@@ -203,5 +203,5 @@ test('OMNI mixer exposes dynamic 2–8 inputs and MIDI controls follow the activ
   assert.match(source, /m\.type === 'mixer' && key === 'channels'/);
   assert.match(source, /this\.syncModulePorts\(m\.id\)/);
   assert.match(modules, /Math\.sqrt\(4 \/ channels\)/);
-  assert.match(worker, /overture-shell-v19/);
+  assert.match(worker, /overture-shell-v20/);
 });
