@@ -252,7 +252,7 @@ class OmniApp {
     el('span', 'omni-wheel-control__title', pitchWrap, 'PITCH');
     this.pitchWheel = new PitchWheel({ onChange: (value) => {
       this.pitchBend = value;
-      this.live?.setPitchBend(value * 200);
+      this.live?.setPitchBend(value * 2);
     } });
     pitchWrap.append(this.pitchWheel.el);
     const modWrap = el('div', 'omni-wheel-control', wheelBank);
@@ -603,7 +603,7 @@ class OmniApp {
       this.master = this.ctx.createGain(); this.master.gain.value = this.patch.global.master; this.master.connect(this.ctx.destination);
       this.live = new LiveGraph(this.ctx, this.master, { onNoteEvent: (event) => this._recordGraphNote(event) });
       await this.live.build(this.patch);
-      this.live.setPitchBend(this.pitchBend * 200);
+      this.live.setPitchBend(this.pitchBend * 2);
       this.live.setModWheel(this.modWheelValue);
       this.powerBtn.textContent = 'POWER OFF'; this.powerBtn.classList.add('lit'); this.msg('Audio running - play the keyboard or your MIDI controller.');
     } catch (err) { this.msg(`Audio could not start: ${err.message}`, true); }
