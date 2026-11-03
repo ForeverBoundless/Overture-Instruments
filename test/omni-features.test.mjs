@@ -73,10 +73,10 @@ test('OMNI performance deck keeps octave controls in the keyboard header and giv
   assert.match(css, /\.omni-keys \.lp-keyboard[^}]*width:100%/);
   assert.match(css, /\.omni-keys \.lp-keyboard[^}]*min-width:520px/);
   assert.match(page, /omni\.css\?v=20261103-performance-chords/);
-  assert.match(page, /omni\.js\?v=20261103-performance-chords/);
+  assert.match(page, /omni\.js\?v=20261103-mixer-eight/);
   assert.match(worker, /overture-shell-v19/);
   assert.match(worker, /omni\.css\?v=20261103-performance-chords/);
-  assert.match(worker, /omni\.js\?v=20261103-performance-chords/);
+  assert.match(worker, /omni\.js\?v=20261103-mixer-eight/);
 });
 
 
@@ -91,7 +91,7 @@ test('OMNI keyboard spans four octaves and status text avoids the centered theme
   assert.match(source, /C2 – C6/);
   assert.match(css, /\.omni-commandbar > \.omni-status[\s\S]*text-align:right/);
   assert.match(source, /commandbar\.appendChild\(this\.status\)/);
-  assert.match(page, /omni\.js\?v=20261103-performance-chords/);
+  assert.match(page, /omni\.js\?v=20261103-mixer-eight/);
   assert.match(worker, /overture-shell-v19/);
 });
 
@@ -166,7 +166,7 @@ test('OMNI performance pane can be shown/hidden from View and remembers its stat
   assert.match(source, /localStorage\.setItem\('overture\.omni\.performance-visible'/);
   assert.match(source, /this\.performanceToggleBtn\.setAttribute\('aria-pressed'/);
   assert.match(css, /#omni-root > \.omni-perf\[hidden\]\s*\{\s*display:none !important/);
-  assert.match(page, /omni\.js\?v=20261103-performance-chords/);
+  assert.match(page, /omni\.js\?v=20261103-mixer-eight/);
   assert.match(worker, /overture-shell-v19/);
 });
 
