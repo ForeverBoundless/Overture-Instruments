@@ -81,6 +81,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .omni-param input[type=range] { width: 100%; accent-color: var(--amber-bright); }
 .omni-param select { grid-column: 1 / -1; padding: 6px 8px; border: 1px solid var(--line); border-radius: 7px; color: #fff; background: rgba(255,255,255,.03); font-size: 11px; }
 .omni-param output { min-width: 40px; color: var(--cyan); font-family: var(--font-mono); font-size: 9px; text-align: right; }
+.omni-param__bounds { grid-column: 1 / -1; display: flex; justify-content: space-between; margin-top: -3px; color: var(--muted, #8995a6); font-family: var(--font-mono); font-size: 9px; line-height: 1; }
 .omni-insp-buttons { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
 
 /* Performance strip */
