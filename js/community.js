@@ -16,6 +16,7 @@ const state = {
   draftType: 'omni_patch',
   draftInstrument: null,
   items: [],
+  directItem: null,
   offset: 0,
   pageSize: 24,
   hasMore: false,
@@ -303,6 +304,7 @@ async function loadAuthorProfiles(items) {
 function renderCard(item) {
   const card = document.createElement('article');
   card.className = 'community-card';
+  card.dataset.communityItemId = String(item.id).toLowerCase();
   const isInstrument = item.record_type === 'instrument_preset';
   const instrumentName = INSTRUMENTS[item.instrument_id]?.name || 'Instrument preset';
   const top = addText(card, 'div', 'community-card__top', isInstrument ? instrumentName : 'OMNI PATCH');
@@ -370,6 +372,18 @@ function renderCard(item) {
   return card;
 }
 
+function renderCardOnce(item, { prepend = false } = {}) {
+  const grid = byId('community-grid');
+  const itemId = String(item.id).toLowerCase();
+  const existing = [...grid.children].find((card) => card.dataset.communityItemId === itemId);
+  if (existing) return existing;
+
+  const card = renderCard(item);
+  if (prepend) grid.prepend(card);
+  else grid.append(card);
+  return card;
+}
+
 async function loadPatches({ append = false } = {}) {
   if (!supabase) return;
   if (state.loading) {
@@ -406,12 +420,28 @@ async function loadPatches({ append = false } = {}) {
     const rows = data || [];
     const page = rows.slice(0, state.pageSize);
     await loadAuthorProfiles(page);
-    state.items = append ? [...state.items, ...page] : page;
+
+    // Keep pagination state unique by record ID, even if requests overlap.
+    const knownIds = new Set(append ? state.items.map((item) => String(item.id).toLowerCase()) : []);
+    const uniquePage = page.filter((item) => {
+      const id = String(item.id).toLowerCase();
+      if (knownIds.has(id)) return false;
+      knownIds.add(id);
+      return true;
+    });
+    state.items = append ? [...state.items, ...uniquePage] : uniquePage;
     state.offset += page.length;
     state.hasMore = rows.length > state.pageSize;
-    page.forEach((item) => grid.append(renderCard(item)));
-    byId('community-result-count').textContent = `${state.items.length}${state.hasMore ? '+' : ''} ITEMS`;
-    byId('community-empty').hidden = state.items.length !== 0;
+
+    // A direct-linked item stays visible across feed refreshes and pagination.
+    if (state.directItem) renderCardOnce(state.directItem, { prepend: true });
+    uniquePage.forEach((item) => renderCardOnce(item));
+
+    const directItemInFeed = state.directItem
+      && state.items.some((item) => String(item.id).toLowerCase() === String(state.directItem.id).toLowerCase());
+    const visibleCount = state.items.length + (state.directItem && !directItemInFeed ? 1 : 0);
+    byId('community-result-count').textContent = `${visibleCount}${state.hasMore ? '+' : ''} ITEMS`;
+    byId('community-empty').hidden = visibleCount !== 0;
     byId('community-load-more').hidden = !state.hasMore;
   } catch (error) {
     message('community-result-count', error.message || 'Could not load community items.', true);
@@ -655,9 +685,11 @@ async function initialise() {
 
   // Do not call auth methods inside this callback: Supabase serializes auth
   // state changes and recursive auth calls can deadlock its internal lock.
-  supabase.auth.onAuthStateChange((_event, session) => {
+  supabase.auth.onAuthStateChange((event, session) => {
     renderAccount(session);
-    if (!state.mine) setTimeout(() => loadPatches(), 0);
+    // INITIAL_SESSION is already covered by the first explicit feed load below.
+    // Refresh only for subsequent sign-in, sign-out or token-change events.
+    if (!state.mine && event !== 'INITIAL_SESSION') setTimeout(() => loadPatches(), 0);
   });
 
   await updateAccount();
@@ -667,7 +699,8 @@ async function initialise() {
   const requestedPatch = params.get('patch');
   const editRequested = params.get('edit') === '1';
   if (requestedPatch) {
-    let item = state.items.find((entry) => entry.id === requestedPatch);
+    const requestedId = String(requestedPatch).toLowerCase();
+    let item = state.items.find((entry) => String(entry.id).toLowerCase() === requestedId);
     if (!item) {
       const { data, error } = await supabase.rpc('get_community_patch_by_id', { p_patch_id: requestedPatch });
       item = Array.isArray(data) ? data[0] : data;
@@ -675,8 +708,11 @@ async function initialise() {
         message('community-result-count', error.message || 'The shared item could not be opened.', true);
       } else if (item) {
         await loadAuthorProfiles([item]);
-        byId('community-grid').prepend(renderCard(item));
       }
+    }
+    if (item) {
+      state.directItem = item;
+      renderCardOnce(item, { prepend: true });
     }
     if (item && editRequested) {
       if (state.user?.id && item.owner_id === state.user.id) beginEdit(item);
