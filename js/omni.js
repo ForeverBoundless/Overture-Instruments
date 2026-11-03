@@ -346,13 +346,9 @@ class OmniApp {
       });
       return out;
     });
-    const panic = el('button', 'omni-tb', perf, 'PANIC'); panic.type = 'button'; panic.addEventListener('click', () => this.allOff());
-    this.midiEl = el('span', 'omni-midi', perf, 'MIDI: searching…');
-    const kbWrap = el('div', 'omni-keys', perf);
-    this.keyboard = new Keyboard({ startOctave: 2, octaves: 3, onNoteOn: (n, v) => this.noteOn(noteToMidi(n), v), onNoteOff: (n) => this.noteOff(noteToMidi(n)) });
-    kbWrap.appendChild(this.keyboard.el);  }
+  }
 
-  msg((text, error = false) { this.status.textContent = text; this.status.classList.toggle('is-error', error); }
+  msg(text, error = false) { this.status.textContent = text; this.status.classList.toggle('is-error', error); }
 
   filterModules() {
     const query = this.moduleSearch.value.trim().toLowerCase();
