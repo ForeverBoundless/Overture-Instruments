@@ -57,3 +57,24 @@ test('OMNI studio menus and performance controls are wired to the live graph', a
   assert.match(css, /omni-perf__deck/);
   assert.match(css, /html\[data-theme="light"\] \.omni-perf/);
 });
+
+
+test('OMNI performance deck keeps octave controls in the keyboard header and gives the keybed usable width', async () => {
+  const [source, css, page, worker] = await Promise.all([
+    readFile(new URL('../js/omni.js', import.meta.url), 'utf8'),
+    readFile(new URL('../css/omni.css', import.meta.url), 'utf8'),
+    readFile(new URL('../omni.html', import.meta.url), 'utf8'),
+    readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
+  ]);
+  assert.ok(source.includes("const octavePanel = el('div', 'omni-octave', keyboardMeta)"));
+  assert.ok(source.includes("this.setInitialView();"));
+  assert.match(source, /const scale = 0\.66/);
+  assert.match(css, /grid-template-columns:88px minmax\(0,1fr\)/);
+  assert.match(css, /\.omni-keys \.lp-keyboard[^}]*width:100%/);
+  assert.match(css, /\.omni-keys \.lp-keyboard[^}]*min-width:520px/);
+  assert.match(page, /omni\.css\?v=20261103-studio-2/);
+  assert.match(page, /omni\.js\?v=20261103-studio-2/);
+  assert.match(worker, /overture-shell-v14/);
+  assert.match(worker, /omni\.css\?v=20261103-studio-2/);
+  assert.match(worker, /omni\.js\?v=20261103-studio-2/);
+});

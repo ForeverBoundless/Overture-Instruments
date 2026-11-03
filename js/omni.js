@@ -35,10 +35,10 @@ class OmniApp {
     this.ctx = null; this.live = null; this.selected = null; this.selectedWire = null; this.pending = null;
     this.selectedModules = new Set(); this.clipboard = null; this.snapEnabled = true;
     this.audioRecorder = null; this.midiRecorder = new MidiRecorder();
-    this.view = { x: 20, y: 20, scale: 1 }; this.history = []; this.future = []; this.rebuildTimer = null;
+    this.view = { x: 20, y: 20, scale: 0.66 }; this.history = []; this.future = []; this.rebuildTimer = null;
     this._build();
-    this.applyView();
     this.render();
+    this.setInitialView();
     this.pushHistory();
     if (this.msgOnLoad) this.msg(this.msgOnLoad);
     this._bindMidi();
@@ -275,8 +275,9 @@ class OmniApp {
 
     const keyboardGroup = el('div', 'omni-key-group', perfDeck);
     const keyboardMeta = el('div', 'omni-key-group__head', keyboardGroup);
-    el('span', 'omni-key-group__title', keyboardMeta, 'BUILT-IN KEYBOARD');
-    el('span', 'omni-key-group__hint', keyboardMeta, 'C2 – C5');
+    const keyboardIdentity = el('div', 'omni-key-group__identity', keyboardMeta);
+    el('span', 'omni-key-group__title', keyboardIdentity, 'BUILT-IN KEYBOARD');
+    el('span', 'omni-key-group__hint', keyboardIdentity, 'C2 – C5');
     const kbWrap = el('div', 'omni-keys', keyboardGroup);
     this.keyboard = new Keyboard({
       startOctave: 2,
@@ -294,8 +295,8 @@ class OmniApp {
     });
     kbWrap.appendChild(this.keyboard.el);
 
-    const octavePanel = el('div', 'omni-octave', perfDeck);
-    el('span', 'omni-octave__title', octavePanel, 'KEYBOARD OCTAVE');
+    const octavePanel = el('div', 'omni-octave', keyboardMeta);
+    el('span', 'omni-octave__title', octavePanel, 'OCTAVE');
     const octaveButtons = el('div', 'omni-octave__buttons', octavePanel);
     this.octaveDownBtn = el('button', 'omni-octave__step', octaveButtons, '−');
     this.octaveDownBtn.type = 'button';
@@ -306,7 +307,7 @@ class OmniApp {
     this.octaveUpBtn.type = 'button';
     this.octaveUpBtn.setAttribute('aria-label', 'Shift keyboard up one octave');
     this.octaveUpBtn.addEventListener('click', () => this.setKeyboardOctave(this.octaveShift + 1));
-    el('span', 'omni-octave__hint', octavePanel, '− / + keys');
+    el('span', 'omni-octave__hint', octavePanel, '− / +');
     this.setKeyboardOctave(0);
     registerMidiTargetProvider(() => [{
       id: 'omni::keyboard-octave', label: 'KEYBOARD OCTAVE', group: 'PERFORMANCE',
@@ -371,6 +372,32 @@ class OmniApp {
 
   snapCoordinate(value) {
     return this.snapEnabled ? Math.round(value / 28) * 28 : value;
+  }
+
+  setInitialView() {
+    const modules = [...this.cards.querySelectorAll('.omni-module')];
+    if (!modules.length) {
+      this.view = { x: 20, y: 20, scale: 0.66 };
+      this.applyView();
+      return;
+    }
+    const bounds = modules.map((card) => ({
+      x: Number.parseFloat(card.style.left) || 0,
+      y: Number.parseFloat(card.style.top) || 0,
+      width: card.offsetWidth || 210,
+      height: card.offsetHeight || 110,
+    }));
+    const minX = Math.min(...bounds.map((item) => item.x));
+    const minY = Math.min(...bounds.map((item) => item.y));
+    const maxX = Math.max(...bounds.map((item) => item.x + item.width));
+    const maxY = Math.max(...bounds.map((item) => item.y + item.height));
+    const scale = 0.66;
+    this.view = {
+      scale,
+      x: (this.canvas.clientWidth - (maxX - minX) * scale) / 2 - minX * scale,
+      y: (this.canvas.clientHeight - (maxY - minY) * scale) / 2 - minY * scale,
+    };
+    this.applyView();
   }
 
   fitView() {
@@ -744,7 +771,7 @@ class OmniApp {
   undo() { if (this.history.length <= 1) return; this.future.push(this.history.pop()); this.patch = JSON.parse(this.history[this.history.length - 1]); this.afterLoad(); }
   redo() { if (!this.future.length) return; const s = this.future.pop(); this.history.push(s); this.patch = JSON.parse(s); this.afterLoad(); }
   afterLoad() { this.selected = null; this.selectedModules.clear(); this.selectedWire = null; this.nameInput.value = this.patch.name; this.masterInput.value = this.patch.global.master; this.render(); this.scheduleRebuild(); this.refreshHistoryButtons(); }
-  load(patch, id = null) { try { this.patch = validatePatch(patch); this.currentId = id; this.afterLoad(); this.pushHistory(); } catch (err) { this.msg(err.message, true); } }
+  load(patch, id = null) { try { this.patch = validatePatch(patch); this.currentId = id; this.afterLoad(); this.setInitialView(); this.pushHistory(); } catch (err) { this.msg(err.message, true); } }
   save() { const existing = this.currentId ? this.store.get(this.currentId) : null; const name = prompt('Instrument name', existing?.name || this.patch.name); if (name === null) return; this.patch.name = name.slice(0, 60) || 'Untitled'; this.nameInput.value = this.patch.name; const it = this.store.save(this.patch.name, this.patch, existing?.id); this.currentId = it.id; this.refreshLoadList(); this.msg(`Saved "${it.name}".`); }
 
   addModule(type, x, y) {
@@ -1070,7 +1097,7 @@ class OmniApp {
       const b = el('button', 'omni-tpl', grid); b.type = 'button';
       el('div', 'omni-tpl-prev', b).innerHTML = templatePreview(t.patch);
       el('strong', '', b, t.name); el('span', '', b, t.desc);
-      b.addEventListener('click', () => { this.load(JSON.parse(JSON.stringify(t.patch))); this.view = { x: 20, y: 20, scale: 1 }; this.applyView(); o.remove(); this.msg(`Loaded template "${t.name}".`); });
+      b.addEventListener('click', () => { this.load(JSON.parse(JSON.stringify(t.patch))); this.setInitialView(); o.remove(); this.msg(`Loaded template "${t.name}".`); });
     });
     const close = el('button', '', card, 'CLOSE'); close.type = 'button'; close.addEventListener('click', () => o.remove());
     o.addEventListener('click', (e) => { if (e.target === o) o.remove(); });
