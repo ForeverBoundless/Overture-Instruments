@@ -1118,8 +1118,19 @@ class OmniApp {
         s.addEventListener('change', () => { this.setParam(m.id, p.key, Number(s.value), true); this.renderCards(); this.renderWires(); });
       } else {
         const inp = el('input', '', row); inp.type = 'range'; const log = !!p.log; inp.min = log ? Math.log(p.min) : p.min; inp.max = log ? Math.log(p.max) : p.max; inp.step = p.step ?? (log ? 0.001 : (p.max - p.min) / 400);
+        const chordInterval = m.type === 'chord' && /^v[2-8]$/.test(p.key);
+        if (chordInterval) {
+          inp.setAttribute('aria-label', `${p.label}, from ${p.min} to +${p.max} semitones`);
+          inp.setAttribute('aria-valuemin', String(p.min));
+          inp.setAttribute('aria-valuemax', String(p.max));
+        }
         inp.value = log ? Math.log(m.params[p.key]) : m.params[p.key];
         const out = el('output', '', row, (+m.params[p.key]).toFixed(p.step === 1 ? 0 : 2));
+        if (chordInterval) {
+          const bounds = el('div', 'omni-param__bounds', row);
+          el('span', '', bounds, `${p.min} st`);
+          el('span', '', bounds, `+${p.max} st`);
+        }
         const val = () => (log ? Math.exp(Number(inp.value)) : Number(inp.value));
         inp.addEventListener('input', () => { this.setParam(m.id, p.key, val(), false); out.textContent = val().toFixed(p.step === 1 ? 0 : 2); });
         inp.addEventListener('change', () => { this.setParam(m.id, p.key, val(), true); this.renderCards(); this.renderWires(); });
