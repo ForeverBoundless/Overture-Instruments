@@ -1,4 +1,4 @@
-/* M400-style finite tape replay model.
+/* M400-style finite tape replay model. Each note strip runs for 8 seconds.
  * This is a procedural approximation, not a recording library. Authentic
  * Streetly tape recordings require licensed source audio and are not fabricated.
  */
