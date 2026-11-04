@@ -136,3 +136,47 @@
   .m400-shell .pn-display { min-width: 0; flex: 1 1 180px; }
   .m400-mark { min-width: 120px; font-size: 14px; }
 }
+
+/* Keep the complete instrument centred at every viewport width. The original
+   four-column minimums could force the top row wider than its shell. */
+.m400-page {
+  width: 100%;
+  min-width: 0;
+  padding: clamp(6px,1.2vw,16px);
+  justify-items: center;
+}
+.m400-shell {
+  width: min(100%, 1420px);
+  max-width: 1420px;
+  min-width: 0;
+  margin-inline: auto;
+}
+.m400-shell .pn-header,
+.m400-shell .pn-rows,
+.m400-shell .pn-row,
+.m400-shell .pn-keybed { min-width: 0; }
+.m400-top {
+  grid-template-columns: repeat(4,minmax(0,1fr));
+  align-items: stretch;
+}
+.m400-top > * { min-width: 0; }
+.m400-shell .pn-keybed {
+  width: 100%;
+  grid-template-columns: minmax(0,1fr);
+  padding: 12px;
+  margin-inline: auto;
+}
+.m400-shell .pn-keybed .lp-keyboard {
+  width: 100%;
+  height: clamp(104px,13vw,154px);
+  min-height: 104px;
+}
+@media (max-width: 1120px) {
+  .m400-top { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+@media (max-width: 650px) {
+  .m400-page { padding: 6px; }
+  .m400-top { grid-template-columns: minmax(0,1fr); }
+  .m400-shell { padding: 8px; }
+  .m400-shell .pn-keybed { padding: 7px; }
+}
