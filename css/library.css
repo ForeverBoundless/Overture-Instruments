@@ -3428,7 +3428,7 @@ body {
 .instrument-tile--roland-tr-808 .instrument-tile__glow { background: radial-gradient(ellipse at 70% 72%, rgba(255,159,10,.5), transparent 40%); filter: blur(7px); opacity: .75; }
 .instrument-tile--roland-tr-808 .instrument-tile__display { border: 3px solid #4d5057; background: linear-gradient(180deg, #2a0a06, #110403); box-shadow: inset 0 0 14px #000, inset 0 0 0 1px rgba(255,106,61,.18), 0 2px 6px rgba(0,0,0,.6); }
 .instrument-tile--roland-tr-808 .instrument-tile__display span { background: #ff6a3d; box-shadow: 0 0 6px rgba(255,106,61,.95), 0 0 13px rgba(255,106,61,.35); }
-.instrument-tile--roland-tr-808 .instrument-tile__keys { width: 160px; height: 40px; right: -8px; bottom: 28px; border: 0; box-shadow: none; transform: rotate(-12deg); background:
+.instrument-tile--roland-tr-808 .instrument-tile__keys { width: 145px; height: 47px; right: -12px; bottom: 22px; border: 0; box-shadow: none; transform: rotate(-18deg); background:
   radial-gradient(circle at 50% 30%, #ff3b20 0 2px, transparent 2.5px) 0 0 / 20px 40px repeat-x,
   repeating-linear-gradient(90deg, #d8362b 0 17px, transparent 17px 20px) 0 0 / 80px 40px no-repeat,
   repeating-linear-gradient(90deg, #f08a2a 0 17px, transparent 17px 20px) 80px 0 / 80px 40px no-repeat; border-radius: 3px; filter: drop-shadow(0 4px 6px rgba(0,0,0,.7)); }
@@ -4116,3 +4116,16 @@ html[data-theme="light"] .instrument-tile--mellotron-m400 .instrument-tile__eyeb
   box-shadow: inset 0 1px rgba(255,255,255,.25);
 }
 .instrument-tile--nord-c2d .instrument-tile__keys::after { content: ''; }
+
+
+/* Eight Voice shared two-bar display: use the same display geometry as the other tiles. */
+.instrument-tile--oberheim-eight-voice {
+  --tile-bar-glow: #8be8d1;
+}
+.instrument-tile--oberheim-eight-voice .instrument-tile__display {
+  display: block;
+}
+.instrument-tile--oberheim-eight-voice .instrument-tile__display span {
+  background: #8be8d1;
+  box-shadow: 0 0 7px rgba(139,232,209,.95), 0 0 14px rgba(101,214,199,.38);
+}
