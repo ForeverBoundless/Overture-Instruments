@@ -129,6 +129,8 @@ test('M400 and Eight Voice are complete instrument pages, not library-only entri
   assert.match(oberheimApp, /eight-voice-processor/);
   assert.match(oberheimApp, /VCF CUTOFF/);
   assert.match(oberheimApp, /STEREO PAN/);
+  assert.match(oberheimApp, /FILTER RESPONSE/);
+  assert.match(oberheimApp, /VCO 1 SHAPE/);
   assert.match(oberheimApp, /LFO ROUTING/);
   assert.match(oberheimApp, /voiceUi\.forEach/);
   assert.match(oberheimEngine, /q\.cutoff/);
