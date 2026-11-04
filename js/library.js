@@ -17,9 +17,7 @@ function buildTile(instrument) {
   tile.setAttribute('aria-label', `Select ${instrument.name}`);
   const art = instrument.id === 'mellotron-m400'
     ? '<div class="m400-tile-art" aria-hidden="true"><span class="m400-tile-reel m400-tile-reel--one"></span><span class="m400-tile-reel m400-tile-reel--two"></span><i></i></div>'
-    : instrument.id === 'oberheim-eight-voice'
-      ? '<div class="eight-tile-art" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>'
-      : '';
+    : '';
   tile.innerHTML = `<div class="instrument-tile__visual" aria-hidden="true"><div class="instrument-tile__glow"></div><div class="instrument-tile__display"><span></span><span></span></div>${art}<div class="instrument-tile__keys"></div><span class="material-symbols-rounded instrument-tile__icon">${instrument.icon}</span></div><div class="instrument-tile__content"><div class="instrument-tile__eyebrow">${instrument.manufacturer}</div><h2>${instrument.name}</h2><p class="instrument-tile__model">${instrument.model}</p><p class="instrument-tile__description">${instrument.description}</p><div class="instrument-specs">${spec('Voice', instrument.voiceMode, 'radio_button_checked')}${spec('Presets', instrument.presets, 'bookmark')}${spec('Keybed', instrument.keys, 'piano')}</div><div class="instrument-tile__actions"><span class="instrument-tile__hint"><span class="material-symbols-rounded">touch_app</span><b>to launch</b></span><md-filled-button class="instrument-launch-button"><span slot="icon" class="material-symbols-rounded">play_arrow</span>Launch</md-filled-button></div></div>`;
   const select = () => { document.querySelectorAll('.instrument-tile.is-selected').forEach((el) => el.classList.remove('is-selected')); tile.classList.add('is-selected'); tile.setAttribute('aria-label', `${instrument.name} selected. Launch button available.`); };
   tile.addEventListener('click', select);
