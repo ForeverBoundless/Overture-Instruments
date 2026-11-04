@@ -75,7 +75,7 @@ class EightVoiceProcessor extends AudioWorkletProcessor {
         v.phase1 += inc1; v.phase2 += inc2; if (v.phase1 >= 1) v.phase1 -= 1; if (v.phase2 >= 1) v.phase2 -= 1;
         const pulse = clamp(this.p.pulse + lfo * .15, .05, .95);
         const osc1 = (q.wave1 ?? this.p.wave1) === 'pulse' ? wave(v.phase1, pulse, inc1) : saw(v.phase1, inc1);
-        const osc2 = (q.wave2 ?? this.p.wave2) === 'saw' ? saw(v.phase2, inc2) : wave(v.phase2, .5, inc2);
+        const osc2 = (q.wave2 ?? this.p.wave2) === 'saw' ? saw(v.phase2, inc2) : wave(v.phase2, pulse, inc2);
         const source = osc1 * (q.osc1 ?? this.p.osc1) * .5 + osc2 * (q.osc2 ?? this.p.osc2) * .5;
         const cutoff = 30 * Math.pow(2, 8.5 * clamp((q.cutoff ?? this.p.cutoff) + (this.p.lfoTarget === 'filter' ? lfo : 0) + (q.filterEnv ?? this.p.filterEnv) * v.env2, 0, 1));
         const g = Math.min(.5, 2 * Math.sin(Math.PI * Math.min(cutoff, sr * .42) / sr));
