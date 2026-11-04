@@ -1101,3 +1101,270 @@ body.little-phatty-body {
   .little-phatty-body .lp-wheel-housing { width: 27px; height: 72px; }
   .little-phatty-body .lp-keyboard { height: 100px; }
 }
+
+
+/* =====================================================================
+   Compact, centred Little Phatty instrument
+   Keep the two-tier hardware layout, but size it for normal laptop
+   viewports so the keyboard is not pushed below the initial screen.
+   ===================================================================== */
+html,
+body.little-phatty-body {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 100%;
+  margin: 0;
+  overflow-x: hidden;
+}
+
+.little-phatty-body #app-root {
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 100vh;
+  height: auto;
+  margin: 0 auto;
+  padding: 12px clamp(10px, 1.8vw, 24px) 20px;
+}
+
+.little-phatty-body #chassis {
+  box-sizing: border-box;
+  position: relative;
+  display: block;
+  float: none;
+  width: min(1280px, 100%);
+  min-width: 0;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 38px 12px;
+  left: auto;
+  right: auto;
+  inset-inline: auto;
+  transform: none !important;
+}
+
+.little-phatty-body #panel {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  gap: 8px;
+  padding: 10px 8px 8px;
+}
+
+.little-phatty-body #panel-logo {
+  height: 24px;
+  max-width: 120px;
+  object-fit: contain;
+}
+
+.little-phatty-body #sections-row {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  grid-template-rows: minmax(180px, auto) minmax(196px, auto);
+  grid-auto-rows: auto;
+  gap: 8px;
+}
+
+.little-phatty-body #sections-row > .lp-section {
+  box-sizing: border-box;
+  min-width: 0;
+  padding: 25px 9px 10px;
+}
+
+.little-phatty-body #sections-row > .lp-section > .lp-section-title {
+  margin-top: -20px;
+  margin-bottom: 10px;
+  padding: 4px 9px;
+  font-size: 7px;
+}
+
+.little-phatty-body .lp-knob {
+  --knob-size: 44px !important;
+  width: 44px;
+  min-width: 44px;
+  gap: 2px;
+  padding: 0;
+}
+
+.little-phatty-body .lp-knob-label {
+  max-width: 62px;
+  font-size: 6.5px;
+  line-height: 1.15;
+}
+
+.little-phatty-body .lp-section-knobs {
+  gap: 7px 8px;
+}
+
+.little-phatty-body .lp-section-buttons {
+  gap: 6px 8px;
+  margin-top: 7px;
+}
+
+.little-phatty-body .lp-btn::before {
+  width: 20px;
+  height: 20px;
+}
+
+.little-phatty-body #lower-row {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  grid-template-columns: 100px minmax(0, 1fr);
+  gap: 8px;
+  margin-top: 8px;
+  padding: 7px;
+}
+
+.little-phatty-body #wheel-housing-block {
+  gap: 9px;
+  padding: 4px;
+}
+
+.little-phatty-body .lp-wheel {
+  width: 30px;
+}
+
+.little-phatty-body .lp-wheel-housing {
+  width: 27px;
+  height: 78px;
+  padding: 3px;
+}
+
+.little-phatty-body .lp-keyboard {
+  width: 100%;
+  height: 112px;
+}
+
+.little-phatty-body #chassis-bottom-cap {
+  height: 6px;
+  margin: 7px -38px 0;
+}
+
+@media (max-width: 1100px) {
+  .little-phatty-body #chassis {
+    width: min(100%, 1080px);
+    padding-inline: 28px;
+  }
+
+  .little-phatty-body #sections-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-areas:
+      "master master lfo"
+      "master master osc"
+      "filter env output";
+    grid-template-rows: auto;
+  }
+
+  .little-phatty-body #sections-row > .lp-section:nth-child(1) {
+    grid-area: master;
+  }
+
+  .little-phatty-body #chassis-bottom-cap {
+    margin-inline: -28px;
+  }
+}
+
+@media (max-width: 760px) {
+  .little-phatty-body #app-root {
+    padding: 10px 8px 18px;
+  }
+
+  .little-phatty-body #chassis {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    padding-inline: 12px;
+  }
+
+  .little-phatty-body #chassis::before,
+  .little-phatty-body #chassis::after {
+    width: 12px;
+  }
+
+  .little-phatty-body #sections-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas:
+      "master master"
+      "lfo osc"
+      "filter filter"
+      "env output";
+    grid-template-rows: auto;
+    gap: 8px;
+  }
+
+  .little-phatty-body #sections-row > .lp-section {
+    padding: 25px 8px 10px;
+  }
+
+  .little-phatty-body #sections-row > .lp-section:nth-child(1) {
+    padding: 12px;
+  }
+
+  .little-phatty-body #lower-row {
+    grid-template-columns: 70px minmax(0, 1fr);
+    gap: 6px;
+    padding: 6px;
+  }
+
+  .little-phatty-body #wheel-housing-block {
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .little-phatty-body .lp-wheel-housing {
+    height: 64px;
+  }
+
+  .little-phatty-body .lp-keyboard {
+    height: 96px;
+  }
+
+  .little-phatty-body #chassis-bottom-cap {
+    margin-inline: -12px;
+  }
+}
+
+@media (max-width: 520px) {
+  .little-phatty-body #sections-row {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "master"
+      "lfo"
+      "osc"
+      "filter"
+      "env"
+      "output";
+  }
+
+  .little-phatty-body #sections-row > .lp-section {
+    padding-inline: 10px;
+  }
+
+  .little-phatty-body .lp-knob {
+    --knob-size: 42px !important;
+    width: 42px;
+    min-width: 42px;
+  }
+
+  .little-phatty-body #lower-row {
+    grid-template-columns: 64px minmax(0, 1fr);
+  }
+
+  .little-phatty-body .lp-wheel {
+    width: 26px;
+  }
+
+  .little-phatty-body .lp-wheel-housing {
+    width: 24px;
+    height: 58px;
+  }
+
+  .little-phatty-body .lp-keyboard {
+    height: 88px;
+  }
+}
