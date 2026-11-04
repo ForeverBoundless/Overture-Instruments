@@ -1,4 +1,4 @@
-const CACHE = 'overture-shell-v30';
+const CACHE = 'overture-shell-v31';
 const APP_SHELL = [
   '/account',
   '/css/account.css?v=20261102-contributions-menu',
@@ -108,6 +108,7 @@ const APP_SHELL = [
   '/js/engine/Prophet10Engine.js',
   '/js/engine/Prophet10Processor.js',
   '/js/engine/OberheimEightVoiceProcessor.js',
+  '/js/engine/OberheimEightVoiceProcessor.js?v=20261104-eightvoice-stable',
   '/js/engine/Sub37Engine.js',
   '/js/engine/TR808Engine.js',
   '/js/engine/Voice.js',
