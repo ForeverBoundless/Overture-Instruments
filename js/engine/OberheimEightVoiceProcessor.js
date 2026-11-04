@@ -28,9 +28,19 @@ class Voice {
 class EightVoiceProcessor extends AudioWorkletProcessor {
   constructor() {
     super(); this.p = { ...DEF }; this.v = Array.from({ length: 8 }, (_, i) => new Voice(i));
-    this.bend = 0; this.mod = 0; this.sustain = false; this.order = 0; this.port.onmessage = (e) => this.message(e.data);
+    this.bend = 0; this.mod = 0; this.sustain = false; this.order = 0; this.scheduled = []; this.port.onmessage = (e) => this.message(e.data);
   }
   message(m) {
+    // OMNI look-ahead sources timestamp note events ahead of the render clock.
+    // Queue them here so the SEM voices start and release on the intended sample.
+    if ((m.t === 'noteOn' || m.t === 'noteOff') && Number.isFinite(m.frame) && m.frame > currentFrame) {
+      this.scheduled.push(m);
+      this.scheduled.sort((a, b) => a.frame - b.frame);
+      return;
+    }
+    this.dispatch(m);
+  }
+  dispatch(m) {
     if (m.t === 'patch') this.p = { ...DEF, ...m.patch };
     else if (m.t === 'param' && (m.key in DEF || m.key.startsWith('voice'))) this.setParam(m.key, m.value);
     else if (m.t === 'noteOn') this.noteOn(m.note | 0, clamp(m.vel, .01, 1));
@@ -39,7 +49,7 @@ class EightVoiceProcessor extends AudioWorkletProcessor {
     else if (m.t === 'mod') this.mod = clamp(m.value, 0, 1);
     else if (m.t === 'sustain') { this.sustain = !!m.down; if (!this.sustain) this.v.forEach((v) => { if (!v.gate) v.stage = 'release'; }); }
     else if (m.t === 'volume') this.p.master = clamp(m.value, 0, 1);
-    else if (m.t === 'allOff' || m.t === 'allSoundOff') this.v.forEach((v) => { v.gate = false; v.stage = 'release'; });
+    else if (m.t === 'allOff' || m.t === 'allSoundOff') { this.scheduled.length = 0; this.v.forEach((v) => { v.gate = false; v.stage = 'release'; }); }
   }
   setParam(key, value) {
     const match = /^voice(\d+)_(.+)$/.exec(key);
@@ -61,6 +71,7 @@ class EightVoiceProcessor extends AudioWorkletProcessor {
   process(_inputs, outputs) {
     const out = outputs[0]; const L = out[0]; const R = out[1] || L; const sr = sampleRate;
     for (let n = 0; n < L.length; n += 1) {
+      while (this.scheduled.length && this.scheduled[0].frame <= currentFrame + n) this.dispatch(this.scheduled.shift());
       let left = 0; let right = 0;
       this.v.forEach((v, i) => {
         if (!v.active) return;
