@@ -95,7 +95,7 @@ class MellotronProcessor extends AudioWorkletProcessor {
         const noteHz = 440 * Math.pow(2, (v.note - 69) / 12);
         const wow = Math.sin(v.pos * .00017 + v.flutter) * .0018 + Math.sin(v.pos * .000043) * .0035;
         const flutter = Math.sin(v.pos * .0021 + v.flutter) * .0011;
-        const speed = Math.max(.25, (noteHz / 261.6256) * Math.pow(2, (this.bend * 2) / 12) *
+        const speed = Math.max(.25, Math.pow(2, (this.bend * 2) / 12) *
           (1 + clamp(this.p.pitch, -1, 1) * .08 + wow + flutter + v.tuning));
         v.phase += noteHz * speed / sr;
         if (v.phase >= 1) v.phase -= Math.floor(v.phase);
