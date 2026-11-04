@@ -75,3 +75,160 @@
 .sub37-shell .s37-section h2 { color: #f1f2f4; }
 .sub37-shell .s37-keybed .lp-key-white { background-image: linear-gradient(180deg, #d9d9d4 0%, #f7f7f3 8%, #fbfbf8 70%, #e2e2dc 100%); }
 .sub37-shell .s37-keybed .lp-key-black { background-image: linear-gradient(90deg, #050506, #2c2d31 40%, #121214 80%, #000); }
+
+
+/* Sub 37 responsive and typography correction.
+   The page imports Figtree and DM Mono; use those loaded faces consistently.
+   All shell widths include their padding, and narrow layouts reflow in place. */
+.sub37-body {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  overflow-x: hidden;
+}
+#sub37-root {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-height: 100vh;
+  padding: 18px;
+}
+.sub37-shell,
+.sub37-shell * { box-sizing: border-box; }
+.sub37-shell {
+  width: min(1510px, 100%);
+  min-width: 0;
+  max-width: 1510px;
+  margin-inline: auto;
+  font-family: 'Figtree', 'Segoe UI', sans-serif;
+  line-height: 1.35;
+}
+.sub37-shell button,
+.sub37-shell select,
+.sub37-shell input,
+.sub37-shell output,
+.sub37-shell label,
+.sub37-shell .s37-button,
+.sub37-shell .lp-knob-label,
+.sub37-shell .lp-wheel-label,
+.sub37-shell .lp-key-label,
+.sub37-shell .s37-section h2,
+.sub37-shell .s37-footer {
+  font-family: 'Figtree', 'Segoe UI', sans-serif !important;
+}
+.s37-header { min-width: 0; padding-inline: 20px; }
+.s37-model { min-width: 0; }
+.s37-model span { font-size: 8px; line-height: 1.3; letter-spacing: .14em; }
+.s37-display { flex: 0 1 260px; min-width: 0; max-width: 100%; width: min(260px, 42%); }
+.s37-row,
+.s37-sequencer,
+.s37-keybed { min-width: 0; }
+.s37-row { margin-inline: 14px; }
+.s37-section h2 { font-size: 9px; line-height: 1.3; }
+.s37-section h2 span { font-size: 7px; line-height: 1.3; }
+.s37-knob .lp-knob-label { font-size: 7px; line-height: 1.2; max-width: 64px; white-space: normal; }
+.s37-env-knobs .lp-knob-label { font-size: 6.5px; }
+.s37-button { font-family: 'Figtree', 'Segoe UI', sans-serif; font-size: 7.5px; line-height: 1.2; }
+.s37-select-wrap { font-size: 7px; line-height: 1.25; }
+.s37-select-wrap select { font-family: 'DM Mono', monospace; font-size: 9px; }
+.s37-sequencer { min-width: 0; margin-inline: 14px; }
+.s37-seq-head,
+.s37-seq-head span { line-height: 1.35; }
+.s37-seq-head { font-size: 7.5px; }
+.s37-seq-head span { font-size: 7px; }
+.s37-step { font-family: 'Figtree', 'Segoe UI', sans-serif; font-size: 8px; }
+.s37-keybed { min-width: 0; margin-inline: 14px; }
+.s37-footer {
+  margin-inline: 14px;
+  font-size: 7px;
+  line-height: 1.55;
+  letter-spacing: .12em;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+#sub37-power > div {
+  max-width: calc(100vw - 32px);
+  box-sizing: border-box;
+  text-align: center;
+}
+
+@media (max-width: 1180px) {
+  #sub37-root { padding: 14px; place-items: start center; }
+  .sub37-shell { width: 100%; min-width: 0; }
+  .s37-header { padding-inline: 14px; }
+  .s37-row,
+  .s37-sequencer,
+  .s37-keybed { margin-inline: 10px; }
+  .s37-sequencer { grid-template-columns: minmax(120px, .7fr) minmax(0, 1.4fr); }
+  .s37-step-grid { grid-column: 1 / -1; }
+}
+
+@media (max-width: 760px) {
+  #sub37-root { padding: 8px; }
+  .sub37-shell { padding: 12px 10px 14px; }
+  .s37-header { flex-wrap: wrap; gap: 10px; padding: 2px 8px 10px; }
+  .s37-moog { height: 30px; }
+  .s37-model b { font-size: 19px; }
+  .s37-display { flex: 1 1 100%; width: 100%; margin: 2px 0 0; }
+  .s37-row,
+  .s37-sequencer,
+  .s37-keybed { margin-inline: 4px; }
+  .s37-performance { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .s37-performance > :first-child { grid-column: 1 / -1; }
+  .s37-mod-row { grid-template-columns: minmax(0, 1fr); }
+  .s37-osc-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .s37-env-row { grid-template-columns: minmax(0, 1fr); }
+  .s37-sequencer { grid-template-columns: minmax(0, 1fr); gap: 9px; }
+  .s37-step-grid { grid-template-columns: repeat(8, minmax(0, 1fr)); }
+  .s37-keybed {
+    grid-template-columns: 72px minmax(0, 1fr);
+    gap: 8px;
+    padding: 8px;
+  }
+  .s37-octave {
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: stretch;
+  }
+}
+
+@media (max-width: 480px) {
+  .sub37-shell { padding-inline: 8px; }
+  .s37-header { gap: 8px; }
+  .s37-model b { font-size: 17px; letter-spacing: .14em; }
+  .s37-model span { font-size: 7px; }
+  .s37-performance,
+  .s37-osc-row { grid-template-columns: minmax(0, 1fr); }
+  .s37-performance > :first-child { grid-column: auto; }
+  .s37-step-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .s37-keybed { grid-template-columns: 60px minmax(0, 1fr); gap: 6px; padding: 6px; }
+  .s37-wheels { gap: 6px; }
+  .s37-footer { font-size: 6.5px; letter-spacing: .09em; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sub37-shell *,
+  #sub37-power { transition-duration: 0.01ms !important; }
+}
+
+/* Independent walnut grain on each cheek. The left panel retains the
+   Library tile's colour/turbulence treatment; the right uses a different
+   seed and grain frequency so the pair does not look stamped or mirrored. */
+.sub37-shell::before {
+  background-color: #633d25;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='160' viewBox='0 0 96 160'%3E%3Cfilter id='wood'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.018 .18' numOctaves='3' seed='17' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0.75 0 0 0 .12 0 .28 0 0 .04 0 .08 0 0 .015 0 0 0 .42 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23wood)'/%3E%3C/svg%3E");
+  background-size: 96px 160px;
+  background-position: center center;
+  background-repeat: no-repeat;
+  box-shadow: inset -2px 0 5px rgba(0,0,0,.24), inset 1px 0 3px rgba(255,205,156,.09);
+}
+.sub37-shell::after {
+  background-color: #633d25;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='160' viewBox='0 0 96 160'%3E%3Cfilter id='wood'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.015 .205' numOctaves='4' seed='43' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0.75 0 0 0 .12 0 .28 0 0 .04 0 .08 0 0 0 .015 0 0 0 .42 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23wood)'/%3E%3C/svg%3E");
+  background-size: 96px 160px;
+  background-position: 42% center;
+  background-repeat: no-repeat;
+  transform: none;
+  filter: saturate(.94) contrast(1.1);
+  box-shadow: inset 2px 0 5px rgba(0,0,0,.24), inset 1px 0 3px rgba(255,205,156,.09);
+}
