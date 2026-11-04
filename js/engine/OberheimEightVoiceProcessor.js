@@ -3,7 +3,7 @@
  * pan. The voices intentionally own all phase/filter/envelope state. */
 /* global sampleRate, registerProcessor, AudioWorkletProcessor */
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
-const DEF = { cutoff: .58, resonance: .16, filterEnv: .48, filterMode: 'low', osc1: .7, osc2: .65, tune: 0.02, pulse: .5, wave1: 'saw', wave2: 'pulse', attack: .08, decay: .35, sustain: .7, release: .32, master: .7, lfoRate: .18, lfoAmount: .08, lfoTarget: 'pitch', bendRange: 2 };
+const DEF = { cutoff: .58, resonance: .16, filterEnv: .48, filterMode: 'low', osc1: .7, osc2: .65, tune: 0, pulse: .5, wave1: 'saw', wave2: 'pulse', attack: .08, decay: .35, sustain: .7, release: .32, master: .7, lfoRate: .18, lfoAmount: .08, lfoTarget: 'pitch', bendRange: 2 };
 const polyBlep = (t, dt) => {
   if (t < dt) { t /= dt; return t + t - t * t - 1; }
   if (t > 1 - dt) { t = (t - 1) / dt; return t * t + t + t + 1; }
