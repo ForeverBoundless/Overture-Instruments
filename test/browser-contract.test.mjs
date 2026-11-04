@@ -31,6 +31,33 @@ test('instrument library search covers canonical descriptive metadata and both t
   assert.match(styles, /html\[data-theme="light"\] #launcher-page \.library-search__field/);
 });
 
+test('Little Phatty uses a grouped responsive layout without viewport shrinking', async () => {
+  const [styles, engine, page] = await Promise.all([
+    readFile(new URL('../css/little-phatty.css', import.meta.url), 'utf8'),
+    readFile(new URL('../js/engine/app.js', import.meta.url), 'utf8'),
+    readFile(new URL('../html/little-phatty.html', import.meta.url), 'utf8'),
+  ]);
+  assert.match(styles, /grid-template-areas:[\s\S]*"master master lfo lfo osc osc osc osc osc osc"[\s\S]*"master master filter filter filter filter env env output output"/);
+  assert.match(styles, /@media \(max-width: 1180px\)/);
+  assert.match(styles, /@media \(max-width: 760px\)/);
+  assert.match(styles, /min-width: 680px/);
+  assert.match(engine, /natural, scrollable page flow/);
+  assert.doesNotMatch(engine, /availH = window\.innerHeight/);
+  assert.match(page, /little-phatty\.css\?v=20261103-layout-rebuild/);
+});
+
+test('Sub 37 side panels use the seeded wood grain from its Library tile', async () => {
+  const [tileStyles, emulatorStyles, page] = await Promise.all([
+    readFile(new URL('../css/library.css', import.meta.url), 'utf8'),
+    readFile(new URL('../css/sub37.css', import.meta.url), 'utf8'),
+    readFile(new URL('../html/sub37.html', import.meta.url), 'utf8'),
+  ]);
+  assert.match(tileStyles, /baseFrequency='\.018 \.18' numOctaves='3' seed='17'/);
+  assert.match(emulatorStyles, /baseFrequency='\.018 \.18' numOctaves='3' seed='17'/);
+  assert.match(emulatorStyles, /background-size:96px 160px/);
+  assert.match(page, /sub37\.css\?v=20261103-library-walnut/);
+});
+
 test('instrument and experiment pages register the shared offline app shell', async () => {
   const paths = [
     '../about.html', '../library.html', '../omni.html', '../experiments.html',
@@ -175,7 +202,7 @@ test('The shared account menu works across site, OMNI, Library and all experimen
   assert.ok(omni.includes('/css/site-theme.css'));
   assert.ok(omni.includes('account-shell.js?v=20261102-contributions-menu'));
   assert.ok(library.includes('account-shell.js?v=20261102-contributions-menu'));
-  assert.ok(worker.includes('overture-shell-v22'));
+  assert.ok(worker.includes('overture-shell-v23'));
   assert.ok(worker.includes('account-shell.js?v=20261102-contributions-menu'));
   for (const page of experimentPages) {
     const html = await readFile(new URL(`../experiments/${page}.html`, import.meta.url), 'utf8');
@@ -246,5 +273,5 @@ test('Contribution page profile, toolbar and result counts have responsive align
   assert.ok(css.includes('.contributions-toolbar.is-owner'));
   assert.ok(css.includes('@media (max-width:380px)'));
   assert.ok(app.includes("classList.toggle('is-owner', state.isOwner)"));
-  assert.ok(worker.includes('overture-shell-v22'));
+  assert.ok(worker.includes('overture-shell-v23'));
 });
