@@ -78,8 +78,9 @@ test('Mellotron retriggers overlap a short de-click tail and release without non
 
   const tail = render(h, 96000);
   assert.ok([...tail.left, ...tail.right].every(Number.isFinite));
-  assert.ok([...tail.left, ...tail.right].some((sample) => Math.abs(sample) > 1e-6) === false,
-    'the released note should eventually reach silence');
+  const maxTail = Math.max(...tail.left.map(Math.abs), ...tail.right.map(Math.abs));
+  assert.ok(maxTail <= 1e-6,
+    `the released note should eventually reach silence (active=${voice.active}, env=${voice.env}, tail=${voice.tailLevel}, peak=${maxTail})`);
 });
 
 test('Mellotron default note release is long enough to avoid an abrupt key-up', async () => {
