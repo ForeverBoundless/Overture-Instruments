@@ -15,6 +15,22 @@ test('all library cards use canonical metadata with declared preset provenance',
   assert.equal(INSTRUMENTS.every((instrument) => instrument.presetProvenance && instrument.description), true);
 });
 
+test('instrument library search covers canonical descriptive metadata and both themes', async () => {
+  const [library, styles] = await Promise.all([
+    readFile(new URL('../js/library.js', import.meta.url), 'utf8'),
+    readFile(new URL('../css/library.css', import.meta.url), 'utf8'),
+  ]);
+  assert.match(library, /id="instrument-search"/);
+  assert.match(library, /instrument\.manufacturer/);
+  assert.match(library, /instrument\.model/);
+  assert.match(library, /instrument\.voiceMode/);
+  assert.match(library, /instrument\.presetProvenance/);
+  assert.match(library, /instrument\.description/);
+  assert.match(library, /aria-live="polite"/);
+  assert.match(styles, /\.library-search__field:focus-within/);
+  assert.match(styles, /html\[data-theme="light"\] #launcher-page \.library-search__field/);
+});
+
 test('instrument and experiment pages register the shared offline app shell', async () => {
   const paths = [
     '../about.html', '../library.html', '../omni.html', '../experiments.html',
@@ -159,7 +175,7 @@ test('The shared account menu works across site, OMNI, Library and all experimen
   assert.ok(omni.includes('/css/site-theme.css'));
   assert.ok(omni.includes('account-shell.js?v=20261102-contributions-menu'));
   assert.ok(library.includes('account-shell.js?v=20261102-contributions-menu'));
-  assert.ok(worker.includes('overture-shell-v21'));
+  assert.ok(worker.includes('overture-shell-v22'));
   assert.ok(worker.includes('account-shell.js?v=20261102-contributions-menu'));
   for (const page of experimentPages) {
     const html = await readFile(new URL(`../experiments/${page}.html`, import.meta.url), 'utf8');
@@ -230,5 +246,5 @@ test('Contribution page profile, toolbar and result counts have responsive align
   assert.ok(css.includes('.contributions-toolbar.is-owner'));
   assert.ok(css.includes('@media (max-width:380px)'));
   assert.ok(app.includes("classList.toggle('is-owner', state.isOwner)"));
-  assert.ok(worker.includes('overture-shell-v21'));
+  assert.ok(worker.includes('overture-shell-v22'));
 });
