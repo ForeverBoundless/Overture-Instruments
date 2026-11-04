@@ -1,6 +1,6 @@
 /** omni/templates.js - starter patches. Compact DSL: modules [id,type,col,row,params?], wires 'a.port>b.port'. */
-import { MODULES, modulePorts, SIGNAL_COLORS } from './modules.js';
-import { defaultParams, SCHEMA } from './graph.js';
+import { MODULES, modulePorts, SIGNAL_COLORS } from './modules.js?v=20261104-sem-mellotron';
+import { defaultParams, SCHEMA } from './graph.js?v=20261104-sem-mellotron';
 
 const CX = 260, CY = 210;
 const T = (name, desc, mods, wires, master = 0.8) => ({ name, desc, mods, wires, master });
