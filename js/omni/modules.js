@@ -6,7 +6,7 @@
  *   audio ports: AudioNode outputs connected to AudioNode inputs
  *   cv ports:    AudioNode outputs connected to AudioParam inputs (audio-rate control)
  *   note ports:  JavaScript events { note, velocity, on } (keyboard, sequencer -> oscillators, envelopes, FM voice)
- * Instrument-derived modules reuse existing engines (LadderFilter, DX7 worklet).
+ * Instrument-derived modules reuse existing engines and worklets (LadderFilter, DX7, SEM, Mellotron).
  */
 import { LadderFilter } from '../engine/LadderFilter.js';
 import { DX7_PRESETS } from '../data/dx7Presets.js';
