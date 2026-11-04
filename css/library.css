@@ -3966,3 +3966,22 @@ html[data-theme="light"] #launcher-page .library-search__hint { color: #708095; 
   text-shadow: 0 0 6px rgba(134,229,209,.8);
 }
 .eight-tile-art span:nth-child(3n) { color: #f0c47e; }
+
+/* The two recent additions share the same card information hierarchy in both
+   themes; their illustration remains instrument-specific. */
+.instrument-tile--mellotron-m400 .instrument-tile__content,
+.instrument-tile--oberheim-eight-voice .instrument-tile__content { min-width: 0; }
+.instrument-tile--mellotron-m400 .instrument-specs,
+.instrument-tile--oberheim-eight-voice .instrument-specs { flex-wrap: wrap; row-gap: 9px; }
+.instrument-tile--mellotron-m400 .instrument-spec,
+.instrument-tile--oberheim-eight-voice .instrument-spec { min-width: 78px; }
+html[data-theme="light"] .instrument-tile--mellotron-m400 .instrument-spec .material-symbols-rounded { color: #94602c !important; }
+html[data-theme="light"] .instrument-tile--oberheim-eight-voice .instrument-spec .material-symbols-rounded { color: #287e78 !important; }
+html[data-theme="light"] .instrument-tile--mellotron-m400 .instrument-tile__hint,
+html[data-theme="light"] .instrument-tile--oberheim-eight-voice .instrument-tile__hint { color: #647386 !important; }
+html[data-theme="light"] .instrument-tile--mellotron-m400 .instrument-tile__eyebrow { color: #87582d !important; }
+html[data-theme="light"] .instrument-tile--oberheim-eight-voice .instrument-tile__eyebrow { color: #28766f !important; }
+@media (max-width: 760px) {
+  .instrument-tile--mellotron-m400 .instrument-specs,
+  .instrument-tile--oberheim-eight-voice .instrument-specs { gap: 8px 12px; }
+}
