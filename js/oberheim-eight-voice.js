@@ -3,7 +3,7 @@ import { PresetStore, num } from './shared/presetStore.js';
 import { el, section, knob, select, display, performance, power, presetBar, footer } from './shared/panel.js';
 import { OBERHEIM_EIGHT_VOICE_PRESETS } from './data/oberheimEightVoicePresets.js';
 
-const DEF = { cutoff: .58, resonance: .16, filterEnv: .48, filterMode: 'low', osc1: .7, osc2: .65, tune: 0, pulse: .5, wave1: 'saw', wave2: 'pulse', attack: .08, decay: .35, sustain: .7, release: .32, master: .7, lfoRate: .18, lfoAmount: .08, lfoTarget: 'pitch', bendRange: 2 };
+const DEF = { cutoff: .53, resonance: .06, filterEnv: .2, filterMode: 'low', osc1: .8, osc2: .68, tune: 0, pulse: .5, wave1: 'saw', wave2: 'saw', attack: .16, decay: .42, sustain: .72, release: .52, master: .64, lfoRate: .13, lfoAmount: 0, lfoTarget: 'pitch', bendRange: 2 };
 const validate = (data) => {
   if (!data || typeof data !== 'object') throw new Error('Not an Eight Voice program.');
   const out = { ...DEF };
@@ -14,7 +14,7 @@ const validate = (data) => {
 
 class EightVoiceApp {
   constructor() {
-    this.engine = new WorkletEngine(new URL('./engine/OberheimEightVoiceProcessor.js', import.meta.url).href, 'oberheim-eight-voice-processor');
+    this.engine = new WorkletEngine(new URL('./engine/OberheimEightVoiceProcessor.js?v=20261104-eightvoice-stable', import.meta.url).href, 'oberheim-eight-voice-processor');
     this.patch = validate(OBERHEIM_EIGHT_VOICE_PRESETS[0].data); this.ui = {}; this.voiceUi = [];
     this.store = new PresetStore({ key: 'overture.oberheim-eight-voice.programs', version: 1, validate });
     this.build();
