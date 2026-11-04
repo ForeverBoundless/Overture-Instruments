@@ -76,7 +76,7 @@ test('Mellotron retriggers overlap a short de-click tail and release without non
   render(h, 512);
   assert.ok(voice.env < envBeforeRelease, 'the note envelope should decay after key release');
 
-  const tail = render(h, 16384);
+  const tail = render(h, 96000);
   assert.ok([...tail.left, ...tail.right].every(Number.isFinite));
   assert.ok([...tail.left, ...tail.right].some((sample) => Math.abs(sample) > 1e-6) === false,
     'the released note should eventually reach silence');
