@@ -38,7 +38,9 @@ class EightVoiceApp {
     const ok = el('div', 'pn-knobs', osc.body);
     this.ui.osc1 = knob(ok, { label: 'VCO 1', min: 0, max: 1, value: DEF.osc1, formatValue: (v) => `${Math.round(v * 100)}%`, onChange: (v) => this.set('osc1', v) });
     this.ui.osc2 = knob(ok, { label: 'VCO 2', min: 0, max: 1, value: DEF.osc2, formatValue: (v) => `${Math.round(v * 100)}%`, onChange: (v) => this.set('osc2', v) });
-    this.ui.tune = knob(ok, { label: 'VCO 2 TUNE', min: 0, max: 1, value: DEF.tune, formatValue: (v) => `${(v * 24 - 12).toFixed(1)} st`, onChange: (v) => this.set('tune', v) });\n    this.ui.wave1 = select(osc.body, 'VCO 1 WAVEFORM', [{ value: 'saw', label: 'SAWTOOTH' }, { value: 'pulse', label: 'PULSE' }], DEF.wave1, (v) => this.set('wave1', v));\n    this.ui.wave2 = select(osc.body, 'VCO 2 WAVEFORM', [{ value: 'pulse', label: 'PULSE' }, { value: 'saw', label: 'SAWTOOTH' }], DEF.wave2, (v) => this.set('wave2', v));
+    this.ui.tune = knob(ok, { label: 'VCO 2 TUNE', min: 0, max: 1, value: DEF.tune, formatValue: (v) => `${(v * 24 - 12).toFixed(1)} st`, onChange: (v) => this.set('tune', v) });
+    this.ui.wave1 = select(osc.body, 'VCO 1 WAVEFORM', [{ value: 'saw', label: 'SAWTOOTH' }, { value: 'pulse', label: 'PULSE' }], DEF.wave1, (v) => this.set('wave1', v));
+    this.ui.wave2 = select(osc.body, 'VCO 2 WAVEFORM', [{ value: 'pulse', label: 'PULSE' }, { value: 'saw', label: 'SAWTOOTH' }], DEF.wave2, (v) => this.set('wave2', v));
     this.ui.pulse = knob(ok, { label: 'PULSE WIDTH', min: 0, max: 1, value: DEF.pulse, formatValue: (v) => `${Math.round(v * 100)}%`, onChange: (v) => this.set('pulse', v) });
     const filter = section(global, 'STATE VARIABLE VCF', '12 dB / OCTAVE · SEM RESPONSE');
     const fk = el('div', 'pn-knobs', filter.body);
@@ -52,7 +54,11 @@ class EightVoiceApp {
     this.ui.decay = knob(ek, { label: 'DECAY', min: 0, max: 1, value: DEF.decay, onChange: (v) => this.set('decay', v) });
     this.ui.sustain = knob(ek, { label: 'SUSTAIN', min: 0, max: 1, value: DEF.sustain, onChange: (v) => this.set('sustain', v) });
     this.ui.lfoAmount = knob(ek, { label: 'LFO MOD', min: 0, max: 1, value: DEF.lfoAmount, onChange: (v) => this.set('lfoAmount', v) });
-    this.ui.release = knob(ek, { label: 'RELEASE', min: 0, max: 1, value: DEF.release, formatValue: (v) => `${(v * v * 4).toFixed(2)} s`, onChange: (v) => this.set('release', v) });\n    this.ui.lfoRate = knob(ek, { label: 'LFO RATE', min: 0, max: 1, value: DEF.lfoRate, onChange: (v) => this.set('lfoRate', v) });\n    this.ui.lfoTarget = select(env.body, 'LFO ROUTING', [{ value: 'pitch', label: 'VIBRATO / PITCH' }, { value: 'filter', label: 'FILTER MOD' }], DEF.lfoTarget, (v) => this.set('lfoTarget', v));\n    this.ui.bendRange = knob(ek, { label: 'BEND RANGE', min: 0, max: 1, value: (DEF.bendRange - 1) / 11, formatValue: (v) => `${Math.round(1 + v * 11)} st`, onChange: (v) => this.set('bendRange', Math.round(1 + v * 11)) });\n    this.ui.master = knob(ek, { label: 'MASTER', min: 0, max: 1, value: DEF.master, onChange: (v) => { this.set('master', v); this.engine.setVolume(v); } });
+    this.ui.release = knob(ek, { label: 'RELEASE', min: 0, max: 1, value: DEF.release, formatValue: (v) => `${(v * v * 4).toFixed(2)} s`, onChange: (v) => this.set('release', v) });
+    this.ui.lfoRate = knob(ek, { label: 'LFO RATE', min: 0, max: 1, value: DEF.lfoRate, onChange: (v) => this.set('lfoRate', v) });
+    this.ui.lfoTarget = select(env.body, 'LFO ROUTING', [{ value: 'pitch', label: 'VIBRATO / PITCH' }, { value: 'filter', label: 'FILTER MOD' }], DEF.lfoTarget, (v) => this.set('lfoTarget', v));
+    this.ui.bendRange = knob(ek, { label: 'BEND RANGE', min: 0, max: 1, value: (DEF.bendRange - 1) / 11, formatValue: (v) => `${Math.round(1 + v * 11)} st`, onChange: (v) => this.set('bendRange', Math.round(1 + v * 11)) });
+    this.ui.master = knob(ek, { label: 'MASTER', min: 0, max: 1, value: DEF.master, onChange: (v) => { this.set('master', v); this.engine.setVolume(v); } });
     const voices = el('div', 'eight-voice-grid', rows);
     for (let i = 0; i < 8; i += 1) this.buildVoice(voices, i);
     const memory = section(rows, 'PROGRAMMER', 'OVERTURE VOICE PROGRAMS');
