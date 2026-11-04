@@ -11,7 +11,10 @@
 import { LadderFilter } from '../engine/LadderFilter.js';
 import { DX7_PRESETS } from '../data/dx7Presets.js';
 
+
 const DX7_URL = new URL('../engine/DX7Processor.js', import.meta.url).href;
+const SEM_URL = new URL('../engine/OberheimEightVoiceProcessor.js', import.meta.url).href;
+const MELLOTRON_URL = new URL('../engine/MellotronProcessor.js', import.meta.url).href;
 const midiHz = (n) => 440 * Math.pow(2, (n - 69) / 12);
 const now = (ctx) => ctx.currentTime;
 
@@ -285,6 +288,107 @@ export const MODULES = {
         level.gain.setTargetAtTime(p.level, now(ctx), 0.01);
       };
       inst.allOff = () => node.port.postMessage({ t: 'allOff' });
+      return inst;
+    },
+  },
+
+  semSynth: {
+    recordNotes: true,
+    name: 'SEM Poly Synth', category: 'Instrument modules', color: '#8be8d1', async: true,
+    params: [
+      P('osc1', 'VCO 1 level', 0, 1, 0.8),
+      P('osc2', 'VCO 2 level', 0, 1, 0.68),
+      P('tune', 'VCO 2 interval (semitones)', -12, 12, 0, { step: 0.1 }),
+      P('wave1', 'VCO 1 waveform', 0, 1, 0, { options: ['Sawtooth', 'Pulse'] }),
+      P('wave2', 'VCO 2 waveform', 0, 1, 0, { options: ['Sawtooth', 'Pulse'] }),
+      P('pulse', 'Pulse width', 0.05, 0.95, 0.5),
+      P('cutoff', 'VCF cutoff (Hz)', 30, 12000, 450, { log: true }),
+      P('resonance', 'VCF resonance', 0, 0.85, 0.08),
+      P('filterEnv', 'Filter envelope amount', 0, 1, 0.28),
+      P('filterMode', 'SEM filter response', 0, 3, 0, { options: ['Low-pass', 'Band-pass', 'High-pass', 'Notch'] }),
+      P('attack', 'Amp attack (s)', 0.002, 1.8, 0.028, { log: true }),
+      P('decay', 'Amp decay (s)', 0.01, 4.01, 0.66, { log: true }),
+      P('sustain', 'Amp sustain', 0, 1, 0.7),
+      P('release', 'Amp release (s)', 0.015, 4.015, 0.94, { log: true }),
+      P('lfoRate', 'LFO rate (Hz)', 0.1, 30, 0.2, { log: true }),
+      P('lfoAmount', 'LFO depth', 0, 0.5, 0.018),
+      P('lfoTarget', 'LFO destination', 0, 1, 0, { options: ['Pitch', 'Filter'] }),
+      P('level', 'Output level', 0, 1, 0.66),
+    ],
+    inputs: [N('note', 'Note')], outputs: [A('out', 'Stereo audio')],
+    async create(ctx, bus) {
+      const inst = new Instance(this, ctx);
+      if (!bus.semLoaded) { await ctx.audioWorklet.addModule(SEM_URL); bus.semLoaded = true; }
+      const node = new AudioWorkletNode(ctx, 'oberheim-eight-voice-processor', {
+        numberOfInputs: 0, numberOfOutputs: 1, outputChannelCount: [2],
+      });
+      inst.track(node); inst.outputs.out = node;
+      inst.inputs.note = noteIn((ev) => {
+        const frame = Math.round(eventTime(ctx, ev) * ctx.sampleRate);
+        node.port.postMessage(ev.on
+          ? { t: 'noteOn', note: ev.note, vel: ev.velocity, frame }
+          : { t: 'noteOff', note: ev.note, frame });
+      });
+      inst.setPitchBend = (semitones) => node.port.postMessage({ t: 'bend', value: Math.max(-1, Math.min(1, semitones / 2)) });
+      inst.setModWheel = (value) => node.port.postMessage({ t: 'mod', value });
+      inst.allOff = () => node.port.postMessage({ t: 'allOff' });
+      inst.apply = () => {
+        const p = inst.params;
+        const unit = (value) => Math.max(0, Math.min(1, value));
+        node.port.postMessage({ t: 'patch', patch: {
+          osc1: p.osc1, osc2: p.osc2, tune: p.tune / 12, pulse: p.pulse,
+          wave1: ['saw', 'pulse'][Math.round(p.wave1)],
+          wave2: ['saw', 'pulse'][Math.round(p.wave2)],
+          cutoff: unit(Math.log2(p.cutoff / 30) / 8.5),
+          resonance: p.resonance, filterEnv: p.filterEnv,
+          filterMode: ['low', 'band', 'high', 'notch'][Math.round(p.filterMode)],
+          attack: Math.sqrt(unit((p.attack - 0.002) / 1.8)),
+          decay: Math.sqrt(unit((p.decay - 0.01) / 4)),
+          sustain: p.sustain,
+          release: Math.sqrt(unit((p.release - 0.015) / 4)),
+          lfoRate: unit(Math.log(p.lfoRate / 0.1) / Math.log(300)),
+          lfoAmount: p.lfoAmount,
+          lfoTarget: ['pitch', 'filter'][Math.round(p.lfoTarget)],
+          master: p.level,
+          bendRange: 2,
+        } });
+      };
+      return inst;
+    },
+  },
+  mellotron: {
+    recordNotes: true,
+    name: 'Mellotron Tape Voice', category: 'Instrument modules', color: '#e0b77e', async: true,
+    params: [
+      P('frame', 'Tape frame', 0, 5, 0, { options: ['Classic M400', '8-Voice Choir', 'Strings', 'Brass', 'Woodwind', 'Organ & Bells'] }),
+      P('track', 'Tape track', 0, 2, 0, { options: ['Track A', 'Track B', 'Track C'] }),
+      P('tone', 'Tape tone', 0, 1, 0.68),
+      P('pitch', 'Tape speed trim', -1, 1, 0),
+      P('volume', 'Playback level', 0, 1, 0.72),
+    ],
+    inputs: [N('note', 'Note / tape trigger')], outputs: [A('out', 'Stereo audio')],
+    async create(ctx, bus) {
+      const inst = new Instance(this, ctx);
+      if (!bus.mellotronLoaded) { await ctx.audioWorklet.addModule(MELLOTRON_URL); bus.mellotronLoaded = true; }
+      const node = new AudioWorkletNode(ctx, 'mellotron-processor', {
+        numberOfInputs: 0, numberOfOutputs: 1, outputChannelCount: [2],
+      });
+      inst.track(node); inst.outputs.out = node;
+      inst.inputs.note = noteIn((ev) => {
+        const frame = Math.round(eventTime(ctx, ev) * ctx.sampleRate);
+        node.port.postMessage(ev.on
+          ? { t: 'noteOn', note: ev.note, vel: ev.velocity, frame }
+          : { t: 'noteOff', note: ev.note, frame });
+      });
+      inst.setPitchBend = (semitones) => node.port.postMessage({ t: 'bend', value: Math.max(-1, Math.min(1, semitones / 2)) });
+      inst.allOff = () => node.port.postMessage({ t: 'allOff' });
+      inst.apply = () => node.port.postMessage({ t: 'patch', patch: {
+        frame: Math.round(inst.params.frame),
+        track: Math.round(inst.params.track),
+        tone: inst.params.tone,
+        pitch: inst.params.pitch,
+        volume: inst.params.volume,
+      } });
       return inst;
     },
   },
