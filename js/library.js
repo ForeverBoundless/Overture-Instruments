@@ -2,7 +2,7 @@ import { INSTRUMENTS } from './data/instruments.js';
 
 const normalizeSearchText = (value) => String(value ?? '')
   .normalize('NFKD')
-  .replace(/[\\u0300-\\u036f]/g, '')
+  .replace(/[\u0300-\u036f]/g, '')
   .toLowerCase()
   .replace(/[^a-z0-9]+/g, ' ')
   .trim();
@@ -157,7 +157,7 @@ const searchableInstruments = INSTRUMENTS.map((instrument) => {
   return {
     tile,
     searchText,
-    compactText: searchText.replace(/\\s+/g, ''),
+    compactText: searchText.replace(/\s+/g, ''),
   };
 });
 
@@ -174,7 +174,7 @@ function updateInstrumentSearch() {
   const rawQuery = searchInput.value.trim();
   const normalizedQuery = normalizeSearchText(rawQuery);
   const terms = normalizedQuery.split(' ').filter(Boolean);
-  const compactQuery = normalizedQuery.replace(/\\s+/g, '');
+  const compactQuery = normalizedQuery.replace(/\s+/g, '');
   let visibleCount = 0;
 
   searchableInstruments.forEach(({ tile, searchText, compactText }) => {
