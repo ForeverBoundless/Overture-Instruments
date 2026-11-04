@@ -3,7 +3,7 @@
  * pan. The voices intentionally own all phase/filter/envelope state. */
 /* global sampleRate, registerProcessor, AudioWorkletProcessor */
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
-const DEF = { cutoff: .58, resonance: .16, filterEnv: .48, filterMode: 'low', osc1: .7, osc2: .65, tune: 0.02, pulse: .5, attack: .08, decay: .35, sustain: .7, master: .7, lfoRate: .18, lfoAmount: .08, bendRange: 2 };
+const DEF = { cutoff: .58, resonance: .16, filterEnv: .48, filterMode: 'low', osc1: .7, osc2: .65, tune: 0.02, pulse: .5, wave1: 'saw', wave2: 'pulse', attack: .08, decay: .35, sustain: .7, release: .32, master: .7, lfoRate: .18, lfoAmount: .08, lfoTarget: 'pitch', bendRange: 2 };
 const polyBlep = (t, dt) => {
   if (t < dt) { t /= dt; return t + t - t * t - 1; }
   if (t > 1 - dt) { t = (t - 1) / dt; return t * t + t + t + 1; }
@@ -56,7 +56,7 @@ class EightVoiceProcessor extends AudioWorkletProcessor {
     const d = .01 + this.p.decay * this.p.decay * 4;
     if (v.stage === 'attack') { v.env1 += (1.1 - v.env1) / (sr * a / 3); v.env2 += (1.1 - v.env2) / (sr * a / 3); if (v.env1 >= 1) v.stage = 'decay'; }
     else if (v.stage === 'decay') { v.env1 += (this.p.sustain - v.env1) / (sr * d / 4); v.env2 += (this.p.sustain - v.env2) / (sr * d / 4); }
-    else if (v.stage === 'release') { v.env1 *= Math.exp(-1 / (sr * .18)); v.env2 *= Math.exp(-1 / (sr * .2)); if (v.env1 < .0001) { v.active = false; v.stage = 'idle'; } }
+    else if (v.stage === 'release') { const release = .015 + this.p.release * this.p.release * 4; v.env1 *= Math.exp(-1 / (sr * release)); v.env2 *= Math.exp(-1 / (sr * release * 1.06)); if (v.env1 < .0001) { v.active = false; v.stage = 'idle'; } }
   }
   process(_inputs, outputs) {
     const out = outputs[0]; const L = out[0]; const R = out[1] || L; const sr = sampleRate;
@@ -69,16 +69,20 @@ class EightVoiceProcessor extends AudioWorkletProcessor {
         v.lfo += (0.1 * Math.pow(300, this.p.lfoRate)) / sr; if (v.lfo >= 1) v.lfo -= 1;
         const lfo = Math.sin(v.lfo * Math.PI * 2) * (this.p.lfoAmount + this.mod * .15);
         const drift = ((i - 3.5) * .006) + (q.tune || 0);
-        const hz = midiHz(v.target + this.bend * this.p.bendRange + lfo * 1.8) * Math.pow(2, drift / 12);
+        const pitchMod = this.p.lfoTarget === 'pitch' ? lfo * 1.8 : 0;
+        const hz = midiHz(v.target + this.bend * this.p.bendRange + pitchMod) * Math.pow(2, drift / 12);
         const inc1 = hz / sr; const inc2 = hz * Math.pow(2, (this.p.tune * 12 + (q.detune || 0)) / 12) / sr;
         v.phase1 += inc1; v.phase2 += inc2; if (v.phase1 >= 1) v.phase1 -= 1; if (v.phase2 >= 1) v.phase2 -= 1;
         const pulse = clamp(this.p.pulse + lfo * .15, .05, .95);
-        const source = wave(v.phase1, pulse, inc1) * this.p.osc1 * .5 + wave(v.phase2, .5, inc2) * this.p.osc2 * .5;
-        const cutoff = 30 * Math.pow(2, 8.5 * (this.p.cutoff + this.p.filterEnv * v.env2));
-        const g = Math.min(.95, 2 * Math.sin(Math.PI * Math.min(cutoff, sr * .45) / sr));
-        v.lp += g * v.bp; v.hp = source - v.lp - (1 - this.p.resonance * .92) * v.bp; v.bp += g * v.hp;
-        const mode = this.p.filterMode; const filtered = mode === 'high' ? v.hp : mode === 'band' ? v.bp : mode === 'notch' ? v.lp + v.hp : v.lp;
-        const level = v.env1 * (q.level ?? .85) * .16; const pan = clamp(v.pan + (q.pan || 0), -1, 1);
+        const osc1 = (q.wave1 ?? this.p.wave1) === 'pulse' ? wave(v.phase1, pulse, inc1) : saw(v.phase1, inc1);
+        const osc2 = (q.wave2 ?? this.p.wave2) === 'saw' ? saw(v.phase2, inc2) : wave(v.phase2, pulse, inc2);
+        const source = osc1 * (q.osc1 ?? this.p.osc1) * .5 + osc2 * (q.osc2 ?? this.p.osc2) * .5;
+        const cutoff = 30 * Math.pow(2, 8.5 * clamp((q.cutoff ?? this.p.cutoff) + (this.p.lfoTarget === 'filter' ? lfo : 0) + (q.filterEnv ?? this.p.filterEnv) * v.env2, 0, 1));
+        const g = Math.min(.5, 2 * Math.sin(Math.PI * Math.min(cutoff, sr * .42) / sr));
+        const damping = 1.8 - clamp(q.resonance ?? this.p.resonance, 0, .85) * 1.65;
+        v.lp += g * v.bp; v.hp = source - v.lp - damping * v.bp; v.bp += g * v.hp;
+        const mode = q.filterMode ?? this.p.filterMode; const filtered = mode === 'high' ? v.hp : mode === 'band' ? v.bp : mode === 'notch' ? v.lp + v.hp : v.lp;
+        const level = v.env1 * (q.level ?? .85) * .16; const pan = clamp((q.pan ?? v.pan), -1, 1);
         left += filtered * level * (1 - pan) * .5; right += filtered * level * (1 + pan) * .5;
       });
       const gain = Math.tanh(this.p.master * 1.35); L[n] = Math.tanh(left * gain); R[n] = Math.tanh(right * gain);

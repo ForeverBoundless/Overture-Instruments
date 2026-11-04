@@ -23,3 +23,43 @@
   .eight-voice-grid .pn-section { min-height: 0; }
   .eight-voice-grid .pn-knob { transform: none; }
 }
+
+/* Refined Eight Voice panel: eight distinct SEM strips, with enough room for
+   the individual oscillator, filter, pan and tuning controls. */
+.eight-shell .pn-header { align-items: center; min-height: 58px; }
+.eight-shell .pn-brand img { width: 116px; height: 26px; object-fit: contain; }
+.eight-shell .pn-model b { font-size: 18px; letter-spacing: .16em; }
+.eight-shell .pn-model span { font-size: 8px; }
+.eight-shell .pn-display { min-width: 225px; }
+.eight-global { grid-template-columns: minmax(260px,1.15fr) minmax(260px,1.25fr) minmax(320px,1.55fr); }
+.eight-global .pn-section { min-height: 168px; }
+.eight-global .pn-body { align-content: flex-start; }
+.eight-global .pn-select { min-width: 122px; }
+.eight-voice-grid { grid-template-columns: repeat(4,minmax(0,1fr)); gap: 9px; }
+.eight-voice-grid .pn-section { min-height: 0; padding: 10px; }
+.eight-voice-grid .pn-section h2 { display: flex; align-items: baseline; justify-content: space-between; font-size: 10px; }
+.eight-voice-grid .pn-section h2 span { font-size: 7px; }
+.eight-voice-grid .pn-knobs { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); justify-items: center; gap: 9px 3px; }
+.eight-voice-grid .pn-knob { transform: none; margin: 0; min-width: 0; }
+.eight-voice-grid .pn-knob .lp-knob-label { max-width: 66px; font-size: 6px; }
+.eight-shell .pn-section { background: linear-gradient(150deg, rgba(34,50,57,.95), rgba(12,19,24,.98)); }
+.eight-shell .pn-section h2 { border-bottom-color: rgba(139,232,209,.18); }
+.eight-shell .pn-select select { border-color: #45636a; background: #071419; }
+.eight-shell .pn-footer { padding-top: 5px; border-top: 1px solid rgba(139,232,209,.12); }
+@media (max-width: 1180px) {
+  .eight-global { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .eight-voice-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+}
+@media (max-width: 680px) {
+  .eight-global,.eight-voice-grid { grid-template-columns: 1fr; }
+  .eight-voice-grid .pn-knobs { grid-template-columns: repeat(3,minmax(0,1fr)); }
+  .eight-shell .pn-header-right { width: 100%; margin-left: 0; }
+  .eight-shell .pn-display { min-width: 0; flex: 1 1 180px; }
+}
+
+.eight-voice-grid .pn-select { min-width: 0; flex: 1 1 86px; }
+.eight-voice-grid .pn-select select { width: 100%; min-width: 0; }
+.eight-voice-grid .pn-body > .pn-select { min-width: 88px; }
+@media (max-width: 680px) {
+  .eight-voice-grid .pn-body > .pn-select { flex: 1 1 30%; }
+}
