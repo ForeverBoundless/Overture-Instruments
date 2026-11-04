@@ -81,7 +81,7 @@ class EightVoiceProcessor extends AudioWorkletProcessor {
         const g = Math.min(.5, 2 * Math.sin(Math.PI * Math.min(cutoff, sr * .42) / sr));
         const damping = 1.8 - clamp(q.resonance ?? this.p.resonance, 0, .85) * 1.65;
         v.lp += g * v.bp; v.hp = source - v.lp - damping * v.bp; v.bp += g * v.hp;
-        const mode = this.p.filterMode; const filtered = mode === 'high' ? v.hp : mode === 'band' ? v.bp : mode === 'notch' ? v.lp + v.hp : v.lp;
+        const mode = q.filterMode ?? this.p.filterMode; const filtered = mode === 'high' ? v.hp : mode === 'band' ? v.bp : mode === 'notch' ? v.lp + v.hp : v.lp;
         const level = v.env1 * (q.level ?? .85) * .16; const pan = clamp((q.pan ?? v.pan), -1, 1);
         left += filtered * level * (1 - pan) * .5; right += filtered * level * (1 + pan) * .5;
       });
