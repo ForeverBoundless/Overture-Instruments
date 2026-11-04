@@ -101,10 +101,10 @@ test('OMNI performance deck keeps octave controls in the keyboard header and giv
   assert.match(css, /grid-template-columns:88px minmax\(0,1fr\)/);
   assert.match(css, /\.omni-keys \.lp-keyboard[^}]*width:100%/);
   assert.match(css, /\.omni-keys \.lp-keyboard[^}]*min-width:520px/);
-  assert.match(page, /omni\.css\?v=20261104-sem-mellotron/);
+  assert.match(page, /omni\.css\?v=20261103-chord-sliders-32/);
   assert.match(page, /omni\.js\?v=20261104-sem-mellotron/);
   assert.match(worker, /overture-shell-v30/);
-  assert.match(worker, /omni\.css\?v=20261104-sem-mellotron/);
+  assert.match(worker, /omni\.css\?v=20261103-chord-sliders-32/);
   assert.match(worker, /omni\.js\?v=20261104-sem-mellotron/);
 });
 
@@ -178,7 +178,7 @@ test('OMNI wordmark explicitly uses Inter Variable', async () => {
   const page = await readFile(new URL('../omni.html', import.meta.url), 'utf8');
   const worker = await readFile(new URL('../service-worker.js', import.meta.url), 'utf8');
   assert.match(css, /\.omni-logo-wording strong\s*\{[^}]*font-family:\s*'Inter Variable'/s);
-  assert.match(page, /omni\.css\?v=20261104-sem-mellotron/);
+  assert.match(page, /omni\.css\?v=20261103-chord-sliders-32/);
   assert.match(worker, /overture-shell-v30/);
 });
 
