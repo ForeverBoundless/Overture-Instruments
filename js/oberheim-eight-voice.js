@@ -57,7 +57,7 @@ class EightVoiceApp {
     this.ui.release = knob(ek, { label: 'RELEASE', min: 0, max: 1, value: DEF.release, formatValue: (v) => `${(v * v * 4).toFixed(2)} s`, onChange: (v) => this.set('release', v) });
     this.ui.lfoRate = knob(ek, { label: 'LFO RATE', min: 0, max: 1, value: DEF.lfoRate, onChange: (v) => this.set('lfoRate', v) });
     this.ui.lfoTarget = select(env.body, 'LFO ROUTING', [{ value: 'pitch', label: 'VIBRATO / PITCH' }, { value: 'filter', label: 'FILTER MOD' }], DEF.lfoTarget, (v) => this.set('lfoTarget', v));
-    this.ui.bendRange = knob(ek, { label: 'BEND RANGE', min: 0, max: 1, value: (DEF.bendRange - 1) / 11, formatValue: (v) => `${Math.round(1 + v * 11)} st`, onChange: (v) => this.set('bendRange', Math.round(1 + v * 11)) });
+    this.ui.bendRange = knob(ek, { label: 'BEND RANGE', min: 1, max: 12, value: DEF.bendRange, formatValue: (v) => `${Math.round(v)} st`, onChange: (v) => this.set('bendRange', Math.round(v)) });
     this.ui.master = knob(ek, { label: 'MASTER', min: 0, max: 1, value: DEF.master, onChange: (v) => { this.set('master', v); this.engine.setVolume(v); } });
     const voices = el('div', 'eight-voice-grid', rows);
     for (let i = 0; i < 8; i += 1) this.buildVoice(voices, i);
