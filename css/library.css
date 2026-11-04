@@ -3896,8 +3896,7 @@ html[data-theme="light"] #launcher-page .library-search__hint { color: #708095; 
 .instrument-tile--oberheim-eight-voice .instrument-tile__visual {
   overflow: hidden;
 }
-.instrument-tile--mellotron-m400 .instrument-tile__keys,
-.instrument-tile--oberheim-eight-voice .instrument-tile__keys {
+.instrument-tile--mellotron-m400 .instrument-tile__keys {
   filter: saturate(.94) sepia(.06);
 }
 .instrument-tile--mellotron-m400 {
