@@ -1,4 +1,4 @@
-const CACHE = 'overture-shell-v28';
+const CACHE = 'overture-shell-v29';
 const APP_SHELL = [
   '/account',
   '/css/account.css?v=20261102-contributions-menu',
@@ -120,13 +120,14 @@ const APP_SHELL = [
   '/js/nord-c2d.js',
   '/js/omni-launch.js',
   '/js/omni.js',
-  '/js/omni.js?v=20261103-chord-sliders-32b',
+  '/js/omni.js?v=20261104-sem-mellotron',
   '/ui/Wheel.js',
   '/js/omni/graph.js',
-  '/js/omni/graph.js?v=20261103-chord-sliders-32b',
+  '/js/omni/graph.js?v=20261104-sem-mellotron',
   '/js/omni/modules.js',
-  '/js/omni/modules.js?v=20261103-chord-sliders-32b',
+  '/js/omni/modules.js?v=20261104-sem-mellotron',
   '/js/omni/templates.js',
+  '/js/omni/templates.js?v=20261104-sem-mellotron',
   '/js/prophet10.js',
   '/js/roland-juno-106.js',
   '/js/roland-tr-808.js',
