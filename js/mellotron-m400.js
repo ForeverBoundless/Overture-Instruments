@@ -44,7 +44,7 @@ class MellotronApp {
   constructor() {
     this.engine = new WorkletEngine(new URL('./engine/MellotronProcessor.js', import.meta.url).href, 'mellotron-processor');
     this.patch = { ...DEF }; this.ui = {};
-    this.store = new PresetStore({ key: 'overture.mellotron-m400.frames', version: 2, validate });
+    this.store = new PresetStore({ key: 'overture.mellotron-m400.frames', version: 1, validate });
     this.build();
     this.perf = performance(this.shell, { notes: NOTES, wheels: false, started: () => this.engine.started, midiStatusEl: this.midi, handlers: {
       noteOn: (n, v) => this.engine.noteOn(n, v), noteOff: (n) => this.engine.noteOff(n), bend: (v) => this.engine.setPitchBend(v),
