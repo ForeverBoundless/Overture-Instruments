@@ -1016,3 +1016,88 @@ body.little-phatty-body {
     transition: none;
   }
 }
+
+
+/* Final viewport sizing correction: include chassis padding in its width and
+   allow the instrument to reflow instead of forcing a desktop-sized canvas. */
+.little-phatty-body,
+.little-phatty-body #app-root {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+}
+.little-phatty-body {
+  margin: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+.little-phatty-body #app-root {
+  display: block;
+  min-height: 100vh;
+  height: auto;
+  padding: 26px 14px 38px;
+}
+.little-phatty-body #chassis {
+  box-sizing: border-box;
+  width: min(1510px, 100%);
+  min-width: 0;
+  max-width: 100%;
+  margin-inline: auto;
+  padding-inline: 46px;
+  transform: none !important;
+  left: auto;
+  right: auto;
+}
+.little-phatty-body #panel,
+.little-phatty-body #sections-row,
+.little-phatty-body #lower-row,
+.little-phatty-body #keyboard-block {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+}
+.little-phatty-body #sections-row > .lp-section {
+  box-sizing: border-box;
+  min-width: 0;
+}
+.little-phatty-body #lower-row { grid-template-columns: 112px minmax(0, 1fr); }
+
+@media (max-width: 760px) {
+  .little-phatty-body #app-root { padding: 18px 8px 28px; }
+  .little-phatty-body #chassis {
+    width: 100%;
+    min-width: 0;
+    padding-inline: 12px;
+  }
+  .little-phatty-body #chassis::before,
+  .little-phatty-body #chassis::after { width: 12px; }
+  .little-phatty-body #sections-row {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "master" "lfo" "osc" "filter" "env" "output";
+    grid-auto-rows: auto;
+    gap: 10px;
+  }
+  .little-phatty-body #sections-row > .lp-section { padding: 30px 12px 14px; }
+  .little-phatty-body #sections-row > .lp-section:nth-child(1) { gap: 12px; padding: 14px; }
+  .little-phatty-body .lp-section-knobs { gap: 9px 10px; }
+  .little-phatty-body #lower-row {
+    grid-template-columns: 82px minmax(0, 1fr);
+    gap: 8px;
+    padding: 8px;
+  }
+  .little-phatty-body #chassis-bottom-cap { margin-inline: -12px; }
+}
+
+@media (max-width: 520px) {
+  .little-phatty-body #sections-row > .lp-section { padding-inline: 10px; }
+  .little-phatty-body .lp-knob { --knob-size: 44px !important; min-width: 44px; }
+  .little-phatty-body #lower-row {
+    grid-template-columns: 76px minmax(0, 1fr);
+    padding: 6px;
+    gap: 6px;
+  }
+  .little-phatty-body #wheel-housing-block { gap: 7px; padding: 4px 2px; }
+  .little-phatty-body .lp-wheel { width: 30px; }
+  .little-phatty-body .lp-wheel-housing { width: 27px; height: 72px; }
+  .little-phatty-body .lp-keyboard { height: 100px; }
+}
