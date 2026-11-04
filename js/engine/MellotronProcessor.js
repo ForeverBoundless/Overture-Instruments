@@ -55,7 +55,7 @@ class MellotronProcessor extends AudioWorkletProcessor {
     super();
     this.p = { ...DEFAULT };
     this.voices = Array.from({ length: 35 }, () => new TapeVoice());
-    this.bend = 0; this.last = 0; this.master = 0; this.scheduled = [];
+    this.bend = 0; this.last = 0; this.master = 0; this.tone = DEFAULT.tone; this.scheduled = [];
     this.port.onmessage = (e) => this.message(e.data);
   }
 
@@ -124,9 +124,13 @@ class MellotronProcessor extends AudioWorkletProcessor {
 
   process(_inputs, outputs) {
     const out = outputs[0]; const L = out[0]; const R = out[1] || L; const sr = sampleRate;
-    // These controls are shared by every active voice and are constant for
-    // this render quantum. Calculate their filter coefficients only once.
-    const toneCutoff = 1100 + clamp(this.p.tone, 0, 1) * 7900;
+    // Smooth tone changes across render quanta so preset and control changes
+    // cannot abruptly alter every active voice's filter coefficient.
+    const targetTone = clamp(this.p.tone, 0, 1);
+    this.tone += (targetTone - this.tone) * (1 - Math.exp(-L.length / (sr * 0.025)));
+    // These filter coefficients are shared by every voice and reused for the
+    // whole render quantum rather than recalculated inside the voice loop.
+    const toneCutoff = 1100 + this.tone * 7900;
     const alpha = 1 - Math.exp(-2 * Math.PI * toneCutoff / sr);
     const stereoAlpha = 1 - Math.exp(-2 * Math.PI * Math.max(500, toneCutoff * .94) / sr);
     const releaseSeconds = Math.max(0.08, Number(this.p.release) || DEFAULT.release);
@@ -175,8 +179,8 @@ class MellotronProcessor extends AudioWorkletProcessor {
         const attackProgress = clamp(v.pos / attackTime, 0, 1);
         const attack = attackProgress * attackProgress * (3 - 2 * attackProgress);
         const tapeEnd = Math.max(0, 1 - v.pos / (sr * 8));
-        v.env += (1 - v.env) * .0018;
         if (v.releasing) v.env *= releaseCoeff;
+        else v.env += (1 - v.env) * .0018;
         if (v.env < .0001 || tapeEnd <= 0) { v.active = false; continue; }
 
         const raw = (sample * (.2 + sound.body * .17) + tapeNoise) * attack * tapeEnd * v.env * v.vel;
