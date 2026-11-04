@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { LiveGraph, connectionError, defaultPatch, validatePatch } from '../js/omni/graph.js';
-import { MODULES, modulePorts } from '../js/omni/modules.js';
-import { TEMPLATES } from '../js/omni/templates.js';
+import { LiveGraph, connectionError, defaultPatch, validatePatch } from '../js/omni/graph.js?v=20261104-sem-mellotron';
+import { MODULES, modulePorts } from '../js/omni/modules.js?v=20261104-sem-mellotron';
+import { TEMPLATES } from '../js/omni/templates.js?v=20261104-sem-mellotron';
 
 test('default OMNI patch validates and rejects audio feedback', () => {
   const patch = validatePatch(defaultPatch());
