@@ -89,37 +89,11 @@ class App {
       this._syncKnobsToPatch(initial.patch);
       if (initial.source === 'factory' && this._presetSelect) { this._presetSelect.value = initial.presetId; this.oled?.showPreset(initial.presetId, initial.patch.name); }
     }
-    this._fitToViewport();
-    window.addEventListener('resize', () => this._scheduleFit());
+    // The Little Phatty uses the same natural, scrollable page flow as the
+    // other emulators. CSS handles viewport changes without shrinking the
+    // entire instrument and making its controls difficult to read.
 
     this.midi.init(); // safe no-op if unsupported/denied; never blocks keyboard input
-  }
-
-  /**
-   * Scales #chassis down (never up) so the full instrument - panel, wheels,
-   * and keyboard together - always fits within the current viewport,
-   * including the 1366x768 target this build was specifically required to
-   * fit. Implemented as a runtime measurement + transform rather than
-   * hand-tuned CSS, because font-metric and box-model variance across
-   * browsers/OSes makes hand-tuned pixel budgets fragile; measuring the
-   * real rendered size and scaling to fit is exact by construction.
-   */
-  _fitToViewport() {
-    const chassis = document.getElementById('chassis');
-    if (!chassis) return;
-    const margin = 20;
-    const availW = window.innerWidth - margin * 2;
-    const availH = window.innerHeight - margin * 2;
-
-    chassis.style.transform = 'translate(-50%, -50%) scale(1)';
-    const rect = chassis.getBoundingClientRect();
-    const scale = Math.min(1, availW / rect.width, availH / rect.height);
-    chassis.style.transform = `translate(-50%, -50%) scale(${scale})`;
-  }
-
-  _scheduleFit() {
-    if (this._fitRAF) cancelAnimationFrame(this._fitRAF);
-    this._fitRAF = requestAnimationFrame(() => this._fitToViewport());
   }
 
   // -------------------------------------------------------------------
