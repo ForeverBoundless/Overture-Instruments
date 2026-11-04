@@ -1,7 +1,7 @@
 /** omni.js - OMNI modular instrument designer: library, canvas, inspector, toolbar, performance input. */
-import { MODULES, CATEGORIES, SIGNAL_COLORS, modulePorts } from './omni/modules.js?v=20261103-chord-sliders-32b';
-import { defaultPatch, validatePatch, connectionError, LiveGraph, patchToSVG, defaultParams } from './omni/graph.js?v=20261103-chord-sliders-32b';
-import { TEMPLATES, templatePreview } from './omni/templates.js';
+import { MODULES, CATEGORIES, SIGNAL_COLORS, modulePorts } from './omni/modules.js?v=20261104-sem-mellotron';
+import { defaultPatch, validatePatch, connectionError, LiveGraph, patchToSVG, defaultParams } from './omni/graph.js?v=20261104-sem-mellotron';
+import { TEMPLATES, templatePreview } from './omni/templates.js?v=20261104-sem-mellotron';
 import { PresetStore, downloadText, pickFile } from './shared/presetStore.js';
 import { AudioRecorder } from './shared/audioRecorder.js';
 import { MidiRecorder } from './shared/midiRecorder.js';
