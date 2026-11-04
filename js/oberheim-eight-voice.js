@@ -66,15 +66,31 @@ class EightVoiceApp {
     footer(this.shell, 'EIGHT VOICE · 8 INDEPENDENT SEMs · 49 KEYS · STATE VARIABLE FILTER · ESC PANIC');
   }
   buildVoice(parent, index) {
-    const sec = section(parent, `VOICE ${index + 1}`, 'SEM');
-    const knobs = el('div', 'pn-knobs', sec.body); const state = { level: null, pan: null, tune: null };
-    state.level = knob(knobs, { label: 'LEVEL', min: 0, max: 1, value: .85, onChange: (v) => this.engine.post({ t: 'param', key: `voice${index}_level`, value: v }) });
-    state.pan = knob(knobs, { label: 'PAN', min: -1, max: 1, value: (index - 3.5) / 5, formatValue: (v) => `${v < 0 ? 'L' : 'R'}${Math.round(Math.abs(v) * 100)}`, onChange: (v) => this.engine.post({ t: 'param', key: `voice${index}_pan`, value: v }) });
-    state.tune = knob(knobs, { label: 'DRIFT', min: -.2, max: .2, value: 0, formatValue: (v) => `${v >= 0 ? '+' : ''}${Math.round(v * 100)} ct`, onChange: (v) => this.engine.post({ t: 'param', key: `voice${index}_tune`, value: v }) });
+    const sec = section(parent, `VOICE ${index + 1}`, 'INDEPENDENT SEM');
+    const knobs = el('div', 'pn-knobs', sec.body);
+    const state = {};
+    const initial = this.patch.voices?.[index] || {};
+    const control = (key, label, min, max, fallback, formatValue) => {
+      state[key] = knob(knobs, {
+        label, min, max, value: initial[key] ?? fallback, formatValue,
+        onChange: (v) => this.engine.post({ t: 'param', key: `voice${index}_${key}`, value: v }),
+      });
+    };
+    control('level', 'LEVEL', 0, 1, .85, (v) => `${Math.round(v * 100)}%`);
+    control('pan', 'STEREO PAN', -1, 1, (index - 3.5) / 5, (v) => `${v < 0 ? 'L' : 'R'}${Math.round(Math.abs(v) * 100)}`);
+    control('tune', 'FINE TUNE', -.2, .2, 0, (v) => `${v >= 0 ? '+' : ''}${Math.round(v * 100)} ct`);
+    control('cutoff', 'VCF CUTOFF', 0, 1, this.patch.cutoff, (v) => `${Math.round(v * 100)}%`);
+    control('resonance', 'VCF RES', 0, .85, this.patch.resonance, (v) => `${Math.round(v * 100)}%`);
+    control('osc1', 'VCO 1 LEVEL', 0, 1, this.patch.osc1, (v) => `${Math.round(v * 100)}%`);
+    control('osc2', 'VCO 2 LEVEL', 0, 1, this.patch.osc2, (v) => `${Math.round(v * 100)}%`);
     this.voiceUi[index] = state;
   }
   refresh() {
     Object.entries(this.patch).forEach(([key, value]) => { if (this.ui[key]?.setValue) this.ui[key].setValue(value, true); });
+    this.voiceUi.forEach((voice, index) => Object.entries(voice).forEach(([key, control]) => {
+      const fallback = key === 'pan' ? (index - 3.5) / 5 : key === 'level' ? .85 : key === 'tune' ? 0 : this.patch[key] ?? 0;
+      control.setValue(this.patch.voices?.[index]?.[key] ?? fallback, true);
+    }));
     this.engine.post({ t: 'patch', patch: this.patch });
   }
 }
