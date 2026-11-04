@@ -1,4 +1,4 @@
-const CACHE = 'overture-shell-v29';
+const CACHE = 'overture-shell-v30';
 const APP_SHELL = [
   '/account',
   '/css/account.css?v=20261102-contributions-menu',
@@ -99,6 +99,7 @@ const APP_SHELL = [
   '/js/engine/MidiManager.js',
   '/js/engine/Mixer.js',
   '/js/engine/MellotronProcessor.js',
+  '/js/engine/MellotronProcessor.js?v=20261104-declick',
   '/js/engine/Noise.js',
   '/js/engine/NordC2DEngine.js',
   '/js/engine/Oscillator.js',
