@@ -1,5 +1,12 @@
 import { INSTRUMENTS } from './data/instruments.js';
 
+const normalizeSearchText = (value) => String(value ?? '')
+  .normalize('NFKD')
+  .replace(/[\\u0300-\\u036f]/g, '')
+  .toLowerCase()
+  .replace(/[^a-z0-9]+/g, ' ')
+  .trim();
+
 const spec = (label, value, icon) => `<div class="instrument-spec"><span class="material-symbols-rounded">${icon}</span><span>${label}</span><strong>${value}</strong></div>`;
 
 function buildTile(instrument) {
@@ -94,6 +101,17 @@ page.innerHTML = `<div class="launcher-ambient launcher-ambient--one" aria-hidde
       <img src="/ui/Logos/Korg_logo.png" alt="Korg">
     </div>
   </div>
+</section><section class="library-search" role="search" aria-label="Search the instrument library">
+  <div class="library-search__field">
+    <label class="library-search__label" for="instrument-search">Search instruments</label>
+    <span class="material-symbols-rounded library-search__icon" aria-hidden="true">search</span>
+    <input id="instrument-search" type="search" autocomplete="off" spellcheck="false" placeholder="Search brands, instruments, voices, features..." aria-describedby="instrument-search-status">
+    <button class="library-search__clear" type="button" aria-label="Clear search" hidden><span class="material-symbols-rounded" aria-hidden="true">close</span></button>
+  </div>
+  <div class="library-search__meta">
+    <span id="instrument-search-status" role="status" aria-live="polite">8 instruments available</span>
+    <span class="library-search__hint">Search by brand, model, voice, or feature</span>
+  </div>
 </section><section class="instrument-grid" aria-label="Available instruments"></section><footer class="launcher-footer"><span>04 AVAILABLE INSTRUMENTS</span><span>SELECT A TILE TO CONTINUE</span></footer>
 <div class="launcher-legal">
   © 2026 Overture Instruments. Independent, unofficial project. Not affiliated with, endorsed by, or sponsored by any manufacturer represented here.
@@ -112,7 +130,77 @@ page.innerHTML = `<div class="launcher-ambient launcher-ambient--one" aria-hidde
   }
 }
 const grid = page.querySelector('.instrument-grid');
-INSTRUMENTS.forEach((instrument) => grid.appendChild(buildTile(instrument)));
+const searchableInstruments = INSTRUMENTS.map((instrument) => {
+  const tile = buildTile(instrument);
+  grid.appendChild(tile);
+
+  // Search the complete card metadata, not only its visible title. Include
+  // field names so terms such as "brand", "voice", and "keybed" are useful too.
+  const searchableValues = [
+    instrument.id,
+    instrument.name,
+    instrument.model,
+    'model subtitle',
+    instrument.manufacturer,
+    'brand',
+    instrument.voiceMode,
+    'voice voice mode',
+    instrument.presets,
+    'presets programs patches patterns',
+    instrument.keys,
+    'keys keybed',
+    instrument.presetProvenance,
+    instrument.description,
+  ];
+  const searchText = normalizeSearchText(searchableValues.join(' '));
+
+  return {
+    tile,
+    searchText,
+    compactText: searchText.replace(/\\s+/g, ''),
+  };
+});
+
+const searchInput = page.querySelector('#instrument-search');
+const searchClear = page.querySelector('.library-search__clear');
+const searchStatus = page.querySelector('#instrument-search-status');
+const emptyState = document.createElement('div');
+emptyState.className = 'library-search__empty';
+emptyState.hidden = true;
+emptyState.innerHTML = `<span class="material-symbols-rounded" aria-hidden="true">search_off</span><strong>No instruments found</strong><p>Try another brand, model, voice type, or feature.</p>`;
+grid.insertAdjacentElement('afterend', emptyState);
+
+function updateInstrumentSearch() {
+  const rawQuery = searchInput.value.trim();
+  const normalizedQuery = normalizeSearchText(rawQuery);
+  const terms = normalizedQuery.split(' ').filter(Boolean);
+  const compactQuery = normalizedQuery.replace(/\\s+/g, '');
+  let visibleCount = 0;
+
+  searchableInstruments.forEach(({ tile, searchText, compactText }) => {
+    const matches = !terms.length
+      || terms.every((term) => searchText.includes(term))
+      || Boolean(compactQuery && compactText.includes(compactQuery));
+
+    tile.hidden = !matches;
+    if (matches) visibleCount += 1;
+  });
+
+  emptyState.hidden = visibleCount !== 0;
+  searchClear.hidden = !rawQuery;
+  searchStatus.textContent = !normalizedQuery
+    ? `${INSTRUMENTS.length} instruments available`
+    : visibleCount
+      ? `${visibleCount} of ${INSTRUMENTS.length} instruments`
+      : `No matches for “${rawQuery}”`;
+}
+
+searchInput.addEventListener('input', updateInstrumentSearch);
+searchClear.addEventListener('click', () => {
+  searchInput.value = '';
+  updateInstrumentSearch();
+  searchInput.focus();
+});
 
 const comingSoon = document.createElement('aside');
 comingSoon.className = `launcher-coming-soon ${INSTRUMENTS.length % 2 ? 'launcher-coming-soon--tile' : 'launcher-coming-soon--banner'}`;
