@@ -7,7 +7,7 @@ const DEF = { cutoff: .58, resonance: .16, filterEnv: .48, filterMode: 'low', os
 const validate = (data) => {
   if (!data || typeof data !== 'object') throw new Error('Not an Eight Voice program.');
   const out = { ...DEF };
-  Object.keys(DEF).forEach((key) => { if (!(key in data)) return; out[key] = key === 'filterMode' ? ['low', 'band', 'high', 'notch'].includes(data[key]) ? data[key] : DEF[key] : key === 'bendRange' ? num(data[key], 1, 12, 2) : num(data[key], 0, 1, DEF[key]); });
+  Object.keys(DEF).forEach((key) => { if (!(key in data)) return; out[key] = ['filterMode', 'wave1', 'wave2', 'lfoTarget'].includes(key) ? (key === 'filterMode' ? ['low', 'band', 'high', 'notch'].includes(data[key]) : key === 'lfoTarget' ? ['pitch', 'filter'].includes(data[key]) : ['saw', 'pulse'].includes(data[key])) ? data[key] : DEF[key] : key === 'bendRange' ? num(data[key], 1, 12, 2) : num(data[key], 0, 1, DEF[key]); });
   out.voices = Array.from({ length: 8 }, (_, i) => { const v = Array.isArray(data.voices) ? data.voices[i] || {} : {}; return { level: num(v.level, 0, 1, .85), pan: num(v.pan, -1, 1, (i - 3.5) / 5), tune: num(v.tune, -.2, .2, 0), detune: num(v.detune, -.2, .2, 0), cutoff: num(v.cutoff, 0, 1, out.cutoff), resonance: num(v.resonance, 0, .85, out.resonance), osc1: num(v.osc1, 0, 1, out.osc1), osc2: num(v.osc2, 0, 1, out.osc2), filterEnv: num(v.filterEnv, 0, 1, out.filterEnv) }; });
   return out;
 };
@@ -38,7 +38,7 @@ class EightVoiceApp {
     const ok = el('div', 'pn-knobs', osc.body);
     this.ui.osc1 = knob(ok, { label: 'VCO 1', min: 0, max: 1, value: DEF.osc1, formatValue: (v) => `${Math.round(v * 100)}%`, onChange: (v) => this.set('osc1', v) });
     this.ui.osc2 = knob(ok, { label: 'VCO 2', min: 0, max: 1, value: DEF.osc2, formatValue: (v) => `${Math.round(v * 100)}%`, onChange: (v) => this.set('osc2', v) });
-    this.ui.tune = knob(ok, { label: 'VCO 2 TUNE', min: 0, max: 1, value: DEF.tune, formatValue: (v) => `${(v * 24 - 12).toFixed(1)} st`, onChange: (v) => this.set('tune', v) });
+    this.ui.tune = knob(ok, { label: 'VCO 2 INTERVAL', min: 0, max: 1, value: DEF.tune, formatValue: (v) => `${(v * 12).toFixed(1)} st`, onChange: (v) => this.set('tune', v) });
     this.ui.wave1 = select(osc.body, 'VCO 1 WAVEFORM', [{ value: 'saw', label: 'SAWTOOTH' }, { value: 'pulse', label: 'PULSE' }], DEF.wave1, (v) => this.set('wave1', v));
     this.ui.wave2 = select(osc.body, 'VCO 2 WAVEFORM', [{ value: 'pulse', label: 'PULSE' }, { value: 'saw', label: 'SAWTOOTH' }], DEF.wave2, (v) => this.set('wave2', v));
     this.ui.pulse = knob(ok, { label: 'PULSE WIDTH', min: 0, max: 1, value: DEF.pulse, formatValue: (v) => `${Math.round(v * 100)}%`, onChange: (v) => this.set('pulse', v) });
