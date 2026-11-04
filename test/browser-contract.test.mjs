@@ -41,6 +41,8 @@ test('Little Phatty uses a grouped responsive layout without viewport shrinking'
   assert.match(styles, /@media \(max-width: 1180px\)/);
   assert.match(styles, /@media \(max-width: 760px\)/);
   assert.match(styles, /min-width: 680px/);
+  assert.match(styles, /#sections-row > \.lp-section > \.lp-section-title/);
+  assert.match(styles, /max-height: none/);
   assert.match(engine, /natural, scrollable page flow/);
   assert.doesNotMatch(engine, /availH = window\.innerHeight/);
   assert.match(page, /little-phatty\.css\?v=20261103-layout-rebuild/);
