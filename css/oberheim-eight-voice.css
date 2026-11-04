@@ -56,3 +56,10 @@
   .eight-shell .pn-header-right { width: 100%; margin-left: 0; }
   .eight-shell .pn-display { min-width: 0; flex: 1 1 180px; }
 }
+
+.eight-voice-grid .pn-select { min-width: 0; flex: 1 1 86px; }
+.eight-voice-grid .pn-select select { width: 100%; min-width: 0; }
+.eight-voice-grid .pn-body > .pn-select { min-width: 88px; }
+@media (max-width: 680px) {
+  .eight-voice-grid .pn-body > .pn-select { flex: 1 1 30%; }
+}
