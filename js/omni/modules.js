@@ -14,7 +14,7 @@ import { DX7_PRESETS } from '../data/dx7Presets.js';
 
 const DX7_URL = new URL('../engine/DX7Processor.js', import.meta.url).href;
 const SEM_URL = new URL('../engine/OberheimEightVoiceProcessor.js', import.meta.url).href;
-const MELLOTRON_URL = new URL('../engine/MellotronProcessor.js', import.meta.url).href;
+const MELLOTRON_URL = new URL('../engine/MellotronProcessor.js?v=20261104-declick', import.meta.url).href;
 const midiHz = (n) => 440 * Math.pow(2, (n - 69) / 12);
 const now = (ctx) => ctx.currentTime;
 
