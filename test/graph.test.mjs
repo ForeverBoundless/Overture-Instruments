@@ -267,3 +267,25 @@ test('mixer validation rejects input sockets above its selected channel count', 
   };
   assert.throws(() => validatePatch(patch), /destination port does not exist/);
 });
+
+test('SEM and Mellotron are distinct instrument-level OMNI sources with starter patches', () => {
+  assert.equal(MODULES.semSynth.name, 'SEM Poly Synth');
+  assert.equal(MODULES.mellotron.name, 'Mellotron Tape Voice');
+  assert.deepEqual(modulePorts({ type: 'semSynth', params: {} }, 'inputs').map((port) => port.id), ['note']);
+  assert.deepEqual(modulePorts({ type: 'mellotron', params: {} }, 'outputs').map((port) => port.id), ['out']);
+  assert.ok(MODULES.semSynth.params.some((parameter) => parameter.key === 'filterMode'));
+  assert.ok(MODULES.semSynth.params.some((parameter) => parameter.key === 'tune'));
+  assert.ok(MODULES.mellotron.params.some((parameter) => parameter.key === 'frame'));
+  assert.ok(MODULES.mellotron.params.some((parameter) => parameter.key === 'track'));
+  assert.ok(MODULES.mellotron.params.some((parameter) => parameter.key === 'release'));
+
+  const sem = TEMPLATES.find((template) => template.name === 'SEM Warm Ensemble');
+  const mellotron = TEMPLATES.find((template) => template.name === 'Mellotron Choir');
+  assert.ok(sem);
+  assert.ok(mellotron);
+  const semPatch = validatePatch(sem.patch);
+  const mellotronPatch = validatePatch(mellotron.patch);
+  assert.equal(semPatch.connections.some((wire) => wire.from.module === 'kb' && wire.to.module === 'sem'), true);
+  assert.equal(mellotronPatch.connections.some((wire) => wire.from.module === 'kb' && wire.to.module === 'mtr'), true);
+  assert.equal(mellotronPatch.modules.find((module) => module.id === 'mtr').params.frame, 1);
+});
