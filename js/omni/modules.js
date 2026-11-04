@@ -13,7 +13,7 @@ import { DX7_PRESETS } from '../data/dx7Presets.js';
 
 
 const DX7_URL = new URL('../engine/DX7Processor.js', import.meta.url).href;
-const SEM_URL = new URL('../engine/OberheimEightVoiceProcessor.js', import.meta.url).href;
+const SEM_URL = new URL('../engine/OberheimEightVoiceProcessor.js?v=20261104-eightvoice-stable', import.meta.url).href;
 const MELLOTRON_URL = new URL('../engine/MellotronProcessor.js?v=20261104-declick', import.meta.url).href;
 const midiHz = (n) => 440 * Math.pow(2, (n - 69) / 12);
 const now = (ctx) => ctx.currentTime;
@@ -302,16 +302,16 @@ export const MODULES = {
       P('wave1', 'VCO 1 waveform', 0, 1, 0, { options: ['Sawtooth', 'Pulse'] }),
       P('wave2', 'VCO 2 waveform', 0, 1, 0, { options: ['Sawtooth', 'Pulse'] }),
       P('pulse', 'Pulse width', 0.05, 0.95, 0.5),
-      P('cutoff', 'VCF cutoff (Hz)', 30, 12000, 450, { log: true }),
-      P('resonance', 'VCF resonance', 0, 0.85, 0.08),
-      P('filterEnv', 'Filter envelope amount', 0, 1, 0.28),
+      P('cutoff', 'VCF cutoff (Hz)', 30, 12000, 530, { log: true }),
+      P('resonance', 'VCF resonance', 0, 0.85, 0.06),
+      P('filterEnv', 'Filter envelope amount', 0, 1, 0.2),
       P('filterMode', 'SEM filter response', 0, 3, 0, { options: ['Low-pass', 'Band-pass', 'High-pass', 'Notch'] }),
       P('attack', 'Amp attack (s)', 0.002, 1.8, 0.028, { log: true }),
       P('decay', 'Amp decay (s)', 0.01, 4.01, 0.66, { log: true }),
       P('sustain', 'Amp sustain', 0, 1, 0.7),
       P('release', 'Amp release (s)', 0.015, 4.015, 0.94, { log: true }),
       P('lfoRate', 'LFO rate (Hz)', 0.1, 30, 0.2, { log: true }),
-      P('lfoAmount', 'LFO depth', 0, 0.5, 0.018),
+      P('lfoAmount', 'LFO depth', 0, 0.5, 0),
       P('lfoTarget', 'LFO destination', 0, 1, 0, { options: ['Pitch', 'Filter'] }),
       P('level', 'Output level', 0, 1, 0.66),
     ],
