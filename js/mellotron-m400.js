@@ -4,7 +4,7 @@ import { el, section, knob, select, display, performance, power, presetBar, foot
 import { MELLOTRON_PRESETS } from './data/mellotronPresets.js';
 
 const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-const NOTES = Array.from({ length: 35 }, (_, i) => {
+const NOTES = Array.from({ length: 47 }, (_, i) => {
   const midi = 43 + i; return `${NOTE_NAMES[midi % 12]}${Math.floor(midi / 12) - 1}`;
 });
 const FRAMES = [
@@ -89,7 +89,7 @@ class MellotronApp {
     this.ui.pitch = knob(ck, { label: 'PITCH', min: -1, max: 1, value: DEF.pitch, formatValue: (v) => `${v >= 0 ? '+' : ''}${(v * 8).toFixed(1)}%`, onChange: (v) => this.set('pitch', v) });
     const memory = section(rows, 'FRAME MEMORY', 'OVERTURE TAPE REGISTRATIONS');
     this.presets = presetBar(memory.body, { factory: MELLOTRON_PRESETS, store: this.store, display: this.display, filename: 'mellotron-m400-frame', panic: () => this.perf.allOff(), apply: (data, name) => { this.patch = validate(data); this.refresh(); this.display.set(`FRAME  ${name}`, 'TAPE HEAD READY'); }, capture: () => ({ ...this.patch }) });
-    footer(this.shell, 'M400 · 35 NOTES · G2–F5 · THREE SELECTABLE TAPE TRACKS · FINITE 8-SECOND REPLAY · ESC PANIC');
+    footer(this.shell, 'M400 · 47 ON-SCREEN NOTES · G2–F6 · 35-KEY TAPE RANGE · THREE SELECTABLE TAPE TRACKS · FINITE 8-SECOND REPLAY · ESC PANIC');
     this.updateTapeReadout();
   }
   refresh() {
