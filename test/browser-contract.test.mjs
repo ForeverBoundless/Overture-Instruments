@@ -62,9 +62,14 @@ test('Little Phatty uses a grouped responsive layout without viewport shrinking'
   assert.match(sizingFix, /#chassis\s*\{[^}]*box-sizing:\s*border-box/);
   assert.match(sizingFix, /#chassis\s*\{[^}]*min-width:\s*0/);
   assert.match(styles, /grid-template-areas:[\s\S]*"master"[\s\S]*"lfo"[\s\S]*"output"/);
+  const compactLayout = styles.slice(styles.lastIndexOf('Compact, centred Little Phatty instrument'));
+  assert.match(compactLayout, /width: min\(1280px, 100%\)/);
+  assert.match(compactLayout, /grid-template-rows: minmax\(180px, auto\) minmax\(196px, auto\)/);
+  assert.match(compactLayout, /margin: 0 auto/);
+  assert.match(compactLayout, /@media \(max-width: 760px\)/);
   assert.match(engine, /natural, scrollable page flow/);
   assert.doesNotMatch(engine, /availH = window\.innerHeight/);
-  assert.match(page, /little-phatty\.css\?v=20261104-sizing-fix/);
+  assert.match(page, /little-phatty\.css\?v=20261104-compact-centred/);
 });
 
 test('Sub 37 side panels use the seeded wood grain from its Library tile', async () => {
@@ -228,7 +233,7 @@ test('The shared account menu works across site, OMNI, Library and all experimen
   assert.ok(omni.includes('/css/site-theme.css'));
   assert.ok(omni.includes('account-shell.js?v=20261102-contributions-menu'));
   assert.ok(library.includes('account-shell.js?v=20261102-contributions-menu'));
-  assert.ok(worker.includes('overture-shell-v24'));
+  assert.ok(worker.includes('overture-shell-v25'));
   assert.ok(worker.includes('account-shell.js?v=20261102-contributions-menu'));
   for (const page of experimentPages) {
     const html = await readFile(new URL(`../experiments/${page}.html`, import.meta.url), 'utf8');
@@ -299,5 +304,5 @@ test('Contribution page profile, toolbar and result counts have responsive align
   assert.ok(css.includes('.contributions-toolbar.is-owner'));
   assert.ok(css.includes('@media (max-width:380px)'));
   assert.ok(app.includes("classList.toggle('is-owner', state.isOwner)"));
-  assert.ok(worker.includes('overture-shell-v24'));
+  assert.ok(worker.includes('overture-shell-v25'));
 });
