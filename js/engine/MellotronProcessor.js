@@ -1,8 +1,6 @@
-/* M400-style tape replay model.
- * Each held key owns a finite, non-looping tape pass. This is a procedural
- * Each strip plays for approximately 8 seconds before reaching its end.
- * This is a procedural approximation, not a recording library: authentic Streetly tape recordings
- * require licensed source audio and are intentionally not fabricated here.
+/* M400-style finite tape replay model. Each note strip runs for 8 seconds.
+ * This is a procedural approximation, not a recording library. Authentic
+ * Streetly tape recordings require licensed source audio and are not fabricated.
  */
 /* global sampleRate, registerProcessor, AudioWorkletProcessor */
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
@@ -45,7 +43,7 @@ class TapeVoice {
     this.note = -1; this.gate = false; this.active = false; this.pos = 0;
     this.speed = 1; this.vel = 0; this.age = 0; this.seed = (Math.random() * 0x7fffffff) | 0;
     this.env = 0; this.releasing = false; this.phase = Math.random();
-    this.flutter = Math.random() * Math.PI * 2; this.filter = 0; this.tuning = 0;
+    this.flutter = Math.random() * Math.PI * 2; this.filter = 0; this.filterR = 0; this.tuning = 0; this.pan = 0;
   }
 }
 
@@ -73,7 +71,7 @@ class MellotronProcessor extends AudioWorkletProcessor {
     if (!v) v = this.voices.find((x) => !x.active) || this.voices.slice().sort((a, b) => a.age - b.age)[0];
     v.note = note; v.vel = vel; v.gate = true; v.active = true; v.pos = 0; v.age = ++this.last;
     v.env = 0; v.releasing = false; v.phase = Math.random(); v.flutter = Math.random() * Math.PI * 2;
-    v.filter = 0; v.tuning = (Math.random() - .5) * .0016;
+    v.filter = 0; v.filterR = 0; v.tuning = (Math.random() - .5) * .0016; v.pan = (Math.random() - .5) * .12;
   }
 
   noteOff(note) {
@@ -88,14 +86,14 @@ class MellotronProcessor extends AudioWorkletProcessor {
   process(_inputs, outputs) {
     const out = outputs[0]; const L = out[0]; const R = out[1] || L; const sr = sampleRate;
     for (let i = 0; i < L.length; i += 1) {
-      let mix = 0;
+      let mixL = 0; let mixR = 0;
       this.voices.forEach((v) => {
         if (!v.active) return;
         const frame = FRAMES[Math.round(clamp(this.p.frame, 0, FRAMES.length - 1))];
         const sound = frame[Math.round(clamp(this.p.track, 0, 2))];
         const noteHz = 440 * Math.pow(2, (v.note - 69) / 12);
-        const wow = Math.sin(v.pos * .00017 + v.flutter) * .0018 + Math.sin(v.pos * .000043) * .0035;
-        const flutter = Math.sin(v.pos * .0021 + v.flutter) * .0011;
+        const wow = Math.sin(v.pos * .00013 + v.flutter) * .0022 + Math.sin(v.pos * .000037 + v.flutter * .37) * .0031;
+        const flutter = Math.sin(v.pos * .0027 + v.flutter) * .00075 + Math.sin(v.pos * .0061 + v.flutter * 1.7) * .00022;
         const speed = Math.max(.25, Math.pow(2, (this.bend * 2) / 12) *
           (1 + clamp(this.p.pitch, -1, 1) * .08 + wow + flutter + v.tuning));
         v.phase += noteHz * speed / sr;
@@ -103,24 +101,32 @@ class MellotronProcessor extends AudioWorkletProcessor {
         let sample = 0;
         sound.partials.forEach((amp, n) => {
           const partialDrift = Math.sin(v.pos * (.00011 + n * .000017) + v.flutter * (n + 1)) * sound.detune * (n + 1);
-          sample += amp * Math.sin(2 * Math.PI * (v.phase * (n + 1) + partialDrift) + n * .27);
+          const partialPhase = v.phase * (n + 1) + partialDrift;
+          const stereoPhase = Math.sin(2 * Math.PI * (partialPhase + v.pan * (n + 1) * .001));
+          sample += amp * (Math.sin(2 * Math.PI * partialPhase + n * .27) * .985 + stereoPhase * .015);
         });
-        const tapeNoise = this.rand(v) * sound.noise * (.45 + .55 * Math.sin(v.pos * .00061) ** 2);
-        const attack = Math.min(1, v.pos / Math.max(1, sr * sound.attack));
+        const tapeNoise = this.rand(v) * sound.noise * (.35 + .65 * Math.sin(v.pos * .00061) ** 2);
+        const attackTime = Math.max(1, sr * sound.attack);
+        const attackProgress = clamp(v.pos / attackTime, 0, 1);
+        const attack = attackProgress * attackProgress * (3 - 2 * attackProgress);
         const tapeEnd = Math.max(0, 1 - v.pos / (sr * 8));
         v.env += (1 - v.env) * .0018;
         if (v.releasing) v.env *= Math.exp(-1 / (sr * .028));
         if (v.env < .0001 || tapeEnd <= 0) { v.active = false; return; }
-        const toneCutoff = 900 + this.p.tone * 10500;
+        const toneCutoff = 1100 + this.p.tone * 7900;
         const alpha = 1 - Math.exp(-2 * Math.PI * toneCutoff / sr);
-        const raw = (sample * (.15 + sound.body * .12) + tapeNoise) * attack * tapeEnd * v.env * v.vel;
+        const raw = (sample * (.2 + sound.body * .17) + tapeNoise) * attack * tapeEnd * v.env * v.vel;
         v.filter += alpha * (raw - v.filter);
-        mix += v.filter;
+        const stereoAlpha = 1 - Math.exp(-2 * Math.PI * Math.max(500, toneCutoff * .94) / sr);
+        v.filterR += stereoAlpha * ((raw * (1 + v.pan * .14)) - v.filterR);
+        const pan = clamp(v.pan, -.5, .5);
+        mixL += v.filter * (1 - pan);
+        mixR += v.filterR * (1 + pan);
         v.pos += speed;
       });
       this.master += (clamp(this.p.volume, 0, 1) - this.master) * .002;
-      const s = Math.tanh(mix * this.master * .9);
-      L[i] = s; R[i] = s;
+      L[i] = Math.tanh(mixL * this.master * .72);
+      R[i] = Math.tanh(mixR * this.master * .72);
     }
     return true;
   }

@@ -108,6 +108,19 @@ test('instrument and experiment pages register the shared offline app shell', as
   }
 });
 
+
+test('library mini-keybeds are shared except for the TR-808 and new art has no embedded labels', async () => {
+  const [libraryCss, libraryJs] = await Promise.all([
+    readFile(new URL('../css/library.css', import.meta.url), 'utf8'),
+    readFile(new URL('../js/library.js', import.meta.url), 'utf8'),
+  ]);
+  assert.match(libraryCss, /\.instrument-tile:not\(\.instrument-tile--roland-tr-808\) \.instrument-tile__keys/);
+  assert.match(libraryCss, /\.instrument-tile--roland-tr-808 \.instrument-tile__keys/);
+  assert.match(libraryJs, /m400-tile-reel/);
+  assert.match(libraryJs, /eight-tile-art/);
+  assert.doesNotMatch(libraryJs, /SEM 0[1-8]|<b>A<\/b>|<b>B<\/b>|<b>C<\/b>/);
+});
+
 test('M400 and Eight Voice are complete instrument pages, not library-only entries', async () => {
   const [mellotronPage, oberheimPage, mellotronApp, oberheimApp, mellotronEngine, oberheimEngine, worker] = await Promise.all([
     '../html/mellotron-m400.html', '../html/oberheim-eight-voice.html',
@@ -121,6 +134,9 @@ test('M400 and Eight Voice are complete instrument pages, not library-only entri
   assert.match(oberheimPage, /oberheim-eight-voice\.js/);
   assert.match(mellotronApp, /new WorkletEngine/);
   assert.match(mellotronApp, /notes: NOTES/);
+  assert.match(mellotronApp, /length: 47/);
+  assert.match(mellotronApp, /G2–F6/);
+  assert.match(mellotronEngine, /finite/i);
   assert.match(mellotronApp, /VIRTUAL FRAME LIBRARY/);
   assert.match(mellotronApp, /THREE-TRACK HEAD/);
   assert.match(mellotronEngine, /FRAMES = \[/);
@@ -269,7 +285,7 @@ test('The shared account menu works across site, OMNI, Library and all experimen
   assert.ok(omni.includes('/css/site-theme.css'));
   assert.ok(omni.includes('account-shell.js?v=20261102-contributions-menu'));
   assert.ok(library.includes('account-shell.js?v=20261102-contributions-menu'));
-  assert.ok(worker.includes('overture-shell-v26'));
+  assert.ok(worker.includes('overture-shell-v28'));
   assert.ok(worker.includes('account-shell.js?v=20261102-contributions-menu'));
   for (const page of experimentPages) {
     const html = await readFile(new URL(`../experiments/${page}.html`, import.meta.url), 'utf8');
