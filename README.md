@@ -91,7 +91,7 @@ The current catalogue contains more than 40 module types grouped around performa
 - **Processing:** mixers, filters, amplifiers, delay, reverb, distortion, bitcrushing, compression, EQ, ring modulation, phasing, panning, crossfading, and resonators.
 - **Modulation and control:** ADSR and AR envelopes, LFOs, sample and hold, CV mixing and offset, slew limiting, and envelope following.
 - **Performance and sequencing:** keyboard and MIDI input, step sequencing, clocks and triggers, Euclidean rhythm, random melody, arpeggiation, chords, note transposition and velocity processing, and note echo.
-- **Instrument-derived modules:** models inspired by the Moog ladder filter, MS-20 dual filter, Juno chorus, and DX7 FM voice.
+- **Instrument-derived modules:** the Moog ladder filter, MS-20 dual filter, Juno chorus, DX7 FM voice, an eight-voice SEM polyphonic synthesizer, and a Mellotron tape-replay source. The SEM module reuses the Eight Voice worklet; the Mellotron module reuses the M400's finite, procedural tape-replay model and its six frames / three tracks (it does not bundle licensed tape recordings).
 
 OMNI distinguishes between **audio**, **CV (control-voltage/audio-rate control)**, and **note-event** connections. Connection checks prevent incompatible port types and block unsupported audio/CV feedback loops. The live graph is built with the Web Audio API, while selected instrument-derived modules reuse Overture's audio engines.
 
