@@ -8,7 +8,7 @@ const validate = (data) => {
   if (!data || typeof data !== 'object') throw new Error('Not an Eight Voice program.');
   const out = { ...DEF };
   Object.keys(DEF).forEach((key) => { if (!(key in data)) return; out[key] = ['filterMode', 'wave1', 'wave2', 'lfoTarget'].includes(key) ? (key === 'filterMode' ? ['low', 'band', 'high', 'notch'].includes(data[key]) : key === 'lfoTarget' ? ['pitch', 'filter'].includes(data[key]) : ['saw', 'pulse'].includes(data[key])) ? data[key] : DEF[key] : key === 'bendRange' ? num(data[key], 1, 12, 2) : num(data[key], 0, 1, DEF[key]); });
-  out.voices = Array.from({ length: 8 }, (_, i) => { const v = Array.isArray(data.voices) ? data.voices[i] || {} : {}; return { level: num(v.level, 0, 1, .85), pan: num(v.pan, -1, 1, (i - 3.5) / 5), tune: num(v.tune, -.2, .2, 0), detune: num(v.detune, -.2, .2, 0), cutoff: num(v.cutoff, 0, 1, out.cutoff), resonance: num(v.resonance, 0, .85, out.resonance), osc1: num(v.osc1, 0, 1, out.osc1), osc2: num(v.osc2, 0, 1, out.osc2), filterEnv: num(v.filterEnv, 0, 1, out.filterEnv) }; });
+  out.voices = Array.from({ length: 8 }, (_, i) => { const v = Array.isArray(data.voices) ? data.voices[i] || {} : {}; return { level: num(v.level, 0, 1, .85), pan: num(v.pan, -1, 1, (i - 3.5) / 5), tune: num(v.tune, -.2, .2, 0), detune: num(v.detune, -.2, .2, 0), cutoff: num(v.cutoff, 0, 1, out.cutoff), resonance: num(v.resonance, 0, .85, out.resonance), osc1: num(v.osc1, 0, 1, out.osc1), osc2: num(v.osc2, 0, 1, out.osc2), filterEnv: num(v.filterEnv, 0, 1, out.filterEnv), filterMode: ['low', 'band', 'high', 'notch'].includes(v.filterMode) ? v.filterMode : out.filterMode, wave1: ['saw', 'pulse'].includes(v.wave1) ? v.wave1 : out.wave1, wave2: ['saw', 'pulse'].includes(v.wave2) ? v.wave2 : out.wave2 }; });
   return out;
 };
 
@@ -62,7 +62,7 @@ class EightVoiceApp {
     const voices = el('div', 'eight-voice-grid', rows);
     for (let i = 0; i < 8; i += 1) this.buildVoice(voices, i);
     const memory = section(rows, 'PROGRAMMER', 'OVERTURE VOICE PROGRAMS');
-    this.presets = presetBar(memory.body, { factory: OBERHEIM_EIGHT_VOICE_PRESETS, store: this.store, display: this.display, filename: 'oberheim-eight-voice-program', panic: () => this.perf.allOff(), apply: (data, name) => { this.patch = validate(data); this.refresh(); this.display.set(`PROGRAM  ${name}`, 'EIGHT VOICE PROGRAMMER'); }, capture: () => ({ ...this.patch, voices: this.voiceUi.map((v) => Object.fromEntries(Object.entries(v).map(([key, control]) => [key, control.value]))) }) });
+    this.presets = presetBar(memory.body, { factory: OBERHEIM_EIGHT_VOICE_PRESETS, store: this.store, display: this.display, filename: 'oberheim-eight-voice-program', panic: () => this.perf.allOff(), apply: (data, name) => { this.patch = validate(data); this.refresh(); this.display.set(`PROGRAM  ${name}`, 'EIGHT VOICE PROGRAMMER'); }, capture: () => ({ ...this.patch, voices: this.voiceUi.map((v) => Object.fromEntries(Object.entries(v).map(([key, control]) => [key, control.select ? control.select.value : control.value]))) }) });
     footer(this.shell, 'EIGHT VOICE · 8 INDEPENDENT SEMs · 49 KEYS · STATE VARIABLE FILTER · ESC PANIC');
   }
   buildVoice(parent, index) {
@@ -83,6 +83,12 @@ class EightVoiceApp {
     control('resonance', 'VCF RES', 0, .85, this.patch.resonance, (v) => `${Math.round(v * 100)}%`);
     control('osc1', 'VCO 1 LEVEL', 0, 1, this.patch.osc1, (v) => `${Math.round(v * 100)}%`);
     control('osc2', 'VCO 2 LEVEL', 0, 1, this.patch.osc2, (v) => `${Math.round(v * 100)}%`);
+    const choice = (key, label, options, fallback) => {
+      state[key] = select(sec.body, label, options, initial[key] ?? fallback, (value) => this.engine.post({ t: 'param', key: `voice${index}_${key}`, value }));
+    };
+    choice('filterMode', 'FILTER RESPONSE', [{ value: 'low', label: 'LOW PASS' }, { value: 'band', label: 'BAND PASS' }, { value: 'high', label: 'HIGH PASS' }, { value: 'notch', label: 'NOTCH' }], this.patch.filterMode);
+    choice('wave1', 'VCO 1 SHAPE', [{ value: 'saw', label: 'SAWTOOTH' }, { value: 'pulse', label: 'PULSE' }], this.patch.wave1);
+    choice('wave2', 'VCO 2 SHAPE', [{ value: 'pulse', label: 'PULSE' }, { value: 'saw', label: 'SAWTOOTH' }], this.patch.wave2);
     this.voiceUi[index] = state;
   }
   refresh() {
