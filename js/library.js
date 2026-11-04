@@ -101,7 +101,7 @@ page.innerHTML = `<div class="launcher-ambient launcher-ambient--one" aria-hidde
       <img src="/ui/Logos/Korg_logo.png" alt="Korg">
     </div>
   </div>
-</section><section class="library-search" role="search" aria-label="Search the instrument library">
+</section><section class="library-search library-search--entering" role="search" aria-label="Search the instrument library">
   <div class="library-search__field">
     <label class="library-search__label" for="instrument-search">Search instruments</label>
     <span class="material-symbols-rounded library-search__icon" aria-hidden="true">search</span>
@@ -109,8 +109,8 @@ page.innerHTML = `<div class="launcher-ambient launcher-ambient--one" aria-hidde
     <button class="library-search__clear" type="button" aria-label="Clear search" hidden><span class="material-symbols-rounded" aria-hidden="true">close</span></button>
   </div>
   <div class="library-search__meta">
-    <span id="instrument-search-status" role="status" aria-live="polite">8 instruments available</span>
     <span class="library-search__hint">Search by brand, model, voice, or feature</span>
+    <span id="instrument-search-status" class="library-search__status" role="status" aria-live="polite"></span>
   </div>
 </section><section class="instrument-grid" aria-label="Available instruments"></section><footer class="launcher-footer"><span>04 AVAILABLE INSTRUMENTS</span><span>SELECT A TILE TO CONTINUE</span></footer>
 <div class="launcher-legal">
