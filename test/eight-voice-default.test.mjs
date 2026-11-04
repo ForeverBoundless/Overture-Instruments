@@ -64,7 +64,7 @@ test('Eight Voice oscillator pairs track at the same pitch across all eight voic
     const voice = h.processor.v[i];
     const advance1 = (voice.phase1 - before[i].p1 + 1) % 1;
     const advance2 = (voice.phase2 - before[i].p2 + 1) % 1;
-    const expected = 440 * Math.pow(2, (before[i].note - 69) / 12) * frames / h.scope.sampleRate;
+    const expected = (440 * Math.pow(2, (before[i].note - 69) / 12) * frames / h.scope.sampleRate) % 1;
     assert.ok(Math.abs(advance1 - expected) < 1e-8, `voice ${i + 1} VCO 1 should track its MIDI note`);
     assert.ok(Math.abs(advance2 - expected) < 1e-8, `voice ${i + 1} VCO 2 should be in unison with VCO 1`);
     assert.ok(Math.abs(advance1 - advance2) < 1e-9, `voice ${i + 1} oscillators must not beat due to hidden tuning`);
