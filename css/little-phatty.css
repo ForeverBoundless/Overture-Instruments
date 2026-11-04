@@ -596,10 +596,10 @@ body.little-phatty-body {
 
 .little-phatty-body #sections-row {
   display: grid;
-  grid-template-columns: repeat(10, minmax(0, 1fr));
+  grid-template-columns: repeat(12, minmax(0, 1fr));
   grid-template-areas:
-    "master master lfo lfo osc osc osc osc osc osc"
-    "master master filter filter filter filter env env output output";
+    "master master lfo lfo lfo lfo osc osc osc osc osc osc"
+    "master master filter filter filter filter env env env env output output";
   grid-auto-rows: minmax(210px, auto);
   align-items: stretch;
   gap: 12px;
