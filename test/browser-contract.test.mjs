@@ -37,7 +37,8 @@ test('Little Phatty uses a grouped responsive layout without viewport shrinking'
     readFile(new URL('../js/engine/app.js', import.meta.url), 'utf8'),
     readFile(new URL('../html/little-phatty.html', import.meta.url), 'utf8'),
   ]);
-  assert.match(styles, /grid-template-areas:[\s\S]*"master master lfo lfo osc osc osc osc osc osc"[\s\S]*"master master filter filter filter filter env env output output"/);
+  assert.match(styles, /grid-template-columns: repeat\(12, minmax\(0, 1fr\)\)/);
+  assert.match(styles, /grid-template-areas:[\s\S]*"master master lfo lfo lfo lfo osc osc osc osc osc osc"[\s\S]*"master master filter filter filter filter env env env env output output"/);
   assert.match(styles, /@media \(max-width: 1180px\)/);
   assert.match(styles, /@media \(max-width: 760px\)/);
   assert.match(styles, /min-width: 680px/);
