@@ -3776,7 +3776,7 @@ html[data-theme="light"] #launcher-page .library-search__empty p {
   justify-content: flex-start;
 }
 
-.library-search__hint {
+.library-search--entering .library-search__hint {
   display: block;
   text-align: left;
   color: #8794a7;
@@ -3786,7 +3786,7 @@ html[data-theme="light"] #launcher-page .library-search__empty p {
   animation: library-search-hint-in .64s cubic-bezier(.2,.75,.25,1) .12s both;
 }
 
-.library-search__field {
+.library-search--entering .library-search__field {
   animation: library-search-field-in .72s cubic-bezier(.2,.75,.25,1) both;
   will-change: opacity, transform, filter;
 }
@@ -3809,6 +3809,6 @@ html[data-theme="light"] #launcher-page .library-search__hint { color: #708095; 
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .library-search__field,
-  .library-search__hint { animation: none !important; will-change: auto; }
+  .library-search--entering .library-search__field,
+  .library-search--entering .library-search__hint { animation: none !important; will-change: auto; }
 }
