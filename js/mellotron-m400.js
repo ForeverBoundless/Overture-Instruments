@@ -42,7 +42,7 @@ const validate = (data) => {
 
 class MellotronApp {
   constructor() {
-    this.engine = new WorkletEngine(new URL('./engine/MellotronProcessor.js', import.meta.url).href, 'mellotron-processor');
+    this.engine = new WorkletEngine(new URL('./engine/MellotronProcessor.js?v=20261104-declick', import.meta.url).href, 'mellotron-processor');
     this.patch = { ...DEF }; this.ui = {};
     this.store = new PresetStore({ key: 'overture.mellotron-m400.frames', version: 1, validate });
     this.build();
