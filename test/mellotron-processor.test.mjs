@@ -78,7 +78,7 @@ test('Mellotron retriggers overlap a short de-click tail and release without non
 
   const tail = render(h, 96000);
   assert.ok([...tail.left, ...tail.right].every(Number.isFinite));
-  const maxTail = Math.max(...tail.left.map(Math.abs), ...tail.right.map(Math.abs));
+  const maxTail = [...tail.left, ...tail.right].reduce((peak, sample) => Math.max(peak, Math.abs(sample)), 0);
   assert.ok(maxTail <= 1e-6,
     `the released note should eventually reach silence (active=${voice.active}, env=${voice.env}, tail=${voice.tailLevel}, peak=${maxTail})`);
 });
