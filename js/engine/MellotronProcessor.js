@@ -4,7 +4,7 @@
  */
 /* global sampleRate, registerProcessor, AudioWorkletProcessor */
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
-const DEFAULT = { volume: 0.72, tone: 0.68, pitch: 0, track: 0, frame: 0 };
+const DEFAULT = { volume: 0.72, tone: 0.68, pitch: 0, track: 0, frame: 0, release: 0.028 };
 const FRAMES = [
   [
     { name: '3 Violins', partials: [1, .72, .43, .25, .13, .07], attack: .22, noise: .035, body: .34, detune: .0018 },
@@ -52,18 +52,30 @@ class MellotronProcessor extends AudioWorkletProcessor {
     super();
     this.p = { ...DEFAULT };
     this.voices = Array.from({ length: 35 }, () => new TapeVoice());
-    this.bend = 0; this.last = 0; this.master = 0;
+    this.bend = 0; this.last = 0; this.master = 0; this.scheduled = [];
     this.port.onmessage = (e) => this.message(e.data);
   }
 
   message(m) {
+    // Honour OMNI's look-ahead timestamps instead of waking notes on receipt.
+    if ((m.t === 'noteOn' || m.t === 'noteOff') && Number.isFinite(m.frame) && m.frame > currentFrame) {
+      this.scheduled.push(m);
+      this.scheduled.sort((a, b) => a.frame - b.frame);
+      return;
+    }
+    this.dispatch(m);
+  }
+  dispatch(m) {
     if (m.t === 'patch') this.p = { ...DEFAULT, ...m.patch };
     else if (m.t === 'param' && m.key in DEFAULT) this.p[m.key] = m.value;
     else if (m.t === 'noteOn') this.noteOn(m.note | 0, clamp(m.vel, .01, 1));
     else if (m.t === 'noteOff') this.noteOff(m.note | 0);
     else if (m.t === 'bend') this.bend = clamp(m.value, -1, 1);
     else if (m.t === 'volume') this.p.volume = clamp(m.value, 0, 1);
-    else if (m.t === 'allOff' || m.t === 'allSoundOff') this.voices.forEach((v) => { v.gate = false; v.releasing = true; });
+    else if (m.t === 'allOff' || m.t === 'allSoundOff') {
+      this.scheduled.length = 0;
+      this.voices.forEach((v) => { v.gate = false; v.releasing = true; });
+    }
   }
 
   noteOn(note, vel) {
@@ -86,6 +98,7 @@ class MellotronProcessor extends AudioWorkletProcessor {
   process(_inputs, outputs) {
     const out = outputs[0]; const L = out[0]; const R = out[1] || L; const sr = sampleRate;
     for (let i = 0; i < L.length; i += 1) {
+      while (this.scheduled.length && this.scheduled[0].frame <= currentFrame + i) this.dispatch(this.scheduled.shift());
       let mixL = 0; let mixR = 0;
       this.voices.forEach((v) => {
         if (!v.active) return;
@@ -111,7 +124,7 @@ class MellotronProcessor extends AudioWorkletProcessor {
         const attack = attackProgress * attackProgress * (3 - 2 * attackProgress);
         const tapeEnd = Math.max(0, 1 - v.pos / (sr * 8));
         v.env += (1 - v.env) * .0018;
-        if (v.releasing) v.env *= Math.exp(-1 / (sr * .028));
+        if (v.releasing) v.env *= Math.exp(-1 / (sr * Math.max(0.028, this.p.release || 0.028)));
         if (v.env < .0001 || tapeEnd <= 0) { v.active = false; return; }
         const toneCutoff = 1100 + this.p.tone * 7900;
         const alpha = 1 - Math.exp(-2 * Math.PI * toneCutoff / sr);
