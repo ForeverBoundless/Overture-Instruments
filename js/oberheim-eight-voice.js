@@ -26,7 +26,18 @@ class EightVoiceApp {
     power('oberheim-power', () => this.engine.start(), () => { this.perf.flushPending(); this.display.set('EIGHT VOICE READY', '8 SEM VOICES ONLINE'); });
     this.presets.load('f:0');
   }
-  set(key, value) { this.patch[key] = value; this.engine.post({ t: 'param', key, value }); }
+  set(key, value) {
+    this.patch[key] = value;
+    this.engine.post({ t: 'param', key, value });
+    const linked = ['cutoff', 'resonance', 'filterEnv', 'filterMode', 'osc1', 'osc2', 'wave1', 'wave2'];
+    if (linked.includes(key)) {
+      this.patch.voices?.forEach((voice, index) => {
+        voice[key] = value;
+        this.engine.post({ t: 'param', key: `voice${index}_${key}`, value });
+        this.voiceUi[index]?.[key]?.setValue?.(value, true);
+      });
+    }
+  }
   build() {
     const root = document.getElementById('oberheim-eight-voice-root');
     const page = el('div', 'pn-page eight-page', root); this.shell = el('main', 'pn-shell eight-shell', page);
