@@ -1,4 +1,4 @@
-const CACHE = 'overture-shell-v21';
+const CACHE = 'overture-shell-v22';
 const APP_SHELL = [
   '/account',
   '/css/account.css?v=20261102-contributions-menu',
