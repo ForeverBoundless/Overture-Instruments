@@ -117,7 +117,7 @@ test('library mini-keybeds are shared except for the TR-808 and new art has no e
   assert.match(libraryCss, /\.instrument-tile:not\(\.instrument-tile--roland-tr-808\) \.instrument-tile__keys/);
   assert.match(libraryCss, /\.instrument-tile--roland-tr-808 \.instrument-tile__keys/);
   assert.match(libraryJs, /m400-tile-reel/);
-  assert.match(libraryJs, /eight-tile-art/);
+  assert.match(libraryJs, /eight-voice-tile-art/);
   assert.doesNotMatch(libraryJs, /SEM 0[1-8]|<b>A<\/b>|<b>B<\/b>|<b>C<\/b>/);
 });
 
@@ -285,7 +285,7 @@ test('The shared account menu works across site, OMNI, Library and all experimen
   assert.ok(omni.includes('/css/site-theme.css'));
   assert.ok(omni.includes('account-shell.js?v=20261102-contributions-menu'));
   assert.ok(library.includes('account-shell.js?v=20261102-contributions-menu'));
-  assert.ok(worker.includes('overture-shell-v28'));
+  assert.ok(worker.includes('overture-shell-v30'));
   assert.ok(worker.includes('account-shell.js?v=20261102-contributions-menu'));
   for (const page of experimentPages) {
     const html = await readFile(new URL(`../experiments/${page}.html`, import.meta.url), 'utf8');
@@ -356,5 +356,5 @@ test('Contribution page profile, toolbar and result counts have responsive align
   assert.ok(css.includes('.contributions-toolbar.is-owner'));
   assert.ok(css.includes('@media (max-width:380px)'));
   assert.ok(app.includes("classList.toggle('is-owner', state.isOwner)"));
-  assert.ok(worker.includes('overture-shell-v26'));
+  assert.ok(worker.includes('overture-shell-v30'));
 });
