@@ -86,7 +86,7 @@ class MellotronProcessor extends AudioWorkletProcessor {
   process(_inputs, outputs) {
     const out = outputs[0]; const L = out[0]; const R = out[1] || L; const sr = sampleRate;
     for (let i = 0; i < L.length; i += 1) {
-      let mix = 0;
+      let mixL = 0; let mixR = 0;
       this.voices.forEach((v) => {
         if (!v.active) return;
         const frame = FRAMES[Math.round(clamp(this.p.frame, 0, FRAMES.length - 1))];
@@ -119,12 +119,14 @@ class MellotronProcessor extends AudioWorkletProcessor {
         v.filter += alpha * (raw - v.filter);
         const stereoAlpha = 1 - Math.exp(-2 * Math.PI * Math.max(500, toneCutoff * .94) / sr);
         v.filterR += stereoAlpha * ((raw * (1 + v.pan * .14)) - v.filterR);
-        mix += v.filter * .5 + v.filterR * .5;
+        const pan = clamp(v.pan, -.5, .5);
+        mixL += v.filter * (1 - pan);
+        mixR += v.filterR * (1 + pan);
         v.pos += speed;
       });
       this.master += (clamp(this.p.volume, 0, 1) - this.master) * .002;
-      const s = Math.tanh(mix * this.master * .9);
-      L[i] = s; R[i] = s;
+      L[i] = Math.tanh(mixL * this.master * .72);
+      R[i] = Math.tanh(mixR * this.master * .72);
     }
     return true;
   }
