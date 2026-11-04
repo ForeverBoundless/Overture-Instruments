@@ -181,7 +181,18 @@ class MellotronProcessor extends AudioWorkletProcessor {
         const tapeEnd = Math.max(0, 1 - v.pos / (sr * 8));
         if (v.releasing) v.env *= releaseCoeff;
         else v.env += (1 - v.env) * .0018;
-        if (v.env < .0001 || tapeEnd <= 0) { v.active = false; continue; }
+        if (v.env < .0001 || tapeEnd <= 0) {
+          // Keep the residual one-pole filter state alive for a tiny fade after
+          // the tape/envelope stops. Otherwise the last filtered sample can
+          // be cut off above zero and produce a click on note release.
+          const pan = clamp(v.pan, -.5, .5);
+          v.tailL = v.filter * (1 - pan);
+          v.tailR = v.filterR * (1 + pan);
+          v.tailLevel = 1;
+          v.tailDecay = Math.exp(-1 / (sr * 0.012));
+          v.active = false;
+          continue;
+        }
 
         const raw = (sample * (.2 + sound.body * .17) + tapeNoise) * attack * tapeEnd * v.env * v.vel;
         v.filter += alpha * (raw - v.filter);
