@@ -364,7 +364,7 @@ export const MODULES = {
       P('track', 'Tape track', 0, 2, 0, { options: ['Track A', 'Track B', 'Track C'] }),
       P('tone', 'Tape tone', 0, 1, 0.68),
       P('pitch', 'Tape speed trim', -1, 1, 0),
-      P('release', 'Note release (s)', 0.028, 1.5, 0.36, { log: true }),
+      P('release', 'Note release (s)', 0.08, 1.5, 0.36, { log: true }),
       P('volume', 'Playback level', 0, 1, 0.72),
     ],
     inputs: [N('note', 'Note / tape trigger')], outputs: [A('out', 'Stereo audio')],
