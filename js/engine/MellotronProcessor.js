@@ -4,7 +4,7 @@
  */
 /* global sampleRate, registerProcessor, AudioWorkletProcessor */
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
-const DEFAULT = { volume: 0.72, tone: 0.68, pitch: 0, track: 0, frame: 0, release: 0.028 };
+const DEFAULT = { volume: 0.72, tone: 0.68, pitch: 0, track: 0, frame: 0, release: 0.18 };
 const FRAMES = [
   [
     { name: '3 Violins', partials: [1, .72, .43, .25, .13, .07], attack: .22, noise: .035, body: .34, detune: .0018 },
@@ -41,9 +41,12 @@ const FRAMES = [
 class TapeVoice {
   constructor() {
     this.note = -1; this.gate = false; this.active = false; this.pos = 0;
-    this.speed = 1; this.vel = 0; this.age = 0; this.seed = (Math.random() * 0x7fffffff) | 0;
+    this.speed = 1; this.vel = 0; this.age = 0; this.seed = ((Math.random() * 0x7fffffff) | 0) || 1;
     this.env = 0; this.releasing = false; this.phase = Math.random();
     this.flutter = Math.random() * Math.PI * 2; this.filter = 0; this.filterR = 0; this.tuning = 0; this.pan = 0;
+    this.noteHz = 0; this.frameIndex = 0; this.trackIndex = 0;
+    this.tailL = 0; this.tailR = 0; this.tailLevel = 0; this.tailDecay = 0;
+
   }
 }
 
@@ -81,7 +84,24 @@ class MellotronProcessor extends AudioWorkletProcessor {
   noteOn(note, vel) {
     let v = this.voices.find((x) => x.active && x.note === note);
     if (!v) v = this.voices.find((x) => !x.active) || this.voices.slice().sort((a, b) => a.age - b.age)[0];
-    v.note = note; v.vel = vel; v.gate = true; v.active = true; v.pos = 0; v.age = ++this.last;
+
+    // Preserve the previous voice's last output as a very short release tail.
+    // This prevents repeated notes and voice stealing from resetting a live
+    // filter state directly to zero, which can produce an audible click.
+    if (v.active) {
+      const pan = clamp(v.pan, -.5, .5);
+      v.tailL = v.filter * (1 - pan);
+      v.tailR = v.filterR * (1 + pan);
+      v.tailLevel = 1;
+      v.tailDecay = Math.exp(-1 / (sampleRate * 0.012));
+    } else {
+      v.tailL = 0; v.tailR = 0; v.tailLevel = 0; v.tailDecay = 0;
+    }
+
+    v.note = note; v.noteHz = 440 * Math.pow(2, (note - 69) / 12);
+    v.frameIndex = Math.round(clamp(this.p.frame, 0, FRAMES.length - 1));
+    v.trackIndex = Math.round(clamp(this.p.track, 0, 2));
+    v.vel = vel; v.gate = true; v.active = true; v.pos = 0; v.age = ++this.last;
     v.env = 0; v.releasing = false; v.phase = Math.random(); v.flutter = Math.random() * Math.PI * 2;
     v.filter = 0; v.filterR = 0; v.tuning = (Math.random() - .5) * .0016; v.pan = (Math.random() - .5) * .12;
   }
@@ -97,46 +117,70 @@ class MellotronProcessor extends AudioWorkletProcessor {
 
   process(_inputs, outputs) {
     const out = outputs[0]; const L = out[0]; const R = out[1] || L; const sr = sampleRate;
+    // These controls are shared by every active voice and are constant for
+    // this render quantum. Calculate their filter coefficients only once.
+    const toneCutoff = 1100 + clamp(this.p.tone, 0, 1) * 7900;
+    const alpha = 1 - Math.exp(-2 * Math.PI * toneCutoff / sr);
+    const stereoAlpha = 1 - Math.exp(-2 * Math.PI * Math.max(500, toneCutoff * .94) / sr);
+    const releaseSeconds = Math.max(0.08, Number(this.p.release) || DEFAULT.release);
+    const releaseCoeff = Math.exp(-1 / (sr * releaseSeconds));
+
     for (let i = 0; i < L.length; i += 1) {
       while (this.scheduled.length && this.scheduled[0].frame <= currentFrame + i) this.dispatch(this.scheduled.shift());
       let mixL = 0; let mixR = 0;
-      this.voices.forEach((v) => {
-        if (!v.active) return;
-        const frame = FRAMES[Math.round(clamp(this.p.frame, 0, FRAMES.length - 1))];
-        const sound = frame[Math.round(clamp(this.p.track, 0, 2))];
-        const noteHz = 440 * Math.pow(2, (v.note - 69) / 12);
+
+      for (let vi = 0; vi < this.voices.length; vi += 1) {
+        const v = this.voices[vi];
+        if (!v.active) {
+          if (v.tailLevel > 0.0001) {
+            mixL += v.tailL * v.tailLevel;
+            mixR += v.tailR * v.tailLevel;
+            v.tailLevel *= v.tailDecay;
+          } else {
+            v.tailLevel = 0;
+          }
+          continue;
+        }
+
+        // A tape note keeps the frame and track it started with. Changing the
+        // transport while notes are held cannot swap their spectrum abruptly.
+        const sound = FRAMES[v.frameIndex][v.trackIndex];
         const wow = Math.sin(v.pos * .00013 + v.flutter) * .0022 + Math.sin(v.pos * .000037 + v.flutter * .37) * .0031;
         const flutter = Math.sin(v.pos * .0027 + v.flutter) * .00075 + Math.sin(v.pos * .0061 + v.flutter * 1.7) * .00022;
         const speed = Math.max(.25, Math.pow(2, (this.bend * 2) / 12) *
           (1 + clamp(this.p.pitch, -1, 1) * .08 + wow + flutter + v.tuning));
-        v.phase += noteHz * speed / sr;
+        v.phase += v.noteHz * speed / sr;
         if (v.phase >= 1) v.phase -= Math.floor(v.phase);
+
         let sample = 0;
-        sound.partials.forEach((amp, n) => {
+        for (let n = 0; n < sound.partials.length; n += 1) {
+          const amp = sound.partials[n];
           const partialDrift = Math.sin(v.pos * (.00011 + n * .000017) + v.flutter * (n + 1)) * sound.detune * (n + 1);
           const partialPhase = v.phase * (n + 1) + partialDrift;
           const stereoPhase = Math.sin(2 * Math.PI * (partialPhase + v.pan * (n + 1) * .001));
           sample += amp * (Math.sin(2 * Math.PI * partialPhase + n * .27) * .985 + stereoPhase * .015);
-        });
-        const tapeNoise = this.rand(v) * sound.noise * (.35 + .65 * Math.sin(v.pos * .00061) ** 2);
+        }
+
+        // Retain the tape's soft mechanical bed, but keep it below the tonal
+        // signal so the seeded noise cannot be mistaken for digital crackle.
+        const tapeNoise = this.rand(v) * sound.noise * 0.22 * (.35 + .65 * Math.sin(v.pos * .00061) ** 2);
         const attackTime = Math.max(1, sr * sound.attack);
         const attackProgress = clamp(v.pos / attackTime, 0, 1);
         const attack = attackProgress * attackProgress * (3 - 2 * attackProgress);
         const tapeEnd = Math.max(0, 1 - v.pos / (sr * 8));
         v.env += (1 - v.env) * .0018;
-        if (v.releasing) v.env *= Math.exp(-1 / (sr * Math.max(0.028, this.p.release || 0.028)));
-        if (v.env < .0001 || tapeEnd <= 0) { v.active = false; return; }
-        const toneCutoff = 1100 + this.p.tone * 7900;
-        const alpha = 1 - Math.exp(-2 * Math.PI * toneCutoff / sr);
+        if (v.releasing) v.env *= releaseCoeff;
+        if (v.env < .0001 || tapeEnd <= 0) { v.active = false; continue; }
+
         const raw = (sample * (.2 + sound.body * .17) + tapeNoise) * attack * tapeEnd * v.env * v.vel;
         v.filter += alpha * (raw - v.filter);
-        const stereoAlpha = 1 - Math.exp(-2 * Math.PI * Math.max(500, toneCutoff * .94) / sr);
         v.filterR += stereoAlpha * ((raw * (1 + v.pan * .14)) - v.filterR);
         const pan = clamp(v.pan, -.5, .5);
         mixL += v.filter * (1 - pan);
         mixR += v.filterR * (1 + pan);
         v.pos += speed;
-      });
+      }
+
       this.master += (clamp(this.p.volume, 0, 1) - this.master) * .002;
       L[i] = Math.tanh(mixL * this.master * .72);
       R[i] = Math.tanh(mixR * this.master * .72);
