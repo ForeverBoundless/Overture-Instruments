@@ -1,6 +1,6 @@
 /* M400-style tape replay model.
  * Each held key owns a finite, non-looping tape pass. This is a procedural
- * approximation, not a recording library: authentic Streetly tape recordings
+ * Each strip plays for approximately eight seconds before reaching its end.\n * This is a procedural approximation, not a recording library: authentic Streetly tape recordings
  * require licensed source audio and are intentionally not fabricated here.
  */
 /* global sampleRate, registerProcessor, AudioWorkletProcessor */
