@@ -77,6 +77,12 @@ const DEFS = [
   T('Velocity Pluck', 'Keyboard velocity opens the filter; glide and slew for a smooth lead.',
     [['kb', 'keyboard', 0, 1], ['osc', 'oscillator', 1, 0, { wave: 1, glide: 0.08 }], ['env', 'envelope', 1, 1, env(0.005, 0.4, 0.3, 0.3)], ['slw', 'slew', 1, 2, { time: 0.05 }], ['flt', 'filter', 2, 0, { cutoff: 600, resonance: 4, modDepth: 3 }], ['vca', 'vca', 3, 0], ['dly', 'delay', 4, 0, { time: 0.3, feedback: 0.3, mix: 0.2 }], ['out', 'output', 5, 0]],
     ['kb.note>osc.pitch', 'kb.note>env.gate', 'kb.velocity>slw.in', 'slw.out>flt.cutoffMod', 'osc.out>flt.in', 'flt.out>vca.in', 'env.out>vca.gain', 'vca.out>dly.in', 'dly.out>out.in']),
+  T('SEM Warm Ensemble', 'An eight-voice SEM instrument with independent voice drift, a gentle filter envelope, chorus and room.',
+    [['kb', 'keyboard', 0, 0], ['sem', 'semSynth', 1, 0, { osc1: 0.8, osc2: 0.68, tune: 0, cutoff: 450, resonance: 0.08, filterEnv: 0.28, attack: 0.18, decay: 0.66, sustain: 0.72, release: 1.1, lfoAmount: 0.012, level: 0.66 }], ['cho', 'junoChorus', 2, 0, { mode: 1 }], ['rev', 'reverb', 3, 0, { size: 2.8, damping: 0.68, mix: 0.28 }], ['out', 'output', 4, 0]],
+    ['kb.note>sem.note', 'sem.out>cho.in', 'cho.out>rev.in', 'rev.out>out.in'], 0.7),
+  T('Mellotron Choir', 'A finite-playback eight-voice choir tape with gentle stereo room and a long, natural release.',
+    [['kb', 'keyboard', 0, 0], ['mtr', 'mellotron', 1, 0, { frame: 1, track: 0, tone: 0.58, release: 0.82, volume: 0.72 }], ['rev', 'reverb', 2, 0, { size: 4.2, damping: 0.72, mix: 0.34 }], ['out', 'output', 3, 0]],
+    ['kb.note>mtr.note', 'mtr.out>rev.in', 'rev.out>out.in'], 0.72),
   T('Empty Canvas', 'Just an Audio Output - build from scratch.', [['out', 'output', 2, 0]], []),
 ];
 
