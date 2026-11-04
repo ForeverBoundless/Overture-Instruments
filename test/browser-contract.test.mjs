@@ -31,6 +31,20 @@ test('instrument library search covers canonical descriptive metadata and both t
   assert.match(styles, /html\[data-theme="light"\] #launcher-page \.library-search__field/);
 });
 
+test('Library search has a staggered entrance, accessible status, and no visible result count', async () => {
+  const [library, styles] = await Promise.all([
+    readFile(new URL('../js/library.js', import.meta.url), 'utf8'),
+    readFile(new URL('../css/library.css', import.meta.url), 'utf8'),
+  ]);
+  assert.match(library, /library-search--entering/);
+  assert.match(library, /class="library-search__hint"/);
+  assert.match(library, /class="library-search__status" role="status"/);
+  assert.doesNotMatch(library, /id="instrument-search-status"[^>]*>8 instruments available/);
+  assert.match(styles, /@keyframes library-search-field-in/);
+  assert.match(styles, /@keyframes library-search-hint-in/);
+  assert.match(styles, /\.library-search__status\s*\{/);
+});
+
 test('Little Phatty uses a grouped responsive layout without viewport shrinking', async () => {
   const [styles, engine, page] = await Promise.all([
     readFile(new URL('../css/little-phatty.css', import.meta.url), 'utf8'),
@@ -44,9 +58,12 @@ test('Little Phatty uses a grouped responsive layout without viewport shrinking'
   assert.match(styles, /min-width: 680px/);
   assert.match(styles, /#sections-row > \.lp-section > \.lp-section-title/);
   assert.match(styles, /max-height: none/);
+  assert.match(styles, /#chassis\s*\{[^}]*box-sizing:\s*border-box/);
+  assert.match(styles, /#chassis\s*\{[^}]*min-width:\s*0/);
+  assert.match(styles, /grid-template-areas:[\s\S]*"master"[\s\S]*"lfo"[\s\S]*"output"/);
   assert.match(engine, /natural, scrollable page flow/);
   assert.doesNotMatch(engine, /availH = window\.innerHeight/);
-  assert.match(page, /little-phatty\.css\?v=20261103-layout-rebuild/);
+  assert.match(page, /little-phatty\.css\?v=20261104-sizing-fix/);
 });
 
 test('Sub 37 side panels use the seeded wood grain from its Library tile', async () => {
@@ -58,7 +75,11 @@ test('Sub 37 side panels use the seeded wood grain from its Library tile', async
   assert.match(tileStyles, /baseFrequency='\.018 \.18' numOctaves='3' seed='17'/);
   assert.match(emulatorStyles, /baseFrequency='\.018 \.18' numOctaves='3' seed='17'/);
   assert.match(emulatorStyles, /background-size:96px 160px/);
-  assert.match(page, /sub37\.css\?v=20261103-library-walnut/);
+  assert.match(emulatorStyles, /seed='43'/);
+  assert.match(emulatorStyles, /font-family: 'Figtree'/);
+  assert.match(emulatorStyles, /\.sub37-shell\s*\{[^}]*min-width:\s*0/);
+  assert.match(emulatorStyles, /@media \(max-width: 480px\)/);
+  assert.match(page, /sub37\.css\?v=20261104-responsive-wood-type/);
 });
 
 test('instrument and experiment pages register the shared offline app shell', async () => {
@@ -205,7 +226,7 @@ test('The shared account menu works across site, OMNI, Library and all experimen
   assert.ok(omni.includes('/css/site-theme.css'));
   assert.ok(omni.includes('account-shell.js?v=20261102-contributions-menu'));
   assert.ok(library.includes('account-shell.js?v=20261102-contributions-menu'));
-  assert.ok(worker.includes('overture-shell-v23'));
+  assert.ok(worker.includes('overture-shell-v24'));
   assert.ok(worker.includes('account-shell.js?v=20261102-contributions-menu'));
   for (const page of experimentPages) {
     const html = await readFile(new URL(`../experiments/${page}.html`, import.meta.url), 'utf8');
@@ -276,5 +297,5 @@ test('Contribution page profile, toolbar and result counts have responsive align
   assert.ok(css.includes('.contributions-toolbar.is-owner'));
   assert.ok(css.includes('@media (max-width:380px)'));
   assert.ok(app.includes("classList.toggle('is-owner', state.isOwner)"));
-  assert.ok(worker.includes('overture-shell-v23'));
+  assert.ok(worker.includes('overture-shell-v24'));
 });
