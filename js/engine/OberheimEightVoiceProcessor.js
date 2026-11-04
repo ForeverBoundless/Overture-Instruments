@@ -74,12 +74,13 @@ class EightVoiceProcessor extends AudioWorkletProcessor {
         const inc1 = hz / sr; const inc2 = hz * Math.pow(2, (this.p.tune * 12 + (q.detune || 0)) / 12) / sr;
         v.phase1 += inc1; v.phase2 += inc2; if (v.phase1 >= 1) v.phase1 -= 1; if (v.phase2 >= 1) v.phase2 -= 1;
         const pulse = clamp(this.p.pulse + lfo * .15, .05, .95);
-        const osc1 = this.p.wave1 === 'pulse' ? wave(v.phase1, pulse, inc1) : saw(v.phase1, inc1);
-        const osc2 = this.p.wave2 === 'saw' ? saw(v.phase2, inc2) : wave(v.phase2, .5, inc2);
-        const source = osc1 * this.p.osc1 * .5 + osc2 * this.p.osc2 * .5;
-        const cutoff = 30 * Math.pow(2, 8.5 * (this.p.cutoff + this.p.filterEnv * v.env2));
+        const osc1 = (q.wave1 ?? this.p.wave1) === 'pulse' ? wave(v.phase1, pulse, inc1) : saw(v.phase1, inc1);
+        const osc2 = (q.wave2 ?? this.p.wave2) === 'saw' ? saw(v.phase2, inc2) : wave(v.phase2, .5, inc2);
+        const source = osc1 * (q.osc1 ?? this.p.osc1) * .5 + osc2 * (q.osc2 ?? this.p.osc2) * .5;
+        const cutoff = 30 * Math.pow(2, 8.5 * clamp((q.cutoff ?? this.p.cutoff) + (this.p.lfoTarget === 'filter' ? lfo : 0) + (q.filterEnv ?? this.p.filterEnv) * v.env2, 0, 1));
         const g = Math.min(.5, 2 * Math.sin(Math.PI * Math.min(cutoff, sr * .42) / sr));
-        v.lp += g * v.bp; v.hp = source - v.lp - (1 - this.p.resonance * .92) * v.bp; v.bp += g * v.hp;
+        const damping = 1.8 - clamp(q.resonance ?? this.p.resonance, 0, .85) * 1.65;
+        v.lp += g * v.bp; v.hp = source - v.lp - damping * v.bp; v.bp += g * v.hp;
         const mode = this.p.filterMode; const filtered = mode === 'high' ? v.hp : mode === 'band' ? v.bp : mode === 'notch' ? v.lp + v.hp : v.lp;
         const level = v.env1 * (q.level ?? .85) * .16; const pan = clamp((q.pan ?? v.pan), -1, 1);
         left += filtered * level * (1 - pan) * .5; right += filtered * level * (1 + pan) * .5;
