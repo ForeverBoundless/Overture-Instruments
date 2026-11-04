@@ -58,8 +58,9 @@ test('Little Phatty uses a grouped responsive layout without viewport shrinking'
   assert.match(styles, /min-width: 680px/);
   assert.match(styles, /#sections-row > \.lp-section > \.lp-section-title/);
   assert.match(styles, /max-height: none/);
-  assert.match(styles, /#chassis\s*\{[^}]*box-sizing:\s*border-box/);
-  assert.match(styles, /#chassis\s*\{[^}]*min-width:\s*0/);
+  const sizingFix = styles.slice(styles.indexOf('Final viewport sizing correction'));
+  assert.match(sizingFix, /#chassis\s*\{[^}]*box-sizing:\s*border-box/);
+  assert.match(sizingFix, /#chassis\s*\{[^}]*min-width:\s*0/);
   assert.match(styles, /grid-template-areas:[\s\S]*"master"[\s\S]*"lfo"[\s\S]*"output"/);
   assert.match(engine, /natural, scrollable page flow/);
   assert.doesNotMatch(engine, /availH = window\.innerHeight/);
@@ -77,7 +78,8 @@ test('Sub 37 side panels use the seeded wood grain from its Library tile', async
   assert.match(emulatorStyles, /background-size:96px 160px/);
   assert.match(emulatorStyles, /seed='43'/);
   assert.match(emulatorStyles, /font-family: 'Figtree'/);
-  assert.match(emulatorStyles, /\.sub37-shell\s*\{[^}]*min-width:\s*0/);
+  const responsiveStyles = emulatorStyles.slice(emulatorStyles.indexOf('Sub 37 responsive and typography correction'));
+  assert.match(responsiveStyles, /\.sub37-shell\s*\{[^}]*min-width:\s*0/);
   assert.match(emulatorStyles, /@media \(max-width: 480px\)/);
   assert.match(page, /sub37\.css\?v=20261104-responsive-wood-type/);
 });
