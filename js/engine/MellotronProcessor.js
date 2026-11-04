@@ -94,6 +94,13 @@ class MellotronProcessor extends AudioWorkletProcessor {
       v.tailR = v.filterR * (1 + pan);
       v.tailLevel = 1;
       v.tailDecay = Math.exp(-1 / (sampleRate * 0.012));
+    } else if (v.tailLevel > 0.0001) {
+      // If the previous note has just entered its tiny de-click tail, carry
+      // its current level forward rather than cutting it when the slot is reused.
+      v.tailL *= v.tailLevel;
+      v.tailR *= v.tailLevel;
+      v.tailLevel = 1;
+      v.tailDecay = Math.exp(-1 / (sampleRate * 0.012));
     } else {
       v.tailL = 0; v.tailR = 0; v.tailLevel = 0; v.tailDecay = 0;
     }
@@ -131,16 +138,16 @@ class MellotronProcessor extends AudioWorkletProcessor {
 
       for (let vi = 0; vi < this.voices.length; vi += 1) {
         const v = this.voices[vi];
-        if (!v.active) {
-          if (v.tailLevel > 0.0001) {
-            mixL += v.tailL * v.tailLevel;
-            mixR += v.tailR * v.tailLevel;
-            v.tailLevel *= v.tailDecay;
-          } else {
-            v.tailLevel = 0;
-          }
-          continue;
+        // The tiny steal/retrigger tail must overlap the new note as well as
+        // inactive voices; otherwise the transition would still be abrupt.
+        if (v.tailLevel > 0.0001) {
+          mixL += v.tailL * v.tailLevel;
+          mixR += v.tailR * v.tailLevel;
+          v.tailLevel *= v.tailDecay;
+        } else {
+          v.tailLevel = 0;
         }
+        if (!v.active) continue;
 
         // A tape note keeps the frame and track it started with. Changing the
         // transport while notes are held cannot swap their spectrum abruptly.
