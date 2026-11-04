@@ -531,7 +531,12 @@
    The page scrolls naturally instead of shrinking the whole instrument.
    ===================================================================== */
 
-.little-phatty-body {
+html,
+body.little-phatty-body {
+  width: 100%;
+  height: auto;
+  min-height: 100%;
+  max-height: none;
   min-width: 0;
   overflow-x: auto;
   overflow-y: auto;
@@ -542,6 +547,7 @@
   width: 100%;
   max-width: 100%;
   min-height: 100vh;
+  max-height: none;
   height: auto;
   padding: 26px 14px 38px;
 }
@@ -621,7 +627,7 @@
   display: none;
 }
 
-.little-phatty-body #sections-row > .lp-section-title {
+.little-phatty-body #sections-row > .lp-section > .lp-section-title {
   position: relative;
   top: auto;
   left: auto;
