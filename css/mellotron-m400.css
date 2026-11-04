@@ -1,0 +1,36 @@
+.m400-shell { --pn-shell: #4a3027; --pn-shell-edge: #8c644b; --pn-section: #34231f; --pn-border: #8a6048; --pn-accent: #e8b26a; --pn-accent-glow: rgba(232,178,106,.45); --pn-display-bg: #1d0d0a; --pn-display-ink: #e6a658; }
+.m400-shell .pn-brand { align-items: center; }.m400-mark { color: #ead7b1; font: 700 15px/1 'DM Mono', monospace; letter-spacing: .18em; }
+.m400-top { grid-template-columns: 1.1fr 1.2fr 1.9fr 1.2fr; }.m400-shell .pn-section h2 { color: #e9bd7a; }
+.m400-tape-bay { min-height: 150px; display: flex; align-items: center; justify-content: space-around; padding: 18px 8px; border: 1px solid #735040; background: linear-gradient(145deg,#2c1b19,#171012); box-shadow: inset 0 0 25px #10090a; }
+.m400-reel { width: 72px; height: 72px; border: 7px solid #a4774d; border-radius: 50%; background: radial-gradient(circle,#24151a 0 7px,#b99264 8px 11px,#4a2d29 12px 23px,#c7a476 24px 29px,#29191a 30px); box-shadow: 0 0 0 3px #1a1012, 0 5px 12px #000; animation: m400-reel 3s linear infinite; }
+.m400-tape-window { display: grid; gap: 8px; text-align: center; color: #e5aa5e; font: 10px 'DM Mono',monospace; letter-spacing: .08em; }.m400-tape-window b { color: #8e6a58; font-size: 8px; }
+@keyframes m400-reel { to { transform: rotate(360deg); } }
+.m400-shell .pn-keybed { border-color: #9c7557; background: #d3c3a6; }.m400-shell .lp-key-white { background: linear-gradient(#fff9e9,#d4c3a6); }.m400-shell .lp-key-black { background: linear-gradient(#3d2524,#140d10); }
+@media (max-width: 1050px) { .m400-top { grid-template-columns: repeat(2,minmax(0,1fr)); } }.m400-shell .pn-footer { color: #c99f78; }
+.m400-shell {
+  background:
+    radial-gradient(circle at 18% 0%, rgba(232,178,106,.12), transparent 34rem),
+    linear-gradient(135deg, #211617, #0d0b10 72%);
+}
+.m400-shell .pn-main { max-width: 1480px; }
+.m400-shell .pn-section {
+  border-color: rgba(232,178,106,.28);
+  box-shadow: 0 12px 30px rgba(0,0,0,.2), inset 0 1px rgba(255,235,197,.05);
+}
+.m400-shell .pn-section h2 { letter-spacing: .12em; text-transform: uppercase; }
+.m400-tape-bay { position: relative; overflow: hidden; }
+.m400-tape-bay::after {
+  content: 'MAGNETIC TAPE TRANSPORT / 35 NOTE RANGE';
+  position: absolute;
+  right: 12px;
+  bottom: 8px;
+  color: rgba(229,170,94,.48);
+  font: 8px 'DM Mono', monospace;
+  letter-spacing: .09em;
+}
+.m400-shell .pn-keybed { margin-top: 20px; box-shadow: 0 9px 24px #0008; }
+@media (max-width: 720px) {
+  .m400-top { grid-template-columns: 1fr; }
+  .m400-tape-bay { min-height: 124px; }
+  .m400-reel { width: 58px; height: 58px; }
+}

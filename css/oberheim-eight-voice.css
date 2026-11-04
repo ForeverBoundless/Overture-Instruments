@@ -1,0 +1,25 @@
+.eight-shell { --pn-shell: #202a31; --pn-shell-edge: #64737a; --pn-section: #11191e; --pn-border: #3e535b; --pn-accent: #8be8d1; --pn-accent-glow: rgba(139,232,209,.42); --pn-display-bg: #061614; --pn-display-ink: #8be8d1; }
+.eight-shell .pn-brand img { width: 108px; height: 22px; object-fit: contain; }.eight-shell .pn-model b { color: #e3f2ed; }.eight-shell .pn-section h2 { color: #9ad6c9; }
+.eight-global { grid-template-columns: 1.4fr 1.7fr 1.5fr; }.eight-voice-grid { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 10px; }.eight-voice-grid .pn-section { min-width: 0; }.eight-voice-grid .pn-section h2 { font-size: 10px; }.eight-voice-grid .pn-knobs { gap: 4px; }.eight-voice-grid .pn-knob { transform: scale(.88); transform-origin: top center; margin-inline: -3px; }
+.eight-shell .pn-keybed { border-color: #5c7e7b; background: #d8ded8; }.eight-shell .lp-key-white { background: linear-gradient(#f7f8ed,#b9c6be); }.eight-shell .lp-key-black { background: linear-gradient(#26353a,#0c1317); }
+@media (max-width: 1100px) { .eight-global { grid-template-columns: repeat(2,minmax(0,1fr)); }.eight-voice-grid { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media (max-width: 650px) { .eight-global,.eight-voice-grid { grid-template-columns: 1fr; } }
+.eight-shell {
+  background:
+    radial-gradient(circle at 82% 4%, rgba(139,232,209,.1), transparent 30rem),
+    linear-gradient(135deg, #18232a, #080e13 76%);
+}
+.eight-shell .pn-main { max-width: 1520px; }
+.eight-shell .pn-section {
+  border-color: rgba(139,232,209,.25);
+  box-shadow: 0 12px 30px rgba(0,0,0,.22), inset 0 1px rgba(214,255,247,.05);
+}
+.eight-shell .pn-section h2 { letter-spacing: .12em; text-transform: uppercase; }
+.eight-global { align-items: stretch; }
+.eight-voice-grid .pn-section { min-height: 190px; }
+.eight-voice-grid .pn-knob { transform: scale(.94); }
+.eight-shell .pn-keybed { margin-top: 20px; box-shadow: 0 9px 24px #0008; }
+@media (max-width: 650px) {
+  .eight-voice-grid .pn-section { min-height: 0; }
+  .eight-voice-grid .pn-knob { transform: none; }
+}

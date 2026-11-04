@@ -24,6 +24,7 @@ export class Keyboard {
     this.octaves = opts.octaves ?? 3;
     this.onNoteOn = opts.onNoteOn ?? (() => {});
     this.onNoteOff = opts.onNoteOff ?? (() => {});
+    this.notes = opts.notes ?? null;
 
     this.el = document.createElement('div');
     this.el.className = 'lp-keyboard';
@@ -39,6 +40,28 @@ export class Keyboard {
   _build() {
     const whiteKeys = [];
     const blackKeys = [];
+
+    if (this.notes) {
+      const whites = this.notes.filter((note) => !note.includes('#'));
+      const whiteWidth = 100 / whites.length;
+      this.notes.forEach((note) => {
+        const key = this._buildKeyEl(note, note.includes('#') ? 'black' : 'white');
+        if (note.includes('#')) {
+          const midi = this._noteToMidi(note);
+          const priorWhites = this.notes.filter((n) => !n.includes('#') && this._noteToMidi(n) < midi).length;
+          const blackWidth = whiteWidth * .62;
+          key.style.left = `calc(${priorWhites * whiteWidth}% - ${blackWidth / 2}%)`;
+          key.style.width = `${blackWidth}%`;
+        } else {
+          const index = whites.indexOf(note);
+          key.style.left = `${index * whiteWidth}%`;
+          key.style.width = `${whiteWidth}%`;
+        }
+        this.el.appendChild(key);
+        this._keyEls.set(note, key);
+      });
+      return;
+    }
 
     for (let o = 0; o < this.octaves; o++) {
       const octave = this.startOctave + o;
@@ -71,6 +94,12 @@ export class Keyboard {
       this.el.appendChild(key);
       this._keyEls.set(note, key);
     });
+  }
+
+  _noteToMidi(note) {
+    const m = /^([A-G]#?)(-?\d+)$/.exec(note);
+    const names = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+    return m ? (Number(m[2]) + 1) * 12 + names.indexOf(m[1]) : -1;
   }
 
   _buildKeyEl(note, colorClass) {

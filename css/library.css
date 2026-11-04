@@ -3812,3 +3812,157 @@ html[data-theme="light"] #launcher-page .library-search__hint { color: #708095; 
   .library-search--entering .library-search__field,
   .library-search--entering .library-search__hint { animation: none !important; will-change: auto; }
 }
+
+/* ===================================================================== MELLotron M400
+   Warm cabinet ivory, finite tape reels, and a three-position track selector
+   distinguish the tape-replay instrument from oscillator-based cards. */
+.instrument-tile--mellotron-m400 .instrument-tile__visual {
+  background: linear-gradient(170deg, #f1e5c7 0%, #c4aa7e 46%, #6f503e 100%);
+  box-shadow: inset 0 1px rgba(255,255,255,.55), inset 0 -12px 22px rgba(49,25,17,.4);
+}
+.instrument-tile--mellotron-m400 .instrument-tile__visual::before {
+  inset: 0;
+  background:
+    radial-gradient(circle at 27px 25px, #d4b37b 0 8px, #5c3b2e 8.5px 11px, transparent 11.5px),
+    radial-gradient(circle at 27px 25px, #171316 0 3px, transparent 3.5px),
+    radial-gradient(circle at 85px 25px, #d4b37b 0 8px, #5c3b2e 8.5px 11px, transparent 11.5px),
+    radial-gradient(circle at 85px 25px, #171316 0 3px, transparent 3.5px),
+    repeating-linear-gradient(90deg, transparent 0 14px, rgba(76,43,29,.18) 14px 15px);
+}
+.instrument-tile--mellotron-m400 .instrument-tile__visual::after {
+  left: 18px;
+  right: 18px;
+  bottom: 17px;
+  height: 7px;
+  border: 1px solid rgba(43,27,24,.7);
+  background: repeating-linear-gradient(90deg, #f9f0da 0 8px, #392a29 8px 10px);
+  box-shadow: 0 3px 4px rgba(38,20,16,.5);
+}
+.instrument-tile--mellotron-m400 .instrument-tile__glow {
+  background: radial-gradient(ellipse at 42% 42%, rgba(255,244,184,.55), transparent 42%);
+  filter: blur(7px);
+}
+.instrument-tile--mellotron-m400 .instrument-tile__display {
+  border: 2px solid #6f4835;
+  background: linear-gradient(180deg, #321812, #160b0a);
+}
+.instrument-tile--mellotron-m400 .instrument-tile__display span {
+  background: #e8a84e;
+  box-shadow: 0 0 7px rgba(255,183,75,.9);
+}
+.instrument-tile--mellotron-m400 .instrument-tile__icon { color: rgba(255,232,174,.9); }
+
+/* ===================================================================== OBERHEIM EIGHT VOICE
+   Graphite SEM modules, a green status display, and eight independent voice
+   lanes give this tile a modular/polyphonic identity. */
+.instrument-tile--oberheim-eight-voice .instrument-tile__visual {
+  background: linear-gradient(165deg, #3c4650 0%, #202a31 52%, #0c1115 100%);
+  box-shadow: inset 0 1px rgba(255,255,255,.2), inset 0 -12px 22px rgba(0,0,0,.5);
+}
+.instrument-tile--oberheim-eight-voice .instrument-tile__visual::before {
+  inset: 0;
+  background:
+    repeating-linear-gradient(90deg, transparent 0 16px, rgba(163,210,207,.12) 16px 17px),
+    linear-gradient(180deg, transparent 0 61%, rgba(0,0,0,.5) 61% 63%, transparent 63%),
+    radial-gradient(circle at 20px 83px, #8bd1c4 0 2px, #1a3438 2.5px 5px, transparent 5.5px) 0 0 / 27px 12px repeat-x;
+}
+.instrument-tile--oberheim-eight-voice .instrument-tile__visual::after {
+  left: 18px;
+  right: 18px;
+  bottom: 16px;
+  height: 8px;
+  border: 1px solid rgba(151,213,205,.36);
+  background: repeating-linear-gradient(90deg, #172329 0 8px, #7ac5b9 8px 10px, #172329 10px 14px);
+  box-shadow: 0 0 9px rgba(101,214,199,.25);
+}
+.instrument-tile--oberheim-eight-voice .instrument-tile__glow {
+  background: radial-gradient(ellipse at 62% 36%, rgba(105,220,204,.42), transparent 43%);
+  filter: blur(8px);
+}
+.instrument-tile--oberheim-eight-voice .instrument-tile__display {
+  border: 3px solid #52616a;
+  background: linear-gradient(180deg, #0b2a25, #061614);
+  box-shadow: inset 0 0 14px #000, inset 0 0 0 1px rgba(139,236,215,.22), 0 2px 6px rgba(0,0,0,.6);
+}
+.instrument-tile--oberheim-eight-voice .instrument-tile__display span {
+  background: #8be8d1;
+  box-shadow: 0 0 7px rgba(139,232,209,.95), 0 0 13px rgba(101,214,199,.35);
+}
+.instrument-tile--oberheim-eight-voice .instrument-tile__icon { color: rgba(139,232,209,.85); }
+
+/* New instrument cards use the shared suspended keybed treatment while
+   keeping their upper art specific to each instrument. */
+.instrument-tile--mellotron-m400 .instrument-tile__visual,
+.instrument-tile--oberheim-eight-voice .instrument-tile__visual {
+  overflow: hidden;
+}
+.instrument-tile--mellotron-m400 .instrument-tile__keys,
+.instrument-tile--oberheim-eight-voice .instrument-tile__keys {
+  filter: saturate(.94) sepia(.06);
+}
+.instrument-tile--mellotron-m400 {
+  --tile-bar-glow: #e7af65;
+  background: linear-gradient(145deg, rgba(63,49,47,.97), rgba(28,24,28,.98));
+}
+.instrument-tile--mellotron-m400 .instrument-tile__visual {
+  background:
+    linear-gradient(160deg, rgba(248,233,200,.9), rgba(135,91,67,.85) 58%, rgba(50,30,31,.98)),
+    repeating-linear-gradient(105deg, rgba(255,255,255,.16) 0 1px, transparent 1px 5px);
+}
+.m400-tile-art {
+  position: absolute;
+  inset: 78px 12px 62px;
+  z-index: 2;
+  border: 1px solid rgba(70,37,29,.72);
+  border-radius: 3px;
+  background: linear-gradient(180deg, rgba(255,244,211,.26), rgba(52,26,29,.35));
+  box-shadow: inset 0 0 0 4px rgba(64,34,29,.12), inset 0 0 16px rgba(38,18,18,.38);
+}
+.m400-tile-reel {
+  position: absolute;
+  top: 10px;
+  width: 37px;
+  height: 37px;
+  border: 5px solid #d5b17b;
+  border-radius: 50%;
+  background: radial-gradient(circle, #2c1a21 0 4px, #83614b 4px 8px, #23161c 8px 13px, #b48b60 14px 16px, #2b1a20 17px);
+  box-shadow: 0 2px 6px rgba(0,0,0,.5);
+  animation: m400-tile-reel-spin 4s linear infinite;
+}
+.m400-tile-reel--one { left: 16px; }
+.m400-tile-reel--two { right: 16px; animation-direction: reverse; }
+.m400-tile-art i { position: absolute; left: 32px; right: 32px; top: 28px; height: 2px; background: #d7ad71; box-shadow: 0 0 7px #e7af65; }
+.m400-tile-art b { position: absolute; bottom: 7px; color: #fff0c8; font: 700 8px var(--font-mono); }
+.m400-tile-art b:nth-of-type(1) { left: 22px; }.m400-tile-art b:nth-of-type(2) { left: 50%; transform: translateX(-50%); }.m400-tile-art b:nth-of-type(3) { right: 22px; }
+@keyframes m400-tile-reel-spin { to { transform: rotate(360deg); } }
+.instrument-tile--oberheim-eight-voice {
+  background: linear-gradient(145deg, rgba(39,57,63,.98), rgba(16,25,31,.98));
+}
+.instrument-tile--oberheim-eight-voice .instrument-tile__visual {
+  background: linear-gradient(160deg, #50636a, #22353c 50%, #0c151b);
+}
+.eight-tile-art {
+  position: absolute;
+  inset: 76px 10px 62px;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 3px;
+  padding: 6px;
+  border: 1px solid rgba(144,220,207,.35);
+  background: rgba(5,15,20,.62);
+  box-shadow: inset 0 0 14px #000b;
+}
+.eight-tile-art span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  border: 1px solid rgba(135,221,207,.27);
+  color: #9ce8d9;
+  background: linear-gradient(145deg, rgba(76,115,119,.5), rgba(12,31,37,.9));
+  font: 6px var(--font-mono);
+  letter-spacing: .04em;
+  text-shadow: 0 0 6px rgba(134,229,209,.8);
+}
+.eight-tile-art span:nth-child(3n) { color: #f0c47e; }

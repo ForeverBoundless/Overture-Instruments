@@ -15,7 +15,12 @@ function buildTile(instrument) {
   tile.tabIndex = 0;
   tile.setAttribute('role', 'button');
   tile.setAttribute('aria-label', `Select ${instrument.name}`);
-  tile.innerHTML = `<div class="instrument-tile__visual" aria-hidden="true"><div class="instrument-tile__glow"></div><div class="instrument-tile__display"><span></span><span></span></div><div class="instrument-tile__keys"></div><span class="material-symbols-rounded instrument-tile__icon">${instrument.icon}</span></div><div class="instrument-tile__content"><div class="instrument-tile__eyebrow">${instrument.manufacturer}</div><h2>${instrument.name}</h2><p class="instrument-tile__model">${instrument.model}</p><p class="instrument-tile__description">${instrument.description}</p><div class="instrument-specs">${spec('Voice', instrument.voiceMode, 'radio_button_checked')}${spec('Presets', instrument.presets, 'bookmark')}${spec('Keybed', instrument.keys, 'piano')}</div><div class="instrument-tile__actions"><span class="instrument-tile__hint"><span class="material-symbols-rounded">touch_app</span><b>to launch</b></span><md-filled-button class="instrument-launch-button"><span slot="icon" class="material-symbols-rounded">play_arrow</span>Launch</md-filled-button></div></div>`;
+  const art = instrument.id === 'mellotron-m400'
+    ? '<div class="m400-tile-art"><span class="m400-tile-reel m400-tile-reel--one"></span><span class="m400-tile-reel m400-tile-reel--two"></span><i></i><b>A</b><b>B</b><b>C</b></div>'
+    : instrument.id === 'oberheim-eight-voice'
+      ? '<div class="eight-tile-art"><span>SEM 01</span><span>SEM 02</span><span>SEM 03</span><span>SEM 04</span><span>SEM 05</span><span>SEM 06</span><span>SEM 07</span><span>SEM 08</span></div>'
+      : '';
+  tile.innerHTML = `<div class="instrument-tile__visual" aria-hidden="true"><div class="instrument-tile__glow"></div><div class="instrument-tile__display"><span></span><span></span></div>${art}<div class="instrument-tile__keys"></div><span class="material-symbols-rounded instrument-tile__icon">${instrument.icon}</span></div><div class="instrument-tile__content"><div class="instrument-tile__eyebrow">${instrument.manufacturer}</div><h2>${instrument.name}</h2><p class="instrument-tile__model">${instrument.model}</p><p class="instrument-tile__description">${instrument.description}</p><div class="instrument-specs">${spec('Voice', instrument.voiceMode, 'radio_button_checked')}${spec('Presets', instrument.presets, 'bookmark')}${spec('Keybed', instrument.keys, 'piano')}</div><div class="instrument-tile__actions"><span class="instrument-tile__hint"><span class="material-symbols-rounded">touch_app</span><b>to launch</b></span><md-filled-button class="instrument-launch-button"><span slot="icon" class="material-symbols-rounded">play_arrow</span>Launch</md-filled-button></div></div>`;
   const select = () => { document.querySelectorAll('.instrument-tile.is-selected').forEach((el) => el.classList.remove('is-selected')); tile.classList.add('is-selected'); tile.setAttribute('aria-label', `${instrument.name} selected. Launch button available.`); };
   tile.addEventListener('click', select);
   tile.addEventListener('keydown', (event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); select(); } });
@@ -113,10 +118,7 @@ page.innerHTML = `<div class="launcher-ambient launcher-ambient--one" aria-hidde
     <span id="instrument-search-status" class="library-search__status" role="status" aria-live="polite"></span>
   </div>
 </section><section class="instrument-grid" aria-label="Available instruments"></section><footer class="launcher-footer"><span>04 AVAILABLE INSTRUMENTS</span><span>SELECT A TILE TO CONTINUE</span></footer>
-<div class="launcher-legal">
-  © 2026 Overture Instruments. Independent, unofficial project. Not affiliated with, endorsed by, or sponsored by any manufacturer represented here.
-  All trademarks and brand names belong to their respective owners.
-</div>`;
+<div class="launcher-legal"></div>`;
 {
   const nav = page.querySelector('#main-nav');
   const toggle = page.querySelector('.menu-toggle');

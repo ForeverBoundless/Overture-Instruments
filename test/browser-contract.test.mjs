@@ -11,7 +11,7 @@ test('PWA shell exposes a manifest and worker registration', async () => {
 });
 
 test('all library cards use canonical metadata with declared preset provenance', () => {
-  assert.equal(INSTRUMENTS.length, 8);
+  assert.equal(INSTRUMENTS.length, 10);
   assert.equal(INSTRUMENTS.every((instrument) => instrument.presetProvenance && instrument.description), true);
 });
 
@@ -94,7 +94,8 @@ test('instrument and experiment pages register the shared offline app shell', as
     '../about.html', '../library.html', '../omni.html', '../experiments.html',
     '../html/korg-ms-20.html', '../html/little-phatty.html', '../html/nord-c2d.html',
     '../html/prophet10.html', '../html/roland-juno-106.html', '../html/roland-tr-808.html',
-    '../html/sub37.html', '../html/yamaha-dx7.html',
+    '../html/sub37.html', '../html/yamaha-dx7.html', '../html/mellotron-m400.html',
+    '../html/oberheim-eight-voice.html',
     '../experiments/beats-lab.html', '../experiments/envelope-lab.html',
     '../experiments/filter-lab.html', '../experiments/fm-lab.html',
     '../experiments/harmonics-lab.html', '../experiments/modulation-lab.html',
@@ -105,6 +106,28 @@ test('instrument and experiment pages register the shared offline app shell', as
     assert.match(page, /rel="manifest"/);
     assert.ok(page.includes('/js/shared/pwa.js'));
   }
+});
+
+test('M400 and Eight Voice are complete instrument pages, not library-only entries', async () => {
+  const [mellotronPage, oberheimPage, mellotronApp, oberheimApp, mellotronEngine, oberheimEngine, worker] = await Promise.all([
+    '../html/mellotron-m400.html', '../html/oberheim-eight-voice.html',
+    '../js/mellotron-m400.js', '../js/oberheim-eight-voice.js',
+    '../js/engine/MellotronProcessor.js', '../js/engine/OberheimEightVoiceProcessor.js',
+    '../service-worker.js',
+  ].map((file) => readFile(new URL(file, import.meta.url), 'utf8')));
+  assert.match(mellotronPage, /id="mellotron-m400-root"/);
+  assert.match(mellotronPage, /mellotron-m400\.js/);
+  assert.match(oberheimPage, /id="oberheim-eight-voice-root"/);
+  assert.match(oberheimPage, /oberheim-eight-voice\.js/);
+  assert.match(mellotronApp, /new WorkletEngine/);
+  assert.match(mellotronApp, /notes: NOTES/);
+  assert.match(oberheimApp, /new WorkletEngine/);
+  assert.match(oberheimApp, /eight-voice-processor/);
+  assert.match(mellotronEngine, /8 second/);
+  assert.match(mellotronEngine, /registerProcessor\('mellotron-processor'/);
+  assert.match(oberheimEngine, /Array\.from\(\{ length: 8/);
+  assert.match(oberheimEngine, /state-variable filter|state variable filter/i);
+  for (const asset of ['/html/mellotron-m400', '/html/oberheim-eight-voice', '/js/engine/MellotronProcessor.js', '/js/engine/OberheimEightVoiceProcessor.js']) assert.ok(worker.includes(asset));
 });
 
 
@@ -233,7 +256,7 @@ test('The shared account menu works across site, OMNI, Library and all experimen
   assert.ok(omni.includes('/css/site-theme.css'));
   assert.ok(omni.includes('account-shell.js?v=20261102-contributions-menu'));
   assert.ok(library.includes('account-shell.js?v=20261102-contributions-menu'));
-  assert.ok(worker.includes('overture-shell-v25'));
+  assert.ok(worker.includes('overture-shell-v26'));
   assert.ok(worker.includes('account-shell.js?v=20261102-contributions-menu'));
   for (const page of experimentPages) {
     const html = await readFile(new URL(`../experiments/${page}.html`, import.meta.url), 'utf8');
@@ -304,5 +327,5 @@ test('Contribution page profile, toolbar and result counts have responsive align
   assert.ok(css.includes('.contributions-toolbar.is-owner'));
   assert.ok(css.includes('@media (max-width:380px)'));
   assert.ok(app.includes("classList.toggle('is-owner', state.isOwner)"));
-  assert.ok(worker.includes('overture-shell-v25'));
+  assert.ok(worker.includes('overture-shell-v26'));
 });

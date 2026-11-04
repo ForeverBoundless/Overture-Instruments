@@ -84,7 +84,7 @@ export function display(parent) {
  * MIDI with pending notes until the engine starts, and all-notes-off.
  * handlers: { noteOn(midi, vel, source), noteOff(midi, source), bend(v), mod(v), sustain(down), aftertouch(v), cc(cc,val), program(n), allOff() }
  */
-export function performance(parent, { octaves = 4, startOctave = 2, wheels = true, started = () => true, handlers, midiStatusEl, octaveShift = true }) {
+export function performance(parent, { octaves = 4, startOctave = 2, notes = null, wheels = true, started = () => true, handlers, midiStatusEl, octaveShift = true }) {
   const keybed = el('section', `pn-keybed${wheels ? '' : ' pn-keybed--nowheels'}`, parent);
   let pitchWheel = null;
   let modWheel = null;
@@ -95,7 +95,7 @@ export function performance(parent, { octaves = 4, startOctave = 2, wheels = tru
     w.append(pitchWheel.el, modWheel.el);
   }
   const wrap = el('div', '', keybed);
-  const keyboard = new Keyboard({ startOctave, octaves, onNoteOn: (n, v) => noteOn(noteToMidi(n), v, 'ui'), onNoteOff: (n) => noteOff(noteToMidi(n), 'ui') });
+  const keyboard = new Keyboard({ startOctave, octaves, notes, onNoteOn: (n, v) => noteOn(noteToMidi(n), v, 'ui'), onNoteOff: (n) => noteOff(noteToMidi(n), 'ui') });
   wrap.appendChild(keyboard.el);
   const held = new Map();
   const pending = new Map();
