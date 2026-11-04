@@ -86,3 +86,15 @@ test('Mellotron default note release is long enough to avoid an abrupt key-up', 
   const h = await createProcessor();
   assert.equal(h.processor.p.release, 0.18);
 });
+
+test('standalone M400 and OMNI load the corrected, cache-busted Mellotron worklet', async () => {
+  const [standalone, modules, worker] = await Promise.all([
+    readFile(new URL('../js/mellotron-m400.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/omni/modules.js', import.meta.url), 'utf8'),
+    readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
+  ]);
+  assert.match(standalone, /MellotronProcessor\.js\?v=20261104-declick/);
+  assert.match(modules, /MellotronProcessor\.js\?v=20261104-declick/);
+  assert.match(worker, /overture-shell-v30/);
+  assert.match(worker, /MellotronProcessor\.js\?v=20261104-declick/);
+});
