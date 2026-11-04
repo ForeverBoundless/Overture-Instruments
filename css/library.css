@@ -4129,3 +4129,10 @@ html[data-theme="light"] .instrument-tile--mellotron-m400 .instrument-tile__eyeb
   background: #8be8d1;
   box-shadow: 0 0 7px rgba(139,232,209,.95), 0 0 14px rgba(101,214,199,.38);
 }
+
+/* Keep the TR-808 pad art on the shared keyboard's exact mobile alignment. */
+@media (max-width: 560px) {
+  .instrument-tile--roland-tr-808 .instrument-tile__keys {
+    right: -28px;
+  }
+}
