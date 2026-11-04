@@ -259,7 +259,7 @@ test('OMNI exposes native SEM and Mellotron instrument modules and refreshes off
   assert.match(templates, /SEM Warm Ensemble/);
   assert.match(templates, /Mellotron Choir/);
   assert.match(page, /omni\.js\?v=20261104-sem-mellotron/);
-  assert.match(worker, /overture-shell-v29/);
+  assert.match(worker, /overture-shell-v30/);
   assert.match(worker, /OberheimEightVoiceProcessor\.js/);
   assert.match(worker, /MellotronProcessor\.js/);
   assert.match(worker, /omni\.js\?v=20261104-sem-mellotron/);
