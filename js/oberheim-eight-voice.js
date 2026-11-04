@@ -1,6 +1,6 @@
 import { WorkletEngine } from './shared/workletEngine.js';
 import { PresetStore, num } from './shared/presetStore.js';
-import { el, section, knob, select, toggle, display, performance, power, presetBar, footer } from './shared/panel.js';
+import { el, section, knob, select, display, performance, power, presetBar, footer } from './shared/panel.js';
 import { OBERHEIM_EIGHT_VOICE_PRESETS } from './data/oberheimEightVoicePresets.js';
 
 const DEF = { cutoff: .58, resonance: .16, filterEnv: .48, filterMode: 'low', osc1: .7, osc2: .65, tune: .02, pulse: .5, wave1: 'saw', wave2: 'pulse', attack: .08, decay: .35, sustain: .7, release: .32, master: .7, lfoRate: .18, lfoAmount: .08, lfoTarget: 'pitch', bendRange: 2 };
