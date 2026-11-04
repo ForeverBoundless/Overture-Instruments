@@ -234,3 +234,33 @@ test('OMNI mixer exposes dynamic 2–8 inputs and MIDI controls follow the activ
   assert.match(modules, /Math\.sqrt\(4 \/ channels\)/);
   assert.match(worker, /overture-shell-v21/);
 });
+
+test('OMNI exposes native SEM and Mellotron instrument modules and refreshes offline assets', async () => {
+  const paths = [
+    '../js/omni/modules.js', '../js/omni.js', '../js/omni/graph.js',
+    '../js/omni/templates.js', '../js/engine/OberheimEightVoiceProcessor.js',
+    '../js/engine/MellotronProcessor.js', '../omni.html', '../service-worker.js',
+  ];
+  const [modules, app, graph, templates, sem, mellotron, page, worker] = await Promise.all(
+    paths.map((path) => readFile(new URL(path, import.meta.url), 'utf8')),
+  );
+  assert.match(modules, /name: 'SEM Poly Synth'/);
+  assert.match(modules, /name: 'Mellotron Tape Voice'/);
+  assert.match(modules, /oberheim-eight-voice-processor/);
+  assert.match(modules, /mellotron-processor/);
+  assert.match(modules, /filterMode: \['low', 'band', 'high', 'notch'\]/);
+  assert.match(modules, /Tape frame/);
+  assert.match(sem, /this\.scheduled\.push\(m\)/);
+  assert.match(sem, /this\.scheduled\[0\]\.frame <= currentFrame \+ n/);
+  assert.match(mellotron, /this\.scheduled\[0\]\.frame <= currentFrame \+ i/);
+  assert.match(mellotron, /this\.p\.release/);
+  assert.match(app, /20261104-sem-mellotron/);
+  assert.match(graph, /20261104-sem-mellotron/);
+  assert.match(templates, /SEM Warm Ensemble/);
+  assert.match(templates, /Mellotron Choir/);
+  assert.match(page, /omni\.js\?v=20261104-sem-mellotron/);
+  assert.match(worker, /overture-shell-v29/);
+  assert.match(worker, /OberheimEightVoiceProcessor\.js/);
+  assert.match(worker, /MellotronProcessor\.js/);
+  assert.match(worker, /omni\.js\?v=20261104-sem-mellotron/);
+});
