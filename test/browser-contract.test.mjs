@@ -385,13 +385,28 @@ test('Login page has a layered animated sound-field background with reduced-moti
   assert.match(accountCss, /@keyframes login-orbit-glint/);
   assert.match(accountCss, /login-ambient__orbit::before/);
   assert.match(accountCss, /@media \\(prefers-reduced-motion:reduce\\)/);
-  assert.match(worker, /overture-shell-v35/);
+  assert.match(accountCss, /Login backdrop performance pass/);
+  assert.match(accountCss, /body\\.login-page \\.site-noise \\{\\s*display:none/);
+  assert.match(accountCss, /@keyframes login-grid-float/);
+  assert.match(accountCss, /@keyframes login-prismatic-reflection/);
+  assert.match(worker, /overture-shell-v36/);
   assert.match(worker, /account\\.css\\?v=20261104-login-prism/);
   assert.match(loginPage, /account\\.css\\?v=20261104-login-prism/);
   assert.match(accountCss, /Light-mode graphite and Overture accent treatment/);
   assert.match(accountCss, /rgba\\(12,22,32,.13\\)/);
   assert.match(accountCss, /mix-blend-mode:multiply/);
-  assert.match(worker, /overture-shell-v35/);
+  assert.match(worker, /overture-shell-v36/);
   assert.match(worker, /account\\.css\\?v=20261104-login-light-contrast/);
   assert.match(loginPage, /account\\.css\\?v=20261104-login-light-contrast/);
+});
+
+
+test('Homepage library CTA logo is black in light mode', async () => {
+  const [home, index] = await Promise.all([
+    readFile(new URL('../css/home.css', import.meta.url), 'utf8'),
+    readFile(new URL('../index.html', import.meta.url), 'utf8'),
+  ]);
+  assert.match(index, /home\\.css\\?v=20261104-home-logo-light/);
+  assert.match(home, /html\\[data-theme="light"\\] a\\.showcase-cta\\[href="\\/library"\\] \\.showcase-cta__icon img/);
+  assert.match(home, /filter:brightness\\(0\\) !important/);
 });
