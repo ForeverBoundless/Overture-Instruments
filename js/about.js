@@ -20,7 +20,15 @@
       rootMargin: '0px 0px -24px 0px'
     });
 
-    revealItems.forEach((item) => revealObserver.observe(item));
+    revealItems.forEach((item) => {
+      const bounds = item.getBoundingClientRect();
+      if (bounds.top < window.innerHeight && bounds.bottom > 0) {
+        item.classList.add('is-visible');
+      } else {
+        item.classList.add('reveal-pending');
+        revealObserver.observe(item);
+      }
+    });
   } else {
     revealItems.forEach((item) => item.classList.add('is-visible'));
   }
