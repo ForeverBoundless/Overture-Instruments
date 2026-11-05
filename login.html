@@ -29,7 +29,7 @@
   <link rel="stylesheet" href="/css/site-footer.css">
   <link rel="stylesheet" href="/css/site-theme.css">
   <link rel="stylesheet" href="/css/site-theme-polish.css?v=20261103-accent-spacing">
-  <link rel="stylesheet" href="/css/account.css?v=20261104-split-login">
+  <link rel="stylesheet" href="/css/account.css?v=20261104-login-ambient">
 
   <script src="/js/shared/supabase-config.js"></script>
   <script src="/js/shared/site-theme.js" defer></script>
@@ -41,8 +41,39 @@
   <script type="module" src="/js/shared/account-shell.js?v=20261102-contributions-menu"></script>
   <script type="module" src="/js/account.js?v=20261104-split-login"></script>
 </head>
-<body>
+<body class="login-page">
   <div class="site-noise" aria-hidden="true"></div>
+  <div class="login-ambient" aria-hidden="true">
+    <div class="login-ambient__grid"></div>
+    <div class="login-ambient__glow login-ambient__glow--cyan"></div>
+    <div class="login-ambient__glow login-ambient__glow--amber"></div>
+    <div class="login-ambient__glow login-ambient__glow--green"></div>
+    <div class="login-ambient__core"></div>
+    <div class="login-ambient__orbit login-ambient__orbit--outer"></div>
+    <div class="login-ambient__orbit login-ambient__orbit--inner"></div>
+    <div class="login-ambient__orbit login-ambient__orbit--fine"></div>
+    <div class="login-ambient__sweep"></div>
+    <svg class="login-ambient__traces" viewBox="0 0 1440 900" preserveAspectRatio="none" focusable="false">
+      <defs>
+        <linearGradient id="login-trace-cyan" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#7de4ff" stop-opacity="0"/>
+          <stop offset=".48" stop-color="#7de4ff" stop-opacity=".52"/>
+          <stop offset="1" stop-color="#7de4ff" stop-opacity="0"/>
+        </linearGradient>
+        <linearGradient id="login-trace-amber" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#ffb75e" stop-opacity="0"/>
+          <stop offset=".5" stop-color="#ffb75e" stop-opacity=".35"/>
+          <stop offset="1" stop-color="#ffb75e" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <path class="login-ambient__trace login-ambient__trace--cyan" d="M-100 650 C 150 580 245 245 510 330 S 950 720 1540 190"/>
+      <path class="login-ambient__trace login-ambient__trace--amber" d="M-100 205 C 160 385 320 90 570 245 S 970 690 1540 505"/>
+    </svg>
+    <i class="login-ambient__spark login-ambient__spark--one"></i>
+    <i class="login-ambient__spark login-ambient__spark--two"></i>
+    <i class="login-ambient__spark login-ambient__spark--three"></i>
+    <i class="login-ambient__spark login-ambient__spark--four"></i>
+  </div>
   <header class="site-header" id="top">
     <a class="site-brand" href="/" aria-label="Overture Instruments home">
       <span class="site-brand__mark"><img src="/ui/Logos/OvertureLogo.png" alt="" width="24" height="24"></span>
