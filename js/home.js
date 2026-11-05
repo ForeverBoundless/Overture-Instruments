@@ -82,10 +82,10 @@
 
   window.addEventListener('hashchange', () => scrollToHash(true));
 
-  // Four-node homepage easter egg. Detect clicks in SVG coordinates from
-  // the hero itself, because the SVG sits behind the transparent hero-content
-  // wrapper and its painted circles cannot reliably receive DOM click events.
-  // Only the circles' original visible radii count as hits.
+  // Four-node homepage easter egg. Listen at window level so transparent
+  // hero content and the fixed site header cannot block a node interaction.
+  // Hit-testing uses screen pixels around the original SVG node centres; it
+  // never changes the visible circles or their styling.
   const heroCircuit = document.querySelector('.hero-circuit');
   const heroSection = heroCircuit?.closest('.hero');
   if (heroCircuit && heroSection) {
@@ -95,26 +95,25 @@
     );
     let progress = 0;
 
-    heroSection.addEventListener('click', (event) => {
+    window.addEventListener('click', (event) => {
+      const heroBounds = heroSection.getBoundingClientRect();
+      if (
+        event.clientX < heroBounds.left || event.clientX > heroBounds.right ||
+        event.clientY < heroBounds.top || event.clientY > heroBounds.bottom
+      ) return;
+
       const screenMatrix = heroCircuit.getScreenCTM();
       if (!screenMatrix) return;
 
-      const point = heroCircuit.createSVGPoint();
-      point.x = event.clientX;
-      point.y = event.clientY;
-
-      let svgPoint;
-      try {
-        svgPoint = point.matrixTransform(screenMatrix.inverse());
-      } catch (error) {
-        return;
-      }
-
       const hitNode = nodes.find((node) => {
-        const dx = svgPoint.x - Number(node.getAttribute('cx'));
-        const dy = svgPoint.y - Number(node.getAttribute('cy'));
-        const radius = Number(node.getAttribute('r')) + 1;
-        return (dx * dx + dy * dy) <= radius * radius;
+        const center = heroCircuit.createSVGPoint();
+        center.x = Number(node.getAttribute('cx'));
+        center.y = Number(node.getAttribute('cy'));
+        const screenCenter = center.matrixTransform(screenMatrix);
+        return Math.hypot(
+          event.clientX - screenCenter.x,
+          event.clientY - screenCenter.y
+        ) <= 9;
       });
 
       if (!hitNode) return;
