@@ -20,8 +20,8 @@ function getReturnTo() {
 }
 
 function redirectAfterAuth() {
-  const target = getReturnTo();
-  if (target && target !== '/account') window.location.replace(target);
+  const target = getReturnTo() || '/account';
+  if (target !== '/login' && target !== '/login/') window.location.replace(target);
 }
 
 function showAuthView(view) {
@@ -77,7 +77,6 @@ function renderProfile() {
   $('account-preview-name').textContent = displayName || username;
   $('account-preview-username').textContent = `@${username}`;
   setAvatar(state.removeAvatar ? '' : avatar, displayName || username);
-  $('account-auth-panel').hidden = true;
   $('account-profile').hidden = false;
 }
 
@@ -105,20 +104,31 @@ async function loadProfile() {
 
 async function showSession(session) {
   state.user = session?.user || null;
+  const isLoginPage = Boolean($('account-auth-panel'));
+  const isAccountPage = Boolean($('account-profile'));
+
   if (!state.user) {
-    $('account-auth-panel').hidden = false;
-    $('account-profile').hidden = true;
-    showAuthView('login');
+    if (isLoginPage) {
+      $('account-auth-panel').hidden = false;
+      showAuthView('login');
+    } else if (isAccountPage) {
+      const returnTo = window.location.pathname + window.location.search + window.location.hash;
+      window.location.replace(`/login?returnTo=${encodeURIComponent(returnTo)}`);
+    }
     return;
   }
 
-  $('account-auth-panel').hidden = true;
+  if (isLoginPage) {
+    redirectAfterAuth();
+    return;
+  }
+  if (!isAccountPage) return;
+
   $('account-profile').hidden = true;
   try {
     await loadProfile();
     renderProfile();
     setStatus('');
-    redirectAfterAuth();
   } catch (error) {
     setStatus(`Could not load your profile: ${error.message || error}`, true);
   }
@@ -325,14 +335,13 @@ async function signOut() {
     state.profile = null;
     state.user = null;
     state.avatarFile = null;
-    $('account-auth-panel').hidden = false;
-    $('account-profile').hidden = true;
-    showAuthView('login');
-    setStatus('You have signed out.');
     window.dispatchEvent(new CustomEvent('overture:profilechange'));
+    window.location.replace('/login');
   } catch (error) {
     setStatus(error.message || 'Could not sign out.', true);
-  } finally { $('account-signout').disabled = false; }
+  } finally {
+    if ($('account-signout')) $('account-signout').disabled = false;
+  }
 }
 
 function previewAvatar() {
@@ -369,17 +378,23 @@ async function initialise() {
   try {
     state.supabase = await configureSupabase();
     if (!state.supabase) throw new Error('Supabase is not configured.');
-    $('account-tab-login').addEventListener('click', () => showAuthView('login'));
-    $('account-tab-signup').addEventListener('click', () => showAuthView('signup'));
-    $('account-login-form').addEventListener('submit', login);
-    $('account-signup-form').addEventListener('submit', signup);
-    $('account-google').addEventListener('click', googleSignIn);
-    $('account-forgot-password').addEventListener('click', requestPasswordReset);
-    $('account-profile-form').addEventListener('submit', saveProfile);
-    $('account-password-form').addEventListener('submit', changePassword);
-    $('account-signout').addEventListener('click', signOut);
-    $('account-avatar-file').addEventListener('change', previewAvatar);
-    $('account-remove-avatar').addEventListener('click', removeAvatar);
+
+    if ($('account-auth-panel')) {
+      $('account-tab-login').addEventListener('click', () => showAuthView('login'));
+      $('account-tab-signup').addEventListener('click', () => showAuthView('signup'));
+      $('account-login-form').addEventListener('submit', login);
+      $('account-signup-form').addEventListener('submit', signup);
+      $('account-google').addEventListener('click', googleSignIn);
+      $('account-forgot-password').addEventListener('click', requestPasswordReset);
+    }
+
+    if ($('account-profile')) {
+      $('account-profile-form').addEventListener('submit', saveProfile);
+      $('account-password-form').addEventListener('submit', changePassword);
+      $('account-signout').addEventListener('click', signOut);
+      $('account-avatar-file').addEventListener('change', previewAvatar);
+      $('account-remove-avatar').addEventListener('click', removeAvatar);
+    }
 
     const { data, error } = await state.supabase.auth.getSession();
     if (error) throw error;
