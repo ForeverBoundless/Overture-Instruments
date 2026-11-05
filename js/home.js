@@ -20,7 +20,17 @@
       rootMargin: '0px 0px -25px 0px'
     });
 
-    revealItems.forEach((item) => revealObserver.observe(item));
+    revealItems.forEach((item) => {
+      const bounds = item.getBoundingClientRect();
+      // Never hide content that is already in the first viewport. Only stage
+      // below-the-fold reveals after the observer is ready.
+      if (bounds.top < window.innerHeight && bounds.bottom > 0) {
+        item.classList.add('is-visible');
+      } else {
+        item.classList.add('reveal-pending');
+        revealObserver.observe(item);
+      }
+    });
   } else {
     revealItems.forEach((item) => item.classList.add('is-visible'));
   }
