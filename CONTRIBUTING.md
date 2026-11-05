@@ -14,7 +14,7 @@ The automated suite cannot verify physical MIDI devices, microphone permissions,
 
 ## Working on OMNI
 
-Module definitions live in `js/omni/modules.js`; the patch schema and live graph lifecycle live in `js/omni/graph.js`. Audio/CV connections must remain cycle-safe. Note generators must attach an absolute `AudioContext` timestamp to scheduled events so native Web Audio nodes and worklets can schedule on the audio clock.
+Module definitions live in `js/omni/modules.js`; every module must also have a complete entry in `js/omni/moduleInfo.js` containing a summary, circuit architecture, practical use, and an explanation of the OMNI implementation. `omni.js` validates this catalogue against the module registry at startup, and the module-reference test checks every entry. Add the reference entry in the same change whenever you add or rename a module. Describe real hardware accurately, and clearly label digital models and approximations rather than presenting them as physical circuits. The patch schema and live graph lifecycle live in `js/omni/graph.js`. Audio/CV connections must remain cycle-safe. Note generators must attach an absolute `AudioContext` timestamp to scheduled events so native Web Audio nodes and worklets can schedule on the audio clock.
 
 ## Saved data compatibility
 
