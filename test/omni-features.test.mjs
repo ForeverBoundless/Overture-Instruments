@@ -264,3 +264,37 @@ test('OMNI exposes native SEM and Mellotron instrument modules and refreshes off
   assert.match(worker, /MellotronProcessor\.js/);
   assert.match(worker, /omni\.js\?v=20261104-sem-mellotron/);
 });
+
+
+test('every OMNI module has a complete technical reference and the inspector can open it', async () => {
+  const [catalogue, references, app, page, styles, worker, contributorGuide] = await Promise.all([
+    import('../js/omni/modules.js'),
+    import('../js/omni/moduleInfo.js'),
+    readFile(new URL('../js/omni.js', import.meta.url), 'utf8'),
+    readFile(new URL('../omni.html', import.meta.url), 'utf8'),
+    readFile(new URL('../css/omni-info.css', import.meta.url), 'utf8'),
+    readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
+    readFile(new URL('../CONTRIBUTING.md', import.meta.url), 'utf8'),
+  ]);
+  assert.equal(references.assertModuleInfoCoverage(catalogue.MODULES), true);
+  assert.deepEqual(Object.keys(references.MODULE_INFO).sort(), Object.keys(catalogue.MODULES).sort());
+  for (const [type, info] of Object.entries(references.MODULE_INFO)) {
+    for (const field of ['summary', 'circuit', 'use', 'implementation']) {
+      assert.equal(typeof info[field], 'string', `${type} needs ${field}`);
+      assert.ok(info[field].trim().length > 40, `${type} needs a substantive ${field} explanation`);
+    }
+  }
+  assert.match(app, /assertModuleInfoCoverage\(MODULES\)/);
+  assert.match(app, /this\.moduleInfoButton/);
+  assert.match(app, /openModuleInfo\(type\)/);
+  assert.match(app, /setAttribute\('role', 'dialog'\)/);
+  assert.match(app, /aria-modal/);
+  assert.match(styles, /html\[data-theme="light"\] \.omni-info-dialog/);
+  assert.match(styles, /\.omni-info-dialog\s*\{/);
+  assert.match(page, /omni-info\.css\?v=20261105-module-info/);
+  assert.match(page, /omni\.js\?v=20261105-module-info/);
+  assert.match(worker, /overture-shell-v39/);
+  assert.match(worker, /omni-info\.css\?v=20261105-module-info/);
+  assert.match(worker, /moduleInfo\.js\?v=20261105-module-info/);
+  assert.match(contributorGuide, /every module must also have a complete entry in `js\/omni\/moduleInfo\.js`/);
+});
