@@ -311,3 +311,8 @@ html[data-theme="light"] .account-avatar-upload input[type=file]::file-selector-
   .account-profile-panel,
   .account-password-panel { padding:18px 15px; }
 }
+
+
+/* Keep the two dedicated account views hidden until their controller reveals them. */
+.account-auth-panel[hidden],
+.account-profile[hidden] { display: none !important; }
