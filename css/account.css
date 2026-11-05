@@ -870,3 +870,67 @@ html[data-theme="light"] .login-page .login-ambient::after {
   html[data-theme="light"] .login-ambient__glow { filter:blur(78px); }
   html[data-theme="light"] .login-ambient__traces { opacity:.76; }
 }
+
+
+/* Login backdrop performance pass. Preserve the layered look while keeping
+   motion on compositor-friendly transforms instead of repainting full screens. */
+body.login-page .site-noise {
+  display:none;
+}
+.login-ambient__grid {
+  animation:login-grid-float 72s ease-in-out infinite alternate;
+  background-position:0 0,0 0;
+  will-change:transform;
+}
+.login-ambient__glow {
+  width:min(48vw,620px);
+  filter:blur(48px);
+  will-change:auto;
+}
+.login-ambient__glow--green {
+  width:min(32vw,420px);
+}
+.login-ambient__trace--cyan,
+.login-ambient__trace--amber {
+  filter:none;
+}
+.login-ambient__trace {
+  animation-duration:42s;
+}
+.login-ambient__trace--amber {
+  animation-duration:54s;
+}
+.login-ambient__sweep {
+  filter:none;
+}
+.login-page .login-ambient::before {
+  inset:-10%;
+  mix-blend-mode:normal;
+  animation:login-prismatic-reflection 38s ease-in-out infinite alternate;
+}
+.login-ambient__orbit::before {
+  animation-duration:30s;
+}
+.login-ambient__orbit--inner::before { animation-duration:38s; }
+.login-ambient__orbit--fine::before { animation-duration:46s; }
+
+@keyframes login-grid-float {
+  from { transform:translate3d(-.35%,.2%,0) scale(1); }
+  to { transform:translate3d(.35%,-.2%,0) scale(1.006); }
+}
+/* Replaces the former background-position animation with a small transform. */
+@keyframes login-prismatic-reflection {
+  from { transform:translate3d(-.6%,0,0) scale(1); opacity:.46; }
+  to { transform:translate3d(.6%,0,0) scale(1.01); opacity:.64; }
+}
+
+@media (max-width:760px) {
+  .login-ambient__glow {
+    width:min(58vw,420px);
+    filter:blur(36px);
+  }
+  .login-ambient__glow--green { width:min(40vw,300px); }
+}
+@media (prefers-reduced-motion:reduce) {
+  .login-ambient__grid { will-change:auto; }
+}
