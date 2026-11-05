@@ -4,7 +4,7 @@
 const boot = window.__overtureOmniBoot;
 const bootStartedAt = performance.now();
 const dependencyGroups = [
-  ['./omni/modules.js?v=20261104-sem-mellotron', './omni/graph.js?v=20261104-sem-mellotron', './omni/templates.js?v=20261104-sem-mellotron'],
+  ['./omni/modules.js?v=20261104-sem-mellotron', './omni/graph.js?v=20261104-sem-mellotron', './omni/templates.js?v=20261104-sem-mellotron', './omni/moduleInfo.js?v=20261105-module-info'],
   ['./shared/presetStore.js', './shared/audioRecorder.js', './shared/midiRecorder.js'],
   ['../ui/Keyboard.js', '../ui/Wheel.js', './engine/MidiManager.js'],
   ['./shared/panel.js', './shared/midiMap.js']
@@ -19,6 +19,7 @@ for (const group of dependencyGroups) {
 }
 const [
   { MODULES, CATEGORIES, SIGNAL_COLORS, modulePorts },
+  { MODULE_INFO, assertModuleInfoCoverage },
   { defaultPatch, validatePatch, connectionError, LiveGraph, patchToSVG, defaultParams },
   { TEMPLATES, templatePreview },
   { PresetStore, downloadText, pickFile },
@@ -30,6 +31,7 @@ const [
   { noteToMidi, KEY_TO_SEMI },
   { registerMidiTarget, registerMidiTargetProvider }
 ] = loaded;
+assertModuleInfoCoverage(MODULES);
 
 const el = (tag, cls, parent, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text !== undefined) n.textContent = text; if (parent) parent.appendChild(n); return n; };
 const uid = (p) => `${p}${Math.random().toString(36).slice(2, 8)}`;
@@ -254,8 +256,63 @@ class OmniApp {
     this._bindCanvas();
     // Inspector
     this.inspector = el('aside', 'omni-inspector', main);
-    el('h2', '', this.inspector, 'INSPECTOR');
+    const inspectorHead = el('div', 'omni-inspector__head', this.inspector);
+    el('h2', '', inspectorHead, 'INSPECTOR');
+    this.moduleInfoButton = el('button', 'omni-info-button', inspectorHead);
+    this.moduleInfoButton.type = 'button';
+    this.moduleInfoButton.textContent = 'i';
+    this.moduleInfoButton.title = 'Read about this module';
+    this.moduleInfoButton.setAttribute('aria-label', 'Open module information');
+    this.moduleInfoButton.hidden = true;
+    this.moduleInfoButton.addEventListener('click', () => {
+      const selectedModule = this.patch.modules.find((item) => item.id === this.selected);
+      if (selectedModule) this.openModuleInfo(selectedModule.type);
+    });
     this.inspBody = el('div', '', this.inspector);
+
+    // The reference window is built once and populated from the complete module catalogue.
+    this.moduleInfoOverlay = el('div', 'omni-info-overlay', root);
+    this.moduleInfoOverlay.hidden = true;
+    this.moduleInfoOverlay.setAttribute('aria-hidden', 'true');
+    this.moduleInfoOverlay.addEventListener('click', (event) => {
+      if (event.target === this.moduleInfoOverlay) this.closeModuleInfo();
+    });
+    this.moduleInfoDialog = el('section', 'omni-info-dialog', this.moduleInfoOverlay);
+    this.moduleInfoDialog.setAttribute('role', 'dialog');
+    this.moduleInfoDialog.setAttribute('aria-modal', 'true');
+    this.moduleInfoDialog.setAttribute('aria-labelledby', 'omni-info-title');
+    this.moduleInfoDialog.tabIndex = -1;
+    const infoHeader = el('header', 'omni-info-dialog__header', this.moduleInfoDialog);
+    const infoHeading = el('div', 'omni-info-dialog__heading', infoHeader);
+    el('span', 'omni-info-dialog__eyebrow', infoHeading, 'OMNI MODULE REFERENCE');
+    this.moduleInfoCategory = el('span', 'omni-info-dialog__category', infoHeading);
+    this.moduleInfoClose = el('button', 'omni-info-dialog__close', infoHeader, '×');
+    this.moduleInfoClose.type = 'button';
+    this.moduleInfoClose.setAttribute('aria-label', 'Close module information');
+    this.moduleInfoClose.addEventListener('click', () => this.closeModuleInfo());
+    this.moduleInfoContent = el('div', 'omni-info-dialog__content', this.moduleInfoDialog);
+    this.moduleInfoTitle = el('h2', 'omni-info-dialog__title', this.moduleInfoContent);
+    this.moduleInfoSummary = el('p', 'omni-info-dialog__summary', this.moduleInfoContent);
+    const makeInfoSection = (label) => {
+      const section = el('section', 'omni-info-section', this.moduleInfoContent);
+      el('h3', '', section, label);
+      return el('p', '', section);
+    };
+    this.moduleInfoCircuit = makeInfoSection('Circuit architecture');
+    this.moduleInfoUse = makeInfoSection('How it is used');
+    this.moduleInfoImplementation = makeInfoSection('OMNI implementation');
+    this.moduleInfoOverlay.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        event.stopPropagation();
+        this.closeModuleInfo();
+      } else if (event.key === 'Tab') {
+        // The close control is the only interactive element in this reading dialog.
+        event.preventDefault();
+        this.moduleInfoClose.focus();
+      }
+    });
+
     // Performance deck: compact transport, tactile wheels and a full-width keybed.
     const perf = el('section', 'omni-perf', root);
     this.performancePane = perf;
@@ -1109,7 +1166,35 @@ class OmniApp {
     this.patch.connections.forEach((c) => { const a = this.portPos(c.from, 'out'); const b = this.portPos(c.to, 'in'); if (!a || !b) return; const type = modulePorts(byId[c.from.module], 'outputs').find((p) => p.id === c.from.port)?.type; draw(a, b, SIGNAL_COLORS[type], c.id, type); });
     if (temp) { const a = this.portPos(temp.from, 'out'); if (a) draw(a, temp.to, '#fff', null); }
   }
+  openModuleInfo(type) {
+    const def = MODULES[type];
+    const info = MODULE_INFO[type];
+    if (!def || !info) {
+      this.msg(`No technical reference is registered for module “${type}”.`, true);
+      return;
+    }
+    this._moduleInfoReturnFocus = document.activeElement;
+    this.moduleInfoTitle.textContent = def.name;
+    this.moduleInfoCategory.textContent = def.category.toUpperCase();
+    this.moduleInfoSummary.textContent = info.summary;
+    this.moduleInfoCircuit.textContent = info.circuit;
+    this.moduleInfoUse.textContent = info.use;
+    this.moduleInfoImplementation.textContent = info.implementation;
+    this.moduleInfoOverlay.hidden = false;
+    this.moduleInfoOverlay.setAttribute('aria-hidden', 'false');
+    this.moduleInfoClose.focus();
+  }
+
+  closeModuleInfo() {
+    if (this.moduleInfoOverlay.hidden) return;
+    this.moduleInfoOverlay.hidden = true;
+    this.moduleInfoOverlay.setAttribute('aria-hidden', 'true');
+    if (this._moduleInfoReturnFocus?.isConnected) this._moduleInfoReturnFocus.focus();
+    this._moduleInfoReturnFocus = null;
+  }
+
   renderInspector() {
+    this.moduleInfoButton.hidden = true;
     const body = this.inspBody; body.replaceChildren();
     if (this.selectedWire) { const c = this.patch.connections.find((x) => x.id === this.selectedWire); if (c) { el('p', 'omni-hint', body, `${c.from.module}.${c.from.port} → ${c.to.module}.${c.to.port}`); const b = el('button', 'omni-tb', body, 'REMOVE WIRE'); b.type = 'button'; b.addEventListener('click', () => this.removeConnection(c.id)); } return; }
     const m = this.patch.modules.find((x) => x.id === this.selected);
@@ -1123,6 +1208,9 @@ class OmniApp {
     }
     if (!m) { el('p', 'omni-hint', body, 'Select a module to edit its parameters. Drag module headers to move them; drag from a right-hand port to a left-hand port to connect.'); const miss = this.missingReport(); if (miss) el('p', 'omni-warn', body, miss); return; }
     const def = MODULES[m.type];
+    this.moduleInfoButton.hidden = false;
+    this.moduleInfoButton.setAttribute('aria-label', `Read about ${def.name}`);
+    this.moduleInfoButton.title = `Read about ${def.name}`;
     el('h3', '', body, def.name); el('p', 'omni-hint', body, `${m.id} · ${def.category}`);
     (def.getVisibleParams ? def.getVisibleParams(m.params) : def.params).forEach((p) => {
       const row = el('label', 'omni-param', body); const lab = el('span', '', row, p.label);
