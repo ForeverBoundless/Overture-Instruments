@@ -402,8 +402,9 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
 .toast { position: fixed; z-index: 200; right: 22px; bottom: 22px; max-width: min(390px, calc(100vw - 44px)); padding: 14px 17px; border: 1px solid rgba(112,220,240,.26); border-radius: 10px; color: #e6f7fa; background: rgba(15,23,30,.94); box-shadow: 0 12px 40px rgba(0,0,0,.4), inset 0 1px rgba(255,255,255,.06); font-size: 11px; line-height: 1.5; opacity: 0; pointer-events: none; transform: translateY(10px); backdrop-filter: blur(14px); transition: opacity .25s ease, transform .25s ease; }.toast.is-visible { opacity: 1; transform: translateY(0); }
 
 /* Scroll reveals and interactive states */
-.reveal { opacity: 0; transform: translateY(18px); transition: opacity .8s cubic-bezier(.2,.8,.2,1), transform .8s cubic-bezier(.2,.8,.2,1); }
-.reveal.is-visible { opacity: 1; transform: translateY(0); }
+.reveal { opacity: 1; transform: none; transition: opacity .8s cubic-bezier(.2,.8,.2,1), transform .8s cubic-bezier(.2,.8,.2,1); }
+.reveal.reveal-pending { opacity: 0; transform: translateY(18px); }
+.reveal.reveal-pending.is-visible { opacity: 1; transform: translateY(0); }
 .hero-content .reveal:nth-child(2) { transition-delay: .06s; }.hero-content .reveal:nth-child(3) { transition-delay: .12s; }.hero-content .reveal:nth-child(4) { transition-delay: .18s; }.hero-content .reveal:nth-child(5) { transition-delay: .23s; }.hero-content .reveal:nth-child(6) { transition-delay: .28s; }.hero-content .reveal:nth-child(7) { transition-delay: .34s; }
 
 @keyframes trace-flow { to { stroke-dashoffset: -180; } }
@@ -2482,7 +2483,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
   display: block; width: 0; height: 100%; border-radius: inherit;
   background: linear-gradient(90deg, #176cff, #7de4ff, #f1fdff);
   box-shadow: 0 0 15px rgba(125,228,255,.95);
-  animation: omni-launch-progress-fill 1.36s cubic-bezier(.22,.74,.21,1) forwards;
+  transition: width .22s ease;
 }
 @keyframes omni-launch-current { to { stroke-dashoffset: -28; } }
 @keyframes omni-launch-port { to { filter: brightness(2); transform: scale(1.28); } }
@@ -2499,11 +2500,10 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
   100% { opacity: .08; transform: rotate(40deg); }
 }
 @keyframes omni-launch-logo-breathe { to { filter: drop-shadow(0 0 23px rgba(125,228,255,.7)) drop-shadow(0 0 58px rgba(20,103,255,.46)); } }
-@keyframes omni-launch-progress-fill { to { width: 100%; } }
 @media (prefers-reduced-motion: reduce) {
   .omni-launch-kaleido, .omni-launch-electric-grid, .omni-launch-flash, .omni-launch-stage, .omni-launch-loader { transition-duration: .01ms !important; animation-duration: .01ms !important; }
   .omni-launch-stage.is-energized .omni-patch-wire, .omni-launch-stage.is-energized .omni-patch-port, .omni-launch-logo, .omni-launch-progress span { animation: none !important; }
-  .omni-launch-progress span { width: 100%; }
+  .omni-launch-progress span { width: 0; }
 }
 
 
