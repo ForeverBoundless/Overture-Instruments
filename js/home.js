@@ -82,27 +82,55 @@
 
   window.addEventListener('hashchange', () => scrollToHash(true));
 
-  // Four-node homepage easter egg. The state lives only in this document:
-  // navigating away or reloading naturally resets the effect.
+  // Four-node homepage easter egg. Detect clicks in SVG coordinates from
+  // the hero itself, because the SVG sits behind the transparent hero-content
+  // wrapper and its painted circles cannot reliably receive DOM click events.
+  // Only the circles' original visible radii count as hits.
   const heroCircuit = document.querySelector('.hero-circuit');
-  if (heroCircuit) {
+  const heroSection = heroCircuit?.closest('.hero');
+  if (heroCircuit && heroSection) {
     const sequence = [1, 2, 3, 4];
+    const nodes = Array.from(
+      heroCircuit.querySelectorAll('.circuit-nodes circle[data-rainbow-step]')
+    );
     let progress = 0;
-    heroCircuit.querySelectorAll('.circuit-nodes circle[data-rainbow-step]').forEach((node) => {
-      node.addEventListener('click', () => {
-        const step = Number(node.getAttribute('data-rainbow-step'));
-        if (step === sequence[progress]) {
-          progress += 1;
-        } else {
-          progress = step === sequence[0] ? 1 : 0;
-        }
 
-        if (progress === sequence.length) {
-          document.querySelector('.hero')?.classList.toggle('hero-rainbow-mode');
-          progress = 0;
-        }
+    heroSection.addEventListener('click', (event) => {
+      const screenMatrix = heroCircuit.getScreenCTM();
+      if (!screenMatrix) return;
+
+      const point = heroCircuit.createSVGPoint();
+      point.x = event.clientX;
+      point.y = event.clientY;
+
+      let svgPoint;
+      try {
+        svgPoint = point.matrixTransform(screenMatrix.inverse());
+      } catch (error) {
+        return;
+      }
+
+      const hitNode = nodes.find((node) => {
+        const dx = svgPoint.x - Number(node.getAttribute('cx'));
+        const dy = svgPoint.y - Number(node.getAttribute('cy'));
+        const radius = Number(node.getAttribute('r')) + 1;
+        return (dx * dx + dy * dy) <= radius * radius;
       });
-    });
+
+      if (!hitNode) return;
+
+      const step = Number(hitNode.getAttribute('data-rainbow-step'));
+      if (step === sequence[progress]) {
+        progress += 1;
+      } else {
+        progress = step === sequence[0] ? 1 : 0;
+      }
+
+      if (progress === sequence.length) {
+        heroSection.classList.toggle('hero-rainbow-mode');
+        progress = 0;
+      }
+    }, true);
   }
 
   // Hero responds gently to pointer movement without shifting page layout.
