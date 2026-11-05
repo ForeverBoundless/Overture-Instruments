@@ -206,8 +206,8 @@ test('Community library has an optional Supabase setup and owner-scoped schema m
   assert.doesNotMatch(accountPage, /account-signup-form/);
   assert.doesNotMatch(accountPage, /account-auth-panel/);
   assert.match(accountApp, /signInWithPassword/);
-  assert.match(accountApp, /window.location.replace(`\/login?returnTo=/);
-  assert.match(accountApp, /const target = getReturnTo() || '\/account'/);
+  assert.ok(accountApp.includes('window.location.replace(`/login?returnTo=${encodeURIComponent(returnTo)}`)'));
+  assert.ok(accountApp.includes("const target = getReturnTo() || '/account';"));
   assert.match(accountApp, /signInWithOAuth/);
   assert.match(accountApp, /updateUser/);
   assert.match(accountMigration, /create table if not exists public\.profiles/);
