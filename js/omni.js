@@ -263,6 +263,8 @@ class OmniApp {
     this.moduleInfoButton.textContent = 'i';
     this.moduleInfoButton.title = 'Read about this module';
     this.moduleInfoButton.setAttribute('aria-label', 'Open module information');
+    this.moduleInfoButton.setAttribute('aria-haspopup', 'dialog');
+    this.moduleInfoButton.setAttribute('aria-controls', 'omni-info-dialog');
     this.moduleInfoButton.hidden = true;
     this.moduleInfoButton.addEventListener('click', () => {
       const selectedModule = this.patch.modules.find((item) => item.id === this.selected);
@@ -278,6 +280,7 @@ class OmniApp {
       if (event.target === this.moduleInfoOverlay) this.closeModuleInfo();
     });
     this.moduleInfoDialog = el('section', 'omni-info-dialog', this.moduleInfoOverlay);
+    this.moduleInfoDialog.id = 'omni-info-dialog';
     this.moduleInfoDialog.setAttribute('role', 'dialog');
     this.moduleInfoDialog.setAttribute('aria-modal', 'true');
     this.moduleInfoDialog.setAttribute('aria-labelledby', 'omni-info-title');
@@ -293,6 +296,8 @@ class OmniApp {
     this.moduleInfoContent = el('div', 'omni-info-dialog__content', this.moduleInfoDialog);
     this.moduleInfoTitle = el('h2', 'omni-info-dialog__title', this.moduleInfoContent);
     this.moduleInfoSummary = el('p', 'omni-info-dialog__summary', this.moduleInfoContent);
+    this.moduleInfoSummary.id = 'omni-info-summary';
+    this.moduleInfoDialog.setAttribute('aria-describedby', 'omni-info-summary');
     const makeInfoSection = (label) => {
       const section = el('section', 'omni-info-section', this.moduleInfoContent);
       el('h3', '', section, label);
