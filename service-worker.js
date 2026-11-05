@@ -36,6 +36,7 @@ const APP_SHELL = [
   '/css/oberheim-eight-voice.css?v=20261104-ivory',
   '/css/omni.css',
   '/css/omni.css?v=20261103-chord-sliders-32',
+  '/css/omni.css?v=20261104-boot-centering',
   '/css/omni-info.css?v=20261105-module-info',
   '/css/knobs.css',
   '/css/panel.css',
