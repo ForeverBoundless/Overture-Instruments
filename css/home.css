@@ -2511,3 +2511,72 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
 html[data-theme="light"] a.showcase-cta[href="/library"] .showcase-cta__icon img {
   filter:brightness(0) !important;
 }
+
+
+/* Hidden hero circuit sequence: four nodes unlock a full-spectrum circuit mode. */
+.hero-circuit .hero-easter-egg-hit {
+  cursor: crosshair;
+  pointer-events: all;
+}
+.hero-rainbow-mode .hero-circuit .circuit-lines {
+  filter: saturate(3.8) brightness(1.95) drop-shadow(0 0 7px #ff2bd6);
+  animation: hero-rainbow-spectrum 1.15s linear infinite;
+}
+.hero-rainbow-mode .hero-circuit .circuit-lines path {
+  stroke-width: 1.8;
+  stroke-dasharray: 8 10;
+  animation: hero-rainbow-current .42s linear infinite;
+}
+.hero-rainbow-mode .hero-circuit .circuit-nodes {
+  filter: saturate(4) brightness(2.25);
+  animation: hero-rainbow-spectrum .78s linear infinite reverse;
+}
+.hero-rainbow-mode .hero-circuit .circuit-nodes circle {
+  filter: drop-shadow(0 0 5px #fff) drop-shadow(0 0 13px #ff2bd6);
+  animation: hero-rainbow-node .9s ease-in-out infinite alternate;
+}
+.hero-rainbow-mode .hero-circuit .circuit-nodes circle:nth-child(2n) {
+  animation-delay: -.3s;
+}
+.hero-rainbow-mode .hero-circuit .circuit-nodes circle:nth-child(3n) {
+  animation-delay: -.6s;
+}
+.hero-rainbow-mode .hero-circuit .circuit-pulses {
+  filter: saturate(4) brightness(2.2);
+  animation: hero-rainbow-spectrum .95s linear infinite;
+}
+.hero-rainbow-mode .hero-circuit .circuit-pulses circle {
+  opacity: .9;
+  stroke-width: 2.4;
+  animation: circuit-ripple 1.6s ease-out infinite;
+}
+.hero-rainbow-mode .hero-circuit .circuit-pulses circle:nth-child(even) {
+  animation-delay: -.8s;
+}
+@keyframes hero-rainbow-spectrum {
+  from { filter: hue-rotate(0deg) saturate(3.8) brightness(1.95) drop-shadow(0 0 8px #ff2bd6); }
+  to { filter: hue-rotate(360deg) saturate(3.8) brightness(1.95) drop-shadow(0 0 8px #ff2bd6); }
+}
+@keyframes hero-rainbow-current {
+  to { stroke-dashoffset: -36; }
+}
+@keyframes hero-rainbow-node {
+  from { opacity: .75; transform: scale(1); }
+  to { opacity: 1; transform: scale(1.65); }
+}
+/* Keep the unlocked spectrum vivid against either site theme. */
+html[data-theme="light"] .hero-rainbow-mode .hero-circuit .circuit-lines,
+html[data-theme="light"] .hero-rainbow-mode .hero-circuit .circuit-nodes,
+html[data-theme="light"] .hero-rainbow-mode .hero-circuit .circuit-pulses {
+  opacity: 1;
+  filter: saturate(5) brightness(1.65) contrast(1.2);
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-rainbow-mode .hero-circuit .circuit-lines,
+  .hero-rainbow-mode .hero-circuit .circuit-lines path,
+  .hero-rainbow-mode .hero-circuit .circuit-nodes,
+  .hero-rainbow-mode .hero-circuit .circuit-nodes circle,
+  .hero-rainbow-mode .hero-circuit .circuit-pulses {
+    animation-duration: 3s;
+  }
+}
