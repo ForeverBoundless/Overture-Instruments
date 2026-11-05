@@ -80,7 +80,7 @@
           stage.remove();
           const loader = document.createElement('div');
           loader.className = 'omni-launch-loader';
-          loader.innerHTML = '<img class="omni-launch-logo" src="/ui/Logos/OvertureLogo.png" alt=""><div class="omni-launch-progress" role="presentation"><span></span></div>';
+          loader.innerHTML = '<img class="omni-launch-logo" src="/ui/Logos/OvertureLogo.png" alt="">';
           overlay.appendChild(loader);
           requestAnimationFrame(() => loader.classList.add('is-visible'));
           // Navigation starts immediately. The destination owns the real
