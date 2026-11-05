@@ -111,6 +111,7 @@ async function showSession(session) {
     if (isLoginPage) {
       $('account-auth-panel').hidden = false;
       showAuthView('login');
+      setStatus('');
     } else if (isAccountPage) {
       const returnTo = window.location.pathname + window.location.search + window.location.hash;
       window.location.replace(`/login?returnTo=${encodeURIComponent(returnTo)}`);
