@@ -368,7 +368,7 @@ test('Contribution page profile, toolbar and result counts have responsive align
 });
 
 
-test('Login page has a layered animated sound-field background with reduced-motion support', async () => {
+test('Login page has an optimized animated sound-field background with reduced-motion support', async () => {
   const [loginPage, accountCss, worker] = await Promise.all([
     readFile(new URL('../login.html', import.meta.url), 'utf8'),
     readFile(new URL('../css/account.css', import.meta.url), 'utf8'),
@@ -388,16 +388,12 @@ test('Login page has a layered animated sound-field background with reduced-moti
   assert.match(accountCss, /Login backdrop performance pass/);
   assert.match(accountCss, /body\\.login-page \\.site-noise \\{\\s*display:none/);
   assert.match(accountCss, /@keyframes login-grid-float/);
-  assert.match(accountCss, /@keyframes login-prismatic-reflection/);
   assert.match(worker, /overture-shell-v36/);
-  assert.match(worker, /account\\.css\\?v=20261104-login-prism/);
-  assert.match(loginPage, /account\\.css\\?v=20261104-login-prism/);
+  assert.match(worker, /account\\.css\\?v=20261104-login-performance/);
+  assert.match(loginPage, /account\\.css\\?v=20261104-login-performance/);
   assert.match(accountCss, /Light-mode graphite and Overture accent treatment/);
   assert.match(accountCss, /rgba\\(12,22,32,.13\\)/);
   assert.match(accountCss, /mix-blend-mode:multiply/);
-  assert.match(worker, /overture-shell-v36/);
-  assert.match(worker, /account\\.css\\?v=20261104-login-light-contrast/);
-  assert.match(loginPage, /account\\.css\\?v=20261104-login-light-contrast/);
 });
 
 
