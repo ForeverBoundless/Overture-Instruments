@@ -1,8 +1,8 @@
-const CACHE = 'overture-shell-v32';
+const CACHE = 'overture-shell-v33';
 const APP_SHELL = [
   '/account',
   '/login',
-  '/css/account.css?v=20261104-split-login',
+  '/css/account.css?v=20261104-login-ambient',
   '/js/account.js?v=20261104-split-login',
   '/js/shared/account-shell.js',
   '/js/shared/account-shell.js?v=20261102-contributions-menu',
