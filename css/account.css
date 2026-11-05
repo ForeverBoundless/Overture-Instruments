@@ -586,3 +586,127 @@ html[data-theme="light"] .login-ambient__spark { opacity:.48; }
     scroll-behavior:auto !important;
   }
 }
+
+
+/* Prismatic refinement: soft volumetric colour, glass-like reflections and
+   moving highlights add depth without competing with the authentication form. */
+.login-page .login-ambient {
+  isolation:isolate;
+}
+.login-page .login-ambient::before,
+.login-page .login-ambient::after {
+  position:absolute;
+  inset:-20%;
+  z-index:1;
+  pointer-events:none;
+  content:"";
+}
+.login-page .login-ambient::before {
+  opacity:.62;
+  mix-blend-mode:screen;
+  background:
+    radial-gradient(ellipse 25% 16% at 21% 35%,rgba(125,228,255,.17),transparent 74%),
+    radial-gradient(ellipse 27% 18% at 76% 61%,rgba(255,183,94,.13),transparent 76%),
+    radial-gradient(ellipse 30% 15% at 58% 17%,rgba(130,230,168,.085),transparent 78%),
+    linear-gradient(116deg,transparent 29%,rgba(125,228,255,.025) 38%,rgba(221,249,255,.095) 40%,rgba(125,228,255,.03) 42%,transparent 53%);
+  background-size:150% 150%,150% 150%,130% 130%,220% 220%;
+  background-position:0 0,100% 100%,50% 0,-70% 0;
+  mask-image:radial-gradient(ellipse at 50% 47%,#000 0%,rgba(0,0,0,.9) 48%,transparent 84%);
+  animation:login-prismatic-reflection 28s ease-in-out infinite alternate;
+}
+.login-page .login-ambient::after {
+  opacity:.62;
+  background:linear-gradient(
+    108deg,
+    transparent 34%,
+    rgba(125,228,255,0) 40%,
+    rgba(125,228,255,.035) 44%,
+    rgba(231,250,255,.085) 45%,
+    rgba(125,228,255,.018) 47%,
+    transparent 54%
+  );
+  mask-image:radial-gradient(ellipse 82% 60% at 50% 48%,#000 18%,transparent 91%);
+  transform:translate3d(-17%,0,0);
+  animation:login-glass-sheen 24s ease-in-out infinite;
+}
+.login-ambient__core {
+  box-shadow:
+    0 0 90px rgba(36,143,169,.035),
+    inset 0 0 84px rgba(125,228,255,.025);
+  background:
+    radial-gradient(ellipse at 48% 42%,rgba(125,228,255,.055),transparent 56%),
+    radial-gradient(circle,rgba(35,111,132,.105) 0%,rgba(25,74,94,.055) 38%,transparent 71%);
+}
+.login-ambient__orbit {
+  box-shadow:
+    0 0 38px rgba(45,163,191,.045),
+    0 0 1px rgba(221,249,255,.2),
+    inset 0 0 28px rgba(45,163,191,.025);
+}
+.login-ambient__orbit::before {
+  position:absolute;
+  inset:-1px;
+  padding:1px;
+  border-radius:inherit;
+  background:conic-gradient(
+    from 0deg,
+    transparent 0deg 228deg,
+    rgba(231,250,255,.04) 244deg,
+    rgba(231,250,255,.74) 255deg,
+    rgba(125,228,255,.18) 267deg,
+    transparent 282deg 360deg
+  );
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  mask-composite:exclude;
+  opacity:.66;
+  content:"";
+  animation:login-orbit-glint 21s linear infinite;
+}
+.login-ambient__orbit--inner::before { animation-duration:27s; animation-direction:reverse; }
+.login-ambient__orbit--fine::before { animation-duration:34s; opacity:.46; }
+.login-ambient__spark {
+  box-shadow:
+    0 0 1px 1px rgba(239,252,255,.72),
+    0 0 9px 3px rgba(125,228,255,.42),
+    0 0 24px rgba(125,228,255,.22);
+}
+@keyframes login-prismatic-reflection {
+  0% { background-position:0 0,100% 100%,50% 0,-70% 0; opacity:.42; }
+  100% { background-position:18% 12%,78% 86%,62% 24%,36% 0; opacity:.72; }
+}
+@keyframes login-glass-sheen {
+  0%,100% { transform:translate3d(-17%,0,0); opacity:.24; }
+  50% { transform:translate3d(17%,0,0); opacity:.68; }
+}
+@keyframes login-orbit-glint {
+  to { transform:rotate(360deg); }
+}
+
+html[data-theme="light"] .login-page .login-ambient::before {
+  opacity:.36;
+  mix-blend-mode:soft-light;
+}
+html[data-theme="light"] .login-page .login-ambient::after {
+  opacity:.3;
+}
+html[data-theme="light"] .login-ambient__orbit::before {
+  opacity:.3;
+}
+html[data-theme="light"] .login-ambient__core {
+  box-shadow:0 0 90px rgba(8,127,159,.045),inset 0 0 84px rgba(8,127,159,.025);
+}
+
+@media (max-width:760px) {
+  .login-page .login-ambient::before { opacity:.42; }
+  .login-page .login-ambient::after { opacity:.36; }
+  .login-ambient__orbit::before { opacity:.42; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .login-page .login-ambient::before,
+  .login-page .login-ambient::after,
+  .login-ambient__orbit::before {
+    animation:none !important;
+  }
+}
