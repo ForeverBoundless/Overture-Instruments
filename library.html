@@ -30,7 +30,14 @@
 </head>
 <body>
 
-<main id="launcher-page" aria-label="Instrument library"></main>
+<main id="launcher-page" aria-label="Instrument library">
+  <section class="library-boot" role="status" aria-live="polite">
+    <img src="/ui/Logos/OvertureLogo.png" alt="" width="42" height="42">
+    <strong>OVERTURE LIBRARY</strong>
+    <span>Preparing the instruments…</span>
+    <i aria-hidden="true"></i>
+  </section>
+</main>
 
 <!-- Site footer + contact modal (same markup as index.html); moved into #launcher-page by library.js -->
 <template id="site-footer-template">
