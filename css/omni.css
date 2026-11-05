@@ -400,6 +400,18 @@ html[data-theme="light"] .omni-boot__track i {background:linear-gradient(90deg,#
   position:relative;
   flex:0 0 auto;
 }
+/* Preserve the hover path across the intentional 8px gap above the menu.
+   Without this transparent child, pointerleave closes <details> mid-transition. */
+.omni-menu[open]::after {
+  position:absolute;
+  z-index:49;
+  top:100%;
+  left:0;
+  width:min(254px,calc(100vw - 18px));
+  height:9px;
+  content:'';
+  background:transparent;
+}
 .omni-menu__trigger {
   display:flex;
   align-items:center;
