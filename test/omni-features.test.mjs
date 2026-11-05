@@ -102,7 +102,7 @@ test('OMNI performance deck keeps octave controls in the keyboard header and giv
   assert.match(css, /\.omni-keys \.lp-keyboard[^}]*width:100%/);
   assert.match(css, /\.omni-keys \.lp-keyboard[^}]*min-width:520px/);
   assert.match(page, /omni\.css\?v=20261103-chord-sliders-32/);
-  assert.match(page, /omni\.js\?v=20261104-sem-mellotron/);
+  assert.match(page, /omni\.js\?v=20261105-module-info/);
   assert.match(worker, /overture-shell-v39/);
   assert.match(worker, /omni\.css\?v=20261103-chord-sliders-32/);
   assert.match(worker, /omni\.js\?v=20261104-sem-mellotron/);
@@ -120,7 +120,7 @@ test('OMNI keyboard spans four octaves and status text avoids the centered theme
   assert.match(source, /C2 – C6/);
   assert.match(css, /\.omni-commandbar > \.omni-status[\s\S]*text-align:right/);
   assert.match(source, /commandbar\.appendChild\(this\.status\)/);
-  assert.match(page, /omni\.js\?v=20261104-sem-mellotron/);
+  assert.match(page, /omni\.js\?v=20261105-module-info/);
   assert.match(worker, /overture-shell-v39/);
 });
 
@@ -195,7 +195,7 @@ test('OMNI performance pane can be shown/hidden from View and remembers its stat
   assert.match(source, /localStorage\.setItem\('overture\.omni\.performance-visible'/);
   assert.match(source, /this\.performanceToggleBtn\.setAttribute\('aria-pressed'/);
   assert.match(css, /#omni-root > \.omni-perf\[hidden\]\s*\{\s*display:none !important/);
-  assert.match(page, /omni\.js\?v=20261104-sem-mellotron/);
+  assert.match(page, /omni\.js\?v=20261105-module-info/);
   assert.match(worker, /overture-shell-v39/);
 });
 
@@ -258,7 +258,7 @@ test('OMNI exposes native SEM and Mellotron instrument modules and refreshes off
   assert.match(graph, /20261104-sem-mellotron/);
   assert.match(templates, /SEM Warm Ensemble/);
   assert.match(templates, /Mellotron Choir/);
-  assert.match(page, /omni\.js\?v=20261104-sem-mellotron/);
+  assert.match(page, /omni\.js\?v=20261105-module-info/);
   assert.match(worker, /overture-shell-v39/);
   assert.match(worker, /OberheimEightVoiceProcessor\.js/);
   assert.match(worker, /MellotronProcessor\.js/);
@@ -297,4 +297,17 @@ test('every OMNI module has a complete technical reference and the inspector can
   assert.match(worker, /omni-info\.css\?v=20261105-module-info/);
   assert.match(worker, /moduleInfo\.js\?v=20261105-module-info/);
   assert.match(contributorGuide, /every module must also have a complete entry in `js\/omni\/moduleInfo\.js`/);
+});
+
+
+test('OMNI dependency import order matches the destructured module bindings', async () => {
+  const source = await readFile(new URL('../js/omni.js', import.meta.url), 'utf8');
+  const groups = source.slice(source.indexOf('const dependencyGroups = ['), source.indexOf('let completedGroups'));
+  const modules = groups.indexOf('./omni/modules.js');
+  const info = groups.indexOf('./omni/moduleInfo.js');
+  const graph = groups.indexOf('./omni/graph.js');
+  const templates = groups.indexOf('./omni/templates.js');
+  assert.ok(modules >= 0 && modules < info && info < graph && graph < templates);
+  assert.match(source, /\{ MODULES, CATEGORIES, SIGNAL_COLORS, modulePorts \},\s*\{ MODULE_INFO, assertModuleInfoCoverage \},\s*\{ defaultPatch, validatePatch, connectionError, LiveGraph, patchToSVG, defaultParams \},\s*\{ TEMPLATES, templatePreview \}/);
+  assert.match(source, /assertModuleInfoCoverage\(MODULES\)/);
 });
