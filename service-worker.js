@@ -1,4 +1,4 @@
-const CACHE = 'overture-shell-v37';
+const CACHE = 'overture-shell-v38';
 const APP_SHELL = [
   '/account',
   '/login',
@@ -121,7 +121,7 @@ const APP_SHELL = [
   '/js/library.js',
   '/js/mellotron-m400.js',
   '/js/nord-c2d.js',
-  '/js/omni-launch.js',
+  '/js/omni-launch.js?v=20261105-single-loader',
   '/js/omni.js',
   '/js/omni.js?v=20261104-sem-mellotron',
   '/ui/Wheel.js',
