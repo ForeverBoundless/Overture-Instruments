@@ -380,7 +380,12 @@ test('Login page has a layered animated sound-field background with reduced-moti
   assert.match(loginPage, /login-ambient__traces/);
   assert.match(accountCss, /@keyframes login-orbit-outer/);
   assert.match(accountCss, /@keyframes login-glow-float/);
-  assert.match(accountCss, /@media \(prefers-reduced-motion:reduce\)/);
-  assert.match(worker, /overture-shell-v33/);
-  assert.match(worker, /account\.css\?v=20261104-login-ambient/);
+  assert.match(accountCss, /@keyframes login-prismatic-reflection/);
+  assert.match(accountCss, /@keyframes login-glass-sheen/);
+  assert.match(accountCss, /@keyframes login-orbit-glint/);
+  assert.match(accountCss, /login-ambient__orbit::before/);
+  assert.match(accountCss, /@media \\(prefers-reduced-motion:reduce\\)/);
+  assert.match(worker, /overture-shell-v34/);
+  assert.match(worker, /account\\.css\\?v=20261104-login-prism/);
+  assert.match(loginPage, /account\\.css\\?v=20261104-login-prism/);
 });
