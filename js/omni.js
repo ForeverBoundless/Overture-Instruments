@@ -1207,4 +1207,46 @@ class OmniApp {
     o.querySelector('button').addEventListener('click', () => o.remove()); o.addEventListener('click', (e) => { if (e.target === o) o.remove(); });
   }
 }
-document.addEventListener('DOMContentLoaded', () => { window.__omniApp = new OmniApp(); });
+const setOmniBootProgress = (value, message, detail) => {
+  const root = document.getElementById('omni-root');
+  const fill = document.getElementById('omni-boot-progress');
+  const label = document.querySelector('.omni-boot__message');
+  const note = document.getElementById('omni-boot-detail');
+  if (fill) fill.style.width = `${Math.max(0, Math.min(100, value))}%`;
+  if (label && message) label.textContent = message;
+  if (note && detail) note.textContent = detail;
+  if (root) root.setAttribute('aria-busy', value >= 100 ? 'false' : 'true');
+};
+document.addEventListener('DOMContentLoaded', () => {
+  try {
+    setOmniBootProgress(12, 'Preparing the workspace…', 'Reading your saved instrument');
+    requestAnimationFrame(() => {
+      try {
+        setOmniBootProgress(32, 'Building the module library…', 'Creating the patch canvas and controls');
+        window.__omniApp = new OmniApp();
+        setOmniBootProgress(76, 'Finishing the workspace…', 'Measuring modules and connecting the canvas');
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          window.__omniApp?.applyView?.();
+          window.__omniApp?.renderWires?.();
+          setOmniBootProgress(100, 'Workspace ready', 'OMNI is ready to use');
+          const root = document.getElementById('omni-root');
+          root?.removeAttribute('aria-busy');
+          document.documentElement.classList.add('omni-ready');
+          document.getElementById('omni-boot')?.remove();
+          window.dispatchEvent(new CustomEvent('overture:omni-ready'));
+        }));
+      } catch (error) {
+        console.error('OMNI could not initialize.', error);
+        const boot = document.getElementById('omni-boot');
+        if (boot) {
+          boot.querySelector('.omni-boot__message').textContent = 'OMNI could not start';
+          boot.querySelector('#omni-boot-detail').textContent = 'Reload the page to try again.';
+        }
+        const root = document.getElementById('omni-root');
+        root?.setAttribute('aria-busy', 'false');
+      }
+    });
+  } catch (error) {
+    console.error('OMNI startup failed.', error);
+  }
+});
