@@ -1,8 +1,8 @@
-const CACHE = 'overture-shell-v35';
+const CACHE = 'overture-shell-v36';
 const APP_SHELL = [
   '/account',
   '/login',
-  '/css/account.css?v=20261104-login-light-contrast',
+  '/css/account.css?v=20261104-login-performance',
   '/js/account.js?v=20261104-split-login',
   '/js/shared/account-shell.js',
   '/js/shared/account-shell.js?v=20261102-contributions-menu',
@@ -22,7 +22,7 @@ const APP_SHELL = [
   '/css/about.css',
   '/css/brand.css',
   '/css/experiments.css',
-  '/css/home.css',
+  '/css/home.css?v=20261104-home-logo-light',
   '/css/keyboard.css',
   '/css/knobs.css',
   '/css/korg-ms-20.css',
