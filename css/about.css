@@ -159,8 +159,9 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
 
 /* Footer */
 /* Motion */
-.about-reveal { opacity: 0; transform: translateY(17px); transition: opacity .75s cubic-bezier(.2,.8,.2,1), transform .75s cubic-bezier(.2,.8,.2,1); }
-.about-reveal.is-visible { opacity: 1; transform: translateY(0); }
+.about-reveal { opacity: 1; transform: none; transition: opacity .75s cubic-bezier(.2,.8,.2,1), transform .75s cubic-bezier(.2,.8,.2,1); }
+.about-reveal.reveal-pending { opacity: 0; transform: translateY(17px); }
+.about-reveal.reveal-pending.is-visible { opacity: 1; transform: translateY(0); }
 .about-hero__content .about-reveal:nth-child(2) { transition-delay: .06s; }
 .about-hero__content .about-reveal:nth-child(3) { transition-delay: .12s; }
 .about-hero__content .about-reveal:nth-child(4) { transition-delay: .18s; }
@@ -314,7 +315,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
 }
 /* Hero stats (replaces the old project-profile panel) */
 .hero-stats { position: relative; z-index: 1; display: grid; gap: 10px; width: min(100%, 470px); margin: 0; padding: 0; justify-self: center; list-style: none; }
-.hero-stat { --accent: var(--amber); position: relative; display: grid; grid-template-columns: minmax(96px, auto) 1fr; align-items: baseline; gap: 4px 16px; padding: 14px 44px 14px 18px; border: 1px solid rgba(255,255,255,.1); border-radius: 13px; background: linear-gradient(145deg, rgba(27,34,45,.82), rgba(11,15,21,.92)); box-shadow: 0 10px 30px rgba(0,0,0,.18), inset 0 1px rgba(255,255,255,.05); cursor: default; opacity: 0; transform: translateY(18px) scale(.98); transition: transform .35s cubic-bezier(.2,.8,.2,1), border-color .25s ease, box-shadow .35s ease; }
+.hero-stat { --accent: var(--amber); position: relative; display: grid; grid-template-columns: minmax(96px, auto) 1fr; align-items: baseline; gap: 4px 16px; padding: 14px 44px 14px 18px; border: 1px solid rgba(255,255,255,.1); border-radius: 13px; background: linear-gradient(145deg, rgba(27,34,45,.82), rgba(11,15,21,.92)); box-shadow: 0 10px 30px rgba(0,0,0,.18), inset 0 1px rgba(255,255,255,.05); cursor: default; opacity: 1; transform: none; transition: transform .35s cubic-bezier(.2,.8,.2,1), border-color .25s ease, box-shadow .35s ease; }
 .hero-stat:nth-child(2n) { --accent: var(--cyan); }
 .hero-stat:nth-child(3n) { --accent: var(--green); }
 .hero-stat::before { position: absolute; inset: 0 auto 0 0; width: 3px; content: ''; border-radius: 13px 0 0 13px; background: var(--accent); opacity: .55; transition: opacity .25s ease, box-shadow .25s ease; }
@@ -326,7 +327,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
 .hero-stat__source svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linejoin: round; }
 .hero-stat:hover .hero-stat__source, .hero-stat:focus-within .hero-stat__source { opacity: 1; pointer-events: auto; transform: translateY(-50%) scale(1); transition: opacity .22s ease, transform .3s cubic-bezier(.34,1.56,.64,1); }
 .hero-stat__source:hover { background: var(--accent); color: #0b0f15; box-shadow: 0 0 16px color-mix(in srgb, var(--accent) 55%, transparent); }
-.hero-stats.is-visible .hero-stat { animation: hero-stat-in .7s cubic-bezier(.2,.8,.2,1) calc(.25s + var(--i) * .11s) both; }
+.hero-stats.reveal-pending.is-visible .hero-stat { animation: hero-stat-in .7s cubic-bezier(.2,.8,.2,1) calc(.25s + var(--i) * .11s) both; }
 @keyframes hero-stat-in { from { opacity: 0; transform: translateY(18px) scale(.98); } to { opacity: 1; transform: none; } }
 .hero-stat--in { animation: none !important; opacity: 1; transform: none; }
 @media (max-width: 760px) { .hero-stats { width: min(100%, 520px); align-self: center; } }
