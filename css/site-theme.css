@@ -1362,3 +1362,16 @@ html[data-theme="light"] .header-account-menu__status{color:#a42f2f}
 @media (max-width:440px){.header-account__label{max-width:68px}.header-account__avatar{width:25px;height:25px;flex-basis:25px}.header-account-wrap.is-signed-in{max-width:137px;padding:2px 3px}.header-account-menu{min-width:146px}.omni-topbar .header-account__label{max-width:50px}}
 @media (prefers-reduced-motion:reduce){.header-account-wrap,.header-account-menu,.header-account-menu-toggle,.header-account-menu-toggle>span{transition:none!important}}
 
+
+/* Preserve instrument identity in light mode without washing out the
+   original dark, illustrated control panels on the left of each tile. */
+html[data-theme="light"] .instrument-tile--little-phatty {background:linear-gradient(145deg,rgba(255,249,229,.98),rgba(229,232,237,.97)) !important}
+html[data-theme="light"] .instrument-tile--sub-37 {background:linear-gradient(145deg,rgba(224,242,248,.98),rgba(225,232,240,.97)) !important}
+html[data-theme="light"] .instrument-tile--prophet-10 {background:linear-gradient(145deg,rgba(250,231,225,.98),rgba(232,226,230,.97)) !important}
+html[data-theme="light"] .instrument-tile--nord-c2d {background:linear-gradient(145deg,rgba(251,229,231,.98),rgba(233,225,234,.97)) !important}
+html[data-theme="light"] .instrument-tile--yamaha-dx7 {background:linear-gradient(145deg,rgba(239,233,249,.98),rgba(226,228,239,.97)) !important}
+html[data-theme="light"] .instrument-tile--roland-juno-106 {background:linear-gradient(145deg,rgba(225,244,238,.98),rgba(225,233,239,.97)) !important}
+html[data-theme="light"] .instrument-tile--roland-tr-808 {background:linear-gradient(145deg,rgba(250,237,222,.98),rgba(232,228,225,.97)) !important}
+html[data-theme="light"] .instrument-tile--korg-ms-20 {background:linear-gradient(145deg,rgba(246,240,220,.98),rgba(231,230,222,.97)) !important}
+html[data-theme="light"] .instrument-tile--mellotron-m400 {background:linear-gradient(145deg,rgba(250,239,220,.98),rgba(236,226,216,.97)) !important}
+html[data-theme="light"] .instrument-tile--oberheim-eight-voice {background:linear-gradient(145deg,rgba(225,241,238,.98),rgba(224,232,237,.97)) !important}
