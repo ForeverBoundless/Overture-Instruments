@@ -1,4 +1,4 @@
-const CACHE = 'overture-shell-v38';
+const CACHE = 'overture-shell-v39';
 const APP_SHELL = [
   '/account',
   '/login',
@@ -36,6 +36,7 @@ const APP_SHELL = [
   '/css/oberheim-eight-voice.css?v=20261104-ivory',
   '/css/omni.css',
   '/css/omni.css?v=20261103-chord-sliders-32',
+  '/css/omni-info.css?v=20261105-module-info',
   '/css/knobs.css',
   '/css/panel.css',
   '/css/prophet10.css',
@@ -123,12 +124,13 @@ const APP_SHELL = [
   '/js/nord-c2d.js',
   '/js/omni-launch.js?v=20261105-single-loader',
   '/js/omni.js',
-  '/js/omni.js?v=20261104-sem-mellotron',
+  '/js/omni.js?v=20261105-module-info',
   '/ui/Wheel.js',
   '/js/omni/graph.js',
   '/js/omni/graph.js?v=20261104-sem-mellotron',
   '/js/omni/modules.js',
   '/js/omni/modules.js?v=20261104-sem-mellotron',
+  '/js/omni/moduleInfo.js?v=20261105-module-info',
   '/js/omni/templates.js',
   '/js/omni/templates.js?v=20261104-sem-mellotron',
   '/js/prophet10.js',
