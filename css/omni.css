@@ -1250,3 +1250,8 @@ html[data-theme="light"] .omni-commandbar > .omni-status:not(.is-error)::before 
 /* Collapsed Performance Pane: keep the hidden attribute authoritative over
    the dock's flex layout so the canvas takes the freed vertical space. */
 #omni-root > .omni-perf[hidden] { display:none !important; }
+
+.omni-boot__meter{display:flex;align-items:center;gap:12px;width:min(280px,75vw)}
+.omni-boot__track{flex:1;min-width:0}
+.omni-boot__meter b{min-width:34px;color:var(--cyan);font:500 10px/1 var(--font-mono);text-align:right;font-variant-numeric:tabular-nums}
+.omni-boot.is-error .omni-boot__meter b{color:#ff8e83}
