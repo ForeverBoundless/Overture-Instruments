@@ -649,6 +649,15 @@ body.high-contrast .lp-oled-line {
   50% { opacity: 1; }
 }
 
+.library-boot { display:grid;justify-items:center;gap:13px;min-height:100vh;align-content:center;color:#e8edf5;font-family:var(--font-body); }
+.library-boot img {object-fit:contain;filter:drop-shadow(0 0 16px rgba(125,228,255,.3))}
+.library-boot strong {font-size:12px;letter-spacing:.2em}
+.library-boot span {color:#9ba8ba;font-size:11px}
+.library-boot i {display:block;width:120px;height:2px;border-radius:9px;background:linear-gradient(90deg,transparent,#7de4ff,transparent);animation:library-boot-pulse 1.2s ease-in-out infinite}
+@keyframes library-boot-pulse {0%,100%{opacity:.3;transform:scaleX(.45)}50%{opacity:1;transform:scaleX(1)}}
+html[data-theme="light"] .library-boot {color:#26374a}
+html[data-theme="light"] .library-boot span {color:#62758a}
+
 /* Scalable instrument library. Each tile is rendered from launcher.js data. */
 #launcher-page { position:fixed; inset:0; z-index:200; overflow-y:auto; color:var(--launcher-ink); background:radial-gradient(circle at 18% 20%,rgba(89,123,203,.23),transparent 26%),radial-gradient(circle at 80% 85%,rgba(236,153,48,.16),transparent 25%),rgba(9,12,17,.94); backdrop-filter:blur(14px) saturate(1.25); transition:opacity .42s ease,transform .42s cubic-bezier(.2,.8,.2,1),visibility .42s; }
 .launcher-page--leaving{opacity:0;transform:scale(1.012);visibility:hidden}.launcher-header,.launcher-hero,.instrument-grid,.launcher-footer{position:relative;z-index:1;width:min(1120px,calc(100% - 48px));margin-inline:auto}.launcher-header{display:flex;align-items:center;justify-content:space-between;padding-top:30px}.launcher-status{display:flex;gap:8px;align-items:center;color:#bac0ce;font-size:12px;font-weight:600}.launcher-status span{width:7px;height:7px;border-radius:50%;background:#83e6a8;box-shadow:0 0 0 4px rgba(131,230,168,.12)}
