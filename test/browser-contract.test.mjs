@@ -366,3 +366,21 @@ test('Contribution page profile, toolbar and result counts have responsive align
   assert.ok(app.includes("classList.toggle('is-owner', state.isOwner)"));
   assert.ok(worker.includes('overture-shell-v32'));
 });
+
+
+test('Login page has a layered animated sound-field background with reduced-motion support', async () => {
+  const [loginPage, accountCss, worker] = await Promise.all([
+    readFile(new URL('../login.html', import.meta.url), 'utf8'),
+    readFile(new URL('../css/account.css', import.meta.url), 'utf8'),
+    readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
+  ]);
+  assert.match(loginPage, /class="login-page"/);
+  assert.match(loginPage, /class="login-ambient"/);
+  assert.match(loginPage, /login-ambient__orbit--outer/);
+  assert.match(loginPage, /login-ambient__traces/);
+  assert.match(accountCss, /@keyframes login-orbit-outer/);
+  assert.match(accountCss, /@keyframes login-glow-float/);
+  assert.match(accountCss, /@media \(prefers-reduced-motion:reduce\)/);
+  assert.match(worker, /overture-shell-v33/);
+  assert.match(worker, /account\.css\?v=20261104-login-ambient/);
+});
