@@ -8,6 +8,18 @@ button, a { -webkit-tap-highlight-color: transparent; }
 
 #omni-root { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; height: 100vh; }
 
+/* Startup screen stays in place until OMNI has built and measured its UI. */
+#omni-root[aria-busy="true"] { display:grid; place-items:center; min-height:100vh; }
+.omni-boot { display:grid; justify-items:center; gap:14px; width:min(340px,calc(100vw - 40px)); padding:34px 24px; text-align:center; color:var(--ink); }
+.omni-boot img { width:48px;height:48px;object-fit:contain;filter:drop-shadow(0 0 16px rgba(125,228,255,.35)); }
+.omni-boot strong { color:var(--cyan);font-size:17px;letter-spacing:.32em;font-weight:700; }
+.omni-boot__message { color:var(--muted);font-size:12px; }
+.omni-boot__track { display:block;width:min(260px,70vw);height:3px;overflow:hidden;border-radius:99px;background:rgba(125,228,255,.14); }
+.omni-boot__track i { display:block;width:0;height:100%;border-radius:inherit;background:linear-gradient(90deg,#176cff,#7de4ff,#f1fdff);box-shadow:0 0 14px rgba(125,228,255,.8);transition:width .18s ease; }
+.omni-boot small { color:var(--faint);font:9px/1.5 var(--font-mono);letter-spacing:.08em; }
+html[data-theme="light"] .omni-boot__track {background:rgba(8,127,159,.16)}
+html[data-theme="light"] .omni-boot__track i {background:linear-gradient(90deg,#086b88,#159bbb,#275f8e)}
+
 /* Toolbar (mirrors site header) */
 .omni-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 18px; border-bottom: 1px solid rgba(255,255,255,.075); background: linear-gradient(180deg, rgba(18,23,31,.9), rgba(11,14,19,.95)); }
 .omni-logo { display: flex; align-items: center; gap: 11px; margin-right: 14px; }
