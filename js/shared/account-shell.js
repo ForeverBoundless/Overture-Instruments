@@ -148,7 +148,7 @@ function setHeaderAccount(anchor, user, profile, supabase) {
     toggle.hidden = true;
     menu.hidden = true;
     toggle.setAttribute('aria-expanded', 'false');
-    anchor.href = `/account?returnTo=${encodeURIComponent(window.location.pathname + window.location.search + window.location.hash)}`;
+    anchor.href = `/login?returnTo=${encodeURIComponent(window.location.pathname + window.location.search + window.location.hash)}`;
     anchor.classList.remove('is-signed-in');
     const label = document.createElement('span');
     label.className = 'header-account__label';
