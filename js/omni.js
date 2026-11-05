@@ -1,15 +1,34 @@
 /** omni.js - OMNI modular instrument designer: library, canvas, inspector, toolbar, performance input. */
-import { MODULES, CATEGORIES, SIGNAL_COLORS, modulePorts } from './omni/modules.js?v=20261104-sem-mellotron';
-import { defaultPatch, validatePatch, connectionError, LiveGraph, patchToSVG, defaultParams } from './omni/graph.js?v=20261104-sem-mellotron';
-import { TEMPLATES, templatePreview } from './omni/templates.js?v=20261104-sem-mellotron';
-import { PresetStore, downloadText, pickFile } from './shared/presetStore.js';
-import { AudioRecorder } from './shared/audioRecorder.js';
-import { MidiRecorder } from './shared/midiRecorder.js';
-import { Keyboard } from '../ui/Keyboard.js';
-import { PitchWheel, ModWheel } from '../ui/Wheel.js';
-import { MidiManager, midiNoteName } from './engine/MidiManager.js';
-import { noteToMidi, KEY_TO_SEMI } from './shared/panel.js';
-import { registerMidiTarget, registerMidiTargetProvider } from './shared/midiMap.js';
+// Load the engine in observable batches. Static imports would delay all startup
+// code until every dependency had arrived, leaving the progress bar at zero.
+const boot = window.__overtureOmniBoot;
+const dependencyGroups = [
+  ['./omni/modules.js?v=20261104-sem-mellotron', './omni/graph.js?v=20261104-sem-mellotron', './omni/templates.js?v=20261104-sem-mellotron'],
+  ['./shared/presetStore.js', './shared/audioRecorder.js', './shared/midiRecorder.js'],
+  ['../ui/Keyboard.js', '../ui/Wheel.js', './engine/MidiManager.js'],
+  ['./shared/panel.js', './shared/midiMap.js']
+];
+let completedGroups = 0;
+const loaded = [];
+for (const group of dependencyGroups) {
+  loaded.push(...await Promise.all(group.map((path) => import(path))));
+  completedGroups += 1;
+  boot?.update?.(4 + completedGroups * 11, 'Loading the synthesis engine…', `Loaded dependency group ${completedGroups} of ${dependencyGroups.length}`);
+  await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+}
+const [
+  { MODULES, CATEGORIES, SIGNAL_COLORS, modulePorts },
+  { defaultPatch, validatePatch, connectionError, LiveGraph, patchToSVG, defaultParams },
+  { TEMPLATES, templatePreview },
+  { PresetStore, downloadText, pickFile },
+  { AudioRecorder },
+  { MidiRecorder },
+  { Keyboard },
+  { PitchWheel, ModWheel },
+  { MidiManager, midiNoteName },
+  { noteToMidi, KEY_TO_SEMI },
+  { registerMidiTarget, registerMidiTargetProvider }
+] = loaded;
 
 const el = (tag, cls, parent, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text !== undefined) n.textContent = text; if (parent) parent.appendChild(n); return n; };
 const uid = (p) => `${p}${Math.random().toString(36).slice(2, 8)}`;
@@ -40,12 +59,16 @@ class OmniApp {
     this.audioRecorder = null; this.midiRecorder = new MidiRecorder();
     this.view = { x: 20, y: 20, scale: 0.66 }; this.history = []; this.future = []; this.rebuildTimer = null;
     this._build();
+  }
+
+  initialize() {
     this.render();
     this.setInitialView();
     this.pushHistory();
     if (this.msgOnLoad) this.msg(this.msgOnLoad);
     this._bindMidi();
     this._bindKeys();
+    return this;
   }
 
   // ------------------------------------------------------------------ layout
@@ -1208,45 +1231,40 @@ class OmniApp {
   }
 }
 const setOmniBootProgress = (value, message, detail) => {
-  const root = document.getElementById('omni-root');
+  if (window.__overtureOmniBoot?.update) {
+    window.__overtureOmniBoot.update(value, message, detail);
+    return;
+  }
   const fill = document.getElementById('omni-boot-progress');
-  const label = document.querySelector('.omni-boot__message');
-  const note = document.getElementById('omni-boot-detail');
   if (fill) fill.style.width = `${Math.max(0, Math.min(100, value))}%`;
-  if (label && message) label.textContent = message;
-  if (note && detail) note.textContent = detail;
-  if (root) root.setAttribute('aria-busy', value >= 100 ? 'false' : 'true');
 };
-document.addEventListener('DOMContentLoaded', () => {
+const nextPaint = () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+document.addEventListener('DOMContentLoaded', async () => {
   try {
-    setOmniBootProgress(12, 'Preparing the workspace…', 'Reading your saved instrument');
-    requestAnimationFrame(() => {
-      try {
-        setOmniBootProgress(32, 'Building the module library…', 'Creating the patch canvas and controls');
-        window.__omniApp = new OmniApp();
-        setOmniBootProgress(76, 'Finishing the workspace…', 'Measuring modules and connecting the canvas');
-        requestAnimationFrame(() => requestAnimationFrame(() => {
-          window.__omniApp?.applyView?.();
-          window.__omniApp?.renderWires?.();
-          setOmniBootProgress(100, 'Workspace ready', 'OMNI is ready to use');
-          const root = document.getElementById('omni-root');
-          root?.removeAttribute('aria-busy');
-          document.documentElement.classList.add('omni-ready');
-          document.getElementById('omni-boot')?.remove();
-          window.dispatchEvent(new CustomEvent('overture:omni-ready'));
-        }));
-      } catch (error) {
-        console.error('OMNI could not initialize.', error);
-        const boot = document.getElementById('omni-boot');
-        if (boot) {
-          boot.querySelector('.omni-boot__message').textContent = 'OMNI could not start';
-          boot.querySelector('#omni-boot-detail').textContent = 'Reload the page to try again.';
-        }
-        const root = document.getElementById('omni-root');
-        root?.setAttribute('aria-busy', 'false');
-      }
-    });
+    setOmniBootProgress(52, 'Preparing the workspace…', 'Engine dependencies are ready');
+    await nextPaint();
+    setOmniBootProgress(60, 'Building the module library…', 'Creating the patch canvas and controls');
+    await nextPaint();
+    const app = new OmniApp();
+    window.__omniApp = app;
+    setOmniBootProgress(78, 'Rendering the workspace…', 'Drawing modules, ports and connections');
+    await nextPaint();
+    app.initialize();
+    setOmniBootProgress(91, 'Finishing the workspace…', 'Measuring modules and positioning the canvas');
+    await nextPaint();
+    app.applyView?.();
+    app.renderWires?.();
+    await nextPaint();
+    setOmniBootProgress(100, 'Workspace ready', 'OMNI is ready to use');
+    const root = document.getElementById('omni-root');
+    root?.removeAttribute('aria-busy');
+    document.documentElement.classList.add('omni-ready');
+    document.getElementById('omni-boot')?.remove();
+    window.dispatchEvent(new CustomEvent('overture:omni-ready'));
   } catch (error) {
-    console.error('OMNI startup failed.', error);
+    console.error('OMNI could not initialize.', error);
+    window.__overtureOmniBoot?.fail?.('OMNI could not start', 'Reload the page to try again.');
+    const root = document.getElementById('omni-root');
+    root?.setAttribute('aria-busy', 'false');
   }
 });
