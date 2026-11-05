@@ -316,3 +316,273 @@ html[data-theme="light"] .account-avatar-upload input[type=file]::file-selector-
 /* Keep the two dedicated account views hidden until their controller reveals them. */
 .account-auth-panel[hidden],
 .account-profile[hidden] { display: none !important; }
+
+
+/* Login-only animated sound-field backdrop. Decorative layers stay behind
+   the authentication UI and never intercept pointer or keyboard input. */
+body.login-page {
+  isolation:isolate;
+  background:
+    radial-gradient(ellipse at 50% 42%,rgba(18,49,62,.25),transparent 48%),
+    radial-gradient(ellipse at 8% 16%,rgba(30,86,100,.11),transparent 34%),
+    var(--bg);
+}
+.login-page .login-ambient {
+  position:fixed;
+  z-index:0;
+  inset:0;
+  overflow:hidden;
+  pointer-events:none;
+  contain:paint;
+  background:
+    radial-gradient(ellipse at 50% 47%,rgba(8,19,28,.08),transparent 58%),
+    linear-gradient(180deg,rgba(5,10,16,.12),transparent 40%,rgba(5,10,16,.08));
+}
+.login-ambient__grid {
+  position:absolute;
+  inset:-12%;
+  opacity:.34;
+  background-image:
+    linear-gradient(rgba(125,228,255,.055) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(125,228,255,.055) 1px,transparent 1px);
+  background-size:58px 58px;
+  mask-image:radial-gradient(ellipse at 50% 48%,#000 4%,rgba(0,0,0,.74) 42%,transparent 78%);
+  animation:login-grid-drift 34s linear infinite;
+}
+.login-ambient__glow {
+  position:absolute;
+  width:min(56vw,760px);
+  aspect-ratio:1;
+  border-radius:50%;
+  filter:blur(100px);
+  opacity:.2;
+  will-change:transform;
+}
+.login-ambient__glow--cyan {
+  top:-34%;
+  left:-18%;
+  background:radial-gradient(circle,rgba(38,177,207,.62),rgba(38,177,207,0) 68%);
+  animation:login-glow-float 25s ease-in-out infinite alternate;
+}
+.login-ambient__glow--amber {
+  right:-22%;
+  bottom:-48%;
+  background:radial-gradient(circle,rgba(255,159,10,.48),rgba(255,159,10,0) 68%);
+  animation:login-glow-float 31s ease-in-out -8s infinite alternate-reverse;
+}
+.login-ambient__glow--green {
+  top:34%;
+  right:16%;
+  width:min(34vw,460px);
+  opacity:.12;
+  background:radial-gradient(circle,rgba(130,230,168,.62),rgba(130,230,168,0) 68%);
+  animation:login-glow-float 28s ease-in-out -13s infinite alternate;
+}
+.login-ambient__core {
+  position:absolute;
+  top:47%;
+  left:50%;
+  width:min(58vw,720px);
+  aspect-ratio:1;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(35,111,132,.09) 0%,rgba(25,74,94,.055) 34%,transparent 70%);
+  transform:translate(-50%,-50%);
+  animation:login-core-breathe 12s ease-in-out infinite;
+}
+.login-ambient__orbit {
+  position:absolute;
+  top:47%;
+  left:50%;
+  border:1px solid rgba(125,228,255,.13);
+  border-radius:50%;
+  transform:translate(-50%,-50%) rotate(-20deg);
+  box-shadow:0 0 38px rgba(45,163,191,.035),inset 0 0 28px rgba(45,163,191,.018);
+}
+.login-ambient__orbit::after {
+  position:absolute;
+  top:50%;
+  right:5%;
+  width:5px;
+  height:5px;
+  border-radius:50%;
+  background:#7de4ff;
+  box-shadow:0 0 9px 2px rgba(125,228,255,.62),0 0 24px rgba(125,228,255,.3);
+  content:"";
+}
+.login-ambient__orbit--outer {
+  width:min(91vw,1180px);
+  height:min(57vw,650px);
+  animation:login-orbit-outer 68s linear infinite;
+}
+.login-ambient__orbit--inner {
+  width:min(69vw,900px);
+  height:min(42vw,470px);
+  border-color:rgba(255,183,94,.12);
+  transform:translate(-50%,-50%) rotate(31deg);
+  animation:login-orbit-inner 52s linear infinite reverse;
+}
+.login-ambient__orbit--inner::after {
+  right:auto;
+  left:9%;
+  width:4px;
+  height:4px;
+  background:#ffb75e;
+  box-shadow:0 0 10px 2px rgba(255,183,94,.58),0 0 26px rgba(255,183,94,.24);
+}
+.login-ambient__orbit--fine {
+  width:min(78vw,1020px);
+  height:min(49vw,550px);
+  border-color:rgba(130,230,168,.075);
+  transform:translate(-50%,-50%) rotate(72deg);
+  animation:login-orbit-fine 86s linear infinite;
+}
+.login-ambient__orbit--fine::after {
+  top:13%;
+  right:18%;
+  width:3px;
+  height:3px;
+  background:#82e6a8;
+  box-shadow:0 0 10px 2px rgba(130,230,168,.48);
+}
+.login-ambient__sweep {
+  position:absolute;
+  top:23%;
+  left:-26%;
+  width:152%;
+  height:1px;
+  opacity:.46;
+  background:linear-gradient(90deg,transparent,rgba(125,228,255,.3) 38%,rgba(125,228,255,.08) 58%,transparent);
+  filter:drop-shadow(0 0 8px rgba(125,228,255,.3));
+  transform:rotate(-15deg);
+  transform-origin:center;
+  animation:login-sweep 17s ease-in-out infinite;
+}
+.login-ambient__traces {
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  overflow:visible;
+  opacity:.78;
+}
+.login-ambient__trace {
+  fill:none;
+  stroke-width:1.25;
+  stroke-dasharray:3 13;
+  stroke-linecap:round;
+  vector-effect:non-scaling-stroke;
+  animation:login-trace-flow 26s linear infinite;
+}
+.login-ambient__trace--cyan {
+  stroke:url(#login-trace-cyan);
+  filter:drop-shadow(0 0 5px rgba(125,228,255,.38));
+}
+.login-ambient__trace--amber {
+  stroke:url(#login-trace-amber);
+  stroke-dasharray:2 17;
+  animation-duration:34s;
+  animation-direction:reverse;
+}
+.login-ambient__spark {
+  position:absolute;
+  width:3px;
+  height:3px;
+  border-radius:50%;
+  background:#b5f0ff;
+  box-shadow:0 0 8px 2px rgba(125,228,255,.44),0 0 22px rgba(125,228,255,.24);
+  animation:login-spark-pulse 4.6s ease-in-out infinite;
+}
+.login-ambient__spark--one { top:25%; left:15%; }
+.login-ambient__spark--two { top:68%; right:17%; width:4px; height:4px; animation-delay:-1.8s; }
+.login-ambient__spark--three { top:18%; right:29%; width:2px; height:2px; background:#ffd39a; box-shadow:0 0 9px 2px rgba(255,183,94,.45); animation-delay:-2.6s; }
+.login-ambient__spark--four { bottom:17%; left:30%; width:2px; height:2px; background:#a7f0c0; box-shadow:0 0 9px 2px rgba(130,230,168,.4); animation-delay:-.9s; }
+
+body.login-page .account-shell {
+  z-index:2;
+}
+body.login-page .site-footer {
+  position:relative;
+  z-index:1;
+}
+
+@keyframes login-grid-drift {
+  from { background-position:0 0,0 0; }
+  to { background-position:58px 58px,-58px 58px; }
+}
+@keyframes login-glow-float {
+  0% { transform:translate3d(-2%,1%,0) scale(.92); }
+  100% { transform:translate3d(7%,-6%,0) scale(1.12); }
+}
+@keyframes login-core-breathe {
+  0%,100% { opacity:.62; transform:translate(-50%,-50%) scale(.92); }
+  50% { opacity:1; transform:translate(-50%,-50%) scale(1.08); }
+}
+@keyframes login-orbit-outer {
+  from { transform:translate(-50%,-50%) rotate(-20deg); }
+  to { transform:translate(-50%,-50%) rotate(340deg); }
+}
+@keyframes login-orbit-inner {
+  from { transform:translate(-50%,-50%) rotate(31deg); }
+  to { transform:translate(-50%,-50%) rotate(391deg); }
+}
+@keyframes login-orbit-fine {
+  from { transform:translate(-50%,-50%) rotate(72deg); }
+  to { transform:translate(-50%,-50%) rotate(-288deg); }
+}
+@keyframes login-sweep {
+  0%,100% { opacity:.16; transform:translateY(-12vh) rotate(-15deg); }
+  50% { opacity:.56; transform:translateY(26vh) rotate(-15deg); }
+}
+@keyframes login-trace-flow {
+  to { stroke-dashoffset:-256; }
+}
+@keyframes login-spark-pulse {
+  0%,100% { opacity:.32; transform:scale(.72); }
+  50% { opacity:1; transform:scale(1.7); }
+}
+
+html[data-theme="light"] body.login-page {
+  background:
+    radial-gradient(ellipse at 50% 42%,rgba(98,177,194,.15),transparent 50%),
+    radial-gradient(ellipse at 8% 16%,rgba(8,127,159,.09),transparent 34%),
+    var(--bg);
+}
+html[data-theme="light"] .login-ambient {
+  background:linear-gradient(180deg,rgba(247,250,253,.12),rgba(233,239,245,.28));
+}
+html[data-theme="light"] .login-ambient__grid {
+  opacity:.46;
+  background-image:
+    linear-gradient(rgba(8,127,159,.075) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(8,127,159,.075) 1px,transparent 1px);
+}
+html[data-theme="light"] .login-ambient__glow { opacity:.12; }
+html[data-theme="light"] .login-ambient__core {
+  background:radial-gradient(circle,rgba(8,127,159,.09),rgba(8,127,159,.035) 42%,transparent 70%);
+}
+html[data-theme="light"] .login-ambient__orbit { border-color:rgba(8,127,159,.14); }
+html[data-theme="light"] .login-ambient__orbit--inner { border-color:rgba(173,95,0,.12); }
+html[data-theme="light"] .login-ambient__orbit--fine { border-color:rgba(36,137,84,.10); }
+html[data-theme="light"] .login-ambient__sweep {
+  opacity:.28;
+  background:linear-gradient(90deg,transparent,rgba(8,127,159,.2),transparent);
+}
+html[data-theme="light"] .login-ambient__traces { opacity:.48; }
+html[data-theme="light"] .login-ambient__spark { opacity:.48; }
+
+@media (max-width:760px) {
+  .login-ambient__grid { background-size:46px 46px; }
+  .login-ambient__glow { filter:blur(76px); opacity:.16; }
+  .login-ambient__orbit--outer { width:116vw; height:72vw; }
+  .login-ambient__orbit--inner { width:91vw; height:57vw; }
+  .login-ambient__orbit--fine { width:102vw; height:64vw; }
+  .login-ambient__traces { opacity:.55; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .login-ambient *,
+  .login-ambient::before,
+  .login-ambient::after {
+    animation:none !important;
+    scroll-behavior:auto !important;
+  }
+}
