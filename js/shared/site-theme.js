@@ -65,7 +65,7 @@
       <nav class="main-nav" id="main-nav" aria-label="Main navigation">
         <a href="/about">About</a><a href="/library">Instrument library</a><a href="/#omni">OMNI</a><a href="/community">Community</a><a href="/experiments" aria-current="page">Experiments</a>
       </nav>
-      <a class="header-account" href="/account" aria-label="Log in to your Overture account"><span class="header-account__label">LOG IN</span></a>
+      <a class="header-account" href="/login" aria-label="Log in to your Overture account"><span class="header-account__label">LOG IN</span></a>
       <button class="menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="main-nav"><span></span><span></span></button>`;
     const nav = header.querySelector('.main-nav');
     const menu = header.querySelector('.menu-toggle');
