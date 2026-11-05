@@ -88,7 +88,7 @@
   if (heroCircuit) {
     const sequence = [1, 2, 3, 4];
     let progress = 0;
-    heroCircuit.querySelectorAll('[data-rainbow-step]').forEach((node) => {
+    heroCircuit.querySelectorAll('.circuit-nodes circle[data-rainbow-step]').forEach((node) => {
       node.addEventListener('click', () => {
         const step = Number(node.getAttribute('data-rainbow-step'));
         if (step === sequence[progress]) {
