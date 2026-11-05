@@ -1252,7 +1252,7 @@ const setOmniBootProgress = (value, message, detail) => {
   if (fill) fill.style.width = `${Math.max(0, Math.min(100, value))}%`;
 };
 const nextPaint = () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-document.addEventListener('DOMContentLoaded', async () => {
+const startOmni = async () => {
   try {
     setOmniBootProgress(52, 'Preparing the workspace…', 'Engine dependencies are ready');
     await nextPaint();
@@ -1284,4 +1284,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const root = document.getElementById('omni-root');
     root?.setAttribute('aria-busy', 'false');
   }
-});
+};
+
+// Dynamic imports can finish after DOMContentLoaded. Start immediately when the
+// document is already interactive/complete; otherwise wait for the event once.
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', startOmni, { once: true });
+} else {
+  void startOmni();
+}
