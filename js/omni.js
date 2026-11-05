@@ -2,6 +2,7 @@
 // Load the engine in observable batches. Static imports would delay all startup
 // code until every dependency had arrived, leaving the progress bar at zero.
 const boot = window.__overtureOmniBoot;
+const bootStartedAt = performance.now();
 const dependencyGroups = [
   ['./omni/modules.js?v=20261104-sem-mellotron', './omni/graph.js?v=20261104-sem-mellotron', './omni/templates.js?v=20261104-sem-mellotron'],
   ['./shared/presetStore.js', './shared/audioRecorder.js', './shared/midiRecorder.js'],
@@ -32,6 +33,11 @@ const [
 
 const el = (tag, cls, parent, text) => { const n = document.createElement(tag); if (cls) n.className = cls; if (text !== undefined) n.textContent = text; if (parent) parent.appendChild(n); return n; };
 const uid = (p) => `${p}${Math.random().toString(36).slice(2, 8)}`;
+const updateRangeFill = (input) => {
+  const min = Number(input.min), max = Number(input.max), value = Number(input.value);
+  const ratio = Number.isFinite(value) && max > min ? Math.min(1, Math.max(0, (value - min) / (max - min))) : 0;
+  input.style.setProperty('--omni-slider-fill', `${ratio * 100}%`);
+};
 const NS = 'http://www.w3.org/2000/svg';
 
 class OmniApp {
@@ -92,6 +98,9 @@ class OmniApp {
       const details = el('details', 'omni-menu', commandbar);
       const summary = el('summary', 'omni-menu__trigger', details, label);
       summary.setAttribute('aria-label', `${label} menu`);
+      details.addEventListener('pointerleave', (event) => {
+        if (event.pointerType === 'mouse') details.open = false;
+      });
       const panel = el('div', 'omni-menu__panel', details);
       panel.setAttribute('role', 'group');
       panel.setAttribute('aria-label', `${label} commands`);
@@ -191,6 +200,9 @@ class OmniApp {
     const helpMenu = group('Help');
     action(helpMenu, 'OMNI guide…', () => this.guide(), 'Open the OMNI guide');
     action(helpMenu, 'Keyboard shortcuts', () => this.showShortcuts(), 'View performance and editing shortcuts');
+    const midiMapButton = tb('MIDI MAP', () => document.querySelector('.oi-midi-tab')?.click(), 'Open MIDI assignments', commandbar);
+    midiMapButton.classList.add('omni-midi-map-button');
+    midiMapButton.setAttribute('aria-label', 'Open MIDI assignments');
 
     this.menuDetails = [...commandbar.querySelectorAll('.omni-menu')];
     this.status.classList.add('omni-status--command');
@@ -358,7 +370,7 @@ class OmniApp {
           const denorm = (t) => { let v = log ? Math.exp(Math.log(p.min) + t * (Math.log(p.max) - Math.log(p.min))) : p.min + t * (p.max - p.min); if (p.step) v = Math.round(v / p.step) * p.step; return Math.min(p.max, Math.max(p.min, v)); };
           out.push({ id: `omni::${m.id}::${p.key}`, label: p.label, group: `${def.name} (${m.id})`, el: document.getElementById(`p-${m.id}-${p.key}`),
             get: () => norm(m.params[p.key]),
-            set: (t) => { const previous = m.params[p.key]; const v = denorm(t); this.setParam(m.id, p.key, v, false); if (v !== previous && ((m.type === 'chord' && p.key === 'voices') || (m.type === 'mixer' && p.key === 'channels'))) this.syncModulePorts(m.id); const inp = document.getElementById(`p-${m.id}-${p.key}`); if (inp) { inp.value = log ? Math.log(v) : v; const o = inp.parentElement?.querySelector('output'); if (o) o.textContent = v.toFixed(p.step === 1 ? 0 : 2); } } });
+            set: (t) => { const previous = m.params[p.key]; const v = denorm(t); this.setParam(m.id, p.key, v, false); if (v !== previous && ((m.type === 'chord' && p.key === 'voices') || (m.type === 'mixer' && p.key === 'channels'))) this.syncModulePorts(m.id); const inp = document.getElementById(`p-${m.id}-${p.key}`); if (inp) { inp.value = log ? Math.log(v) : v; updateRangeFill(inp); const o = inp.parentElement?.querySelector('output'); if (o) o.textContent = v.toFixed(p.step === 1 ? 0 : 2); } } });
         });
       });
       this.patch.macros.forEach((macro) => {
@@ -1140,7 +1152,7 @@ class OmniApp {
         const s = el('select', '', row); p.options.forEach((o, i) => { const op = el('option', '', s, o); op.value = i; }); s.value = Math.round(m.params[p.key]);
         s.addEventListener('change', () => { this.setParam(m.id, p.key, Number(s.value), true); this.renderCards(); this.renderWires(); });
       } else {
-        const inp = el('input', '', row); inp.type = 'range'; const log = !!p.log; inp.min = log ? Math.log(p.min) : p.min; inp.max = log ? Math.log(p.max) : p.max; inp.step = p.step ?? (log ? 0.001 : (p.max - p.min) / 400);
+        const inp = el('input', 'omni-slider', row); inp.type = 'range'; const log = !!p.log; inp.min = log ? Math.log(p.min) : p.min; inp.max = log ? Math.log(p.max) : p.max; inp.step = p.step ?? (log ? 0.001 : (p.max - p.min) / 400);
         const chordInterval = m.type === 'chord' && /^v[2-8]$/.test(p.key);
         if (chordInterval) {
           inp.setAttribute('aria-label', `${p.label}, from ${p.min} to +${p.max} semitones`);
@@ -1148,6 +1160,7 @@ class OmniApp {
           inp.setAttribute('aria-valuemax', String(p.max));
         }
         inp.value = log ? Math.log(m.params[p.key]) : m.params[p.key];
+        updateRangeFill(inp);
         const out = el('output', '', row, (+m.params[p.key]).toFixed(p.step === 1 ? 0 : 2));
         if (chordInterval) {
           const bounds = el('div', 'omni-param__bounds', row);
@@ -1155,7 +1168,7 @@ class OmniApp {
           el('span', '', bounds, `+${p.max} st`);
         }
         const val = () => (log ? Math.exp(Number(inp.value)) : Number(inp.value));
-        inp.addEventListener('input', () => { this.setParam(m.id, p.key, val(), false); out.textContent = val().toFixed(p.step === 1 ? 0 : 2); });
+        inp.addEventListener('input', () => { updateRangeFill(inp); this.setParam(m.id, p.key, val(), false); out.textContent = val().toFixed(p.step === 1 ? 0 : 2); });
         inp.addEventListener('change', () => { this.setParam(m.id, p.key, val(), true); this.renderCards(); this.renderWires(); });
         lab.htmlFor = inp.id = `p-${m.id}-${p.key}`;
         inp.setAttribute('role', 'slider');
@@ -1255,7 +1268,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     app.applyView?.();
     app.renderWires?.();
     await nextPaint();
+    const visibleFor = performance.now() - bootStartedAt;
+    if (visibleFor < 720) await new Promise((resolve) => setTimeout(resolve, 720 - visibleFor));
     setOmniBootProgress(100, 'Workspace ready', 'OMNI is ready to use');
+    await nextPaint();
+    await new Promise((resolve) => setTimeout(resolve, 140));
     const root = document.getElementById('omni-root');
     root?.removeAttribute('aria-busy');
     document.documentElement.classList.add('omni-ready');
