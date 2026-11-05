@@ -83,7 +83,9 @@
           loader.innerHTML = '<img class="omni-launch-logo" src="/ui/Logos/OvertureLogo.png" alt=""><div class="omni-launch-progress" role="presentation"><span></span></div>';
           overlay.appendChild(loader);
           requestAnimationFrame(() => loader.classList.add('is-visible'));
-          window.setTimeout(() => window.location.assign('/omni'), reduced ? 420 : 1420);
+          // Navigation starts immediately. The destination owns the real
+          // progress indicator and removes it only after its UI is rendered.
+          window.location.assign('/omni');
         }, reduced ? 40 : 300);
       };
 
