@@ -1,0 +1,196 @@
+/* OMNI module reference dialog and inspector information control. */
+.omni-inspector__head {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 14px;
+}
+.omni-inspector__head h2 { margin: 0 !important; }
+.omni-info-button {
+  display: grid;
+  width: 27px;
+  height: 27px;
+  flex: 0 0 27px;
+  place-items: center;
+  padding: 0 0 1px;
+  border: 1px solid rgba(125,228,255,.38);
+  border-radius: 50%;
+  color: #a7eaff;
+  background: rgba(125,228,255,.075);
+  font: 600 15px/1 Georgia, serif;
+  cursor: pointer;
+  transition: color .16s ease, background .16s ease, border-color .16s ease, box-shadow .16s ease;
+}
+.omni-info-button:hover,
+.omni-info-button:focus-visible {
+  border-color: rgba(125,228,255,.8);
+  color: #e5f9ff;
+  background: rgba(125,228,255,.17);
+  box-shadow: 0 0 15px rgba(125,228,255,.12);
+  outline: none;
+}
+.omni-info-button:focus-visible { outline: 2px solid var(--cyan); outline-offset: 3px; }
+.omni-info-button[hidden],
+.omni-info-overlay[hidden] { display: none !important; }
+
+.omni-info-overlay {
+  position: fixed;
+  z-index: 500;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: clamp(14px, 3vw, 34px);
+  background: rgba(3,7,12,.76);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+.omni-info-dialog {
+  display: flex;
+  width: min(680px, 100%);
+  max-height: min(820px, 88dvh);
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid rgba(157,184,212,.2);
+  border-radius: 16px;
+  color: #e8eef6;
+  background:
+    radial-gradient(ellipse at 8% 0%, rgba(125,228,255,.075), transparent 42%),
+    linear-gradient(155deg, #1b2532 0%, #111821 58%, #0c121a 100%);
+  box-shadow: 0 28px 90px rgba(0,0,0,.52), inset 0 1px rgba(255,255,255,.055);
+}
+.omni-info-dialog__header {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 20px 24px 17px;
+  border-bottom: 1px solid rgba(224,233,246,.1);
+}
+.omni-info-dialog__heading { display: grid; gap: 6px; min-width: 0; }
+.omni-info-dialog__eyebrow {
+  color: #7de4ff;
+  font: 600 9px/1.3 var(--font-mono);
+  letter-spacing: .17em;
+}
+.omni-info-dialog__category {
+  color: #8e9bae;
+  font: 500 9px/1.3 var(--font-mono);
+  letter-spacing: .1em;
+}
+.omni-info-dialog__close {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  place-items: center;
+  padding: 0 0 3px;
+  border: 1px solid rgba(224,233,246,.15);
+  border-radius: 9px;
+  color: #b8c4d3;
+  background: rgba(255,255,255,.045);
+  font: 300 25px/1 var(--font-body);
+  cursor: pointer;
+}
+.omni-info-dialog__close:hover,
+.omni-info-dialog__close:focus-visible {
+  border-color: rgba(255,183,94,.45);
+  color: #ffd49b;
+  background: rgba(255,183,94,.09);
+  outline: 0;
+}
+.omni-info-dialog__content {
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 25px 28px 30px;
+  scrollbar-color: rgba(125,228,255,.32) transparent;
+}
+.omni-info-dialog__title {
+  margin: 0 0 10px;
+  color: #f1f5fa;
+  font: 550 clamp(25px, 4vw, 34px)/1.12 var(--font-body);
+  letter-spacing: -.045em;
+}
+.omni-info-dialog__summary {
+  margin: 0 0 23px;
+  color: #b9c8d9;
+  font-size: 13px;
+  line-height: 1.75;
+}
+.omni-info-section {
+  display: grid;
+  gap: 8px;
+  padding: 17px 0;
+  border-top: 1px solid rgba(224,233,246,.1);
+}
+.omni-info-section h3 {
+  margin: 0;
+  color: #8de6fb;
+  font: 600 9px/1.4 var(--font-mono);
+  letter-spacing: .13em;
+  text-transform: uppercase;
+}
+.omni-info-section p {
+  margin: 0;
+  color: #d4dde8;
+  font-size: 12px;
+  line-height: 1.8;
+}
+@media (max-width: 600px) {
+  .omni-info-overlay { padding: 10px; }
+  .omni-info-dialog { max-height: 92dvh; border-radius: 12px; }
+  .omni-info-dialog__header { padding: 16px 17px 14px; }
+  .omni-info-dialog__content { padding: 21px 18px 24px; }
+  .omni-info-dialog__title { font-size: 26px; }
+}
+
+/* The reference window follows the active site theme, independently of the
+   module workspace's own dark visual identity. */
+html[data-theme="light"] .omni-info-button {
+  border-color: rgba(8,127,159,.35);
+  color: #086d88;
+  background: rgba(8,127,159,.065);
+}
+html[data-theme="light"] .omni-info-button:hover,
+html[data-theme="light"] .omni-info-button:focus-visible {
+  border-color: rgba(8,127,159,.72);
+  color: #064e66;
+  background: rgba(8,127,159,.13);
+  box-shadow: 0 0 14px rgba(8,127,159,.1);
+}
+html[data-theme="light"] .omni-info-overlay { background: rgba(27,39,53,.34); }
+html[data-theme="light"] .omni-info-dialog {
+  border-color: rgba(43,59,78,.17);
+  color: #26394d;
+  background:
+    radial-gradient(ellipse at 8% 0%, rgba(8,127,159,.055), transparent 44%),
+    linear-gradient(155deg, #ffffff 0%, #f4f7fa 62%, #eaf0f5 100%);
+  box-shadow: 0 24px 70px rgba(31,48,68,.22), inset 0 1px #fff;
+}
+html[data-theme="light"] .omni-info-dialog__header,
+html[data-theme="light"] .omni-info-section { border-color: rgba(43,59,78,.12); }
+html[data-theme="light"] .omni-info-dialog__eyebrow { color: #087f9f; }
+html[data-theme="light"] .omni-info-dialog__category { color: #66788c; }
+html[data-theme="light"] .omni-info-dialog__close {
+  border-color: rgba(43,59,78,.16);
+  color: #52677d;
+  background: rgba(255,255,255,.72);
+}
+html[data-theme="light"] .omni-info-dialog__close:hover,
+html[data-theme="light"] .omni-info-dialog__close:focus-visible {
+  border-color: rgba(173,95,0,.36);
+  color: #81500f;
+  background: rgba(255,183,94,.14);
+}
+html[data-theme="light"] .omni-info-dialog__title { color: #1d2f42; }
+html[data-theme="light"] .omni-info-dialog__summary { color: #53677c; }
+html[data-theme="light"] .omni-info-section h3 { color: #087f9f; }
+html[data-theme="light"] .omni-info-section p { color: #344a60; }
+
+@media (prefers-reduced-motion: reduce) {
+  .omni-info-button { transition: none; }
+}
