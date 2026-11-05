@@ -16,8 +16,8 @@
     })();
   </script>
   <meta name="theme-color" content="#0b0e13">
-  <meta name="description" content="Create and manage your Overture Instruments account.">
-  <title>Account | Overture Instruments</title>
+  <meta name="description" content="Manage your Overture Instruments profile and account settings.">
+  <title>Account Settings | Overture Instruments</title>
   <link rel="icon" type="image/png" href="/ui/Logos/OvertureLogo.png">
   <link rel="manifest" href="/manifest.webmanifest">
 
@@ -39,7 +39,7 @@
   <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js" defer></script>
   <script src="/js/shared/contact.js?v=20261029-modalfix" defer></script>
   <script type="module" src="/js/shared/account-shell.js?v=20261102-contributions-menu"></script>
-  <script type="module" src="/js/account.js?v=20261102-account-layout"></script>
+  <script type="module" src="/js/account.js?v=20261104-split-login"></script>
 </head>
 <body>
   <div class="site-noise" aria-hidden="true"></div>
@@ -55,53 +55,12 @@
       <a href="/community">Community</a>
       <a href="/experiments">Experiments</a>
     </nav>
-    <a class="header-account" href="/account" aria-label="Log in to your Overture account"><span class="header-account__label">LOG IN</span></a>
+    <a class="header-account" href="/login" aria-label="Log in to your Overture account"><span class="header-account__label">LOG IN</span></a>
     <button class="menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="main-nav"><span></span><span></span></button>
   </header>
 
   <main class="account-shell">
 <div id="account-status" class="account-status" role="status" aria-live="polite">Connecting to Overture Accounts…</div>
-
-    <section class="account-auth-panel account-panel" id="account-auth-panel" hidden>
-      <div class="account-auth-heading">
-        <p class="account-overline">WELCOME</p>
-        <h2 id="account-auth-title">Sign in to Overture</h2>
-        <p id="account-auth-description">Use your email address and password, or continue with Google.</p>
-      </div>
-
-      <div class="account-auth-tabs" role="tablist" aria-label="Account access">
-        <button type="button" class="is-active" id="account-tab-login" role="tab" aria-selected="true" aria-controls="account-login-view">LOG IN</button>
-        <button type="button" id="account-tab-signup" role="tab" aria-selected="false" aria-controls="account-signup-view">CREATE ACCOUNT</button>
-      </div>
-
-      <div class="account-auth-view" id="account-login-view" role="tabpanel" aria-labelledby="account-tab-login">
-        <form id="account-login-form" class="account-form">
-          <label><span>EMAIL ADDRESS</span><input type="email" name="email" autocomplete="email" required placeholder="you@example.com"></label>
-          <label><span>PASSWORD</span><input type="password" name="password" autocomplete="current-password" minlength="8" required placeholder="Your password"></label>
-          <div class="account-form-row">
-            <button type="button" class="account-text-button" id="account-forgot-password">Forgot password?</button>
-            <button class="account-button account-button--primary" type="submit">LOG IN</button>
-          </div>
-        </form>
-      </div>
-
-      <div class="account-auth-view" id="account-signup-view" role="tabpanel" aria-labelledby="account-tab-signup" hidden>
-        <form id="account-signup-form" class="account-form">
-          <label><span>USERNAME</span><input type="text" name="username" autocomplete="username" minlength="3" maxlength="24" pattern="[a-zA-Z0-9_]{3,24}" required placeholder="e.g. overture_user"><small>3–24 characters. Use letters, numbers, and underscores.</small></label>
-          <label><span>NAME <i>(OPTIONAL)</i></span><input type="text" name="display_name" autocomplete="name" maxlength="80" placeholder="Your name"></label>
-          <label><span>EMAIL ADDRESS</span><input type="email" name="email" autocomplete="email" required placeholder="you@example.com"></label>
-          <label><span>PASSWORD</span><input type="password" name="password" autocomplete="new-password" minlength="8" required placeholder="At least 8 characters"></label>
-          <button class="account-button account-button--primary account-button--wide" type="submit">CREATE ACCOUNT</button>
-        </form>
-      </div>
-
-      <div class="account-auth-divider"><span></span><b>OR</b><span></span></div>
-      <button type="button" class="account-button account-google-button" id="account-google">
-        <svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5Z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.92c-.58 2.96-2.26 5.48-4.77 7.18l7.73 6C44.39 38.07 46.98 31.9 46.98 24.55Z"/><path fill="#FBBC05" d="M10.53 28.59A14.4 14.4 0 0 1 9.75 24c0-1.59.27-3.13.76-4.59l-7.98-6.19A23.9 23.9 0 0 0 0 24c0 3.87.93 7.53 2.56 10.78l7.97-6.19Z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.9-5.8l-7.73-6c-2.14 1.44-4.88 2.3-8.17 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48Z"/></svg>
-        CONTINUE WITH GOOGLE
-      </button>
-      <p class="account-legal">By creating an account, you agree to use Overture respectfully. Your public profile shows your username, optional name, and profile picture. Your email address is never displayed publicly.</p>
-    </section>
 
     <section class="account-profile" id="account-profile" hidden>
       <div class="account-profile-heading">
