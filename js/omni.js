@@ -4,7 +4,8 @@
 const boot = window.__overtureOmniBoot;
 const bootStartedAt = performance.now();
 const dependencyGroups = [
-  ['./omni/modules.js?v=20261104-sem-mellotron', './omni/graph.js?v=20261104-sem-mellotron', './omni/templates.js?v=20261104-sem-mellotron', './omni/moduleInfo.js?v=20261105-module-info'],
+  // Keep this order aligned with the first four module bindings below.
+  ['./omni/modules.js?v=20261104-sem-mellotron', './omni/moduleInfo.js?v=20261105-module-info', './omni/graph.js?v=20261104-sem-mellotron', './omni/templates.js?v=20261104-sem-mellotron'],
   ['./shared/presetStore.js', './shared/audioRecorder.js', './shared/midiRecorder.js'],
   ['../ui/Keyboard.js', '../ui/Wheel.js', './engine/MidiManager.js'],
   ['./shared/panel.js', './shared/midiMap.js']
