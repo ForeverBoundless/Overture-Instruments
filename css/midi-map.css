@@ -197,3 +197,64 @@ html[data-theme="light"] body.oi-midi-learning [data-oi-midi][data-oi-midi-assig
 }
 html[data-theme="light"] .oi-midi-pane {scrollbar-color:rgba(43,59,78,.25) transparent}
 html[data-theme="light"] .oi-midi-pane::-webkit-scrollbar-thumb {background:rgba(43,59,78,.25)}
+
+
+/* OMNI presents the shared MIDI assignment UI as a centred modal.
+   Other emulator pages retain the standard right-side drawer. */
+body.omni-page:has(.oi-midi-pane:not([hidden]))::before {
+  content:"";
+  position:fixed;
+  inset:0;
+  z-index:900;
+  background:rgba(4,8,13,.62);
+  -webkit-backdrop-filter:blur(7px);
+  backdrop-filter:blur(7px);
+}
+body.omni-page .oi-midi-pane {
+  top:50%;
+  right:auto;
+  bottom:auto;
+  left:50%;
+  width:min(620px,calc(100vw - 36px));
+  max-height:min(780px,calc(100dvh - 40px));
+  padding:22px 24px 24px;
+  border:1px solid rgba(125,228,255,.22);
+  border-radius:16px;
+  background:linear-gradient(155deg,rgba(19,28,39,.99),rgba(9,14,21,.99));
+  box-shadow:0 30px 100px rgba(0,0,0,.52),inset 0 1px rgba(255,255,255,.055);
+  transform:translate(-50%,-48%) scale(.985);
+  opacity:0;
+  animation:oi-midi-modal-in .2s cubic-bezier(.2,.75,.25,1) forwards;
+}
+@keyframes oi-midi-modal-in {
+  to {transform:translate(-50%,-50%) scale(1);opacity:1}
+}
+body.omni-page .oi-midi-pane .oi-midi-head h2 {
+  font-size:17px;
+  letter-spacing:-.025em;
+}
+body.omni-page .oi-midi-pane .oi-midi-close {
+  width:32px;
+  height:32px;
+  border-radius:8px;
+}
+html[data-theme="light"] body.omni-page:has(.oi-midi-pane:not([hidden]))::before {
+  background:rgba(29,43,59,.28);
+}
+html[data-theme="light"] body.omni-page .oi-midi-pane {
+  border-color:rgba(43,59,78,.2);
+  border-radius:16px;
+  background:linear-gradient(155deg,#fbfcfe,#e8eef5);
+  box-shadow:0 30px 90px rgba(37,53,73,.28),inset 0 1px rgba(255,255,255,.9);
+}
+@media (max-width:600px) {
+  body.omni-page .oi-midi-pane {
+    width:calc(100vw - 24px);
+    max-height:calc(100dvh - 24px);
+    padding:17px 15px 19px;
+    border-radius:13px;
+  }
+}
+@media (prefers-reduced-motion:reduce) {
+  body.omni-page .oi-midi-pane {animation:none;transform:translate(-50%,-50%);opacity:1}
+}
