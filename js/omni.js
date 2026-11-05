@@ -69,7 +69,6 @@ class OmniApp {
 
   initialize() {
     this.render();
-    this.setInitialView();
     this.pushHistory();
     if (this.msgOnLoad) this.msg(this.msgOnLoad);
     this._bindMidi();
@@ -429,33 +428,12 @@ class OmniApp {
   }
 
   setInitialView() {
-    const modules = [...this.cards.querySelectorAll('.omni-module')];
-    if (!modules.length) {
-      this.view = { x: 20, y: 20, scale: 0.66 };
-      this.applyView();
-      this.renderWires();
-      return;
-    }
-    const bounds = modules.map((card) => ({
-      x: Number.parseFloat(card.style.left) || 0,
-      y: Number.parseFloat(card.style.top) || 0,
-      width: card.offsetWidth || 210,
-      height: card.offsetHeight || 110,
-    }));
-    const minX = Math.min(...bounds.map((item) => item.x));
-    const minY = Math.min(...bounds.map((item) => item.y));
-    const maxX = Math.max(...bounds.map((item) => item.x + item.width));
-    const maxY = Math.max(...bounds.map((item) => item.y + item.height));
-    const scale = 0.66;
-    this.view = {
-      scale,
-      x: (this.canvas.clientWidth - (maxX - minX) * scale) / 2 - minX * scale,
-      y: (this.canvas.clientHeight - (maxY - minY) * scale) / 2 - minY * scale,
-    };
-    this.applyView();
+    // Size the entire patch to the canvas rather than relying on a fixed zoom.
+    // This is also used for newly loaded templates and is called after the
+    // workspace has entered its normal grid layout during initial startup.
+    this.fitView();
     this.renderWires();
   }
-
   fitView() {
     const modules = [...this.cards.querySelectorAll('.omni-module')];
     if (!modules.length) {
@@ -1265,8 +1243,6 @@ const startOmni = async () => {
     app.initialize();
     setOmniBootProgress(91, 'Finishing the workspace…', 'Measuring modules and positioning the canvas');
     await nextPaint();
-    app.applyView?.();
-    app.renderWires?.();
     await nextPaint();
     const visibleFor = performance.now() - bootStartedAt;
     if (visibleFor < 720) await new Promise((resolve) => setTimeout(resolve, 720 - visibleFor));
@@ -1274,9 +1250,15 @@ const startOmni = async () => {
     await nextPaint();
     await new Promise((resolve) => setTimeout(resolve, 140));
     const root = document.getElementById('omni-root');
+    // Remove the boot card before measuring the canvas: while the boot card is
+    // a grid child it occupies the first workspace row and distorts its height.
     root?.removeAttribute('aria-busy');
     document.documentElement.classList.add('omni-ready');
     document.getElementById('omni-boot')?.remove();
+
+    // Read the now-uncovered canvas dimensions and fit every default module
+    // inside the real viewport before the browser paints the workspace.
+    app.setInitialView();
     window.dispatchEvent(new CustomEvent('overture:omni-ready'));
   } catch (error) {
     console.error('OMNI could not initialize.', error);
