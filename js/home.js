@@ -82,6 +82,29 @@
 
   window.addEventListener('hashchange', () => scrollToHash(true));
 
+  // Four-node homepage easter egg. The state lives only in this document:
+  // navigating away or reloading naturally resets the effect.
+  const heroCircuit = document.querySelector('.hero-circuit');
+  if (heroCircuit) {
+    const sequence = [1, 2, 3, 4];
+    let progress = 0;
+    heroCircuit.querySelectorAll('[data-rainbow-step]').forEach((node) => {
+      node.addEventListener('click', () => {
+        const step = Number(node.getAttribute('data-rainbow-step'));
+        if (step === sequence[progress]) {
+          progress += 1;
+        } else {
+          progress = step === sequence[0] ? 1 : 0;
+        }
+
+        if (progress === sequence.length) {
+          document.querySelector('.hero')?.classList.toggle('hero-rainbow-mode');
+          progress = 0;
+        }
+      });
+    });
+  }
+
   // Hero responds gently to pointer movement without shifting page layout.
   const hero = document.querySelector('.hero');
   const heroMark = document.querySelector('.hero-mark-wrap');
