@@ -3627,6 +3627,7 @@ body {
 
 .library-search__empty {
   display: grid;
+  grid-column: 1 / -1;
   justify-items: center;
   gap: 8px;
   width: min(1120px, calc(100% - 48px));
