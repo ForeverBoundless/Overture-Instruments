@@ -170,7 +170,7 @@ const emptyState = document.createElement('div');
 emptyState.className = 'library-search__empty';
 emptyState.hidden = true;
 emptyState.innerHTML = `<span class="material-symbols-rounded" aria-hidden="true">search_off</span><strong>No instruments found</strong><p>Try another brand, model, voice type, or feature.</p>`;
-grid.insertAdjacentElement('afterend', emptyState);
+grid.prepend(emptyState);
 
 function updateInstrumentSearch() {
   const rawQuery = searchInput.value.trim();
