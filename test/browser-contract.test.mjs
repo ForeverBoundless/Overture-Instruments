@@ -204,7 +204,10 @@ test('Community library has an optional Supabase setup and owner-scoped schema m
   assert.doesNotMatch(loginPage, /account-profile-form/);
   assert.match(accountPage, /account-profile-form/);
   assert.doesNotMatch(accountPage, /account-signup-form/);
+  assert.doesNotMatch(accountPage, /account-auth-panel/);
   assert.match(accountApp, /signInWithPassword/);
+  assert.match(accountApp, /window.location.replace(`\/login?returnTo=/);
+  assert.match(accountApp, /const target = getReturnTo() || '\/account'/);
   assert.match(accountApp, /signInWithOAuth/);
   assert.match(accountApp, /updateUser/);
   assert.match(accountMigration, /create table if not exists public\.profiles/);
@@ -282,6 +285,7 @@ test('The shared account menu works across site, OMNI, Library and all experimen
   assert.equal(account.includes('account-hero'), false);
   assert.equal(account.includes('Your place in'), false);
   assert.ok(shell.includes('header-account-logout'));
+  assert.ok(shell.includes("currentPath === '/login' || currentPath === '/login/'"));
   assert.ok(shell.includes('await supabase.auth.signOut()'));
   assert.ok(theme.includes('.header-account-wrap.is-signed-in:hover .header-account-menu'));
   assert.ok(theme.includes('.header-account-wrap.is-signed-in:focus-within .header-account-menu'));
