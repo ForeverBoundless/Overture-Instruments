@@ -2514,10 +2514,6 @@ html[data-theme="light"] a.showcase-cta[href="/library"] .showcase-cta__icon img
 
 
 /* Hidden hero circuit sequence: four nodes unlock a full-spectrum circuit mode. */
-.hero-circuit .hero-easter-egg-hit {
-  cursor: crosshair;
-  pointer-events: all;
-}
 .hero-rainbow-mode .hero-circuit .circuit-lines {
   filter: saturate(3.8) brightness(1.95) drop-shadow(0 0 7px #ff2bd6);
   animation: hero-rainbow-spectrum 1.15s linear infinite;
