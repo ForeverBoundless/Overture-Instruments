@@ -2505,3 +2505,9 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
   .omni-launch-stage.is-energized .omni-patch-wire, .omni-launch-stage.is-energized .omni-patch-port, .omni-launch-logo, .omni-launch-progress span { animation: none !important; }
   .omni-launch-progress span { width: 100%; }
 }
+
+
+/* The source wordmark is white for the dark hero; render it black in light mode. */
+html[data-theme="light"] a.showcase-cta[href="/library"] .showcase-cta__icon img {
+  filter:brightness(0) !important;
+}
