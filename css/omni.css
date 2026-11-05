@@ -9,7 +9,17 @@ button, a { -webkit-tap-highlight-color: transparent; }
 #omni-root { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; height: 100vh; }
 
 /* Startup screen stays in place until OMNI has built and measured its UI. */
-#omni-root[aria-busy="true"] { display:grid; place-items:center; min-height:100vh; }
+#omni-root[aria-busy="true"] {
+  display:grid;
+  grid-template-rows:minmax(0,1fr);
+  place-items:center;
+  align-content:center;
+  width:100%;
+  height:100dvh;
+  min-height:100dvh;
+  max-height:100dvh;
+  margin:0;
+}
 .omni-boot { display:grid; justify-items:center; gap:14px; width:min(340px,calc(100vw - 40px)); padding:34px 24px; text-align:center; color:var(--ink); }
 .omni-boot img { width:48px;height:48px;object-fit:contain;filter:drop-shadow(0 0 16px rgba(125,228,255,.35)); }
 .omni-boot strong { color:var(--cyan);font-size:17px;letter-spacing:.32em;font-weight:700; }
@@ -1371,4 +1381,11 @@ html[data-theme="light"] .omni-commandbar .omni-midi-map-button:hover {
   border-color:rgba(8,127,159,.45);
   color:#173b52;
   background:rgba(8,127,159,.09);
+}
+
+
+/* While the engine boots, override the app's three-row workspace grid.
+   A single full-height row keeps the boot card centred in the viewport. */
+#omni-root[aria-busy="true"] {
+  grid-template-rows:minmax(0,1fr) !important;
 }
