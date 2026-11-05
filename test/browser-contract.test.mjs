@@ -406,3 +406,20 @@ test('Homepage library CTA logo is black in light mode', async () => {
   assert.match(home, /html\\[data-theme="light"\\] a\\.showcase-cta\\[href="\\/library"\\] \\.showcase-cta__icon img/);
   assert.match(home, /filter:brightness\\(0\\) !important/);
 });
+
+
+test('library empty state appears before the coming-soon tile or banner', async () => {
+  const [app, styles, page, worker] = await Promise.all([
+    readFile(new URL('../js/library.js', import.meta.url), 'utf8'),
+    readFile(new URL('../css/library.css', import.meta.url), 'utf8'),
+    readFile(new URL('../library.html', import.meta.url), 'utf8'),
+    readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
+  ]);
+  const emptyStateInsertion = app.indexOf('grid.prepend(emptyState)');
+  const comingSoonCreation = app.indexOf('const comingSoon = document.createElement');
+  assert.ok(emptyStateInsertion >= 0 && comingSoonCreation > emptyStateInsertion);
+  assert.match(styles, /\.library-search__empty\s*\{[^}]*grid-column:\s*1\s*\/\s*-1/s);
+  assert.match(page, /library\.css\?v=20261104-empty-state-order/);
+  assert.match(worker, /overture-shell-v37/);
+  assert.match(worker, /library\.css\?v=20261104-empty-state-order/);
+});
