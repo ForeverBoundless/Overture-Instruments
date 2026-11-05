@@ -28,7 +28,7 @@ Overture is a work in progress. Its models are independently implemented in soft
 
 | Area | What it does |
 | --- | --- |
-| **Instrument library** | Eight browser-based instruments, each with its own interface and sound engine. |
+| **Instrument library** | A searchable catalogue of ten browser-based instruments, each with its own interface and sound engine. |
 | **OMNI** | A modular workspace for assembling an instrument from sound sources, processors, modulation, and performance modules. Patches can be played, saved locally, and exported as JSON or SVG schematics. |
 | **Experiments** | Eight interactive laboratories for learning about waveforms, filters, envelopes, FM, harmonics, beats, time-based effects, and modulation. |
 | **Community** | A searchable library of public OMNI patches and supported instrument presets, with in-browser auditioning, downloads, sharing, and owner publishing tools. |
@@ -41,7 +41,7 @@ Overture is a work in progress. Its models are independently implemented in soft
 
 ## Instrument library
 
-The current library contains eight instrument emulators. The sound-generation models are implemented in Overture's JavaScript audio code; the interface and feature set vary by instrument.
+The current library contains ten instrument emulators. The library search covers instrument names, manufacturers, models, voice modes, preset provenance, and descriptions. The sound-generation models are implemented in Overture's JavaScript audio code; the interface and feature set vary by instrument.
 
 ### Moog Little Phatty Stage Edition
 
@@ -75,6 +75,14 @@ A rhythm machine whose percussion is synthesized in real time rather than played
 
 A monophonic semi-modular synthesizer with two oscillators, ring modulation, a high-pass filter followed by a low-pass filter, two envelope generators, a modulation generator, sample and hold, portamento, and a patch panel whose cables change signal routing. Its External Signal Processor accepts audio input and includes envelope-related processing and a pitch-tracking path. When explicitly enabled, microphone input can be analysed for a clear, sustained voiced fundamental and converted to pitch CV, which can then be patched to the oscillator pitch input. This is monophonic pitch tracking, not speech recognition; results depend on the input signal and tracking conditions. The library includes 10 original Overture patches and user patch management.
 
+### Mellotron M400
+
+A tape-replay keyboard model built around six selectable virtual tape frames, each with three tracks. The frames cover orchestral strings, choir, brass, woodwinds, flute and cello, organ, and bell-style sounds. Notes have finite tape-style playback, with tape-speed pitch control and mechanical variation. The implementation uses procedural Overture tape-frame models; it does not include licensed recordings from original Mellotron tape libraries. The instrument includes eight Overture registrations and browser-local preset storage.
+
+### Oberheim Eight Voice
+
+An eight-voice synthesizer model based on independently controlled SEM-style voices. Each voice has two oscillators and a state-variable filter with low-pass, band-pass, high-pass, and notch modes. Voice-level controls include tuning, detuning, level, and stereo position, alongside shared modulation and program controls. The included collection contains eight Overture programs; it is not presented as a verified copy of an original factory bank.
+
 ### Preset and program counts
 
 Counts shown in the interface describe the current application data and program slots. They do not automatically mean that every entry is an exact or verified copy of a manufacturer's original factory preset. Where a collection is labelled as an original Overture patch, voice, or pattern, it is a configuration created for this project.
@@ -85,7 +93,7 @@ Counts shown in the interface describe the current application data and program 
 
 **OMNI is a browser-based modular instrument designer.** Instead of starting with a finished instrument panel, you assemble a sound system from functional modules and connect their inputs and outputs on a patch canvas.
 
-The current catalogue contains more than 40 module types grouped around performance, sources, processing, modulation, instrument-specific modules, and output. Examples include:
+The current catalogue contains 48 module types grouped around performance, sources, processing, modulation, instrument-specific modules, and output. Examples include:
 
 - **Sound sources:** oscillators, noise, sub-oscillator, supersaw, additive oscillator, plucked-string voice, drum voice, and FM sources.
 - **Processing:** mixers, filters, amplifiers, delay, reverb, distortion, bitcrushing, compression, EQ, ring modulation, phasing, panning, crossfading, and resonators.
@@ -93,7 +101,7 @@ The current catalogue contains more than 40 module types grouped around performa
 - **Performance and sequencing:** keyboard and MIDI input, step sequencing, clocks and triggers, Euclidean rhythm, random melody, arpeggiation, chords, note transposition and velocity processing, and note echo.
 - **Instrument-derived modules:** the Moog ladder filter, MS-20 dual filter, Juno chorus, DX7 FM voice, an eight-voice SEM polyphonic synthesizer, and a Mellotron tape-replay source. The SEM module reuses the Eight Voice worklet; the Mellotron module reuses the M400's finite, procedural tape-replay model and its six frames / three tracks (it does not bundle licensed tape recordings).
 
-OMNI distinguishes between **audio**, **CV (control-voltage/audio-rate control)**, and **note-event** connections. Connection checks prevent incompatible port types and block unsupported audio/CV feedback loops. The live graph is built with the Web Audio API, while selected instrument-derived modules reuse Overture's audio engines.
+OMNI distinguishes between **audio**, **CV (control-voltage/audio-rate control)**, and **note-event** connections. Connection checks prevent incompatible port types and block unsupported audio/CV feedback loops. The live graph is built with the Web Audio API, while selected instrument-derived modules reuse Overture's audio engines. Every module also has a technical reference, opened with the information button in the inspector when that module is selected. Each reference explains the module's purpose, the relevant real-world circuit architecture where one exists, practical uses, and how the digital OMNI implementation works; it distinguishes hardware principles from software models.
 
 You can add, move, duplicate, and remove modules; connect or disconnect ports; edit module parameters; play the patch from the on-screen keyboard or a compatible MIDI controller; and map MIDI CCs to available controls. The editor supports module search, grid snapping, fit-to-view, shift-click and box multi-selection, group movement, and copy/paste of selected modules with their internal connections.
 
@@ -140,7 +148,7 @@ Community data and preview uploads use Supabase. See [the Supabase setup guide](
 
 ## Overture Accounts
 
-Accounts are optional for using the instrument library, OMNI, and Experiments. They are used for publishing and managing Community items. Users can create an account or sign in with an email address and password, or continue with Google. The account page also supports password reset, password changes, and sign-out.
+Accounts are optional for using the instrument library, OMNI, and Experiments, and for browsing or downloading public Community items. Sign-in and account creation are handled on the dedicated `/login` page using email and password or Google. The `/account` page is for profile and account settings, including password changes and sign-out. Password-reset flows are also available. An account is needed to publish or manage Community items. The `/contributions` page displays a contributor's published items and lets signed-in owners manage their own submissions.
 
 A profile can have a unique username, an optional display name, and a profile picture. The picture can be a PNG, JPG, or WebP file up to 3 MB. When signed in, the shared site header displays the account identity; Community submissions show the author's profile name. Email addresses are used for authentication and are not displayed on public profiles or Community items.
 
@@ -213,7 +221,7 @@ The repository includes a `vercel.json` configuration with `cleanUrls` enabled. 
 ├── omni.html                  # OMNI modular workspace shell
 ├── experiments.html           # Experiments index
 ├── community.html              # Community patch library
-├── account.html                # Account and profile settings
+├── login.html                  # Sign-in, account creation and password recovery\n├── account.html                # Account and profile settings\n├── contributions.html          # Contributor profiles and published items
 ├── html/                      # Individual instrument page documents
 ├── experiments/               # Individual experiment route documents
 ├── css/                       # Site, library, instrument, OMNI and lab styles
@@ -221,11 +229,11 @@ The repository includes a `vercel.json` configuration with `cleanUrls` enabled. 
 │   ├── engine/                # Audio engines, processors, MIDI and envelopes
 │   ├── data/                  # Presets, programs, patterns, tuning and algorithms
 │   ├── shared/                # Shared panel, MIDI map, storage, navigation, theme and account utilities
-│   ├── omni/                  # OMNI module catalogue, graph and templates
+│   ├── omni/                  # OMNI module catalogue, technical references, graph and templates
 │   ├── experiments/           # Shared implementation for the eight sound labs
 │   └── *.js                   # Page-level instrument and site controllers
 ├── ui/                        # Reusable controls, fonts, logos and images
-├── supabase/                  # Community/account setup guide and SQL migrations
+├── supabase/                  # Community/account setup guide and SQL migrations\n├── test/                      # Unit, browser-contract and OMNI feature tests\n├── docs/                      # Architecture and design notes
 ├── LICENSE                    # MIT license with third-party-materials scope notes
 ├── README.md
 └── vercel.json                # Clean URL configuration
@@ -235,11 +243,11 @@ The root also contains browser-interaction and harness scripts used for developm
 
 ## Testing and contributions
 
-Run `npm test` to execute unit tests, browser-facing static contracts, and the existing interaction smoke harness. GitHub Actions runs the same command on pushes and pull requests. See [CONTRIBUTING.md](CONTRIBUTING.md) for manual audio/MIDI checks and [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for OMNI, persistence, and offline-system design notes.
+`npm test` runs the unit suite, browser/PWA and OMNI feature-contract tests, and the existing interaction smoke harness. The tests cover instrument catalogue metadata, OMNI graph behaviour, module-reference coverage, saved-data migrations, audio and MIDI recording, and the Mellotron and Eight Voice engines. GitHub Actions runs the same command on pushes and pull requests. See [CONTRIBUTING.md](CONTRIBUTING.md) for manual audio/MIDI checks and [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for OMNI, persistence, and offline-system design notes.
 
 ## Browser support and practical notes
 
-Use a recent desktop version of **Chrome or Microsoft Edge** for the most complete experience, particularly for Web MIDI and AudioWorklet features. Other modern browsers may support much of the Web Audio functionality, but MIDI support varies by browser, operating system, and device. Overture can be installed as a PWA; its service worker precaches the main instrument, OMNI, experiment, and Community application assets for offline use after installation. The cached Community page shell may open offline, but loading patches, signing in, and publishing require a network connection.
+Use a recent desktop version of **Chrome or Microsoft Edge** for the most complete experience, particularly for Web MIDI and AudioWorklet features. Other modern browsers may support much of the Web Audio functionality, but MIDI support varies by browser, operating system, and device. Overture can be installed as a PWA; its service worker precaches the core site, instrument library and emulator assets, OMNI, Experiments, Community, login, and account pages for offline use after installation. The cached Community page shell may open offline, but loading patches, signing in, and publishing require a network connection.
 
 - **Start audio with a user gesture.** Browsers commonly prevent audio from starting until you press an instrument's power control or interact with its keyboard.
 - **Grant permissions when prompted.** External MIDI access and the MS-20 microphone input require explicit browser permission.
