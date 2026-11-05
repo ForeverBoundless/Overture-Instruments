@@ -23,7 +23,15 @@
 <script src="/js/shared/pwa.js" defer></script>
 </head>
 <body>
-<main id="omni-root"></main>
+<main id="omni-root" aria-busy="true">
+  <section class="omni-boot" id="omni-boot" role="status" aria-live="polite">
+    <img src="/ui/Logos/OvertureLogo.png" alt="" width="48" height="48">
+    <strong>OMNI</strong>
+    <span class="omni-boot__message">Preparing the workspace…</span>
+    <span class="omni-boot__track"><i id="omni-boot-progress"></i></span>
+    <small id="omni-boot-detail">Loading modules and interface</small>
+  </section>
+</main>
 <script type="module" src="/js/omni.js?v=20261104-sem-mellotron"></script>
 <script type="module" src="/js/shared/midiMap.js"></script>
 </body>
