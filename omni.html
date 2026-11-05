@@ -10,7 +10,7 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/keyboard.css"><link rel="stylesheet" href="/css/knobs.css"><link rel="stylesheet" href="/css/omni.css?v=20261103-chord-sliders-32">
+<link rel="stylesheet" href="/css/keyboard.css"><link rel="stylesheet" href="/css/knobs.css"><link rel="stylesheet" href="/css/omni.css?v=20261104-live-progress">
 <script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
 <script defer src="/_vercel/insights/script.js"></script>
 <link rel="stylesheet" href="/css/midi-map.css?v=20261103-theme">
@@ -27,12 +27,42 @@
   <section class="omni-boot" id="omni-boot" role="status" aria-live="polite">
     <img src="/ui/Logos/OvertureLogo.png" alt="" width="48" height="48">
     <strong>OMNI</strong>
-    <span class="omni-boot__message">Preparing the workspace…</span>
-    <span class="omni-boot__track"><i id="omni-boot-progress"></i></span>
-    <small id="omni-boot-detail">Loading modules and interface</small>
+    <span class="omni-boot__message">Loading the synthesis engine…</span>
+    <div class="omni-boot__meter">
+      <span class="omni-boot__track" id="omni-boot-track" role="progressbar" aria-label="OMNI loading progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="4"><i id="omni-boot-progress" style="width:4%"></i></span>
+      <b id="omni-boot-value">4%</b>
+    </div>
+    <small id="omni-boot-detail">Preparing the module library and audio engine</small>
   </section>
 </main>
-<script type="module" src="/js/omni.js?v=20261104-sem-mellotron"></script>
+<script>
+  window.__overtureOmniBoot = {
+    update(value, message, detail) {
+      const progress = Math.max(0, Math.min(100, Math.round(value)));
+      const root = document.getElementById('omni-root');
+      const track = document.getElementById('omni-boot-track');
+      const fill = document.getElementById('omni-boot-progress');
+      const percent = document.getElementById('omni-boot-value');
+      const label = document.querySelector('.omni-boot__message');
+      const note = document.getElementById('omni-boot-detail');
+      if (fill) fill.style.width = progress + '%';
+      if (track) track.setAttribute('aria-valuenow', String(progress));
+      if (percent) percent.textContent = progress + '%';
+      if (label && message) label.textContent = message;
+      if (note && detail) note.textContent = detail;
+      if (root) root.setAttribute('aria-busy', 'true');
+    },
+    fail(message, detail) {
+      const boot = document.getElementById('omni-boot');
+      const label = document.querySelector('.omni-boot__message');
+      const note = document.getElementById('omni-boot-detail');
+      if (boot) boot.classList.add('is-error');
+      if (label) label.textContent = message || 'OMNI could not start';
+      if (note) note.textContent = detail || 'Reload the page to try again.';
+    }
+  };
+</script>
+<script type="module" src="/js/omni.js?v=20261104-live-progress"></script>
 <script type="module" src="/js/shared/midiMap.js"></script>
 </body>
 </html>
