@@ -27,11 +27,11 @@ test('Hohner D6 and Oberheim OB-Xa are complete first-class emulator entries', a
   ]);
   assert.match(metadata, /id: 'hohner-d6'/);
   assert.match(metadata, /id: 'ob-xa'/);
-  assert.match(library, /hohner-d6-tile-art/);
-  assert.match(library, /obxa-tile-art/);
+  assert.doesNotMatch(library, /hohner-d6-tile-art|obxa-tile-art/);
+  
   assert.match(library, /instrument-tile__keys/);
-  assert.match(styles, /\.hohner-d6-tile-art/);
-  assert.match(styles, /\.obxa-tile-art/);
+  assert.match(styles, /\.instrument-tile--hohner-d6 \.instrument-tile__visual::after/);
+  assert.match(styles, /\.instrument-tile--ob-xa \.instrument-tile__visual::after/);
   assert.match(d6Page, /hohner-d6\.css/);
   assert.match(d6App, /toneFilters/);
   assert.match(d6App, /registerMidiTargetProvider/);
@@ -73,7 +73,7 @@ test('Hohner D6 and Oberheim OB-Xa are complete first-class emulator entries', a
   assert.match(obEngine, /width=clamp\(\.5-p\.pulseWidth\*\.45/);
   assert.doesNotMatch(obEngine, /lfoVca/);
   assert.match(obPage, /Oberheim_logo\.png/);
-  assert.match(worker, /overture-shell-v47/);
+  assert.match(worker, /overture-shell-v49/);
   assert.match(worker, /hohner-d6/);
   assert.match(worker, /ob-xa/);
 });
@@ -538,22 +538,25 @@ test('OB-Xa modulation panel is arranged into labelled responsive control groups
 });
 
 
-test('Hohner D6 and OB-Xa library cards share the established layout and keep unique visual treatments', async () => {
-  const [styles, page, worker] = await Promise.all([
+
+test('Hohner D6 and OB-Xa library cards use minimalist instrument-specific surfaces', async () => {
+  const [styles, page, worker, libraryJs] = await Promise.all([
     readFile(new URL('../css/library.css', import.meta.url), 'utf8'),
     readFile(new URL('../library.html', import.meta.url), 'utf8'),
     readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/library.js', import.meta.url), 'utf8'),
   ]);
   for (const id of ['hohner-d6', 'ob-xa']) {
     assert.ok(styles.includes('.instrument-tile--' + id + ' .instrument-specs'));
     assert.ok(styles.includes('.instrument-tile--' + id + ' .instrument-tile__content'));
     assert.ok(styles.includes('html[data-theme="light"] .instrument-tile--' + id));
+    assert.ok(styles.includes('.instrument-tile--' + id + ' .instrument-tile__visual::after'));
   }
-  assert.match(styles, /\.hohner-d6-tile-art/);
-  assert.match(styles, /\.obxa-tile-art/);
-  assert.match(styles, /\.instrument-tile--hohner-d6 \.instrument-tile__keys/);
-  assert.match(styles, /\.instrument-tile--ob-xa \.instrument-tile__keys/);
-  assert.match(page, /library\.css\?v=20261106-tile-consistency-r1/);
-  assert.match(worker, /overture-shell-v48/);
-  assert.match(worker, /library\.css\?v=20261106-tile-consistency-r1/);
+  assert.doesNotMatch(libraryJs, /hohner-d6-tile-art|obxa-tile-art/);
+  assert.doesNotMatch(styles, /hohner-d6-tile-art|obxa-tile-art/);
+  assert.match(styles, /\.instrument-tile--hohner-d6 \.instrument-tile__display/);
+  assert.match(styles, /\.instrument-tile--ob-xa \.instrument-tile__display/);
+  assert.match(page, /library\.css\?v=20261106-tile-minimal-r1/);
+  assert.match(worker, /overture-shell-v49/);
+  assert.match(worker, /library\.css\?v=20261106-tile-minimal-r1/);
 });

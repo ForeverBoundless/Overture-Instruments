@@ -1,4 +1,4 @@
-const CACHE = 'overture-shell-v48';
+const CACHE = 'overture-shell-v49';
 const APP_SHELL = [
   '/account',
   '/login',
@@ -26,7 +26,7 @@ const APP_SHELL = [
   '/css/keyboard.css',
   '/css/hohner-d6.css?v=20261106-audio-r1',
   '/css/ob-xa.css?v=20261106-mays-mod-r1',
-  '/css/library.css?v=20261106-tile-consistency-r1',
+  '/css/library.css?v=20261106-tile-minimal-r1',
   '/css/knobs.css',
   '/css/korg-ms-20.css',
   '/css/mellotron-m400.css',
