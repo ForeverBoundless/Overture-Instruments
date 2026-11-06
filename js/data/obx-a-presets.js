@@ -6,7 +6,7 @@ preset('Warm Poly',{...base,osc2Tune:.008,cutoff:.47,resonance:.08,filterEnv:.26
 preset('OB Strings',{...base,osc2Wave:'pulse',osc2Tune:.025,pulseWidth:.43,cutoff:.48,resonance:.07,filterEnv:.14,ampAttack:.3,ampDecay:.46,ampSustain:.84,ampRelease:.7,lfoRate:.13,lfoAmount:.08,lfoTarget:'pulse'}),
 preset('Sync Lead',{...base,osc2Wave:'pulse',sync:true,osc2Tune:.15,cutoff:.68,resonance:.33,filterEnv:.35,ampAttack:.004,ampDecay:.2,ampSustain:.65,ampRelease:.18}),
 preset('Hollow Motion',{...base,osc1Wave:'pulse',osc2Wave:'pulse',pulseWidth:.32,cutoff:.58,resonance:.48,filterMode:'12',lfoRate:.31,lfoAmount:.38,lfoTarget:'filter',ampAttack:.04,ampSustain:.7}),
-preset('Cross Mod',{...base,osc2Wave:'triangle',noiseRoute: false, crossMod:.42,osc2Tune:.04,cutoff:.61,resonance:.28,filterEnv:.58,ampAttack:.01,ampDecay:.34,ampSustain:.58}),
+preset('F-ENV Sweep',{...base,osc2Wave:'triangle',fEnvOsc2:true,osc2Tune:.04,cutoff:.61,resonance:.28,filterEnv:.58,ampAttack:.01,ampDecay:.34,ampSustain:.58}),
 preset('Soft Brass',{...base,osc2Tune:.01,cutoff:.55,resonance:.11,filterEnv:.66,filterAttack:.04,filterDecay:.4,filterSustain:.35,ampAttack:.05,ampDecay:.38,ampSustain:.7}),
 preset('Dark Sequence',{...base,osc1Wave:'pulse',pulseWidth:.41,osc2Tune:-.02,cutoff:.32,resonance:.4,filterEnv:.64,filterDecay:.18,filterSustain:.05,ampAttack:.003,ampDecay:.26,ampSustain:.55}),
 preset('Dream Machine',{...base,osc2Wave:'triangle',osc2Tune:.018,cutoff:.42,resonance:.09,filterMode:'12',ampAttack:.52,ampDecay:.7,ampSustain:.82,ampRelease:.88,lfoRate:.12,lfoAmount:.055}),
