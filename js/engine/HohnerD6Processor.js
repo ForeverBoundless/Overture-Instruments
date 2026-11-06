@@ -5,13 +5,13 @@
  */
 /* global sampleRate, currentFrame, registerProcessor, AudioWorkletProcessor */
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
-const DEFAULT = { tone: 0, pickup: 'bothIn', volume: 0.72, damping: 0.34 };
+const DEFAULT = { toneFilters: [true, false, false, false], pickup: 'bothIn', volume: 0.72, damping: 0.34 };
 const midiHz = (n) => 440 * Math.pow(2, (n - 69) / 12);
 
 class ClavString {
   constructor() {
     this.note = -1; this.active = false; this.gate = false; this.order = 0;
-    this.buffer = new Float32Array(2048); this.length = 2048; this.index = 0;
+    this.buffer = new Float32Array(2048); this.length = 2048; this.index = 0; this.position = 0; this.toneState = new Float32Array(6);
     this.velocity = 0.7; this.release = 1; this.toneState = 0; this.lp = 0;
     this.pan = 0; this.seed = 1;
   }
@@ -49,13 +49,13 @@ class HohnerD6Processor extends AudioWorkletProcessor {
     if (m.t === 'patch') {
       this.p = { ...DEFAULT, ...m.patch };
       if (m.patch?.pedals) this.pedals = this.mergePedals(m.patch.pedals);
-    } else if (m.t === 'param' && m.key in DEFAULT) this.p[m.key] = m.value;
+    } else if (m.t === 'param' && m.key in DEFAULT) this.p[m.key] = Array.isArray(m.value) ? m.value.slice() : m.value;
     else if (m.t === 'pedals') this.pedals = this.mergePedals(m.pedals || {});
     else if (m.t === 'pedal') this.pedals[m.name] = { ...(this.pedals[m.name] || {}), ...m.values };
     else if (m.t === 'noteOn') this.noteOn(m.note | 0, clamp(m.vel, 0.01, 1));
     else if (m.t === 'noteOff') this.noteOff(m.note | 0);
     else if (m.t === 'bend') this.bend = clamp(m.value, -1, 1);
-    else if (m.t === 'sustain') { this.sustain = !!m.down; if (!this.sustain) this.voices.forEach((v) => { if (!v.gate && v.note >= 0) v.active = false; }); }
+    else if (m.t === 'sustain') { this.sustain = !!m.down; if (!this.sustain) this.voices.forEach((v) => { if (!v.gate && v.note >= 0) v.release = Math.min(v.release, 0.98); }); }
     else if (m.t === 'volume') this.p.volume = clamp(m.value, 0, 1);
     else if (m.t === 'allOff' || m.t === 'allSoundOff') {
       this.scheduled.length = 0; this.voices.forEach((v) => { v.gate = false; v.release = 0; v.active = false; v.note = -1; });
@@ -75,7 +75,7 @@ class HohnerD6Processor extends AudioWorkletProcessor {
     if (!v) v = this.voices.find((voice) => !voice.active) || this.voices.slice().sort((a, b) => a.order - b.order)[0];
     const hz = midiHz(note);
     const length = Math.max(32, Math.round(sampleRate / hz));
-    v.buffer = new Float32Array(length); v.length = length; v.index = 0;
+    v.buffer = new Float32Array(length); v.length = length; v.index = 0; v.position = 0; v.toneState.fill(0);
     v.seed = ((note * 7919 + (this.order + 17) * 104729) | 0) || 1;
     const pluck = 0.16 + velocity * 0.22;
     for (let i = 0; i < length; i += 1) {
@@ -96,6 +96,19 @@ class HohnerD6Processor extends AudioWorkletProcessor {
   }
   applyEffects(left, right, sr) {
     const fx = this.fx; const pedals = this.pedals;
+    const compressor = pedals.compressor;
+    if (compressor.enabled) {
+      const level = Math.max(Math.abs(left), Math.abs(right));
+      const attack = 1 - Math.exp(-1 / (sr * 0.006));
+      const release = 1 - Math.exp(-1 / (sr * 0.16));
+      fx.compEnvelope += (level - fx.compEnvelope) * (level > fx.compEnvelope ? attack : release);
+      const threshold = 0.095;
+      const ratio = 1 + clamp(compressor.sustain, 0, 1) * 8;
+      const over = Math.max(0, fx.compEnvelope - threshold);
+      const gain = 1 / (1 + over * (ratio - 1) * 7);
+      const makeup = 0.72 + clamp(compressor.level, 0, 1) * 0.56;
+      left *= gain * makeup; right *= gain * makeup;
+    }
     const drive = pedals.overdrive;
     if (drive.enabled) {
       const amount = 1 + clamp(drive.drive, 0, 1) * 22;
@@ -160,33 +173,45 @@ class HohnerD6Processor extends AudioWorkletProcessor {
   }
   process(_inputs, outputs) {
     const out = outputs[0]; const L = out[0]; const R = out[1] || L; const sr = sampleRate;
-    const toneCutoff = [15000, 9800, 5700, 3100][Math.round(clamp(this.p.tone, 0, 3))] || 15000;
-    const toneAlpha = 1 - Math.exp(-2 * Math.PI * toneCutoff / sr);
+    const stringAlpha = 1 - Math.exp(-2 * Math.PI * 5200 / sr);
+    const toneAlphas = [1500, 5200, 550, 1800, 180, 900].map((fc) => 1 - Math.exp(-2 * Math.PI * fc / sr));
+    const toneSelection = Array.isArray(this.p.toneFilters) ? this.p.toneFilters : DEFAULT.toneFilters;
     const damping = 0.991 + (1 - clamp(this.p.damping, 0, 1)) * 0.006;
     for (let i = 0; i < L.length; i += 1) {
       while (this.scheduled.length && this.scheduled[0].frame <= currentFrame + i) this.dispatch(this.scheduled.shift());
       let left = 0; let right = 0;
       for (const v of this.voices) {
         if (!v.active) continue;
-        const pitch = v.note + this.bend * 2;
-        const speed = Math.pow(2, (pitch - v.note) / 12);
-        const length = Math.max(32, Math.round(sampleRate / midiHz(pitch)));
-        const readDelay = Math.min(v.length - 1, Math.max(1, Math.round(length * 0.999)));
-        const read = v.buffer[v.index] || 0;
-        const next = v.buffer[(v.index + 1) % v.length] || 0;
+        const readIndex = v.index;
+        const read = v.buffer[readIndex] || 0;
+        const next = v.buffer[(readIndex + 1) % v.length] || 0;
         const loop = (read + next) * 0.5;
-        v.lp += toneAlpha * (loop - v.lp);
-        v.buffer[v.index] = v.lp * (damping * (v.gate ? 1 : 0.965));
-        v.index += 1;
-        if (v.index >= v.length) v.index = 0;
+        v.lp += stringAlpha * (loop - v.lp);
+        v.buffer[readIndex] = v.lp * (damping * (v.gate ? 1 : 0.965));
+        const speed = Math.pow(2, this.bend * 2 / 12);
+        v.position = (v.position + speed) % v.length;
+        v.index = Math.floor(v.position);
         let a = this.pickupSample(v, 0.13);
         let b = this.pickupSample(v, 0.37);
         let sample = this.p.pickup === 'bridge' ? a
           : this.p.pickup === 'neck' ? b
             : this.p.pickup === 'bothOut' ? (a - b) * 0.88
               : (a + b) * 0.5;
-        const releaseTime = 0.018 + clamp(this.p.damping, 0, 1) * 0.09;
+        const releaseTime = 0.018 + (1 - clamp(this.p.damping, 0, 1)) * 0.09;
         if (!v.gate) v.release *= Math.exp(-1 / (sr * releaseTime));
+        const st = v.toneState;
+        st[0] += toneAlphas[0] * (sample - st[0]);
+        st[1] += toneAlphas[1] * (sample - st[1]);
+        st[2] += toneAlphas[2] * (sample - st[2]);
+        st[3] += toneAlphas[3] * (sample - st[3]);
+        st[4] += toneAlphas[4] * (sample - st[4]);
+        st[5] += toneAlphas[5] * (sample - st[5]);
+        const bands = [sample - st[0], st[1] - st[2], st[3] - st[4], st[5]];
+        let filtered = 0; let activeFilters = 0;
+        for (let band = 0; band < 4; band += 1) {
+          if (toneSelection[band]) { filtered += bands[band] * [1.25, 1.5, 1.45, 1.5][band]; activeFilters += 1; }
+        }
+        sample = activeFilters ? filtered / Math.sqrt(activeFilters) : 0;
         const output = sample * v.release * v.velocity * 1.65;
         left += output * (1 - v.pan) * 0.5; right += output * (1 + v.pan) * 0.5;
         if (v.release < 0.001) { v.active = false; v.note = -1; }
