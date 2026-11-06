@@ -1375,3 +1375,6 @@ html[data-theme="light"] .instrument-tile--roland-tr-808 {background:linear-grad
 html[data-theme="light"] .instrument-tile--korg-ms-20 {background:linear-gradient(145deg,rgba(246,240,220,.98),rgba(231,230,222,.97)) !important}
 html[data-theme="light"] .instrument-tile--mellotron-m400 {background:linear-gradient(145deg,rgba(250,239,220,.98),rgba(236,226,216,.97)) !important}
 html[data-theme="light"] .instrument-tile--oberheim-eight-voice {background:linear-gradient(145deg,rgba(225,241,238,.98),rgba(224,232,237,.97)) !important}
+
+html[data-theme="light"] .instrument-tile--hohner-d6 {background:linear-gradient(145deg,rgba(246,229,207,.98),rgba(234,224,211,.97)) !important}
+html[data-theme="light"] .instrument-tile--ob-xa {background:linear-gradient(145deg,rgba(224,235,243,.98),rgba(222,228,232,.97)) !important}
