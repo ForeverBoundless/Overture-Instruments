@@ -12,7 +12,7 @@ class ClavString {
   constructor() {
     this.note = -1; this.active = false; this.gate = false; this.order = 0;
     this.buffer = new Float32Array(2048); this.length = 2048; this.index = 0; this.position = 0; this.toneState = new Float32Array(6);
-    this.velocity = 0.7; this.release = 1; this.lp = 0;
+    this.velocity = 0.7; this.release = 1; this.lp = 0; this.muteState = 0;
     this.pan = 0; this.seed = 1;
   }
 }
@@ -176,7 +176,10 @@ class HohnerD6Processor extends AudioWorkletProcessor {
     const stringAlpha = 1 - Math.exp(-2 * Math.PI * 5200 / sr);
     const toneAlphas = [1500, 5200, 550, 1800, 180, 900].map((fc) => 1 - Math.exp(-2 * Math.PI * fc / sr));
     const toneSelection = Array.isArray(this.p.toneFilters) ? this.p.toneFilters : DEFAULT.toneFilters;
-    const damping = 0.997 - clamp(this.p.damping, 0, 1) * 0.038;
+    const damping = 0.997 - clamp(this.p.damping, 0, 1) * 0.003;
+    const muteAmount = clamp(this.p.damping, 0, 1);
+    const muteCutoff = 12000 - muteAmount * 9500;
+    const muteAlpha = 1 - Math.exp(-2 * Math.PI * muteCutoff / sr);
     for (let i = 0; i < L.length; i += 1) {
       while (this.scheduled.length && this.scheduled[0].frame <= currentFrame + i) this.dispatch(this.scheduled.shift());
       let left = 0; let right = 0;
@@ -199,6 +202,8 @@ class HohnerD6Processor extends AudioWorkletProcessor {
               : (a + b) * 0.5;
         const releaseTime = 0.006;
         if (!v.gate) v.release *= Math.exp(-1 / (sr * releaseTime));
+        v.muteState += muteAlpha * (sample - v.muteState);
+        sample = sample * (1 - muteAmount * .85) + v.muteState * (muteAmount * .85);
         const st = v.toneState;
         st[0] += toneAlphas[0] * (sample - st[0]);
         st[1] += toneAlphas[1] * (sample - st[1]);
