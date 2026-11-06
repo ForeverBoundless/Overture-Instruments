@@ -19,7 +19,7 @@ const wave=(shape,p,w,d)=>shape==='pulse'?pulse(p,w,d):shape==='triangle'?triang
 const DEFAULT={osc1Wave:'saw',osc2Wave:'saw',osc1Level:.82,osc2Level:.56,osc2Tune:0,pulseWidth:.5,noise:0,sync:false,crossMod:0,cutoff:.53,resonance:.13,filterMode:'24',filterEnv:.42,filterKeyTrack:.35,filterAttack:.08,filterDecay:.32,filterSustain:.12,filterRelease:.32,ampAttack:.015,ampDecay:.3,ampSustain:.76,ampRelease:.32,lfoRate:.16,lfoAmount:0,lfoWave:'triangle',lfoTarget:'pitch',bendRange:2,master:.7,mode:'poly',splitPoint:60,unisonDetune:.12};
 const GLOBAL_KEYS=new Set(['mode','splitPoint','unisonDetune','bendRange','master']);
 class XaVoice{
- constructor(i){this.i=i;this.note=-1;this.layer=0;this.active=false;this.gate=false;this.order=0;this.phase1=Math.random();this.phase2=Math.random();this.lfo=Math.random();this.amp=0;this.filterEnv=0;this.ampStage='idle';this.filterStage='idle';this.lp1=0;this.bp1=0;this.lp2=0;this.bp2=0;this.pan=(i-3.5)/5;this.vel=.8;this.rand=(Math.random()-.5)*.0005;this.noiseSeed=((i+1)*17117)|0;}
+ constructor(i){this.i=i;this.note=-1;this.layer=0;this.active=false;this.gate=false;this.order=0;this.phase1=Math.random();this.phase2=Math.random();this.lfo=Math.random();this.lfoHold=0;this.amp=0;this.filterEnv=0;this.ampStage='idle';this.filterStage='idle';this.lp1=0;this.bp1=0;this.lp2=0;this.bp2=0;this.pan=(i-3.5)/5;this.vel=.8;this.rand=(Math.random()-.5)*.0005;this.noiseSeed=((i+1)*17117)|0;}
 }
 class OBXaProcessor extends AudioWorkletProcessor{
  constructor(){super();this.p={...DEFAULT};this.pB={...DEFAULT};this.voices=Array.from({length:8},(_,i)=>new XaVoice(i));this.order=0;this.bend=0;this.mod=0;this.sustain=false;this.scheduled=[];this.port.onmessage=e=>this.message(e.data);}
@@ -83,8 +83,10 @@ class OBXaProcessor extends AudioWorkletProcessor{
     if(!v.active)continue;
     const p=v.layer===1?this.pB:this.p;
     this.env(v,p,'amp',dt);this.env(v,p,'filter',dt);
-    v.lfo+=(.08*Math.pow(300,p.lfoRate))/sr;if(v.lfo>=1)v.lfo-=1;
-    const lfo=p.lfoWave==='square'?(v.lfo<.5?1:-1):p.lfoWave==='saw'?2*v.lfo-1:Math.sin(v.lfo*2*Math.PI);
+    v.lfo+=(.08*Math.pow(300,p.lfoRate))/sr;
+    let lfoWrapped=false;if(v.lfo>=1){v.lfo-=1;lfoWrapped=true;}
+    if(p.lfoWave==='s&h'&&lfoWrapped)v.lfoHold=this.noise(v);
+    const lfo=p.lfoWave==='s&h'?v.lfoHold:p.lfoWave==='square'?(v.lfo<.5?1:-1):p.lfoWave==='saw'?2*v.lfo-1:Math.sin(v.lfo*2*Math.PI);
     const lfoDepth=p.lfoAmount+this.mod*.22;
     const pitchMod=p.lfoTarget==='pitch'?lfo*lfoDepth*1.8:0;
     const pwMod=p.lfoTarget==='pulse'?lfo*lfoDepth*.4:0;
@@ -92,7 +94,6 @@ class OBXaProcessor extends AudioWorkletProcessor{
     const note=v.note+this.bend*this.p.bendRange+pitchMod+unisonOffset;
     const f1=hz(note),f2=hz(note+p.osc2Tune*12+v.rand*12);
     const d1=f1/sr,d2=f2/sr;
-    const oldPhase1=v.phase1;
     v.phase1+=d1;
     const masterWrap=v.phase1>=1;
     if(masterWrap)v.phase1-=Math.floor(v.phase1);
