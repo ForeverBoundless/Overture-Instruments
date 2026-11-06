@@ -6,16 +6,19 @@ import { OBXA_PRESETS } from './data/obx-a-presets.js';
 const NOTE_NAMES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
 const NOTES=Array.from({length:61},(_,i)=>{const n=36+i;return NOTE_NAMES[n%12]+(Math.floor(n/12)-1);});
 const DEF={...OBXA_PRESETS[0].data};
-const GLOBAL_KEYS=new Set(['mode','splitPoint','unisonDetune','bendRange','master']);
-const LAYER_KEYS=['osc1Wave','osc2Wave','fEnvOsc2','osc1Level','osc2Level','osc2Tune','pulseWidth','noise','sync','crossMod','cutoff','resonance','filterMode','filterEnv','filterKeyTrack','filterAttack','filterDecay','filterSustain','filterRelease','ampAttack','ampDecay','ampSustain','ampRelease','lfoRate','lfoAmount','lfoWave','lfoTarget'];
+const GLOBAL_KEYS=new Set(['mode','splitPoint','unisonDetune','bendRange','bendOsc2Only','master']);
+const LAYER_KEYS=['osc1Wave','osc2Wave','osc1Range','fEnvOsc2','osc1Level','osc2Level','osc2Tune','pulseWidth','sync','cutoff','resonance','filterMode','filterEnv','filterTrack','filterAttack','filterDecay','filterSustain','filterRelease','ampAttack','ampDecay','ampSustain','ampRelease','lfoRate','lfoAmount','lfoWave','lfoTarget','osc1Route','osc2Route','osc2Half','noiseRoute'];
 const cleanLayer=(source)=>{
  const out={...DEF,...source};
- ['osc1Level','osc2Level','pulseWidth','noise','crossMod','cutoff','resonance','filterEnv','filterKeyTrack','filterAttack','filterDecay','filterSustain','filterRelease','ampAttack','ampDecay','ampSustain','ampRelease','lfoRate','lfoAmount'].forEach(k=>out[k]=Math.max(0,Math.min(1,Number(out[k])||0)));
+ ['osc1Level','osc2Level','pulseWidth','cutoff','resonance','filterEnv','filterAttack','filterDecay','filterSustain','filterRelease','ampAttack','ampDecay','ampSustain','ampRelease','lfoRate','lfoAmount'].forEach(k=>out[k]=Math.max(0,Math.min(1,Number(out[k])||0)));
+ out.osc1Range=Math.max(-2,Math.min(2,Number(out.osc1Range)||0));
  out.osc2Tune=Math.max(-1,Math.min(1,Number(out.osc2Tune)||0));
- ['osc1Wave','osc2Wave'].forEach(k=>out[k]=['saw','pulse','triangle'].includes(out[k])?out[k]:'saw');
+ ['osc1Wave','osc2Wave'].forEach(k=>out[k]=['saw','pulse','sawPulse','triangle'].includes(out[k])?out[k]:'saw');
+ ['fEnvOsc2','filterTrack','osc1Route','osc2Route','osc2Half','noiseRoute'].forEach(k=>out[k]=!!out[k]);
+ delete out.noise;delete out.crossMod;delete out.filterKeyTrack;
  out.filterMode=['12','24'].includes(String(out.filterMode))?String(out.filterMode):'24';
- out.lfoWave=['triangle','square','saw','s&h'].includes(out.lfoWave)?out.lfoWave:'triangle';
- out.lfoTarget=['pitch','filter','pulse'].includes(out.lfoTarget)?out.lfoTarget:'pitch';
+ out.lfoWave=['sine','square','saw','s&h'].includes(out.lfoWave)?out.lfoWave:'sine';
+ out.lfoTarget=['osc1','osc2','both','filter','pulse'].includes(out.lfoTarget)?out.lfoTarget:'both';
  out.sync=!!out.sync;
  return out;
 };
@@ -74,16 +77,15 @@ class OBXaApp{
   const top=el('div','pn-row obxa-top',rows);
   const oscillators=section(top,'OSCILLATORS','TWO VCOs PER VOICE');
   const ok=el('div','pn-knobs',oscillators.body);
+  this.ui.osc1Range=knob(ok,{label:'OSC 1 OCTAVES',min:-2,max:2,value:this.currentLayer().osc1Range,formatValue:v=>v.toFixed(1)+' oct',onChange:v=>this.set('osc1Range',v)});
   this.ui.osc1Level=knob(ok,{label:'OSC 1 LEVEL',min:0,max:1,value:this.currentLayer().osc1Level,onChange:v=>this.set('osc1Level',v)});
   this.ui.osc2Level=knob(ok,{label:'OSC 2 LEVEL',min:0,max:1,value:this.currentLayer().osc2Level,onChange:v=>this.set('osc2Level',v)});
-  this.ui.osc2Tune=knob(ok,{label:'OSC 2 SEMITONES',min:-1,max:1,value:this.currentLayer().osc2Tune,formatValue:v=>(v*12).toFixed(1)+' st',onChange:v=>this.set('osc2Tune',v)});
+  this.ui.osc2Tune=knob(ok,{label:'OSC 2 RANGE',min:-1,max:1,value:this.currentLayer().osc2Tune,formatValue:v=>(v*30).toFixed(1)+' st',onChange:v=>this.set('osc2Tune',v)});
   this.ui.pulseWidth=knob(ok,{label:'PULSE WIDTH',min:0,max:1,value:this.currentLayer().pulseWidth,onChange:v=>this.set('pulseWidth',v)});
-  this.ui.noise=knob(ok,{label:'NOISE',min:0,max:1,value:this.currentLayer().noise,onChange:v=>this.set('noise',v)});
   this.ui.osc1Wave=select(oscillators.body,'OSC 1 SHAPE',[{value:'saw',label:'SAWTOOTH'},{value:'pulse',label:'PULSE'},{value:'sawPulse',label:'SAW + PULSE'}],this.currentLayer().osc1Wave,v=>this.set('osc1Wave',v));
   this.ui.osc2Wave=select(oscillators.body,'OSC 2 SHAPE',[{value:'saw',label:'SAWTOOTH'},{value:'pulse',label:'PULSE'},{value:'sawPulse',label:'SAW + PULSE'}],this.currentLayer().osc2Wave,v=>this.set('osc2Wave',v));
   this.ui.fEnvOsc2=toggle(oscillators.body,'F-ENV → OSC 2',this.currentLayer().fEnvOsc2,v=>this.set('fEnvOsc2',v));
   this.ui.sync=toggle(oscillators.body,'OSC SYNC',this.currentLayer().sync,v=>this.set('sync',v));
-  this.ui.crossMod=knob(ok,{label:'CROSS MOD',min:0,max:1,value:this.currentLayer().crossMod,onChange:v=>this.set('crossMod',v)});
   const filter=section(top,'FILTER','CURTIS-STYLE LOW-PASS · 2 OR 4 POLE');
   const fk=el('div','pn-knobs',filter.body);
   this.ui.cutoff=knob(fk,{label:'FREQUENCY',min:0,max:1,value:this.currentLayer().cutoff,onChange:v=>this.set('cutoff',v)});
@@ -107,8 +109,15 @@ class OBXaApp{
   this.ui.lfoAmount=knob(mk,{label:'LFO AMOUNT',min:0,max:1,value:this.currentLayer().lfoAmount,onChange:v=>this.set('lfoAmount',v)});
   this.ui.bendRange=knob(mk,{label:'BEND RANGE',min:1,max:12,value:this.patch.bendRange,formatValue:v=>Math.round(v)+' st',onChange:v=>this.set('bendRange',Math.round(v))});
   this.ui.master=knob(mk,{label:'MASTER',min:0,max:1,value:this.patch.master,onChange:v=>{this.set('master',v);this.engine.setVolume(v);}});
-  this.ui.lfoWave=select(modulation.body,'LFO SHAPE',[{value:'triangle',label:'TRIANGLE'},{value:'square',label:'SQUARE'},{value:'saw',label:'SAWTOOTH'},{value:'s&h',label:'SAMPLE & HOLD'}],this.currentLayer().lfoWave,v=>this.set('lfoWave',v));
-  this.ui.lfoTarget=select(modulation.body,'MOD DESTINATION',[{value:'pitch',label:'OSCILLATOR FREQUENCY'},{value:'filter',label:'FILTER CUTOFF'},{value:'pulse',label:'PULSE WIDTH'}],this.currentLayer().lfoTarget,v=>this.set('lfoTarget',v));
+  this.ui.lfoWave=select(modulation.body,'LFO SHAPE',[{value:'sine',label:'SINE'},{value:'square',label:'SQUARE'},{value:'saw',label:'SAWTOOTH'},{value:'s&h',label:'SAMPLE & HOLD'}],this.currentLayer().lfoWave,v=>this.set('lfoWave',v));
+  this.ui.lfoTarget=select(modulation.body,'FREQUENCY MODULATION',[{value:'both',label:'OSC 1 + OSC 2'},{value:'osc1',label:'OSC 1 ONLY'},{value:'osc2',label:'OSC 2 ONLY'},{value:'filter',label:'FILTER CUTOFF'},{value:'pulse',label:'PULSE WIDTH'}],this.currentLayer().lfoTarget,v=>this.set('lfoTarget',v));
+  this.ui.bendOsc2Only=toggle(modulation.body,'BEND OSC 2 ONLY',this.patch.bendOsc2Only,v=>this.set('bendOsc2Only',v));
+  const sourceSwitches=section(rows,'FILTER SOURCE & TRACKING','OSCILLATOR / NOISE ROUTING');
+  this.ui.osc1Route=toggle(sourceSwitches.body,'OSC 1',this.currentLayer().osc1Route,v=>this.set('osc1Route',v));
+  this.ui.osc2Route=toggle(sourceSwitches.body,'OSC 2',this.currentLayer().osc2Route,v=>this.set('osc2Route',v));
+  this.ui.osc2Half=toggle(sourceSwitches.body,'OSC 2 HALF LEVEL',this.currentLayer().osc2Half,v=>this.set('osc2Half',v));
+  this.ui.noiseRoute=toggle(sourceSwitches.body,'NOISE',this.currentLayer().noiseRoute,v=>this.set('noiseRoute',v));
+  this.ui.filterTrack=toggle(sourceSwitches.body,'KEYBOARD TRACK',this.currentLayer().filterTrack,v=>this.set('filterTrack',v));
   this.ui.mode=select(modulation.body,'VOICE MODE',[{value:'poly',label:'POLYPHONIC'},{value:'unison',label:'UNISON'},{value:'double',label:'DOUBLE / LAYER'},{value:'split',label:'SPLIT'}],this.patch.mode,v=>this.set('mode',v));
   this.ui.splitPoint=knob(mk,{label:'SPLIT POINT',min:36,max:96,value:this.patch.splitPoint,formatValue:v=>NOTE_NAMES[Math.round(v)%12]+(Math.floor(Math.round(v)/12)-1),onChange:v=>this.set('splitPoint',Math.round(v))});
   this.ui.unisonDetune=knob(mk,{label:'UNISON SPREAD',min:0,max:1,value:this.patch.unisonDetune,onChange:v=>this.set('unisonDetune',v)});
@@ -117,7 +126,7 @@ class OBXaApp{
   this.presets=presetBar(memory.body,{factory:OBXA_PRESETS,store:this.store,display:this.display,filename:'oberheim-obxa-program',panic:()=>this.perf.allOff(),
    apply:(data,name)=>{this.patch=validate(data);this.layerIndex=0;this.refresh();this.display.set(name.toUpperCase(),'OB-Xa PROGRAM');},
    capture:()=>({...this.patch,layerB:{...this.patch.layerB}})});
-  footer(this.shell,'OBERHEIM OB-Xa · 8-VOICE MODEL · 61-KEY RANGE · DUAL VCOs · 2-/4-POLE LOW-PASS · SPLIT & DOUBLE MODES · ESC PANIC');
+  footer(this.shell,'OBERHEIM OB-Xa · 8-VOICE MODEL · DUAL VCOs · DUAL VCFs · SPLIT & DOUBLE · ESC PANIC');
  }
  refresh(){
   ['mode','splitPoint','unisonDetune','bendRange','master'].forEach(key=>{if(this.ui[key]?.setValue)this.ui[key].setValue(this.patch[key],true);});
