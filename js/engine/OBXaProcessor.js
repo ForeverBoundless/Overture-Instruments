@@ -17,7 +17,7 @@ const pulse=(p,w,d)=>{const duty=clamp(w,.05,.95);return (p<duty?1:-1)+BLEP(p,d)
 const triangle=(p)=>1-4*Math.abs(Math.round(p)-p);
 const wave=(shape,p,w,d)=>shape==='pulse'?pulse(p,w,d):shape==='sawPulse'?(saw(p,d)+pulse(p,w,d))*.5:shape==='triangle'?triangle(p):saw(p,d);
 const DEFAULT={osc1Wave:'saw',osc2Wave:'saw',osc1Range:0,fEnvOsc2:false,osc1Route:true,osc2Route:true,osc2Half:false,noiseRoute:false,filterTrack:true,osc1Level:.82,osc2Level:.56,osc2Tune:0,pulseWidth:.5,sync:false,cutoff:.53,resonance:.13,filterMode:'24',filterEnv:.42,filterAttack:.08,filterDecay:.32,filterSustain:.12,filterRelease:.32,ampAttack:.015,ampDecay:.3,ampSustain:.76,ampRelease:.32,lfoRate:.16,lfoAmount:0,lfoWave:'sine',lfoTarget:'both',bendRange:2,bendOsc2Only:false,master:.7,mode:'poly',splitPoint:60,unisonDetune:.12};
-const GLOBAL_KEYS=new Set(['mode','splitPoint','unisonDetune','bendRange','master']);
+const GLOBAL_KEYS=new Set(['mode','splitPoint','unisonDetune','bendRange','bendOsc2Only','master']);
 class XaVoice{
  constructor(i){this.i=i;this.note=-1;this.layer=0;this.active=false;this.gate=false;this.order=0;this.phase1=Math.random();this.phase2=Math.random();this.lfo=Math.random();this.lfoHold=0;this.amp=0;this.filterEnv=0;this.ampStage='idle';this.filterStage='idle';this.lp1=0;this.bp1=0;this.lp2=0;this.bp2=0;this.pan=(i-3.5)/5;this.vel=.8;this.rand=(Math.random()-.5)*.0005;this.noiseSeed=((i+1)*17117)|0;}
 }
