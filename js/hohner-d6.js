@@ -57,7 +57,7 @@ class HohnerD6App {
         bend: (v) => this.engine.setPitchBend(v), sustain: (v) => this.engine.setSustain(v),
         allOff: () => this.engine.allNotesOff(),
         program: (p) => this.presets.load('f:' + (p % HOHNER_D6_PRESETS.length)),
-        cc: (cc,value) => { if (cc === 7) this.ui.volume.setValue(value / 127); if (cc === 74) this.ui.damping.setValue(value / 127); },
+        cc: (cc,value) => { if (cc === 7) this.ui.volume.setValue(value / 127); if (cc === 74) { this.ui.damping.setValue(value / 127); if(this.damperRange)this.damperRange.value=String(value / 127); this.set('damping',value / 127); } },
       },
     });
     this.buildPedals(this.page);
@@ -119,7 +119,7 @@ class HohnerD6App {
     const visual = el('section','d6-strings-panel',rows);
     el('div','d6-strings-panel__label',visual,'TANGENT / STRING / PICKUP ASSEMBLY');
     const stringsArt = el('div','d6-string-lines',visual);
-    for(let i=0;i<24;i++){const line=el('i','',stringsArt);line.style.setProperty('--string-index',i);}
+    for(let i=0;i<60;i++){const line=el('i','',stringsArt);line.style.setProperty('--string-index',i);}
     const memory = section(rows,'PROGRAM MEMORY','OVERTURE CLAVINET REGISTRATIONS');
     this.presets = presetBar(memory.body,{factory:HOHNER_D6_PRESETS,store:this.store,display:this.display,filename:'hohner-d6-program',
       panic:()=>this.perf.allOff(),apply:(data,name)=>{this.patch=validate(data);this.refresh();this.display.set(name.toUpperCase(),'CLAVINET D6 PROGRAM');},
