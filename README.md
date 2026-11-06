@@ -89,7 +89,7 @@ A 60-note electromechanical keyboard whose strings are excited by rubber-tipped 
 
 ### Oberheim OB-Xa
 
-An eight-voice model of Oberheim's 1981 Curtis-chip polysynth, with two oscillators per voice, saw/pulse/triangle sources, oscillator hard sync, cross modulation, noise, and a selectable 12 dB-per-octave SEM-style or 24 dB-per-octave low-pass response. Independent filter and amplifier ADSR envelopes shape each layer, while the LFO offers triangle, square, sawtooth, and sample-and-hold modulation destinations. The voice allocator supports Poly, Unison, Split, and Double modes. Split and Double use separately editable Layer A and Layer B programs, and saved registrations preserve both timbres. Ten original Overture program recipes are included. The synthesis engine is a procedural model of the instrument's architecture and behaviour, not a circuit-exact reproduction or a copy of Oberheim factory programs.
+An eight-voice model of Oberheim's 1981 polysynth, with two oscillators and two low-pass filters per voice, saw, pulse, combined saw-plus-pulse and triangle waveforms, oscillator hard sync, noise routing, and selectable 12 dB or 24 dB filter slopes. Independent filter and amplifier ADSR envelopes shape each layer, while the LFO offers triangle, square, sawtooth, and sample-and-hold modulation destinations. The voice allocator supports Poly, Unison, Split, and Double modes. Split and Double use separately editable Layer A and Layer B programs, and saved registrations preserve both timbres. Ten original Overture program recipes are included. The synthesis engine is a procedural model of the instrument's architecture and behaviour, not a circuit-exact reproduction or a copy of Oberheim factory programs.
 
 ### Preset and program counts
 
