@@ -5,7 +5,7 @@
   if (year) year.textContent = String(new Date().getFullYear());
 
   // Reveal sections as they enter the viewport, without hiding content if unsupported.
-  const revealItems = document.querySelectorAll('.about-reveal');
+  const revealItems = document.querySelectorAll('.about-reveal, .story-circuit');
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
   if ('IntersectionObserver' in window && !reduceMotion.matches) {
