@@ -82,7 +82,7 @@ class OBXaApp{
   this.ui.osc2Level=knob(ok,{label:'OSC 2 LEVEL',min:0,max:1,value:this.currentLayer().osc2Level,onChange:v=>this.set('osc2Level',v)});
   this.ui.osc2Tune=knob(ok,{label:'OSC 2 RANGE',min:-1,max:1,value:this.currentLayer().osc2Tune,formatValue:v=>(v*30).toFixed(1)+' st',onChange:v=>this.set('osc2Tune',v)});
   this.ui.pulseWidth=knob(ok,{label:'PULSE WIDTH',min:0,max:1,value:this.currentLayer().pulseWidth,onChange:v=>this.set('pulseWidth',v)});
-  this.ui.osc1Wave=select(oscillators.body,'OSC 1 SHAPE',[{value:'saw',label:'SAWTOOTH'},{value:'pulse',label:'PULSE'},{value:'sawPulse',label:'SAW + PULSE'}],this.currentLayer().osc1Wave,v=>this.set('osc1Wave',v));
+  this.ui.osc1Wave=select(oscillators.body,'OSC 1 SHAPE',[{value:'saw',label:'SAWTOOTH'},{value:'pulse',label:'PULSE'},{value:'sawPulse',label:'SAW + PULSE'},{value:'triangle',label:'TRIANGLE'}],this.currentLayer().osc1Wave,v=>this.set('osc1Wave',v));
   this.ui.osc2Wave=select(oscillators.body,'OSC 2 SHAPE',[{value:'saw',label:'SAWTOOTH'},{value:'pulse',label:'PULSE'},{value:'sawPulse',label:'SAW + PULSE'}],this.currentLayer().osc2Wave,v=>this.set('osc2Wave',v));
   this.ui.fEnvOsc2=toggle(oscillators.body,'F-ENV → OSC 2',this.currentLayer().fEnvOsc2,v=>this.set('fEnvOsc2',v));
   this.ui.sync=toggle(oscillators.body,'OSC SYNC',this.currentLayer().sync,v=>this.set('sync',v));
@@ -91,7 +91,6 @@ class OBXaApp{
   this.ui.cutoff=knob(fk,{label:'FREQUENCY',min:0,max:1,value:this.currentLayer().cutoff,onChange:v=>this.set('cutoff',v)});
   this.ui.resonance=knob(fk,{label:'RESONANCE',min:0,max:1,value:this.currentLayer().resonance,onChange:v=>this.set('resonance',v)});
   this.ui.filterEnv=knob(fk,{label:'ENVELOPE AMOUNT',min:0,max:1,value:this.currentLayer().filterEnv,onChange:v=>this.set('filterEnv',v)});
-  this.ui.filterKeyTrack=knob(fk,{label:'KEYBOARD TRACK',min:0,max:1,value:this.currentLayer().filterKeyTrack,onChange:v=>this.set('filterKeyTrack',v)});
   this.ui.filterMode=select(filter.body,'SLOPE',[{value:'12',label:'12 dB / OCT'},{value:'24',label:'24 dB / OCT'}],this.currentLayer().filterMode,v=>this.set('filterMode',v));
   const env=section(rows,'ENVELOPES','INDEPENDENT FILTER AND AMPLIFIER ADSR');
   const eg=el('div','obxa-envelope-grid',env.body);
@@ -129,7 +128,7 @@ class OBXaApp{
   footer(this.shell,'OBERHEIM OB-Xa · 8-VOICE MODEL · DUAL VCOs · DUAL VCFs · SPLIT & DOUBLE · ESC PANIC');
  }
  refresh(){
-  ['mode','splitPoint','unisonDetune','bendRange','master'].forEach(key=>{if(this.ui[key]?.setValue)this.ui[key].setValue(this.patch[key],true);});
+  ['mode','splitPoint','unisonDetune','bendRange','bendOsc2Only','master'].forEach(key=>{if(this.ui[key]?.setValue)this.ui[key].setValue(this.patch[key],true);});
   this.renderLayerControls();
   this.engine.post({t:'patch',patch:this.patch});
  }
