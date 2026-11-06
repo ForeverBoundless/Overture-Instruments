@@ -1,4 +1,4 @@
-const CACHE = 'overture-shell-v44';
+const CACHE = 'overture-shell-v45';
 const APP_SHELL = [
   '/account',
   '/login',
@@ -25,7 +25,7 @@ const APP_SHELL = [
   '/css/home.css?v=20261104-home-logo-light',
   '/css/keyboard.css',
   '/css/hohner-d6.css?v=20261106-hardware-audio',
-  '/css/ob-xa.css?v=20261106-architecture',
+  '/css/ob-xa.css?v=20261106-architecture-r3',
   '/css/library.css?v=20261105-d6-obxa',
   '/css/knobs.css',
   '/css/korg-ms-20.css',
@@ -118,7 +118,7 @@ const APP_SHELL = [
   '/js/engine/Prophet10Processor.js',
   '/js/engine/OberheimEightVoiceProcessor.js',
   '/js/engine/HohnerD6Processor.js',
-  '/js/engine/OBXaProcessor.js?v=20261106-architecture',
+  '/js/engine/OBXaProcessor.js?v=20261106-architecture-r3',
   '/js/engine/OberheimEightVoiceProcessor.js?v=20261104-eightvoice-stable',
   '/js/engine/Sub37Engine.js',
   '/js/engine/TR808Engine.js',
@@ -147,8 +147,7 @@ const APP_SHELL = [
   '/js/roland-tr-808.js',
   '/js/oberheim-eight-voice.js',
   '/js/hohner-d6.js?v=20261106-hardware-audio',
-  '/js/obxa.js?v=20261106-architecture-r2',
-  '/js/obxa.js?v=20261105-obxa-layers',
+  '/js/obxa.js?v=20261106-architecture-r3',
   '/js/shared/audioRecorder.js',
   '/js/shared/contact.js',
   '/js/shared/midiMap.js',
