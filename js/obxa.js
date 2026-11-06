@@ -2,135 +2,114 @@ import { WorkletEngine } from './shared/workletEngine.js';
 import { PresetStore } from './shared/presetStore.js';
 import { el, section, knob, select, toggle, display, performance, power, presetBar, footer } from './shared/panel.js';
 import { OBXA_PRESETS } from './data/obx-a-presets.js';
-
-const NOTE_NAMES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const NOTE_NAMES=['C','C#','D','D#','E','F','G','G#','A','A#','B'];
 const NOTES=Array.from({length:61},(_,i)=>{const n=36+i;return NOTE_NAMES[n%12]+(Math.floor(n/12)-1);});
-const DEF={...OBXA_PRESETS[0].data};
-const GLOBAL_KEYS=new Set(['mode','splitPoint','unisonDetune','bendRange','bendOsc2Only','master']);
-const LAYER_KEYS=['osc1Wave','osc2Wave','osc1Range','fEnvOsc2','osc1Level','osc2Level','osc2Tune','pulseWidth','sync','cutoff','resonance','filterMode','filterEnv','filterTrack','filterAttack','filterDecay','filterSustain','filterRelease','ampAttack','ampDecay','ampSustain','ampRelease','lfoRate','lfoAmount','lfoWave','lfoTarget','osc1Route','osc2Route','osc2Half','noiseRoute'];
-const cleanLayer=(source)=>{
- const out={...DEF,...source};
- ['osc1Level','osc2Level','pulseWidth','cutoff','resonance','filterEnv','filterAttack','filterDecay','filterSustain','filterRelease','ampAttack','ampDecay','ampSustain','ampRelease','lfoRate','lfoAmount'].forEach(k=>out[k]=Math.max(0,Math.min(1,Number(out[k])||0)));
- out.osc1Range=Math.max(-2,Math.min(2,Number(out.osc1Range)||0));
- out.osc2Tune=Math.max(-1,Math.min(1,Number(out.osc2Tune)||0));
- ['osc1Wave','osc2Wave'].forEach(k=>out[k]=['saw','pulse','sawPulse','triangle'].includes(out[k])?out[k]:'saw');
- ['fEnvOsc2','filterTrack','osc1Route','osc2Route','osc2Half','noiseRoute'].forEach(k=>out[k]=!!out[k]);
- delete out.noise;delete out.crossMod;delete out.filterKeyTrack;
- out.filterMode=['12','24'].includes(String(out.filterMode))?String(out.filterMode):'24';
- out.lfoWave=['sine','square','saw','s&h'].includes(out.lfoWave)?out.lfoWave:'sine';
- out.lfoTarget=['osc1','osc2','both','filter','pulse'].includes(out.lfoTarget)?out.lfoTarget:'both';
- out.sync=!!out.sync;
- return out;
+const GLOBAL_DEFAULTS={mode:'full',voiceCount:8,splitPoint:60,unison:false,unisonDetune:.12,bendRange:2,bendOsc2Only:false,master:.7,masterTune:0,hold:false};
+const LAYER_DEFAULTS={osc1Wave:'saw',osc2Wave:'saw',osc1Range:0,osc1Level:.82,osc2Level:.56,osc2Tune:0,pulseWidth:.5,sync:false,fEnvOsc2:false,osc1Route:true,osc2Route:true,osc2Half:false,noiseRoute:false,cutoff:.53,resonance:.13,filterMode:'24',filterTrack:true,filterEnv:.42,filterAttack:.08,filterDecay:.32,filterSustain:.12,filterRelease:.32,ampAttack:.015,ampDecay:.3,ampSustain:.76,ampRelease:.32,lfoRate:.16,lfoAmount:0,lfoWave:'sine',lfoTarget:'both',pulseWidthAmount:0,lfoPulse1:false,lfoPulse2:false,transpose:0,portamento:0};
+const DEF={...GLOBAL_DEFAULTS,...LAYER_DEFAULTS},GLOBAL_KEYS=new Set(Object.keys(GLOBAL_DEFAULTS)),LAYER_KEYS=Object.keys(LAYER_DEFAULTS);
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,Number(v)||0));
+const cleanLayer=(source={})=>{
+ const out={...LAYER_DEFAULTS,...source};
+ ['osc1Level','osc2Level','pulseWidth','cutoff','resonance','filterEnv','filterAttack','filterDecay','filterSustain','filterRelease','ampAttack','ampDecay','ampSustain','ampRelease','lfoRate','lfoAmount','pulseWidthAmount','portamento'].forEach(k=>out[k]=clamp(out[k],0,1));
+ out.osc1Range=Math.round(clamp(out.osc1Range,-2,2));out.osc2Tune=clamp(out.osc2Tune,-1,1);out.transpose=Math.round(clamp(out.transpose,-24,24));
+ ['osc1Wave','osc2Wave'].forEach(k=>out[k]=out[k]==='pulse'?'pulse':'saw');
+ ['fEnvOsc2','sync','osc1Route','osc2Route','osc2Half','noiseRoute','filterTrack','lfoPulse1','lfoPulse2'].forEach(k=>out[k]=!!out[k]);
+ out.filterMode=String(out.filterMode)==='12'?'12':'24';out.lfoWave=['sine','square','s&h'].includes(out.lfoWave)?out.lfoWave:'sine';
+ out.lfoTarget=['osc1','osc2','filter','both'].includes(out.lfoTarget)?out.lfoTarget:'both';return out;
 };
-const validate=(data)=>{
+const validate=data=>{
  if(!data||typeof data!=='object')throw new Error('Not an OB-Xa program.');
- const {layerB,...rootSource}=data;
- const out=cleanLayer(rootSource);
- out.mode=['poly','unison','double','split'].includes(out.mode)?out.mode:'poly';
- out.splitPoint=Math.max(36,Math.min(96,Math.round(Number(out.splitPoint)||60)));
- out.unisonDetune=Math.max(0,Math.min(1,Number(out.unisonDetune)||0));
- out.bendRange=Math.max(1,Math.min(12,Math.round(Number(out.bendRange)||2)));
- out.master=Math.max(0,Math.min(1,Number(out.master)||0));
+ const {layerB,...root}=data;const out={...GLOBAL_DEFAULTS,...cleanLayer(root)};
+ if(data.mode==='unison'){out.mode='full';out.unison=true;}else out.mode=['full','split','double'].includes(data.mode)?data.mode:'full';
+ out.voiceCount=[4,6,8].includes(Number(data.voiceCount))?Number(data.voiceCount):8;out.splitPoint=Math.round(clamp(data.splitPoint??60,36,96));
+ out.unison=!!out.unison;out.unisonDetune=clamp(data.unisonDetune??.12,0,1);out.bendRange=Math.round(clamp(data.bendRange??2,1,12));
+ out.bendOsc2Only=!!out.bendOsc2Only;out.master=clamp(data.master??.7,0,1);out.masterTune=clamp(data.masterTune??0,-1,1);out.hold=!!out.hold;
  const derivedB=layerB||{...out,osc1Wave:'pulse',osc2Wave:'saw',osc2Tune:Math.min(1,out.osc2Tune+.035),cutoff:Math.max(.08,out.cutoff-.07),resonance:Math.min(.9,out.resonance+.04),ampAttack:Math.min(1,out.ampAttack+.025)};
- out.layerB=cleanLayer(derivedB);
- return out;
+ out.layerB=cleanLayer(derivedB);return out;
 };
 class OBXaApp{
  constructor(){
-  this.engine=new WorkletEngine(new URL('./engine/OBXaProcessor.js?v=20261105-obxa-layers',import.meta.url).href,'obxa-processor');
-  this.patch=validate(DEF);this.layerIndex=0;this.ui={};
-  this.store=new PresetStore({key:'overture.obxa.programs',version:1,validate});
-  this.build();
+  this.engine=new WorkletEngine(new URL('./engine/OBXaProcessor.js?v=20261106-architecture',import.meta.url).href,'obxa-processor');
+  this.patch=validate(DEF);this.layerIndex=0;this.ui={};this.store=new PresetStore({key:'overture.obxa.programs',version:2,validate});this.build();
   this.perf=performance(this.shell,{notes:NOTES,octaves:5,startOctave:2,started:()=>this.engine.started,midiStatusEl:this.midi,handlers:{
-   noteOn:(n,v)=>this.engine.noteOn(n,v),noteOff:n=>this.engine.noteOff(n),bend:v=>this.engine.setPitchBend(v),
-   mod:v=>this.engine.setModWheel(v),sustain:d=>this.engine.setSustain(d),allOff:()=>this.engine.allNotesOff(),
-   program:p=>this.presets.load('f:'+(p%OBXA_PRESETS.length)),
-   cc:(cc,value)=>{if(cc===7)this.ui.master.setValue(value/127);if(cc===74)this.ui.cutoff.setValue(value/127);if(cc===71)this.ui.resonance.setValue(value/127);},
+   noteOn:(n,v)=>this.engine.noteOn(n,v),noteOff:n=>this.engine.noteOff(n),bend:v=>this.engine.setPitchBend(v),mod:v=>this.engine.setModWheel(v),
+   sustain:d=>this.engine.setSustain(d),allOff:()=>this.engine.allNotesOff(),program:p=>this.presets.load('f:'+(p%OBXA_PRESETS.length)),
+   cc:(cc,value)=>{if(cc===7)this.ui.master.setValue(value/127);if(cc===74)this.ui.cutoff.setValue(value/127);if(cc===71)this.ui.resonance.setValue(value/127);}
   }});
-  power('obxa-power',()=>this.engine.start(),()=>{this.perf.flushPending();this.display.set('OB-Xa READY','EIGHT VOICES ONLINE');});
+  power('obxa-power',()=>this.engine.start(),()=>{this.perf.flushPending();this.display.set('OB-Xa READY',this.patch.voiceCount+' VOICES · TWO CONTROL GROUPS');});
   this.presets.load('f:0');
  }
  currentLayer(){return this.layerIndex===1?this.patch.layerB:this.patch;}
  set(key,value){
   const global=GLOBAL_KEYS.has(key);
-  if(global){this.patch[key]=value;if(key==='mode')this.engine.allNotesOff();}
+  if(global){this.patch[key]=value;if(['mode','voiceCount','unison'].includes(key))this.engine.allNotesOff();if(key==='hold')this.engine.post({t:'hold',value:!!value});}
   else this.currentLayer()[key]=value;
-  this.engine.post({t:'param',key,value,layer:global?0:this.layerIndex});
+  this.engine.post({t:'param',key,value,layer:global?0:this.layerIndex});this.updateLayoutState();
  }
- selectLayer(value){
-  this.layerIndex=Number(value)===1?1:0;
-  this.renderLayerControls();
-  this.display.set('EDIT LAYER '+(this.layerIndex?'B':'A'),'OB-Xa TWO-TIMBRE PROGRAM');
- }
- renderLayerControls(){
-  const source=this.currentLayer();
-  LAYER_KEYS.forEach(key=>{if(this.ui[key]?.setValue)this.ui[key].setValue(source[key],true);});
-  if(this.ui.layerEdit)this.ui.layerEdit.setValue(String(this.layerIndex),true);
- }
+ selectLayer(value){this.layerIndex=Number(value)===1?1:0;this.renderLayerControls();this.display.set('EDIT TIMBRE '+(this.layerIndex?'B':'A'),'OB-Xa TWO-SYNTH PROGRAM');}
+ renderLayerControls(){const source=this.currentLayer();LAYER_KEYS.forEach(key=>{if(this.ui[key]?.setValue)this.ui[key].setValue(source[key],true);});if(this.ui.layerEdit)this.ui.layerEdit.setValue(String(this.layerIndex),true);}
+ updateLayoutState(){this.shell.classList.toggle('is-split',this.patch.mode==='split');this.shell.classList.toggle('is-dual',this.patch.mode!=='full');}
  build(){
-  const page=el('div','pn-page obxa-page',document.getElementById('obxa-root'));
-  this.shell=el('main','pn-shell obxa-shell',page);
-  const header=el('header','pn-header obxa-header',this.shell);
-  el('div','obxa-brand',header).innerHTML='<strong>OBERHEIM</strong><span>OB-Xa · POLYPHONIC ANALOG SYNTHESIZER</span>';
+  const page=el('div','pn-page obxa-page',document.getElementById('obxa-root'));this.shell=el('main','pn-shell obxa-shell',page);
+  const header=el('header','pn-header obxa-header',this.shell),brand=el('div','obxa-brand',header);
+  const logo=el('img','obxa-brand__logo',brand);logo.src='/ui/Logos/Oberheim_logo.png';logo.alt='Oberheim';
+  el('span','obxa-brand__model',brand,'OB-Xa · PROGRAMMABLE POLYPHONIC SYNTHESIZER');
   const right=el('div','pn-header-right',header);this.display=display(right);this.midi=el('div','pn-midi',right,'MIDI: searching…');
-  const rows=el('div','pn-rows',this.shell);
-  const top=el('div','pn-row obxa-top',rows);
-  const oscillators=section(top,'OSCILLATORS','TWO VCOs PER VOICE');
-  const ok=el('div','pn-knobs',oscillators.body);
-  this.ui.osc1Range=knob(ok,{label:'OSC 1 OCTAVES',min:-2,max:2,value:this.currentLayer().osc1Range,formatValue:v=>v.toFixed(1)+' oct',onChange:v=>this.set('osc1Range',v)});
+  const rows=el('div','pn-rows',this.shell),top=el('div','pn-row obxa-top',rows);
+  const oscillators=section(top,'OSCILLATORS','TWO VCOs PER VOICE'),ok=el('div','pn-knobs',oscillators.body);
+  this.ui.osc1Range=knob(ok,{label:'OSC 1 FREQUENCY',min:-2,max:2,value:this.currentLayer().osc1Range,formatValue:v=>(Math.round(v)>0?'+':'')+Math.round(v)+' OCT',onChange:v=>this.set('osc1Range',Math.round(v))});
   this.ui.osc1Level=knob(ok,{label:'OSC 1 LEVEL',min:0,max:1,value:this.currentLayer().osc1Level,onChange:v=>this.set('osc1Level',v)});
   this.ui.osc2Level=knob(ok,{label:'OSC 2 LEVEL',min:0,max:1,value:this.currentLayer().osc2Level,onChange:v=>this.set('osc2Level',v)});
-  this.ui.osc2Tune=knob(ok,{label:'OSC 2 RANGE',min:-1,max:1,value:this.currentLayer().osc2Tune,formatValue:v=>(v*30).toFixed(1)+' st',onChange:v=>this.set('osc2Tune',v)});
+  this.ui.osc2Tune=knob(ok,{label:'OSC 2 DETUNE',min:-1,max:1,value:this.currentLayer().osc2Tune,formatValue:v=>(v*30).toFixed(1)+' ST',onChange:v=>this.set('osc2Tune',v)});
   this.ui.pulseWidth=knob(ok,{label:'PULSE WIDTH',min:0,max:1,value:this.currentLayer().pulseWidth,onChange:v=>this.set('pulseWidth',v)});
-  this.ui.osc1Wave=select(oscillators.body,'OSC 1 SHAPE',[{value:'saw',label:'SAWTOOTH'},{value:'pulse',label:'PULSE'},{value:'sawPulse',label:'SAW + PULSE'},{value:'triangle',label:'TRIANGLE'}],this.currentLayer().osc1Wave,v=>this.set('osc1Wave',v));
-  this.ui.osc2Wave=select(oscillators.body,'OSC 2 SHAPE',[{value:'saw',label:'SAWTOOTH'},{value:'pulse',label:'PULSE'},{value:'sawPulse',label:'SAW + PULSE'}],this.currentLayer().osc2Wave,v=>this.set('osc2Wave',v));
+  this.ui.osc1Wave=select(oscillators.body,'OSC 1 WAVEFORM',[{value:'saw',label:'SAWTOOTH'},{value:'pulse',label:'PULSE'}],this.currentLayer().osc1Wave,v=>this.set('osc1Wave',v));
+  this.ui.osc2Wave=select(oscillators.body,'OSC 2 WAVEFORM',[{value:'saw',label:'SAWTOOTH'},{value:'pulse',label:'PULSE'}],this.currentLayer().osc2Wave,v=>this.set('osc2Wave',v));
   this.ui.fEnvOsc2=toggle(oscillators.body,'F-ENV → OSC 2',this.currentLayer().fEnvOsc2,v=>this.set('fEnvOsc2',v));
-  this.ui.sync=toggle(oscillators.body,'OSC SYNC',this.currentLayer().sync,v=>this.set('sync',v));
-  const filter=section(top,'FILTER','CURTIS-STYLE LOW-PASS · 2 OR 4 POLE');
-  const fk=el('div','pn-knobs',filter.body);
+  this.ui.sync=toggle(oscillators.body,'OSC 2 SYNC',this.currentLayer().sync,v=>this.set('sync',v));
+  const filter=section(top,'FILTER','TWO SELECTABLE LOW-PASS RESPONSES'),fk=el('div','pn-knobs',filter.body);
   this.ui.cutoff=knob(fk,{label:'FREQUENCY',min:0,max:1,value:this.currentLayer().cutoff,onChange:v=>this.set('cutoff',v)});
   this.ui.resonance=knob(fk,{label:'RESONANCE',min:0,max:1,value:this.currentLayer().resonance,onChange:v=>this.set('resonance',v)});
-  this.ui.filterEnv=knob(fk,{label:'ENVELOPE AMOUNT',min:0,max:1,value:this.currentLayer().filterEnv,onChange:v=>this.set('filterEnv',v)});
-  this.ui.filterMode=select(filter.body,'SLOPE',[{value:'12',label:'12 dB / OCT'},{value:'24',label:'24 dB / OCT'}],this.currentLayer().filterMode,v=>this.set('filterMode',v));
-  const env=section(rows,'ENVELOPES','INDEPENDENT FILTER AND AMPLIFIER ADSR');
-  const eg=el('div','obxa-envelope-grid',env.body);
+  this.ui.filterEnv=knob(fk,{label:'ENVELOPE MODULATION',min:0,max:1,value:this.currentLayer().filterEnv,onChange:v=>this.set('filterEnv',v)});
+  this.ui.filterMode=select(filter.body,'FILTER POLES',[{value:'12',label:'2-POLE · 12 dB/OCT'},{value:'24',label:'4-POLE · 24 dB/OCT'}],this.currentLayer().filterMode,v=>this.set('filterMode',v));
+  const routes=el('div','obxa-switch-row',filter.body);
+  this.ui.osc1Route=toggle(routes,'OSC 1',this.currentLayer().osc1Route,v=>this.set('osc1Route',v));
+  this.ui.osc2Route=toggle(routes,'OSC 2',this.currentLayer().osc2Route,v=>this.set('osc2Route',v));
+  this.ui.osc2Half=toggle(routes,'OSC 2 HALF',this.currentLayer().osc2Half,v=>this.set('osc2Half',v));
+  this.ui.noiseRoute=toggle(routes,'PINK NOISE',this.currentLayer().noiseRoute,v=>this.set('noiseRoute',v));
+  this.ui.filterTrack=toggle(routes,'TRACK',this.currentLayer().filterTrack,v=>this.set('filterTrack',v));
+  const env=section(rows,'ENVELOPES','INDEPENDENT FILTER AND LOUDNESS ADSR'),eg=el('div','obxa-envelope-grid',env.body);
   const makeEnvelope=(parent,title,prefix)=>{
    const box=el('div','obxa-envelope',parent);el('h3','',box,title);const k=el('div','pn-knobs',box);
-   [['Attack','Attack'],['Decay','Decay'],['Sustain','Sustain'],['Release','Release']].forEach(([label,suffix])=>{
-    const key=prefix+suffix;
-    this.ui[key]=knob(k,{label,min:0,max:1,value:this.currentLayer()[key],onChange:v=>this.set(key,v)});
-   });
+   [['Attack','ATTACK'],['Decay','DECAY'],['Sustain','SUSTAIN'],['Release','RELEASE']].forEach(([suffix,label])=>{const key=prefix+suffix;this.ui[key]=knob(k,{label,min:0,max:1,value:this.currentLayer()[key],onChange:v=>this.set(key,v)});});
   };
-  makeEnvelope(eg,'FILTER ENVELOPE','filter');makeEnvelope(eg,'AMPLIFIER ENVELOPE','amp');
-  const modulation=section(rows,'MODULATION & PERFORMANCE','PROGRAM MEMORY · VOICE ALLOCATION · DUAL TIMBRE');
-  const mk=el('div','pn-knobs',modulation.body);
+  makeEnvelope(eg,'FILTER ENVELOPE','filter');makeEnvelope(eg,'LOUDNESS ENVELOPE','amp');
+  const modulation=section(rows,'MODULATION','TWO FOUR-VOICE LFO GROUPS · FREQUENCY AND PULSE-WIDTH ROUTING'),mk=el('div','pn-knobs',modulation.body);
   this.ui.lfoRate=knob(mk,{label:'LFO RATE',min:0,max:1,value:this.currentLayer().lfoRate,onChange:v=>this.set('lfoRate',v)});
-  this.ui.lfoAmount=knob(mk,{label:'LFO AMOUNT',min:0,max:1,value:this.currentLayer().lfoAmount,onChange:v=>this.set('lfoAmount',v)});
-  this.ui.bendRange=knob(mk,{label:'BEND RANGE',min:1,max:12,value:this.patch.bendRange,formatValue:v=>Math.round(v)+' st',onChange:v=>this.set('bendRange',Math.round(v))});
-  this.ui.master=knob(mk,{label:'MASTER',min:0,max:1,value:this.patch.master,onChange:v=>{this.set('master',v);this.engine.setVolume(v);}});
-  this.ui.lfoWave=select(modulation.body,'LFO SHAPE',[{value:'sine',label:'SINE'},{value:'square',label:'SQUARE'},{value:'saw',label:'SAWTOOTH'},{value:'s&h',label:'SAMPLE & HOLD'}],this.currentLayer().lfoWave,v=>this.set('lfoWave',v));
-  this.ui.lfoTarget=select(modulation.body,'FREQUENCY MODULATION',[{value:'both',label:'OSC 1 + OSC 2'},{value:'osc1',label:'OSC 1 ONLY'},{value:'osc2',label:'OSC 2 ONLY'},{value:'filter',label:'FILTER CUTOFF'},{value:'pulse',label:'PULSE WIDTH'}],this.currentLayer().lfoTarget,v=>this.set('lfoTarget',v));
+  this.ui.lfoAmount=knob(mk,{label:'FREQUENCY DEPTH',min:0,max:1,value:this.currentLayer().lfoAmount,onChange:v=>this.set('lfoAmount',v)});
+  this.ui.pulseWidthAmount=knob(mk,{label:'PULSE WIDTH DEPTH',min:0,max:1,value:this.currentLayer().pulseWidthAmount,onChange:v=>this.set('pulseWidthAmount',v)});
+  this.ui.lfoWave=select(modulation.body,'LFO WAVEFORM',[{value:'sine',label:'SINE'},{value:'square',label:'SQUARE'},{value:'s&h',label:'SAMPLE / HOLD'}],this.currentLayer().lfoWave,v=>this.set('lfoWave',v));
+  this.ui.lfoTarget=select(modulation.body,'FREQUENCY ROUTE',[{value:'both',label:'OSC 1 + OSC 2'},{value:'osc1',label:'OSC 1'},{value:'osc2',label:'OSC 2'},{value:'filter',label:'FILTER'}],this.currentLayer().lfoTarget,v=>this.set('lfoTarget',v));
+  const pwRoutes=el('div','obxa-switch-row',modulation.body);
+  this.ui.lfoPulse1=toggle(pwRoutes,'PULSE WIDTH · OSC 1',this.currentLayer().lfoPulse1,v=>this.set('lfoPulse1',v));
+  this.ui.lfoPulse2=toggle(pwRoutes,'PULSE WIDTH · OSC 2',this.currentLayer().lfoPulse2,v=>this.set('lfoPulse2',v));
   this.ui.bendOsc2Only=toggle(modulation.body,'BEND OSC 2 ONLY',this.patch.bendOsc2Only,v=>this.set('bendOsc2Only',v));
-  const sourceSwitches=section(rows,'FILTER SOURCE & TRACKING','OSCILLATOR / NOISE ROUTING');
-  this.ui.osc1Route=toggle(sourceSwitches.body,'OSC 1',this.currentLayer().osc1Route,v=>this.set('osc1Route',v));
-  this.ui.osc2Route=toggle(sourceSwitches.body,'OSC 2',this.currentLayer().osc2Route,v=>this.set('osc2Route',v));
-  this.ui.osc2Half=toggle(sourceSwitches.body,'OSC 2 HALF LEVEL',this.currentLayer().osc2Half,v=>this.set('osc2Half',v));
-  this.ui.noiseRoute=toggle(sourceSwitches.body,'NOISE',this.currentLayer().noiseRoute,v=>this.set('noiseRoute',v));
-  this.ui.filterTrack=toggle(sourceSwitches.body,'KEYBOARD TRACK',this.currentLayer().filterTrack,v=>this.set('filterTrack',v));
-  this.ui.mode=select(modulation.body,'VOICE MODE',[{value:'poly',label:'POLYPHONIC'},{value:'unison',label:'UNISON'},{value:'double',label:'DOUBLE / LAYER'},{value:'split',label:'SPLIT'}],this.patch.mode,v=>this.set('mode',v));
-  this.ui.splitPoint=knob(mk,{label:'SPLIT POINT',min:36,max:96,value:this.patch.splitPoint,formatValue:v=>NOTE_NAMES[Math.round(v)%12]+(Math.floor(Math.round(v)/12)-1),onChange:v=>this.set('splitPoint',Math.round(v))});
-  this.ui.unisonDetune=knob(mk,{label:'UNISON SPREAD',min:0,max:1,value:this.patch.unisonDetune,onChange:v=>this.set('unisonDetune',v)});
-  this.ui.layerEdit=select(modulation.body,'EDIT TIMBRE',[{value:'0',label:'LAYER A'},{value:'1',label:'LAYER B'}],'0',v=>this.selectLayer(v));
-  const memory=section(rows,'PROGRAMMER','OVERTURE OB-Xa-STYLE PROGRAMS');
-  this.presets=presetBar(memory.body,{factory:OBXA_PRESETS,store:this.store,display:this.display,filename:'oberheim-obxa-program',panic:()=>this.perf.allOff(),
-   apply:(data,name)=>{this.patch=validate(data);this.layerIndex=0;this.refresh();this.display.set(name.toUpperCase(),'OB-Xa PROGRAM');},
-   capture:()=>({...this.patch,layerB:{...this.patch.layerB}})});
-  footer(this.shell,'OBERHEIM OB-Xa · 8-VOICE MODEL · DUAL VCOs · DUAL VCFs · SPLIT & DOUBLE · ESC PANIC');
+  this.ui.hold=toggle(modulation.body,'HOLD',this.patch.hold,v=>this.set('hold',v));
+  const allocation=section(rows,'KEYBOARD & VOICE ALLOCATION','FULL · SPLIT · DOUBLE · PROGRAMMABLE VOICE BANKS'),ak=el('div','pn-knobs',allocation.body);
+  this.ui.mode=select(allocation.body,'KEYBOARD MODE',[{value:'full',label:'FULL · POLY'},{value:'split',label:'SPLIT'},{value:'double',label:'DOUBLE / LAYER'}],this.patch.mode,v=>this.set('mode',v));
+  this.ui.voiceCount=select(allocation.body,'VOICE CONFIGURATION',[{value:'4',label:'4 VOICES'},{value:'6',label:'6 VOICES'},{value:'8',label:'8 VOICES'}],String(this.patch.voiceCount),v=>this.set('voiceCount',Number(v)));
+  this.ui.splitPoint=knob(ak,{label:'SPLIT POINT',min:36,max:96,value:this.patch.splitPoint,formatValue:v=>NOTE_NAMES[Math.round(v)%12]+(Math.floor(Math.round(v)/12)-1),onChange:v=>this.set('splitPoint',Math.round(v))});
+  this.ui.unison=toggle(allocation.body,'UNISON',this.patch.unison,v=>this.set('unison',v));
+  this.ui.unisonDetune=knob(ak,{label:'UNISON DETUNE',min:0,max:1,value:this.patch.unisonDetune,onChange:v=>this.set('unisonDetune',v)});
+  this.ui.transpose=knob(ak,{label:'TIMBRE TRANSPOSE',min:-24,max:24,value:this.currentLayer().transpose,formatValue:v=>(Math.round(v)>0?'+':'')+Math.round(v)+' ST',onChange:v=>this.set('transpose',Math.round(v))});
+  this.ui.portamento=knob(ak,{label:'PORTAMENTO',min:0,max:1,value:this.currentLayer().portamento,onChange:v=>this.set('portamento',v)});
+  this.ui.bendRange=knob(ak,{label:'PITCH BEND RANGE',min:1,max:12,value:this.patch.bendRange,formatValue:v=>Math.round(v)+' ST',onChange:v=>this.set('bendRange',Math.round(v))});
+  this.ui.masterTune=knob(ak,{label:'MASTER TUNE',min:-1,max:1,value:this.patch.masterTune,formatValue:v=>(v*100).toFixed(0)+' CENT',onChange:v=>this.set('masterTune',v)});
+  this.ui.master=knob(ak,{label:'MASTER VOLUME',min:0,max:1,value:this.patch.master,onChange:v=>this.set('master',v)});
+  this.ui.layerEdit=select(allocation.body,'EDIT TIMBRE',[{value:'0',label:'LOWER / A'},{value:'1',label:'UPPER / B'}],'0',v=>this.selectLayer(v));
+  const memory=section(rows,'PROGRAMMER','OVERTURE OB-Xa PROGRAMS');
+  this.presets=presetBar(memory.body,{factory:OBXA_PRESETS,store:this.store,display:this.display,filename:'oberheim-obxa-program',panic:()=>this.perf.allOff(),apply:(data,name)=>{this.patch=validate(data);this.layerIndex=0;this.refresh();this.display.set(name.toUpperCase(),'OB-Xa PROGRAM');},capture:()=>({...this.patch,layerB:{...this.patch.layerB}})});
+  footer(this.shell,'OBERHEIM OB-Xa · 4 / 6 / 8 VOICES · DUAL VCO · SELECTABLE 2 / 4-POLE VCF · PINK NOISE · POLYPHONIC GLIDE');this.updateLayoutState();
  }
- refresh(){
-  ['mode','splitPoint','unisonDetune','bendRange','bendOsc2Only','master'].forEach(key=>{if(this.ui[key]?.setValue)this.ui[key].setValue(this.patch[key],true);});
-  this.renderLayerControls();
-  this.engine.post({t:'patch',patch:this.patch});
- }
+ refresh(){['mode','voiceCount','splitPoint','unison','unisonDetune','bendRange','bendOsc2Only','master','masterTune','hold'].forEach(key=>{if(this.ui[key]?.setValue)this.ui[key].setValue(this.patch[key],true);});this.renderLayerControls();this.updateLayoutState();this.engine.post({t:'patch',patch:this.patch});}
 }
 new OBXaApp();

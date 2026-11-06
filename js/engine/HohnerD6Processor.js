@@ -5,7 +5,7 @@
  */
 /* global sampleRate, currentFrame, registerProcessor, AudioWorkletProcessor */
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
-const DEFAULT = { toneFilters: [true, false, false, false], pickup: 'bothIn', volume: 0.72, damping: 0.34 };
+const DEFAULT = { toneFilters: [true, false, false, false], pickup: 'bothIn', volume: 0.72, damping: 0.34, pedalboardEnabled: true };
 const midiHz = (n) => 440 * Math.pow(2, (n - 69) / 12);
 
 class ClavString {
@@ -84,7 +84,7 @@ class HohnerD6Processor extends AudioWorkletProcessor {
       v.buffer[i] = this.random(v) * envelope * tangentPulse * velocity * 0.52;
     }
     v.note = note; v.velocity = velocity; v.active = true; v.gate = true; v.order = ++this.order;
-    v.release = 1; v.toneState = 0; v.lp = 0; v.pan = ((note % 5) - 2) * 0.018;
+    v.release = 1; v.lp = 0; v.pan = ((note % 5) - 2) * 0.018;
   }
   noteOff(note) {
     this.voices.forEach((v) => { if (v.note === note) { v.gate = false; if (!this.sustain) v.release = Math.min(v.release, 0.98); } });
@@ -95,6 +95,7 @@ class HohnerD6Processor extends AudioWorkletProcessor {
     return v.buffer[index];
   }
   applyEffects(left, right, sr) {
+    if (!this.p.pedalboardEnabled) return [left, right];
     const fx = this.fx; const pedals = this.pedals;
     const compressor = pedals.compressor;
     if (compressor.enabled) {
@@ -134,11 +135,11 @@ class HohnerD6Processor extends AudioWorkletProcessor {
       fx.phaserPhase += (0.1 + clamp(phaser.rate, 0, 1) * 2.1) / sr;
       if (fx.phaserPhase >= 1) fx.phaserPhase -= 1;
       const sweep = 0.18 + (0.55 + 0.45 * Math.sin(fx.phaserPhase * Math.PI * 2)) * clamp(phaser.depth, 0, 1) * 0.64;
-      let l = left + fx.phaserPhaserL[3] * phaser.feedback * 0.65;
-      let r = right + fx.phaserPhaserR[3] * phaser.feedback * 0.65;
+      let l = left + fx.phaserL[3] * phaser.feedback * 0.65;
+      let r = right + fx.phaserR[3] * phaser.feedback * 0.65;
       for (let stage = 0; stage < 4; stage += 1) {
-        const yl = -sweep * l + fx.phaserPhaserL[stage]; fx.phaserPhaserL[stage] = l + sweep * yl; l = yl;
-        const yr = -sweep * r + fx.phaserPhaserR[stage]; fx.phaserPhaserR[stage] = r + sweep * yr; r = yr;
+        const yl = -sweep * l + fx.phaserL[stage]; fx.phaserL[stage] = l + sweep * yl; l = yl;
+        const yr = -sweep * r + fx.phaserR[stage]; fx.phaserR[stage] = r + sweep * yr; r = yr;
       }
       const mix = clamp(phaser.mix, 0, 1);
       left = left * (1 - mix) + l * mix; right = right * (1 - mix) + r * mix;

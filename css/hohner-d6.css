@@ -36,3 +36,29 @@
 .d6-page>.d6-pedalboard{width:min(1460px,calc(100vw - 28px))}
 .d6-page>.pn-footer{width:min(1460px,100%);padding:7px 10px 0;text-align:center}
 @media(max-width:520px){.d6-shell .pn-keybed.pn-keybed--nowheels{grid-template-columns:minmax(0,1fr) 34px}.d6-damper-control{padding-inline:0}.d6-damper-control__range{width:18px}.d6-damper-control__range::-webkit-slider-thumb{width:15px;height:12px;margin-left:-6px}}
+
+
+/* D6 panel proportions: a compact, centred wood-faced instrument. */
+.d6-page{width:100%;display:flex;flex-direction:column;align-items:center;gap:8px}
+.d6-shell{width:min(1460px,calc(100vw - 28px));margin-inline:auto}
+.d6-shell .pn-rows{width:100%}
+.d6-shell .pn-body{justify-content:center;align-items:center}
+.d6-shell .pn-knobs{justify-content:center;align-items:flex-start}
+.d6-shell .pn-section{background:linear-gradient(145deg,#644a2e,#3b291a 62%,#2a1c12);border-color:#9a7448;box-shadow:inset 0 1px #fff2,inset 0 -2px #1b1009,0 2px 4px #0005}
+.d6-shell .pn-section h2{color:#f0d4a5;border-bottom-color:#d5b18455}
+.d6-shell .pn-knob .lp-knob-svg{background:radial-gradient(circle at 50% 48%,#e2d4b7 0 42%,#9a805b 43% 47%,transparent 48%);border-radius:50%}
+.d6-shell .lp-knob-body{fill:#d8c8a7!important;stroke:#70583b!important;stroke-width:2.2}
+.d6-shell .lp-knob-flutes{opacity:.16}
+.d6-shell .lp-knob-pointer,.d6-shell .lp-knob-pointer-dot{stroke:#453322!important;fill:#453322!important}
+.d6-shell .lp-knob-cap{fill:#90734d;stroke:#f1dfba}
+.d6-shell .lp-knob-ring-track{stroke:#2c1e12;stroke-width:2.4}
+.d6-shell .lp-knob-led{fill:#8c6a3e;stroke:none}
+.d6-shell .lp-knob-led.lit{fill:#f2c77f!important;stroke:#f2c77f!important;stroke-width:1.4}
+.d6-pedalboard__head{flex-wrap:wrap}
+.d6-pedalboard__master{margin-left:auto;min-width:82px}
+.d6-pedalboard__master.lit{border-color:#f0d39b;background:linear-gradient(#ffe1a6,#c58a40);color:#241609;box-shadow:0 0 10px #eeb45b55,inset 0 1px #fff9}
+.d6-pedalboard:has(.d6-pedalboard__master:not(.lit)) .d6-pedals{opacity:.47;filter:saturate(.55)}
+.d6-shell .pn-keybed{width:100%}
+.d6-damper-control{background:linear-gradient(90deg,#24180f,#4b3521);border-radius:2px}
+.d6-damper-control__label{color:#e8c996}
+@media(max-width:700px){.d6-shell{width:calc(100vw - 12px)}.d6-shell .pn-body{justify-content:center}}

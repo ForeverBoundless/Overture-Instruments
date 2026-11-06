@@ -1,6 +1,6 @@
 import { WorkletEngine } from './shared/workletEngine.js';
 import { PresetStore } from './shared/presetStore.js';
-import { el, section, knob, select, display, performance, power, presetBar, footer } from './shared/panel.js';
+import { el, section, knob, select, toggle, display, performance, power, presetBar, footer } from './shared/panel.js';
 import { registerMidiTargetProvider, registerMidiTarget } from './shared/midiMap.js';
 import { HOHNER_D6_PRESETS } from './data/hohnerD6Presets.js';
 
@@ -20,7 +20,7 @@ const PEDAL_DEFS = {
 const DEFAULT_PEDALS = Object.fromEntries(Object.entries(PEDAL_DEFS).map(([id, def]) => [id, {
   enabled: false, ...Object.fromEntries(def.controls.map(([key,label,min,max,value]) => [key, value])),
 }]));
-const DEF = { toneFilters: [true, false, false, false], pickup: 'bothIn', volume: .72, damping: .34, pedals: DEFAULT_PEDALS };
+const DEF = { toneFilters: [true, false, false, false], pickup: 'bothIn', volume: .72, damping: .34, pedalboardEnabled: true, pedals: DEFAULT_PEDALS };
 const LEGACY_TONES = [[true,false,false,false],[false,true,false,false],[false,false,true,false],[false,false,false,true]];
 const clone = (value) => JSON.parse(JSON.stringify(value));
 const validate = (data) => {
@@ -33,6 +33,7 @@ const validate = (data) => {
   out.pickup = ['bridge','neck','bothIn','bothOut'].includes(data.pickup) ? data.pickup : 'bothIn';
   out.volume = Math.min(1, Math.max(0, Number(data.volume) || 0));
   out.damping = Math.min(1, Math.max(0, Number(data.damping) || 0));
+  out.pedalboardEnabled = data.pedalboardEnabled !== false;
   Object.entries(DEFAULT_PEDALS).forEach(([id, values]) => {
     const supplied = data.pedals && data.pedals[id] ? data.pedals[id] : {};
     out.pedals[id] = { ...values, ...supplied, enabled: !!supplied.enabled };
@@ -115,10 +116,6 @@ class HohnerD6App {
     const level = section(top,'ONBOARD OUTPUT','VOLUME CONTROL');
     const knobs = el('div','pn-knobs',level.body);
     this.ui.volume = knob(knobs,{label:'VOLUME',min:0,max:1,value:this.patch.volume,onChange:(v)=>this.set('volume',v)});
-    const visual = el('section','d6-strings-panel',rows);
-    el('div','d6-strings-panel__label',visual,'TANGENT / STRING / PICKUP ASSEMBLY');
-    const stringsArt = el('div','d6-string-lines',visual);
-    for(let i=0;i<60;i++){const line=el('i','',stringsArt);line.style.setProperty('--string-index',i);}
     const memory = section(rows,'PROGRAM MEMORY','OVERTURE CLAVINET REGISTRATIONS');
     this.presets = presetBar(memory.body,{factory:HOHNER_D6_PRESETS,store:this.store,display:this.display,filename:'hohner-d6-program',
       panic:()=>this.perf.allOff(),apply:(data,name)=>{this.patch=validate(data);this.refresh();this.display.set(name.toUpperCase(),'CLAVINET D6 PROGRAM');},
@@ -130,6 +127,9 @@ class HohnerD6App {
     const board = el('section','d6-pedalboard',parent);
     const head = el('header','d6-pedalboard__head',board);
     const title = el('div','',head); el('h2','',title,'EFFECTS PEDALBOARD'); el('p','',title,'INDEPENDENT STOMPBOXES · SERIAL SIGNAL CHAIN');
+    this.ui.pedalboardEnabled = toggle(head,'BOARD ON',this.patch.pedalboardEnabled,v=>this.set('pedalboardEnabled',v));
+    this.ui.pedalboardEnabled.classList.add('d6-pedalboard__master');
+    this.ui.pedalboardEnabled.setAttribute('aria-label','Enable or bypass the entire effects pedalboard');
     el('span','d6-pedalboard__signal',head,'CLAV OUT → PEDALS → AMP');
     const grid = el('div','d6-pedals',board);
     Object.entries(PEDAL_DEFS).forEach(([id,def],index)=>{
