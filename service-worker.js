@@ -1,4 +1,4 @@
-const CACHE = 'overture-shell-v43';
+const CACHE = 'overture-shell-v44';
 const APP_SHELL = [
   '/account',
   '/login',
@@ -147,7 +147,7 @@ const APP_SHELL = [
   '/js/roland-tr-808.js',
   '/js/oberheim-eight-voice.js',
   '/js/hohner-d6.js?v=20261106-hardware-audio',
-  '/js/obxa.js?v=20261106-architecture',
+  '/js/obxa.js?v=20261106-architecture-r2',
   '/js/obxa.js?v=20261105-obxa-layers',
   '/js/shared/audioRecorder.js',
   '/js/shared/contact.js',

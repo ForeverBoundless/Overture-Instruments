@@ -45,7 +45,7 @@ class OBXaProcessor extends AudioWorkletProcessor{
  noteOn(note,vel){
   this.heldNotes.set(note,vel);
   const layers=this.p.mode==='double'?[0,1]:[this.layerFor(note)];
-  if(this.hold)layers.forEach(layer=>{const chord=this.chordMemory[layer];if(!chord.includes(note))chord.push(note);chord.sort((a,b)=>a-b);});
+  if(this.hold&&!this.p.chordMode)layers.forEach(layer=>{const chord=this.chordMemory[layer];if(!chord.includes(note))chord.push(note);chord.sort((a,b)=>a-b);});
   if(this.p.unison){layers.forEach(layer=>{const low=this.lowestHeld(layer);if(low)this.triggerUnison(layer,low[0],low[1]);});return;}
   if(this.p.chordMode){layers.forEach(layer=>{const memory=this.chordMemory[layer],base=memory.length?memory[0]:note,notes=memory.length?memory:[note];notes.forEach(stored=>{let played=note+(stored-base);while(played>96)played-=12;while(played<36)played+=12;this.startVoice(this.allocate(played,layer),played,vel,layer,0,1,note);});});return;}
   layers.forEach(layer=>this.startVoice(this.allocate(note,layer),note,vel,layer,0,1,note));

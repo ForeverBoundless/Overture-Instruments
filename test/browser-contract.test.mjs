@@ -52,8 +52,15 @@ test('Hohner D6 and Oberheim OB-Xa are complete first-class emulator entries', a
   assert.match(obApp, /MASTER TUNE/);
   assert.match(obApp, /PULSE WIDTH DEPTH/);
   assert.match(obApp, /PORTAMENTO/);
+  assert.match(obApp, /CHORD MEMORY/);
+  assert.match(obApp, /LOWER \/ UPPER BALANCE/);
+  assert.match(obApp, /GLIDE MODE/);
+  assert.match(obApp, /VOLUME MOD/);
+  assert.match(obEngine, /chordMemory/);
+  assert.match(obEngine, /portamentoMode==='quantized'/);
+  assert.match(obEngine, /inputNote===note/);
   assert.match(obPage, /Oberheim_logo\.png/);
-  assert.match(worker, /overture-shell-v43/);
+  assert.match(worker, /overture-shell-v44/);
   assert.match(worker, /hohner-d6/);
   assert.match(worker, /ob-xa/);
 });

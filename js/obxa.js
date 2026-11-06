@@ -30,7 +30,7 @@ const validate=data=>{
 };
 class OBXaApp{
  constructor(){
-  this.engine=new WorkletEngine(new URL('./engine/OBXaProcessor.js?v=20261106-architecture',import.meta.url).href,'obxa-processor');
+  this.engine=new WorkletEngine(new URL('./engine/OBXaProcessor.js?v=20261106-architecture-r2',import.meta.url).href,'obxa-processor');
   this.patch=validate(DEF);this.layerIndex=0;this.ui={};this.store=new PresetStore({key:'overture.obxa.programs',version:3,validate});this.build();
   this.perf=performance(this.shell,{notes:NOTES,octaves:5,startOctave:2,started:()=>this.engine.started,midiStatusEl:this.midi,handlers:{
    noteOn:(n,v)=>this.engine.noteOn(n,v),noteOff:n=>this.engine.noteOff(n),bend:v=>this.engine.setPitchBend(v),mod:v=>this.engine.setModWheel(v),
@@ -101,6 +101,7 @@ class OBXaApp{
   this.ui.hold=toggle(modulation.body,'HOLD / CAPTURE',this.patch.hold,v=>this.set('hold',v));
   this.ui.chordMode=toggle(modulation.body,'CHORD MEMORY',this.patch.chordMode,v=>this.set('chordMode',v));
   this.ui.clearChord=button(modulation.body,'CLEAR CHORD',()=>{this.engine.post({t:'clearChord'});this.display.set('CHORD MEMORY CLEARED','PLAY AND HOLD A NEW CHORD');});
+  el('p','pn-help',modulation.body,'With HOLD enabled, play the notes of a chord and release them. Turn HOLD off to release the keys; enable CHORD MEMORY to play that captured interval set from any root note.');
   const allocation=section(rows,'KEYBOARD & VOICE ALLOCATION','FULL · SPLIT · DOUBLE · PROGRAMMABLE VOICE BANKS'),ak=el('div','pn-knobs',allocation.body);
   this.ui.mode=select(allocation.body,'KEYBOARD MODE',[{value:'full',label:'FULL · POLY'},{value:'split',label:'SPLIT'},{value:'double',label:'DOUBLE / LAYER'}],this.patch.mode,v=>this.set('mode',v));
   this.ui.voiceCount=select(allocation.body,'VOICE CONFIGURATION',[{value:'4',label:'4 VOICES'},{value:'6',label:'6 VOICES'},{value:'8',label:'8 VOICES'}],String(this.patch.voiceCount),v=>this.set('voiceCount',Number(v)));
