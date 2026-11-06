@@ -28,7 +28,7 @@ Overture is a work in progress. Its models are independently implemented in soft
 
 | Area | What it does |
 | --- | --- |
-| **Instrument library** | A searchable catalogue of ten browser-based instruments, each with its own interface and sound engine. |
+| **Instrument library** | A searchable catalogue of twelve browser-based instruments, each with its own interface and sound engine. |
 | **OMNI** | A modular workspace for assembling an instrument from sound sources, processors, modulation, and performance modules. Patches can be played, saved locally, and exported as JSON or SVG schematics. |
 | **Experiments** | Eight interactive laboratories for learning about waveforms, filters, envelopes, FM, harmonics, beats, time-based effects, and modulation. |
 | **Community** | A searchable library of public OMNI patches and supported instrument presets, with in-browser auditioning, downloads, sharing, and owner publishing tools. |
@@ -41,7 +41,7 @@ Overture is a work in progress. Its models are independently implemented in soft
 
 ## Instrument library
 
-The current library contains ten instrument emulators. The library search covers instrument names, manufacturers, models, voice modes, preset provenance, and descriptions. The sound-generation models are implemented in Overture's JavaScript audio code; the interface and feature set vary by instrument.
+The current library contains twelve instrument emulators. The library search covers instrument names, manufacturers, models, voice modes, preset provenance, and descriptions. The sound-generation models are implemented in Overture's JavaScript audio code; the interface and feature set vary by instrument.
 
 ### Moog Little Phatty Stage Edition
 
@@ -82,6 +82,14 @@ A tape-replay keyboard model built around six selectable virtual tape frames, ea
 ### Oberheim Eight Voice
 
 An eight-voice synthesizer model based on independently controlled SEM-style voices. Each voice has two oscillators and a state-variable filter with low-pass, band-pass, high-pass, and notch modes. Voice-level controls include tuning, detuning, level, and stereo position, alongside shared modulation and program controls. The included collection contains eight Overture programs; it is not presented as a verified copy of an original factory bank.
+
+### Hohner Clavinet D6
+
+A 60-note electromechanical keyboard whose strings are excited by rubber-tipped tangents and captured by two magnetic pickups. The emulator uses an original procedural plucked-string model with a decaying delay line and separate pickup-position taps; it is not a recording bank. Its front panel follows the D6's two pickup switches: A/B selects the pickup or the in-/out-of-phase combination, while C/D selects single- or dual-pickup operation. The four tone rockers—Brilliant, Treble, Medium, and Soft—can be combined independently, and the instrument is silent when none is engaged, as on the hardware. A continuous mute/damping control shapes the string decay. A separate six-stompbox board adds overdrive, compression, wah, phaser, chorus, and spring-style reverb. Pedal knobs use the shared MIDI mapping system, and every pedal bypass switch is also available as a MIDI target. Eight original Overture registrations demonstrate dry, driven, phased, wah, and chorus sounds; they are not claimed to be factory programs.
+
+### Oberheim OB-Xa
+
+An eight-voice model of Oberheim's 1981 Curtis-chip polysynth, with two oscillators per voice, saw/pulse/triangle sources, oscillator hard sync, cross modulation, noise, and a selectable 12 dB-per-octave SEM-style or 24 dB-per-octave low-pass response. Independent filter and amplifier ADSR envelopes shape each layer, while the LFO offers triangle, square, sawtooth, and sample-and-hold modulation destinations. The voice allocator supports Poly, Unison, Split, and Double modes. Split and Double use separately editable Layer A and Layer B programs, and saved registrations preserve both timbres. Ten original Overture program recipes are included. The synthesis engine is a procedural model of the instrument's architecture and behaviour, not a circuit-exact reproduction or a copy of Oberheim factory programs.
 
 ### Preset and program counts
 
@@ -281,7 +289,7 @@ Original software source code and associated documentation authored for Overture
 
 The repository also references third-party brand names, logos, fonts, product names, and other materials. These may be subject to separate copyright, trademark, or licence terms. The MIT license does **not** automatically grant permission to reuse those assets. Check the terms for any third-party material before redistributing it or incorporating it into another project.
 
-Overture Instruments is independent and unofficial. It is not affiliated with, endorsed by, sponsored by, or licensed by Moog Music, Roland, Sequential, Nord, Yamaha, Korg, Oberheim, Novation, or any other manufacturer referenced by the project. Product and company names are used for identification and descriptive purposes; all trademarks remain the property of their respective owners.
+Overture Instruments is independent and unofficial. It is not affiliated with, endorsed by, sponsored by, or licensed by Moog Music, Roland, Sequential, Nord, Yamaha, Korg, Hohner, Oberheim, Novation, or any other manufacturer referenced by the project. Product and company names are used for identification and descriptive purposes; all trademarks remain the property of their respective owners.
 
 ---
 
