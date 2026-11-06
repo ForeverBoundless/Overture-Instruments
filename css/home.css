@@ -2575,3 +2575,33 @@ html[data-theme="light"] .hero-rainbow-mode .hero-circuit .circuit-pulses {
     animation-duration: 3s;
   }
 }
+
+
+/* The hero headline joins the circuit spectrum while the hidden sequence is active. */
+.hero-rainbow-mode .hero-title em {
+  animation: hero-rainbow-text-glow 1.05s linear infinite;
+  will-change: filter;
+}
+@keyframes hero-rainbow-text-glow {
+  0% {
+    filter: hue-rotate(0deg) saturate(2.5) brightness(1.22)
+      drop-shadow(0 0 5px #ff3030) drop-shadow(0 0 17px #ff3030);
+  }
+  33% {
+    filter: hue-rotate(120deg) saturate(2.5) brightness(1.28)
+      drop-shadow(0 0 7px #30ff70) drop-shadow(0 0 21px #30ff70);
+  }
+  66% {
+    filter: hue-rotate(240deg) saturate(2.5) brightness(1.28)
+      drop-shadow(0 0 7px #3070ff) drop-shadow(0 0 21px #3070ff);
+  }
+  100% {
+    filter: hue-rotate(360deg) saturate(2.5) brightness(1.22)
+      drop-shadow(0 0 5px #ff3030) drop-shadow(0 0 17px #ff3030);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-rainbow-mode .hero-title em {
+    animation-duration: 3s;
+  }
+}
