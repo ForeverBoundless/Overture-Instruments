@@ -73,7 +73,7 @@ test('OB-Xa worklet allocates two independent timbres for split and double modes
   h.processor.noteOn(60, .8);
   let active = h.processor.voices.filter((voice) => voice.active);
   assert.equal(active.length, 2);
-  assert.deepEqual(active.map((voice) => voice.layer).sort(), [0, 1]);
+  assert.deepEqual(Array.from(active, (voice) => voice.layer).sort(), [0, 1]);
 
   h.processor.dispatch({ t: 'param', key: 'mode', value: 'double', layer: 0 });
   h.processor.noteOn(64, .9);
