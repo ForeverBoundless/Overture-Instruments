@@ -4320,3 +4320,41 @@ html[data-theme="light"] .instrument-tile--mellotron-m400 .instrument-tile__eyeb
 .obxa-tile-art__display::after{content:'';display:block;width:4px;height:4px;margin:2px auto;background:#9ed9ef;box-shadow:0 0 5px #a6def4}
 .instrument-tile--ob-xa .instrument-tile__display span{background:#78b6db;box-shadow:0 0 7px #78b6db}
 @media(max-width:560px){.hohner-d6-tile-art,.obxa-tile-art{right:7px;left:7px}.obxa-tile-art{grid-template-columns:9px minmax(0,1fr) 9px}.obxa-tile-art__controls{gap:3px}.obxa-tile-art__controls i{width:8px;height:8px}}
+
+
+/* Hohner D6 and OB-Xa: match the newer card information layout while
+   retaining the walnut Clavinet and graphite/blue Oberheim illustrations. */
+.instrument-tile--hohner-d6 .instrument-tile__content,
+.instrument-tile--ob-xa .instrument-tile__content { min-width: 0; }
+.instrument-tile--hohner-d6 .instrument-specs,
+.instrument-tile--ob-xa .instrument-specs {
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  row-gap: 9px;
+}
+.instrument-tile--hohner-d6 .instrument-spec,
+.instrument-tile--ob-xa .instrument-spec { min-width: 78px; }
+.instrument-tile--hohner-d6 { --tile-bar-glow: #e9b56f; }
+.instrument-tile--ob-xa { --tile-bar-glow: #78b6db; }
+.instrument-tile--hohner-d6 .instrument-tile__visual,
+.instrument-tile--ob-xa .instrument-tile__visual { overflow: hidden; isolation: isolate; }
+.instrument-tile--hohner-d6 .instrument-tile__keys { filter: sepia(.1) saturate(.92); }
+.instrument-tile--ob-xa .instrument-tile__keys { filter: saturate(.88) contrast(1.04); }
+.hohner-d6-tile-art,
+.obxa-tile-art { box-sizing: border-box; border-radius: 5px; }
+.instrument-tile--hohner-d6 .instrument-tile__icon { color: rgba(233,181,111,.86); }
+.instrument-tile--ob-xa .instrument-tile__icon { color: rgba(120,182,219,.88); }
+html[data-theme="light"] .instrument-tile--hohner-d6 .instrument-tile__eyebrow { color: #72563f !important; }
+html[data-theme="light"] .instrument-tile--ob-xa .instrument-tile__eyebrow { color: #28766f !important; }
+html[data-theme="light"] .instrument-tile--hohner-d6 .instrument-spec .material-symbols-rounded { color: #94602c !important; }
+html[data-theme="light"] .instrument-tile--ob-xa .instrument-spec .material-symbols-rounded { color: #287e78 !important; }
+html[data-theme="light"] .instrument-tile--hohner-d6 .instrument-tile__hint,
+html[data-theme="light"] .instrument-tile--ob-xa .instrument-tile__hint { color: #647386 !important; }
+@media (max-width: 760px) {
+  .instrument-tile--hohner-d6 .instrument-specs,
+  .instrument-tile--ob-xa .instrument-specs { gap: 8px 12px; }
+}
+@media (max-width: 560px) {
+  .hohner-d6-tile-art,
+  .obxa-tile-art { right: 7px; left: 7px; }
+}
