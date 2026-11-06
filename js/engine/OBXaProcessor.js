@@ -15,8 +15,8 @@ const BLEP=(t,d)=>{
 const saw=(p,d)=>2*p-1-BLEP(p,d);
 const pulse=(p,w,d)=>{const duty=clamp(w,.05,.95);return (p<duty?1:-1)+BLEP(p,d)-BLEP((p+1-duty)%1,d);};
 const triangle=(p)=>1-4*Math.abs(Math.round(p)-p);
-const wave=(shape,p,w,d)=>shape==='pulse'?pulse(p,w,d):shape==='sawPulse'?(saw(p,d)+pulse(p,w,d))*.5:saw(p,d);
-const DEFAULT={osc1Wave:'saw',osc2Wave:'saw',fEnvOsc2:false,osc1Level:.82,osc2Level:.56,osc2Tune:0,pulseWidth:.5,noise:0,sync:false,crossMod:0,cutoff:.53,resonance:.13,filterMode:'24',filterEnv:.42,filterKeyTrack:.35,filterAttack:.08,filterDecay:.32,filterSustain:.12,filterRelease:.32,ampAttack:.015,ampDecay:.3,ampSustain:.76,ampRelease:.32,lfoRate:.16,lfoAmount:0,lfoWave:'triangle',lfoTarget:'pitch',bendRange:2,master:.7,mode:'poly',splitPoint:60,unisonDetune:.12};
+const wave=(shape,p,w,d)=>shape==='pulse'?pulse(p,w,d):shape==='sawPulse'?(saw(p,d)+pulse(p,w,d))*.5:shape==='triangle'?triangle(p):saw(p,d);
+const DEFAULT={osc1Wave:'saw',osc2Wave:'saw',osc1Range:0,fEnvOsc2:false,osc1Route:true,osc2Route:true,osc2Half:false,noiseRoute:false,filterTrack:true,osc1Level:.82,osc2Level:.56,osc2Tune:0,pulseWidth:.5,sync:false,cutoff:.53,resonance:.13,filterMode:'24',filterEnv:.42,filterAttack:.08,filterDecay:.32,filterSustain:.12,filterRelease:.32,ampAttack:.015,ampDecay:.3,ampSustain:.76,ampRelease:.32,lfoRate:.16,lfoAmount:0,lfoWave:'sine',lfoTarget:'both',bendRange:2,bendOsc2Only:false,master:.7,mode:'poly',splitPoint:60,unisonDetune:.12};
 const GLOBAL_KEYS=new Set(['mode','splitPoint','unisonDetune','bendRange','master']);
 class XaVoice{
  constructor(i){this.i=i;this.note=-1;this.layer=0;this.active=false;this.gate=false;this.order=0;this.phase1=Math.random();this.phase2=Math.random();this.lfo=Math.random();this.lfoHold=0;this.amp=0;this.filterEnv=0;this.ampStage='idle';this.filterStage='idle';this.lp1=0;this.bp1=0;this.lp2=0;this.bp2=0;this.pan=(i-3.5)/5;this.vel=.8;this.rand=(Math.random()-.5)*.0005;this.noiseSeed=((i+1)*17117)|0;}
@@ -85,28 +85,33 @@ class OBXaProcessor extends AudioWorkletProcessor{
     if(!v.active)continue;
     const p=v.layer===1?this.pB:this.p;
     this.env(v,p,'amp',dt);this.env(v,p,'filter',dt);
-    v.lfo+=(.08*Math.pow(300,p.lfoRate))/sr;
+    v.lfo+=(.1*Math.pow(200,p.lfoRate))/sr;
     let lfoWrapped=false;if(v.lfo>=1){v.lfo-=1;lfoWrapped=true;}
     if(p.lfoWave==='s&h'&&lfoWrapped)v.lfoHold=this.noise(v);
     const lfo=p.lfoWave==='s&h'?v.lfoHold:p.lfoWave==='square'?(v.lfo<.5?1:-1):p.lfoWave==='saw'?2*v.lfo-1:Math.sin(v.lfo*2*Math.PI);
     const lfoDepth=p.lfoAmount+this.mod*.22;
-    const pitchMod=p.lfoTarget==='pitch'?lfo*lfoDepth*1.8:0;
+    const pitchMod1=(p.lfoTarget==='osc1'||p.lfoTarget==='both')?lfo*lfoDepth*1.8:0;
+    const pitchMod2=(p.lfoTarget==='osc2'||p.lfoTarget==='both')?lfo*lfoDepth*1.8:0;
     const pwMod=p.lfoTarget==='pulse'?lfo*lfoDepth*.4:0;
     const unisonOffset=this.p.mode==='unison'?(v.i-3.5)*this.p.unisonDetune*.055:0;
-    const note=v.note+this.bend*this.p.bendRange+pitchMod+unisonOffset;
-    const f1=hz(note),osc2Env=p.fEnvOsc2?(v.filterEnv-.15)*p.filterEnv*18:0,f2=hz(note+p.osc2Tune*12+osc2Env+v.rand*12);
+    const bend1=this.p.bendOsc2Only?0:this.bend*this.p.bendRange;
+    const note1=v.note+bend1+pitchMod1+unisonOffset;
+    const note2=v.note+this.bend*this.p.bendRange+pitchMod2+unisonOffset;
+    const f1=hz(note1+p.osc1Range*12),osc2Env=p.fEnvOsc2?(v.filterEnv-.15)*p.filterEnv*30:0,f2=hz(note2+p.osc2Tune*30+osc2Env+v.rand*12);
     const d1=f1/sr,d2=f2/sr;
     v.phase1+=d1;
     const masterWrap=v.phase1>=1;
     if(masterWrap)v.phase1-=Math.floor(v.phase1);
-    const fm=p.crossMod*Math.sin(v.phase1*Math.PI*2)*f1*.45;
     if(p.sync&&masterWrap)v.phase2=0;
-    else{v.phase2+=d2+fm/sr;if(v.phase2>=1||v.phase2<0)v.phase2=(v.phase2%1+1)%1;}
+    else{v.phase2+=d2;if(v.phase2>=1||v.phase2<0)v.phase2=(v.phase2%1+1)%1;}
     const p1=wave(p.osc1Wave,v.phase1,p.pulseWidth+pwMod,d1);
     const p2=wave(p.osc2Wave,v.phase2,p.pulseWidth+pwMod,d2);
-    const raw=(p1*p.osc1Level+p2*p.osc2Level+this.noise(v)*p.noise)*.38;
+    const osc1=p.osc1Route?p1*p.osc1Level:0;
+    const osc2=p.osc2Route?p2*p.osc2Level*(p.osc2Half?.562:1):0;
+    const noise=p.noiseRoute?this.noise(v)*.22:0;
+    const raw=(osc1+osc2+noise)*.38;
     const filterMod=p.lfoTarget==='filter'?lfo*lfoDepth*.32:0;
-    const noteTrack=(v.note-60)/48*p.filterKeyTrack;
+    const noteTrack=p.filterTrack?(v.note-60)/48*.35:0;
     const envAmount=(v.filterEnv-.2)*p.filterEnv;
     const normalized=clamp(p.cutoff+filterMod+noteTrack+envAmount,0,1);
     const cutoff=Math.min(sr*.38,35*Math.pow(2,normalized*9.2));
