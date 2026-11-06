@@ -32,6 +32,7 @@ function render(processor, scope, frames = 512) {
 
 test('Hohner D6 worklet renders a struck string and honours the six-switch tone logic', async () => {
   const h = await createWorklet('../js/engine/HohnerD6Processor.js', 'hohner-d6-processor');
+  assert.equal(h.processor.voices.length, 60, 'the D6 model should provide one voice for each physical string');
   h.processor.dispatch({ t: 'patch', patch: {
     toneFilters: [true, true, false, false], pickup: 'bothIn', volume: .8, damping: .3,
   } });
@@ -74,12 +75,14 @@ test('OB-Xa worklet allocates two independent timbres for split and double modes
   let active = h.processor.voices.filter((voice) => voice.active);
   assert.equal(active.length, 2);
   assert.deepEqual(Array.from(active, (voice) => voice.layer).sort(), [0, 1]);
+  assert.ok(active.some((voice) => voice.i < 4), 'lower/Layer A should allocate from the first four voice cards');
+  assert.ok(active.some((voice) => voice.i >= 4), 'upper/Layer B should allocate from the second four voice cards');
 
   h.processor.dispatch({ t: 'param', key: 'mode', value: 'double', layer: 0 });
   h.processor.noteOn(64, .9);
   active = h.processor.voices.filter((voice) => voice.active && voice.note === 64);
   assert.equal(active.length, 2);
-  assert.deepEqual(active.map((voice) => voice.layer).sort(), [0, 1]);
+  assert.deepEqual(Array.from(active, (voice) => voice.layer).sort(), [0, 1]);
 });
 
 test('OB-Xa worklet supports eight-voice unison and generates finite audio', async () => {
