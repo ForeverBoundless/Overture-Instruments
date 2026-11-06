@@ -4293,3 +4293,30 @@ html[data-theme="light"] .instrument-tile--mellotron-m400 .instrument-tile__eyeb
 .instrument-tile--korg-ms-20 { background:linear-gradient(145deg,rgba(111,90,44,.32),rgba(28,27,24,.98)); }
 .instrument-tile--mellotron-m400 { background:linear-gradient(145deg,rgba(63,49,47,.97),rgba(28,24,28,.98)); }
 .instrument-tile--oberheim-eight-voice { background:linear-gradient(145deg,rgba(39,57,63,.98),rgba(16,25,31,.98)); }
+
+/* Hohner Clavinet D6 — walnut cabinet, exposed string field and rocker row. */
+.instrument-tile--hohner-d6 {background:linear-gradient(145deg,rgba(92,61,36,.96),rgba(29,23,21,.99));}
+.instrument-tile--hohner-d6 .instrument-tile__visual::after{content:'';position:absolute;z-index:0;inset:8px;border:1px solid rgba(220,184,130,.25);border-radius:5px;background:linear-gradient(90deg,rgba(182,128,72,.22),transparent 30%,rgba(10,11,12,.18));pointer-events:none}
+.hohner-d6-tile-art{position:absolute;z-index:2;top:91px;right:9px;bottom:87px;left:9px;overflow:hidden;border:1px solid rgba(220,184,130,.46);border-radius:5px;background:linear-gradient(145deg,#a8794b,#5f3c25 56%,#30251f);box-shadow:inset 0 1px #fff5,inset 0 -10px 15px #0006,0 3px 7px #0005;pointer-events:none}
+.hohner-d6-tile-art__wood{position:absolute;inset:0;background:repeating-linear-gradient(4deg,transparent 0 7px,rgba(255,226,177,.055) 8px,transparent 10px),linear-gradient(110deg,#c08c5c22,#1d120b44)}
+.hohner-d6-tile-art__strings{position:absolute;left:8%;right:8%;top:15%;bottom:22%;background:repeating-linear-gradient(180deg,transparent 0 4px,rgba(239,218,182,.86) 4.5px,rgba(75,52,35,.8) 5px,transparent 5.5px);transform:skewY(-4deg);filter:drop-shadow(0 0 1px #f5dfb8)}
+.hohner-d6-tile-art__switches{position:absolute;left:8%;right:8%;bottom:7%;height:17%;display:grid;grid-template-columns:repeat(6,1fr);gap:4px;padding:3px;border:1px solid #23170f;border-radius:3px;background:linear-gradient(#433020,#1c140e);box-shadow:inset 0 1px #fff2}
+.hohner-d6-tile-art__switches i{border:1px solid #bca17e;border-radius:2px;background:linear-gradient(110deg,#e7d7bb,#8e7658 55%,#d5c19d);box-shadow:0 1px 2px #0009}
+.hohner-d6-tile-art__pickup{position:absolute;top:9%;right:7%;width:24%;height:4px;border-radius:4px;background:#e1d4b7;box-shadow:0 0 5px #fff6}
+.instrument-tile--hohner-d6 .instrument-tile__display span{background:#e9b56f;box-shadow:0 0 7px #df9e4d}
+
+/* OB-Xa — dark control field, blue pinstripes and wood end cheeks. */
+.instrument-tile--ob-xa{background:linear-gradient(145deg,rgba(51,59,68,.98),rgba(17,23,29,.99))}
+.instrument-tile--ob-xa .instrument-tile__visual::after{content:'';position:absolute;z-index:0;inset:8px;border:1px solid #7f9aa85c;border-radius:5px;background:linear-gradient(180deg,#1b222a,#343a3d 32%,#151a20);box-shadow:inset 0 1px #fff2;pointer-events:none}
+.obxa-tile-art{position:absolute;z-index:2;top:91px;right:9px;bottom:87px;left:9px;display:grid;grid-template-columns:12px minmax(0,1fr) 12px;gap:3px;padding:5px;border:1px solid #8c969b88;border-radius:4px;background:linear-gradient(145deg,#151b21,#323a40 48%,#151a20);box-shadow:inset 0 1px #fff3,0 3px 7px #0007;pointer-events:none}
+.obxa-tile-art__cheek{border-radius:2px;background:repeating-linear-gradient(8deg,#65452c,#a2764e 3px,#63422c 5px);box-shadow:inset 1px 0 #fff3,inset -1px 0 #0008}
+.obxa-tile-art__cheek--right{background:repeating-linear-gradient(-7deg,#60432e,#9e724a 3px,#503725 5px)}
+.obxa-tile-art__panel{position:relative;min-width:0;border:1px solid #71808b55;border-radius:2px;background:linear-gradient(180deg,#343e47,#202930 60%,#171f26)}
+.obxa-tile-art__blue-line{position:absolute;top:9%;left:4%;right:4%;height:2px;background:#78b6db;box-shadow:0 0 5px #78b6db77}
+.obxa-tile-art__controls{position:absolute;top:20%;left:5%;right:5%;bottom:20%;display:grid;grid-template-columns:repeat(6,1fr);grid-template-rows:repeat(2,1fr);gap:5px}
+.obxa-tile-art__controls i{align-self:center;justify-self:center;width:10px;height:10px;max-width:100%;border:1px solid #909da5;border-radius:50%;background:radial-gradient(circle at 34% 28%,#c6cdd0 0 8%,#687780 32%,#202b33 70%);box-shadow:0 2px 2px #000a}
+.obxa-tile-art__controls i:nth-child(3n){border-color:#8db8d2;background:radial-gradient(circle at 35% 28%,#c9e2ef 0 8%,#65889b 34%,#263b49 72%)}
+.obxa-tile-art__display{position:absolute;right:6%;bottom:5%;width:18%;height:8%;border:1px solid #111;border-radius:2px;background:#0b1820;box-shadow:inset 0 0 5px #000}
+.obxa-tile-art__display::after{content:'';display:block;width:4px;height:4px;margin:2px auto;background:#9ed9ef;box-shadow:0 0 5px #a6def4}
+.instrument-tile--ob-xa .instrument-tile__display span{background:#78b6db;box-shadow:0 0 7px #78b6db}
+@media(max-width:560px){.hohner-d6-tile-art,.obxa-tile-art{right:7px;left:7px}.obxa-tile-art{grid-template-columns:9px minmax(0,1fr) 9px}.obxa-tile-art__controls{gap:3px}.obxa-tile-art__controls i{width:8px;height:8px}}
