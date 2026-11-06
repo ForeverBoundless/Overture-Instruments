@@ -1,4 +1,4 @@
-const CACHE = 'overture-shell-v41';
+const CACHE = 'overture-shell-v42';
 const APP_SHELL = [
   '/account',
   '/login',
