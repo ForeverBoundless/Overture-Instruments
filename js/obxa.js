@@ -14,7 +14,7 @@ const cleanLayer=(source)=>{
  out.osc2Tune=Math.max(-1,Math.min(1,Number(out.osc2Tune)||0));
  ['osc1Wave','osc2Wave'].forEach(k=>out[k]=['saw','pulse','triangle'].includes(out[k])?out[k]:'saw');
  out.filterMode=['12','24'].includes(String(out.filterMode))?String(out.filterMode):'24';
- out.lfoWave=['triangle','square','saw'].includes(out.lfoWave)?out.lfoWave:'triangle';
+ out.lfoWave=['triangle','square','saw','s&h'].includes(out.lfoWave)?out.lfoWave:'triangle';
  out.lfoTarget=['pitch','filter','pulse'].includes(out.lfoTarget)?out.lfoTarget:'pitch';
  out.sync=!!out.sync;
  return out;
@@ -106,7 +106,7 @@ class OBXaApp{
   this.ui.lfoAmount=knob(mk,{label:'LFO AMOUNT',min:0,max:1,value:this.currentLayer().lfoAmount,onChange:v=>this.set('lfoAmount',v)});
   this.ui.bendRange=knob(mk,{label:'BEND RANGE',min:1,max:12,value:this.patch.bendRange,formatValue:v=>Math.round(v)+' st',onChange:v=>this.set('bendRange',Math.round(v))});
   this.ui.master=knob(mk,{label:'MASTER',min:0,max:1,value:this.patch.master,onChange:v=>{this.set('master',v);this.engine.setVolume(v);}});
-  this.ui.lfoWave=select(modulation.body,'LFO SHAPE',[{value:'triangle',label:'TRIANGLE'},{value:'square',label:'SQUARE'},{value:'saw',label:'SAWTOOTH'}],this.currentLayer().lfoWave,v=>this.set('lfoWave',v));
+  this.ui.lfoWave=select(modulation.body,'LFO SHAPE',[{value:'triangle',label:'TRIANGLE'},{value:'square',label:'SQUARE'},{value:'saw',label:'SAWTOOTH'},{value:'s&h',label:'SAMPLE & HOLD'}],this.currentLayer().lfoWave,v=>this.set('lfoWave',v));
   this.ui.lfoTarget=select(modulation.body,'MOD DESTINATION',[{value:'pitch',label:'OSCILLATOR FREQUENCY'},{value:'filter',label:'FILTER CUTOFF'},{value:'pulse',label:'PULSE WIDTH'}],this.currentLayer().lfoTarget,v=>this.set('lfoTarget',v));
   this.ui.mode=select(modulation.body,'VOICE MODE',[{value:'poly',label:'POLYPHONIC'},{value:'unison',label:'UNISON'},{value:'double',label:'DOUBLE / LAYER'},{value:'split',label:'SPLIT'}],this.patch.mode,v=>this.set('mode',v));
   this.ui.splitPoint=knob(mk,{label:'SPLIT POINT',min:36,max:96,value:this.patch.splitPoint,formatValue:v=>NOTE_NAMES[Math.round(v)%12]+(Math.floor(Math.round(v)/12)-1),onChange:v=>this.set('splitPoint',Math.round(v))});
