@@ -2,7 +2,7 @@ import { WorkletEngine } from './shared/workletEngine.js';
 import { PresetStore } from './shared/presetStore.js';
 import { el, section, knob, select, toggle, button, display, performance, power, presetBar, footer } from './shared/panel.js';
 import { OBXA_PRESETS } from './data/obx-a-presets.js';
-const NOTE_NAMES=['C','C#','D','D#','E','F','G','G#','A','A#','B'];
+const NOTE_NAMES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
 const NOTES=Array.from({length:61},(_,i)=>{const n=36+i;return NOTE_NAMES[n%12]+(Math.floor(n/12)-1);});
 const GLOBAL_DEFAULTS={mode:'full',voiceCount:8,splitPoint:60,unison:false,unisonDetune:.12,bendRange:12,bendNarrow:false,bendOsc2Only:false,master:.7,masterTune:0,hold:false,layerBalance:.5,chordMode:false,portamentoMode:'linear',portamentoOffset:true,transposeDown:false,transposeUp:false,modLowerEnabled:true,modUpperEnabled:true};
 const LAYER_DEFAULTS={osc1Wave:'saw',osc2Wave:'saw',osc1Range:0,osc1Level:.82,osc2Level:.56,osc2Tune:0,pulseWidth:.5,sync:false,fEnvOsc2:false,osc1Route:true,osc2Route:true,osc2Half:false,noiseRoute:false,cutoff:.53,resonance:.13,filterMode:'24',filterTrack:true,filterEnv:.42,filterAttack:.08,filterDecay:.32,filterSustain:.12,filterRelease:.32,ampAttack:.015,ampDecay:.3,ampSustain:.76,ampRelease:.32,lfoRate:.16,lfoAmount:0,lfoWave:'sine',lfoTarget:'both',lfoOsc1:true,lfoOsc2:true,lfoFilter:false,pulseWidthAmount:0,lfoPulse1:false,lfoPulse2:false,transpose:0,portamento:0};
@@ -30,14 +30,14 @@ const validate=data=>{
 };
 class OBXaApp{
  constructor(){
-  this.engine=new WorkletEngine(new URL('./engine/OBXaProcessor.js?v=20261106-architecture-r3',import.meta.url).href,'obxa-processor');
+  this.engine=new WorkletEngine(new URL('./engine/OBXaProcessor.js?v=20261106-audio-r1',import.meta.url).href,'obxa-processor');
+  power('obxa-power',()=>this.engine.start(),()=>{this.perf?.flushPending();this.display?.set('OB-Xa READY',this.patch.voiceCount+' VOICES · TWO CONTROL GROUPS');});
   this.patch=validate(DEF);this.layerIndex=0;this.ui={};this.store=new PresetStore({key:'overture.obxa.programs',version:3,validate});this.build();
   this.perf=performance(this.shell,{notes:NOTES,octaves:5,startOctave:2,started:()=>this.engine.started,midiStatusEl:this.midi,handlers:{
    noteOn:(n,v)=>this.engine.noteOn(n,v),noteOff:n=>this.engine.noteOff(n),bend:v=>this.engine.setPitchBend(v),mod:v=>this.engine.setModWheel(v),
    sustain:d=>this.engine.setSustain(d),allOff:()=>this.engine.allNotesOff(),program:p=>this.presets.load('f:'+(p%OBXA_PRESETS.length)),
    cc:(cc,value)=>{if(cc===7)this.ui.master.setValue(value/127);if(cc===74)this.ui.cutoff.setValue(value/127);if(cc===71)this.ui.resonance.setValue(value/127);}
   }});
-  power('obxa-power',()=>this.engine.start(),()=>{this.perf.flushPending();this.display.set('OB-Xa READY',this.patch.voiceCount+' VOICES · TWO CONTROL GROUPS');});
   this.presets.load('f:0');
  }
  currentLayer(){return this.layerIndex===1?this.patch.layerB:this.patch;}
@@ -62,7 +62,7 @@ class OBXaApp{
   this.ui.osc1Range=knob(ok,{label:'OSC 1 FREQUENCY',min:-2,max:2,value:this.currentLayer().osc1Range,formatValue:v=>(Math.round(v)>0?'+':'')+Math.round(v)+' OCT',onChange:v=>this.set('osc1Range',Math.round(v))});
   this.ui.osc1Level=knob(ok,{label:'OSC 1 LEVEL',min:0,max:1,value:this.currentLayer().osc1Level,onChange:v=>this.set('osc1Level',v)});
   this.ui.osc2Level=knob(ok,{label:'OSC 2 LEVEL',min:0,max:1,value:this.currentLayer().osc2Level,onChange:v=>this.set('osc2Level',v)});
-  this.ui.osc2Tune=knob(ok,{label:'OSC 2 DETUNE',min:-1,max:1,value:this.currentLayer().osc2Tune,formatValue:v=>(v*30).toFixed(1)+' ST',onChange:v=>this.set('osc2Tune',v)});
+  this.ui.osc2Tune=knob(ok,{label:'OSC 2 DETUNE',min:-1,max:1,value:this.currentLayer().osc2Tune,formatValue:v=>(Math.round(v*60)/2).toFixed(1)+' ST',onChange:v=>this.set('osc2Tune',Math.round(v*60)/60)});
   this.ui.pulseWidth=knob(ok,{label:'PULSE WIDTH',min:0,max:1,value:this.currentLayer().pulseWidth,onChange:v=>this.set('pulseWidth',v)});
   this.ui.osc1Wave=select(oscillators.body,'OSC 1 WAVEFORM',[{value:'saw',label:'SAWTOOTH'},{value:'pulse',label:'PULSE'}],this.currentLayer().osc1Wave,v=>this.set('osc1Wave',v));
   this.ui.osc2Wave=select(oscillators.body,'OSC 2 WAVEFORM',[{value:'saw',label:'SAWTOOTH'},{value:'pulse',label:'PULSE'}],this.currentLayer().osc2Wave,v=>this.set('osc2Wave',v));

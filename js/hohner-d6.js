@@ -45,7 +45,7 @@ const validate = (data) => {
 };
 class HohnerD6App {
   constructor() {
-    this.engine = new WorkletEngine(new URL('./engine/HohnerD6Processor.js', import.meta.url).href, 'hohner-d6-processor');
+    this.engine = new WorkletEngine(new URL('./engine/HohnerD6Processor.js?v=20261106-audio-r1', import.meta.url).href, 'hohner-d6-processor');
     this.patch = validate(HOHNER_D6_PRESETS[0].data);
     this.ui = {}; this.pedalUi = {}; this.pedalSwitches = {};
     this.store = new PresetStore({ key: 'overture.hohner-d6.programs', version: 1, validate });

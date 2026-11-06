@@ -100,3 +100,41 @@ test('OB-Xa worklet supports eight-voice unison and generates finite audio', asy
   assert.ok([...output.left, ...output.right].every(Number.isFinite));
   assert.ok([...output.left, ...output.right].some((sample) => Math.abs(sample) > 1e-7));
 });
+
+
+async function renderD6(pedal = null, boardEnabled = true, frames = 12288) {
+  const h = await createWorklet('../js/engine/HohnerD6Processor.js', 'hohner-d6-processor');
+  h.processor.dispatch({ t: 'patch', patch: { toneFilters: [true, false, false, false], pickup: 'bothIn', volume: .82, damping: 0, pedalboardEnabled: boardEnabled } });
+  if (pedal) h.processor.dispatch({ t: 'pedal', name: pedal, values: { enabled: true } });
+  h.processor.noteOn(57, .96);
+  return render(h.processor, h.scope, frames);
+}
+const signalRms = (signal) => Math.sqrt(signal.reduce((sum, sample) => sum + sample * sample, 0) / signal.length);
+const differenceRms = (a, b) => Math.sqrt(a.reduce((sum, sample, i) => sum + (sample - b[i]) ** 2, 0) / a.length);
+
+test('Each D6 pedal changes the rendered audio signal', async () => {
+  const dry = await renderD6();
+  const drySignal = Float32Array.from(dry.left, (x, i) => (x + dry.right[i]) * .5);
+  assert.ok(signalRms(drySignal) > 1e-5, 'dry Clavinet should produce audible output');
+  for (const pedal of ['overdrive','compressor','wah','phaser','chorus','spring']) {
+    const wet = await renderD6(pedal);
+    const wetSignal = Float32Array.from(wet.left, (x, i) => (x + wet.right[i]) * .5);
+    assert.ok([...wet.left, ...wet.right].every(Number.isFinite), pedal + ' should remain numerically stable');
+    assert.ok(differenceRms(drySignal, wetSignal) > 1e-6, pedal + ' should audibly change the dry signal');
+  }
+});
+
+test('D6 master pedalboard bypass returns the dry signal unchanged', async () => {
+  const dry = await renderD6(null, true, 4096);
+  const bypass = await renderD6('overdrive', false, 4096);
+  assert.ok(differenceRms(dry.left, bypass.left) < 1e-7);
+  assert.ok(differenceRms(dry.right, bypass.right) < 1e-7);
+});
+
+test('OB-Xa worklet uses stable filter stages and per-voice analog variation', async () => {
+  const source = await readFile(new URL('../js/engine/OBXaProcessor.js', import.meta.url), 'utf8');
+  assert.match(source, /Math\.tan\(Math\.PI\*cutoff\/sr\)/);
+  assert.match(source, /ic1a/);
+  assert.match(source, /tune1/);
+  assert.match(source, /filterTrim/);
+});

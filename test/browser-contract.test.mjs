@@ -35,8 +35,8 @@ test('Hohner D6 and Oberheim OB-Xa are complete first-class emulator entries', a
   assert.match(d6App, /toneFilters/);
   assert.match(d6App, /registerMidiTargetProvider/);
   assert.match(d6App, /pedal:/);
-  assert.match(d6Engine, /compressor\.enabled/);
-  assert.match(d6Engine, /toneSelection/);
+  assert.match(d6Engine, /c\.enabled/);
+  assert.match(d6Engine, /tone\.some\(Boolean\)/);
   assert.doesNotMatch(d6Engine, /v\.toneState\s*=\s*0/);
   assert.doesNotMatch(d6Engine, /phaserPhaser/);
   assert.match(d6Engine, /pedalboardEnabled/);
@@ -72,7 +72,7 @@ test('Hohner D6 and Oberheim OB-Xa are complete first-class emulator entries', a
   assert.match(obEngine, /width=clamp\(\.5-p\.pulseWidth\*\.45/);
   assert.doesNotMatch(obEngine, /lfoVca/);
   assert.match(obPage, /Oberheim_logo\.png/);
-  assert.match(worker, /overture-shell-v45/);
+  assert.match(worker, /overture-shell-v46/);
   assert.match(worker, /hohner-d6/);
   assert.match(worker, /ob-xa/);
 });
@@ -489,4 +489,20 @@ test('library empty state appears before the coming-soon tile or banner', async 
   assert.match(page, /library\.css\?v=20261105-d6-obxa/);
   assert.match(worker, /overture-shell-v42/);
   assert.match(worker, /library\.css\?v=20261105-d6-obxa/);
+});
+
+
+test('Both emulator power overlays use a working button and gesture-first startup', async () => {
+  const [obPage, d6Page, panel, obApp, worklet] = await Promise.all([
+    readFile(new URL('../html/ob-xa.html', import.meta.url), 'utf8'),
+    readFile(new URL('../html/hohner-d6.html', import.meta.url), 'utf8'),
+    readFile(new URL('../js/shared/panel.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/obxa.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/shared/workletEngine.js', import.meta.url), 'utf8'),
+  ]);
+  assert.match(obPage, /<button type="button" id="obxa-power"/);
+  assert.match(d6Page, /<button type="button" id="hohner-power"/);
+  assert.match(panel, /addEventListener\('pointerdown'/);
+  assert.ok(obApp.indexOf("power('obxa-power'") < obApp.indexOf('this.build()'));
+  assert.match(worklet, /await ctx\.audioWorklet\.addModule/);
 });

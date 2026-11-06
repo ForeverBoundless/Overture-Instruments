@@ -1,5 +1,5 @@
 export const HOHNER_D6_PRESETS = [
-  { name: 'Clavinet Classic', data: { tone: 0, pickup: 'bothIn', volume: 0.72, damping: 0.34, pedals: {} } },
+  { name: 'Clavinet Classic', data: { tone: 0, pickup: 'bothIn', volume: 0.82, damping: 0, pedals: {} } },
   { name: 'Dry Funk', data: { tone: 1, pickup: 'bridge', volume: 0.78, damping: 0.48, pedals: { overdrive: { enabled: true, drive: 0.18, tone: 0.72, level: 0.78 }, wah: { enabled: false, position: 0.55, resonance: 0.62, mix: 0.72 } } } },
   { name: 'Nasal Muted', data: { tone: 2, pickup: 'neck', volume: 0.7, damping: 0.72, pedals: {} } },
   { name: 'Bright Chicken Pickin', data: { tone: 0, pickup: 'bothOut', volume: 0.76, damping: 0.28, pedals: { compressor: { enabled: true, sustain: 0.58, level: 0.72 } } } },

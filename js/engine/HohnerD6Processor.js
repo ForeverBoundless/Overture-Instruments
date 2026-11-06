@@ -1,232 +1,200 @@
-/* Hohner D6-style struck-string model.
- * A plucked-string delay line approximates the tangent/anvil excitation and
- * the two pickup positions. It is a procedural physical-model approximation,
- * not a sample bank or a claim of circuit-level identity.
+/* Hohner Clavinet D6 physical-model approximation.
+ * One waveguide string per key; velocity-shaped tangent excitation; fractional
+ * pickup combs; string loss/dispersion; yarn-damper release; four-register tone stack.
+ * The stompboxes form a separate serial effects chain.
  */
 /* global sampleRate, currentFrame, registerProcessor, AudioWorkletProcessor */
-const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
-const DEFAULT = { toneFilters: [true, false, false, false], pickup: 'bothIn', volume: 0.72, damping: 0.34, pedalboardEnabled: true };
-const midiHz = (n) => 440 * Math.pow(2, (n - 69) / 12);
-
-class ClavString {
-  constructor() {
-    this.note = -1; this.active = false; this.gate = false; this.order = 0;
-    this.buffer = new Float32Array(2048); this.length = 2048; this.index = 0; this.position = 0; this.toneState = new Float32Array(6);
-    this.velocity = 0.7; this.release = 1; this.lp = 0; this.muteState = 0;
-    this.pan = 0; this.seed = 1;
-  }
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+const midiHz=n=>440*Math.pow(2,(n-69)/12);
+const DEFAULT={toneFilters:[true,false,false,false],pickup:'bothIn',volume:.82,damping:0,pedalboardEnabled:true};
+class ClavString{
+ constructor(){
+  this.note=-1;this.active=false;this.gate=false;this.order=0;this.buffer=new Float32Array(2048);
+  this.length=2048;this.position=0;this.velocity=.7;this.release=1;this.releasePitch=0;
+  this.loss=0;this.lossAlpha=.2;this.dispersion=.04;this.dispIn=0;this.dispOut=0;this.rippleDelay=1;this.ripple=-.001;
+  this.tone=new Float32Array(5);this.mute=0;this.pan=0;this.seed=1;
+  this.pickupIntegral=0;this.pickupPrevious=0;this.beatPhase=0;this.beatRate=1;this.beatDepth=0;
+  this.knock=0;this.knockState=0;this.loopGain=.999;
+ }
 }
-class HohnerD6Processor extends AudioWorkletProcessor {
-  constructor() {
-    super();
-    this.p = { ...DEFAULT };
-    this.voices = Array.from({ length: 60 }, () => new ClavString());
-    this.order = 0; this.bend = 0; this.sustain = false; this.scheduled = [];
-    this.pedals = {
-      overdrive: { enabled: false, drive: 0.25, tone: 0.65, level: 0.78 },
-      compressor: { enabled: false, sustain: 0.45, level: 0.75 },
-      wah: { enabled: false, position: 0.5, resonance: 0.65, mix: 0.75 },
-      phaser: { enabled: false, rate: 0.22, depth: 0.5, feedback: 0.15, mix: 0.5 },
-      chorus: { enabled: false, rate: 0.2, depth: 0.5, mix: 0.38 },
-      spring: { enabled: false, mix: 0.25, decay: 0.35 },
-    };
-    this.fx = {
-      phaserPhase: 0, chorusPhase: 0, wahL: 0, wahB: 0, wahR: 0, wahBR: 0, driveL: 0, driveR: 0,
-      phaserL: new Float32Array(4), phaserR: new Float32Array(4),
-      chorusL: new Float32Array(8192), chorusR: new Float32Array(8192), chorusIndex: 0,
-      springL: new Float32Array(16384), springR: new Float32Array(16384), springIndex: 0,
-      compEnvelope: 0,
-    };
-    this.port.onmessage = (event) => this.message(event.data);
+class HohnerD6Processor extends AudioWorkletProcessor{
+ constructor(){
+  super();this.p={...DEFAULT};this.voices=Array.from({length:60},()=>new ClavString());
+  this.order=0;this.bend=0;this.sustain=false;this.scheduled=[];
+  this.pedals={
+   overdrive:{enabled:false,drive:.25,tone:.65,level:.78},
+   compressor:{enabled:false,sustain:.45,level:.75},
+   wah:{enabled:false,position:.5,resonance:.65,mix:.75},
+   phaser:{enabled:false,rate:.22,depth:.5,feedback:.15,mix:.5},
+   chorus:{enabled:false,rate:.2,depth:.5,mix:.38},
+   spring:{enabled:false,mix:.25,decay:.35}
+  };
+  const size=8192;
+  this.fx={
+   comp:0,driveL:0,driveR:0,phaserPhase:0,chorusPhase:0,chorusIndex:0,springIndex:0,
+   wahL1:0,wahL2:0,wahR1:0,wahR2:0,
+   phaserXL:new Float32Array(6),phaserYL:new Float32Array(6),phaserXR:new Float32Array(6),phaserYR:new Float32Array(6),
+   chorusL:new Float32Array(size),chorusR:new Float32Array(size),
+   springL:Array.from({length:4},()=>new Float32Array(size)),springR:Array.from({length:4},()=>new Float32Array(size)),
+   springLP_L:new Float32Array(4),springLP_R:new Float32Array(4)
+  };
+  this.port.onmessage=e=>this.message(e.data);
+ }
+ message(m){
+  if((m.t==='noteOn'||m.t==='noteOff')&&Number.isFinite(m.frame)&&m.frame>currentFrame){this.scheduled.push(m);this.scheduled.sort((a,b)=>a.frame-b.frame);return;}
+  this.dispatch(m);
+ }
+ dispatch(m){
+  if(m.t==='patch'){this.p={...DEFAULT,...m.patch};if(m.patch?.pedals)this.pedals=this.mergePedals(m.patch.pedals);}
+  else if(m.t==='param'&&m.key in DEFAULT)this.p[m.key]=Array.isArray(m.value)?m.value.slice():m.value;
+  else if(m.t==='pedals')this.pedals=this.mergePedals(m.pedals||{});
+  else if(m.t==='pedal'&&this.pedals[m.name])this.pedals[m.name]={...this.pedals[m.name],...m.values};
+  else if(m.t==='noteOn')this.noteOn(m.note|0,clamp(m.vel,.01,1));
+  else if(m.t==='noteOff')this.noteOff(m.note|0);
+  else if(m.t==='bend')this.bend=clamp(m.value,-1,1);
+  else if(m.t==='sustain'){this.sustain=!!m.down;if(!this.sustain)this.voices.forEach(v=>{if(!v.gate&&v.note>=0)this.releaseVoice(v);});}
+  else if(m.t==='volume')this.p.volume=clamp(m.value,0,1);
+  else if(m.t==='allOff'||m.t==='allSoundOff'){this.scheduled.length=0;this.voices.forEach(v=>{v.gate=false;v.release=0;v.active=false;v.note=-1;});}
+ }
+ mergePedals(incoming){const next={...this.pedals};Object.keys(next).forEach(name=>{if(incoming[name])next[name]={...next[name],...incoming[name]};});return next;}
+ random(v){let x=v.seed|0;x^=x<<13;x^=x>>>17;x^=x<<5;v.seed=x|0;return (x>>>0)/4294967296*2-1;}
+ noteOn(note,velocity){
+  if(note<29||note>88)return;
+  let v=this.voices.find(x=>x.active&&x.note===note);
+  if(!v)v=this.voices.find(x=>!x.active)||this.voices.slice().sort((a,b)=>a.order-b.order)[0];
+  const length=sampleRate/midiHz(note);
+  v.buffer=new Float32Array(Math.ceil(length)+1);v.length=length;v.position=0;
+  v.seed=((note*7919+(this.order+17)*104729)|0)||1;
+  const pulseLength=Math.max(8,Math.min(Math.round(length*.12),Math.round(sampleRate*(.0004+(1-velocity)*.0013))));
+  for(let i=0;i<pulseLength;i++){
+   const x=(i+.5)/pulseLength,tri=x<.5?2*x:2*(1-x),shape=tri*tri*(3-2*tri);
+   v.buffer[i]=shape*velocity*.78+this.random(v)*.003*velocity;
   }
-  message(m) {
-    if ((m.t === 'noteOn' || m.t === 'noteOff') && Number.isFinite(m.frame) && m.frame > currentFrame) {
-      this.scheduled.push(m); this.scheduled.sort((a, b) => a.frame - b.frame); return;
+  const wound=note<=51,period=length/sampleRate,t60=wound?17.5:9.5-clamp((note-52)/36,0,1)*5.2;
+  v.loopGain=Math.pow(10,-3*period/t60);v.dispersion=wound?.14:.035;
+  v.lossAlpha=1-Math.exp(-2*Math.PI*(4300+Math.max(0,note-52)*18)/sampleRate);
+  v.rippleDelay=Math.max(1,Math.round(length*(.33+(this.random(v)+1)*.085)));v.ripple=-.001+(this.random(v)+1)*.0015;
+  v.note=note;v.velocity=velocity;v.active=true;v.gate=true;v.order=++this.order;
+  v.release=1;v.releasePitch=0;v.loss=0;v.dispIn=0;v.dispOut=0;v.tone.fill(0);v.mute=0;
+  v.pickupIntegral=0;v.pickupPrevious=0;v.pan=((note%5)-2)*.018;
+  v.beatPhase=0;v.beatRate=.5+(this.random(v)+1)*.75;v.beatDepth=note<=64&&this.random(v)>.35?.72:0;
+  v.knock=note>=72?(this.random(v)+1)*(.006+velocity*.012)*.5:0;v.knockState=0;
+ }
+ releaseVoice(v){if(!v.active)return;v.gate=false;v.releasePitch=3;}
+ noteOff(note){this.voices.forEach(v=>{if(v.note===note&&v.gate){v.gate=false;if(!this.sustain)this.releaseVoice(v);}});}
+ pickupTap(v,delay){
+  let pos=(v.position-delay)%v.length;if(pos<0)pos+=v.length;
+  const i=Math.floor(pos),f=pos-i,j=(i+1)%v.buffer.length;return v.buffer[i]*(1-f)+v.buffer[j]*f;
+ }
+ pickup(v,position){return this.pickupTap(v,0)-this.pickupTap(v,v.length*position);}
+ applyEffects(inputL,inputR,sr){
+  const fx=this.fx,p=this.pedals;let l=inputL,r=inputR;
+  if(this.p.pedalboardEnabled){
+   const c=p.compressor;
+   if(c.enabled){
+    const level=Math.max(Math.abs(l),Math.abs(r)),atk=1-Math.exp(-1/(sr*.008)),rel=1-Math.exp(-1/(sr*.19));
+    fx.comp+=(level-fx.comp)*(level>fx.comp?atk:rel);
+    const threshold=.035+(1-clamp(c.sustain,0,1))*.025,ratio=2.2+clamp(c.sustain,0,1)*6.8;
+    const reduction=fx.comp>threshold?Math.pow(threshold/Math.max(fx.comp,1e-8),1-1/ratio):1;
+    const makeup=.9+clamp(c.level,0,1)*.8;l*=reduction*makeup;r*=reduction*makeup;
+   }
+   const d=p.overdrive;
+   if(d.enabled){
+    const amount=1+clamp(d.drive,0,1)*20,cutoff=650+clamp(d.tone,0,1)*7800,a=1-Math.exp(-2*Math.PI*cutoff/sr);
+    fx.driveL+=a*(l-fx.driveL);fx.driveR+=a*(r-fx.driveR);
+    const wetL=Math.tanh(fx.driveL*amount)*(1.1+d.level*.35),wetR=Math.tanh(fx.driveR*amount)*(1.1+d.level*.35),mix=.32+clamp(d.drive,0,1)*.62;
+    l=l*(1-mix)+wetL*mix;r=r*(1-mix)+wetR*mix;
+   }
+   const w=p.wah;
+   if(w.enabled){
+    const center=260*Math.pow(8.5,clamp(w.position,0,1)),g=Math.tan(Math.PI*center/sr),k=1/(1.1+clamp(w.resonance,0,1)*8);
+    const a1=1/(1+g*(g+k)),a2=g*a1,a3=g*a2;
+    const xL=l-fx.wahL2,yL=a1*fx.wahL1+a2*xL,zL=fx.wahL2+a2*fx.wahL1+a3*xL;
+    fx.wahL1=2*yL-fx.wahL1;fx.wahL2=2*zL-fx.wahL2;
+    const xR=r-fx.wahR2,yR=a1*fx.wahR1+a2*xR,zR=fx.wahR2+a2*fx.wahR1+a3*xR;
+    fx.wahR1=2*yR-fx.wahR1;fx.wahR2=2*zR-fx.wahR2;
+    const mix=clamp(w.mix,0,1);l=l*(1-mix)+yL*mix*4.4;r=r*(1-mix)+yR*mix*4.4;
+   }
+   const ph=p.phaser;
+   if(ph.enabled){
+    fx.phaserPhase+=(.08+clamp(ph.rate,0,1)*1.85)/sr;if(fx.phaserPhase>=1)fx.phaserPhase-=1;
+    const sweep=.5+.5*Math.sin(fx.phaserPhase*Math.PI*2),center=180+sweep*clamp(ph.depth,0,1)*1600;
+    const tangent=Math.tan(Math.PI*center/sr),coef=(1-tangent)/(1+tangent);
+    let wl=l+fx.phaserYL[5]*clamp(ph.feedback,0,1)*.7,wr=r+fx.phaserYR[5]*clamp(ph.feedback,0,1)*.7;
+    for(let j=0;j<6;j++){
+     const nl=coef*wl+fx.phaserXL[j]-coef*fx.phaserYL[j];fx.phaserXL[j]=wl;fx.phaserYL[j]=nl;wl=nl;
+     const nr=coef*wr+fx.phaserXR[j]-coef*fx.phaserYR[j];fx.phaserXR[j]=wr;fx.phaserYR[j]=nr;wr=nr;
     }
-    this.dispatch(m);
+    const mix=clamp(ph.mix,0,1);l=l*(1-mix)+wl*mix;r=r*(1-mix)+wr*mix;
+   }
+   const ch=p.chorus;
+   if(ch.enabled){
+    fx.chorusPhase+=(.08+clamp(ch.rate,0,1)*1.35)/sr;if(fx.chorusPhase>=1)fx.chorusPhase-=1;
+    const phase=fx.chorusPhase*Math.PI*2,depth=clamp(ch.depth,0,1),len=fx.chorusL.length;
+    const dl=sr*(.017+Math.sin(phase)*.0048*depth),dr=sr*(.019+Math.sin(phase+1.23)*.0048*depth);
+    const pl=(fx.chorusIndex-dl+len)%len,pr=(fx.chorusIndex-dr+len)%len,il=Math.floor(pl),ir=Math.floor(pr);
+    const wetL=fx.chorusL[il]*(1-(pl-il))+fx.chorusL[(il+1)%len]*(pl-il);
+    const wetR=fx.chorusR[ir]*(1-(pr-ir))+fx.chorusR[(ir+1)%len]*(pr-ir);
+    fx.chorusL[fx.chorusIndex]=l+wetL*.08;fx.chorusR[fx.chorusIndex]=r+wetR*.08;fx.chorusIndex=(fx.chorusIndex+1)%len;
+    const mix=clamp(ch.mix,0,1)*.78;l=l*(1-mix)+wetL*mix;r=r*(1-mix)+wetR*mix;
+   }
+   const s=p.spring;
+   if(s.enabled){
+    const idx=fx.springIndex,len=fx.springL[0].length,delays=[29.7,34.1,39.7,44.9],feedback=.48+clamp(s.decay,0,1)*.43;
+    let wetL=0,wetR=0;
+    for(let j=0;j<4;j++){
+     const delay=Math.min(len-1,Math.round(sr*delays[j]/1000)),read=(idx-delay+len)%len,dl=fx.springL[j][read],dr=fx.springR[j][read];
+     fx.springLP_L[j]+=.19*(dl-fx.springLP_L[j]);fx.springLP_R[j]+=.19*(dr-fx.springLP_R[j]);
+     const gain=.27-j*.016;wetL+=dl*gain;wetR+=dr*gain;
+     fx.springL[j][idx]=l+fx.springLP_L[j]*feedback+fx.springLP_R[j]*.065;
+     fx.springR[j][idx]=r+fx.springLP_R[j]*feedback+fx.springLP_L[j]*.065;
+    }
+    fx.springIndex=(idx+1)%len;const mix=clamp(s.mix,0,1);
+    l=l*(1-mix)+wetL*mix*2.25;r=r*(1-mix)+wetR*mix*2.25;
+   }
   }
-  dispatch(m) {
-    if (m.t === 'patch') {
-      this.p = { ...DEFAULT, ...m.patch };
-      if (m.patch?.pedals) this.pedals = this.mergePedals(m.patch.pedals);
-    } else if (m.t === 'param' && m.key in DEFAULT) this.p[m.key] = Array.isArray(m.value) ? m.value.slice() : m.value;
-    else if (m.t === 'pedals') this.pedals = this.mergePedals(m.pedals || {});
-    else if (m.t === 'pedal') this.pedals[m.name] = { ...(this.pedals[m.name] || {}), ...m.values };
-    else if (m.t === 'noteOn') this.noteOn(m.note | 0, clamp(m.vel, 0.01, 1));
-    else if (m.t === 'noteOff') this.noteOff(m.note | 0);
-    else if (m.t === 'bend') this.bend = clamp(m.value, -1, 1);
-    else if (m.t === 'sustain') { this.sustain = !!m.down; if (!this.sustain) this.voices.forEach((v) => { if (!v.gate && v.note >= 0) v.release = Math.min(v.release, 0.98); }); }
-    else if (m.t === 'volume') this.p.volume = clamp(m.value, 0, 1);
-    else if (m.t === 'allOff' || m.t === 'allSoundOff') {
-      this.scheduled.length = 0; this.voices.forEach((v) => { v.gate = false; v.release = 0; v.active = false; v.note = -1; });
-    }
+  return [l,r];
+ }
+ process(_inputs,outputs){
+  const out=outputs[0],L=out[0],R=out[1]||out[0],sr=sampleRate;
+  const alpha=[130,450,950,1800,4200].map(fc=>1-Math.exp(-2*Math.PI*fc/sr));
+  const damping=clamp(this.p.damping,0,1),tone=Array.isArray(this.p.toneFilters)?this.p.toneFilters:DEFAULT.toneFilters;
+  const cutoff=12000-damping*9500,muteAlpha=1-Math.exp(-2*Math.PI*cutoff/sr);
+  for(let i=0;i<L.length;i++){
+   while(this.scheduled.length&&this.scheduled[0].frame<=currentFrame+i)this.dispatch(this.scheduled.shift());
+   let left=0,right=0;
+   for(const v of this.voices){
+    if(!v.active)continue;
+    const index=Math.floor(v.position),frac=v.position-index,next=(index+1)%v.buffer.length,read=v.buffer[index]*(1-frac)+v.buffer[next]*frac;
+    v.loss+=v.lossAlpha*(read-v.loss);
+    const dispersed=v.dispersion*v.loss+v.dispIn-v.dispersion*v.dispOut;v.dispIn=v.loss;v.dispOut=dispersed;
+    const rippleIndex=(index-v.rippleDelay+v.buffer.length)%v.buffer.length,ripple=v.buffer[rippleIndex]*v.ripple;
+    v.buffer[index]=(dispersed+ripple)*v.loopGain*(1-damping*.0017)*(v.gate?1:.982);
+    if(!v.gate&&!this.sustain){v.release*=Math.exp(-1/(sr*.018));v.releasePitch*=Math.exp(-1/(sr*.018));}
+    v.position+=Math.pow(2,(this.bend*2-v.releasePitch)/12);if(v.position>=v.length)v.position-=v.length;
+    const a=this.pickup(v,.20),b=this.pickup(v,.24);
+    let sample=this.p.pickup==='bridge'?a:this.p.pickup==='neck'?b:this.p.pickup==='bothOut'?(a-b)*.68:(a+b)*.5;
+    v.pickupIntegral+=.08*(sample-v.pickupIntegral);
+    const magnetic=Math.tanh(v.pickupIntegral*2.8);sample=(magnetic-v.pickupPrevious)*3.2;v.pickupPrevious=magnetic;
+    v.mute+=muteAlpha*(sample-v.mute);sample=sample*(1-damping*.82)+v.mute*damping*.82;
+    const st=v.tone;for(let j=0;j<5;j++)st[j]+=alpha[j]*(sample-st[j]);
+    const low130=st[0],low450=st[1],low1800=st[3],low4200=st[4];
+    if(tone[3])sample=low1800;
+    if(tone[2])sample=sample*.55+(low1800-low450)*.7;
+    if(tone[1])sample+=(sample-low1800)*.28;
+    if(tone[0])sample+=(sample-low4200)*.42;
+    sample-=low130*.12;sample+=(sample-low4200)*.16;
+    if(!tone.some(Boolean))sample=0;
+    v.beatPhase+=v.beatRate/sr;if(v.beatPhase>=1)v.beatPhase-=1;
+    const beat=1-v.beatDepth*(1-Math.cos(v.beatPhase*Math.PI*2))*.5;
+    if(v.knock>0){v.knockState=v.knockState*.91+this.random(v)*v.knock*.08;sample+=v.knockState;}
+    const output=sample*beat*v.release*v.velocity*2.3;left+=output*(1-v.pan)*.5;right+=output*(1+v.pan)*.5;
+    if(v.release<.0008){v.active=false;v.note=-1;}
+   }
+   const [l,r]=this.applyEffects(left*this.p.volume,right*this.p.volume,sr);
+   L[i]=Math.tanh(l*1.1);R[i]=Math.tanh(r*1.1);
   }
-  mergePedals(incoming) {
-    const next = { ...this.pedals };
-    Object.keys(next).forEach((name) => { if (incoming[name]) next[name] = { ...next[name], ...incoming[name] }; });
-    return next;
-  }
-  random(v) {
-    let x = v.seed | 0; x ^= x << 13; x ^= x >>> 17; x ^= x << 5; v.seed = x | 0;
-    return (x >>> 0) / 4294967296 * 2 - 1;
-  }
-  noteOn(note, velocity) {
-    let v = this.voices.find((voice) => voice.active && voice.note === note);
-    if (!v) v = this.voices.find((voice) => !voice.active) || this.voices.slice().sort((a, b) => a.order - b.order)[0];
-    const hz = midiHz(note);
-    const length = Math.max(32, Math.round(sampleRate / hz));
-    v.buffer = new Float32Array(length); v.length = length; v.index = 0; v.position = 0; v.toneState.fill(0);
-    v.seed = ((note * 7919 + (this.order + 17) * 104729) | 0) || 1;
-    const pluck = 0.16 + velocity * 0.22;
-    for (let i = 0; i < length; i += 1) {
-      const envelope = Math.exp(-i / Math.max(12, length * pluck));
-      const tangentPulse = i < Math.max(8, length * 0.12) ? 1 : 0.24;
-      v.buffer[i] = this.random(v) * envelope * tangentPulse * velocity * 0.52;
-    }
-    v.note = note; v.velocity = velocity; v.active = true; v.gate = true; v.order = ++this.order;
-    v.release = 1; v.lp = 0; v.pan = ((note % 5) - 2) * 0.018;
-  }
-  noteOff(note) {
-    this.voices.forEach((v) => { if (v.note === note) { v.gate = false; if (!this.sustain) v.release = Math.min(v.release, 0.98); } });
-  }
-  pickupSample(v, position) {
-    const offset = Math.max(1, Math.floor(v.length * position));
-    const index = (v.index - offset + v.length) % v.length;
-    return v.buffer[index];
-  }
-  applyEffects(left, right, sr) {
-    if (!this.p.pedalboardEnabled) return [left, right];
-    const fx = this.fx; const pedals = this.pedals;
-    const compressor = pedals.compressor;
-    if (compressor.enabled) {
-      const level = Math.max(Math.abs(left), Math.abs(right));
-      const attack = 1 - Math.exp(-1 / (sr * 0.006));
-      const release = 1 - Math.exp(-1 / (sr * 0.16));
-      fx.compEnvelope += (level - fx.compEnvelope) * (level > fx.compEnvelope ? attack : release);
-      const threshold = 0.095;
-      const ratio = 1 + clamp(compressor.sustain, 0, 1) * 8;
-      const over = Math.max(0, fx.compEnvelope - threshold);
-      const gain = 1 / (1 + over * (ratio - 1) * 7);
-      const makeup = 0.72 + clamp(compressor.level, 0, 1) * 0.56;
-      left *= gain * makeup; right *= gain * makeup;
-    }
-    const drive = pedals.overdrive;
-    if (drive.enabled) {
-      const amount = 1 + clamp(drive.drive, 0, 1) * 22;
-      const mix = 0.35 + clamp(drive.drive, 0, 1) * 0.55;
-      const a = 1 - Math.exp(-2 * Math.PI * (450 + drive.tone * 9200) / sr);
-      fx.driveL += a * (left - fx.driveL); fx.driveR += a * (right - fx.driveR);
-      const wetL = Math.tanh(fx.driveL * amount) * drive.level * 1.35;
-      const wetR = Math.tanh(fx.driveR * amount) * drive.level * 1.35;
-      left = left * (1 - mix) + wetL * mix; right = right * (1 - mix) + wetR * mix;
-    }
-    const wah = pedals.wah;
-    if (wah.enabled) {
-      const center = 330 + clamp(wah.position, 0, 1) * 2250;
-      const g = Math.min(0.48, 2 * Math.sin(Math.PI * center / sr));
-      const q = 1.15 + clamp(wah.resonance, 0, 1) * 5.4;
-      fx.wahL += g * fx.wahB; const highL = left - fx.wahL - q * fx.wahB; fx.wahB += g * highL;
-      fx.wahR += g * fx.wahBR; const highR = right - fx.wahR - q * fx.wahBR; fx.wahBR += g * highR;
-      const mix = clamp(wah.mix, 0, 1);
-      left = left * (1 - mix) + fx.wahB * mix * 2.1; right = right * (1 - mix) + fx.wahBR * mix * 2.1;
-    }
-    const phaser = pedals.phaser;
-    if (phaser.enabled) {
-      fx.phaserPhase += (0.1 + clamp(phaser.rate, 0, 1) * 2.1) / sr;
-      if (fx.phaserPhase >= 1) fx.phaserPhase -= 1;
-      const sweep = 0.18 + (0.55 + 0.45 * Math.sin(fx.phaserPhase * Math.PI * 2)) * clamp(phaser.depth, 0, 1) * 0.64;
-      let l = left + fx.phaserL[3] * phaser.feedback * 0.65;
-      let r = right + fx.phaserR[3] * phaser.feedback * 0.65;
-      for (let stage = 0; stage < 4; stage += 1) {
-        const yl = -sweep * l + fx.phaserL[stage]; fx.phaserL[stage] = l + sweep * yl; l = yl;
-        const yr = -sweep * r + fx.phaserR[stage]; fx.phaserR[stage] = r + sweep * yr; r = yr;
-      }
-      const mix = clamp(phaser.mix, 0, 1);
-      left = left * (1 - mix) + l * mix; right = right * (1 - mix) + r * mix;
-    }
-    const chorus = pedals.chorus;
-    if (chorus.enabled) {
-      fx.chorusPhase += (0.08 + clamp(chorus.rate, 0, 1) * 1.25) / sr;
-      const depth = clamp(chorus.depth, 0, 1);
-      const delayL = 900 + Math.sin(fx.chorusPhase * Math.PI * 2) * 430 * depth;
-      const delayR = 1050 + Math.sin(fx.chorusPhase * Math.PI * 2 + 1.2) * 430 * depth;
-      const readL = (fx.chorusIndex - delayL + fx.chorusL.length) % fx.chorusL.length;
-      const readR = (fx.chorusIndex - delayR + fx.chorusR.length) % fx.chorusR.length;
-      const wetL = fx.chorusL[Math.floor(readL)] || 0; const wetR = fx.chorusR[Math.floor(readR)] || 0;
-      fx.chorusL[fx.chorusIndex] = left + wetL * 0.18; fx.chorusR[fx.chorusIndex] = right + wetR * 0.18;
-      fx.chorusIndex = (fx.chorusIndex + 1) % fx.chorusL.length;
-      const mix = clamp(chorus.mix, 0, 1);
-      left = left * (1 - mix) + wetL * mix; right = right * (1 - mix) + wetR * mix;
-    }
-    const spring = pedals.spring;
-    if (spring.enabled) {
-      const idx = fx.springIndex;
-      const dl = fx.springL[(idx - 1901 + fx.springL.length) % fx.springL.length];
-      const dr = fx.springR[(idx - 2237 + fx.springR.length) % fx.springR.length];
-      const decay = 0.28 + clamp(spring.decay, 0, 1) * 0.62;
-      fx.springL[idx] = left + dr * decay * 0.52;
-      fx.springR[idx] = right + dl * decay * 0.52;
-      fx.springIndex = (idx + 1) % fx.springL.length;
-      const mix = clamp(spring.mix, 0, 1);
-      left = left * (1 - mix) + dl * mix; right = right * (1 - mix) + dr * mix;
-    }
-    return [left, right];
-  }
-  process(_inputs, outputs) {
-    const out = outputs[0]; const L = out[0]; const R = out[1] || L; const sr = sampleRate;
-    const stringAlpha = 1 - Math.exp(-2 * Math.PI * 5200 / sr);
-    const toneAlphas = [1500, 5200, 550, 1800, 180, 900].map((fc) => 1 - Math.exp(-2 * Math.PI * fc / sr));
-    const toneSelection = Array.isArray(this.p.toneFilters) ? this.p.toneFilters : DEFAULT.toneFilters;
-    const damping = 0.997 - clamp(this.p.damping, 0, 1) * 0.003;
-    const muteAmount = clamp(this.p.damping, 0, 1);
-    const muteCutoff = 12000 - muteAmount * 9500;
-    const muteAlpha = 1 - Math.exp(-2 * Math.PI * muteCutoff / sr);
-    for (let i = 0; i < L.length; i += 1) {
-      while (this.scheduled.length && this.scheduled[0].frame <= currentFrame + i) this.dispatch(this.scheduled.shift());
-      let left = 0; let right = 0;
-      for (const v of this.voices) {
-        if (!v.active) continue;
-        const readIndex = v.index;
-        const read = v.buffer[readIndex] || 0;
-        const next = v.buffer[(readIndex + 1) % v.length] || 0;
-        const loop = (read + next) * 0.5;
-        v.lp += stringAlpha * (loop - v.lp);
-        v.buffer[readIndex] = v.lp * (damping * (v.gate ? 1 : 0.965));
-        const speed = Math.pow(2, this.bend * 2 / 12);
-        v.position = (v.position + speed) % v.length;
-        v.index = Math.floor(v.position);
-        let a = this.pickupSample(v, 0.13);
-        let b = this.pickupSample(v, 0.37);
-        let sample = this.p.pickup === 'bridge' ? a
-          : this.p.pickup === 'neck' ? b
-            : this.p.pickup === 'bothOut' ? (a - b) * 0.88
-              : (a + b) * 0.5;
-        const releaseTime = 0.006;
-        if (!v.gate) v.release *= Math.exp(-1 / (sr * releaseTime));
-        v.muteState += muteAlpha * (sample - v.muteState);
-        sample = sample * (1 - muteAmount * .85) + v.muteState * (muteAmount * .85);
-        const st = v.toneState;
-        st[0] += toneAlphas[0] * (sample - st[0]);
-        st[1] += toneAlphas[1] * (sample - st[1]);
-        st[2] += toneAlphas[2] * (sample - st[2]);
-        st[3] += toneAlphas[3] * (sample - st[3]);
-        st[4] += toneAlphas[4] * (sample - st[4]);
-        st[5] += toneAlphas[5] * (sample - st[5]);
-        const bands = [sample - st[0], st[1] - st[2], st[3] - st[4], st[5]];
-        let filtered = 0; let activeFilters = 0;
-        for (let band = 0; band < 4; band += 1) {
-          if (toneSelection[band]) { filtered += bands[band] * [1.25, 1.5, 1.45, 1.5][band]; activeFilters += 1; }
-        }
-        sample = activeFilters ? filtered / Math.sqrt(activeFilters) : 0;
-        const output = sample * v.release * v.velocity * 1.65;
-        left += output * (1 - v.pan) * 0.5; right += output * (1 + v.pan) * 0.5;
-        if (v.release < 0.001) { v.active = false; v.note = -1; }
-      }
-      let l = left * this.p.volume * 0.9; let r = right * this.p.volume * 0.9;
-      [l, r] = this.applyEffects(l, r, sr);
-      L[i] = Math.tanh(l); R[i] = Math.tanh(r);
-    }
-    return true;
-  }
+  return true;
+ }
 }
-registerProcessor('hohner-d6-processor', HohnerD6Processor);
+registerProcessor('hohner-d6-processor',HohnerD6Processor);

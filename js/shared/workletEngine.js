@@ -20,25 +20,34 @@ export class WorkletEngine {
   start() {
     if (this.started) return Promise.resolve(true);
     if (this._starting) return this._starting;
-    this._starting = (async () => {
+    const attempt = (async () => {
       const AC = window.AudioContext || window.webkitAudioContext;
       if (!AC) throw new Error('Web Audio is not supported in this browser.');
-      this.ctx = new AC({ latencyHint: 'interactive' });
-      if (!this.ctx.audioWorklet) throw new Error('AudioWorklet is unavailable (use a secure https:// page or localhost).');
-      const resume = this.ctx.state === 'suspended' ? this.ctx.resume() : Promise.resolve();
-      await this.ctx.audioWorklet.addModule(this.moduleUrl);
-      this.node = new AudioWorkletNode(this.ctx, this.processorName, { numberOfInputs: this.inputs, numberOfOutputs: 1, outputChannelCount: [this.channels] });
-      this.output = this.ctx.createGain();
-      this.node.connect(this.output);
-      this.output.connect(this.ctx.destination);
-      await resume;
-      this.started = true;
-      this._queue.forEach((m) => this.node.port.postMessage(m));
-      this._queue = [];
-      return true;
+      const ctx = new AC({ latencyHint: 'interactive' }); this.ctx = ctx;
+      try {
+        if (!ctx.audioWorklet) throw new Error('AudioWorklet is unavailable (use a secure https:// page or localhost).');
+        // Resume during the pointer gesture, before waiting for the worklet module fetch.
+        const resume = ctx.state === 'suspended' ? ctx.resume() : Promise.resolve();
+        await ctx.audioWorklet.addModule(this.moduleUrl);
+        const node = new AudioWorkletNode(ctx, this.processorName, { numberOfInputs: this.inputs, numberOfOutputs: 1, outputChannelCount: [this.channels] });
+        const output = ctx.createGain(); node.connect(output); output.connect(ctx.destination);
+        await resume;
+        this.node = node; this.output = output; this.started = true;
+        this._queue.forEach((message) => node.port.postMessage(message)); this._queue = [];
+        return true;
+      } catch (error) {
+        this.started = false;
+        try { this.node?.disconnect(); } catch {}
+        try { this.output?.disconnect(); } catch {}
+        this.node = null; this.output = null;
+        if (ctx.state !== 'closed') { try { await ctx.close(); } catch {} }
+        if (this.ctx === ctx) this.ctx = null;
+        throw error;
+      }
     })();
-    this._starting.catch(() => { this._starting = null; });
-    return this._starting;
+    this._starting = attempt;
+    attempt.finally(() => { if (this._starting === attempt) this._starting = null; }).catch(() => {});
+    return attempt;
   }
 
   post(message) {
