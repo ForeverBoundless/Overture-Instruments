@@ -29,7 +29,6 @@ const APP_SHELL = [
   '/css/library.css?v=20261105-d6-obxa',
   '/css/knobs.css',
   '/css/korg-ms-20.css',
-  '/css/library.css?v=20261104-empty-state-order',
   '/css/mellotron-m400.css',
   '/css/mellotron-m400.css?v=20261104-centered-47key-r2',
   '/css/little-phatty.css?v=20261104-compact-centred',
