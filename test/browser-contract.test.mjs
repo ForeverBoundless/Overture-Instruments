@@ -10,8 +10,45 @@ test('PWA shell exposes a manifest and worker registration', async () => {
   assert.match(home, /manifest\.webmanifest/);
 });
 
+
+test('Hohner D6 and Oberheim OB-Xa are complete first-class emulator entries', async () => {
+  const [metadata, library, styles, d6Page, d6App, d6Engine, obPage, obApp, obEngine, worker] = await Promise.all([
+    readFile(new URL('../js/data/instruments.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/library.js', import.meta.url), 'utf8'),
+    readFile(new URL('../css/library.css', import.meta.url), 'utf8'),
+    readFile(new URL('../html/hohner-d6.html', import.meta.url), 'utf8'),
+    readFile(new URL('../js/hohner-d6.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/engine/HohnerD6Processor.js', import.meta.url), 'utf8'),
+    readFile(new URL('../html/ob-xa.html', import.meta.url), 'utf8'),
+    readFile(new URL('../js/obxa.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/engine/OBXaProcessor.js', import.meta.url), 'utf8'),
+    readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
+  ]);
+  assert.match(metadata, /id: 'hohner-d6'/);
+  assert.match(metadata, /id: 'ob-xa'/);
+  assert.match(library, /hohner-d6-tile-art/);
+  assert.match(library, /obxa-tile-art/);
+  assert.match(library, /instrument-tile__keys/);
+  assert.match(styles, /\.hohner-d6-tile-art/);
+  assert.match(styles, /\.obxa-tile-art/);
+  assert.match(d6Page, /hohner-d6\.css/);
+  assert.match(d6App, /toneFilters/);
+  assert.match(d6App, /registerMidiTargetProvider/);
+  assert.match(d6App, /pedal:/);
+  assert.match(d6Engine, /compressor\.enabled/);
+  assert.match(d6Engine, /toneSelection/);
+  assert.match(obPage, /ob-xa\.css/);
+  assert.match(obApp, /EDIT TIMBRE/);
+  assert.match(obApp, /double \/ layer/);
+  assert.match(obEngine, /mode==='double'/);
+  assert.match(obEngine, /mode==='split'/);
+  assert.match(worker, /overture-shell-v41/);
+  assert.match(worker, /hohner-d6/);
+  assert.match(worker, /ob-xa/);
+});
+
 test('all library cards use canonical metadata with declared preset provenance', () => {
-  assert.equal(INSTRUMENTS.length, 10);
+  assert.equal(INSTRUMENTS.length, 12);
   assert.equal(INSTRUMENTS.every((instrument) => instrument.presetProvenance && instrument.description), true);
 });
 
@@ -95,7 +132,7 @@ test('instrument and experiment pages register the shared offline app shell', as
     '../html/korg-ms-20.html', '../html/little-phatty.html', '../html/nord-c2d.html',
     '../html/prophet10.html', '../html/roland-juno-106.html', '../html/roland-tr-808.html',
     '../html/sub37.html', '../html/yamaha-dx7.html', '../html/mellotron-m400.html',
-    '../html/oberheim-eight-voice.html',
+    '../html/oberheim-eight-voice.html', '../html/hohner-d6.html', '../html/ob-xa.html',
     '../experiments/beats-lab.html', '../experiments/envelope-lab.html',
     '../experiments/filter-lab.html', '../experiments/fm-lab.html',
     '../experiments/harmonics-lab.html', '../experiments/modulation-lab.html',
@@ -293,7 +330,7 @@ test('The shared account menu works across site, OMNI, Library and all experimen
   assert.ok(omni.includes('/css/site-theme.css'));
   assert.ok(omni.includes('account-shell.js?v=20261102-contributions-menu'));
   assert.ok(library.includes('account-shell.js?v=20261102-contributions-menu'));
-  assert.ok(worker.includes('overture-shell-v32'));
+  assert.ok(worker.includes('overture-shell-v41'));
   assert.ok(worker.includes('account-shell.js?v=20261102-contributions-menu'));
   for (const page of experimentPages) {
     const html = await readFile(new URL(`../experiments/${page}.html`, import.meta.url), 'utf8');
@@ -388,7 +425,7 @@ test('Login page has an optimized animated sound-field background with reduced-m
   assert.match(accountCss, /Login backdrop performance pass/);
   assert.match(accountCss, /body\\.login-page \\.site-noise \\{\\s*display:none/);
   assert.match(accountCss, /@keyframes login-grid-float/);
-  assert.match(worker, /overture-shell-v36/);
+  assert.match(worker, /overture-shell-v41/);
   assert.match(worker, /account\\.css\\?v=20261104-login-performance/);
   assert.match(loginPage, /account\\.css\\?v=20261104-login-performance/);
   assert.match(accountCss, /Light-mode graphite and Overture accent treatment/);
@@ -420,6 +457,6 @@ test('library empty state appears before the coming-soon tile or banner', async 
   assert.ok(emptyStateInsertion >= 0 && comingSoonCreation > emptyStateInsertion);
   assert.match(styles, /\.library-search__empty\s*\{[^}]*grid-column:\s*1\s*\/\s*-1/s);
   assert.match(page, /library\.css\?v=20261104-empty-state-order/);
-  assert.match(worker, /overture-shell-v37/);
+  assert.match(worker, /overture-shell-v41/);
   assert.match(worker, /library\.css\?v=20261104-empty-state-order/);
 });
