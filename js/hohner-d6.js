@@ -1,7 +1,7 @@
 import { WorkletEngine } from './shared/workletEngine.js';
 import { PresetStore } from './shared/presetStore.js';
 import { el, section, knob, select, display, performance, power, presetBar, footer } from './shared/panel.js';
-import { registerMidiTargetProvider } from './shared/midiMap.js';
+import { registerMidiTargetProvider, registerMidiTarget } from './shared/midiMap.js';
 import { HOHNER_D6_PRESETS } from './data/hohnerD6Presets.js';
 
 const NOTE_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
@@ -61,7 +61,8 @@ class HohnerD6App {
       },
     });
     this.buildPedals(this.page);
-    footer(this.shell,'HOHNER D6 · 60 NOTES · TWO MAGNETIC PICKUPS · FOUR FILTERS · ESC PANIC');
+    footer(this.page,'HOHNER D6 · 60 NOTES · TWO MAGNETIC PICKUPS · FOUR FILTERS · PEDALBOARD IS A SEPARATE SIGNAL CHAIN');
+    this.addDamperSlider();
     power('hohner-power', () => this.engine.start(), () => {
       this.perf.flushPending(); this.display.set('D6 READY','60 STRINGS · PICKUPS ONLINE');
     });
@@ -153,13 +154,13 @@ class HohnerD6App {
   setPickupSwitch(group,value){
     const state=this.pickupState();
     if(group==='ab')state.ab=value;else state.cd=value;
-    this.patch.pickup=state.cd==='C'?(state.ab==='A'?'neck':'bridge'):(state.ab==='A'?'bothOut':'bothIn');
+    this.patch.pickup=state.cd==='C'?(state.ab==='A'?'neck':'bridge'):(state.ab==='A'?'bothIn':'bothOut');
     this.engine.post({t:'param',key:'pickup',value:this.patch.pickup});
     this.updatePickupButtons();
   }
   pickupState(){
     const pickup=this.patch.pickup;
-    return {ab:(pickup==='neck'||pickup==='bothOut')?'A':'B',cd:(pickup==='bridge'||pickup==='neck')?'C':'D'};
+    return {ab:(pickup==='neck'||pickup==='bothIn')?'A':'B',cd:(pickup==='neck'||pickup==='bridge')?'C':'D'};
   }
   updatePickupButtons(){
     const state=this.pickupState();
@@ -168,9 +169,20 @@ class HohnerD6App {
     }));
   }
   updateToneButtons(){this.toneButtons?.forEach((b,index)=>{const active=!!this.patch.toneFilters[index];b.classList.toggle('is-active',active);b.setAttribute('aria-pressed',String(active));});}
+  addDamperSlider(){
+    const wrap=el('label','d6-damper-control',this.perf.keybed);
+    el('span','d6-damper-control__label',wrap,'DAMPER');
+    const range=el('input','d6-damper-control__range',wrap);
+    range.type='range';range.min='0';range.max='1';range.step='.001';range.value=String(this.patch.damping);
+    range.setAttribute('aria-label','String damper / mute slider');range.setAttribute('aria-orientation','vertical');
+    range.addEventListener('input',()=>{const value=Number(range.value);this.ui.damping.setValue(value,true);this.set('damping',value);});
+    registerMidiTarget(range,{id:'d6:damper',label:'String damper',group:'KEYBOARD',get:()=>this.patch.damping,set:(value)=>{range.value=String(value);this.ui.damping.setValue(value,true);this.set('damping',value);}});
+    this.damperRange=range;
+  }
   refresh(){
     Object.entries(this.patch).forEach(([key,value])=>{if(key!=='pedals'&&this.ui[key]?.setValue)this.ui[key].setValue(value,true);});
     this.updateToneButtons(); this.updatePickupButtons();
+    if(this.damperRange)this.damperRange.value=String(this.patch.damping);
     Object.entries(this.patch.pedals).forEach(([id,values])=>{
       this.setPedal(id,values);
       Object.entries(values).forEach(([key,value])=>{if(key!=='enabled')this.pedalUi[id]?.[key]?.setValue(value,true);});
