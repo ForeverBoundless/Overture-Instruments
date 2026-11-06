@@ -98,6 +98,6 @@ test('standalone M400 and OMNI load the corrected, cache-busted Mellotron workle
   ]);
   assert.match(standalone, /MellotronProcessor\.js\?v=20261104-declick/);
   assert.match(modules, /MellotronProcessor\.js\?v=20261104-declick/);
-  assert.match(worker, /overture-shell-v31/);
+  assert.match(worker, /overture-shell-v41/);
   assert.match(worker, /MellotronProcessor\.js\?v=20261104-declick/);
 });
