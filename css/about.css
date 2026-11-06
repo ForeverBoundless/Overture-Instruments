@@ -347,13 +347,13 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
 
 /* Story circuit traces flanking the centered copy (variation of the homepage hero circuit) */
 .story-layout { position: relative; }
-.story-circuit { position: absolute; top: 50%; z-index: 0; width: clamp(210px, 23vw, 330px); height: auto; pointer-events: none; opacity: 0; transform: translateY(-50%); transition: opacity .9s ease; --c: var(--amber); }
+.story-circuit { position: absolute; top: 50%; z-index: 0; width: clamp(210px, 23vw, 330px); height: auto; pointer-events: none; opacity: 1; transform: translateY(-50%); transition: opacity .9s ease; --c: var(--amber); }
 .story-circuit--left { left: -70px; }
 .story-circuit--right { right: -70px; transform: translateY(-50%) scaleX(-1); }
 .story-circuit.is-visible { opacity: 1; }
-.story-circuit__lines path { stroke: var(--c); stroke-dasharray: 7 10; opacity: 0; animation: trace-flow 12s linear infinite, circuit-hue 9s ease-in-out infinite; }
+.story-circuit__lines path { stroke: var(--c); stroke-dasharray: 7 10; opacity: .85; animation: trace-flow 12s linear infinite, circuit-hue 9s ease-in-out infinite; }
 .story-circuit__lines path:nth-child(2n) { animation-duration: 18s, 9s; animation-direction: reverse, normal; }
-.story-circuit__nodes circle { fill: var(--c); filter: drop-shadow(0 0 5px var(--c)); opacity: 0; transform-box: fill-box; transform-origin: center; animation: node-blink 3.2s ease-in-out infinite, circuit-hue 9s ease-in-out infinite; }
+.story-circuit__nodes circle { fill: var(--c); filter: drop-shadow(0 0 5px var(--c)); opacity: .8; transform-box: fill-box; transform-origin: center; animation: node-blink 3.2s ease-in-out infinite, circuit-hue 9s ease-in-out infinite; }
 .story-circuit__nodes circle:nth-child(3n) { animation-delay: -1.5s, -3s; }
 .story-circuit__pulses circle { stroke: var(--c); opacity: 0; transform-box: fill-box; transform-origin: center; animation: circuit-ripple 3.5s ease-out infinite, circuit-hue 9s ease-in-out infinite; }
 .story-circuit__pulses circle:nth-child(2) { animation-delay: -1.2s, -3s; }
