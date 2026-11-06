@@ -7,7 +7,7 @@ const NOTE_NAMES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
 const NOTES=Array.from({length:61},(_,i)=>{const n=36+i;return NOTE_NAMES[n%12]+(Math.floor(n/12)-1);});
 const DEF={...OBXA_PRESETS[0].data};
 const GLOBAL_KEYS=new Set(['mode','splitPoint','unisonDetune','bendRange','master']);
-const LAYER_KEYS=['osc1Wave','osc2Wave','osc1Level','osc2Level','osc2Tune','pulseWidth','noise','sync','crossMod','cutoff','resonance','filterMode','filterEnv','filterKeyTrack','filterAttack','filterDecay','filterSustain','filterRelease','ampAttack','ampDecay','ampSustain','ampRelease','lfoRate','lfoAmount','lfoWave','lfoTarget'];
+const LAYER_KEYS=['osc1Wave','osc2Wave','fEnvOsc2','osc1Level','osc2Level','osc2Tune','pulseWidth','noise','sync','crossMod','cutoff','resonance','filterMode','filterEnv','filterKeyTrack','filterAttack','filterDecay','filterSustain','filterRelease','ampAttack','ampDecay','ampSustain','ampRelease','lfoRate','lfoAmount','lfoWave','lfoTarget'];
 const cleanLayer=(source)=>{
  const out={...DEF,...source};
  ['osc1Level','osc2Level','pulseWidth','noise','crossMod','cutoff','resonance','filterEnv','filterKeyTrack','filterAttack','filterDecay','filterSustain','filterRelease','ampAttack','ampDecay','ampSustain','ampRelease','lfoRate','lfoAmount'].forEach(k=>out[k]=Math.max(0,Math.min(1,Number(out[k])||0)));
@@ -79,8 +79,9 @@ class OBXaApp{
   this.ui.osc2Tune=knob(ok,{label:'OSC 2 SEMITONES',min:-1,max:1,value:this.currentLayer().osc2Tune,formatValue:v=>(v*12).toFixed(1)+' st',onChange:v=>this.set('osc2Tune',v)});
   this.ui.pulseWidth=knob(ok,{label:'PULSE WIDTH',min:0,max:1,value:this.currentLayer().pulseWidth,onChange:v=>this.set('pulseWidth',v)});
   this.ui.noise=knob(ok,{label:'NOISE',min:0,max:1,value:this.currentLayer().noise,onChange:v=>this.set('noise',v)});
-  this.ui.osc1Wave=select(oscillators.body,'OSC 1 SHAPE',[{value:'saw',label:'SAWTOOTH'},{value:'pulse',label:'PULSE'}],this.currentLayer().osc1Wave,v=>this.set('osc1Wave',v));
-  this.ui.osc2Wave=select(oscillators.body,'OSC 2 SHAPE',[{value:'saw',label:'SAWTOOTH'},{value:'pulse',label:'PULSE'},{value:'triangle',label:'TRIANGLE'}],this.currentLayer().osc2Wave,v=>this.set('osc2Wave',v));
+  this.ui.osc1Wave=select(oscillators.body,'OSC 1 SHAPE',[{value:'saw',label:'SAWTOOTH'},{value:'pulse',label:'PULSE'},{value:'sawPulse',label:'SAW + PULSE'}],this.currentLayer().osc1Wave,v=>this.set('osc1Wave',v));
+  this.ui.osc2Wave=select(oscillators.body,'OSC 2 SHAPE',[{value:'saw',label:'SAWTOOTH'},{value:'pulse',label:'PULSE'},{value:'sawPulse',label:'SAW + PULSE'}],this.currentLayer().osc2Wave,v=>this.set('osc2Wave',v));
+  this.ui.fEnvOsc2=toggle(oscillators.body,'F-ENV → OSC 2',this.currentLayer().fEnvOsc2,v=>this.set('fEnvOsc2',v));
   this.ui.sync=toggle(oscillators.body,'OSC SYNC',this.currentLayer().sync,v=>this.set('sync',v));
   this.ui.crossMod=knob(ok,{label:'CROSS MOD',min:0,max:1,value:this.currentLayer().crossMod,onChange:v=>this.set('crossMod',v)});
   const filter=section(top,'FILTER','CURTIS-STYLE LOW-PASS · 2 OR 4 POLE');
