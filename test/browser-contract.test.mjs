@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { INSTRUMENTS } from '../js/data/instruments.js';
+import { OBXA_PRESETS } from '../js/data/obx-a-presets.js';
 
 test('PWA shell exposes a manifest and worker registration', async () => {
   const [manifest, worker, home] = await Promise.all(['../manifest.webmanifest', '../service-worker.js', '../index.html'].map((file) => readFile(new URL(file, import.meta.url), 'utf8')));
@@ -72,7 +73,7 @@ test('Hohner D6 and Oberheim OB-Xa are complete first-class emulator entries', a
   assert.match(obEngine, /width=clamp\(\.5-p\.pulseWidth\*\.45/);
   assert.doesNotMatch(obEngine, /lfoVca/);
   assert.match(obPage, /Oberheim_logo\.png/);
-  assert.match(worker, /overture-shell-v46/);
+  assert.match(worker, /overture-shell-v47/);
   assert.match(worker, /hohner-d6/);
   assert.match(worker, /ob-xa/);
 });
@@ -505,4 +506,33 @@ test('Both emulator power overlays use a working button and gesture-first startu
   assert.match(panel, /addEventListener\('pointerdown'/);
   assert.ok(obApp.indexOf("power('obxa-power'") < obApp.indexOf('this.build()'));
   assert.match(worklet, /await ctx\.audioWorklet\.addModule/);
+});
+
+
+test('OB-Xa includes a Lyle Mays-inspired unison ensemble preset', () => {
+  const program = OBXA_PRESETS.find(({ name }) => name === 'Lyle Mays Ensemble');
+  assert.ok(program, 'the Lyle Mays Ensemble program should be in the factory list');
+  const patch = program.data;
+  assert.equal(patch.mode, 'full');
+  assert.equal(patch.voiceCount, 8);
+  assert.equal(patch.unison, true);
+  assert.equal(patch.osc1Wave, 'saw');
+  assert.equal(patch.osc2Wave, 'saw');
+  assert.ok(patch.osc2Tune > 0, 'VCO 2 should sit slightly sharp of VCO 1');
+  assert.ok(patch.ampAttack >= .1, 'the stacked sound should fade in gently');
+});
+
+test('OB-Xa modulation panel is arranged into labelled responsive control groups', async () => {
+  const [app, styles] = await Promise.all([
+    readFile(new URL('../js/obxa.js', import.meta.url), 'utf8'),
+    readFile(new URL('../css/ob-xa.css', import.meta.url), 'utf8'),
+  ]);
+  for (const label of ['LFO GENERATOR', 'MODULATION DESTINATIONS', 'PERFORMANCE', 'VOICE ASSIGNMENT & HOLD']) {
+    assert.ok(app.includes(label), 'missing modulation group: ' + label);
+  }
+  assert.match(app, /obxa-modulation-layout/);
+  assert.match(app, /obxa-mod-route-grid/);
+  assert.match(styles, /\.obxa-mod-grid/);
+  assert.match(styles, /@media\(max-width:760px\)/);
+  assert.match(styles, /@media\(max-width:440px\)/);
 });

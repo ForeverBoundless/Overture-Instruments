@@ -10,5 +10,14 @@ preset('F-ENV Sweep',{...base,osc2Wave:'triangle',fEnvOsc2:true,osc2Tune:.04,cut
 preset('Soft Brass',{...base,osc2Tune:.01,cutoff:.55,resonance:.11,filterEnv:.66,filterAttack:.04,filterDecay:.4,filterSustain:.35,ampAttack:.05,ampDecay:.38,ampSustain:.7}),
 preset('Dark Sequence',{...base,osc1Wave:'pulse',pulseWidth:.41,osc2Tune:-.02,cutoff:.32,resonance:.4,filterEnv:.64,filterDecay:.18,filterSustain:.05,ampAttack:.003,ampDecay:.26,ampSustain:.55}),
 preset('Dream Machine',{...base,osc2Wave:'triangle',osc2Tune:.018,cutoff:.42,resonance:.09,filterMode:'12',ampAttack:.52,ampDecay:.7,ampSustain:.82,ampRelease:.88,lfoRate:.12,lfoAmount:.055}),
-preset('Unison Bass',{...base,mode:'unison',osc2Wave:'pulse',osc2Tune:.035,cutoff:.38,resonance:.42,filterEnv:.82,ampAttack:.003,ampDecay:.21,ampSustain:.56,ampRelease:.15})
+preset('Unison Bass',{...base,mode:'unison',osc2Wave:'pulse',osc2Tune:.035,cutoff:.38,resonance:.42,filterEnv:.82,ampAttack:.003,ampDecay:.21,ampSustain:.56,ampRelease:.15}),
+preset('Lyle Mays Ensemble',{
+ ...base,mode:'full',voiceCount:8,unison:true,unisonDetune:.38,
+ osc1Wave:'saw',osc2Wave:'saw',osc1Level:.82,osc2Level:.68,osc2Tune:.006,
+ cutoff:.64,resonance:.06,filterMode:'12',filterTrack:true,filterEnv:.14,
+ filterAttack:.13,filterDecay:.58,filterSustain:.2,filterRelease:.62,
+ ampAttack:.16,ampDecay:.6,ampSustain:.82,ampRelease:.68,
+ lfoRate:.12,lfoAmount:.025,lfoWave:'sine',lfoOsc1:true,lfoOsc2:true,
+ lfoFilter:false,pulseWidthAmount:0,lfoPulse1:false,lfoPulse2:false,master:.72
+})
 ];
