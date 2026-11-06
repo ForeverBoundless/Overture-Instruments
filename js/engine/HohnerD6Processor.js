@@ -12,7 +12,7 @@ class ClavString {
   constructor() {
     this.note = -1; this.active = false; this.gate = false; this.order = 0;
     this.buffer = new Float32Array(2048); this.length = 2048; this.index = 0; this.position = 0; this.toneState = new Float32Array(6);
-    this.velocity = 0.7; this.release = 1; this.toneState = 0; this.lp = 0;
+    this.velocity = 0.7; this.release = 1; this.lp = 0;
     this.pan = 0; this.seed = 1;
   }
 }
