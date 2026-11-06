@@ -60,6 +60,8 @@ class HohnerD6App {
         cc: (cc,value) => { if (cc === 7) this.ui.volume.setValue(value / 127); if (cc === 74) this.ui.damping.setValue(value / 127); },
       },
     });
+    this.buildPedals(this.page);
+    footer(this.shell,'HOHNER D6 · 60 NOTES · TWO MAGNETIC PICKUPS · FOUR FILTERS · ESC PANIC');
     power('hohner-power', () => this.engine.start(), () => {
       this.perf.flushPending(); this.display.set('D6 READY','60 STRINGS · PICKUPS ONLINE');
     });
@@ -85,8 +87,8 @@ class HohnerD6App {
     }
   }
   build() {
-    const page = el('div','pn-page d6-page',document.getElementById('hohner-d6-root'));
-    this.shell = el('main','pn-shell d6-shell',page);
+    this.page = el('div','pn-page d6-page',document.getElementById('hohner-d6-root'));
+    this.shell = el('main','pn-shell d6-shell',this.page);
     const header = el('header','pn-header d6-header',this.shell);
     el('div','pn-brand d6-brand',header).innerHTML = '<div class="d6-wordmark"><strong>HOHNER</strong><span>MADE IN GERMANY</span></div><div class="pn-model"><b>CLAVINET D6</b><span>ELECTROMECHANICAL KEYBOARD · 1971</span></div>';
     const right = el('div','pn-header-right',header);
@@ -121,8 +123,7 @@ class HohnerD6App {
     this.presets = presetBar(memory.body,{factory:HOHNER_D6_PRESETS,store:this.store,display:this.display,filename:'hohner-d6-program',
       panic:()=>this.perf.allOff(),apply:(data,name)=>{this.patch=validate(data);this.refresh();this.display.set(name.toUpperCase(),'CLAVINET D6 PROGRAM');},
       capture:()=>clone(this.patch)});
-    this.buildPedals(rows);
-    footer(this.shell,'HOHNER D6 · 60 NOTES · TWO MAGNETIC PICKUPS · FOUR FILTER PRESETS · PEDALS ARE MIDI-LEARNABLE · ESC PANIC');
+    
     this.updateToneButtons();
   }
   buildPedals(parent) {
@@ -152,13 +153,13 @@ class HohnerD6App {
   setPickupSwitch(group,value){
     const state=this.pickupState();
     if(group==='ab')state.ab=value;else state.cd=value;
-    this.patch.pickup=state.cd==='C'?(state.ab==='A'?'neck':'bridge'):(state.ab==='A'?'bothIn':'bothOut');
+    this.patch.pickup=state.cd==='C'?(state.ab==='A'?'neck':'bridge'):(state.ab==='A'?'bothOut':'bothIn');
     this.engine.post({t:'param',key:'pickup',value:this.patch.pickup});
     this.updatePickupButtons();
   }
   pickupState(){
     const pickup=this.patch.pickup;
-    return {ab:(pickup==='bridge'||pickup==='bothOut')?'B':'A',cd:(pickup==='bothIn'||pickup==='bothOut')?'D':'C'};
+    return {ab:(pickup==='neck'||pickup==='bothOut')?'A':'B',cd:(pickup==='bridge'||pickup==='neck')?'C':'D'};
   }
   updatePickupButtons(){
     const state=this.pickupState();
