@@ -20,7 +20,7 @@ class HohnerD6Processor extends AudioWorkletProcessor {
   constructor() {
     super();
     this.p = { ...DEFAULT };
-    this.voices = Array.from({ length: 24 }, () => new ClavString());
+    this.voices = Array.from({ length: 60 }, () => new ClavString());
     this.order = 0; this.bend = 0; this.sustain = false; this.scheduled = [];
     this.pedals = {
       overdrive: { enabled: false, drive: 0.25, tone: 0.65, level: 0.78 },
