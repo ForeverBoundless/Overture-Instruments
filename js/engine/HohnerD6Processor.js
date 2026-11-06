@@ -31,7 +31,7 @@ class HohnerD6Processor extends AudioWorkletProcessor {
       spring: { enabled: false, mix: 0.25, decay: 0.35 },
     };
     this.fx = {
-      phase: 0, wahL: 0, wahB: 0, wahR: 0, wahBR: 0, driveL: 0, driveR: 0,
+      phaserPhase: 0, chorusPhase: 0, wahL: 0, wahB: 0, wahR: 0, wahBR: 0, driveL: 0, driveR: 0,
       phaserL: new Float32Array(4), phaserR: new Float32Array(4),
       chorusL: new Float32Array(8192), chorusR: new Float32Array(8192), chorusIndex: 0,
       springL: new Float32Array(16384), springR: new Float32Array(16384), springIndex: 0,
@@ -131,24 +131,24 @@ class HohnerD6Processor extends AudioWorkletProcessor {
     }
     const phaser = pedals.phaser;
     if (phaser.enabled) {
-      fx.phase += (0.1 + clamp(phaser.rate, 0, 1) * 2.1) / sr;
-      if (fx.phase >= 1) fx.phase -= 1;
-      const sweep = 0.18 + (0.55 + 0.45 * Math.sin(fx.phase * Math.PI * 2)) * clamp(phaser.depth, 0, 1) * 0.64;
-      let l = left + fx.phaserL[3] * phaser.feedback * 0.65;
-      let r = right + fx.phaserR[3] * phaser.feedback * 0.65;
+      fx.phaserPhase += (0.1 + clamp(phaser.rate, 0, 1) * 2.1) / sr;
+      if (fx.phaserPhase >= 1) fx.phaserPhase -= 1;
+      const sweep = 0.18 + (0.55 + 0.45 * Math.sin(fx.phaserPhase * Math.PI * 2)) * clamp(phaser.depth, 0, 1) * 0.64;
+      let l = left + fx.phaserPhaserL[3] * phaser.feedback * 0.65;
+      let r = right + fx.phaserPhaserR[3] * phaser.feedback * 0.65;
       for (let stage = 0; stage < 4; stage += 1) {
-        const yl = -sweep * l + fx.phaserL[stage]; fx.phaserL[stage] = l + sweep * yl; l = yl;
-        const yr = -sweep * r + fx.phaserR[stage]; fx.phaserR[stage] = r + sweep * yr; r = yr;
+        const yl = -sweep * l + fx.phaserPhaserL[stage]; fx.phaserPhaserL[stage] = l + sweep * yl; l = yl;
+        const yr = -sweep * r + fx.phaserPhaserR[stage]; fx.phaserPhaserR[stage] = r + sweep * yr; r = yr;
       }
       const mix = clamp(phaser.mix, 0, 1);
       left = left * (1 - mix) + l * mix; right = right * (1 - mix) + r * mix;
     }
     const chorus = pedals.chorus;
     if (chorus.enabled) {
-      fx.phase += (0.08 + clamp(chorus.rate, 0, 1) * 1.25) / sr;
+      fx.chorusPhase += (0.08 + clamp(chorus.rate, 0, 1) * 1.25) / sr;
       const depth = clamp(chorus.depth, 0, 1);
-      const delayL = 900 + Math.sin(fx.phase * Math.PI * 2) * 430 * depth;
-      const delayR = 1050 + Math.sin(fx.phase * Math.PI * 2 + 1.2) * 430 * depth;
+      const delayL = 900 + Math.sin(fx.chorusPhase * Math.PI * 2) * 430 * depth;
+      const delayR = 1050 + Math.sin(fx.chorusPhase * Math.PI * 2 + 1.2) * 430 * depth;
       const readL = (fx.chorusIndex - delayL + fx.chorusL.length) % fx.chorusL.length;
       const readR = (fx.chorusIndex - delayR + fx.chorusR.length) % fx.chorusR.length;
       const wetL = fx.chorusL[Math.floor(readL)] || 0; const wetR = fx.chorusR[Math.floor(readR)] || 0;
