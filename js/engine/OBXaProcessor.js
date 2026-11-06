@@ -74,10 +74,10 @@ class OBXaProcessor extends AudioWorkletProcessor{
    for(const v of this.voices){
     if(!v.active||v.i>=count)continue;const p=v.layer===1?this.pB:this.p;this.env(v,p,'amp',dt);this.env(v,p,'filter',dt);
     if(v.glide>.001){const time=.004+v.glide*v.glide*1.15,alpha=1-Math.exp(-dt/time);v.pitch+=(v.targetPitch-v.pitch)*alpha;if(Math.abs(v.targetPitch-v.pitch)<.001)v.pitch=v.targetPitch;}else v.pitch=v.targetPitch;
-    const group=v.i<half?0:1,lfo=group===0?lfo0:lfo1,lfoDepth=p.lfoAmount*this.mod;
+    const group=v.i<half?0:1,lfo=group===0?lfo0:lfo1,lfoDepth=clamp(p.lfoAmount+this.mod*.22,0,1);
     const pitchMod1=(p.lfoTarget==='osc1'||p.lfoTarget==='both')?lfo*lfoDepth*4:0,pitchMod2=(p.lfoTarget==='osc2'||p.lfoTarget==='both')?lfo*lfoDepth*4:0,filterMod=p.lfoTarget==='filter'?lfo*lfoDepth*.32:0;
-    const pwMod1=p.lfoPulse1?lfo*p.pulseWidthAmount*.42*this.mod:0,pwMod2=p.lfoPulse2?lfo*p.pulseWidthAmount*.42*this.mod:0,unisonOffset=this.p.unison?(v.i-(count-1)/2)*this.p.unisonDetune*.11:0;
-    const bend1=this.p.bendOsc2Only?0:this.bend*this.p.bendRange,bend2=this.bend*this.p.bendRange,commonTune=this.p.masterTune*.5;
+    const pwDepth=clamp(p.pulseWidthAmount+this.mod*.22,0,1),pwMod1=p.lfoPulse1?lfo*pwDepth*.42:0,pwMod2=p.lfoPulse2?lfo*pwDepth*.42:0,unisonOffset=this.p.unison?(v.i-(count-1)/2)*this.p.unisonDetune*.11:0;
+    const bend1=this.p.bendOsc2Only?0:this.bend*this.p.bendRange,bend2=this.bend*this.p.bendRange,commonTune=this.p.masterTune;
     const note1=v.pitch+bend1+pitchMod1+unisonOffset+commonTune,note2=v.pitch+bend2+pitchMod2+unisonOffset+commonTune;
     const f1=hz(note1+p.osc1Range*12),osc2Env=p.fEnvOsc2?v.filterEnv*p.filterEnv*12:0,f2=hz(note2+p.osc2Tune*30+osc2Env+v.rand*12),d1=f1/sr,d2=f2/sr;
     v.phase1+=d1;const masterWrap=v.phase1>=1;if(masterWrap)v.phase1-=Math.floor(v.phase1);
