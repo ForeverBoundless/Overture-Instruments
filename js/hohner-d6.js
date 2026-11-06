@@ -10,8 +10,8 @@ const NOTES = Array.from({ length: 60 }, (_, i) => {
   return NOTE_NAMES[midi % 12] + (Math.floor(midi / 12) - 1);
 });
 const PEDAL_DEFS = {
-  overdrive: { name: 'Overdrive', subtitle: 'Analog drive / clipping', controls: [['drive','DRIVE',0,1,.24],['tone','TONE',0,1,.66],['level','LEVEL',0,1,.78]] },
   compressor: { name: 'Compressor', subtitle: 'Sustain / level', controls: [['sustain','SUSTAIN',0,1,.45],['level','LEVEL',0,1,.75]] },
+  overdrive: { name: 'Overdrive', subtitle: 'Analog drive / clipping', controls: [['drive','DRIVE',0,1,.24],['tone','TONE',0,1,.66],['level','LEVEL',0,1,.78]] },
   wah: { name: 'Wah', subtitle: 'Resonant filter', controls: [['position','POSITION',0,1,.5],['resonance','RESONANCE',0,1,.65],['mix','MIX',0,1,.75]] },
   phaser: { name: 'Phaser', subtitle: 'Four-stage sweep', controls: [['rate','RATE',0,1,.22],['depth','DEPTH',0,1,.5],['feedback','FEEDBACK',0,1,.15],['mix','MIX',0,1,.5]] },
   chorus: { name: 'Chorus', subtitle: 'Stereo modulation', controls: [['rate','RATE',0,1,.2],['depth','DEPTH',0,1,.5],['mix','MIX',0,1,.38]] },
@@ -57,7 +57,7 @@ class HohnerD6App {
         bend: (v) => this.engine.setPitchBend(v), sustain: (v) => this.engine.setSustain(v),
         allOff: () => this.engine.allNotesOff(),
         program: (p) => this.presets.load('f:' + (p % HOHNER_D6_PRESETS.length)),
-        cc: (cc,value) => { if (cc === 7) this.ui.volume.setValue(value / 127); if (cc === 74) { this.ui.damping.setValue(value / 127); if(this.damperRange)this.damperRange.value=String(value / 127); this.set('damping',value / 127); } },
+        cc: (cc,value) => { if (cc === 7) this.ui.volume.setValue(value / 127); if (cc === 74) { if(this.damperRange)this.damperRange.value=String(value / 127); this.set('damping',value / 127); } },
       },
     });
     this.buildPedals(this.page);
@@ -112,10 +112,9 @@ class HohnerD6App {
       b.addEventListener('click',()=>{const next=this.patch.toneFilters.slice();next[index]=!next[index];this.set('toneFilters',next);this.updateToneButtons();});
       this.toneButtons ||= []; this.toneButtons.push(b);
     });
-    const level = section(top,'OUTPUT & DAMPING','MECHANICAL RESPONSE');
+    const level = section(top,'ONBOARD OUTPUT','VOLUME CONTROL');
     const knobs = el('div','pn-knobs',level.body);
     this.ui.volume = knob(knobs,{label:'VOLUME',min:0,max:1,value:this.patch.volume,onChange:(v)=>this.set('volume',v)});
-    this.ui.damping = knob(knobs,{label:'DAMPING',min:0,max:1,value:this.patch.damping,onChange:(v)=>this.set('damping',v)});
     const visual = el('section','d6-strings-panel',rows);
     el('div','d6-strings-panel__label',visual,'TANGENT / STRING / PICKUP ASSEMBLY');
     const stringsArt = el('div','d6-string-lines',visual);
@@ -175,8 +174,8 @@ class HohnerD6App {
     const range=el('input','d6-damper-control__range',wrap);
     range.type='range';range.min='0';range.max='1';range.step='.001';range.value=String(this.patch.damping);
     range.setAttribute('aria-label','String damper / mute slider');range.setAttribute('aria-orientation','vertical');
-    range.addEventListener('input',()=>{const value=Number(range.value);this.ui.damping.setValue(value,true);this.set('damping',value);});
-    registerMidiTarget(range,{id:'d6:damper',label:'String damper',group:'KEYBOARD',get:()=>this.patch.damping,set:(value)=>{range.value=String(value);this.ui.damping.setValue(value,true);this.set('damping',value);}});
+    range.addEventListener('input',()=>{const value=Number(range.value);this.set('damping',value);});
+    registerMidiTarget(range,{id:'d6:damper',label:'String damper',group:'KEYBOARD',get:()=>this.patch.damping,set:(value)=>{range.value=String(value);this.set('damping',value);}});
     this.damperRange=range;
   }
   refresh(){
