@@ -176,7 +176,7 @@ class HohnerD6Processor extends AudioWorkletProcessor {
     const stringAlpha = 1 - Math.exp(-2 * Math.PI * 5200 / sr);
     const toneAlphas = [1500, 5200, 550, 1800, 180, 900].map((fc) => 1 - Math.exp(-2 * Math.PI * fc / sr));
     const toneSelection = Array.isArray(this.p.toneFilters) ? this.p.toneFilters : DEFAULT.toneFilters;
-    const damping = 0.991 + (1 - clamp(this.p.damping, 0, 1)) * 0.006;
+    const damping = 0.997 - clamp(this.p.damping, 0, 1) * 0.038;
     for (let i = 0; i < L.length; i += 1) {
       while (this.scheduled.length && this.scheduled[0].frame <= currentFrame + i) this.dispatch(this.scheduled.shift());
       let left = 0; let right = 0;
@@ -197,7 +197,7 @@ class HohnerD6Processor extends AudioWorkletProcessor {
           : this.p.pickup === 'neck' ? b
             : this.p.pickup === 'bothOut' ? (a - b) * 0.88
               : (a + b) * 0.5;
-        const releaseTime = 0.018 + (1 - clamp(this.p.damping, 0, 1)) * 0.09;
+        const releaseTime = 0.006;
         if (!v.gate) v.release *= Math.exp(-1 / (sr * releaseTime));
         const st = v.toneState;
         st[0] += toneAlphas[0] * (sample - st[0]);
