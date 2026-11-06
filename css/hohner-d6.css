@@ -23,3 +23,16 @@
 .d6-pickup-switch.is-active{color:#24170b;border-color:#f0c98b;background:linear-gradient(#ffdda1,#bd8241);box-shadow:inset 0 1px #fff8,0 0 8px #edb46655}
 .d6-pickup-switch:focus-visible,.d6-rocker:focus-visible,.d6-pedal__switch:focus-visible{outline:2px solid #ffd28b;outline-offset:2px}
 @media(max-width:700px){.d6-pickup-options{grid-template-columns:1fr}}
+
+/* Separate D6 mute-bar slider placed to the right of the shared 60-note keybed. */
+.d6-shell .pn-keybed.pn-keybed--nowheels{grid-template-columns:minmax(0,1fr) 46px;align-items:stretch}
+.d6-damper-control{display:grid;grid-template-rows:auto minmax(0,1fr);justify-items:center;align-items:center;gap:5px;min-width:0;padding:3px 2px;border-left:1px solid #82664a88;color:#e5cba5}
+.d6-damper-control__label{font:700 7px 'DM Mono',monospace;letter-spacing:.12em;writing-mode:vertical-rl;transform:rotate(180deg)}
+.d6-damper-control__range{appearance:none;-webkit-appearance:none;writing-mode:vertical-lr;direction:rtl;width:22px;height:100%;min-height:94px;margin:0;background:transparent;cursor:ns-resize;touch-action:pan-y}
+.d6-damper-control__range::-webkit-slider-runnable-track{width:4px;border:1px solid #7f6647;border-radius:4px;background:linear-gradient(90deg,#18110b,#d5b68a,#352416);box-shadow:inset 0 0 3px #000}
+.d6-damper-control__range::-moz-range-track{width:4px;border:1px solid #7f6647;border-radius:4px;background:linear-gradient(90deg,#18110b,#d5b68a,#352416)}
+.d6-damper-control__range::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:13px;margin-left:-7px;border:1px solid #f3ddbb;border-radius:2px;background:linear-gradient(#fff0d1,#af8550);box-shadow:0 2px 4px #000a}
+.d6-damper-control__range::-moz-range-thumb{width:18px;height:13px;border:1px solid #f3ddbb;border-radius:2px;background:linear-gradient(#fff0d1,#af8550);box-shadow:0 2px 4px #000a}
+.d6-page>.d6-pedalboard{width:min(1460px,calc(100vw - 28px))}
+.d6-page>.pn-footer{width:min(1460px,100%);padding:7px 10px 0;text-align:center}
+@media(max-width:520px){.d6-shell .pn-keybed.pn-keybed--nowheels{grid-template-columns:minmax(0,1fr) 34px}.d6-damper-control{padding-inline:0}.d6-damper-control__range{width:18px}.d6-damper-control__range::-webkit-slider-thumb{width:15px;height:12px;margin-left:-6px}}
