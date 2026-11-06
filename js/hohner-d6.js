@@ -20,12 +20,16 @@ const PEDAL_DEFS = {
 const DEFAULT_PEDALS = Object.fromEntries(Object.entries(PEDAL_DEFS).map(([id, def]) => [id, {
   enabled: false, ...Object.fromEntries(def.controls.map(([key,label,min,max,value]) => [key, value])),
 }]));
-const DEF = { tone: 0, pickup: 'bothIn', volume: .72, damping: .34, pedals: DEFAULT_PEDALS };
+const DEF = { toneFilters: [true, false, false, false], pickup: 'bothIn', volume: .72, damping: .34, pedals: DEFAULT_PEDALS };
+const LEGACY_TONES = [[true,false,false,false],[false,true,false,false],[false,false,true,false],[false,false,false,true]];
 const clone = (value) => JSON.parse(JSON.stringify(value));
 const validate = (data) => {
   if (!data || typeof data !== 'object') throw new Error('Not a D6 program.');
   const out = { ...DEF, ...data, pedals: clone(DEFAULT_PEDALS) };
-  out.tone = Math.round(Math.min(3, Math.max(0, Number(data.tone) || 0)));
+  out.toneFilters = Array.isArray(data.toneFilters)
+    ? Array.from({length:4},(_,i)=>!!data.toneFilters[i])
+    : LEGACY_TONES[Math.round(Math.min(3,Math.max(0,Number(data.tone)||0)))];
+  delete out.tone;
   out.pickup = ['bridge','neck','bothIn','bothOut'].includes(data.pickup) ? data.pickup : 'bothIn';
   out.volume = Math.min(1, Math.max(0, Number(data.volume) || 0));
   out.damping = Math.min(1, Math.max(0, Number(data.damping) || 0));
@@ -91,16 +95,18 @@ class HohnerD6App {
     const top = el('div','pn-row d6-controls',rows);
     const strings = section(top,'STRING & PICKUP SYSTEM','60 TANGENT-ACTUATED STRINGS');
     const pick = el('div','d6-pickup-options',strings.body);
-    this.ui.pickup = select(pick,'PICKUP COMBINATION',[
-      {value:'bothIn',label:'BOTH PICKUPS · IN PHASE'}, {value:'bothOut',label:'BOTH PICKUPS · OUT OF PHASE'},
-      {value:'bridge',label:'BRIDGE PICKUP'}, {value:'neck',label:'NECK PICKUP'},
-    ],this.patch.pickup,(v)=>this.set('pickup',v));
+    const pickupAB = el('div','d6-pickup-group',pick); el('span','d6-pickup-label',pickupAB,'A / B · PICKUP / PHASE');
+    const abButtons = el('div','d6-pickup-buttons',pickupAB); this.pickupButtons = { ab: {}, cd: {} };
+    ['A','B'].forEach((value)=>{const b=el('button','d6-pickup-switch',abButtons,value);b.type='button';b.addEventListener('click',()=>this.setPickupSwitch('ab',value));this.pickupButtons.ab[value]=b;});
+    const pickupCD = el('div','d6-pickup-group',pick); el('span','d6-pickup-label',pickupCD,'C / D · SINGLE / BOTH PICKUPS');
+    const cdButtons = el('div','d6-pickup-buttons',pickupCD);
+    ['C','D'].forEach((value)=>{const b=el('button','d6-pickup-switch',cdButtons,value);b.type='button';b.addEventListener('click',()=>this.setPickupSwitch('cd',value));this.pickupButtons.cd[value]=b;});
     const tone = section(top,'TONE SELECTOR','FOUR MECHANICAL ROCKER FILTERS');
     const toneButtons = el('div','d6-tone-switches',tone.body);
     ['BRILLIANT','TREBLE','MEDIUM','SOFT'].forEach((label,index) => {
       const b = el('button','d6-rocker',toneButtons);
       b.type = 'button'; b.innerHTML = '<span>' + String(index+1).padStart(2,'0') + '</span><b>' + label + '</b>';
-      b.addEventListener('click',()=>{this.set('tone',index);this.updateToneButtons();});
+      b.addEventListener('click',()=>{const next=this.patch.toneFilters.slice();next[index]=!next[index];this.set('toneFilters',next);this.updateToneButtons();});
       this.toneButtons ||= []; this.toneButtons.push(b);
     });
     const level = section(top,'OUTPUT & DAMPING','MECHANICAL RESPONSE');
@@ -143,10 +149,27 @@ class HohnerD6App {
       bypass.setAttribute('aria-label','Toggle ' + def.name); led.setAttribute('aria-hidden','true');
     });
   }
-  updateToneButtons(){this.toneButtons?.forEach((b,index)=>{b.classList.toggle('is-active',this.patch.tone===index);b.setAttribute('aria-pressed',String(this.patch.tone===index));});}
+  setPickupSwitch(group,value){
+    const state=this.pickupState();
+    if(group==='ab')state.ab=value;else state.cd=value;
+    this.patch.pickup=state.cd==='C'?(state.ab==='A'?'neck':'bridge'):(state.ab==='A'?'bothIn':'bothOut');
+    this.engine.post({t:'param',key:'pickup',value:this.patch.pickup});
+    this.updatePickupButtons();
+  }
+  pickupState(){
+    const pickup=this.patch.pickup;
+    return {ab:(pickup==='bridge'||pickup==='bothOut')?'B':'A',cd:(pickup==='bothIn'||pickup==='bothOut')?'D':'C'};
+  }
+  updatePickupButtons(){
+    const state=this.pickupState();
+    Object.entries(this.pickupButtons||{}).forEach(([group,buttons])=>Object.entries(buttons).forEach(([value,button])=>{
+      const active=state[group]===value;button.classList.toggle('is-active',active);button.setAttribute('aria-pressed',String(active));
+    }));
+  }
+  updateToneButtons(){this.toneButtons?.forEach((b,index)=>{const active=!!this.patch.toneFilters[index];b.classList.toggle('is-active',active);b.setAttribute('aria-pressed',String(active));});}
   refresh(){
     Object.entries(this.patch).forEach(([key,value])=>{if(key!=='pedals'&&this.ui[key]?.setValue)this.ui[key].setValue(value,true);});
-    this.updateToneButtons();
+    this.updateToneButtons(); this.updatePickupButtons();
     Object.entries(this.patch.pedals).forEach(([id,values])=>{
       this.setPedal(id,values);
       Object.entries(values).forEach(([key,value])=>{if(key!=='enabled')this.pedalUi[id]?.[key]?.setValue(value,true);});
