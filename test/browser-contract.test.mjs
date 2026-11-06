@@ -39,7 +39,7 @@ test('Hohner D6 and Oberheim OB-Xa are complete first-class emulator entries', a
   assert.match(d6Engine, /toneSelection/);
   assert.match(obPage, /ob-xa\.css/);
   assert.match(obApp, /EDIT TIMBRE/);
-  assert.match(obApp, /double \/ layer/);
+  assert.match(obApp, /DOUBLE \/ LAYER/);
   assert.match(obEngine, /mode==='double'/);
   assert.match(obEngine, /mode==='split'/);
   assert.match(worker, /overture-shell-v41/);
@@ -456,7 +456,7 @@ test('library empty state appears before the coming-soon tile or banner', async 
   const comingSoonCreation = app.indexOf('const comingSoon = document.createElement');
   assert.ok(emptyStateInsertion >= 0 && comingSoonCreation > emptyStateInsertion);
   assert.match(styles, /\.library-search__empty\s*\{[^}]*grid-column:\s*1\s*\/\s*-1/s);
-  assert.match(page, /library\.css\?v=20261104-empty-state-order/);
+  assert.match(page, /library\.css\?v=20261105-d6-obxa/);
   assert.match(worker, /overture-shell-v41/);
-  assert.match(worker, /library\.css\?v=20261104-empty-state-order/);
+  assert.match(worker, /library\.css\?v=20261105-d6-obxa/);
 });
