@@ -42,7 +42,7 @@ test('Hohner D6 and Oberheim OB-Xa are complete first-class emulator entries', a
   assert.match(obApp, /DOUBLE \/ LAYER/);
   assert.match(obEngine, /mode==='double'/);
   assert.match(obEngine, /mode==='split'/);
-  assert.match(worker, /overture-shell-v41/);
+  assert.match(worker, /overture-shell-v42/);
   assert.match(worker, /hohner-d6/);
   assert.match(worker, /ob-xa/);
 });
@@ -330,7 +330,7 @@ test('The shared account menu works across site, OMNI, Library and all experimen
   assert.ok(omni.includes('/css/site-theme.css'));
   assert.ok(omni.includes('account-shell.js?v=20261102-contributions-menu'));
   assert.ok(library.includes('account-shell.js?v=20261102-contributions-menu'));
-  assert.ok(worker.includes('overture-shell-v41'));
+  assert.ok(worker.includes('overture-shell-v42'));
   assert.ok(worker.includes('account-shell.js?v=20261102-contributions-menu'));
   for (const page of experimentPages) {
     const html = await readFile(new URL(`../experiments/${page}.html`, import.meta.url), 'utf8');
@@ -401,7 +401,7 @@ test('Contribution page profile, toolbar and result counts have responsive align
   assert.ok(css.includes('.contributions-toolbar.is-owner'));
   assert.ok(css.includes('@media (max-width:380px)'));
   assert.ok(app.includes("classList.toggle('is-owner', state.isOwner)"));
-  assert.ok(worker.includes('overture-shell-v41'));
+  assert.ok(worker.includes('overture-shell-v42'));
 });
 
 
@@ -425,7 +425,7 @@ test('Login page has an optimized animated sound-field background with reduced-m
   assert.match(accountCss, /Login backdrop performance pass/);
   assert.match(accountCss, /body\\.login-page \\.site-noise \\{\\s*display:none/);
   assert.match(accountCss, /@keyframes login-grid-float/);
-  assert.match(worker, /overture-shell-v41/);
+  assert.match(worker, /overture-shell-v42/);
   assert.match(worker, /account\\.css\\?v=20261104-login-performance/);
   assert.match(loginPage, /account\\.css\\?v=20261104-login-performance/);
   assert.match(accountCss, /Light-mode graphite and Overture accent treatment/);
@@ -457,6 +457,6 @@ test('library empty state appears before the coming-soon tile or banner', async 
   assert.ok(emptyStateInsertion >= 0 && comingSoonCreation > emptyStateInsertion);
   assert.match(styles, /\.library-search__empty\s*\{[^}]*grid-column:\s*1\s*\/\s*-1/s);
   assert.match(page, /library\.css\?v=20261105-d6-obxa/);
-  assert.match(worker, /overture-shell-v41/);
+  assert.match(worker, /overture-shell-v42/);
   assert.match(worker, /library\.css\?v=20261105-d6-obxa/);
 });
