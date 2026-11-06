@@ -350,8 +350,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
 .story-circuit { position: absolute; top: 50%; z-index: 0; width: clamp(210px, 23vw, 330px); height: auto; pointer-events: none; opacity: 0; transform: translateY(-50%); transition: opacity .9s ease; --c: var(--amber); }
 .story-circuit--left { left: -70px; }
 .story-circuit--right { right: -70px; transform: translateY(-50%) scaleX(-1); }
-.story-circuit.is-visible { opacity: 1; transform: translateY(-50%); }
-.story-circuit--right.is-visible { transform: translateY(-50%) scaleX(-1); }
+.story-circuit.is-visible { opacity: 1; }
 .story-circuit__lines path { stroke: var(--c); stroke-dasharray: 7 10; opacity: 0; animation: trace-flow 12s linear infinite, circuit-hue 9s ease-in-out infinite; }
 .story-circuit__lines path:nth-child(2n) { animation-duration: 18s, 9s; animation-direction: reverse, normal; }
 .story-circuit__nodes circle { fill: var(--c); filter: drop-shadow(0 0 5px var(--c)); opacity: 0; transform-box: fill-box; transform-origin: center; animation: node-blink 3.2s ease-in-out infinite, circuit-hue 9s ease-in-out infinite; }
@@ -391,19 +390,3 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
 @media (max-width: 1200px) { .story-circuit--left { left: -30px; } .story-circuit--right { right: -30px; } .story-circuit { width: clamp(170px, 19vw, 240px); } }
 @media (max-width: 980px) { .story-circuit { display: none; } }
 .story-copy { position: relative; z-index: 1; }
-
-/* Keep the circuit SVGs vertically centred while the shared reveal animation runs.
-   The generic .about-reveal pending state also sets transform, so these more
-   specific rules preserve the circuit's -50% anchor during and after the reveal. */
-.story-circuit.about-reveal.reveal-pending {
-  transform: translateY(calc(-50% + 17px));
-}
-.story-circuit.about-reveal.reveal-pending.is-visible {
-  transform: translateY(-50%);
-}
-.story-circuit--right.about-reveal.reveal-pending {
-  transform: translateY(calc(-50% + 17px)) scaleX(-1);
-}
-.story-circuit--right.about-reveal.reveal-pending.is-visible {
-  transform: translateY(-50%) scaleX(-1);
-}
