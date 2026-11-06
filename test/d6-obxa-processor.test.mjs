@@ -87,7 +87,7 @@ test('OB-Xa worklet supports eight-voice unison and generates finite audio', asy
   h.processor.dispatch({ t: 'patch', patch: {
     mode: 'unison', unisonDetune: .6, master: .7,
     osc1Wave: 'saw', osc2Wave: 'pulse', osc1Level: .8, osc2Level: .65,
-    filterMode: '24', lfoWave: 's&h', lfoAmount: .3,
+    filterMode: '24', lfoWave: 's&h', lfoAmount: .3, noiseRoute: true, filterTrack: true, osc1Range: .5, fEnvOsc2: true,
   } });
   h.processor.noteOn(57, .9);
   const active = h.processor.voices.filter((voice) => voice.active);
