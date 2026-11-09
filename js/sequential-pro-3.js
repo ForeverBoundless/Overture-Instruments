@@ -65,7 +65,7 @@ class Pro3App{
   power('pro3-power',()=>this.engine.start(),()=>{this.perf.flushPending();this.display.set('PRO 3 READY','OVERTURE PROGRAM · AUDIO ACTIVE');});
   this.engine.post({t:'patch',patch:this.patch});
  }
- set(k,v){this.patch[k]=v;this.engine.post({t:'param',key:k,value:v});}
+ set(k,v){this.patch[k]=v;this.engine.post({t:'param',key:k,value:v});if(k==='seqTrack')this.updateSequence();}
  postPatch(){this.engine.post({t:'patch',patch:this.patch});}
  makeKnobs(parent,defs){
   const row=el('div','pn-knobs',parent);
@@ -183,7 +183,7 @@ class Pro3App{
   this.perf=performance(this.shell,{notes:NOTES,octaves:3,startOctave:2,wheels:true,started:()=>this.engine.started,midiStatusEl:this.midi,handlers:{
    noteOn:(n,v)=>this.engine.noteOn(n,v),noteOff:n=>this.engine.noteOff(n),bend:v=>this.engine.setPitchBend(v),mod:v=>this.engine.setModWheel(v),
    aftertouch:v=>this.engine.setAftertouch(v),sustain:d=>this.engine.setSustain(d),allOff:()=>this.engine.allNotesOff(),
-   program:p=>this.presets.load('f:'+ (p%FACTORY.length)),cc:(cc,v)=>{if(cc===7)this.set('volume',v/127);if(cc===74)this.set('filterCutoff',v/127);}
+   program:p=>this.presets.load('f:'+ (p%FACTORY.length)),clock:()=>this.engine.post({t:'clock'}),start:()=>this.engine.post({t:'transport',play:true}),continue:()=>this.engine.post({t:'transport',play:true}),stop:()=>this.engine.post({t:'transport',play:false}),cc:(cc,v)=>{if(cc===7)this.set('volume',v/127);if(cc===74)this.set('filterCutoff',v/127);}
   }});
  }
  refresh(){
