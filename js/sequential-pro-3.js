@@ -168,7 +168,7 @@ class Pro3App{
  }
  toggleStep(i){
   const track=Number(this.patch.seqTrack)||0,step=this.seqPage*16+i,arr=this.patch.seqTracks[track];
-  if(track===0)arr[step]=arr[step]===null?48+((i%8)*2):null;
+  if(track<3)arr[step]=arr[step]===null?48+((i%8)*2)+track*7:null;
   else arr[step]=arr[step]===null?.7:null;
   this.engine.post({t:'sequence',tracks:this.patch.seqTracks,destinations:this.patch.seqDestinations,length:Number(this.patch.seqLength)||16});
   this.updateSequence();
@@ -257,7 +257,7 @@ class Pro3App{
   const choose=document.createElement('select');FACTORY.forEach((x,i)=>{const o=document.createElement('option');o.value='f:'+i;o.textContent=x.name;choose.appendChild(o);});choose.addEventListener('change',()=>this.presets.load(choose.value));strip.appendChild(choose);
   const save=document.createElement('button');save.textContent='SAVE USER';save.onclick=()=>this.display.flash('USE PRESET MEMORY BELOW THE HARDWARE PANEL');strip.appendChild(save);
   addKeyboard(p,{x:195,y:802,w:1380,h:90,firstNote:36,count:37,keyColor:'amber',onNoteOn:(n,v)=>{this.engine.noteOn(n,v);},onNoteOff:n=>this.engine.noteOff(n)});
-  this.hardwareSelects=[this.hwTrackSelect,this.hwDestSelect,this.hwPhrase];this.renderHardwareSteps=()=>{const tr=Number(this.patch.seqTrack)||0,offset=this.seqPage*16;this.hwSteps.forEach((btn,i)=>btn.setValue(this.patch.seqTracks[tr]?.[offset+i]!==null&&this.patch.seqTracks[tr]?.[offset+i]!==undefined,true));this.hwDestSelect.value=this.patch.seqDestinations[tr]||'none';};
+  this.hardwareSelects=[this.hwTrackSelect,this.hwDestSelect,this.hwPhrase];this.renderHardwareSteps=()=>{const tr=Number(this.patch.seqTrack)||0,offset=this.seqPage*16;this.hwSteps.forEach((btn,i)=>btn.setValue(this.patch.seqTracks[tr]?.[offset+i]!==null&&this.patch.seqTracks[tr]?.[offset+i]!==undefined,true));this.hwDestSelect.value=this.patch.seqDestinations[tr]||'none';this.hwDestSelect.disabled=tr<3;this.hwDestSelect.title=tr<3?'Tracks 1–3 are note tracks':'Tracks 4–16 can automate a synth parameter';};
   this.renderHardwareSteps();
   this.displayHardwarePreset=(name)=>{this.hwDisplay.set(name.toUpperCase(),'PRO 3 · PROGRAM');};
  }
