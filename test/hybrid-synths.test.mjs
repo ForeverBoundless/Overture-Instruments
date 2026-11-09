@@ -54,7 +54,9 @@ test('Sequential Pro 3 paraphonic mode allocates three note gates through shared
   const h = await createWorklet('../js/engine/Pro3Processor.js', 'pro3-processor');
   h.processor.message({ t: 'patch', patch: { mode: 'paraphonic', ampAttack: .001, ampSustain: 1 } });
   for (const note of [48, 55, 60]) h.processor.message({ t: 'noteOn', note, vel: .8 });
-  const activeNotes = h.processor.voices.filter((voice) => voice.gate).map((voice) => voice.note).sort((a, b) => a - b);
+  const activeNotes = [];
+  for (const voice of h.processor.voices) if (voice.gate) activeNotes.push(voice.note);
+  activeNotes.sort((a, b) => a - b);
   assert.deepEqual(activeNotes, [48, 55, 60]);
   assert.equal(h.processor.envs.amp.gate, true, 'the paraphonic voices share the main amplifier envelope');
 });
