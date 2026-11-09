@@ -210,10 +210,11 @@ class Super8Processor extends AudioWorkletProcessor{
       for(let k=0;k<n;k++){
        const offset=k===0?0:(k-3)*clamp(p.detune)*.004*superMode;
        const freq=base*(1+offset),phaseShift=side==='R'?((p.lrPhase||0)*.5):0;
-       const next=phase[k]+freq/sampleRate*(1+(side==='L'?lf1L:lf1R)*.0002*lr)+phaseShift*.000001;
+       const next=phase[k]+freq/sampleRate*(1+(side==='L'?lf1L:lf1R)*.0002*lr);
        if(k===0&&next>=1)masterWrap=true;
        phase[k]=next%1;
-       signal+=this.osc1(p,v,phase[k],k,waveDepth,pw,lr,freq/sampleRate);
+       const stereoPhase=(phase[k]+phaseShift)%1;
+       signal+=this.osc1(p,v,stereoPhase,k,waveDepth,pw,lr,freq/sampleRate);
       }
       if(side==='L')v.syncResetL=masterWrap;else v.syncResetR=masterWrap;
       return signal/n;
