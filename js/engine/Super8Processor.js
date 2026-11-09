@@ -205,18 +205,23 @@ class Super8Processor extends AudioWorkletProcessor{
      const waveSource=p.waveModSource==='LFO 1'?(lf1L+1)*.5:p.waveModSource==='ENV 1'?v.env1:p.waveMod;const waveDepth=clamp(waveSource+this.modWheel*.12+(mods.waveMod||0)+(p.lfo2Amount||0)*lf2);
      const superMode=p.superMode==='on'?1:p.superMode==='half'?.5:0;
      const dds1=(side)=>{
-      const lr=side==='L'?-1:1,phase=side==='L'?v.ph1L:v.ph1R;let signal=0;
+      const lr=side==='L'?-1:1,phase=side==='L'?v.ph1L:v.ph1R;let signal=0,masterWrap=false;
       const n=superMode?7:1;
       for(let k=0;k<n;k++){
        const offset=k===0?0:(k-3)*clamp(p.detune)*.004*superMode;
        const freq=base*(1+offset),phaseShift=side==='R'?((p.lrPhase||0)*.5):0;
-       phase[k]=(phase[k]+freq/sampleRate*(1+(side==='L'?lf1L:lf1R)*.0002*lr)+phaseShift*.000001) % 1;
+       const next=phase[k]+freq/sampleRate*(1+(side==='L'?lf1L:lf1R)*.0002*lr)+phaseShift*.000001;
+       if(k===0&&next>=1)masterWrap=true;
+       phase[k]=next%1;
        signal+=this.osc1(p,v,phase[k],k,waveDepth,pw,lr,freq/sampleRate);
       }
+      if(side==='L')v.syncResetL=masterWrap;else v.syncResetR=masterWrap;
       return signal/n;
      };
      const o1L=dds1('L'),o1R=this.global.binaural?dds1('R'):o1L;
      const f2=base*Math.pow(2,((p.dds2Octave||0)*12+(p.dds2Tune||0)+pitch2)/12);
+     if(p.dds2Mode==='sync'&&v.syncResetL)v.ph2L=0;
+     if(p.dds2Mode==='sync'&&v.syncResetR)v.ph2R=0;
      v.ph2L=(v.ph2L+f2/sampleRate)%1;v.ph2R=(v.ph2R+f2/sampleRate)%1;
      let o2L=wav(p.dds2Wave,v.ph2L,pw,f2/sampleRate),o2R=this.global.binaural?wav(p.dds2Wave,v.ph2R,pw,f2/sampleRate):o2L;
      if(p.dds2Mode==='sync'){o2L=wav(p.dds2Wave,v.ph2L,pw,f2/sampleRate);o2R=wav(p.dds2Wave,v.ph2R,pw,f2/sampleRate);}
