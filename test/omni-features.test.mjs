@@ -105,7 +105,7 @@ test('OMNI performance deck keeps octave controls in the keyboard header and giv
   assert.match(page, /omni\.js\?v=20261105-module-info/);
   assert.match(worker, /overture-shell-v\d+/);
   assert.match(worker, /omni\.css\?v=20261104-boot-centering/);
-  assert.match(worker, /omni\.js\?v=20261104-sem-mellotron/);
+  assert.ok(worker.includes('/js/omni.js?v=20261105-module-info'));
 });
 
 
@@ -262,7 +262,7 @@ test('OMNI exposes native SEM and Mellotron instrument modules and refreshes off
   assert.match(worker, /overture-shell-v\d+/);
   assert.match(worker, /OberheimEightVoiceProcessor\.js/);
   assert.match(worker, /MellotronProcessor\.js/);
-  assert.match(worker, /omni\.js\?v=20261104-sem-mellotron/);
+  assert.ok(worker.includes('/js/omni.js?v=20261105-module-info'));
 });
 
 
