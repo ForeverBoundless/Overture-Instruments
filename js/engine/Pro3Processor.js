@@ -166,17 +166,22 @@ class Pro3Processor extends AudioWorkletProcessor{
   if(type==="off"||mix===0)return [xL,xR];
   const len=f.bufL.length,delay=Math.max(2,Math.min(len-2,Math.floor(time*sampleRate))),read=(f.write-delay+len)%len;
   const wetL=f.bufL[read],wetR=f.bufR[read];
-  if(type==="chorus"||type==="flanger"||type==="phaser"){f.phase+=dt*(.12+clamp(p["fx"+(index+1)+"Time"])*4);const mod=Math.sin(f.phase*2*Math.PI)*.012*sampleRate;const d=Math.floor(Math.max(2,delay+mod)),r=(f.write-d+len)%len;const a=f.bufL[r],b=f.bufR[r];f.bufL[f.write]=xL+a*fb;f.bufR[f.write]=xR+b*fb;f.write=(f.write+1)%len;return [smooth(xL,a,mix),smooth(xR,b,mix)];}
+  const modMix=clamp(mix+(this.currentMods?.['fx'+(index+1)+'Mix']||0));
+  if(type==="ringMod"){f.phase+=dt*(20+clamp(p["fx"+(index+1)+"Time"])*1800)*2*Math.PI;const ring=Math.sin(f.phase);f.bufL[f.write]=xL;f.bufR[f.write]=xR;f.write=(f.write+1)%len;return [smooth(xL,xL*ring,modMix),smooth(xR,xR*ring,modMix)];}
+  if(type==="digitalDistortion"){const drive=1+clamp(p["fx"+(index+1)+"Tone"])*24;return [Math.tanh(xL*drive)*(1-modMix)+xL*modMix,Math.tanh(xR*drive)*(1-modMix)+xR*modMix];}
+  if(type==="highPass"){const cutoff=30*Math.pow(2,clamp(p["fx"+(index+1)+"Tone"])*10);const alpha=Math.exp(-2*Math.PI*cutoff/sampleRate);const hpL=xL-f.lp;f.lp=xL+(f.lp-xL)*alpha;return [xL-f.lp,xR-f.lp];}
+  if(type==="chorus"||type==="flanger"||type==="phaser"||type==="rotary"){f.phase+=dt*(.12+clamp(p["fx"+(index+1)+"Time"])*4);const mod=Math.sin(f.phase*2*Math.PI)*.012*sampleRate;const d=Math.floor(Math.max(2,delay+mod)),r=(f.write-d+len)%len;const a=f.bufL[r],b=f.bufR[r];f.bufL[f.write]=xL+a*fb;f.bufR[f.write]=xR+b*fb;f.write=(f.write+1)%len;return [smooth(xL,a,modMix),smooth(xR,b,modMix)];}
   const tone=clamp(p["fx"+(index+1)+"Tone"]);f.lp+=(1-tone*.92)*(wetL-f.lp);
   f.bufL[f.write]=xL+f.lp*fb;f.bufR[f.write]=xR+wetR*fb;f.write=(f.write+1)%len;
   const wet=type==="superPlate"?f.lp*.8+wetR*.2:wetL;
-  return [smooth(xL,wet,mix),smooth(xR,wetR,mix)];
+  return [smooth(xL,wet,modMix),smooth(xR,wetR,modMix)];
  }
  advanceSequencer(dt){
   if(this.seqRunning){
    const rate=(clamp(this.p.bpm,30,260)/60)*dt;this.seqPhase+=rate;
    if(this.seqPhase>=1){this.seqPhase-=1;this.sequenceTick();}
   }
+  if(this.p.arpEnabled&&!this.held.size&&this.arpNote>=0){this.noteOffArp(this.arpNote);this.arpNote=-1;}
   if(this.p.arpEnabled&&this.held.size){
    this.arpPhase+=(clamp(this.p.bpm,30,260)/60)*dt*(4/Math.max(1,Number(this.p.arpDivision)||4));
    if(this.arpPhase>=1){this.arpPhase-=1;const notes=[...this.held.keys()].sort((a,b)=>a-b);let idx=this.arpStep++%notes.length;if(this.p.arpMode==="down")idx=notes.length-1-idx;else if(this.p.arpMode==="random")idx=Math.floor(Math.random()*notes.length);else if(this.p.arpMode==="upDown"){const span=Math.max(1,notes.length*2-2),x=this.arpStep%span;idx=x<notes.length?x:span-x;}
@@ -206,11 +211,14 @@ class Pro3Processor extends AudioWorkletProcessor{
    const sharedGate=this.voices.some(v=>v.gate)||this.p.hold;
    Object.values(this.envs).forEach(e=>{e.gate=sharedGate;});
    const env={filter:this.envTick("filter",dt),amp:this.envTick("amp",dt),aux1:this.envTick("aux1",dt),aux2:this.envTick("aux2",dt)};
+   const mods={};
+   for(const route of (this.p.modRoutes||[])){if(!route||!route.destination||route.destination==='none')continue;const src=this.sourceValue(route.source,lf,env,this.currentNote);mods[route.destination]=(mods[route.destination]||0)+src*(Number(route.amount)||0);}
+   this.currentMods=mods;
    let raw=0;
    for(let oi=0;oi<3;oi++){
     const v=this.voices[oi],note=this.p.mode==="paraphonic"?v.note:this.currentNote;
     if(!v.gate&&env.amp<.0001)continue;
-    const pitchMod=lf[oi]*.0+(this.mod*.01)+(this.bend*(this.p.bendRange||2))+(this.at*.012);
+    const pitchDest='osc'+(oi+1)+'Pitch',shapeDest='osc'+(oi+1)+'Shape';const pitchMod=(mods[pitchDest]||0)*24+(this.bend*(this.p.bendRange||2))+(this.mod*.01)+(this.at*.012);
     const semi=(oi===0?Number(this.p.osc1Octave)||0:oi===1?Number(this.p.osc2Octave)||0:Number(this.p.osc3Octave)||0)*12;
     const tune=(oi===0?this.p.osc1Tune:oi===1?this.p.osc2Tune:this.p.osc3Tune)||0;
     const slide=(oi===0?this.p.osc1Glide:oi===1?this.p.osc2Glide:this.p.osc3Glide)||this.p.glide||0;
@@ -218,9 +226,9 @@ class Pro3Processor extends AudioWorkletProcessor{
     v.drift+=dt*(.07+oi*.03);
     const hz=f0*Math.pow(2,Math.sin(v.drift)*((Number(oi===0?this.p.osc1Slop:oi===1?this.p.osc2Slop:this.p.osc3Slop)||0)*.008));
     const inc=hz/sr;const old=v.phase[oi];v.phase[oi]=(v.phase[oi]+inc)%1;
-    const key="osc"+(oi+1),waveName=this.p[key+"Wave"],shape=clamp(this.p[key+"Shape"]||.5);
+    const key="osc"+(oi+1),waveName=this.p[key+"Wave"],shape=clamp((this.p[key+"Shape"]||.5)+(mods[shapeDest]||0));
     let s;
-    if(oi===2&&waveName==="wavetable")s=this.wavetable(v.phase[oi],Math.floor(shape*31),clamp((Number(this.p.osc3ShapeMod)||0)+lf[2]*.2+this.auto.osc3Shape||0));
+    if(oi===2&&waveName==="wavetable")s=this.wavetable(v.phase[oi],Math.floor(shape*31),clamp((Number(this.p.osc3ShapeMod)||0)+lf[2]*.2+(mods.osc3ShapeMod||0)+(this.auto.osc3Shape||0)));
     else if(oi===2&&waveName==="superSaw"){
       s=0;for(let k=-3;k<=3;k++){const det=k*.0025*(this.p.osc3ShapeMod||.2);s+=wave("saw",.5,(v.phase[oi]+det+1)%1)/7;}
     }else s=wave(waveName,clamp(shape,.02,.98),v.phase[oi]);
@@ -230,15 +238,15 @@ class Pro3Processor extends AudioWorkletProcessor{
     raw+=s*level;
    }
    raw+=(Math.random()*2-1)*clamp(this.p.noiseLevel)*.3;
-   const seqCut=this.auto.filterCutoff??this.auto.filterCutoff;
-   const cutoff=20*Math.pow(2,clamp((this.p.filterCutoff||.5)+(this.p.filterEnvAmount||0)*(env.filter-.3)+lf[0]*.05+(this.mod*.15)+(seqCut||0),0,1)*10);
-   let sample=this.filter(raw,cutoff,clamp(this.p.resonance),this.p.filterType==="ladder"?"ladder":this.p.filterType==="stateVariable"?"svf":"prophet6",this.p.filterState||0,sr);
+   const seqCut=this.auto.filterCutoff??0;
+   const cutoff=20*Math.pow(2,clamp((this.p.filterCutoff||.5)+(this.p.filterEnvAmount||0)*(env.filter-.3)+lf[0]*.05+(this.mod*.15)+(mods.filterCutoff||0)+(seqCut||0),0,1)*10);
+   let sample=this.filter(raw,cutoff,clamp(this.p.resonance+(mods.resonance||0)),this.p.filterType==="ladder"?"ladder":this.p.filterType==="stateVariable"?"svf":"prophet6",this.p.filterState||0,sr);
    sample=Math.tanh(sample*(1+clamp(this.p.filterDrive)*7+clamp(this.p.distortion)*9));
    const delaySamples=Math.max(2,Math.floor(sr/(25+clamp(this.p.feedbackTune)*1500)));
    const fbRead=(this.fbWrite-delaySamples+this.fb.length)%this.fb.length,feedback=this.fb[fbRead];
    const fbAmount=clamp(this.p.feedbackAmount,0,.96),fbIn=this.p.feedbackGrunge?Math.tanh(sample+feedback*fbAmount*4):sample+feedback*fbAmount;
    this.fb[this.fbWrite]=clamp(fbIn,-3,3);this.fbWrite=(this.fbWrite+1)%this.fb.length;
-   sample=(sample+feedback*fbAmount*.8)*env.amp*this.velocity*.22;
+   sample=(sample+feedback*fbAmount*.8)*env.amp*this.velocity*.22*(1+(mods.ampLevel||0));
    let left=sample,right=sample;
    [left,right]=this.fxProcess(left,right,0,this.p,dt);[left,right]=this.fxProcess(left,right,1,this.p,dt);
    const pan=.05*Math.sin(this.touch*Math.PI);L[i]=left*(.75-pan)*this.p.volume;R[i]=right*(.75+pan)*this.p.volume;
