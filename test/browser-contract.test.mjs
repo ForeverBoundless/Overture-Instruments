@@ -69,7 +69,7 @@ test('Hohner D6 and Oberheim OB-Xa are complete first-class emulator entries', a
   assert.match(obEngine, /portamentoMode==='quantized'/);
   assert.match(obEngine, /inputNote===note/);
   assert.match(obEngine, /mode==='full'\?0:\(v\.i<half\?0:1\)/);
-  assert.match(obEngine, /modEnabled\?clamp\(p\.pulseWidthAmount/);
+  assert.match(obEngine, /enabled\?clamp\(p\.pulseWidthAmount/);
   assert.match(obEngine, /width=clamp\(\.5-p\.pulseWidth\*\.45/);
   assert.doesNotMatch(obEngine, /lfoVca/);
   assert.match(obPage, /Oberheim_logo\.png/);
