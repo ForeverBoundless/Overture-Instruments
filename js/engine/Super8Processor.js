@@ -21,15 +21,21 @@ const LAYER_DEFAULT={
  portamento:0,transpose:0,bendRange:2,volume:.85,velocity:1,aftertouch:0
 };
 const clone=o=>JSON.parse(JSON.stringify(o));
-function wav(kind,p,pw){
- p=((p%1)+1)%1;
+function polyBlep(t,dt){
+ if(dt<=0)return 0;
+ if(t<dt){const x=t/dt;return x+x-x*x-1;}
+ if(t>1-dt){const x=(t-1)/dt;return x*x+x+x+1;}
+ return 0;
+}
+function wav(kind,p,pw,dt=0){
+ p=((p%1)+1)%1;const d=Math.min(.49,Math.max(0,dt)),duty=clamp(pw,.02,.98);
  if(kind==='sine')return Math.sin(p*2*Math.PI);
  if(kind==='triangle')return 1-4*Math.abs(p-.5);
- if(kind==='square')return p<.5?1:-1;
- if(kind==='pulse')return p<pw?1:-1;
+ if(kind==='square')return (p<.5?1:-1)+polyBlep(p,d)-polyBlep((p-.5+1)%1,d);
+ if(kind==='pulse')return (p<duty?1:-1)+polyBlep(p,d)-polyBlep((p-duty+1)%1,d);
  if(kind==='noise')return Math.random()*2-1;
  if(kind==='alt')return 0;
- return p*2-1;
+ return 2*p-1-polyBlep(p,d);
 }
 function altWave(index,phase){
  const p=((phase%1)+1)%1,shape=index%8,partials=2+(index%23);let v=0;
@@ -140,12 +146,12 @@ class Super8Processor extends AudioWorkletProcessor{
   for(let s=0;s<8;s++)for(let d=0;d<8;d++){const amt=Number(mat[s*8+d])||0;if(!amt)continue;const src=this.source(s,v,p,lf1,lf2);const key=['lfo1Rate','crossMod','waveMod','mix','hpf','resonance','env1Decay','delayTime'][d];out[key]=(out[key]||0)+src*amt;}
   return out;
  }
- osc1(p,v,phase,superIndex,tablePos,pw,lr){
+ osc1(p,v,phase,superIndex,tablePos,pw,lr,dt){
   const sampleAlt=index=>{const user=p.userWaves?.[index];if(user?.length){const pos=phase*user.length,i=pos|0,f=pos-i;return lerp(user[i%user.length],user[(i+1)%user.length],f);}return altWave(index,phase);};
   if(p.dds1Wave==='altA'||p.dds1Wave==='altB'){return lerp(sampleAlt(p.altA|0),sampleAlt(p.altB|0),clamp(tablePos));}
   const waveName=p.dds1Wave==='whiteNoise'?'noise':p.dds1Wave;
-  if(waveName==='noise')return wav('noise',phase,pw);
-  let x=wav(waveName,phase,pw);
+  if(waveName==='noise')return wav('noise',phase,pw,dt);
+  let x=wav(waveName,phase,pw,dt);
   if(p.waveMod>0&&waveName!=='sine'){const alt=altWave(p.altA||0,phase);x=lerp(x,alt,clamp(tablePos));}
   return x;
  }
@@ -205,15 +211,15 @@ class Super8Processor extends AudioWorkletProcessor{
        const offset=k===0?0:(k-3)*clamp(p.detune)*.004*superMode;
        const freq=base*(1+offset),phaseShift=side==='R'?((p.lrPhase||0)*.5):0;
        phase[k]=(phase[k]+freq/sampleRate*(1+(side==='L'?lf1L:lf1R)*.0002*lr)+phaseShift*.000001) % 1;
-       signal+=this.osc1(p,v,phase[k],k,waveDepth,pw,lr);
+       signal+=this.osc1(p,v,phase[k],k,waveDepth,pw,lr,freq/sampleRate);
       }
       return signal/n;
      };
      const o1L=dds1('L'),o1R=this.global.binaural?dds1('R'):o1L;
      const f2=base*Math.pow(2,((p.dds2Octave||0)*12+(p.dds2Tune||0)+pitch2)/12);
      v.ph2L=(v.ph2L+f2/sampleRate)%1;v.ph2R=(v.ph2R+f2/sampleRate)%1;
-     let o2L=wav(p.dds2Wave,v.ph2L,pw),o2R=this.global.binaural?wav(p.dds2Wave,v.ph2R,pw):o2L;
-     if(p.dds2Mode==='sync'){o2L=wav(p.dds2Wave,v.ph2L,pw);o2R=wav(p.dds2Wave,v.ph2R,pw);}
+     let o2L=wav(p.dds2Wave,v.ph2L,pw,f2/sampleRate),o2R=this.global.binaural?wav(p.dds2Wave,v.ph2R,pw,f2/sampleRate):o2L;
+     if(p.dds2Mode==='sync'){o2L=wav(p.dds2Wave,v.ph2L,pw,f2/sampleRate);o2R=wav(p.dds2Wave,v.ph2R,pw,f2/sampleRate);}
      else if(p.dds2Mode==='ring'){o2L*=o1L;o2R*=o1R;}
      if(p.dds2Mode==='sync'){o2L*=1+clamp(p.crossMod)*o1L*2;o2R*=1+clamp(p.crossMod)*o1R*2;}
      const sub=p.subMode==='sine'?Math.sin(v.ph2L*Math.PI*2):p.subMode==='square'?wav('square',v.ph2L,.5):0;
