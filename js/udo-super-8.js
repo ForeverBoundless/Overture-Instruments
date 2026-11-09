@@ -263,7 +263,7 @@ class Super8App{
   p.style.cssText+=';--hp-ink:#242c30;--hp-muted:#68737a;--hp-line:#a2abb0;--hp-section:#dce1e3;--hp-head:#c8d0d4;--hp-control:#e9edef;--hp-accent:#d65b3c;--hp-display:#f2a183;background:linear-gradient(180deg,#e3e7e9,#c3cbd0 60%,#aeb8be);border:7px solid #717a80;border-radius:5px';
   const header=box(15,12,1570,52,'UDO AUDIO · SUPER 8','16 VOICE · TWO PART · BINAURAL ANALOG-HYBRID');
   const logo=document.createElement('img');logo.src='/ui/Logos/UDO_logo.svg';logo.alt='UDO Audio';logo.style.cssText='position:absolute;left:1270px;top:20px;width:110px;height:28px;object-fit:contain';p.appendChild(logo);
-  this.hwDisplay=addDisplay(p,{x:1010,y:18,w:210,h:40,brand:'PERFORMANCE / PATCH',skin:'amber'});this.hwDisplay.set('P 001','INITIAL PERFORMANCE');
+  this.hwDisplay=addDisplay(p,{x:1010,y:18,w:210,h:40,brand:'PERFORMANCE / PATCH',skin:'amber'});addButton(p,{x:1550,y:30,label:'POWER',value:false,onChange:v=>{if(v)document.getElementById('super8-power').click();}});this.hwDisplay.set('P 001','INITIAL PERFORMANCE');
   addLabel(p,1450,28,'SUPER 8');addLabel(p,1530,28,'16 VOICE');
   const main=box(15,76,1570,245,'SYNTHESIS CONTROL','TWO INDEPENDENT FPGA DDS OSCILLATORS · ANALOG FILTER / VCA');
   const vol=box(25,332,130,112,'MASTER','VOLUME / DISTORTION');
