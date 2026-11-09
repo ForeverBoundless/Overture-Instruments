@@ -60,7 +60,7 @@ test('Hohner D6 and Oberheim OB-Xa are complete first-class emulator entries', a
   assert.match(obApp, /LOWER \/ UPPER BALANCE/);
   assert.match(obApp, /GLIDE MODE/);
   assert.match(obApp, /MODULATION \/ BEND ENABLE/);
-  assert.match(obApp, /UPPER MOD \/ BEND/);
+  assert.match(obApp, /UPPER BANK/);
   assert.match(obApp, /TRANSPOSE DOWN/);
   assert.match(obApp, /TRANSPOSE UP/);
   assert.match(obApp, /NARROW PITCH BEND/);
