@@ -41,7 +41,7 @@ Overture is a work in progress. Its models are independently implemented in soft
 
 ## Instrument library
 
-The current library contains twelve instrument emulators. The library search covers instrument names, manufacturers, models, voice modes, preset provenance, and descriptions. The sound-generation models are implemented in Overture's JavaScript audio code; the interface and feature set vary by instrument.
+The current library contains fourteen instrument emulators. The library search covers instrument names, manufacturers, models, voice modes, preset provenance, and descriptions. The sound-generation models are implemented in Overture's JavaScript audio code; the interface and feature set vary by instrument.
 
 ### Moog Little Phatty Stage Edition
 
@@ -86,6 +86,16 @@ An eight-voice synthesizer model based on independently controlled SEM-style voi
 ### Hohner Clavinet D6
 
 A 60-note electromechanical keyboard whose strings are excited by rubber-tipped tangents and captured by two magnetic pickups. The emulator uses an original waveguide model with velocity-shaped tangent attacks, register-dependent string loss, dispersion, pickup-position comb filtering, and the brief pitch fall at key release; it is not a recording bank. Its front panel follows the D6's two pickup rockers: C+A selects the lower pickup, C+B the upper pickup, D+A both pickups in phase, and D+B both pickups out of phase. The four tone rockers—Brilliant, Treble, Medium, and Soft—can be combined independently, and the instrument is silent when none is engaged, as on the hardware. A separate right-side mute slider applies a felt-damper model to the strings; releasing a key also damps its string promptly, as on the instrument. A separate serial six-stompbox signal chain adds overdrive, compression, a resonant wah filter, a six-stage phaser, modulated stereo chorus, and a four-line spring-style reverb. A master board bypass switches the complete effects chain without changing the individual pedal states. Pedal knobs use the shared MIDI mapping system, and every pedal bypass switch is also available as a MIDI target. Eight original Overture registrations demonstrate dry, driven, phased, wah, and chorus sounds; they are not claimed to be factory programs.
+
+
+
+### Sequential Pro 3
+
+A hybrid monosynth model with two analogue-style VCOs and a third digital wavetable oscillator. The control surface includes oscillator waveforms and shaping, oscillator sync and slop, three filter modes (Prophet-6-style low-pass, transistor ladder and state-variable), four delay/ADSR envelopes, three LFOs and a 32-slot modulation matrix. Performance and sound-design tools include three-note paraphony with shared filter/envelope behaviour, tuned feedback, two effect processors, an arpeggiator, patch morph endpoints, and a 16-track sequencer arranged as four 16-step phrases. The browser model includes 32 procedurally generated wavetable banks and accepts single-cycle WAV imports. Its initial programs are Overture-authored examples, not an extracted or verified Sequential factory bank. External hardware audio/CV connections are not claimed to be available in the browser.
+
+### UDO Audio Super 8
+
+A bi-timbral hybrid polysynth model with two DDS oscillator sections per layer, a seven-oscillator Super mode, alternative-waveform slots, cross-modulation, hard-sync-style and ring-modulation modes, sub-oscillator options, and analogue-style high-pass/low-pass filtering. The architecture includes true stereo left/right voice paths, selectable single, dual and split operation, binaural voice allocation, separate upper/lower layer patches, two envelopes, two LFOs and an 8 × 8 modulation matrix per layer. Each layer also has its own chorus, stereo delay with freeze, arpeggiator and 64-step sequencer. The interface includes a two-axis bender, 61-key keyboard, MIDI channel handling and polyphonic-pressure input. The initial performance and layer-patch examples are original Overture recipes; they are not copied factory programs. The model uses procedural alternative waveforms and software approximations of the hardware's FPGA and analogue signal paths.
 
 ### Oberheim OB-Xa
 

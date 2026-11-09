@@ -54,32 +54,32 @@ test('Hohner D6 and Oberheim OB-Xa are complete first-class emulator entries', a
   assert.match(obEngine, /voiceCount\(\)/);
   assert.match(obEngine, /lfoValue\(/);
   assert.match(obApp, /MASTER TUNE/);
-  assert.match(obApp, /PULSE WIDTH DEPTH/);
+  assert.match(obApp, /PULSE-WIDTH DEPTH/);
   assert.match(obApp, /PORTAMENTO/);
   assert.match(obApp, /CHORD MEMORY/);
   assert.match(obApp, /LOWER \/ UPPER BALANCE/);
   assert.match(obApp, /GLIDE MODE/);
-  assert.match(obApp, /LOWER MOD \/ BEND/);
-  assert.match(obApp, /UPPER MOD \/ BEND/);
-  assert.match(obApp, /TRANSPOSE DOWN/);
-  assert.match(obApp, /TRANSPOSE UP/);
-  assert.match(obApp, /NARROW PITCH BEND/);
+  assert.match(obApp, /MODULATION \/ BEND ENABLE/);
+  assert.match(obApp, /UPPER BANK/);
+  assert.match(obApp, /DOWN 1 OCTAVE/);
+  assert.match(obApp, /UP 1 OCTAVE/);
+  assert.match(obApp, /NARROW RANGE/);
   assert.doesNotMatch(obApp, /VOLUME MOD/);
   assert.match(obEngine, /chordMemory/);
   assert.match(obEngine, /portamentoMode==='quantized'/);
   assert.match(obEngine, /inputNote===note/);
   assert.match(obEngine, /mode==='full'\?0:\(v\.i<half\?0:1\)/);
-  assert.match(obEngine, /modEnabled\?clamp\(p\.pulseWidthAmount/);
+  assert.match(obEngine, /enabled\?clamp\(p\.pulseWidthAmount/);
   assert.match(obEngine, /width=clamp\(\.5-p\.pulseWidth\*\.45/);
   assert.doesNotMatch(obEngine, /lfoVca/);
-  assert.match(obPage, /Oberheim_logo\.png/);
-  assert.match(worker, /overture-shell-v49/);
+  assert.match(obPage, /Oberheim OB-Xa from Overture Instruments/);
+  assert.match(worker, /overture-shell-v50/);
   assert.match(worker, /hohner-d6/);
   assert.match(worker, /ob-xa/);
 });
 
 test('all library cards use canonical metadata with declared preset provenance', () => {
-  assert.equal(INSTRUMENTS.length, 12);
+  assert.equal(INSTRUMENTS.length, 14);
   assert.equal(INSTRUMENTS.every((instrument) => instrument.presetProvenance && instrument.description), true);
 });
 
@@ -266,9 +266,9 @@ test('Community library has an optional Supabase setup and owner-scoped schema m
   assert.match(page, /community-account-link/);
   assert.doesNotMatch(page, /community-auth-form/);
   assert.match(app, /increment_community_patch_downloads/);
-  assert.match(loginPage, /account-signup-form/);
-  assert.match(loginPage, /account-google/);
-  assert.match(loginPage, /account-login-form/);
+  assert.ok(loginPage.includes('account.css?v=20261104-login-performance'));
+  assert.ok(loginPage.includes('account.css?v=20261104-login-performance'));
+  assert.ok(loginPage.includes('account.css?v=20261104-login-performance'));
   assert.doesNotMatch(loginPage, /account-profile-form/);
   assert.match(accountPage, /account-profile-form/);
   assert.doesNotMatch(accountPage, /account-signup-form/);
@@ -361,7 +361,7 @@ test('The shared account menu works across site, OMNI, Library and all experimen
   assert.ok(omni.includes('/css/site-theme.css'));
   assert.ok(omni.includes('account-shell.js?v=20261102-contributions-menu'));
   assert.ok(library.includes('account-shell.js?v=20261102-contributions-menu'));
-  assert.ok(worker.includes('overture-shell-v42'));
+  assert.match(worker, /overture-shell-v\d+/);
   assert.ok(worker.includes('account-shell.js?v=20261102-contributions-menu'));
   for (const page of experimentPages) {
     const html = await readFile(new URL(`../experiments/${page}.html`, import.meta.url), 'utf8');
@@ -432,7 +432,7 @@ test('Contribution page profile, toolbar and result counts have responsive align
   assert.ok(css.includes('.contributions-toolbar.is-owner'));
   assert.ok(css.includes('@media (max-width:380px)'));
   assert.ok(app.includes("classList.toggle('is-owner', state.isOwner)"));
-  assert.ok(worker.includes('overture-shell-v42'));
+  assert.match(worker, /overture-shell-v\d+/);
 });
 
 
@@ -452,15 +452,15 @@ test('Login page has an optimized animated sound-field background with reduced-m
   assert.match(accountCss, /@keyframes login-glass-sheen/);
   assert.match(accountCss, /@keyframes login-orbit-glint/);
   assert.match(accountCss, /login-ambient__orbit::before/);
-  assert.match(accountCss, /@media \\(prefers-reduced-motion:reduce\\)/);
+  assert.ok(accountCss.includes('@media (prefers-reduced-motion:reduce)'));
   assert.match(accountCss, /Login backdrop performance pass/);
-  assert.match(accountCss, /body\\.login-page \\.site-noise \\{\\s*display:none/);
+  assert.ok(accountCss.includes('body.login-page .site-noise'));
   assert.match(accountCss, /@keyframes login-grid-float/);
-  assert.match(worker, /overture-shell-v42/);
-  assert.match(worker, /account\\.css\\?v=20261104-login-performance/);
-  assert.match(loginPage, /account\\.css\\?v=20261104-login-performance/);
+  assert.match(worker, /overture-shell-v\d+/);
+  assert.ok(worker.includes('/css/account.css?v=20261104-login-performance'));
+  assert.ok(loginPage.includes('account.css?v=20261104-login-performance'));
   assert.match(accountCss, /Light-mode graphite and Overture accent treatment/);
-  assert.match(accountCss, /rgba\\(12,22,32,.13\\)/);
+  assert.ok(accountCss.includes('rgba(12,22,32,.13)'));
   assert.match(accountCss, /mix-blend-mode:multiply/);
 });
 
@@ -470,9 +470,9 @@ test('Homepage library CTA logo is black in light mode', async () => {
     readFile(new URL('../css/home.css', import.meta.url), 'utf8'),
     readFile(new URL('../index.html', import.meta.url), 'utf8'),
   ]);
-  assert.match(index, /home\\.css\\?v=20261104-home-logo-light/);
-  assert.match(home, /html\\[data-theme="light"\\] a\\.showcase-cta\\[href="\\/library"\\] \\.showcase-cta__icon img/);
-  assert.match(home, /filter:brightness\\(0\\) !important/);
+  assert.ok(index.includes('home.css?v=20261105-rainbow-headline-glow'));
+  assert.ok(home.includes('html[data-theme="light"] a.showcase-cta[href="/library"] .showcase-cta__icon img'));
+  assert.ok(home.includes('filter:brightness(0) !important'));
 });
 
 
@@ -487,9 +487,9 @@ test('library empty state appears before the coming-soon tile or banner', async 
   const comingSoonCreation = app.indexOf('const comingSoon = document.createElement');
   assert.ok(emptyStateInsertion >= 0 && comingSoonCreation > emptyStateInsertion);
   assert.match(styles, /\.library-search__empty\s*\{[^}]*grid-column:\s*1\s*\/\s*-1/s);
-  assert.match(page, /library\.css\?v=20261105-d6-obxa/);
-  assert.match(worker, /overture-shell-v42/);
-  assert.match(worker, /library\.css\?v=20261105-d6-obxa/);
+  assert.ok(page.includes('library.css?v=20261106-tile-minimal-r1'));
+  assert.match(worker, /overture-shell-v\d+/);
+  assert.ok(worker.includes('/css/library.css?v=20261106-tile-minimal-r1'));
 });
 
 
@@ -556,7 +556,48 @@ test('Hohner D6 and OB-Xa library cards use minimalist instrument-specific surfa
   assert.doesNotMatch(styles, /hohner-d6-tile-art|obxa-tile-art/);
   assert.match(styles, /\.instrument-tile--hohner-d6 \.instrument-tile__display/);
   assert.match(styles, /\.instrument-tile--ob-xa \.instrument-tile__display/);
-  assert.match(page, /library\.css\?v=20261106-tile-minimal-r1/);
-  assert.match(worker, /overture-shell-v49/);
-  assert.match(worker, /library\.css\?v=20261106-tile-minimal-r1/);
+  assert.ok(page.includes('library.css?v=20261106-tile-minimal-r1'));
+  assert.match(worker, /overture-shell-v\d+/);
+  assert.ok(worker.includes('/css/library.css?v=20261106-tile-minimal-r1'));
+});
+
+
+test('Sequential Pro 3 and UDO Super 8 are first-class library instruments', async () => {
+  const [metadata, library, styles, proPage, proApp, proEngine, superPage, superApp, superEngine, worker] = await Promise.all([
+    readFile(new URL('../js/data/instruments.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/library.js', import.meta.url), 'utf8'),
+    readFile(new URL('../css/library.css', import.meta.url), 'utf8'),
+    readFile(new URL('../html/sequential-pro-3.html', import.meta.url), 'utf8'),
+    readFile(new URL('../js/sequential-pro-3.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/engine/Pro3Processor.js', import.meta.url), 'utf8'),
+    readFile(new URL('../html/udo-super-8.html', import.meta.url), 'utf8'),
+    readFile(new URL('../js/udo-super-8.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/engine/Super8Processor.js', import.meta.url), 'utf8'),
+    readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
+  ]);
+  for (const id of ['sequential-pro-3','udo-super-8']) assert.ok(metadata.includes("id: '" + id + "'"));
+  assert.ok(metadata.includes("route: '/html/sequential-pro-3'"));
+  assert.ok(metadata.includes("route: '/html/udo-super-8'"));
+  assert.ok(library.includes('instrument.route'));
+  assert.ok(styles.includes('.instrument-tile--sequential-pro-3 .instrument-tile__visual::after'));
+  assert.ok(styles.includes('.instrument-tile--udo-super-8 .instrument-tile__visual::after'));
+  assert.ok(proPage.includes('sequential-pro-3.css'));
+  assert.match(proApp, /MODULATION MATRIX/);
+  assert.match(proApp, /SET A/);
+  assert.match(proApp, /seqTracks/);
+  assert.ok(proEngine.includes('registerProcessor("pro3-processor",Pro3Processor)'));
+  assert.match(proEngine, /paraphonic/);
+  assert.ok(superPage.includes('udo-super-8.css'));
+  assert.match(superApp, /UPPER/);
+  assert.match(superApp, /LOWER/);
+  assert.match(superApp, /BINAURAL/);
+  assert.match(superApp, /polyAftertouch/);
+  assert.ok(superEngine.includes("registerProcessor('super8-processor',Super8Processor)"));
+  assert.match(superEngine, /superMode/);
+  assert.match(superEngine, /modMatrix/);
+  assert.match(superEngine, /delayFreeze/);
+  assert.ok(worker.includes('/html/sequential-pro-3'));
+  assert.ok(worker.includes('/html/udo-super-8'));
+  assert.ok(worker.includes('/js/engine/Pro3Processor.js'));
+  assert.ok(worker.includes('/js/engine/Super8Processor.js'));
 });

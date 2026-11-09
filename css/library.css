@@ -4395,3 +4395,70 @@ html[data-theme="light"] .instrument-tile--ob-xa .instrument-tile__hint { color:
   .instrument-tile--hohner-d6 .instrument-specs,
   .instrument-tile--ob-xa .instrument-specs { gap: 8px 12px; }
 }
+
+
+/* Sequential Pro 3 — charcoal control surface, walnut cheeks and warm LEDs. */
+.instrument-tile--sequential-pro-3 {
+  --tile-bar-glow: #ffab45;
+  background: linear-gradient(145deg, rgba(91,59,34,.34), rgba(18,21,25,.98));
+}
+.instrument-tile--sequential-pro-3 .instrument-tile__visual {
+  background: linear-gradient(90deg,#66462f 0 7%,#20252a 7% 93%,#61432e 93% 100%);
+  box-shadow: inset 0 1px rgba(255,255,255,.14), inset 0 -14px 22px rgba(0,0,0,.35);
+}
+.instrument-tile--sequential-pro-3 .instrument-tile__visual::before {
+  background:
+    repeating-linear-gradient(0deg,transparent 0 9px,rgba(255,255,255,.035) 9px 10px),
+    linear-gradient(180deg,rgba(255,255,255,.07),transparent 38%,rgba(0,0,0,.2));
+}
+.instrument-tile--sequential-pro-3 .instrument-tile__visual::after {
+  left:17px;right:17px;top:83px;height:17px;
+  background:repeating-linear-gradient(90deg,transparent 0 8px,rgba(255,160,65,.7) 8px 10px,transparent 10px 13px);
+  border-top:1px solid rgba(255,180,91,.55);
+  border-bottom:1px solid rgba(255,180,91,.28);
+  opacity:.65;
+}
+.instrument-tile--sequential-pro-3 .instrument-tile__glow {
+  background:radial-gradient(ellipse at 52% 42%,rgba(255,153,53,.24),transparent 55%);
+  filter:blur(8px);opacity:.7;
+}
+.instrument-tile--sequential-pro-3 .instrument-tile__display {
+  border:3px solid #674a31;background:linear-gradient(180deg,#241709,#100b07);
+}
+.instrument-tile--sequential-pro-3 .instrument-tile__display span {
+  background:#ffad52;box-shadow:0 0 6px rgba(255,164,74,.78);
+}
+
+/* UDO Super 8 — folded pale metal, dark controls and a restrained vermilion rail. */
+.instrument-tile--udo-super-8 {
+  --tile-bar-glow:#ed8764;
+  background:linear-gradient(145deg,rgba(155,169,177,.28),rgba(22,29,34,.98));
+}
+.instrument-tile--udo-super-8 .instrument-tile__visual {
+  background:linear-gradient(150deg,#d5dadd 0%,#929da4 54%,#65717a 100%);
+  box-shadow:inset 0 1px rgba(255,255,255,.55),inset 0 -14px 22px rgba(20,28,34,.24);
+}
+.instrument-tile--udo-super-8 .instrument-tile__visual::before {
+  background:
+    repeating-linear-gradient(0deg,transparent 0 7px,rgba(39,49,56,.10) 7px 8px),
+    linear-gradient(110deg,rgba(255,255,255,.23),transparent 48%,rgba(16,26,32,.12));
+}
+.instrument-tile--udo-super-8 .instrument-tile__visual::after {
+  left:16px;right:16px;top:91px;height:3px;
+  background:linear-gradient(90deg,transparent,rgba(190,77,48,.92) 12%,rgba(190,77,48,.92) 88%,transparent);
+  box-shadow:0 0 7px rgba(190,77,48,.32);
+}
+.instrument-tile--udo-super-8 .instrument-tile__glow {
+  background:radial-gradient(ellipse at 50% 40%,rgba(237,135,100,.22),transparent 58%);
+  filter:blur(8px);opacity:.7;
+}
+.instrument-tile--udo-super-8 .instrument-tile__display {
+  border:3px solid #4f5b62;background:linear-gradient(180deg,#192229,#10171c);
+}
+.instrument-tile--udo-super-8 .instrument-tile__display span {
+  background:#ee9878;box-shadow:0 0 6px rgba(238,152,120,.75);
+}
+.instrument-tile--sequential-pro-3 .instrument-tile__content,
+.instrument-tile--udo-super-8 .instrument-tile__content { min-width:0; }
+.instrument-tile--sequential-pro-3 .instrument-specs,
+.instrument-tile--udo-super-8 .instrument-specs { flex-wrap:wrap; }

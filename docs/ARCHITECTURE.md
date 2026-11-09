@@ -45,3 +45,8 @@ The community prototype uses Supabase Auth (email OTP), a `community_patches` ta
 
 
 Unlisted records are excluded from ordinary anonymous table reads. Direct-link access uses the narrowly scoped `get_community_patch_by_id(uuid)` function, which returns only the item matching the supplied UUID when it is public/unlisted or owned by the current user. The discovery feed queries public rows only.
+
+
+## New hybrid instruments
+
+The Sequential Pro 3 and UDO Super 8 each use a dedicated AudioWorklet processor under `js/engine/`. Their panels reuse `WorkletEngine`, the shared keyboard/MIDI plumbing, `PresetStore`, and the MIDI-map registration system. The Pro 3 stores one patch with its sequencer tracks and 32 modulation routes; the Super 8 stores an overall performance with two separately editable layer patches and independent step data. Initial sound examples are authored by Overture and are labelled accordingly rather than being represented as authentic hardware factory banks. Browser-only versions do not claim to provide physical CV, external audio, or separate hardware output connectors.
