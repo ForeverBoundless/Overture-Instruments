@@ -236,10 +236,10 @@ class Super8App{
  }
  buildKeyboard(){
   this.perf=performance(this.shell,{notes:NOTES,octaves:5,startOctave:1,wheels:false,started:()=>this.engine.started,midiStatusEl:this.midi,handlers:{
-   noteOn:(n,v,source,channel)=>this.engine.noteOn(n,v,channel),noteOff:(n,source,channel)=>this.engine.noteOff(n,channel),
+   noteOn:(n,v,source,channel)=>this.engine.post({t:'noteOn',note:n,vel:v,channel,source}),noteOff:(n,source,channel)=>this.engine.post({t:'noteOff',note:n,channel,source}),
    bend:v=>this.engine.setPitchBend(v),mod:v=>this.engine.setModWheel(v),aftertouch:v=>this.engine.setAftertouch(v),
    polyAftertouch:(n,v)=>this.engine.post({t:'polyAt',note:n,value:v}),sustain:d=>this.engine.setSustain(d),allOff:()=>this.engine.allNotesOff(),
-   program:p=>this.presets.load('f:'+p%FACTORY.length),cc:(cc,v)=>{if(cc===7)this.setGlobal('volume',v/127);if(cc===11)this.engine.post({t:'expression',value:v/127});}
+   program:p=>this.presets.load('f:'+p%FACTORY.length),clock:()=>this.engine.post({t:'clock'}),start:()=>this.engine.post({t:'transport',layer:this.active,play:true}),continue:()=>this.engine.post({t:'transport',layer:this.active,play:true}),stop:()=>this.engine.post({t:'transport',layer:this.active,play:false}),cc:(cc,v)=>{if(cc===7)this.setGlobal('volume',v/127);if(cc===11)this.engine.post({t:'expression',value:v/127});}
   }});
  }
 }
