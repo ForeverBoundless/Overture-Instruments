@@ -98,3 +98,32 @@ test('UDO Super 8 single mode exposes sixteen mono voices or eight binaural supe
   h.processor.message({ t: 'param', key: 'binaural', value: false });
   assert.equal(h.processor.layerRanges(0).length, 16);
 });
+
+
+test('Pro 3 and Super 8 load the shared reference-style hardware surface', async () => {
+  const [pro, super8, helper, styles, proPage, superPage, logo, worker] = await Promise.all([
+    readFile(new URL('../js/sequential-pro-3.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/udo-super-8.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/shared/hardwarePanel.js', import.meta.url), 'utf8'),
+    readFile(new URL('../css/hardware-panel.css', import.meta.url), 'utf8'),
+    readFile(new URL('../html/sequential-pro-3.html', import.meta.url), 'utf8'),
+    readFile(new URL('../html/udo-super-8.html', import.meta.url), 'utf8'),
+    readFile(new URL('../ui/Logos/UDO_logo.svg', import.meta.url), 'utf8'),
+    readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
+  ]);
+  assert.match(pro, /buildHardwarePanel\(\)/);
+  assert.match(pro, /SEQUENCER/);
+  assert.match(pro, /OSCILLATOR 1/);
+  assert.match(pro, /TUNED FEEDBACK/);
+  assert.match(super8, /buildHardwarePanel\(\)/);
+  assert.match(super8, /LAYER UPPER/);
+  assert.match(super8, /BINAURAL/);
+  assert.match(super8, /UDO_logo\.svg/);
+  assert.match(helper, /export function addKeyboard/);
+  assert.match(helper, /export function addFader/);
+  assert.match(styles, /hp-key-black/);
+  assert.match(proPage, /hardware-panel\.css/);
+  assert.match(superPage, /hardware-panel\.css/);
+  assert.match(logo, /UDO Audio/);
+  assert.match(worker, /UDO_logo\.svg/);
+});
