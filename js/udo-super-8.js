@@ -221,7 +221,7 @@ class Super8App{
  }
  selectLayer(index){
   this.active=index?1:0;this.patch.activeLayer=this.active;
-  this.layerButtons?.forEach((b,i)=>b.classList.toggle('lit',i===this.active));
+  this.layerButtons?.forEach((b,i)=>b.classList.toggle('lit',i===this.active));this.layerButtonsHardware?.forEach((b,i)=>b.setValue(i===this.active,true));this.hwKnobs?.forEach(({key,control})=>control.setValue(this.p()[key],true));this.hwSelects?.forEach(({key,select})=>{if(key in this.p())select.value=String(this.p()[key]);});
   this.ui=Object.fromEntries(Object.entries(this.ui).map(([k,v])=>[k,v]));
   this.refresh();this.refreshLayerSelect();
  }
@@ -249,16 +249,17 @@ class Super8App{
   const hw=createHardwareSurface(root,{id:'udo-super-8',width:1600,height:730,skin:'super8',programLabel:'SUPER 8 · INITIAL PERFORMANCE'});
   this.hw=hw;const p=hw.instrument;
   const box=(x,y,w,h,title,sub='')=>addSection(p,{x,y,w,h,title,sub});
-  const k=(parent,key,label,x,y,min=0,max=1,layer=true)=>addKnob(p,{x,y,label,min,max,value:layer?this.p()[key]:this.patch[key],onChange:v=>layer?this.set(key,v):this.setGlobal(key,v),midiId:'SUPER8:'+(layer?'L'+this.active+':':'G:')+key,formatValue:v=>max>5?String(Number(v).toFixed(1)):Number(v).toFixed(2)});
+  this.hwKnobs=[];
+  const k=(parent,key,label,x,y,min=0,max=1,layer=true)=>{const control=addKnob(p,{x,y,label,min,max,value:layer?this.p()[key]:this.patch[key],onChange:v=>layer?this.set(key,v):this.setGlobal(key,v),midiId:'SUPER8:'+(layer?'L'+this.active+':':'G:')+key,formatValue:v=>max>5?String(Number(v).toFixed(1)):Number(v).toFixed(2)});if(layer)this.hwKnobs.push({key,control});return control;};
   const f=(parent,key,label,x,y,min=0,max=1)=>addFader(p,{x,y,label,min,max,value:this.p()[key],height:90,onChange:v=>this.set(key,v),midiId:'SUPER8:'+key});
   const b=(parent,key,label,x,y,global=false)=>addButton(p,{x,y,label,value:global?this.patch[key]:this.p()[key],onChange:v=>global?this.setGlobal(key,v):this.set(key,v),midiId:'SUPER8:'+(global?'G:':'L'+this.active+':')+key});
-  const sel=(parent,key,label,x,y,options,global=false)=>{
+  this.hwSelects=[];const sel=(parent,key,label,x,y,options,global=false)=>{
    const value=global?this.patch[key]:this.p()[key];const wrap=document.createElement('label');wrap.className='hp-native-select';
    wrap.style.cssText='position:absolute;left:'+(x-50)+'px;top:'+(y-8)+'px;width:100px;display:grid;gap:3px;text-align:center;color:var(--hp-ink);font:7px Saira,sans-serif;letter-spacing:.06em';
    const title=document.createElement('span');title.textContent=label;const s=document.createElement('select');s.style.cssText='width:100%;height:20px;background:var(--hp-control);color:var(--hp-ink);border:1px solid var(--hp-line);font:8px DM Mono,monospace';
    options.forEach(v=>{const o=document.createElement('option');o.value=String(v);o.textContent=String(v).toUpperCase();s.appendChild(o);});s.value=String(value);
    s.addEventListener('change',()=>{const next=typeof value==='number'?Number(s.value):s.value;global?this.setGlobal(key,next):this.set(key,next);});
-   wrap.append(title,s);p.appendChild(wrap);return s;
+   wrap.append(title,s);p.appendChild(wrap);if(!global)this.hwSelects.push({key,select:s});return s;
   };
   p.style.cssText+=';--hp-ink:#242c30;--hp-muted:#68737a;--hp-line:#a2abb0;--hp-section:#dce1e3;--hp-head:#c8d0d4;--hp-control:#e9edef;--hp-accent:#d65b3c;--hp-display:#f2a183;background:linear-gradient(180deg,#e3e7e9,#c3cbd0 60%,#aeb8be);border:7px solid #717a80;border-radius:5px';
   const header=box(15,12,1570,52,'UDO AUDIO · SUPER 8','16 VOICE · TWO PART · BINAURAL ANALOG-HYBRID');
