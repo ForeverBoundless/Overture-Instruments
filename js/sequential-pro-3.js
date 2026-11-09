@@ -228,7 +228,7 @@ class Pro3App{
   this.hwDestSelect=sel(seq.body,'seqDestination','DESTINATION',450,122,['note','none','osc1Shape','osc2Shape','osc3ShapeMod','filterCutoff','resonance','fx1Mix','fx2Mix','feedbackAmount']);
   this.hwPhrase=sel(seq.body,'seqPhrase','PHRASE',600,122,['A','B','C','D']);
   k(seq.body,'bpm','TEMPO',790,117,30,260,1);k(seq.body,'seqSwing','SWING',900,117);
-  const play=addButton(p,{x:1020,y:127,label:'PLAY',value:false,onChange:v=>{this.patch.seqEnabled=v;this.engine.post({t:'transport',play:v});}});
+  addButton(p,{x:1020,y:127,label:'PLAY',value:false,onChange:v=>{this.patch.seqEnabled=v;this.engine.post({t:'transport',play:v});}});addButton(p,{x:1500,y:40,label:'POWER',value:false,onChange:v=>{if(v)document.getElementById('pro3-power').click();}});
   this.hwSteps=[];for(let i=0;i<16;i++){const x=235+i*51;const btn=addButton(p,{x,y:202,label:String(i+1),size:30,led:'red',value:false,onChange:()=>{this.toggleStep(i);this.renderHardwareSteps();}});this.hwSteps.push(btn);}
   const lfo=box(190,264,350,238,'LFO 1–3','RATE · SHAPE · PHASE · SLEW');
   for(let i=0;i<3;i++){const x=250+i*105;addLabel(p,x,310,'LFO '+(i+1));k(lfo.body,'lfo'+(i+1)+'Rate','RATE',x,365);k(lfo.body,'lfo'+(i+1)+'Amount','AMOUNT',x,430);sel(lfo.body,'lfo'+(i+1)+'Wave','SHAPE',x,465,['sine','triangle','saw','reverseSaw','square','sampleHold']);}
