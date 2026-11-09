@@ -228,8 +228,7 @@ class Pro3App{
   this.hwDestSelect=sel(seq.body,'seqDestination','DESTINATION',450,122,['note','none','osc1Shape','osc2Shape','osc3ShapeMod','filterCutoff','resonance','fx1Mix','fx2Mix','feedbackAmount']);
   this.hwDestSelect.value=this.patch.seqDestinations[0];this.hwDestSelect.addEventListener('change',()=>{const track=Number(this.patch.seqTrack)||0;this.patch.seqDestinations[track]=this.hwDestSelect.value;this.engine.post({t:'sequence',tracks:this.patch.seqTracks,destinations:this.patch.seqDestinations,length:this.patch.seqLength});});
   this.hwTrackSelect.addEventListener('change',()=>{this.hwDestSelect.value=this.patch.seqDestinations[Number(this.patch.seqTrack)||0]||'none';this.renderHardwareSteps();});
-  this.hwPhrase.addEventListener('change',()=>{this.seqPage=['A','B','C','D'].indexOf(this.hwPhrase.value);this.renderHardwareSteps();});
-  this.hwPhrase=sel(seq.body,'seqPhrase','PHRASE',600,122,['A','B','C','D']);
+  this.hwPhrase=sel(seq.body,'seqPhrase','PHRASE',600,122,['A','B','C','D']);this.hwPhrase.value='A';this.hwPhrase.addEventListener('change',()=>{this.seqPage=['A','B','C','D'].indexOf(this.hwPhrase.value);this.renderHardwareSteps();});
   k(seq.body,'bpm','TEMPO',790,117,30,260,1);k(seq.body,'seqSwing','SWING',900,117);
   addButton(p,{x:1020,y:127,label:'PLAY',value:false,onChange:v=>{this.patch.seqEnabled=v;this.engine.post({t:'transport',play:v});}});addButton(p,{x:1500,y:40,label:'POWER',value:false,onChange:v=>{if(v)document.getElementById('pro3-power').click();}});
   this.hwSteps=[];for(let i=0;i<16;i++){const x=235+i*51;const btn=addButton(p,{x,y:202,label:String(i+1),size:30,led:'red',value:false,onChange:()=>{this.toggleStep(i);this.renderHardwareSteps();}});this.hwSteps.push(btn);}
