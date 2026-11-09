@@ -113,7 +113,8 @@ class Super8App{
   this.makeToggle(mod.body,'lfo2Aftertouch','AFTERTOUCH MOD');
   const mixer=section(top,'MIXER / VCA','LAYER LEVEL AND PAN');
   this.makeKnobs(mixer.body,[['mix','DDS 1 / DDS 2'],['pan','LAYER PAN']]);
-  this.makeKnobs(mixer.body,[['velocity','VELOCITY'],['volume','MASTER',0,1]]);
+  this.makeKnobs(mixer.body,[['velocity','VELOCITY']]);
+  knob(mixer.body,{label:'MASTER',min:0,max:1,value:this.patch.volume,size:45,onChange:v=>this.setGlobal('volume',v)});
   const mid=el('div','pn-row super8-middle',rows);
   const filt=section(mid,'ANALOG VCF','ONE-POLE HPF · FOUR-POLE LPF');
   this.makeKnobs(filt.body,[['hpf','HPF CUTOFF'],['cutoff','LPF CUTOFF'],['resonance','RESONANCE']]);
