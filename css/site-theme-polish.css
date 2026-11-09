@@ -185,3 +185,10 @@ html[data-theme="light"] .omni-logo-wording strong {
   -webkit-text-fill-color:#111820 !important;
   text-shadow:none !important;
 }
+
+/* Keep the three OMNI feature chips black against the light homepage theme. */
+html[data-theme="light"] .feature-section--omni .omni-chips span {
+  color: #9dcbd3 !important;
+  border-color: rgba(125, 228, 255, .28) !important;
+  background: #000 !important;
+}
