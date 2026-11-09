@@ -84,12 +84,12 @@ class Super8Processor extends AudioWorkletProcessor{
   layers.forEach(layer=>{
    const p=this.layers[layer],held=this.held[layer];held.set(note,vel);
    if(p.arpEnabled)return;
-   this.allocateNote(note,vel,layer);
+   this.allocateNote(note,vel,layer);this.voices.forEach(v=>{if(v.active&&v.layer===layer&&v.inputNote===note&&v.order===this.order)v.channel=channel;});
   });
  }
  allocateNote(note,vel,layer){
   const p=this.layers[layer],bank=this.layerRanges(layer),mono=['solo','legato'].includes(p.voiceMode);
-  if(mono){const v=bank.find(x=>x.active)||bank[0];const legato=p.voiceMode==='legato'&&v.gate;this.startVoice(v,note,vel,layer,legato);return;}
+  if(mono){const v=bank.find(x=>x.active)||bank[0];const legato=p.voiceMode==='legato'&&v.gate;this.startVoice(v,note,vel,layer,legato,0,1,false);return;}
   const unison=p.unison||'off';
   let size=1;
   if(unison==='half')size=Math.max(2,Math.floor(bank.length/2));
@@ -98,29 +98,40 @@ class Super8Processor extends AudioWorkletProcessor{
   const chosen=bank.slice(0,size);
   chosen.forEach((v,i)=>this.startVoice(v,note+(unison==='octave'&&i>0?12*i:unison==='fifth'&&i>0?(i===1?7:12):0),vel,layer,false,i,size));
  }
- startVoice(v,note,vel,layer,legato=false,index=0,size=1){
-  const p=this.layers[layer],last=v.pitch;v.layer=layer;v.note=note;v.inputNote=note;v.targetPitch=note+(p.transpose||0);v.pitch=legato?last:v.targetPitch;v.active=true;v.gate=true;v.order=++this.order;v.velocity=vel;v.aftertouch=0;
-  if(!legato){v.e1Stage='delay';v.e2Stage='attack';v.e1Time=v.e2Time=0;v.env1=v.env2=0;}
+ startVoice(v,note,vel,layer,legato=false,index=0,size=1,sequence=false){
+  const p=this.layers[layer],last=v.pitch;v.layer=layer;v.note=note;v.inputNote=note;v.channel=1;v.seqVoice=!!sequence;v.arpVoice=false;v.targetPitch=note+(p.transpose||0);v.pitch=legato?last:v.targetPitch;v.active=true;v.gate=true;v.order=++this.order;v.velocity=vel;v.aftertouch=0;
+  if(!legato){v.e1Stage='attack';v.e2Stage='attack';v.e1Time=v.e2Time=0;v.env1=v.env2=0;}
   v.noise=Math.random()*999;v.pan=size>1?(index-(size-1)/2)/Math.max(1,size):v.pan;
   v.ph1L.fill(Math.random());v.ph1R.fill(Math.random());v.ph2L=Math.random();v.ph2R=Math.random();
  }
  noteOff(note,channel){
-  this.held.forEach((held,layer)=>{if(!held.has(note))return;held.delete(note);if(this.sustain)return;this.voices.forEach(v=>{if(v.inputNote===note&&v.layer===layer){v.gate=false;if(this.layers[layer].voiceMode==='poly2')v.e2Stage='release';}});});
+  const matches=this.voices.filter(v=>v.active&&v.inputNote===note&&v.channel===channel&&!v.seqVoice&&!v.arpVoice);
+  matches.forEach(v=>{this.held[v.layer].delete(note);if(!this.sustain){v.gate=false;if(this.layers[v.layer].voiceMode==='poly2')v.e2Stage='release';}});
  }
  releaseUnheld(){this.voices.forEach(v=>{if(v.active&&!this.held[v.layer].has(v.inputNote))v.gate=false;});}
  envTick(v,p,dt){
-  const tick=(stage,level,attack,decay,sustain,release)=>{if(stage==='delay')return {stage:'delay',level,time:0};if(stage==='attack'){level+=(1-level)*(1-Math.exp(-dt/(.001+attack*attack*3)));if(level>.999)return {stage:'attackHold',level:1,time:0};}else if(stage==='attackHold'){if(v.e1Time>=(p.env1AttackHold||0)*2)return {stage:'decayHold',level,time:0};}else if(stage==='decayHold'){if(v.e1Time>=(p.env1DecayHold||0)*2)return {stage:'decay',level,time:0};}else if(stage==='decay'){level+=(sustain-level)*(1-Math.exp(-dt/(.002+decay*decay*5)));if(Math.abs(level-sustain)<.001)return {stage:'sustain',level:sustain,time:0};}else if(stage==='sustain')level=sustain;else if(stage==='release'){level*=Math.exp(-dt/(.005+release*release*4));if(level<.0001)return {stage:'idle',level:0,time:0};}return {stage,level,time:v.e1Time+dt};};
-  const a=tick(v.e1Stage,v.env1,p.env1Attack,p.env1Decay,p.env1Sustain,p.env1Release);v.e1Stage=a.stage;v.env1=a.level;
-  const b=tick(v.e2Stage,v.env2,p.env2Attack,p.env2Decay,p.env2Sustain,p.env2Release);v.e2Stage=b.stage;v.env2=b.level;
-  if(!v.gate){if(v.e1Stage!=='idle')v.e1Stage='release';if(v.e2Stage!=='idle')v.e2Stage='release';}
-  if(p.env1Loop&&v.gate&&v.e1Stage==='sustain'){v.e1Stage='attack';v.env1=0;}
+  const tick=(which,stage,level,time,attack,attackHold,decayHold,decay,sustain,release)=>{
+   if(!v.gate&&stage!=='idle'&&stage!=='release')stage='release';
+   if(stage==='attack'){level+=(1-level)*(1-Math.exp(-dt/(.001+attack*attack*3)));if(level>.999){level=1;stage=attackHold>0?'attackHold':decayHold>0?'decayHold':'decay';time=0;}}
+   else if(stage==='attackHold'){time+=dt;if(time>=attackHold*2){stage=decayHold>0?'decayHold':'decay';time=0;}}
+   else if(stage==='decayHold'){time+=dt;if(time>=decayHold*2){stage='decay';time=0;}}
+   else if(stage==='decay'){level+=(sustain-level)*(1-Math.exp(-dt/(.002+decay*decay*5)));if(Math.abs(level-sustain)<.001){level=sustain;stage='sustain';}}
+   else if(stage==='sustain')level=sustain;
+   else if(stage==='release'){level*=Math.exp(-dt/(.005+release*release*4));if(level<.0001){level=0;stage='idle';time=0;}}
+   return {stage,level,time};
+  };
+  const a=tick(1,v.e1Stage,v.env1,v.e1Time,p.env1Attack,p.env1AttackHold,p.env1DecayHold,p.env1Decay,p.env1Sustain,p.env1Release);
+  v.e1Stage=a.stage;v.env1=a.level;v.e1Time=a.time;
+  const b=tick(2,v.e2Stage,v.env2,v.e2Time,p.env2Attack,0,p.env2DecayHold,p.env2Decay,p.env2Sustain,p.env2Release);
+  v.e2Stage=b.stage;v.env2=b.level;v.e2Time=b.time;
+  if(p.env1Loop&&v.gate&&v.e1Stage==='sustain'){v.e1Stage='attack';v.env1=0;v.e1Time=0;}
  }
  lfo(v,p,dt,which,side){
   const rate=which===1?(p.lfo1HighFreq?20+clamp(p.lfo1Rate)*9980:.03+clamp(p.lfo1Rate)*40):.05+clamp(p.lfo2Rate)*50;
   const phaseKey=which===1?(side==='L'?'lfo1L':'lfo1R'):'lfo2';
   v[phaseKey]=(v[phaseKey]+rate*dt)%(Math.PI*2);const phase=v[phaseKey]/(Math.PI*2),shape=which===1?p.lfo1Wave:p.lfo2Wave;
   if(shape==='square')return phase<.5?1:-1;if(shape==='saw')return 2*phase-1;if(shape==='reverseSaw')return 1-2*phase;if(shape==='triangle')return 1-4*Math.abs(phase-.5);
-  return Math.sin(v[phaseKey]);
+  const offset=side==='R'&&which===1?(p.lrPhase||0)*Math.PI*2:0;return Math.sin(v[phaseKey]+offset);
  }
  source(index,v,p,lf1,lf2){return [v.note/127*2-1,lf2,v.env1,v.velocity*2-1,v.aftertouch,this.expression,this.global.benderX,v.note/127*2-1][index]||0;}
  mod(p,v,lf1,lf2){
@@ -162,8 +173,8 @@ class Super8Processor extends AudioWorkletProcessor{
  }
  tickSequencers(dt,layer){
   const p=this.layers[layer],s=this.seq[layer],a=this.arp[layer],held=[...this.held[layer].entries()].sort((x,y)=>x[0]-y[0]);
-  if(p.seqEnabled){s.phase+=(p.seqBpm/60)*dt;if(s.phase>=1){s.phase-=1;const n=p.seqSteps[s.step%p.seqLength];if(s.note>=0){this.noteOff(s.note,1);s.note=-1;}if(n!==null&&n!==undefined){s.note=n;this.allocateNote(n,.85,layer);}s.step=(s.step+1)%clamp(p.seqLength,1,64);}}
-  if(p.arpEnabled&&held.length){a.phase+=(p.seqBpm/60)*dt*(4/Math.max(1,p.arpDivision));if(a.phase>=1){a.phase-=1;let index=a.index++%held.length;if(p.arpMode==='down')index=held.length-1-index;else if(p.arpMode==='random')index=Math.floor(Math.random()*held.length);else if(p.arpMode==='upDown'){const span=Math.max(1,held.length*2-2),z=a.index%span;index=z<held.length?z:span-z;}const n=held[index][0];this.allocateNote(n,held[index][1],layer);}}
+  if(p.seqEnabled){s.phase+=(p.seqBpm/60)*dt;if(s.phase>=1){s.phase-=1;const n=p.seqSteps[s.step%p.seqLength];if(s.note>=0){this.voices.forEach(v=>{if(v.active&&v.layer===layer&&v.seqVoice){v.gate=false;v.seqVoice=false;}});s.note=-1;}if(n!==null&&n!==undefined){s.note=n;this.allocateNote(n,.85,layer);this.voices.forEach(v=>{if(v.active&&v.layer===layer&&v.inputNote===n&&v.order===this.order)v.seqVoice=true;});}s.step=(s.step+1)%clamp(p.seqLength,1,64);}}
+  if(p.arpEnabled&&held.length){a.phase+=(p.seqBpm/60)*dt*(4/Math.max(1,p.arpDivision));if(a.phase>=1){a.phase-=1;let index=a.index++%held.length;if(p.arpMode==='down')index=held.length-1-index;else if(p.arpMode==='random')index=Math.floor(Math.random()*held.length);else if(p.arpMode==='upDown'){const span=Math.max(1,held.length*2-2),z=a.index%span;index=z<held.length?z:span-z;}const n=held[index][0];this.voices.forEach(v=>{if(v.active&&v.layer===layer&&v.arpVoice){v.gate=false;v.arpVoice=false;}});this.allocateNote(n,held[index][1],layer);this.voices.forEach(v=>{if(v.active&&v.layer===layer&&v.inputNote===n&&v.order===this.order)v.arpVoice=true;});}else if(p.arpEnabled&&!held.length){this.voices.forEach(v=>{if(v.active&&v.layer===layer&&v.arpVoice){v.gate=false;v.arpVoice=false;}});}}
  }
  process(_inputs,outputs){
   const out=outputs[0],L=out[0],R=out[1]||out[0],dt=1/sampleRate;
@@ -177,7 +188,7 @@ class Super8Processor extends AudioWorkletProcessor{
      const glide=clamp(p.portamento);v.pitch+=(v.targetPitch-v.pitch)*(glide>0?1-Math.exp(-dt/(.005+glide*2)):1);
      this.envTick(v,p,dt);
      if(v.e2Stage==='idle'&&v.env2===0&&!v.gate){v.active=false;continue;}
-     const lf1L=this.lfo(v,p,dt,1,'L'),lf1R=this.lfo(v,p,dt,1,'R'),lf2=this.lfo(v,p,dt,2,'L'),mods=this.mod(p,v,lf1L,lf2);
+     v.aftertouch=this.polyPressure.get(v.inputNote)??this.aftertouch[layer]??0;const lf1L=this.lfo(v,p,dt,1,'L'),lf1R=this.lfo(v,p,dt,1,'R'),lf2=this.lfo(v,p,dt,2,'L'),mods=this.mod(p,v,lf1L,lf2);
      const pitchBend=(this.pitchBend[layer]||0)*p.bendRange+this.global.benderX*3;
      const base=midiHz(v.pitch+pitchBend+(this.global.masterTune||0)+(p.transpose||0)),pw=.5+.42*Math.sin(v.noise+i*.0002*p.pwDrift*300);
      const waveDepth=clamp((p.waveMod||0)+this.modWheel*.12+(mods.waveMod||0)+(p.lfo2Amount||0)*lf2);
@@ -193,10 +204,10 @@ class Super8Processor extends AudioWorkletProcessor{
       }
       return signal/n;
      };
-     const o1L=dds1('L'),o1R=dds1('R');
+     const o1L=dds1('L'),o1R=this.global.binaural?dds1('R'):o1L;
      const f2=base*Math.pow(2,((p.dds2Octave||0)*12+(p.dds2Tune||0))/12);
      v.ph2L=(v.ph2L+f2/sampleRate)%1;v.ph2R=(v.ph2R+f2/sampleRate)%1;
-     let o2L=wav(p.dds2Wave,v.ph2L,pw),o2R=wav(p.dds2Wave,v.ph2R,pw);
+     let o2L=wav(p.dds2Wave,v.ph2L,pw),o2R=this.global.binaural?wav(p.dds2Wave,v.ph2R,pw):o2L;
      if(p.dds2Mode==='sync'){o2L=wav(p.dds2Wave,v.ph2L,pw);o2R=wav(p.dds2Wave,v.ph2R,pw);}
      else if(p.dds2Mode==='ring'){o2L*=o1L;o2R*=o1R;}
      if(p.dds2Mode==='sync'){o2L*=1+clamp(p.crossMod)*o1L*2;o2R*=1+clamp(p.crossMod)*o1R*2;}
