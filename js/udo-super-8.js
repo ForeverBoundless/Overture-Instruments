@@ -2,6 +2,7 @@ import { WorkletEngine } from './shared/workletEngine.js';
 import { PresetStore } from './shared/presetStore.js';
 import { el,section,knob,select,toggle,button,display,performance,power,presetBar,footer } from './shared/panel.js';
 import { registerMidiTarget } from './shared/midiMap.js';
+import { createHardwareSurface,addSection,addLabel,addRule,addLED,addKnob,addFader,addButton,addDisplay,addKeyboard,addWheel,addTouchStrip } from './shared/hardwarePanel.js';
 
 const NOTE_NAMES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
 const NOTES=Array.from({length:61},(_,i)=>{const n=36+i;return NOTE_NAMES[n%12]+(Math.floor(n/12)-1);});
@@ -52,7 +53,7 @@ class Super8App{
   this.engine=new WorkletEngine(new URL('./engine/Super8Processor.js',import.meta.url).href,'super8-processor');
   this.patch=validate({});this.store=new PresetStore({key:'overture.udo-super-8.performances',version:1,validate});
   this.layerStores=[0,1].map(i=>new PresetStore({key:'overture.udo-super-8.layer.'+i,version:1,validate:cleanLayer}));
-  this.active=0;this.ui={};this.build();this.presets.load('f:0');
+  this.active=0;this.ui={};this.build();this.buildHardwarePanel();this.presets.load('f:0');
   power('super8-power',()=>this.engine.start(),()=>{this.perf.flushPending();this.display.set('SUPER 8 READY','TWO FPGA-STYLE DDS CORES · STEREO OUTPUT');});
   this.postPatch();
  }
@@ -144,7 +145,7 @@ class Super8App{
   this.buildWaves(rows);
   this.buildLayerPresets(rows);
   const perf=section(rows,'PERFORMANCE MEMORY','ORIGINAL OVERTURE PERFORMANCES');
-  this.presets=presetBar(perf.body,{factory:FACTORY,store:this.store,display:this.display,filename:'udo-super-8-performance',panic:()=>this.perf?.allOff(),apply:(data,name)=>{this.patch=validate(data);this.selectLayer(this.patch.activeLayer||0);this.refresh();this.display.set(name.toUpperCase(),'OVERTURE PERFORMANCE');},capture:()=>clone(this.patch)});
+  this.presets=presetBar(perf.body,{factory:FACTORY,store:this.store,display:this.display,filename:'udo-super-8-performance',panic:()=>this.perf?.allOff(),apply:(data,name)=>{this.patch=validate(data);this.selectLayer(this.patch.activeLayer||0);this.refresh();this.display.set(name.toUpperCase(),'OVERTURE PERFORMANCE');this.displayHardwarePreset?.(name);this.renderHardwareSeq?.();},capture:()=>clone(this.patch)});
   footer(this.page,'UDO AUDIO SUPER 8 · DUAL DDS · SEVEN-OSCILLATOR SUPER MODE · TRUE BINAURAL STEREO · TWO LAYERS · OVERTURE SOFTWARE MODEL');
   this.buildKeyboard();
  }
@@ -240,6 +241,79 @@ class Super8App{
    polyAftertouch:(n,v,channel)=>this.engine.post({t:'polyAt',note:n,value:v,channel}),sustain:d=>this.engine.setSustain(d),allOff:()=>this.engine.allNotesOff(),
    program:p=>this.presets.load('f:'+p%FACTORY.length),clock:()=>this.engine.post({t:'clock'}),start:()=>this.engine.post({t:'transport',layer:this.active,play:true}),continue:()=>this.engine.post({t:'transport',layer:this.active,play:true}),stop:()=>this.engine.post({t:'transport',layer:this.active,play:false}),cc:(cc,v,channel)=>{if(cc===7)this.setGlobal('volume',v/127);if(cc===11)this.engine.post({t:'expression',value:v/127,channel});if(cc===74)this.engine.post({t:'mpeSlide',value:v/127,channel});}
   }});
+ }
+
+ buildHardwarePanel(){
+  this.page.classList.add('hp-legacy-hidden');
+  const root=document.getElementById('super8-root');
+  const hw=createHardwareSurface(root,{id:'udo-super-8',width:1600,height:730,skin:'super8',programLabel:'SUPER 8 · INITIAL PERFORMANCE'});
+  this.hw=hw;const p=hw.instrument;
+  const box=(x,y,w,h,title,sub='')=>addSection(p,{x,y,w,h,title,sub});
+  const k=(parent,key,label,x,y,min=0,max=1,layer=true)=>addKnob(p,{x,y,label,min,max,value:layer?this.p()[key]:this.patch[key],onChange:v=>layer?this.set(key,v):this.setGlobal(key,v),midiId:'SUPER8:'+(layer?'L'+this.active+':':'G:')+key,formatValue:v=>max>5?String(Number(v).toFixed(1)):Number(v).toFixed(2)});
+  const f=(parent,key,label,x,y,min=0,max=1)=>addFader(p,{x,y,label,min,max,value:this.p()[key],height:90,onChange:v=>this.set(key,v),midiId:'SUPER8:'+key});
+  const b=(parent,key,label,x,y,global=false)=>addButton(p,{x,y,label,value:global?this.patch[key]:this.p()[key],onChange:v=>global?this.setGlobal(key,v):this.set(key,v),midiId:'SUPER8:'+(global?'G:':'L'+this.active+':')+key});
+  const sel=(parent,key,label,x,y,options,global=false)=>{
+   const value=global?this.patch[key]:this.p()[key];const wrap=document.createElement('label');wrap.className='hp-native-select';
+   wrap.style.cssText='position:absolute;left:'+(x-50)+'px;top:'+(y-8)+'px;width:100px;display:grid;gap:3px;text-align:center;color:var(--hp-ink);font:7px Saira,sans-serif;letter-spacing:.06em';
+   const title=document.createElement('span');title.textContent=label;const s=document.createElement('select');s.style.cssText='width:100%;height:20px;background:var(--hp-control);color:var(--hp-ink);border:1px solid var(--hp-line);font:8px DM Mono,monospace';
+   options.forEach(v=>{const o=document.createElement('option');o.value=String(v);o.textContent=String(v).toUpperCase();s.appendChild(o);});s.value=String(value);
+   s.addEventListener('change',()=>{const next=typeof value==='number'?Number(s.value):s.value;global?this.setGlobal(key,next):this.set(key,next);});
+   wrap.append(title,s);p.appendChild(wrap);return s;
+  };
+  p.style.cssText+=';--hp-ink:#242c30;--hp-muted:#68737a;--hp-line:#a2abb0;--hp-section:#dce1e3;--hp-head:#c8d0d4;--hp-control:#e9edef;--hp-accent:#d65b3c;--hp-display:#f2a183;background:linear-gradient(180deg,#e3e7e9,#c3cbd0 60%,#aeb8be);border:7px solid #717a80;border-radius:5px';
+  const header=box(15,12,1570,52,'UDO AUDIO · SUPER 8','16 VOICE · TWO PART · BINAURAL ANALOG-HYBRID');
+  const logo=document.createElement('img');logo.src='/ui/Logos/UDO_logo.svg';logo.alt='UDO Audio';logo.style.cssText='position:absolute;left:1270px;top:20px;width:110px;height:28px;object-fit:contain';p.appendChild(logo);
+  this.hwDisplay=addDisplay(p,{x:1010,y:18,w:210,h:40,brand:'PERFORMANCE / PATCH',skin:'amber'});this.hwDisplay.set('P 001','INITIAL PERFORMANCE');
+  addLabel(p,1450,28,'SUPER 8');addLabel(p,1530,28,'16 VOICE');
+  const main=box(15,76,1570,245,'SYNTHESIS CONTROL','TWO INDEPENDENT FPGA DDS OSCILLATORS · ANALOG FILTER / VCA');
+  const vol=box(25,332,130,112,'MASTER','VOLUME / DISTORTION');
+  k(vol.body,'volume','MASTER VOLUME',80,386,0,1,false);
+  const lfo=box(165,332,210,180,'LFO 2 / PERFORMANCE','FREQUENCY · AMOUNT · SHAPE');
+  k(lfo.body,'lfo2Rate','FREQUENCY',220,400);k(lfo.body,'lfo2Amount','AMOUNT',310,400);sel(lfo.body,'lfo2Wave','SHAPE',265,470,['sine','triangle','saw','reverseSaw','square']);
+  const ddsmod=box(165,76,210,245,'DDS MODULATOR','WAVE MORPH / MODULATION SOURCE');
+  sel(ddsmod.body,'waveModSource','SOURCE',265,128,['Manual','LFO 1','ENV 1']);
+  k(ddsmod.body,'waveMod','WAVE MORPH',265,220);b(ddsmod.body,'lfo2Bender','BENDER',215,285);b(ddsmod.body,'lfo2Aftertouch','AFTERTOUCH',315,285);
+  const d1=box(385,76,225,245,'DDS 1','FPGA SUPER-WAVE OSCILLATOR');
+  sel(d1.body,'dds1Wave','WAVEFORM',495,128,['saw','triangle','square','pulse','altA','altB']);
+  sel(d1.body,'superMode','SUPER MODE',495,180,['off','half','on']);
+  k(d1.body,'detune','DETUNE',435,255);k(d1.body,'pwDrift','PW DRIFT',555,255);
+  const d2=box(620,76,230,245,'DDS 2','FPGA OSCILLATOR · CROSS / RING MOD');
+  sel(d2.body,'dds2Wave','WAVEFORM',730,128,['sine','saw','square','triangle','pulse','whiteNoise']);
+  sel(d2.body,'dds2Octave','OCTAVE',680,180,[-2,-1,0,1,2]);sel(d2.body,'dds2Mode','MODE',790,180,['normal','sync','ring']);
+  k(d2.body,'dds2Tune','FINE',675,255,-7,7);k(d2.body,'crossMod','CROSS MOD',745,255);k(d2.body,'subLevel','SUB LEVEL',815,255);
+  const mix=box(860,76,135,245,'MIXER','DDS 1 / DDS 2');
+  f(mix.body,'mix','OSC MIX',900,210);f(mix.body,'pan','PAN',965,210);
+  const filter=box(1005,76,245,245,'VCF','ANALOG HIGH-PASS / LOW-PASS');
+  k(filter.body,'hpf','HPF',1065,245);k(filter.body,'cutoff','LPF CUTOFF',1145,245);k(filter.body,'resonance','RESONANCE',1220,245);
+  sel(filter.body,'drive','DRIVE',1070,130,['off','1','2']);sel(filter.body,'keyTrack','KEY TRACK',1180,130,['off','half','on']);
+  const env=box(1260,76,190,245,'ENVELOPES','MODULATION / AMPLIFIER');
+  [['env1','ENV 1'],['env2','ENV 2']].forEach(([prefix,label],i)=>{const x=1310+i*90;addLabel(p,x,135,label);['Attack','Decay','Sustain','Release'].forEach((part,j)=>k(env.body,prefix+part,part.toUpperCase(),x-28+j*18,235));});
+  const fx=box(1460,76,125,245,'FX','CHORUS / DELAY');
+  sel(fx.body,'chorus','CHORUS',1520,135,['off','I','II','both']);k(fx.body,'chorusMix','MIX',1505,235);k(fx.body,'delayTime','DELAY',1560,235);
+  b(fx.body,'delayFreeze','FREEZE',1520,290);
+  const assign=box(385,332,410,180,'LAYER / VOICE ASSIGN','UPPER / LOWER · SINGLE / DUAL / SPLIT');
+  const layerUp=addButton(p,{x:455,y:378,label:'LAYER UPPER',value:this.active===0,onChange:()=>this.selectLayer(0),size:30,led:'red'});
+  const layerLo=addButton(p,{x:545,y:378,label:'LAYER LOWER',value:this.active===1,onChange:()=>this.selectLayer(1),size:30,led:'red'});
+  sel(assign.body,'mode','MODE',680,365,['single','dual','split'],true);b(assign.body,'binaural','BINAURAL',465,465,true);b(assign.body,'mpe','MPE',555,465,true);
+  const perf=box(805,332,300,180,'LFO 1 / LEFT-HAND CONTROL','LFO RATE · DELAY · STEREO PHASE');
+  k(perf.body,'lfo1Rate','LFO 1 RATE',870,420);k(perf.body,'lfo1Delay','DELAY',970,420);k(perf.body,'lrPhase','L/R PHASE',1060,420);
+  sel(perf.body,'lfo1Wave','WAVEFORM',955,475,['sine','triangle','saw','reverseSaw','square']);
+  const arp=box(1115,332,220,180,'ARPEGGIATOR','MULTI-MODE · SMART HOLD');
+  b(arp.body,'arpEnabled','ARP ON',1165,385);b(arp.body,'arpHold','HOLD',1260,385);sel(arp.body,'arpMode','MODE',1220,455,['up','down','upDown','random','sequencer']);sel(arp.body,'arpDivision','DIVISION',1220,495,['1','2','4','8','16']);
+  const seq=box(1345,332,240,180,'SEQUENCER','64 STEPS · PER LAYER');
+  sel(seq.body,'seqLength','LENGTH',1400,390,Array.from({length:64},(_,i)=>i+1));k(seq.body,'seqBpm','TEMPO',1510,395,40,240);
+  this.hwSeqButtons=[];for(let i=0;i<16;i++){this.hwSeqButtons.push(addButton(p,{x:1368+i*13.5,y:474,label:'',size:10,value:this.p().seqSteps[i]!==null,onChange:()=>{this.toggleSeqStep(i);this.renderHardwareSeq();}}));}
+  const bottom=box(15,526,1570,44,'PERFORMANCE MEMORY / EFFECTS','64 PATCHES · 512 PERFORMANCES · TWO EFFECTS PER LAYER');
+  const presetStrip=document.createElement('div');presetStrip.className='hp-preset-strip';presetStrip.style.cssText='left:12px;top:10px';bottom.body.appendChild(presetStrip);
+  const choose=document.createElement('select');FACTORY.forEach((x,i)=>{const o=document.createElement('option');o.value='f:'+i;o.textContent=x.name;choose.appendChild(o);});choose.addEventListener('change',()=>this.presets.load(choose.value));presetStrip.appendChild(choose);
+  const keyarea=box(15,582,1570,132,'61-KEY Fatar SEMI-WEIGHTED KEYBED','VELOCITY SENSITIVE · POLYPHONIC AFTERTOUCH');
+  addWheel(p,{x:75,y:600,label:'PITCH',min:-1,max:1,height:82,spring:true,onChange:v=>this.engine.post({t:'bend',value:v}),midiId:'SUPER8:Pitch'});
+  addWheel(p,{x:135,y:600,label:'MOD',height:82,onChange:v=>this.engine.setModWheel(v),midiId:'SUPER8:Mod'});
+  addKeyboard(p,{x:190,y:592,w:1380,h:115,firstNote:36,count:61,keyColor:'amber',onNoteOn:(n,v)=>this.engine.post({t:'noteOn',note:n,vel:v,source:'ui'}),onNoteOff:n=>this.engine.post({t:'noteOff',note:n,source:'ui'})});
+  this.renderHardwareSeq=()=>this.hwSeqButtons.forEach((x,i)=>x.setValue(this.p().seqSteps[i]!==null&&this.p().seqSteps[i]!==undefined,true));
+  this.displayHardwarePreset=name=>this.hwDisplay.set(name.toUpperCase(),'SUPER 8 · PERFORMANCE');
+  this.renderHardwareSeq();
+  this.layerButtonsHardware=[layerUp,layerLo];
  }
 }
 new Super8App();
