@@ -102,19 +102,19 @@ export function performance(parent, { octaves = 4, startOctave = 2, notes = null
   const compKeys = new Map();
   let compOct = 0;
   const light = (midi, on) => keyboard.setKeyActive(midiNoteName(midi), on);
-  function noteOn(midi, vel, source) {
+  function noteOn(midi, vel, source, channel = 1) {
     if (midi < 0 || midi > 127) return;
     held.set(midi, vel);
     light(midi, true);
     if (!started()) { pending.set(midi, vel); return; }
-    handlers.noteOn(midi, vel, source);
+    handlers.noteOn(midi, vel, source, channel);
   }
-  function noteOff(midi, source) {
+  function noteOff(midi, source, channel = 1) {
     if (!held.has(midi)) return;
     held.delete(midi);
     pending.delete(midi);
     light(midi, false);
-    if (started()) handlers.noteOff(midi, source);
+    if (started()) handlers.noteOff(midi, source, channel);
   }
   function allOff() {
     [...held.keys()].forEach((m) => light(m, false));
@@ -151,12 +151,17 @@ export function performance(parent, { octaves = 4, startOctave = 2, notes = null
   window.addEventListener('blur', () => { compKeys.forEach((m) => noteOff(m, 'keys')); compKeys.clear(); pitchWheel?.springReturnToCenter(); });
 
   const midi = new MidiManager({
-    onNoteOn: (n, v) => noteOn(n, v, 'midi'),
-    onNoteOff: (n) => noteOff(n, 'midi'),
+    onNoteOn: (n, v, channel) => noteOn(n, v, 'midi', channel),
+    onNoteOff: (n, channel) => noteOff(n, 'midi', channel),
     onPitchBend: (_r, v) => pitchWheel ? pitchWheel.setExternalValue(v) : handlers.bend?.(v),
     onModWheel: (v) => modWheel ? modWheel.setExternalValue(v) : handlers.mod?.(v),
     onSustain: (d) => { if (started()) handlers.sustain?.(d); },
-    onAftertouch: (v) => { if (started()) handlers.aftertouch?.(v); },
+    onAftertouch: (v, channel) => { if (started()) handlers.aftertouch?.(v, channel); },
+    onPolyAftertouch: (n, v, channel) => { if (started()) handlers.polyAftertouch?.(n, v, channel); },
+    onClock: () => { if (started()) handlers.clock?.(); },
+    onStart: () => { if (started()) handlers.start?.(); },
+    onContinue: () => { if (started()) handlers.continue?.(); },
+    onStop: () => { if (started()) handlers.stop?.(); },
     onProgramChange: (p) => handlers.program?.(p),
     onControlChange: (cc, v) => { if (started()) handlers.cc?.(cc, v); },
     onAllNotesOff: () => allOff(),
