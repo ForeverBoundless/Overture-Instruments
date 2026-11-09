@@ -85,6 +85,6 @@ test('standalone and OMNI defaults use the same stable Eight Voice sound', async
   assert.match(modules, /P\('lfoAmount', 'LFO depth', 0, 0\.5, 0\)/);
   assert.match(modules, /OberheimEightVoiceProcessor\.js\?v=20261104-eightvoice-stable/);
   assert.match(templates, /SEM Warm Ensemble[\s\S]*?lfoAmount: 0, lfoTarget: 0/);
-  assert.match(worker, /overture-shell-v\\d+/);
+  assert.match(worker, /overture-shell-v\d+/);
   assert.match(worker, /OberheimEightVoiceProcessor\.js\?v=20261104-eightvoice-stable/);
 });
