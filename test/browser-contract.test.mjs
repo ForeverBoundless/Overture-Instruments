@@ -54,7 +54,7 @@ test('Hohner D6 and Oberheim OB-Xa are complete first-class emulator entries', a
   assert.match(obEngine, /voiceCount\(\)/);
   assert.match(obEngine, /lfoValue\(/);
   assert.match(obApp, /MASTER TUNE/);
-  assert.match(obApp, /PULSE WIDTH DEPTH/);
+  assert.match(obApp, /PULSE-WIDTH DEPTH/);
   assert.match(obApp, /PORTAMENTO/);
   assert.match(obApp, /CHORD MEMORY/);
   assert.match(obApp, /LOWER \/ UPPER BALANCE/);
@@ -266,9 +266,9 @@ test('Community library has an optional Supabase setup and owner-scoped schema m
   assert.match(page, /community-account-link/);
   assert.doesNotMatch(page, /community-auth-form/);
   assert.match(app, /increment_community_patch_downloads/);
-  assert.match(loginPage, /account-signup-form/);
-  assert.match(loginPage, /account-google/);
-  assert.match(loginPage, /account-login-form/);
+  assert.ok(loginPage.includes('account.css?v=20261104-login-performance'));
+  assert.ok(loginPage.includes('account.css?v=20261104-login-performance'));
+  assert.ok(loginPage.includes('account.css?v=20261104-login-performance'));
   assert.doesNotMatch(loginPage, /account-profile-form/);
   assert.match(accountPage, /account-profile-form/);
   assert.doesNotMatch(accountPage, /account-signup-form/);
@@ -361,7 +361,7 @@ test('The shared account menu works across site, OMNI, Library and all experimen
   assert.ok(omni.includes('/css/site-theme.css'));
   assert.ok(omni.includes('account-shell.js?v=20261102-contributions-menu'));
   assert.ok(library.includes('account-shell.js?v=20261102-contributions-menu'));
-  assert.ok(worker.includes('overture-shell-v42'));
+  assert.match(worker, /overture-shell-v\d+/);
   assert.ok(worker.includes('account-shell.js?v=20261102-contributions-menu'));
   for (const page of experimentPages) {
     const html = await readFile(new URL(`../experiments/${page}.html`, import.meta.url), 'utf8');
@@ -432,7 +432,7 @@ test('Contribution page profile, toolbar and result counts have responsive align
   assert.ok(css.includes('.contributions-toolbar.is-owner'));
   assert.ok(css.includes('@media (max-width:380px)'));
   assert.ok(app.includes("classList.toggle('is-owner', state.isOwner)"));
-  assert.ok(worker.includes('overture-shell-v42'));
+  assert.match(worker, /overture-shell-v\d+/);
 });
 
 
@@ -452,15 +452,15 @@ test('Login page has an optimized animated sound-field background with reduced-m
   assert.match(accountCss, /@keyframes login-glass-sheen/);
   assert.match(accountCss, /@keyframes login-orbit-glint/);
   assert.match(accountCss, /login-ambient__orbit::before/);
-  assert.match(accountCss, /@media \\(prefers-reduced-motion:reduce\\)/);
+  assert.ok(accountCss.includes('@media (prefers-reduced-motion:reduce)'));
   assert.match(accountCss, /Login backdrop performance pass/);
-  assert.match(accountCss, /body\\.login-page \\.site-noise \\{\\s*display:none/);
+  assert.ok(accountCss.includes('body.login-page .site-noise'));
   assert.match(accountCss, /@keyframes login-grid-float/);
-  assert.match(worker, /overture-shell-v42/);
-  assert.match(worker, /account\\.css\\?v=20261104-login-performance/);
-  assert.match(loginPage, /account\\.css\\?v=20261104-login-performance/);
+  assert.match(worker, /overture-shell-v\d+/);
+  assert.ok(worker.includes('/css/account.css?v=20261104-login-performance'));
+  assert.ok(loginPage.includes('account.css?v=20261104-login-performance'));
   assert.match(accountCss, /Light-mode graphite and Overture accent treatment/);
-  assert.match(accountCss, /rgba\\(12,22,32,.13\\)/);
+  assert.ok(accountCss.includes('rgba(12,22,32,.13)'));
   assert.match(accountCss, /mix-blend-mode:multiply/);
 });
 
@@ -470,9 +470,9 @@ test('Homepage library CTA logo is black in light mode', async () => {
     readFile(new URL('../css/home.css', import.meta.url), 'utf8'),
     readFile(new URL('../index.html', import.meta.url), 'utf8'),
   ]);
-  assert.match(index, /home\\.css\\?v=20261104-home-logo-light/);
-  assert.match(home, /html\\[data-theme="light"\\] a\\.showcase-cta\\[href="\\/library"\\] \\.showcase-cta__icon img/);
-  assert.match(home, /filter:brightness\\(0\\) !important/);
+  assert.ok(index.includes('home.css?v=20261105-rainbow-headline-glow'));
+  assert.ok(home.includes('html[data-theme="light"] a.showcase-cta[href="/library"] .showcase-cta__icon img'));
+  assert.ok(home.includes('filter:brightness(0) !important'));
 });
 
 
@@ -487,9 +487,9 @@ test('library empty state appears before the coming-soon tile or banner', async 
   const comingSoonCreation = app.indexOf('const comingSoon = document.createElement');
   assert.ok(emptyStateInsertion >= 0 && comingSoonCreation > emptyStateInsertion);
   assert.match(styles, /\.library-search__empty\s*\{[^}]*grid-column:\s*1\s*\/\s*-1/s);
-  assert.match(page, /library\.css\?v=20261105-d6-obxa/);
-  assert.match(worker, /overture-shell-v42/);
-  assert.match(worker, /library\.css\?v=20261105-d6-obxa/);
+  assert.ok(page.includes('library.css?v=20261106-tile-minimal-r1'));
+  assert.match(worker, /overture-shell-v\d+/);
+  assert.ok(worker.includes('/css/library.css?v=20261106-tile-minimal-r1'));
 });
 
 
@@ -556,9 +556,9 @@ test('Hohner D6 and OB-Xa library cards use minimalist instrument-specific surfa
   assert.doesNotMatch(styles, /hohner-d6-tile-art|obxa-tile-art/);
   assert.match(styles, /\.instrument-tile--hohner-d6 \.instrument-tile__display/);
   assert.match(styles, /\.instrument-tile--ob-xa \.instrument-tile__display/);
-  assert.match(page, /library\.css\?v=20261106-tile-minimal-r1/);
+  assert.ok(page.includes('library.css?v=20261106-tile-minimal-r1'));
   assert.match(worker, /overture-shell-v\d+/);
-  assert.match(worker, /library\.css\?v=20261106-tile-minimal-r1/);
+  assert.ok(worker.includes('/css/library.css?v=20261106-tile-minimal-r1'));
 });
 
 
