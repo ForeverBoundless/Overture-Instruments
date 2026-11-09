@@ -1,4 +1,4 @@
-const CACHE = 'overture-shell-v49';
+const CACHE = 'overture-shell-v50';
 const APP_SHELL = [
   '/account',
   '/login',
@@ -25,6 +25,8 @@ const APP_SHELL = [
   '/css/home.css?v=20261104-home-logo-light',
   '/css/keyboard.css',
   '/css/hohner-d6.css?v=20261106-audio-r1',
+  '/css/sequential-pro-3.css',
+  '/css/udo-super-8.css',
   '/css/ob-xa.css?v=20261106-mays-mod-r1',
   '/css/library.css?v=20261106-tile-minimal-r1',
   '/css/knobs.css',
@@ -75,6 +77,8 @@ const APP_SHELL = [
   '/html/oberheim-eight-voice',
   '/html/hohner-d6',
   '/html/ob-xa',
+  '/html/sequential-pro-3',
+  '/html/udo-super-8',
   '/html/prophet10',
   '/html/roland-juno-106',
   '/html/roland-tr-808',
@@ -117,6 +121,8 @@ const APP_SHELL = [
   '/js/engine/Prophet10Engine.js',
   '/js/engine/Prophet10Processor.js',
   '/js/engine/OberheimEightVoiceProcessor.js',
+  '/js/engine/Pro3Processor.js',
+  '/js/engine/Super8Processor.js',
   '/js/engine/HohnerD6Processor.js?v=20261106-audio-r1',
   '/js/engine/OBXaProcessor.js?v=20261106-audio-r1',
   '/js/engine/OberheimEightVoiceProcessor.js?v=20261104-eightvoice-stable',
@@ -143,6 +149,8 @@ const APP_SHELL = [
   '/js/omni/templates.js',
   '/js/omni/templates.js?v=20261104-sem-mellotron',
   '/js/prophet10.js',
+  '/js/sequential-pro-3.js',
+  '/js/udo-super-8.js',
   '/js/roland-juno-106.js',
   '/js/roland-tr-808.js',
   '/js/oberheim-eight-voice.js',
