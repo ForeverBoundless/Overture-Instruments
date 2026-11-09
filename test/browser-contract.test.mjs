@@ -73,13 +73,13 @@ test('Hohner D6 and Oberheim OB-Xa are complete first-class emulator entries', a
   assert.match(obEngine, /width=clamp\(\.5-p\.pulseWidth\*\.45/);
   assert.doesNotMatch(obEngine, /lfoVca/);
   assert.match(obPage, /Oberheim_logo\.png/);
-  assert.match(worker, /overture-shell-v49/);
+  assert.match(worker, /overture-shell-v50/);
   assert.match(worker, /hohner-d6/);
   assert.match(worker, /ob-xa/);
 });
 
 test('all library cards use canonical metadata with declared preset provenance', () => {
-  assert.equal(INSTRUMENTS.length, 12);
+  assert.equal(INSTRUMENTS.length, 14);
   assert.equal(INSTRUMENTS.every((instrument) => instrument.presetProvenance && instrument.description), true);
 });
 
@@ -559,4 +559,45 @@ test('Hohner D6 and OB-Xa library cards use minimalist instrument-specific surfa
   assert.match(page, /library\.css\?v=20261106-tile-minimal-r1/);
   assert.match(worker, /overture-shell-v49/);
   assert.match(worker, /library\.css\?v=20261106-tile-minimal-r1/);
+});
+
+
+test('Sequential Pro 3 and UDO Super 8 are first-class library instruments', async () => {
+  const [metadata, library, styles, proPage, proApp, proEngine, superPage, superApp, superEngine, worker] = await Promise.all([
+    readFile(new URL('../js/data/instruments.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/library.js', import.meta.url), 'utf8'),
+    readFile(new URL('../css/library.css', import.meta.url), 'utf8'),
+    readFile(new URL('../html/sequential-pro-3.html', import.meta.url), 'utf8'),
+    readFile(new URL('../js/sequential-pro-3.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/engine/Pro3Processor.js', import.meta.url), 'utf8'),
+    readFile(new URL('../html/udo-super-8.html', import.meta.url), 'utf8'),
+    readFile(new URL('../js/udo-super-8.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/engine/Super8Processor.js', import.meta.url), 'utf8'),
+    readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
+  ]);
+  for (const id of ['sequential-pro-3','udo-super-8']) assert.match(metadata, new RegExp("id: '" + id + "'"));
+  assert.match(metadata, /route: '\\/html\\/sequential-pro-3'/);
+  assert.match(metadata, /route: '\\/html\\/udo-super-8'/);
+  assert.match(library, /instrument\\.route/);
+  assert.match(styles, /\\.instrument-tile--sequential-pro-3 \\.instrument-tile__visual::after/);
+  assert.match(styles, /\\.instrument-tile--udo-super-8 \\.instrument-tile__visual::after/);
+  assert.match(proPage, /sequential-pro-3\\.css/);
+  assert.match(proApp, /MODULATION MATRIX/);
+  assert.match(proApp, /SET A/);
+  assert.match(proApp, /seqTracks/);
+  assert.match(proEngine, /registerProcessor\\("pro3-processor"/);
+  assert.match(proEngine, /paraphonic/);
+  assert.match(superPage, /udo-super-8\\.css/);
+  assert.match(superApp, /UPPER/);
+  assert.match(superApp, /LOWER/);
+  assert.match(superApp, /BINAURAL/);
+  assert.match(superApp, /polyAftertouch/);
+  assert.match(superEngine, /registerProcessor\\('super8-processor'/);
+  assert.match(superEngine, /superMode/);
+  assert.match(superEngine, /modMatrix/);
+  assert.match(superEngine, /delayFreeze/);
+  assert.match(worker, /\\/html\\/sequential-pro-3/);
+  assert.match(worker, /\\/html\\/udo-super-8/);
+  assert.match(worker, /\\/js\\/engine\\/Pro3Processor\\.js/);
+  assert.match(worker, /\\/js\\/engine\\/Super8Processor\\.js/);
 });
