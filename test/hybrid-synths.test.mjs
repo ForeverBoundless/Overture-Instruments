@@ -57,7 +57,7 @@ test('Sequential Pro 3 paraphonic mode allocates three note gates through shared
   const activeNotes = [];
   for (const voice of h.processor.voices) if (voice.gate) activeNotes.push(voice.note);
   activeNotes.sort((a, b) => a - b);
-  assert.deepEqual(activeNotes, [48, 55, 60]);
+  assert.equal(activeNotes.join(','), '48,55,60');
   assert.equal(h.processor.envs.amp.gate, true, 'the paraphonic voices share the main amplifier envelope');
 });
 
@@ -73,7 +73,9 @@ test('UDO Super 8 dual binaural mode allocates upper/lower voices and renders st
   h.processor.message({ t: 'noteOn', note: 60, vel: .9, channel: 1, source: 'midi' });
   h.processor.message({ t: 'noteOn', note: 67, vel: .85, channel: 2, source: 'midi' });
   const allocated = h.processor.voices.filter((voice) => voice.active);
-  assert.deepEqual([...new Set(allocated.map((voice) => voice.layer))].sort(), [0, 1]);
+  const activeLayers = new Set();
+  for (const voice of allocated) activeLayers.add(voice.layer);
+  assert.equal([...activeLayers].sort().join(','), '0,1');
   assert.ok(allocated.some((voice) => voice.channel === 1));
   assert.ok(allocated.some((voice) => voice.channel === 2));
   h.processor.message({ t: 'bend', value: .35, channel: 2 });
