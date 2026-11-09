@@ -107,7 +107,6 @@ class Super8App{
   this.makeKnobs(d2.body,[['dds2Tune','FINE',-7,7],['crossMod','CROSS MOD'],['subLevel','SUB LEVEL']]);
   const mod=section(top,'DDS MODULATOR','OSCILLATOR INTERACTION');
   this.makeSelect(mod.body,'waveModSource','WAVE SOURCE',['Manual','LFO 1','ENV 1']);
-  this.makeSelect(mod.body,'lfo2Destination','PITCH DEST',['DDS 1','DDS 1 + DDS 2','DDS 2']);
   this.makeToggle(mod.body,'lfo1HighFreq','LFO 1 HIGH FREQUENCY');
   this.makeToggle(mod.body,'lfo2Bender','BENDER MOD');
   this.makeToggle(mod.body,'lfo2Aftertouch','AFTERTOUCH MOD');
@@ -237,9 +236,9 @@ class Super8App{
  buildKeyboard(){
   this.perf=performance(this.shell,{notes:NOTES,octaves:5,startOctave:1,wheels:false,started:()=>this.engine.started,midiStatusEl:this.midi,handlers:{
    noteOn:(n,v,source,channel)=>this.engine.post({t:'noteOn',note:n,vel:v,channel,source}),noteOff:(n,source,channel)=>this.engine.post({t:'noteOff',note:n,channel,source}),
-   bend:v=>this.engine.setPitchBend(v),mod:v=>this.engine.setModWheel(v),aftertouch:v=>this.engine.setAftertouch(v),
-   polyAftertouch:(n,v)=>this.engine.post({t:'polyAt',note:n,value:v}),sustain:d=>this.engine.setSustain(d),allOff:()=>this.engine.allNotesOff(),
-   program:p=>this.presets.load('f:'+p%FACTORY.length),clock:()=>this.engine.post({t:'clock'}),start:()=>this.engine.post({t:'transport',layer:this.active,play:true}),continue:()=>this.engine.post({t:'transport',layer:this.active,play:true}),stop:()=>this.engine.post({t:'transport',layer:this.active,play:false}),cc:(cc,v)=>{if(cc===7)this.setGlobal('volume',v/127);if(cc===11)this.engine.post({t:'expression',value:v/127});}
+   bend:(v,channel)=>this.engine.post({t:'bend',value:v,channel}),mod:v=>this.engine.setModWheel(v),aftertouch:(v,channel)=>this.engine.post({t:'at',value:v,channel}),expression:(v,channel)=>this.engine.post({t:'expression',value:v,channel}),
+   polyAftertouch:(n,v,channel)=>this.engine.post({t:'polyAt',note:n,value:v,channel}),sustain:d=>this.engine.setSustain(d),allOff:()=>this.engine.allNotesOff(),
+   program:p=>this.presets.load('f:'+p%FACTORY.length),clock:()=>this.engine.post({t:'clock'}),start:()=>this.engine.post({t:'transport',layer:this.active,play:true}),continue:()=>this.engine.post({t:'transport',layer:this.active,play:true}),stop:()=>this.engine.post({t:'transport',layer:this.active,play:false}),cc:(cc,v,channel)=>{if(cc===7)this.setGlobal('volume',v/127);if(cc===11)this.engine.post({t:'expression',value:v/127,channel});if(cc===74)this.engine.post({t:'mpeSlide',value:v/127,channel});}
   }});
  }
 }
