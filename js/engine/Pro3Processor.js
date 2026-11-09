@@ -43,10 +43,10 @@ function makeTables(){
  for(let t=0;t<32;t++){
   const bank=[];
   for(let f=0;f<16;f++){
-   const data=new Float32Array(1024);let peak=0;
+   const data=new Float32Array(512);let peak=0;
    for(let i=0;i<data.length;i++){
     const p=i/data.length;let x=0;
-    for(let h=1;h<=22;h++){
+    for(let h=1;h<=12;h++){
      const weight=(1/Math.pow(h,1+t*.013))*Math.cos((f+1)*h*.31+t*.09);
      x+=weight*Math.sin(2*Math.PI*h*p);
     }
