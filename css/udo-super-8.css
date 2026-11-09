@@ -55,3 +55,21 @@
 @media(max-width:1150px){.super8-top{grid-template-columns:repeat(2,minmax(0,1fr))}.super8-middle{grid-template-columns:repeat(2,minmax(0,1fr))}.super8-lower{grid-template-columns:1fr}}
 @media(max-width:760px){.super8-shell{width:calc(100vw - 12px);padding:10px 8px 12px}.super8-header{align-items:flex-start;flex-direction:column}.super8-header-right{width:100%;flex-wrap:wrap}.super8-top,.super8-middle{grid-template-columns:1fr}.super8-shell .pn-keybed .lp-keyboard{height:100px}.super8-layerbar{align-items:flex-start}}
 @media(max-width:440px){.super8-wordmark{font-size:18px}.super8-model strong{font-size:17px}.super8-matrix__cell{height:20px;font-size:6px}.super8-seq__step{height:20px;font-size:6px}}
+
+/* Precision Super 8 hardware panel rebuild */
+.hp-legacy-hidden>.pn-page,.hp-legacy-hidden>.pn-power{display:none!important}
+.super8-body{background:radial-gradient(ellipse at 50% 0%,#edf0f1,#8c969d 72%);overflow:auto}
+.hp-super8-stage{--hp-ink:#263137;--hp-muted:#68737a;--hp-line:#9da8ad;--hp-section:#dce1e3;--hp-head:#c7d0d4;--hp-control:#eef1f2;--hp-accent:#d65b3c;--hp-display:#f2a183}
+.hp-super8{background:linear-gradient(180deg,#e7eaeb,#cbd2d6 50%,#aeb8be);border-color:#6f787e}
+.hp-super8 .hp-section{border-radius:2px;box-shadow:inset 0 1px #ffffffa0,0 1px 3px #27333a30}
+.hp-super8 .hp-section-head{background:linear-gradient(#dfe4e6,#c2cbd0)}
+.hp-super8 .hp-knob-art{filter:drop-shadow(0 2px 2px #0004)}
+.hp-super8 .hp-keybed{border-color:#899196}
+.hp-super8 .hp-key-white{background:linear-gradient(100deg,#c7cbca,#fff 22%,#f8f8f5 66%,#cdd1d0)}
+.hp-super8 .hp-button{background:linear-gradient(120deg,#8d969a,#e1e4e4 50%,#788186)}
+.hp-super8 .hp-button-face{background:linear-gradient(#fafbfa,#b7c0c4 60%,#818b90)}
+.hp-super8 .hp-button.is-on .hp-button-face{background:linear-gradient(#e58c70,#b54e32)}
+.hp-super8 .hp-button-label{color:#354148}
+.hp-super8 .hp-native-select{z-index:4}
+.hp-super8 .hp-preset-strip{z-index:8}
+#super8-power{display:none!important}
