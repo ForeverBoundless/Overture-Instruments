@@ -145,6 +145,10 @@ class Pro3App{
   this.makeSelect(controls,'seqMode','PLAY MODE',['forward','reverse','forwardReverse','random']);
   this.makeSelect(controls,'seqLength','LENGTH',Array.from({length:64},(_,i)=>String(i+1)));
   this.makeSelect(controls,'seqTrack','TRACK',Array.from({length:16},(_,i)=>String(i+1)));
+  this.seqDestSelect=select(controls,'TRACK DESTINATION',['note','none','osc1Pitch','osc2Pitch','osc3Pitch','osc1Shape','osc2Shape','osc3ShapeMod','filterCutoff','resonance','fx1Mix','fx2Mix','feedbackAmount'],this.patch.seqDestinations[0],v=>{
+   const track=Number(this.patch.seqTrack)||0;this.patch.seqDestinations[track]=v;
+   this.engine.post({t:'sequence',tracks:this.patch.seqTracks,destinations:this.patch.seqDestinations,length:Number(this.patch.seqLength)||16});
+  });
   const buttons=el('div','pn-buttons',seq.body);button(buttons,'PLAY',()=>{this.patch.seqEnabled=true;this.engine.post({t:'transport',play:true});});button(buttons,'STOP',()=>{this.patch.seqEnabled=false;this.engine.post({t:'transport',play:false});});
   this.makeKnobs(seq.body,[['bpm','TEMPO',30,260],['seqSwing','SWING'],['seqGate','GATE']]);
   const steps=el('div','pro3-steps',seq.body);this.stepButtons=[];
@@ -170,6 +174,7 @@ class Pro3App{
  }
  updateSequence(){
   const track=Number(this.patch.seqTrack)||0;
+  if(this.seqDestSelect){this.seqDestSelect.setValue(this.patch.seqDestinations[track]||'none',true);this.seqDestSelect.select.disabled=track<3;this.seqDestSelect.select.title=track<3?'Tracks 1–3 are note tracks':'Choose the parameter this track automates';}
   this.stepButtons.forEach((b,i)=>{const v=this.patch.seqTracks[track]?.[this.seqPage*16+i];b.classList.toggle('is-on',v!==null&&v!==undefined);b.textContent=String(i+1);});
  }
  applyMorph(t){
