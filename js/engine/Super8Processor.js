@@ -57,7 +57,7 @@ class Super8Processor extends AudioWorkletProcessor{
   if(m.t==='patch'){this.global={...this.global,...m.patch};this.layers=[clone(LAYER_DEFAULT),clone(LAYER_DEFAULT)].map((d,i)=>({...d,...(m.patch.layers?.[i]||{})}));return;}
   if(m.t==='param'){if(m.layer===0||m.layer===1)this.layers[m.layer][m.key]=m.value;else this.global[m.key]=m.value;return;}
   if(m.t==='noteOn')this.noteOn(m.note|0,clamp(m.vel,.01,1),Number(m.channel)||1);
-  else if(m.t==='noteOff')this.noteOff(m.note|0,Number(m.channel)||1);
+  else if(m.t==='noteOff')this.noteOff(m.note|0,Number(m.channel)||1,m.source||'ui');
   else if(m.t==='bend'){this.pitchBend=[clamp(m.value,-1,1),clamp(m.value,-1,1)];}
   else if(m.t==='bendAxis'){this.global.benderX=clamp(m.x,-1,1);this.global.benderY=clamp(m.y,-1,1);}
   else if(m.t==='mod')this.modWheel=clamp(m.value);
