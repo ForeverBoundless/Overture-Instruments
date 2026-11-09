@@ -226,6 +226,9 @@ class Pro3App{
   const seq=box(190,92,930,158,'SEQUENCER','16 TRACKS · 4 PHRASES · 64 STEPS');
   addLabel(p,215,134,'TRACK / PHRASE');this.hwTrackSelect=sel(seq.body,'seqTrack','TRACK',300,122,Array.from({length:16},(_,i)=>i));
   this.hwDestSelect=sel(seq.body,'seqDestination','DESTINATION',450,122,['note','none','osc1Shape','osc2Shape','osc3ShapeMod','filterCutoff','resonance','fx1Mix','fx2Mix','feedbackAmount']);
+  this.hwDestSelect.value=this.patch.seqDestinations[0];this.hwDestSelect.addEventListener('change',()=>{const track=Number(this.patch.seqTrack)||0;this.patch.seqDestinations[track]=this.hwDestSelect.value;this.engine.post({t:'sequence',tracks:this.patch.seqTracks,destinations:this.patch.seqDestinations,length:this.patch.seqLength});});
+  this.hwTrackSelect.addEventListener('change',()=>{this.hwDestSelect.value=this.patch.seqDestinations[Number(this.patch.seqTrack)||0]||'none';this.renderHardwareSteps();});
+  this.hwPhrase.addEventListener('change',()=>{this.seqPage=['A','B','C','D'].indexOf(this.hwPhrase.value);this.renderHardwareSteps();});
   this.hwPhrase=sel(seq.body,'seqPhrase','PHRASE',600,122,['A','B','C','D']);
   k(seq.body,'bpm','TEMPO',790,117,30,260,1);k(seq.body,'seqSwing','SWING',900,117);
   addButton(p,{x:1020,y:127,label:'PLAY',value:false,onChange:v=>{this.patch.seqEnabled=v;this.engine.post({t:'transport',play:v});}});addButton(p,{x:1500,y:40,label:'POWER',value:false,onChange:v=>{if(v)document.getElementById('pro3-power').click();}});
@@ -254,8 +257,8 @@ class Pro3App{
   const preset=box(18,748,1564,48,'PROGRAM MEMORY','OVERTURE PATCHES');const strip=document.createElement('div');strip.className='hp-preset-strip';strip.style.cssText='left:18px;top:12px';preset.body.appendChild(strip);
   const choose=document.createElement('select');FACTORY.forEach((x,i)=>{const o=document.createElement('option');o.value='f:'+i;o.textContent=x.name;choose.appendChild(o);});choose.addEventListener('change',()=>this.presets.load(choose.value));strip.appendChild(choose);
   const save=document.createElement('button');save.textContent='SAVE USER';save.onclick=()=>this.display.flash('USE PRESET MEMORY BELOW THE HARDWARE PANEL');strip.appendChild(save);
-  addKeyboard(p,{x:195,y:782,w:1380,h:110,firstNote:36,count:37,keyColor:'amber',onNoteOn:(n,v)=>{this.engine.noteOn(n,v);},onNoteOff:n=>this.engine.noteOff(n)});
-  this.hardwareSelects=[this.hwTrackSelect,this.hwDestSelect,this.hwPhrase];this.renderHardwareSteps=()=>{const tr=Number(this.patch.seqTrack)||0;this.hwSteps.forEach((btn,i)=>btn.setValue(this.patch.seqTracks[tr]?.[i]!==null&&this.patch.seqTracks[tr]?.[i]!==undefined,true));};
+  addKeyboard(p,{x:195,y:802,w:1380,h:90,firstNote:36,count:37,keyColor:'amber',onNoteOn:(n,v)=>{this.engine.noteOn(n,v);},onNoteOff:n=>this.engine.noteOff(n)});
+  this.hardwareSelects=[this.hwTrackSelect,this.hwDestSelect,this.hwPhrase];this.renderHardwareSteps=()=>{const tr=Number(this.patch.seqTrack)||0,offset=this.seqPage*16;this.hwSteps.forEach((btn,i)=>btn.setValue(this.patch.seqTracks[tr]?.[offset+i]!==null&&this.patch.seqTracks[tr]?.[offset+i]!==undefined,true));this.hwDestSelect.value=this.patch.seqDestinations[tr]||'none';};
   this.renderHardwareSteps();
   this.displayHardwarePreset=(name)=>{this.hwDisplay.set(name.toUpperCase(),'PRO 3 · PROGRAM');};
  }
