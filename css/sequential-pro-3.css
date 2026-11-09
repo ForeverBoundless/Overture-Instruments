@@ -64,7 +64,7 @@
 @media(max-width:440px){.pro3-wordmark{font-size:19px}.pro3-model strong{font-size:17px}.pro3-shell .pn-knobs{gap:7px}.pro3-route{grid-template-columns:18px minmax(0,1fr) minmax(0,1fr) 46px}.pro3-steps{gap:2px}.pro3-step{height:19px;font-size:6px}}
 
 /* Precision hardware panel rebuild */
-.hp-legacy-hidden>.pn-page,.hp-legacy-hidden>.pn-power{display:none!important}
+.hp-root>.hp-legacy-hidden{display:none!important}.hp-legacy-hidden>.pn-power{display:none!important}
 .pro3-body{background:radial-gradient(ellipse at 50% 0%,#30343a,#0a0d10 68%);overflow:auto}
 .hp-pro3-stage{--hp-ink:#e7e3d9;--hp-muted:#9ba3a5;--hp-line:#687176;--hp-section:#292f33;--hp-head:#171c20;--hp-control:#111619;--hp-accent:#ff4a37;--hp-display:#ffbd63}
 .hp-pro3{background:linear-gradient(180deg,#3b4145 0%,#23292d 6%,#171c20 50%,#0b0f12 100%);border-color:#070a0c}
