@@ -48,7 +48,7 @@ body.prophet10-body {
 #prophet10-root {
   height: 100%;
   display: grid;
-  place-items: center;
+  place-items: safe center;
 }
 
 .p10-stage {

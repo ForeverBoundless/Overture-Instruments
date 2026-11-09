@@ -185,3 +185,10 @@ html[data-theme="light"] .omni-logo-wording strong {
   -webkit-text-fill-color:#111820 !important;
   text-shadow:none !important;
 }
+
+/* Use black text and outlines for the OMNI feature chips in light mode. */
+html[data-theme="light"] .feature-section--omni .omni-chips span {
+  color: #000 !important;
+  border-color: #000 !important;
+  background: transparent !important;
+}

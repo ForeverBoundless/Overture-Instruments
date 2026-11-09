@@ -468,7 +468,7 @@
 .little-phatty-body .lp-help-panel .lp-btn::before { display: none; }
 
 @media (max-width: 1180px) {
-  .little-phatty-body #app-root { place-items: start center; }
+  .little-phatty-body #app-root { place-items: safe center; }
 }
 @media (max-width: 760px) {
   .little-phatty-body #app-root { padding: 8px; }
@@ -1120,7 +1120,8 @@ body.little-phatty-body {
 
 .little-phatty-body #app-root {
   box-sizing: border-box;
-  display: block;
+  display: grid;
+  place-items: safe center;
   width: 100%;
   min-width: 0;
   max-width: 100%;
