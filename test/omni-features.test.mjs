@@ -28,7 +28,7 @@ test('OMNI chord interval sliders expose the complete ±32-semitone range', asyn
   assert.ok(worker.includes(`/js/omni/modules.js?v=20261104-sem-mellotron`));
   assert.ok(page.includes('omni.css?v=20261104-boot-centering'));
   assert.ok(page.includes('omni.js?v=20261105-module-info'));
-  assert.ok(assert.match(worker, /overture-shell-v\d+/););
+  assert.match(worker, /overture-shell-v\d+/);
   assert.ok(worker.includes('/css/omni.css?v=20261104-boot-centering'));
   assert.ok(worker.includes('/js/omni.js?v=20261105-module-info'));
 });
