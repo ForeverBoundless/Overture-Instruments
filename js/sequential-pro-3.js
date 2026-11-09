@@ -204,12 +204,12 @@ class Pro3App{
   const hw=createHardwareSurface(root,{id:'sequential-pro-3',width:1600,height:900,skin:'pro3',programLabel:'PRO 3 · INITIAL PROGRAM'});
   this.hw=hw;const p=hw.instrument;
   const box=(x,y,w,h,title,sub='')=>addSection(p,{x,y,w,h,title,sub});
-  const k=(parent,key,label,x,y,min=0,max=1,step)=>addKnob(parent,{x,y,label,min,max,value:this.patch[key],step,onChange:v=>this.set(key,v),midiId:'PRO3:'+key,formatValue:v=>max>5?String(Number(v).toFixed(1)):Number(v).toFixed(2)});
-  const f=(parent,key,label,x,y,min=0,max=1)=>addFader(parent,{x,y,label,min,max,value:this.patch[key],height:94,onChange:v=>this.set(key,v),midiId:'PRO3:'+key});
-  const b=(parent,key,label,x,y)=>addButton(parent,{x,y,label,value:this.patch[key],onChange:v=>this.set(key,v),midiId:'PRO3:'+key});
+  const k=(parent,key,label,x,y,min=0,max=1,step)=>addKnob(p,{x,y,label,min,max,value:this.patch[key],step,onChange:v=>this.set(key,v),midiId:'PRO3:'+key,formatValue:v=>max>5?String(Number(v).toFixed(1)):Number(v).toFixed(2)});
+  const f=(parent,key,label,x,y,min=0,max=1)=>addFader(p,{x,y,label,min,max,value:this.patch[key],height:94,onChange:v=>this.set(key,v),midiId:'PRO3:'+key});
+  const b=(parent,key,label,x,y)=>addButton(p,{x,y,label,value:this.patch[key],onChange:v=>this.set(key,v),midiId:'PRO3:'+key});
   const sel=(parent,key,label,x,y,options)=>{
    const wrap=document.createElement('label');wrap.className='hp-native-select';wrap.style.cssText='position:absolute;left:'+(x-54)+'px;top:'+(y-10)+'px;width:108px;display:grid;gap:3px;text-align:center;color:var(--hp-ink);font:7px Saira,sans-serif;letter-spacing:.06em';
-   const title=document.createElement('span');title.textContent=label;const s=document.createElement('select');s.style.cssText='width:100%;height:20px;background:var(--hp-control);color:var(--hp-ink);border:1px solid var(--hp-line);font:8px DM Mono,monospace';options.forEach(v=>{const o=document.createElement('option');o.value=String(v);o.textContent=String(v).toUpperCase();s.appendChild(o);});s.value=String(this.patch[key]);s.addEventListener('change',()=>this.set(key,typeof this.patch[key]==='number'?Number(s.value):s.value));wrap.append(title,s);parent.appendChild(wrap);return s;
+   const title=document.createElement('span');title.textContent=label;const s=document.createElement('select');s.style.cssText='width:100%;height:20px;background:var(--hp-control);color:var(--hp-ink);border:1px solid var(--hp-line);font:8px DM Mono,monospace';options.forEach(v=>{const o=document.createElement('option');o.value=String(v);o.textContent=String(v).toUpperCase();s.appendChild(o);});s.value=String(this.patch[key]);s.addEventListener('change',()=>this.set(key,typeof this.patch[key]==='number'?Number(s.value):s.value));wrap.append(title,s);p.appendChild(wrap);return s;
   };
   p.style.cssText+=';--hp-ink:#e7e3d9;--hp-muted:#9ba3a5;--hp-line:#687176;--hp-section:#292f33;--hp-head:#171c20;--hp-control:#111619;--hp-accent:#ff4a37;--hp-display:#ffbd63;background:linear-gradient(180deg,#31373b,#1b2024 25%,#101417);border:8px solid #090c0e;border-radius:6px';
   const top=box(18,16,1564,66,'SEQUENTIAL · PRO 3','MONOPHONIC / PARAPHONIC MULTI-FILTER SYNTHESIZER');
@@ -254,7 +254,7 @@ class Pro3App{
   const preset=box(18,748,1564,48,'PROGRAM MEMORY','OVERTURE PATCHES');const strip=document.createElement('div');strip.className='hp-preset-strip';strip.style.cssText='left:18px;top:12px';preset.body.appendChild(strip);
   const choose=document.createElement('select');FACTORY.forEach((x,i)=>{const o=document.createElement('option');o.value='f:'+i;o.textContent=x.name;choose.appendChild(o);});choose.addEventListener('change',()=>this.presets.load(choose.value));strip.appendChild(choose);
   const save=document.createElement('button');save.textContent='SAVE USER';save.onclick=()=>this.display.flash('USE PRESET MEMORY BELOW THE HARDWARE PANEL');strip.appendChild(save);
-  addKeyboard(p,{x:195,y:812,w:1380,h:80,firstNote:36,count:37,keyColor:'amber',onNoteOn:(n,v)=>{this.engine.noteOn(n,v);},onNoteOff:n=>this.engine.noteOff(n)});
+  addKeyboard(p,{x:195,y:782,w:1380,h:110,firstNote:36,count:37,keyColor:'amber',onNoteOn:(n,v)=>{this.engine.noteOn(n,v);},onNoteOff:n=>this.engine.noteOff(n)});
   this.hardwareSelects=[this.hwTrackSelect,this.hwDestSelect,this.hwPhrase];this.renderHardwareSteps=()=>{const tr=Number(this.patch.seqTrack)||0;this.hwSteps.forEach((btn,i)=>btn.setValue(this.patch.seqTracks[tr]?.[i]!==null&&this.patch.seqTracks[tr]?.[i]!==undefined,true));};
   this.renderHardwareSteps();
   this.displayHardwarePreset=(name)=>{this.hwDisplay.set(name.toUpperCase(),'PRO 3 · PROGRAM');};
