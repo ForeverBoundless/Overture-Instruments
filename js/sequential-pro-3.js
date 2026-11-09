@@ -2,6 +2,7 @@ import { WorkletEngine } from './shared/workletEngine.js';
 import { PresetStore } from './shared/presetStore.js';
 import { el, section, knob, select, toggle, button, display, performance, power, presetBar, footer } from './shared/panel.js';
 import { registerMidiTarget } from './shared/midiMap.js';
+import { createHardwareSurface,addSection,addLabel,addRule,addLED,addKnob,addFader,addButton,addDisplay,addKeyboard,addWheel,addTouchStrip } from './shared/hardwarePanel.js';
 
 const NOTES=Array.from({length:37},(_,i)=>{const n=36+i;return ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'][n%12]+(Math.floor(n/12)-1);});
 const clone=v=>JSON.parse(JSON.stringify(v));
@@ -61,7 +62,7 @@ class Pro3App{
  constructor(){
   this.engine=new WorkletEngine(new URL('./engine/Pro3Processor.js',import.meta.url).href,'pro3-processor');
   this.patch=clean(BASE);this.store=new PresetStore({key:'overture.sequential-pro-3.programs',version:1,validate:clean});
-  this.ui={};this.build();this.buildPerformance();this.presets.load('f:0');
+  this.ui={};this.build();this.buildHardwarePanel();this.buildPerformance();this.presets.load('f:0');
   power('pro3-power',()=>this.engine.start(),()=>{this.perf.flushPending();this.display.set('PRO 3 READY','OVERTURE PROGRAM · AUDIO ACTIVE');});
   this.engine.post({t:'patch',patch:this.patch});
  }
@@ -114,7 +115,7 @@ class Pro3App{
   const fb=section(lower,'TUNED FEEDBACK','RESONANT DELAY PATH');this.makeKnobs(fb.body,[['feedbackAmount','AMOUNT'],['feedbackTune','TUNING']]);this.makeToggle(fb.body,'feedbackGrunge','GRUNGE');
   this.buildAdvanced(rows);
   const memory=section(rows,'PROGRAM MEMORY','ORIGINAL OVERTURE PROGRAMS · USER PRESETS');
-  this.presets=presetBar(memory.body,{factory:FACTORY,store:this.store,display:this.display,filename:'sequential-pro-3-program',panic:()=>this.perf?.allOff(),apply:(data,name)=>{this.patch=clean(data);this.refresh();this.display.set(name.toUpperCase(),'OVERTURE PRO 3 PROGRAM');},capture:()=>clone(this.patch)});
+  this.presets=presetBar(memory.body,{factory:FACTORY,store:this.store,display:this.display,filename:'sequential-pro-3-program',panic:()=>this.perf?.allOff(),apply:(data,name)=>{this.patch=clean(data);this.refresh();this.display.set(name.toUpperCase(),'OVERTURE PRO 3 PROGRAM');this.displayHardwarePreset?.(name);this.renderHardwareSteps?.();},capture:()=>clone(this.patch)});
   footer(this.page,'SEQUENTIAL PRO 3 · TWO ANALOG VCOs · DIGITAL WAVETABLE · THREE FILTERS · PARAPHONIC · OVERTURE SOFTWARE MODEL');
  }
  buildAdvanced(rows){
@@ -195,6 +196,68 @@ class Pro3App{
   Object.entries(this.patch).forEach(([k,v])=>{const c=this.ui[k];if(c?.setValue)c.setValue(v,true);});
   this.modRows?.forEach((r,i)=>{r.src.value=this.patch.modRoutes[i].source;r.dst.value=this.patch.modRoutes[i].destination;r.amount.value=String(this.patch.modRoutes[i].amount);});
   this.updateSequence();this.postPatch();
+ }
+
+ buildHardwarePanel(){
+  this.page.classList.add('hp-legacy-hidden');
+  const root=document.getElementById('pro3-root');
+  const hw=createHardwareSurface(root,{id:'sequential-pro-3',width:1600,height:900,skin:'pro3',programLabel:'PRO 3 · INITIAL PROGRAM'});
+  this.hw=hw;const p=hw.instrument;
+  const box=(x,y,w,h,title,sub='')=>addSection(p,{x,y,w,h,title,sub});
+  const k=(parent,key,label,x,y,min=0,max=1,step)=>addKnob(parent,{x,y,label,min,max,value:this.patch[key],step,onChange:v=>this.set(key,v),midiId:'PRO3:'+key,formatValue:v=>max>5?String(Number(v).toFixed(1)):Number(v).toFixed(2)});
+  const f=(parent,key,label,x,y,min=0,max=1)=>addFader(parent,{x,y,label,min,max,value:this.patch[key],height:94,onChange:v=>this.set(key,v),midiId:'PRO3:'+key});
+  const b=(parent,key,label,x,y)=>addButton(parent,{x,y,label,value:this.patch[key],onChange:v=>this.set(key,v),midiId:'PRO3:'+key});
+  const sel=(parent,key,label,x,y,options)=>{
+   const wrap=document.createElement('label');wrap.className='hp-native-select';wrap.style.cssText='position:absolute;left:'+(x-54)+'px;top:'+(y-10)+'px;width:108px;display:grid;gap:3px;text-align:center;color:var(--hp-ink);font:7px Saira,sans-serif;letter-spacing:.06em';
+   const title=document.createElement('span');title.textContent=label;const s=document.createElement('select');s.style.cssText='width:100%;height:20px;background:var(--hp-control);color:var(--hp-ink);border:1px solid var(--hp-line);font:8px DM Mono,monospace';options.forEach(v=>{const o=document.createElement('option');o.value=String(v);o.textContent=String(v).toUpperCase();s.appendChild(o);});s.value=String(this.patch[key]);s.addEventListener('change',()=>this.set(key,typeof this.patch[key]==='number'?Number(s.value):s.value));wrap.append(title,s);parent.appendChild(wrap);return s;
+  };
+  p.style.cssText+=';--hp-ink:#e7e3d9;--hp-muted:#9ba3a5;--hp-line:#687176;--hp-section:#292f33;--hp-head:#171c20;--hp-control:#111619;--hp-accent:#ff4a37;--hp-display:#ffbd63;background:linear-gradient(180deg,#31373b,#1b2024 25%,#101417);border:8px solid #090c0e;border-radius:6px';
+  const top=box(18,16,1564,66,'SEQUENTIAL · PRO 3','MONOPHONIC / PARAPHONIC MULTI-FILTER SYNTHESIZER');
+  const logo=document.createElement('img');logo.src='/ui/Logos/Sequential_logo.png';logo.alt='Sequential';logo.style.cssText='position:absolute;left:35px;top:38px;width:145px;height:25px;object-fit:contain;filter:brightness(0) invert(1)';p.appendChild(logo);
+  this.hwDisplay=addDisplay(p,{x:1210,y:27,w:230,h:42,brand:'PROGRAM / BANK',skin:'amber'});this.hwDisplay.set('001 · PROLOGUE BASS','FACTORY PROGRAM');
+  const mode=addButton(p,{x:1480,y:40,label:'PARAPHONIC',value:this.patch.mode==='paraphonic',onChange:v=>this.set('mode',v?'paraphonic':'mono')});
+  const perf=box(18,92,155,410,'PERFORMANCE','37-KEY · PITCH / MOD / TOUCH');
+  addWheel(p,{x:62,y:145,label:'PITCH',min:-1,max:1,value:0,height:118,spring:true,onChange:v=>this.engine.post({t:'bend',value:v}),midiId:'PRO3:Pitch Bend'});
+  addWheel(p,{x:117,y:145,label:'MOD',value:0,height:118,onChange:v=>this.engine.post({t:'mod',value:v}),midiId:'PRO3:Mod Wheel'});
+  addTouchStrip(p,{x:153,y:304,w:18,h:120,label:'TOUCH',onChange:v=>{this.patch.touch=v;this.engine.post({t:'touch',value:v});}});
+  b(perf.body,'hold','HOLD',75,55);b(perf.body,'arpEnabled','ARPEGGIATOR',75,102);
+  sel(perf.body,'mode','VOICE MODE',75,170,['mono','paraphonic']);
+  k(perf.body,'glide','GLIDE',75,270);
+  const seq=box(190,92,930,158,'SEQUENCER','16 TRACKS · 4 PHRASES · 64 STEPS');
+  addLabel(p,215,134,'TRACK / PHRASE');this.hwTrackSelect=sel(seq.body,'seqTrack','TRACK',300,122,Array.from({length:16},(_,i)=>i));
+  this.hwDestSelect=sel(seq.body,'seqDestination','DESTINATION',450,122,['note','none','osc1Shape','osc2Shape','osc3ShapeMod','filterCutoff','resonance','fx1Mix','fx2Mix','feedbackAmount']);
+  this.hwPhrase=sel(seq.body,'seqPhrase','PHRASE',600,122,['A','B','C','D']);
+  k(seq.body,'bpm','TEMPO',790,117,30,260,1);k(seq.body,'seqSwing','SWING',900,117);
+  const play=addButton(p,{x:1020,y:127,label:'PLAY',value:false,onChange:v=>{this.patch.seqEnabled=v;this.engine.post({t:'transport',play:v});}});
+  this.hwSteps=[];for(let i=0;i<16;i++){const x=235+i*51;const btn=addButton(p,{x,y:202,label:String(i+1),size:30,led:'red',value:false,onChange:()=>{this.toggleStep(i);this.renderHardwareSteps();}});this.hwSteps.push(btn);}
+  const lfo=box(190,264,350,238,'LFO 1–3','RATE · SHAPE · PHASE · SLEW');
+  for(let i=0;i<3;i++){const x=250+i*105;addLabel(p,x,310,'LFO '+(i+1));k(lfo.body,'lfo'+(i+1)+'Rate','RATE',x,365);k(lfo.body,'lfo'+(i+1)+'Amount','AMOUNT',x,430);sel(lfo.body,'lfo'+(i+1)+'Wave','SHAPE',x,465,['sine','triangle','saw','reverseSaw','square','sampleHold']);}
+  const osc1=box(555,264,270,238,'OSCILLATOR 1','ANALOG VCO');
+  sel(osc1.body,'osc1Wave','WAVE',625,314,['saw','triangle','pulse']);sel(osc1.body,'osc1Octave','OCTAVE',750,314,[-2,-1,0,1,2]);
+  k(osc1.body,'osc1Level','LEVEL',615,400);k(osc1.body,'osc1Tune','FINE',690,400,-7,7);k(osc1.body,'osc1Shape','SHAPE',765,400);b(osc1.body,'osc1Sync','SYNC',770,470);
+  const osc2=box(840,264,270,238,'OSCILLATOR 2','ANALOG VCO');
+  sel(osc2.body,'osc2Wave','WAVE',910,314,['saw','triangle','pulse']);sel(osc2.body,'osc2Octave','OCTAVE',1035,314,[-2,-1,0,1,2]);
+  k(osc2.body,'osc2Level','LEVEL',900,400);k(osc2.body,'osc2Tune','FINE',975,400,-7,7);k(osc2.body,'osc2Shape','SHAPE',1050,400);b(osc2.body,'osc2Sync','SYNC',1055,470);
+  const osc3=box(1125,264,260,238,'OSCILLATOR 3','DIGITAL WAVETABLE');
+  sel(osc3.body,'osc3Wave','WAVE',1195,314,['sine','triangle','saw','pulse','superSaw','wavetable']);sel(osc3.body,'osc3Octave','OCTAVE',1320,314,[-2,-1,0,1,2]);
+  k(osc3.body,'osc3Level','LEVEL',1190,400);k(osc3.body,'osc3Shape','TABLE',1260,400,0,31,1);k(osc3.body,'osc3ShapeMod','SHAPE MOD',1330,400);
+  const mixer=box(1400,264,182,238,'MIXER','OSC / NOISE');
+  f(mixer.body,'osc1Level','OSC 1',1430,375);f(mixer.body,'osc2Level','OSC 2',1480,375);f(mixer.body,'osc3Level','OSC 3',1530,375);f(mixer.body,'noiseLevel','NOISE',1570,375);
+  const filter=box(190,516,400,218,'FILTER','PROPHET 6 · LADDER · STATE VARIABLE');
+  sel(filter.body,'filterType','TOPOLOGY',300,570,['prophet6','ladder','stateVariable']);
+  k(filter.body,'filterCutoff','CUTOFF',290,650);k(filter.body,'resonance','RESONANCE',390,650);k(filter.body,'filterDrive','DRIVE',490,650);k(filter.body,'filterKeyTrack','KEY TRACK',565,650);
+  const env=box(605,516,480,218,'ENVELOPES','FILTER / AMPLIFIER / AUXILIARY');
+  [['filter','FILTER'],['amp','AMP'],['aux1','AUX 1'],['aux2','AUX 2']].forEach(([prefix,label],i)=>{const x=665+i*110;addLabel(p,x,565,label);['Attack','Decay','Sustain','Release'].forEach((part,j)=>k(env.body,prefix+part,'ADSR'.split('')[j],x-32+j*22,650));});
+  const fb=box(1100,516,225,218,'TUNED FEEDBACK','RESONANT FEEDBACK PATH');k(fb.body,'feedbackAmount','AMOUNT',1170,650);k(fb.body,'feedbackTune','TUNING',1260,650);b(fb.body,'feedbackGrunge','GRUNGE',1200,700);
+  const fx=box(1340,516,242,218,'EFFECTS','TWO INDEPENDENT FX');
+  sel(fx.body,'fx1Type','EFFECT 1',1400,570,['off','stereoDelay','bbdDelay','chorus','flanger','phaser','ringMod','rotary','digitalDistortion','superPlate']);k(fx.body,'fx1Mix','MIX 1',1420,650);k(fx.body,'fx2Mix','MIX 2',1500,650);sel(fx.body,'fx2Type','EFFECT 2',1540,570,['off','stereoDelay','chorus','flanger','phaser','superPlate']);
+  const preset=box(18,748,1564,48,'PROGRAM MEMORY','OVERTURE PATCHES');const strip=document.createElement('div');strip.className='hp-preset-strip';strip.style.cssText='left:18px;top:12px';preset.body.appendChild(strip);
+  const choose=document.createElement('select');FACTORY.forEach((x,i)=>{const o=document.createElement('option');o.value='f:'+i;o.textContent=x.name;choose.appendChild(o);});choose.addEventListener('change',()=>this.presets.load(choose.value));strip.appendChild(choose);
+  const save=document.createElement('button');save.textContent='SAVE USER';save.onclick=()=>this.display.flash('USE PRESET MEMORY BELOW THE HARDWARE PANEL');strip.appendChild(save);
+  addKeyboard(p,{x:195,y:812,w:1380,h:80,firstNote:36,count:37,keyColor:'amber',onNoteOn:(n,v)=>{this.engine.noteOn(n,v);},onNoteOff:n=>this.engine.noteOff(n)});
+  this.hardwareSelects=[this.hwTrackSelect,this.hwDestSelect,this.hwPhrase];this.renderHardwareSteps=()=>{const tr=Number(this.patch.seqTrack)||0;this.hwSteps.forEach((btn,i)=>btn.setValue(this.patch.seqTracks[tr]?.[i]!==null&&this.patch.seqTracks[tr]?.[i]!==undefined,true));};
+  this.renderHardwareSteps();
+  this.displayHardwarePreset=(name)=>{this.hwDisplay.set(name.toUpperCase(),'PRO 3 · PROGRAM');};
  }
 }
 new Pro3App();
