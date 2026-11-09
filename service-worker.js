@@ -164,6 +164,7 @@ const APP_SHELL = [
   '/js/shared/panel.js',
   '/js/shared/presetStore.js',
   '/js/shared/pwa.js',
+  '/js/shared/hardwarePanel.js',
   '/js/shared/site-nav.js',
   '/js/shared/site-theme.js',
   '/js/shared/workletEngine.js',
