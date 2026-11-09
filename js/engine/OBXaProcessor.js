@@ -47,13 +47,13 @@ class OBXaProcessor extends AudioWorkletProcessor{
   this.heldNotes.set(note,vel);
   const soundingNote=this.transposeNote(note),layers=this.p.mode==='double'?[0,1]:[this.layerFor(note)];
   if(this.hold&&!this.p.chordMode)layers.forEach(layer=>{const chord=this.chordMemory[layer];if(!chord.includes(soundingNote))chord.push(soundingNote);chord.sort((a,b)=>a-b);});
-  if(this.p.unison){layers.forEach(layer=>{const low=this.lowestHeld(layer);if(low)this.triggerUnison(layer,low[0],low[1]);});return;}
+  if(this.p.unison||this.p.mode==='unison'){layers.forEach(layer=>{const low=this.lowestHeld(layer);if(low)this.triggerUnison(layer,low[0],low[1]);});return;}
   if(this.p.chordMode){layers.forEach(layer=>{const memory=this.chordMemory[layer],base=memory.length?memory[0]:soundingNote,notes=memory.length?memory:[soundingNote];notes.forEach(stored=>{let played=soundingNote+(stored-base);while(played>96)played-=12;while(played<36)played+=12;this.startVoice(this.allocate(played,layer),played,vel,layer,0,1,note);});});return;}
   layers.forEach(layer=>this.startVoice(this.allocate(soundingNote,layer),soundingNote,vel,layer,0,1,note));
  }
  noteOff(note){
   this.heldNotes.delete(note);
-  if(this.p.unison){const layers=this.p.mode==='double'?[0,1]:[this.layerFor(note)];layers.forEach(layer=>{const low=this.lowestHeld(layer);if(low)this.triggerUnison(layer,low[0],low[1]);else if(!this.hold&&!this.sustain)this.bank(layer).forEach(v=>{v.gate=false;this.release(v);});});return;}
+  if(this.p.unison||this.p.mode==='unison'){const layers=this.p.mode==='double'?[0,1]:[this.layerFor(note)];layers.forEach(layer=>{const low=this.lowestHeld(layer);if(low)this.triggerUnison(layer,low[0],low[1]);else if(!this.hold&&!this.sustain)this.bank(layer).forEach(v=>{v.gate=false;this.release(v);});});return;}
   this.voices.forEach(v=>{if(v.inputNote===note&&v.gate){v.gate=false;if(!this.sustain&&!this.hold)this.release(v);}});
  }
  releaseUnheld(){
