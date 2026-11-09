@@ -29,14 +29,20 @@ const DEFAULT={
  modRoutes:[],morph:0
 };
 function makeEnv(){return {v:0,stage:"idle",time:0,gate:false};}
-function wave(kind,pw,phase){
- const p=((phase%1)+1)%1;
+function polyBlep(t,dt){
+ if(dt<=0)return 0;
+ if(t<dt){const x=t/dt;return x+x-x*x-1;}
+ if(t>1-dt){const x=(t-1)/dt;return x*x+x+x+1;}
+ return 0;
+}
+function wave(kind,pw,phase,dt=0){
+ const p=((phase%1)+1)%1,d=Math.min(.49,Math.max(0,dt)),duty=clamp(pw,.02,.98);
  if(kind==="sine")return Math.sin(p*Math.PI*2);
  if(kind==="triangle")return 1-4*Math.abs(p-.5);
- if(kind==="pulse")return p<pw?1:-1;
- if(kind==="square")return p<.5?1:-1;
- if(kind==="reverseSaw")return 1-2*p;
- return 2*p-1;
+ if(kind==="pulse")return (p<duty?1:-1)+polyBlep(p,d)-polyBlep((p-duty+1)%1,d);
+ if(kind==="square")return (p<.5?1:-1)+polyBlep(p,d)-polyBlep((p-.5+1)%1,d);
+ if(kind==="reverseSaw")return 1-2*p+polyBlep(p,d);
+ return 2*p-1-polyBlep(p,d);
 }
 function makeTables(){
  const tableSize=256,lookupSize=4096;
@@ -222,8 +228,9 @@ class Pro3Processor extends AudioWorkletProcessor{
     const pitchDest='osc'+(oi+1)+'Pitch',shapeDest='osc'+(oi+1)+'Shape';const pitchMod=(mods[pitchDest]||0)*24+(this.bend*(this.p.bendRange||2))+(this.mod*.01)+(this.at*.012);
     const semi=(oi===0?Number(this.p.osc1Octave)||0:oi===1?Number(this.p.osc2Octave)||0:Number(this.p.osc3Octave)||0)*12;
     const tune=(oi===0?this.p.osc1Tune:oi===1?this.p.osc2Tune:this.p.osc3Tune)||0;
-    const slide=(oi===0?this.p.osc1Glide:oi===1?this.p.osc2Glide:this.p.osc3Glide)||this.p.glide||0;
-    const f0=midiHz(note+semi+tune+pitchMod+(v.slop*(oi===0?1:oi===1?1.1:.2)));
+    const slide=clamp((oi===0?this.p.osc1Glide:oi===1?this.p.osc2Glide:this.p.osc3Glide)||this.p.glide||0);
+    const targetHz=midiHz(note+semi+tune+pitchMod+(v.slop*(oi===0?1:oi===1?1.1:.2)));
+    v.glideHz=v.glideHz||targetHz;v.glideHz+=(targetHz-v.glideHz)*(slide>0?1-Math.exp(-dt/(.004+slide*1.8)):1);const f0=v.glideHz;
     v.drift+=dt*(.07+oi*.03);
     const hz=f0*Math.pow(2,Math.sin(v.drift)*((Number(oi===0?this.p.osc1Slop:oi===1?this.p.osc2Slop:this.p.osc3Slop)||0)*.008));
     const inc=hz/sr;const old=v.phase[oi];v.phase[oi]=(v.phase[oi]+inc)%1;
@@ -232,9 +239,8 @@ class Pro3Processor extends AudioWorkletProcessor{
     if(oi===2&&waveName==="wavetable")s=this.wavetable(v.phase[oi],Math.floor(shape*31),clamp((Number(this.p.osc3ShapeMod)||0)+lf[2]*.2+(mods.osc3ShapeMod||0)+(this.auto.osc3Shape||0)));
     else if(oi===2&&waveName==="superSaw"){
       s=0;for(let k=-3;k<=3;k++){const det=k*.0025*(this.p.osc3ShapeMod||.2);s+=wave("saw",.5,(v.phase[oi]+det+1)%1)/7;}
-    }else s=wave(waveName,clamp(shape,.02,.98),v.phase[oi]);
-    if(oi===1&&this.p.osc2Sync&&v.phase[0]<inc)v.phase[1]=0;
-    if(oi===1&&this.p.osc1Sync&&v.phase[0]<inc)v.phase[1]=0;
+    }else s=wave(waveName,clamp(shape,.02,.98),v.phase[oi],inc);
+    if(oi===1&&(this.p.osc2Sync||this.p.osc1Sync)&&v.phase[0]<inc)v.phase[1]=0;
     const level=Number(this.p[key+"Level"])||0;
     raw+=s*level;
    }
