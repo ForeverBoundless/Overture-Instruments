@@ -1,4 +1,4 @@
-const CACHE = 'overture-shell-v50';
+const CACHE = 'overture-shell-v51';
 const APP_SHELL = [
   '/account',
   '/login',
@@ -25,6 +25,7 @@ const APP_SHELL = [
   '/css/home.css?v=20261104-home-logo-light',
   '/css/keyboard.css',
   '/css/hohner-d6.css?v=20261106-audio-r1',
+  '/css/hardware-panel.css',
   '/css/sequential-pro-3.css',
   '/css/udo-super-8.css',
   '/css/ob-xa.css?v=20261106-mays-mod-r1',
@@ -181,6 +182,7 @@ const APP_SHELL = [
   '/ui/Logos/OvertureLogo.png',
   '/ui/Logos/Roland_logo.png',
   '/ui/Logos/Sequential_logo.png',
+  '/ui/Logos/UDO_logo.svg',
   '/ui/Logos/Yamaha_logo.png',
   '/ui/Photos/Dev1.png',
   '/ui/Photos/Dev2.png',
