@@ -39,20 +39,21 @@ function wave(kind,pw,phase){
  return 2*p-1;
 }
 function makeTables(){
+ const tableSize=256,lookupSize=4096;
+ const sine=new Float32Array(lookupSize);
+ for(let i=0;i<lookupSize;i++)sine[i]=Math.sin(2*Math.PI*i/lookupSize);
  const tables=[];
  for(let t=0;t<32;t++){
   const bank=[];
   for(let f=0;f<16;f++){
-   const data=new Float32Array(256);let peak=0;
-   for(let i=0;i<data.length;i++){
-    const p=i/data.length;let x=0;
-    for(let h=1;h<=10;h++){
-     const weight=(1/Math.pow(h,1+t*.013))*Math.cos((f+1)*h*.31+t*.09);
-     x+=weight*Math.sin(2*Math.PI*h*p);
-    }
-    data[i]=x;peak=Math.max(peak,Math.abs(x));
+   const data=new Float32Array(tableSize);let peak=0;
+   for(let h=1;h<=10;h++){
+    const weight=(1/Math.pow(h,1+t*.013))*Math.cos((f+1)*h*.31+t*.09);
+    const step=Math.round(h*lookupSize/tableSize);
+    for(let i=0;i<tableSize;i++)data[i]+=weight*sine[(i*step)%lookupSize];
    }
-   for(let i=0;i<data.length;i++)data[i]/=peak||1;
+   for(let i=0;i<tableSize;i++){peak=Math.max(peak,Math.abs(data[i]));}
+   const norm=peak||1;for(let i=0;i<tableSize;i++)data[i]/=norm;
    bank.push(data);
   }
   tables.push(bank);
