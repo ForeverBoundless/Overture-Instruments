@@ -149,6 +149,23 @@ test('both visible hardware keyboards use the pending-note performance input pat
   assert.match(super8, /this\.hwKeyboard\?\.setActive\(n,true\)/);
 });
 
+
+test('Pro 3 and Super 8 hardware panel sections and keybeds stay within their chassis', async () => {
+  const [pro, super8] = await Promise.all([
+    readFile(new URL('../js/sequential-pro-3.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/udo-super-8.js', import.meta.url), 'utf8'),
+  ]);
+  const proHardware = pro.slice(pro.indexOf(' buildHardwarePanel(){'), pro.indexOf('\n }\n\n}', pro.indexOf(' buildHardwarePanel(){')));
+  const superHardware = super8.slice(super8.indexOf(' buildHardwarePanel(){'), super8.indexOf('\n }\n\n}', super8.indexOf(' buildHardwarePanel(){')));
+  assert.match(proHardware, /createHardwareSurface\(root,\{id:'sequential-pro-3',width:1680,height:850/);
+  assert.match(proHardware, /x:196,y:712,w:1468,h:130,firstNote:36,count:37/);
+  assert.match(superHardware, /createHardwareSurface\(root,\{id:'udo-super-8',width:1680/);
+  assert.match(superHardware, /x:255,y:548,w:1395,h:202,firstNote:36,count:61/);
+  assert.match(superHardware, /panelSection\(15,542,230,212,'LFO 2 \/ BENDER'/);
+  const styles = await readFile(new URL('../css/hardware-panel.css', import.meta.url), 'utf8');
+  assert.match(styles, /\.hp-root\{padding:8px 4px 24px;justify-content:center/);
+});
+
 test('shared hardware fader can construct and expose MIDI metadata at runtime', () => {
   class FakeNode {
     constructor(tag) { this.tagName = tag; this.style = {}; this.children = []; this.attributes = {}; this.listeners = {}; }
