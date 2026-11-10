@@ -142,3 +142,18 @@ body.pn-body.hp-pro3-body,body.pn-body.hp-super8-body{min-height:100vh;overflow-
 .hp-section-head{justify-content:flex-start;gap:6px;overflow:hidden;padding-inline:7px}
 .hp-section-title{font-size:9px;letter-spacing:.08em;min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis}
 .hp-section-sub{display:none}
+
+/* Final centering and responsive chassis alignment for the new hybrid synths. */
+.hp-root{display:flex;align-items:flex-start;justify-content:center;width:100%;padding:clamp(12px,2vw,26px) 8px 40px}
+.hp-stage{margin-inline:auto;align-self:center}
+.hp-info{box-sizing:border-box;max-width:calc(100vw - 24px);width:100%;min-width:0}
+.hp-info-left{flex:1 1 auto;min-width:0}
+.hp-info-mid{flex:0 1 auto;min-width:0;justify-content:flex-end}
+.hp-info-program{min-width:0}
+.hp-instrument{transform-origin:top center}
+@media(max-width:700px){
+ .hp-root{padding:8px 4px 28px}
+ .hp-info{gap:5px;padding-inline:6px}
+ .hp-info-mid{max-width:42%}
+ .hp-info-program{max-width:42vw}
+}
