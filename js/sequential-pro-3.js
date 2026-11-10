@@ -212,7 +212,7 @@ class Pro3App{
    return remember('knobs',key,control);
   };
   const fader=(key,label,x,y,min=0,max=1,opts={})=>{
-   const control=addFader(p,{x,y,label,min,max,value:this.patch[key],height:opts.height||72,width:opts.width||22,small:!!opts.small,midiId:'PRO3:'+key,formatValue:v=>max>10?String(Number(v).toFixed(1)):Number(v).toFixed(2),onChange:v=>this.set(key,v)});
+   const control=addFader(p,{x,y,label,min,max,value:this.patch[key],height:opts.height||72,width:opts.width||22,small:!!opts.small,midiId:'PRO3:'+key,group:opts.group||'SYNTHESIS',formatValue:v=>max>10?String(Number(v).toFixed(1)):Number(v).toFixed(2),onChange:v=>this.set(key,v)});
    return remember('faders',key,control);
   };
   const btn=(key,label,x,y,opts={})=>{
