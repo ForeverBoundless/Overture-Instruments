@@ -138,7 +138,7 @@ test('Pro 3 and Super 8 hardware modules parse before browser startup', async ()
   assert.doesNotThrow(() => new Function(stripModuleSyntax(pro, 'Pro3App')), 'Pro 3 UI module parses');
   assert.doesNotThrow(() => new Function(stripModuleSyntax(super8, 'Super8App')), 'Super 8 UI module parses');
   const hardwareMethod = super8.slice(super8.indexOf(' buildHardwarePanel(){'), super8.indexOf('\n }\n\n}', super8.indexOf(' buildHardwarePanel(){')));
-  assert.equal((hardwareMethod.match(/const grid=/g) || []).length, 1, 'Super 8 hardware matrix is declared once');
+  assert.equal((hardwareMethod.match(/const hardwareGrid=/g) || []).length, 1, 'Super 8 hardware matrix is declared once');
 });
 
 test('Pro 3 and Super 8 load the shared reference-style hardware surface', async () => {
