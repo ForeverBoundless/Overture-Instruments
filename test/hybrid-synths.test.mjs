@@ -146,12 +146,12 @@ test('both new hardware synths start audio directly from their visible power swi
     readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
   ]);
   assert.match(panel, /return go;/);
-  assert.match(pro, /this\.activateAudio=power\('pro3-power'/);
-  assert.match(super8, /this\.activateAudio=power\('super8-power'/);
+  assert.ok(pro.includes("this.activateAudio=power('pro3-power'"));
+  assert.ok(super8.includes("this.activateAudio=power('super8-power'"));
   assert.match(pro, /label:'POWER',value:false,toggle:false/);
   assert.match(super8, /label:'POWER',value:false,toggle:false/);
-  assert.doesNotMatch(pro, /getElementById\('pro3-power'\)\.click\(\)/);
-  assert.doesNotMatch(super8, /getElementById\('super8-power'\)\.click\(\)/);
+  assert.ok(!pro.includes("getElementById('pro3-power').click()"));
+  assert.ok(!super8.includes("getElementById('super8-power').click()"));
   assert.match(worker, /overture-shell-v60/);
 });
 
