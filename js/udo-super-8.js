@@ -382,7 +382,7 @@ class Super8App{
   }
   // Lower-left controller block and a continuous 61-note Fatar keybed.
   panelSection(15,542,230,212,'LFO 2 / BENDER','MODULATION / TWO-AXIS CONTROL');
-  knob('lfo2Rate','LFO 2 RATE',72,612,{size:48,group:'LFO 2'});knob('lfo2Amount','LFO 2 AMOUNT',180,612,{size:48,group:'LFO 2'});sel('lfo2Wave','LFO 2 SHAPE',125,668,['sine','triangle','saw','reverseSaw','square'],{width:120,group:'LFO 2'});
+  knob('lfo2Rate','LFO 2 RATE',72,612,{size:48,group:'LFO 2'});knob('lfo2Amount','LFO 2 AMOUNT',180,612,{size:48,group:'LFO 2'});sel('lfo2Wave','LFO 2 SHAPE',70,668,['sine','triangle','saw','reverseSaw','square'],{width:92,group:'LFO 2'});sel('lfo2Destination','DESTINATION',174,668,['DDS 1 pitch','DDS 2 pitch','Both pitch','Filter','Amp'],{width:112,group:'LFO 2'});
   const bx=document.createElement('label');bx.className='hp-super8-range';bx.style.cssText='position:absolute;left:28px;top:706px;width:91px;display:grid;gap:4px;z-index:8;color:var(--hp-ink);font:700 8px Saira,sans-serif';p.appendChild(bx);
   const xLabel=document.createElement('span');xLabel.textContent='X · PITCH BEND';const xInput=document.createElement('input');xInput.type='range';xInput.min='-1';xInput.max='1';xInput.step='.001';xInput.value=String(this.patch.benderX);bx.append(xLabel,xInput);
   xInput.addEventListener('input',()=>{this.patch.benderX=Number(xInput.value);this.engine.post({t:'bendAxis',x:this.patch.benderX,y:this.patch.benderY});});
