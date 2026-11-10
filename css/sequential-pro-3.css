@@ -77,3 +77,47 @@
 .hp-pro3 .hp-native-select{z-index:4}
 .hp-pro3 .hp-preset-strip{z-index:8}
 #pro3-power{display:none!important}
+
+
+/* Pro 3: visible program workflow and its complete modulation matrix. */
+.hp-pro3-stage{--hp-ink:#ebe7dc;--hp-muted:#a4a6a1;--hp-line:#626b70;--hp-section:#252b2f;--hp-head:#14191d;--hp-control:#0f1418;--hp-accent:#ff4a36;--hp-display:#ffbd66}
+.hp-pro3{background:linear-gradient(180deg,#30373b 0%,#23292d 35%,#151a1e 77%,#0b0f12);border:8px solid #090c0f;border-radius:5px;box-shadow:0 27px 65px #000c,inset 0 1px #ffffff19,inset 0 -2px #000}
+.hp-pro3:before{inset:3px;border-color:#ffffff16}
+.hp-pro3 .hp-section{border-radius:2px;border-color:#5b656a;background:linear-gradient(150deg,#2a3034,#1c2226 70%,#151b1e);box-shadow:inset 0 1px #ffffff0b,0 2px 4px #0005}
+.hp-pro3 .hp-section-head{height:26px;background:linear-gradient(#343b40,#1c2327);border-bottom-color:#687176}
+.hp-pro3 .hp-section-title{font-size:9px;letter-spacing:.14em;color:#f0ece2}
+.hp-pro3 .hp-section-sub{color:#9aa3a5;font-size:6px}
+.hp-pro3 .hp-knob-art{filter:drop-shadow(0 2px 2px #000a)}
+.hp-pro3 .hp-control-label{color:#dedbd2;font-size:7px}
+.hp-pro3 .hp-knob-value{color:#a8a9a4}
+.hp-pro3 .hp-native-select select{background:linear-gradient(#353d42,#13191d);color:#e8e5dc;border-color:#697378}
+.hp-pro3 .hp-native-select span{color:#e0dbcf}
+.hp-pro3 .hp-button{background:linear-gradient(120deg,#090c0f,#42494d 50%,#101518);border-color:#070a0c}
+.hp-pro3 .hp-button-face{background:linear-gradient(#51585b,#242b2f 60%,#111518)}
+.hp-pro3 .hp-button.is-on .hp-button-face{background:linear-gradient(#b74b32,#511e16)}
+.hp-pro3 .hp-keybed{border-color:#090c0e;background:#090b0d}
+.hp-pro3 .hp-key-white{background:linear-gradient(100deg,#c6c7c2,#fff 17%,#faf9f5 66%,#c7c9c5)}
+.hp-pro3 .hp-key-black{background:linear-gradient(100deg,#07090b,#383d40 40%,#151a1c 75%,#050607)}
+.hp-pro3 .hp-key.active.hp-key-white{background:linear-gradient(#ffdaa0,#d77e29)}
+.hp-pro3 .hp-key.active.hp-key-black{background:linear-gradient(#e78c3b,#5c2a13)}
+.hp-pro3 .hp-key-mark{color:#555d60}
+.hp-pro3 .hp-wheel-slot{border-color:#080a0d}
+.hp-pro3 .hp-pro3-select select{background:linear-gradient(#353d42,#13191d);color:#e8e5dc;border-color:#697378}
+.hp-pro3 .hp-fader-track{background:linear-gradient(90deg,#070a0c,#41484b 48%,#0d1215);border-color:#090c0e}
+.hp-pro3 .hp-fader-cap{background:linear-gradient(#e7e8e4,#92999b 45%,#30383b 62%,#cdd0ce);border-color:#07090b}
+.hp-pro3-hardware-footer{box-sizing:border-box;align-self:stretch;width:100%;min-height:40px}
+.hp-pro3-action{height:27px;padding:0 11px;border:1px solid #596268;border-radius:2px;background:linear-gradient(#394147,#1a2024);color:#ece7dc;font:700 8px 'DM Mono',monospace;letter-spacing:.06em;cursor:pointer;box-shadow:inset 0 1px #ffffff23,0 1px 2px #0006}
+.hp-pro3-action:hover{border-color:#d98b4a;background:linear-gradient(#4b5258,#22292e)}
+.hp-pro3-wave-import{display:inline-flex;align-items:center;position:relative;overflow:hidden;padding:0 12px;cursor:pointer}
+.hp-pro3-matrix-dialog{width:min(980px,94vw);max-height:86vh;overflow:auto;border:1px solid #586267;border-radius:5px;padding:0;background:linear-gradient(#252c30,#11171b);color:#ebe7dc;box-shadow:0 25px 80px #000d}
+.hp-pro3-matrix-dialog::backdrop{background:#04070bbd;backdrop-filter:blur(3px)}
+.hp-pro3-matrix-dialog form{padding:14px}
+.hp-pro3-matrix-dialog header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:10px;border-bottom:1px solid #556066;font:800 12px InterLocal,sans-serif;letter-spacing:.1em}
+.hp-pro3-matrix-dialog header button{width:30px;height:28px;border:1px solid #667177;border-radius:3px;background:#252d32;color:#ece7dc;font-size:18px;cursor:pointer}
+.hp-pro3-matrix-dialog p{font:10px 'DM Mono',monospace;color:#a6adb0}
+.hp-pro3-matrix-route{display:grid;grid-template-columns:34px minmax(0,1fr) minmax(0,1fr) minmax(130px,1fr) 45px;align-items:center;gap:7px;padding:5px;border-bottom:1px solid #ffffff12}
+.hp-pro3-matrix-route strong{font:700 8px 'DM Mono',monospace;color:#ffb25e}
+.hp-pro3-matrix-route select{width:100%;height:26px;min-width:0;background:#1d252a;color:#e8e5dd;border:1px solid #515e64;border-radius:2px;font:8px 'DM Mono',monospace}
+.hp-pro3-matrix-route input{width:100%;accent-color:#ff9f3b}
+.hp-pro3-matrix-route output{font:8px 'DM Mono',monospace;color:#bdc2c0;text-align:right}
+@media(max-width:700px){.hp-pro3-hardware-footer{flex-wrap:wrap}.hp-pro3-matrix-route{grid-template-columns:24px minmax(0,1fr) minmax(0,1fr) 80px 38px}.hp-pro3-action{font-size:7px;padding:0 7px}}
