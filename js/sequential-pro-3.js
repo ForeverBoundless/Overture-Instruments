@@ -26,7 +26,7 @@ const BASE={
  seqEnabled:false,seqMode:'forward',seqLength:16,seqSwing:0,seqGate:.72,
  seqTracks:Array.from({length:16},()=>Array(64).fill(null)),
  seqDestinations:Array.from({length:16},(_,i)=>i===0?'note':i===1?'osc1Shape':i===2?'filterCutoff':'none'),
- seqPhrase:'A',seqLinked:false,seqTrack:0,seqRecord:false,
+ seqPhrase:'A',seqLinked:false,seqTrack:0,seqDestination:'note',seqRecord:false,
  modRoutes:Array.from({length:32},()=>({source:'LFO 1',destination:'filterCutoff',amount:0})),morph:0
 };
 const clamp=(v,a=0,b=1)=>Math.min(b,Math.max(a,Number(v)||0));
@@ -270,16 +270,14 @@ class Pro3App{
   group(256,262,210,265,'OSCILLATOR 1','ANALOG VCO · SAW / TRIANGLE / PULSE');
   sel('osc1Wave','WAVEFORM',315,303,['saw','triangle','pulse'],{width:110,group:'OSCILLATOR 1'});
   sel('osc1Octave','OCTAVE',420,303,[-2,-1,0,1,2],{width:76,group:'OSCILLATOR 1'});
-  k('osc1Level','LEVEL',302,398,0,1,.01,{size:58,group:'OSCILLATOR 1'});
   k('osc1Tune','FINE',367,398,-7,7,.05,{size:58,group:'OSCILLATOR 1'});
   k('osc1Shape','SHAPE / PW',432,398,0,1,.01,{size:58,group:'OSCILLATOR 1'});
   k('osc1Slop','SLOP',302,478,0,1,.01,{size:54,group:'OSCILLATOR 1'});
   k('osc1Glide','GLIDE',390,478,0,1,.01,{size:54,group:'OSCILLATOR 1'});
-  btn('osc1Sync','HARD SYNC',440,500,{size:20,group:'OSCILLATOR 1'});
+  
   group(472,262,210,265,'OSCILLATOR 2','ANALOG VCO · VARIABLE SHAPE / PULSE WIDTH');
   sel('osc2Wave','WAVEFORM',532,303,['saw','triangle','pulse'],{width:110,group:'OSCILLATOR 2'});
   sel('osc2Octave','OCTAVE',638,303,[-2,-1,0,1,2],{width:76,group:'OSCILLATOR 2'});
-  k('osc2Level','LEVEL',518,398,0,1,.01,{size:58,group:'OSCILLATOR 2'});
   k('osc2Tune','FINE',583,398,-7,7,.05,{size:58,group:'OSCILLATOR 2'});
   k('osc2Shape','SHAPE / PW',648,398,0,1,.01,{size:58,group:'OSCILLATOR 2'});
   k('osc2Slop','SLOP',518,478,0,1,.01,{size:54,group:'OSCILLATOR 2'});
@@ -288,16 +286,16 @@ class Pro3App{
   group(688,262,220,265,'OSCILLATOR 3','DIGITAL WAVETABLE · 32 BANKS / SUPER SAW');
   sel('osc3Wave','WAVEFORM',756,303,['sine','triangle','saw','pulse','superSaw','wavetable'],{width:120,group:'OSCILLATOR 3'});
   sel('osc3Octave','OCTAVE',866,303,[-2,-1,0,1,2],{width:74,group:'OSCILLATOR 3'});
-  k('osc3Level','LEVEL',738,398,0,1,.01,{size:58,group:'OSCILLATOR 3'});
   k('osc3Shape','WAVETABLE',808,398,0,31,1,{size:58,group:'OSCILLATOR 3'});
   k('osc3ShapeMod','MORPH',878,398,0,1,.01,{size:58,group:'OSCILLATOR 3'});
   k('osc3Tune','FINE',758,478,-7,7,.05,{size:54,group:'OSCILLATOR 3'});
   k('osc3Glide','GLIDE',850,478,0,1,.01,{size:54,group:'OSCILLATOR 3'});
-  group(914,262,154,265,'MIXER','OSCILLATORS / NOISE');
-  fader('osc1Level','OSC 1',946,405,0,1,{height:112,width:20});
-  fader('osc2Level','OSC 2',980,405,0,1,{height:112,width:20});
-  fader('osc3Level','OSC 3',1014,405,0,1,{height:112,width:20});
-  fader('noiseLevel','NOISE',1048,405,0,1,{height:112,width:20});
+  group(914,262,154,265,'MIXER','OSCILLATORS / NOISE / EXTERNAL');
+  fader('osc1Level','OSC 1',930,405,0,1,{height:112,width:18});
+  fader('osc2Level','OSC 2',958,405,0,1,{height:112,width:18});
+  fader('osc3Level','OSC 3',986,405,0,1,{height:112,width:18});
+  fader('noiseLevel','NOISE',1014,405,0,1,{height:112,width:18});
+  const ext=fader('externalLevel','EXT',1042,405,0,1,{height:112,width:18});ext.el.style.opacity='.42';ext.el.style.pointerEvents='none';ext.el.title='External audio requires a hardware input and is not available in this browser emulator';
   group(1074,262,250,265,'FILTER','PROPHET-6 · LADDER · OB-6 STATE VARIABLE');
   sel('filterType','FILTER MODEL',1137,303,['prophet6','ladder','stateVariable'],{width:130,group:'FILTER'});
   k('filterCutoff','CUTOFF',1126,408,0,1,.005,{size:58,group:'FILTER'});
@@ -325,7 +323,7 @@ class Pro3App{
   group(1122,540,544,150,'ARPEGGIATOR / SEQUENCER CONTROL','CLOCK · DIRECTION · GATE');
   sel('arpMode','ARP MODE',1212,578,['up','down','upDown','random','assign'],{width:120,group:'ARPEGGIATOR'});
   sel('arpDivision','CLOCK',1370,578,['1','2','4','8','16'],{width:90,group:'ARPEGGIATOR'});
-  btn('arpEnabled','ARPEGGIATOR',1530,600,{group:'ARPEGGIATOR'});
+  btn('arpEnabled','ARPEGGIATOR',1530,600,{group:'ARPEGGIATOR'});btn('arpLatch','LATCH',1610,600,{group:'ARPEGGIATOR',size:22});
   k('arpSwing','SWING',1280,654,0,1,.01,{size:52,group:'ARPEGGIATOR'});
   // Front performance area and the real 37-note keybed.
   group(14,704,174,132,'PERFORMANCE','PITCH · MOD · TOUCH');
@@ -333,13 +331,13 @@ class Pro3App{
   addWheel(p,{x:110,y:724,label:'MOD',value:0,height:78,onChange:v=>this.engine.post({t:'mod',value:v}),midiId:'PRO3:Mod Wheel'});
   addTouchStrip(p,{x:168,y:726,w:15,h:78,label:'TOUCH',onChange:v=>{this.patch.touch=v;this.engine.post({t:'touch',value:v});}});
   addKeyboard(p,{x:196,y:712,w:1468,h:130,firstNote:36,count:37,keyColor:'amber',onNoteOn:(n,v)=>this.engine.noteOn(n,v),onNoteOff:n=>this.engine.noteOff(n),onAftertouch:(n,v)=>this.engine.post({t:'at',value:v})});
-  this.hwTrackSelect.addEventListener('change',()=>{this.hwDestSelect.value=this.patch.seqDestinations[Number(this.patch.seqTrack)||0]||'none';this.renderHardwareSteps();});
+  this.hwTrackSelect.addEventListener('change',()=>{this.hwDestSelect.value=this.patch.seqDestinations[Number(this.patch.seqTrack)||0]||'note';this.patch.seqDestination=this.hwDestSelect.value;this.renderHardwareSteps();});
   this.hwPhrase.addEventListener('change',()=>{this.seqPage=['A','B','C','D'].indexOf(this.patch.seqPhrase||'A');this.renderHardwareSteps();});
-  this.hwDestSelect.addEventListener('change',()=>{const track=Number(this.patch.seqTrack)||0;this.patch.seqDestinations[track]=this.hwDestSelect.value;this.engine.post({t:'sequence',tracks:this.patch.seqTracks,destinations:this.patch.seqDestinations,length:this.patch.seqLength});});
+  this.hwDestSelect.addEventListener('change',()=>{const track=Number(this.patch.seqTrack)||0;this.patch.seqDestinations[track]=this.hwDestSelect.value;this.patch.seqDestination=this.hwDestSelect.value;this.engine.post({t:'sequence',tracks:this.patch.seqTracks,destinations:this.patch.seqDestinations,length:this.patch.seqLength});});
   this.renderHardwareSteps=()=>{
    const track=Number(this.patch.seqTrack)||0,offset=(this.seqPage||0)*16;
    this.hwSteps.forEach((control,i)=>control.setValue(this.patch.seqTracks[track]?.[offset+i]!==null&&this.patch.seqTracks[track]?.[offset+i]!==undefined,true));
-   this.hwDestSelect.value=this.patch.seqDestinations[track]||'none';this.hwDestSelect.disabled=track<3;
+   this.hwDestSelect.value=this.patch.seqDestinations[track]||'note';this.patch.seqDestination=this.hwDestSelect.value;this.hwDestSelect.disabled=track<3;
   };
   this.displayHardwarePreset=name=>this.hwDisplay.set(name.toUpperCase(),'PRO 3 · PROGRAM');
   this.syncHardware=()=>{
