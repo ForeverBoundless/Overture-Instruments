@@ -64,7 +64,7 @@ class Pro3App{
   this.engine=new WorkletEngine(new URL('./engine/Pro3Processor.js',import.meta.url).href,'pro3-processor');
   this.patch=clean(BASE);this.store=new PresetStore({key:'overture.sequential-pro-3.programs',version:1,validate:clean});
   this.ui={};this.build();this.buildHardwarePanel();this.buildPerformance();this.presets.load('f:0');
-  this.activateAudio=power('pro3-power',()=>this.engine.start(),()=>{this.perf.flushPending();this.display.set('PRO 3 READY','OVERTURE PROGRAM · AUDIO ACTIVE');},()=>this.hwPower?.setValue(false,true));
+  this.activateAudio=power('pro3-power',()=>this.engine.start(),()=>{this.hwPower?.setValue(true,true);this.perf.flushPending();this.display.set('PRO 3 READY','OVERTURE PROGRAM · AUDIO ACTIVE');},()=>this.hwPower?.setValue(false,true));
   this.engine.post({t:'patch',patch:this.patch});
  }
  set(k,v){this.patch[k]=v;this.engine.post({t:'param',key:k,value:v});if(k==='seqTrack')this.updateSequence();this.syncHardware?.();}
