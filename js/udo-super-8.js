@@ -21,7 +21,7 @@ const LAYER={
  arpEnabled:false,arpMode:'up',arpDivision:4,arpRange:1,arpSwing:0,arpHold:false,
  portamento:0,transpose:0,bendRange:2,velocity:'off',aftertouch:0
 };
-const GLOBAL={mode:'single',activeLayer:0,splitPoint:60,binaural:true,mpe:true,volume:.72,benderX:0,benderY:0,expression:1};
+const GLOBAL={mode:'single',activeLayer:0,splitPoint:60,binaural:true,mpe:true,volume:.72,distortion:0,benderX:0,benderY:0,expression:1};
 function cleanLayer(d={}){const p={...clone(LAYER),...d};p.modMatrix=Array.from({length:64},(_,i)=>Number(d.modMatrix?.[i])||0);p.seqSteps=Array.from({length:64},(_,i)=>d.seqSteps?.[i]??null);p.seqSlides=Array.from({length:64},(_,i)=>!!d.seqSlides?.[i]);p.seqAccents=Array.from({length:64},(_,i)=>!!d.seqAccents?.[i]);p.seqGates=Array.from({length:64},(_,i)=>Math.max(.05,Math.min(1,Number(d.seqGates?.[i]??.75))));return p;}
 function validate(d){
  if(!d||typeof d!=='object')throw new Error('Not a Super 8 performance.');
@@ -320,8 +320,9 @@ class Super8App{
   this.hwDisplay=addDisplay(p,{x:1115,y:20,w:225,h:36,brand:'PERFORMANCE / PROGRAM',skin:'amber'});this.hwDisplay.set('P 001','OVERTURE PERFORMANCE');
   addButton(p,{x:1550,y:36,label:'POWER',value:false,size:25,group:'GLOBAL',onChange:v=>{if(v)document.getElementById('super8-power').click();}});
   // Top strip mirrors the silver Super 8's real left-to-right signal path.
-  panelSection(15,72,97,226,'MASTER','MASTER VOLUME');
-  knob('volume','MASTER VOLUME',63,173,{global:true,group:'MASTER',size:66});
+  panelSection(15,72,97,226,'MASTER','VOLUME / DISTORTION');
+  knob('volume','MASTER VOLUME',63,145,{global:true,group:'MASTER',size:58});
+  knob('distortion','DISTORTION',63,231,{global:true,group:'MASTER',size:48});
   panelSection(116,72,140,226,'LFO 1','RATE · DELAY · PHASE · MODE');
   knob('lfo1Rate','RATE',149,150,{group:'LFO 1',size:49});
   knob('lfo1Delay','DELAY',222,150,{group:'LFO 1',size:49});
