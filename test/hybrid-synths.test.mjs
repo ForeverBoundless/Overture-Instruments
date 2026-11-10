@@ -133,7 +133,7 @@ test('Pro 3 and Super 8 hardware modules parse before browser startup', async ()
   ]);
   const stripModuleSyntax = (source, className) => source
     .replace(/^import\s+.*?;\s*$/gm, '')
-    .replace(/import\\.meta\\.url/g, "'https://example.test/'")
+    .replaceAll('import.meta.url', "'https://example.test/'")
     .replace(new RegExp('new\\s+' + className + '\\(\\);\\s*
   assert.doesNotThrow(() => new Function(stripModuleSyntax(pro, 'Pro3App')), 'Pro 3 UI module parses');
   assert.doesNotThrow(() => new Function(stripModuleSyntax(super8, 'Super8App')), 'Super 8 UI module parses');
