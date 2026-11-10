@@ -132,8 +132,14 @@ test('Pro 3 and Super 8 hardware modules parse before browser startup', async ()
     readFile(new URL('../js/udo-super-8.js', import.meta.url), 'utf8'),
   ]);
   const stripModuleSyntax = (source, className) => source
-    .replace(/^import\\s+.*?;\\s*$/gm, '')
-    .replace(new RegExp('new\\\\s+' + className + '\\\\(\\\\);\\\\s*, async () => {
+    .replace(/^import\s+.*?;\s*$/gm, '')
+    .replace(new RegExp('new\\s+' + className + '\\(\\);\\s*$'), '');
+  assert.doesNotThrow(() => new Function(stripModuleSyntax(pro, 'Pro3App')), 'Pro 3 UI module parses');
+  assert.doesNotThrow(() => new Function(stripModuleSyntax(super8, 'Super8App')), 'Super 8 UI module parses');
+  assert.equal((super8.match(/const grid=/g) || []).length, 1, 'Super 8 has a single modulation-grid declaration');
+});
+
+test('Pro 3 and Super 8 load the shared reference-style hardware surface', async () => {
   const [pro, super8, helper, styles, proPage, superPage, logo, worker] = await Promise.all([
     readFile(new URL('../js/sequential-pro-3.js', import.meta.url), 'utf8'),
     readFile(new URL('../js/udo-super-8.js', import.meta.url), 'utf8'),
@@ -148,12 +154,12 @@ test('Pro 3 and Super 8 hardware modules parse before browser startup', async ()
   assert.match(pro, /SEQUENCER/);
   assert.match(pro, /OSCILLATOR 1/);
   assert.match(pro, /TUNED FEEDBACK/);
+  assert.match(pro, /addKeyboard\(p,\{x:196,y:712,w:1468,h:130,firstNote:36,count:37/);
   assert.match(super8, /buildHardwarePanel\(\)/);
   assert.match(super8, /label:'UPPER'/);
   assert.match(super8, /BINAURAL/);
   assert.match(super8, /UDO_logo\.png/);
   assert.match(super8, /count:61/);
-  assert.match(super8, /PRESSURE  Y/);
   assert.match(super8, /PRESSURE  Y/);
   assert.match(super8, /hp-super8-hardware-footer/);
   assert.match(super8, /MODULATION MATRIX/);
@@ -166,12 +172,6 @@ test('Pro 3 and Super 8 hardware modules parse before browser startup', async ()
   assert.match(worker, /UDO_logo\.png/);
   assert.match(worker, /UDO_logo\.svg/);
 });
-), '');
-  assert.doesNotThrow(() => new Function(stripModuleSyntax(pro, 'Pro3App')), 'Pro 3 UI module parses');
-  assert.doesNotThrow(() => new Function(stripModuleSyntax(super8, 'Super8App')), 'Super 8 UI module parses');
-  assert.equal((super8.match(/const grid=/g) || []).length, 1, 'Super 8 has a single hardware modulation-grid declaration');
-});
-
 test('Pro 3 and Super 8 load the shared reference-style hardware surface', async () => {
   const [pro, super8, helper, styles, proPage, superPage, logo, worker] = await Promise.all([
     readFile(new URL('../js/sequential-pro-3.js', import.meta.url), 'utf8'),
