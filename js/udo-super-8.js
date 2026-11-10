@@ -278,7 +278,7 @@ class Super8App{
    this.hwKnobs.push({key,control,global:!layer});return remember('knobs',key,control);
   };
   const fader=(key,label,x,y,opts={})=>{
-   const control=addFader(p,{x,y,label,min:opts.min??0,max:opts.max??1,value:this.p()[key],height:opts.height||82,width:opts.width||20,midiId:'SUPER8:L'+this.active+':'+key,formatValue:v=>Number(v).toFixed(2),onChange:v=>this.set(key,v)});
+   const control=addFader(p,{x,y,label,min:opts.min??0,max:opts.max??1,value:this.p()[key],height:opts.height||82,width:opts.width||20,midiId:'SUPER8:L'+this.active+':'+key,group:opts.group||'SYNTHESIS',formatValue:v=>Number(v).toFixed(2),onChange:v=>this.set(key,v)});
    this.hwFaders.push({key,control});return remember('faders',key,control);
   };
   const btn=(key,label,x,y,opts={})=>{
