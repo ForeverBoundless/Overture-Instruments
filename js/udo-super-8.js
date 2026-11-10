@@ -356,12 +356,12 @@ class Super8App{
   const env2=[['env2Attack','ATK'],['env2DecayHold','D-HOLD'],['env2Decay','DEC'],['env2Sustain','SUS'],['env2Release','REL']];
   env1.forEach(([key,label],i)=>knob(key,label,1278+(i%3)*39,174+Math.floor(i/3)*67,{size:36,group:'ENVELOPE 1'}));
   env2.forEach(([key,label],i)=>knob(key,label,1390+(i%3)*39,174+Math.floor(i/3)*67,{size:36,group:'ENVELOPE 2'}));
-  addButton(p,{x:1315,y:283,label:'',value:!!this.p().env1Loop,size:17,group:'ENVELOPE 1',onChange:v=>this.set('env1Loop',v)});addLabel(p,1370,286,'ENV 1 LOOP');
+  addButton(p,{x:1370,y:127,label:'ENV 1 LOOP',value:!!this.p().env1Loop,size:17,group:'ENVELOPE 1',onChange:v=>this.set('env1Loop',v)});
   panelSection(1485,72,180,226,'EFFECTS','STEREO CHORUS / DELAY');
   sel('chorus','CHORUS',1530,114,['off','I','II','both'],{width:95,group:'EFFECTS'});
-  knob('chorusMix','CHORUS MIX',1525,188,{size:44,group:'EFFECTS'});knob('delayTime','DELAY TIME',1605,188,{size:44,group:'EFFECTS'});
-  knob('delayFeedback','FEEDBACK',1525,245,{size:39,group:'EFFECTS'});knob('delayMod','DELAY MOD',1605,245,{size:39,group:'EFFECTS'});
-  btn('delaySync','SYNC',1535,284,{group:'EFFECTS',size:17});btn('delayFreeze','FREEZE',1618,284,{group:'EFFECTS',size:17});
+  knob('chorusMix','CHORUS MIX',1525,188,{size:42,group:'EFFECTS'});knob('delayTime','DELAY TIME',1605,188,{size:42,group:'EFFECTS'});
+  knob('delayFeedback','FEEDBACK',1525,236,{size:34,group:'EFFECTS'});knob('delayMod','DELAY MOD',1605,236,{size:34,group:'EFFECTS'});
+  btn('delaySync','SYNC',1535,287,{group:'EFFECTS',size:16});btn('delayFreeze','FREEZE',1618,287,{group:'EFFECTS',size:16});
   // Second hardware row: mode, layers, sequencer, and arpeggiator.
   panelSection(15,310,1650,128,'LAYER / PERFORMANCE / STEP CONTROL','UPPER AND LOWER PARTS · 64-STEPS PER PART · BINAURAL VOICE MODE');
   addLabel(p,85,345,'EDIT PART');
