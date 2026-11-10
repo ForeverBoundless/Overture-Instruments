@@ -1,4 +1,4 @@
-const CACHE = 'overture-shell-v51';
+const CACHE = 'overture-shell-v52';
 const APP_SHELL = [
   '/account',
   '/login',
@@ -183,6 +183,7 @@ const APP_SHELL = [
   '/ui/Logos/OvertureLogo.png',
   '/ui/Logos/Roland_logo.png',
   '/ui/Logos/Sequential_logo.png',
+  '/ui/Logos/UDO_logo.png',
   '/ui/Logos/UDO_logo.svg',
   '/ui/Logos/Yamaha_logo.png',
   '/ui/Photos/Dev1.png',
