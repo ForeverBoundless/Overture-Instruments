@@ -127,6 +127,28 @@ test('UDO Super 8 single mode exposes sixteen mono voices or eight binaural supe
 });
 
 
+
+test('default Pro 3 and Super 8 performances produce audible audio without a custom test patch', async () => {
+  const pro = await createWorklet('../js/engine/Pro3Processor.js', 'pro3-processor');
+  pro.processor.message({ t: 'noteOn', note: 60, vel: .85 });
+  assertAudio(render(pro, 4096), 'Pro 3 factory default');
+
+  const super8 = await createWorklet('../js/engine/Super8Processor.js', 'super8-processor');
+  super8.processor.message({ t: 'noteOn', note: 60, vel: .85, channel: 1, source: 'ui' });
+  assertAudio(render(super8, 4096), 'Super 8 factory default');
+});
+
+test('both visible hardware keyboards use the pending-note performance input path', async () => {
+  const [pro, super8] = await Promise.all([
+    readFile(new URL('../js/sequential-pro-3.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/udo-super-8.js', import.meta.url), 'utf8'),
+  ]);
+  assert.match(pro, /this\.hwKeyboard=addKeyboard\(p,\{[^}]*onNoteOn:\(n,v\)=>this\.perf\.noteOn\(n,v,'ui'\),onNoteOff:n=>this\.perf\.noteOff\(n,'ui'\)/);
+  assert.match(super8, /this\.hwKeyboard=addKeyboard\(p,\{[^}]*onNoteOn:\(n,v\)=>this\.perf\.noteOn\(n,v,'ui'\),onNoteOff:n=>this\.perf\.noteOff\(n,'ui'\)/);
+  assert.match(pro, /this\.hwKeyboard\?\.setActive\(n,true\)/);
+  assert.match(super8, /this\.hwKeyboard\?\.setActive\(n,true\)/);
+});
+
 test('shared hardware fader can construct and expose MIDI metadata at runtime', () => {
   class FakeNode {
     constructor(tag) { this.tagName = tag; this.style = {}; this.children = []; this.attributes = {}; this.listeners = {}; }
