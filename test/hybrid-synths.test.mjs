@@ -138,6 +138,23 @@ test('default Pro 3 and Super 8 performances produce audible audio without a cus
   assertAudio(render(super8, 4096), 'Super 8 factory default');
 });
 
+test('both new hardware synths start audio directly from their visible power switches', async () => {
+  const [pro, super8, panel, worker] = await Promise.all([
+    readFile(new URL('../js/sequential-pro-3.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/udo-super-8.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/shared/panel.js', import.meta.url), 'utf8'),
+    readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
+  ]);
+  assert.match(panel, /return go;/);
+  assert.match(pro, /this\\.activateAudio=power\\('pro3-power'/);
+  assert.match(super8, /this\\.activateAudio=power\\('super8-power'/);
+  assert.match(pro, /label:'POWER',value:false,toggle:false/);
+  assert.match(super8, /label:'POWER',value:false,toggle:false/);
+  assert.doesNotMatch(pro, /getElementById\\('pro3-power'\\)\\.click\\(\\)/);
+  assert.doesNotMatch(super8, /getElementById\\('super8-power'\\)\\.click\\(\\)/);
+  assert.match(worker, /overture-shell-v60/);
+});
+
 test('both visible hardware keyboards use the pending-note performance input path', async () => {
   const [pro, super8] = await Promise.all([
     readFile(new URL('../js/sequential-pro-3.js', import.meta.url), 'utf8'),
