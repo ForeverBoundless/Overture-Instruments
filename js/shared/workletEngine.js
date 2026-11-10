@@ -15,6 +15,8 @@ export class WorkletEngine {
     this.started = false;
     this._starting = null;
     this._queue = [];
+    this.processorError = null;
+    this.onProcessorError = null;
   }
 
   start() {
@@ -26,13 +28,27 @@ export class WorkletEngine {
       const ctx = new AC({ latencyHint: 'interactive' }); this.ctx = ctx;
       try {
         if (!ctx.audioWorklet) throw new Error('AudioWorklet is unavailable (use a secure https:// page or localhost).');
-        // Resume during the pointer gesture, before waiting for the worklet module fetch.
-        const resume = ctx.state === 'suspended' ? ctx.resume() : Promise.resolve();
-        await ctx.audioWorklet.addModule(this.moduleUrl);
+        // Call resume immediately inside the user's trusted gesture. Load the
+        // processor at the same time, then verify the browser actually resumed.
+        const resume = ctx.state === 'running' ? Promise.resolve() : ctx.resume();
+        await Promise.all([ctx.audioWorklet.addModule(this.moduleUrl), resume]);
+        if (ctx.state !== 'running') {
+          await ctx.resume();
+        }
+        if (ctx.state !== 'running') {
+          throw new Error('The browser kept the audio engine suspended. Check site sound permissions and try Power again.');
+        }
         const node = new AudioWorkletNode(ctx, this.processorName, { numberOfInputs: this.inputs, numberOfOutputs: 1, outputChannelCount: [this.channels] });
-        const output = ctx.createGain(); node.connect(output); output.connect(ctx.destination);
-        await resume;
+        const output = ctx.createGain();
+        output.gain.value = 1;
+        node.connect(output);
+        output.connect(ctx.destination);
+        node.addEventListener('processorerror', () => {
+          this.processorError = new Error('The audio processor stopped unexpectedly. Reload this instrument and try again.');
+          this.onProcessorError?.(this.processorError);
+        });
         this.node = node; this.output = output; this.started = true;
+        this.processorError = null;
         this._queue.forEach((message) => node.port.postMessage(message)); this._queue = [];
         return true;
       } catch (error) {
