@@ -365,8 +365,8 @@ class Super8Processor extends AudioWorkletProcessor{
       return signal/n;
      };
      const o1L=dds1('L'),o1R=this.global.binaural?dds1('R'):o1L;
-     const lfoMode=p.dds2Range==='LFO';
-     const dds2Hz=lfoMode?(0.1+clamp(p.dds2Tune/14+.5)*99.9):base*Math.pow(2,(dds2Foot+(p.dds2Tune||0)+pitch2)/12);
+     const lfoMode=p.dds2Range==='LFO'&&p.dds2Mode!=='sub';
+     const dds2Hz=lfoMode?(0.1+clamp(p.dds2Tune/14+.5)*99.9):midiHz(v.pitch+midiBend+(this.global.masterTune||0)+(p.transpose||0)+dds2Foot+(p.dds2Tune||0)+pitch2);
      const f2=dds2Hz;
      if(p.dds2Mode==='sync'&&v.syncResetL)v.ph2L=0;
      if(p.dds2Mode==='sync'&&v.syncResetR)v.ph2R=0;
