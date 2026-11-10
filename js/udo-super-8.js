@@ -382,14 +382,25 @@ class Super8App{
   }
   // Lower-left controller block and a continuous 61-note Fatar keybed.
   panelSection(15,542,230,212,'LFO 2 / BENDER','MODULATION / TWO-AXIS CONTROL');
-  knob('lfo2Rate','LFO 2 RATE',72,612,{size:48,group:'LFO 2'});knob('lfo2Amount','LFO 2 AMOUNT',180,612,{size:48,group:'LFO 2'});sel('lfo2Wave','LFO 2 SHAPE',70,668,['sine','triangle','saw','reverseSaw','square'],{width:92,group:'LFO 2'});sel('lfo2Destination','DESTINATION',174,668,['DDS 1 pitch','DDS 2 pitch','Both pitch','Filter','Amp'],{width:112,group:'LFO 2'});
-  const bx=document.createElement('label');bx.className='hp-super8-range';bx.style.cssText='position:absolute;left:28px;top:706px;width:91px;display:grid;gap:4px;z-index:8;color:var(--hp-ink);font:700 8px Saira,sans-serif';p.appendChild(bx);
-  const xLabel=document.createElement('span');xLabel.textContent='X · PITCH BEND';const xInput=document.createElement('input');xInput.type='range';xInput.min='-1';xInput.max='1';xInput.step='.001';xInput.value=String(this.patch.benderX);bx.append(xLabel,xInput);
-  xInput.addEventListener('input',()=>{this.patch.benderX=Number(xInput.value);this.engine.post({t:'bendAxis',x:this.patch.benderX,y:this.patch.benderY});});
-  const by=document.createElement('label');by.className='hp-super8-range';by.style.cssText='position:absolute;left:128px;top:706px;width:91px;display:grid;gap:4px;z-index:8;color:var(--hp-ink);font:700 8px Saira,sans-serif';p.appendChild(by);
-  const yLabel=document.createElement('span');yLabel.textContent='Y · MODULATION';const yInput=document.createElement('input');yInput.type='range';yInput.min='-1';yInput.max='1';yInput.step='.001';yInput.value=String(this.patch.benderY);by.append(yLabel,yInput);
-  yInput.addEventListener('input',()=>{this.patch.benderY=Number(yInput.value);this.engine.post({t:'bendAxis',x:this.patch.benderX,y:this.patch.benderY});});
-  this.hwBenderInputs=[xInput,yInput];
+  knob('lfo2Rate','LFO 2 RATE',72,606,{size:45,group:'LFO 2'});knob('lfo2Amount','LFO 2 AMOUNT',180,606,{size:45,group:'LFO 2'});
+  sel('lfo2Wave','LFO 2 SHAPE',70,658,['sine','triangle','saw','reverseSaw','square'],{width:92,group:'LFO 2'});
+  sel('lfo2Destination','DESTINATION',174,658,['DDS 1 pitch','DDS 2 pitch','Both pitch','Filter','Amp'],{width:108,group:'LFO 2'});
+  // The Super 8's bender is a two-axis touch surface, not two independent sliders.
+  const pad=document.createElement('div');pad.className='hp-super8-bender-pad';pad.tabIndex=0;pad.setAttribute('role','group');pad.setAttribute('aria-label','Two-axis bender: horizontal pitch, vertical modulation');
+  const padCross=document.createElement('i');padCross.className='hp-super8-bender-cross';
+  const padDot=document.createElement('i');padDot.className='hp-super8-bender-dot';pad.append(padCross,padDot);
+  const padCaption=document.createElement('span');padCaption.className='hp-super8-bender-caption';padCaption.textContent='X · PITCH    Y · MOD';
+  pad.style.cssText='position:absolute;left:61px;top:705px;width:128px;height:42px;z-index:8;touch-action:none';
+  p.appendChild(pad);p.appendChild(padCaption);
+  padCaption.style.cssText='position:absolute;left:80px;top:747px;width:100px;text-align:center;font:6px DM Mono,monospace;color:var(--hp-muted)';
+  const renderBender=()=>{padDot.style.left=((this.patch.benderX+1)*50)+'%';padDot.style.top=((1-this.patch.benderY)*50)+'%';pad.setAttribute('aria-label','Bender X '+this.patch.benderX.toFixed(2)+', Y '+this.patch.benderY.toFixed(2));};
+  const updateBender=(e)=>{const rect=pad.getBoundingClientRect();this.patch.benderX=Math.max(-1,Math.min(1,((e.clientX-rect.left)/(rect.width||1))*2-1));this.patch.benderY=Math.max(-1,Math.min(1),1-((e.clientY-rect.top)/(rect.height||1))*2);renderBender();this.engine.post({t:'bendAxis',x:this.patch.benderX,y:this.patch.benderY});};
+  let benderPointer=null;
+  pad.addEventListener('pointerdown',e=>{benderPointer=e.pointerId;pad.setPointerCapture?.(e.pointerId);updateBender(e);e.preventDefault();});
+  pad.addEventListener('pointermove',e=>{if(e.pointerId===benderPointer)updateBender(e);});
+  const finishBender=e=>{if(e.pointerId===benderPointer)benderPointer=null;};pad.addEventListener('pointerup',finishBender);pad.addEventListener('pointercancel',finishBender);
+  pad.addEventListener('keydown',e=>{const step=e.shiftKey?.2:.05;if(e.key==='ArrowLeft')this.patch.benderX-=step;else if(e.key==='ArrowRight')this.patch.benderX+=step;else if(e.key==='ArrowUp')this.patch.benderY+=step;else if(e.key==='ArrowDown')this.patch.benderY-=step;else return;this.patch.benderX=Math.max(-1,Math.min(1,this.patch.benderX));this.patch.benderY=Math.max(-1,Math.min(1,this.patch.benderY));renderBender();this.engine.post({t:'bendAxis',x:this.patch.benderX,y:this.patch.benderY});e.preventDefault();});
+  this.hwBenderPad=pad;this.renderHardwareBender=renderBender;renderBender();
   addKeyboard(p,{x:255,y:548,w:1395,h:202,firstNote:36,count:61,keyColor:'amber',onNoteOn:(n,v)=>this.engine.post({t:'noteOn',note:n,vel:v,source:'ui'}),onNoteOff:n=>this.engine.post({t:'noteOff',note:n,source:'ui'}),onAftertouch:(n,v)=>this.engine.post({t:'polyAt',note:n,value:v,channel:1})});
   // Preset and layer-memory controls remain in the visible front panel.
   const hardwareFooter=document.createElement('div');hardwareFooter.className='hp-super8-hardware-footer';
@@ -418,7 +429,7 @@ class Super8App{
    this.hwFaders.forEach(({key,control})=>control.setValue(this.p()[key],true));
    this.hwButtons.forEach(({key,control,global})=>{const owner=global?this.patch:this.p();if(key in owner)control.setValue(owner[key],true);});
    this.hwSelects.forEach(({key,select,global})=>{const owner=global?this.patch:this.p();if(key in owner)select.value=String(owner[key]);});
-   this.hwBenderInputs[0].value=String(this.patch.benderX);this.hwBenderInputs[1].value=String(this.patch.benderY);
+   this.renderHardwareBender?.();
    this.layerButtonsHardware.forEach((control,i)=>control.setValue(i===this.active,true));
    this.refreshLayerSelect();this.renderHardwareSeq();this.refreshHardwareLayerList();this.renderHardwareMatrix?.();
   };
@@ -430,8 +441,8 @@ class Super8App{
   this.matrixDialog.addEventListener('close',()=>{});
   p.appendChild(this.matrixDialog);
   this.toggleHardwareMatrix=()=>{if(this.matrixDialog.open)this.matrixDialog.close();else this.matrixDialog.showModal();};
-  this.hwControls.all.push({el:xInput,_oiMidi:{id:'SUPER8:G:benderX',label:'Bender X',group:'PERFORMANCE',get:()=>((this.patch.benderX+1)/2),set:v=>{this.patch.benderX=v*2-1;xInput.value=String(this.patch.benderX);this.engine.post({t:'bendAxis',x:this.patch.benderX,y:this.patch.benderY});}}});
-  this.hwControls.all.push({el:yInput,_oiMidi:{id:'SUPER8:G:benderY',label:'Bender Y',group:'PERFORMANCE',get:()=>((this.patch.benderY+1)/2),set:v=>{this.patch.benderY=v*2-1;yInput.value=String(this.patch.benderY);this.engine.post({t:'bendAxis',x:this.patch.benderX,y:this.patch.benderY});}}});
+  this.hwControls.all.push({el:pad,_oiMidi:{id:'SUPER8:G:benderX',label:'Bender X · Pitch',group:'PERFORMANCE',get:()=>((this.patch.benderX+1)/2),set:v=>{this.patch.benderX=v*2-1;this.renderHardwareBender();this.engine.post({t:'bendAxis',x:this.patch.benderX,y:this.patch.benderY});}}});
+  this.hwControls.all.push({el:pad,_oiMidi:{id:'SUPER8:G:benderY',label:'Bender Y · Modulation',group:'PERFORMANCE',get:()=>((this.patch.benderY+1)/2),set:v=>{this.patch.benderY=v*2-1;this.renderHardwareBender();this.engine.post({t:'bendAxis',x:this.patch.benderX,y:this.patch.benderY});}}});
   this.matrixDialog=document.createElement('dialog');this.matrixDialog.className='hp-super8-matrix-dialog';
   this.matrixDialog.innerHTML='<form method="dialog"><header><strong>8 × 8 MODULATION MATRIX</strong><button>×</button></header><p>Rows are modulation sources; columns are destinations. Click a cell to cycle + depth, − depth, and off.</p><div class="hp-super8-matrix-grid"></div></form>';
   const grid=this.matrixDialog.querySelector('.hp-super8-matrix-grid');grid.style.cssText='display:grid;grid-template-columns:120px repeat(8,minmax(30px,1fr));gap:4px;align-items:center';
