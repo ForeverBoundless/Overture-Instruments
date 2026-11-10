@@ -17,12 +17,12 @@ const LAYER={
  lfo2Rate:.15,lfo2Delay:0,lfo2Wave:'triangle',lfo2Destination:'filter',lfo2Amount:0,lfo2Bender:false,lfo2Aftertouch:false,
  chorus:'off',chorusMix:.25,delayTime:.28,delayFeedback:.25,delayMod:.1,delaySync:false,delayFreeze:false,
  voiceMode:'poly1',unison:'off',modMatrix:Array(64).fill(0),
- seqEnabled:false,seqLength:16,seqMode:'step',seqSteps:Array(64).fill(null),seqSwing:0,seqBpm:120,
+ seqEnabled:false,seqLength:16,seqMode:'step',seqSteps:Array(64).fill(null),seqSlides:Array(64).fill(false),seqAccents:Array(64).fill(false),seqGates:Array(64).fill(.75),seqSwing:0,seqBpm:120,
  arpEnabled:false,arpMode:'up',arpDivision:4,arpRange:1,arpSwing:0,arpHold:false,
  portamento:0,transpose:0,bendRange:2,velocity:1,aftertouch:0
 };
 const GLOBAL={mode:'single',activeLayer:0,splitPoint:60,binaural:true,mpe:true,volume:.72,distortion:0,benderX:0,benderY:0,expression:1};
-function cleanLayer(d={}){const p={...clone(LAYER),...d};p.modMatrix=Array.from({length:64},(_,i)=>Number(d.modMatrix?.[i])||0);p.seqSteps=Array.from({length:64},(_,i)=>d.seqSteps?.[i]??null);return p;}
+function cleanLayer(d={}){const p={...clone(LAYER),...d};p.modMatrix=Array.from({length:64},(_,i)=>Number(d.modMatrix?.[i])||0);p.seqSteps=Array.from({length:64},(_,i)=>d.seqSteps?.[i]??null);p.seqSlides=Array.from({length:64},(_,i)=>!!d.seqSlides?.[i]);p.seqAccents=Array.from({length:64},(_,i)=>!!d.seqAccents?.[i]);p.seqGates=Array.from({length:64},(_,i)=>Math.max(.05,Math.min(1,Number(d.seqGates?.[i]??.75))));return p;}
 function validate(d){
  if(!d||typeof d!=='object')throw new Error('Not a Super 8 performance.');
  return {...GLOBAL,...d,layers:[cleanLayer(d.layers?.[0]),cleanLayer(d.layers?.[1])]};
@@ -190,12 +190,32 @@ class Super8App{
   this.seqPage=0;this.updateSeq();
  }
  toggleSeqStep(i){
-  const p=this.p(),step=this.seqPage*16+i,v=p.seqSteps[step];
-  if(v===null||v===undefined)p.seqSteps[step]=48+i;
-  else p.seqSteps[step]=null;
-  this.engine.post({t:'param',layer:this.active,key:'seqSteps',value:p.seqSteps});this.updateSeq();
+  const p=this.p(),step=this.seqPage*16+i,mode=p.seqMode,v=p.seqSteps[step];
+  if(mode==='slide'){
+   if(v===null||v===undefined)p.seqSteps[step]=48+i;
+   p.seqSlides[step]=!p.seqSlides[step];
+  }else if(mode==='accent'){
+   if(v===null||v===undefined)p.seqSteps[step]=48+i;
+   p.seqAccents[step]=!p.seqAccents[step];
+  }else if(mode==='rest'){
+   p.seqSteps[step]=null;p.seqSlides[step]=false;p.seqAccents[step]=false;
+  }else if(mode==='length'){
+   const lengths=[.25,.375,.5,.625,.75,.875,1],current=Number(p.seqGates[step]??.75);
+   p.seqGates[step]=lengths[(Math.max(0,lengths.indexOf(current))+1)%lengths.length];
+  }else{
+   if(v===null||v===undefined)p.seqSteps[step]=48+i;
+   else {p.seqSteps[step]=null;p.seqSlides[step]=false;p.seqAccents[step]=false;}
+  }
+  ['seqSteps','seqSlides','seqAccents','seqGates'].forEach(key=>this.engine.post({t:'param',layer:this.active,key,value:p[key]}));
+  this.updateSeq();this.renderHardwareSeq?.();
  }
- updateSeq(){this.seqButtons?.forEach((b,i)=>{const v=this.p().seqSteps[this.seqPage*16+i];b.classList.toggle('is-on',v!==null&&v!==undefined);b.textContent=String(i+1);});}
+ updateSeq(){this.seqButtons?.forEach((b,i)=>{
+  const step=this.seqPage*16+i,v=this.p().seqSteps[step],p=this.p();
+  b.classList.toggle('is-on',v!==null&&v!==undefined);
+  b.classList.toggle('is-slide',!!p.seqSlides[step]);b.classList.toggle('is-accent',!!p.seqAccents[step]);
+  b.dataset.gate=String(p.seqGates[step]);b.title='Step '+(step+1)+' · '+(v===null||v===undefined?'REST':'NOTE '+v)+(p.seqSlides[step]?' · SLIDE':'')+(p.seqAccents[step]?' · ACCENT':'')+' · GATE '+Math.round(p.seqGates[step]*100)+'%';
+  b.textContent=String(i+1);
+ });}
  buildArp(rows){
   const sec=section(rows,'ARPEGGIATOR','INDEPENDENT FOR UPPER AND LOWER LAYERS');
   this.makeToggle(sec.body,'arpEnabled','ARP ON');this.makeSelect(sec.body,'arpMode','MODE',['up','down','upDown','random','sequencer']);this.makeSelect(sec.body,'arpDivision','CLOCK',['1','2','4','8','16']);this.makeKnobs(sec.body,[['arpRange','RANGE',1,4],['arpSwing','SWING']]);this.makeToggle(sec.body,'arpHold','HOLD');
@@ -416,7 +436,14 @@ class Super8App{
   const waveInput=document.createElement('input');waveInput.type='file';waveInput.multiple=true;waveInput.accept='.wav,audio/wav';waveInput.style.cssText='position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer';
   waveInput.addEventListener('change',async()=>{try{if(!this.engine.ctx)throw new Error('Power on audio first.');const waves=[];for(const file of [...(waveInput.files||[])].slice(0,64)){const decoded=await this.engine.ctx.decodeAudioData(await file.arrayBuffer());const data=decoded.getChannelData(0);if(data.length<64||data.length>65536)throw new Error(file.name+' is not a supported single-cycle file.');waves.push(Array.from(data));}if(waves.length)this.engine.post({t:'waves',layer:this.active,waves});this.display.flash(waves.length+' WAVES LOADED');}catch(error){this.display.flash('WAVE IMPORT FAILED');alert(error.message);}});
   waveLabel.appendChild(waveInput);hardwareFooter.appendChild(waveLabel);
-  this.renderHardwareSeq=()=>{const offset=this.hwSeqPage*16;this.hwSeqButtons.forEach((control,i)=>control.setValue(this.p().seqSteps[offset+i]!==null&&this.p().seqSteps[offset+i]!==undefined,true));};
+  this.renderHardwareSeq=()=>{
+   const offset=this.hwSeqPage*16,p=this.p();
+   this.hwSeqButtons.forEach((control,i)=>{
+    const step=offset+i,button=control.el,active=p.seqSteps[step]!==null&&p.seqSteps[step]!==undefined;
+    control.setValue(active,true);button?.classList.toggle('is-slide',!!p.seqSlides[step]);button?.classList.toggle('is-accent',!!p.seqAccents[step]);
+    if(button){button.title='Step '+(step+1)+' · '+(active?'NOTE '+p.seqSteps[step]:'REST')+(p.seqSlides[step]?' · SLIDE':'')+(p.seqAccents[step]?' · ACCENT':'')+' · GATE '+Math.round(p.seqGates[step]*100)+'%';}
+   });
+  };
   this.refreshHardwarePresetList=(selected='f:0')=>{
    this.hwPresets.replaceChildren();
    FACTORY.forEach((item,i)=>{const option=document.createElement('option');option.value='f:'+i;option.textContent=String(i+1).padStart(2,'0')+' · '+item.name;this.hwPresets.appendChild(option);});
