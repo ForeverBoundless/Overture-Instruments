@@ -72,7 +72,7 @@ export function addKnob(parent,{x,y,label,min=0,max=1,value=0,step,size:customSi
  return {el:wrap,getValue:()=>current,setValue,render};
 }
 
-export function addFader(parent,{x,y,label,min=0,max=1,value=0,height=92,width=32,orientation='vertical',small=false,onChange=()=>{},formatValue=v=>Number(v).toFixed(2),midiId}){
+export function addFader(parent,{x,y,label,min=0,max=1,value=0,height=92,width=32,orientation='vertical',small=false,onChange=()=>{},formatValue=v=>Number(v).toFixed(2),midiId,group=''}){
  const vertical=orientation==='vertical',wrap=node('div','hp-fader '+(vertical?'hp-fader-vertical':'hp-fader-horizontal')+(small?' hp-fader-small':''),parent);
  const totalW=vertical?width:height,totalH=vertical?height:width;
  Object.assign(wrap.style,{left:(x-totalW/2)+'px',top:(y-totalH/2)+'px',width:totalW+'px',height:(totalH+(vertical?24:22))+'px'});
