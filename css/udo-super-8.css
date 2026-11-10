@@ -122,3 +122,18 @@
 .hp-super8-matrix-head{font:600 6px 'DM Mono',monospace;text-align:center;color:#5d6970}
 .hp-super8-matrix-source{font:600 8px 'DM Mono',monospace;color:#37444a}
 @media(max-width:700px){.hp-super8-hardware-footer{flex-wrap:wrap}.hp-super8-hardware-footer select{min-width:150px!important}.hp-super8-action{font-size:7px;padding:0 7px}}
+
+
+/* UDO two-axis bender touch surface */
+.hp-super8-bender-pad{border:1px solid #758187;border-radius:3px;background:
+ linear-gradient(90deg,transparent 49.5%,#5b6870 49.5% 50.5%,transparent 50.5%),
+ linear-gradient(0deg,transparent 49.5%,#5b6870 49.5% 50.5%,transparent 50.5%),
+ linear-gradient(145deg,#f3f5f5,#aeb9bf);box-shadow:inset 0 1px 5px #17222a44,0 1px 2px #0003;cursor:crosshair;outline:none;overflow:hidden}
+.hp-super8-bender-pad:before{content:'';position:absolute;inset:5px;border:1px solid #ffffff7a;pointer-events:none}
+.hp-super8-bender-pad:focus-visible{outline:2px solid #d65b3c;outline-offset:2px}
+.hp-super8-bender-cross{position:absolute;inset:0;pointer-events:none;background:
+ linear-gradient(90deg,transparent 24.5%,#65747c35 24.5% 25%,transparent 25% 74.5%,#65747c35 74.5% 75%,transparent 75%),
+ linear-gradient(0deg,transparent 24.5%,#65747c35 24.5% 25%,transparent 25% 74.5%,#65747c35 74.5% 75%,transparent 75%)}
+.hp-super8-bender-dot{position:absolute;left:50%;top:50%;width:13px;height:13px;border:2px solid #f5f7f6;border-radius:50%;background:#d45d3d;box-shadow:0 1px 3px #0007,0 0 5px #cf573caa;transform:translate(-50%,-50%);pointer-events:none}
+.hp-super8-bender-caption{pointer-events:none}
+.hp-super8 .hp-button-label{font-size:6px}
