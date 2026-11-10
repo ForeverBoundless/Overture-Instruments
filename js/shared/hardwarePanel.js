@@ -17,11 +17,11 @@ export function createHardwareSurface(root,{id,width,height,skin='pro3',programL
  const frame=node('div','hp-frame',stage),instrument=node('div','hp-instrument hp-'+skin,frame);
  instrument.style.width=width+'px';instrument.style.height=height+'px';instrument.dataset.instrument=id;
  const resize=()=>{
-  // Never fit the entire chassis to viewport height. The hardware remains at
-  // its natural proportions and the document scrolls vertically.
+  // Preserve the hardware's proportions and scale to available width only.
+  // The document scrolls vertically when the complete chassis is taller than
+  // the viewport; the keyboard is never shrunk or clipped to make it fit.
   const availableWidth=Math.max(320,window.innerWidth-32);
-  const availableHeight=Math.max(420,window.innerHeight-80);
-  const scale=Math.min(1,availableWidth/width,availableHeight/height);
+  const scale=Math.min(1,availableWidth/width);
   instrument.style.transform='scale('+scale+')';instrument.style.setProperty('--hp-scale',String(scale));
   frame.style.width=(width*scale)+'px';
   frame.style.height=(height*scale)+'px';
