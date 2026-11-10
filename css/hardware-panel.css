@@ -129,7 +129,7 @@ body.pn-body.hp-pro3-body,body.pn-body.hp-super8-body{min-height:100vh;overflow-
 .hp-surface-brand{z-index:5}
 .hp-legacy-hidden{display:none!important}
 @media(max-width:700px){
- .hp-root{padding:8px 4px 24px;justify-content:flex-start}
+ .hp-root{padding:8px 4px 24px;justify-content:center;align-items:flex-start}
  .hp-info{font-size:8px;gap:5px}
  .hp-info-program{font-size:9px;max-width:40vw}
  .hp-info-midi{font-size:7px}
@@ -140,5 +140,5 @@ body.pn-body.hp-pro3-body,body.pn-body.hp-super8-body{min-height:100vh;overflow-
 /* Compact, left-aligned hardware legends stay inside each physical section. */
 .hp-root{display:flex;justify-content:center;align-items:flex-start;overflow-x:hidden}
 .hp-section-head{justify-content:flex-start;gap:6px;overflow:hidden;padding-inline:7px}
-.hp-section-title{font-size:9px;letter-spacing:.08em;overflow:hidden;text-overflow:ellipsis}
+.hp-section-title{font-size:9px;letter-spacing:.08em;min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis}
 .hp-section-sub{display:none}
