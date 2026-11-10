@@ -9,7 +9,7 @@ const DEFAULT={
  mode:"mono",osc1Wave:"saw",osc1Octave:0,osc1Tune:0,osc1Shape:.5,osc1Level:.78,osc1Glide:.04,osc1Slop:.08,osc1Sync:false,
  osc2Wave:"pulse",osc2Octave:0,osc2Tune:0,osc2Shape:.5,osc2Level:.55,osc2Glide:.04,osc2Slop:.08,osc2Sync:false,
  osc3Wave:"wavetable",osc3Octave:0,osc3Tune:0,osc3Shape:.35,osc3ShapeMod:.25,osc3Level:.45,osc3Glide:.02,osc3Slop:.02,
- noiseLevel:0,externalLevel:0,filterType:"prophet6",filterCutoff:.68,resonance:.16,filterState:0,filterKeyTrack:.35,filterEnvAmount:.38,filterDrive:.08,distortion:.08,
+ noiseLevel:0,externalLevel:0,filterType:"prophet6",filterCutoff:.68,resonance:.16,filterState:0,filterBp:false,filterKeyTrack:.35,filterEnvAmount:.38,filterDrive:.08,distortion:.08,
  filterDelay:0,filterAttack:.03,filterDecay:.28,filterSustain:.45,filterRelease:.25,filterLoop:false,
  ampDelay:0,ampAttack:.015,ampDecay:.24,ampSustain:.8,ampRelease:.22,ampLoop:false,
  aux1Delay:0,aux1Attack:.02,aux1Decay:.28,aux1Sustain:0,aux1Release:.2,aux1Loop:false,
@@ -20,7 +20,7 @@ const DEFAULT={
  bpm:120,glide:0,hold:false,mod:0,bend:0,aftertouch:0,touch:0,volume:.72,
  fx1Type:"stereoDelay",fx1Mix:.18,fx1Time:.28,fx1Feedback:.28,fx1Tone:.55,
  fx2Type:"superPlate",fx2Mix:.16,fx2Time:.42,fx2Feedback:.25,fx2Tone:.6,
- feedbackAmount:0,feedbackTune:.5,feedbackGrunge:false,
+ feedbackAmount:0,feedbackTune:24,feedbackGrunge:false,
  arpEnabled:false,arpMode:"up",arpDivision:4,arpSwing:0,arpLatch:false,
  seqEnabled:false,seqMode:"forward",seqLength:16,seqSwing:0,seqGate:.72,
  seqTracks:Array.from({length:16},()=>Array(64).fill(null)),
@@ -69,7 +69,7 @@ function makeTables(){
 class Pro3Processor extends AudioWorkletProcessor{
  constructor(){
   super();this.p={...DEFAULT};this.tables=makeTables();this.userTable=null;
-  this.voices=Array.from({length:3},(_,i)=>({note:60,gate:false,order:0,phase:[0,0,0],drift:Math.random()*6.28,slop:(Math.random()-.5)*.012}));
+  this.voices=Array.from({length:3},(_,i)=>({note:60,gate:false,order:0,phase:[0,0,0],drift:Math.random()*6.28,slop:(Math.random()-.5)*.012,ampEnv:makeEnv(),velocity:.8}));
   this.currentNote=60;this.lastNote=60;this.order=0;this.held=new Map();this.arpLatched=new Set();this.sustain=false;this.bend=0;this.mod=0;this.at=0;this.touch=0;this.velocity=.8;
   this.envs={filter:makeEnv(),amp:makeEnv(),aux1:makeEnv(),aux2:makeEnv()};
   this.lfos=[{phase:0,hold:0,last:0},{phase:0,hold:0,last:0},{phase:0,hold:0,last:0}];
@@ -84,13 +84,14 @@ class Pro3Processor extends AudioWorkletProcessor{
  }
  message(m){
   if(m.t==="patch"){
-   this.p={...DEFAULT,...m.patch};this.p.seqTracks=m.patch.seqTracks||DEFAULT.seqTracks;this.p.seqDestinations=m.patch.seqDestinations||DEFAULT.seqDestinations;this.p.modRoutes=m.patch.modRoutes||[];
+   this.p={...DEFAULT,...m.patch};this.p.seqTracks=m.patch.seqTracks||DEFAULT.seqTracks;this.p.seqDestinations=m.patch.seqDestinations||DEFAULT.seqDestinations;this.p.modRoutes=m.patch.modRoutes||[];if(Number(this.p.feedbackTune)<=1)this.p.feedbackTune=Number(this.p.feedbackTune||0)*48;
    this.lfos.forEach((l,i)=>{l.paramPhase=null;});
    return;
   }
   if(m.t==="param"){
    const old=this.p[m.key];this.p[m.key]=m.value;
    if(m.key==="volume"||m.key==="distortion")this.p[m.key]=clamp(m.value);
+   if(m.key==="feedbackAmount")this.p[m.key]=clamp(m.value,-1,1);
    if(m.key==="arpLatch"&&old&&!m.value){this.arpLatched.forEach(note=>this.held.delete(note));this.arpLatched.clear();}
    if(/^lfo[123]Phase$/.test(m.key)){const i=Number(m.key[3])-1;if(this.lfos[i])this.lfos[i].paramPhase=null;}
    return;
@@ -102,7 +103,7 @@ class Pro3Processor extends AudioWorkletProcessor{
   else if(m.t==="at")this.at=clamp(m.value);
   else if(m.t==="touch")this.touch=clamp(m.value);
   else if(m.t==="sustain"){this.sustain=!!m.down;if(!this.sustain)this.releaseUnheld();}
-  else if(m.t==="allOff"){this.held.clear();this.voices.forEach(v=>v.gate=false);Object.values(this.envs).forEach(e=>{e.gate=false;e.stage="release";});}
+  else if(m.t==="allOff"){this.held.clear();this.voices.forEach(v=>{v.gate=false;v.ampEnv.gate=false;v.ampEnv.stage="release";});Object.values(this.envs).forEach(e=>{e.gate=false;e.stage="release";});}
   else if(m.t==="sequence"){this.p.seqTracks=m.tracks||this.p.seqTracks;this.p.seqDestinations=m.destinations||this.p.seqDestinations;this.p.seqLength=m.length||this.p.seqLength;}
   else if(m.t==="transport"){this.seqRunning=!!m.play;this.seqStep=0;this.seqPhase=0;this.arpPhase=0;this.arpStep=0;if(!this.seqRunning&&this.seqNote>=0){this.noteOff(this.seqNote);this.seqNote=-1;}}
   else if(m.t==="clock"){this.externalClock=(this.externalClock+1)%24;if(this.externalClock===0){this.seqPhase=1;this.arpPhase=1;}}
@@ -116,12 +117,16 @@ class Pro3Processor extends AudioWorkletProcessor{
   this.trigger(note,vel);
  }
  trigger(note,vel){
+  const startVoiceAmp=v=>{
+   v.ampEnv.gate=true;v.velocity=vel;
+   if(v.ampEnv.stage==="idle"||v.ampEnv.stage==="release"||!v.ampEnv.gate){v.ampEnv.stage="delay";v.ampEnv.time=0;v.ampEnv.v=0;}
+  };
   if(this.p.mode==="paraphonic"){
-   let v=this.voices.find(x=>!x.gate)||this.voices.slice().sort((a,b)=>a.order-b.order)[0];
-   v.note=note;v.gate=true;v.order=++this.order;
+   const v=this.voices.find(x=>!x.gate)||this.voices.slice().sort((a,b)=>a.order-b.order)[0];
+   v.note=note;v.gate=true;v.order=++this.order;startVoiceAmp(v);
   }else{
    this.currentNote=note;this.lastNote=note;
-   this.voices.forEach(v=>{v.note=note;v.gate=true;v.order=++this.order;});
+   this.voices.forEach(v=>{v.note=note;v.gate=true;v.order=++this.order;v.velocity=vel;});
   }
   Object.values(this.envs).forEach(e=>{if(e.stage==="idle"||e.stage==="release"||!e.gate){e.stage="delay";e.time=0;}e.gate=true;});
  }
@@ -129,17 +134,17 @@ class Pro3Processor extends AudioWorkletProcessor{
   if(this.p.arpEnabled&&this.p.arpLatch){this.arpLatched.add(note);return;}
   this.held.delete(note);this.arpLatched.delete(note);
   if(this.sustain||this.p.hold||this.p.arpEnabled)return;
-  if(this.p.mode==="paraphonic")this.voices.forEach(v=>{if(v.note===note)v.gate=false;});
+  if(this.p.mode==="paraphonic")this.voices.forEach(v=>{if(v.note===note){v.gate=false;v.ampEnv.gate=false;if(v.ampEnv.stage!=="idle")v.ampEnv.stage="release";}});
   else if(this.currentNote===note){const next=[...this.held.entries()].sort((a,b)=>b[0]-a[0])[0];if(next){this.currentNote=next[0];this.voices.forEach(v=>v.note=next[0]);}else this.voices.forEach(v=>v.gate=false);}
   this.updateSharedGate();
  }
- releaseUnheld(){if(this.held.size||this.p.hold)return;this.voices.forEach(v=>v.gate=false);this.updateSharedGate();}
+ releaseUnheld(){if(this.held.size||this.p.hold)return;this.voices.forEach(v=>{v.gate=false;v.ampEnv.gate=false;if(v.ampEnv.stage!=="idle")v.ampEnv.stage="release";});this.updateSharedGate();}
  updateSharedGate(){const gate=this.voices.some(v=>v.gate);Object.values(this.envs).forEach(e=>{if(!gate){e.gate=false;if(e.stage!=="idle")e.stage="release";}});}
- envTick(name,dt){
-  const e=this.envs[name],prefix=name==="filter"?"filter":name==="amp"?"amp":name;
+ envTickState(e,prefix,dt){
   const delay=clamp(this.p[prefix+"Delay"]||0)*2,attack=.001+Math.pow(clamp(this.p[prefix+"Attack"]||0),2)*8,
         decay=.002+Math.pow(clamp(this.p[prefix+"Decay"]||0),2)*6,sustain=clamp(this.p[prefix+"Sustain"]||0),release=.005+Math.pow(clamp(this.p[prefix+"Release"]||0),2)*8;
   if(e.gate&&e.stage==="idle")e.stage="delay";
+  if(!e.gate&&e.stage!=="idle"&&e.stage!=="release")e.stage="release";
   if(e.stage==="delay"){e.time+=dt;if(e.time>=delay){e.stage="attack";e.time=0;}}
   else if(e.stage==="attack"){e.v+=(1-e.v)*(1-Math.exp(-dt/attack));if(e.v>.999){e.v=1;e.stage="decay";}}
   else if(e.stage==="decay"){e.v+=(sustain-e.v)*(1-Math.exp(-dt/decay));if(Math.abs(e.v-sustain)<.001)e.stage="sustain";}
@@ -147,6 +152,10 @@ class Pro3Processor extends AudioWorkletProcessor{
   else if(e.stage==="release"){e.v*=Math.exp(-dt/release);if(e.v<.0001){e.v=0;e.stage="idle";}}
   if(this.p[prefix+"Loop"]&&e.gate&&e.stage==="sustain"){e.stage="attack";e.v=0;}
   return e.v;
+ }
+ envTick(name,dt){
+  const prefix=name==="filter"?"filter":name==="amp"?"amp":name;
+  return this.envTickState(this.envs[name],prefix,dt);
  }
  lfoValue(index,dt){
   const names=["lfo1","lfo2","lfo3"],key=names[index],l=this.lfos[index],raw=clamp(this.p[key+"Rate"]);
@@ -310,7 +319,7 @@ class Pro3Processor extends AudioWorkletProcessor{
    }
   }
  }
- noteOffArp(n){if(this.p.mode==="paraphonic")this.voices.forEach(v=>{if(v.note===n)v.gate=false;});else if(this.currentNote===n)this.voices.forEach(v=>v.gate=false);this.updateSharedGate();}
+ noteOffArp(n){if(this.p.mode==="paraphonic")this.voices.forEach(v=>{if(v.note===n){v.gate=false;v.ampEnv.gate=false;if(v.ampEnv.stage!=="idle")v.ampEnv.stage="release";}});else if(this.currentNote===n){this.voices.forEach(v=>{v.gate=false;});}this.updateSharedGate();}
  sequenceTick(){
   const len=clamp(Number(this.p.seqLength)||16,1,64),mode=this.p.seqMode;let step=this.seqStep;
   if(mode==="reverse")step=(len-1-this.seqStep)%len;else if(mode==="random")step=Math.floor(Math.random()*len);
@@ -321,7 +330,7 @@ class Pro3Processor extends AudioWorkletProcessor{
   const get=(i)=>tracks[i]&&tracks[i][step];
   const n=get(0);
   if(n!==null&&n!==undefined&&Number(n)>=0){const note=clamp(Number(n),24,108);this.trigger(note,.82);this.seqNote=note;}
-  if(this.p.mode==="paraphonic"){for(let i=1;i<3;i++){const v=get(i);if(v!==null&&v!==undefined){const voice=this.voices[i];voice.note=clamp(Number(v),24,108);voice.gate=true;}}}
+  if(this.p.mode==="paraphonic"){for(let i=1;i<3;i++){const v=get(i);if(v!==null&&v!==undefined){const voice=this.voices[i];voice.note=clamp(Number(v),24,108);voice.gate=true;voice.ampEnv.gate=true;voice.ampEnv.stage="attack";voice.ampEnv.time=0;voice.ampEnv.v=0;}}}
   this.auto={};for(let i=3;i<16;i++){const v=get(i);if(v!==null&&v!==undefined)this.auto[this.p.seqDestinations?.[i]||"none"]=clamp(v);}
  }
  process(_inputs,outputs){
@@ -338,7 +347,8 @@ class Pro3Processor extends AudioWorkletProcessor{
    let raw=0;
    for(let oi=0;oi<3;oi++){
     const v=this.voices[oi],note=this.p.mode==="paraphonic"?v.note:this.currentNote;
-    if(!v.gate&&env.amp<.0001)continue;
+    if(this.p.mode==="paraphonic"?!v.gate&&v.ampEnv.v<.0001:!v.gate&&env.amp<.0001)continue;
+    const oscillatorAmp=this.p.mode==="paraphonic"?this.envTickState(v.ampEnv,"amp",dt):1;
     const pitchDest='osc'+(oi+1)+'Pitch',shapeDest='osc'+(oi+1)+'Shape';const pitchMod=(mods[pitchDest]||0)*24+(this.bend*(this.p.bendRange||2))+(this.mod*.01)+(this.at*.012);
     const semi=(oi===0?Number(this.p.osc1Octave)||0:oi===1?Number(this.p.osc2Octave)||0:Number(this.p.osc3Octave)||0)*12;
     const tune=(oi===0?this.p.osc1Tune:oi===1?this.p.osc2Tune:this.p.osc3Tune)||0;
@@ -356,7 +366,7 @@ class Pro3Processor extends AudioWorkletProcessor{
     }else s=wave(waveName,clamp(shape,.02,.98),v.phase[oi],inc);
     if(oi===1&&(this.p.osc2Sync||this.p.osc1Sync)&&v.phase[0]<inc)v.phase[1]=0;
     const level=Number(this.p[key+"Level"])||0;
-    raw+=s*level;
+    raw+=s*level*oscillatorAmp;
    }
    raw+=(Math.random()*2-1)*clamp(this.p.noiseLevel)*.3;
    const seqCut=this.auto.filterCutoff??0;
@@ -368,11 +378,12 @@ class Pro3Processor extends AudioWorkletProcessor{
    let sampleR=this.filter(raw,cutoff,clamp(this.p.resonance+(mods.resonance||0)),filterType,filterMode,sr,'R');
    const drive=1+clamp(this.p.filterDrive)*7+clamp(this.p.distortion)*9;
    sampleL=Math.tanh(sampleL*drive);sampleR=Math.tanh(sampleR*drive);
-   const delaySamples=Math.max(2,Math.floor(sr/(25+clamp(this.p.feedbackTune)*1500)));
+   const feedbackHz=midiHz(12+clamp(this.p.feedbackTune,0,48));
+   const delaySamples=Math.max(2,Math.floor(sr/feedbackHz));
    const fbRead=(this.fbWrite-delaySamples+this.fb.length)%this.fb.length,feedback=this.fb[fbRead];
-   const fbAmount=clamp(this.p.feedbackAmount,0,.96),feedbackInput=(sampleL+sampleR)*.5,fbIn=this.p.feedbackGrunge?Math.tanh(feedbackInput+feedback*fbAmount*4):feedbackInput+feedback*fbAmount;
+   const fbAmount=clamp(this.p.feedbackAmount,-1,.96),feedbackInput=(sampleL+sampleR)*.5,fbIn=this.p.feedbackGrunge?Math.tanh(feedbackInput+feedback*fbAmount*4):feedbackInput+feedback*fbAmount;
    this.fb[this.fbWrite]=clamp(fbIn,-3,3);this.fbWrite=(this.fbWrite+1)%this.fb.length;
-   const amp=env.amp*this.velocity*.22*(1+(mods.ampLevel||0));
+   const amp=(this.p.mode==="paraphonic"?1:env.amp)*this.velocity*.22*(1+(mods.ampLevel||0));
    sampleL=(sampleL+feedback*fbAmount*.8)*amp;sampleR=(sampleR+feedback*fbAmount*.78)*amp;
    let left=sampleL,right=sampleR;
    [left,right]=this.fxProcess(left,right,0,this.p,dt);[left,right]=this.fxProcess(left,right,1,this.p,dt);
