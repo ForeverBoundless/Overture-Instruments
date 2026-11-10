@@ -71,7 +71,7 @@ class Super8App{
   this.shell=this.midiHost;
   this.buildKeyboard();
   this.presets.load('f:0');
-  power('super8-power',()=>this.engine.start(),()=>{this.perf.flushPending();this.display.set('SUPER 8 READY','TWO FPGA-STYLE DDS CORES · STEREO OUTPUT');});
+  this.activateAudio=power('super8-power',()=>this.engine.start(),()=>{this.perf.flushPending();this.display.set('SUPER 8 READY','TWO FPGA-STYLE DDS CORES · STEREO OUTPUT');},()=>this.hwPower?.setValue(false,true));
   this.postPatch();
  }
  loadPerformance(id){
@@ -347,7 +347,7 @@ class Super8App{
   const logo=document.createElement('img');logo.src='/ui/Logos/UDO_logo.png';logo.alt='UDO Audio';logo.draggable=false;
   logo.style.cssText='position:absolute;left:27px;top:27px;width:122px;height:28px;object-fit:contain;z-index:7';p.appendChild(logo);
   this.hwDisplay=addDisplay(p,{x:1115,y:20,w:225,h:36,brand:'PERFORMANCE / PROGRAM',skin:'amber'});this.hwDisplay.set('P 001','OVERTURE PERFORMANCE');
-  addButton(p,{x:1550,y:36,label:'POWER',value:false,size:25,group:'GLOBAL',onChange:v=>{if(v)document.getElementById('super8-power').click();}});
+  this.hwPower=addButton(p,{x:1550,y:36,label:'POWER',value:false,toggle:false,size:25,led:'green',group:'GLOBAL',onChange:async()=>{const ready=await this.activateAudio?.();this.hwPower?.setValue(!!ready,true);}});
   // Top strip mirrors the silver Super 8's real left-to-right signal path.
   panelSection(15,72,97,226,'MASTER','VOLUME / DISTORTION');
   knob('volume','MASTER VOLUME',63,145,{global:true,group:'MASTER',size:58});
