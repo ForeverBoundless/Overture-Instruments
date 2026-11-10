@@ -188,7 +188,7 @@ class Pro3App{
  }
  buildPerformance(){
   this.perf=performance(this.shell,{notes:NOTES,octaves:3,startOctave:2,wheels:true,started:()=>this.engine.started,midiStatusEl:this.midi,handlers:{
-   noteOn:(n,v)=>this.engine.noteOn(n,v),noteOff:n=>this.engine.noteOff(n),bend:v=>this.engine.setPitchBend(v),mod:v=>this.engine.setModWheel(v),
+   noteOn:(n,v)=>{this.hwKeyboard?.setActive(n,true);this.engine.noteOn(n,v);},noteOff:n=>{this.hwKeyboard?.setActive(n,false);this.engine.noteOff(n);},bend:v=>this.engine.setPitchBend(v),mod:v=>this.engine.setModWheel(v),
    aftertouch:v=>this.engine.setAftertouch(v),sustain:d=>this.engine.setSustain(d),allOff:()=>this.engine.allNotesOff(),
    program:p=>this.presets.load('f:'+ (p%FACTORY.length)),clock:()=>this.engine.post({t:'clock'}),start:()=>this.engine.post({t:'transport',play:true}),continue:()=>this.engine.post({t:'transport',play:true}),stop:()=>this.engine.post({t:'transport',play:false}),cc:(cc,v)=>{if(cc===7)this.set('volume',v/127);if(cc===74)this.set('filterCutoff',v/127);}
   }});
@@ -336,7 +336,7 @@ class Pro3App{
   const modWheel=addWheel(p,{x:110,y:724,label:'MOD',value:0,height:78,onChange:v=>this.engine.post({t:'mod',value:v}),midiId:'PRO3:Mod Wheel'});
   const touchStrip=addTouchStrip(p,{x:168,y:726,w:15,h:78,label:'TOUCH',onChange:v=>{this.patch.touch=v;this.engine.post({t:'touch',value:v});}});
   this.hwControls.all.push(pitchWheel,modWheel,touchStrip);
-  addKeyboard(p,{x:196,y:712,w:1468,h:130,firstNote:36,count:37,keyColor:'amber',onNoteOn:(n,v)=>this.engine.noteOn(n,v),onNoteOff:n=>this.engine.noteOff(n),onAftertouch:(n,v)=>this.engine.post({t:'at',value:v})});
+  this.hwKeyboard=addKeyboard(p,{x:196,y:712,w:1468,h:130,firstNote:36,count:37,keyColor:'amber',onNoteOn:(n,v)=>this.perf.noteOn(n,v,'ui'),onNoteOff:n=>this.perf.noteOff(n,'ui'),onAftertouch:(n,v)=>this.engine.post({t:'at',value:v})});
   this.hwTrackSelect.addEventListener('change',()=>{this.hwDestSelect.value=this.patch.seqDestinations[Number(this.patch.seqTrack)||0]||'note';this.patch.seqDestination=this.hwDestSelect.value;this.renderHardwareSteps();});
   this.hwPhrase.addEventListener('change',()=>{this.seqPage=['A','B','C','D'].indexOf(this.patch.seqPhrase||'A');this.renderHardwareSteps();});
   this.hwDestSelect.addEventListener('change',()=>{const track=Number(this.patch.seqTrack)||0;this.patch.seqDestinations[track]=this.hwDestSelect.value;this.patch.seqDestination=this.hwDestSelect.value;this.engine.post({t:'sequence',tracks:this.patch.seqTracks,destinations:this.patch.seqDestinations,length:this.patch.seqLength});});
