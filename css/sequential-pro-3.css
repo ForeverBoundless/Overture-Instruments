@@ -121,3 +121,16 @@
 .hp-pro3-matrix-route input{width:100%;accent-color:#ff9f3b}
 .hp-pro3-matrix-route output{font:8px 'DM Mono',monospace;color:#bdc2c0;text-align:right}
 @media(max-width:700px){.hp-pro3-hardware-footer{flex-wrap:wrap}.hp-pro3-matrix-route{grid-template-columns:24px minmax(0,1fr) minmax(0,1fr) 80px 38px}.hp-pro3-action{font-size:7px;padding:0 7px}}
+
+
+/* The panel itself scales to width; keep legends at readable screen sizes. */
+.hp-pro3 .hp-section-title{font-size:calc(8px / var(--hp-scale,1))!important}
+.hp-pro3 .hp-section-sub{font-size:calc(6px / var(--hp-scale,1))!important}
+.hp-pro3 .hp-label{font-size:calc(8px / var(--hp-scale,1))!important}
+.hp-pro3 .hp-control-label{font-size:calc(7px / var(--hp-scale,1))!important}
+.hp-pro3 .hp-knob-value{font-size:calc(6px / var(--hp-scale,1))!important}
+.hp-pro3 .hp-button-label{font-size:calc(6px / var(--hp-scale,1))!important}
+.hp-pro3 .hp-native-select span{font-size:calc(7px / var(--hp-scale,1))!important}
+.hp-pro3 .hp-native-select select{font-size:calc(7px / var(--hp-scale,1))!important}
+.hp-pro3 .hp-fader-label{font-size:calc(7px / var(--hp-scale,1))!important}
+.hp-pro3 .hp-fader-value{font-size:calc(6px / var(--hp-scale,1))!important}
