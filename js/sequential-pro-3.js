@@ -22,7 +22,7 @@ const BASE={
  fx1Type:'stereoDelay',fx1Mix:.18,fx1Time:.28,fx1Feedback:.28,fx1Tone:.55,
  fx2Type:'superPlate',fx2Mix:.16,fx2Time:.42,fx2Feedback:.25,fx2Tone:.6,
  feedbackAmount:0,feedbackTune:.5,feedbackGrunge:false,
- arpEnabled:false,arpMode:'up',arpDivision:4,arpSwing:0,arpLatch:false,
+ arpEnabled:false,arpMode:'up',arpDivision:4,arpRange:1,arpSwing:0,arpLatch:false,
  seqEnabled:false,seqMode:'forward',seqLength:16,seqSwing:0,seqGate:.72,
  seqTracks:Array.from({length:16},()=>Array(64).fill(null)),
  seqDestinations:Array.from({length:16},(_,i)=>i===0?'note':i===1?'osc1Shape':i===2?'filterCutoff':'none'),
@@ -240,9 +240,11 @@ class Pro3App{
   logo.style.cssText='position:absolute;left:35px;top:48px;width:145px;height:30px;object-fit:contain;filter:brightness(0) invert(1);z-index:5';p.appendChild(logo);
   this.hwDisplay=addDisplay(p,{x:1165,y:34,w:245,h:55,brand:'PROGRAM / PARAMETER DISPLAY',skin:'amber'});
   this.hwDisplay.set('001 · PROLOGUE BASS','OVERTURE PROGRAM');
-  addButton(p,{x:1470,y:54,label:'WRITE',value:false,size:27,onChange:()=>this.display.flash('PROGRAM WRITE · USE PRESET MEMORY')});
-  addButton(p,{x:1530,y:54,label:'COMPARE',value:false,size:27,onChange:()=>this.display.flash('COMPARE')});
-  addButton(p,{x:1590,y:54,label:'GLOBAL',value:false,size:27,onChange:()=>this.display.flash('GLOBAL SETTINGS')});
+  sel('mode','VOICE MODE',930,42,['mono','paraphonic'],{width:115,group:'PERFORMANCE'});
+  btn('hold','HOLD',1050,56,{group:'PERFORMANCE'});
+  addButton(p,{x:1470,y:54,label:'WRITE',value:false,size:27,onChange:()=>this.hwDisplay.set('WRITE','SELECT A PROGRAM SLOT')});
+  addButton(p,{x:1530,y:54,label:'COMPARE',value:false,size:27,onChange:()=>this.hwDisplay.set('COMPARE','PATCH COMPARISON')});
+  addButton(p,{x:1590,y:54,label:'GLOBAL',value:false,size:27,onChange:()=>this.hwDisplay.set('GLOBAL','SYSTEM SETTINGS')});
   const seq=group(14,140,1652,112,'16-TRACK STEP SEQUENCER','FOUR 16-STEP PHRASES · 64 STEPS · NOTE / MODULATION TRACKS');
   this.hwTrackSelect=sel('seqTrack','TRACK',130,181,Array.from({length:16},(_,i)=>i),{width:86,group:'SEQUENCER'});
   this.hwPhrase=sel('seqPhrase','PHRASE',245,181,['A','B','C','D'],{width:86,group:'SEQUENCER'});
@@ -302,7 +304,8 @@ class Pro3App{
   k('resonance','RESONANCE',1200,408,0,1,.005,{size:58,group:'FILTER'});
   k('filterDrive','DRIVE',1274,408,0,1,.01,{size:58,group:'FILTER'});
   k('filterEnvAmount','ENV AMOUNT',1145,490,0,1,.01,{size:54,group:'FILTER'});
-  k('filterKeyTrack','KEY TRACK',1250,490,0,1,.01,{size:54,group:'FILTER'});
+  k('filterKeyTrack','KEY TRACK',1210,490,0,1,.01,{size:54,group:'FILTER'});
+  sel('filterState','LP / NOTCH / HP',1290,480,[0,.25,.5,.75,1],{width:88,group:'FILTER'});
   group(1330,262,336,265,'TUNED FEEDBACK / PERFORMANCE','RESONANT FEEDBACK PATH');
   k('feedbackAmount','FEEDBACK',1410,410,0,.96,.005,{size:62,group:'TUNED FEEDBACK'});
   k('feedbackTune','TUNING',1515,410,0,1,.01,{size:62,group:'TUNED FEEDBACK'});
@@ -319,12 +322,12 @@ class Pro3App{
   group(696,540,420,150,'DUAL DIGITAL EFFECTS','SERIAL EFFECT 1 → EFFECT 2');
   sel('fx1Type','EFFECT 1',775,578,['off','stereoDelay','bbdDelay','chorus','flanger','phaser','ringMod','rotary','digitalDistortion','highPass','superPlate'],{width:135,group:'EFFECTS'});
   sel('fx2Type','EFFECT 2',1005,578,['off','stereoDelay','bbdDelay','chorus','flanger','phaser','ringMod','rotary','digitalDistortion','highPass','superPlate'],{width:135,group:'EFFECTS'});
-  k('fx1Mix','MIX 1',758,654,0,1,.01,{size:52,group:'EFFECTS'});k('fx1Time','TIME 1',838,654,0,1,.01,{size:52,group:'EFFECTS'});k('fx2Mix','MIX 2',928,654,0,1,.01,{size:52,group:'EFFECTS'});k('fx2Time','TIME 2',1008,654,0,1,.01,{size:52,group:'EFFECTS'});
+  k('fx1Mix','MIX 1',730,654,0,1,.01,{size:42,group:'EFFECTS'});k('fx1Time','TIME 1',778,654,0,1,.01,{size:42,group:'EFFECTS'});k('fx1Feedback','FEEDBACK 1',826,654,0,.88,.01,{size:42,group:'EFFECTS'});k('fx1Tone','TONE 1',874,654,0,1,.01,{size:42,group:'EFFECTS'});k('fx2Mix','MIX 2',922,654,0,1,.01,{size:42,group:'EFFECTS'});k('fx2Time','TIME 2',970,654,0,1,.01,{size:42,group:'EFFECTS'});k('fx2Feedback','FEEDBACK 2',1018,654,0,.88,.01,{size:42,group:'EFFECTS'});k('fx2Tone','TONE 2',1066,654,0,1,.01,{size:42,group:'EFFECTS'});
   group(1122,540,544,150,'ARPEGGIATOR / SEQUENCER CONTROL','CLOCK · DIRECTION · GATE');
   sel('arpMode','ARP MODE',1212,578,['up','down','upDown','random','assign'],{width:120,group:'ARPEGGIATOR'});
   sel('arpDivision','CLOCK',1370,578,['1','2','4','8','16'],{width:90,group:'ARPEGGIATOR'});
   btn('arpEnabled','ARPEGGIATOR',1530,600,{group:'ARPEGGIATOR'});btn('arpLatch','LATCH',1610,600,{group:'ARPEGGIATOR',size:22});
-  k('arpSwing','SWING',1280,654,0,1,.01,{size:52,group:'ARPEGGIATOR'});
+  k('arpRange','OCTAVE RANGE',1280,654,1,4,1,{size:46,group:'ARPEGGIATOR'});k('arpSwing','SWING',1380,654,0,1,.01,{size:46,group:'ARPEGGIATOR'});
   // Front performance area and the real 37-note keybed.
   group(14,704,174,132,'PERFORMANCE','PITCH · MOD · TOUCH');
   addWheel(p,{x:53,y:724,label:'PITCH',min:-1,max:1,value:0,height:78,spring:true,onChange:v=>this.engine.post({t:'bend',value:v}),midiId:'PRO3:Pitch Bend'});
@@ -345,9 +348,40 @@ class Pro3App{
    this.hwControls.faders.forEach(({key,control})=>control.setValue(this.patch[key],true));
    this.hwControls.buttons.forEach(({key,control})=>{if(this.patch[key]!==undefined)control.setValue(this.patch[key],true);});
    this.hwControls.selects.forEach(({key,control})=>control.setValue(this.patch[key]));
-   this.renderHardwareSteps();
+   this.renderHardwareSteps();this.refreshHardwareMatrix?.();
   };
   this.renderHardwareSteps();this.syncHardware();
+  // Keep the complete program and modulation workflow available with the physical panel visible.
+  const hardwareFooter=document.createElement('div');hardwareFooter.className='hp-pro3-hardware-footer';
+  hardwareFooter.style.cssText='display:flex;align-items:center;gap:8px;flex-wrap:wrap;width:100%;padding:6px 9px;border:1px solid #555f65;border-radius:3px;background:linear-gradient(#242a2f,#11171b);box-shadow:0 2px 6px #0007';
+  this.hw.stage.appendChild(hardwareFooter);
+  this.hwPresets=document.createElement('select');this.hwPresets.style.cssText='min-width:250px;height:27px;background:#0e1418;color:#eee7d9;border:1px solid #596268;font:9px DM Mono,monospace';
+  hardwareFooter.appendChild(this.hwPresets);this.hwPresets.addEventListener('change',()=>this.presets.load(this.hwPresets.value));
+  this.refreshHardwarePresetList=(selected='f:0')=>{this.hwPresets.replaceChildren();FACTORY.forEach((item,i)=>{const o=document.createElement('option');o.value='f:'+i;o.textContent=String(i+1).padStart(2,'0')+' · '+item.name;this.hwPresets.appendChild(o);});this.store.items.forEach(item=>{const o=document.createElement('option');o.value='u:'+item.id;o.textContent='U · '+item.name;this.hwPresets.appendChild(o);});this.hwPresets.value=selected;};
+  const saveProgram=document.createElement('button');saveProgram.type='button';saveProgram.textContent='SAVE PROGRAM';saveProgram.className='hp-pro3-action';saveProgram.addEventListener('click',()=>{const name=prompt('Name this Pro 3 program','My Pro 3 Program');if(name===null)return;try{const item=this.store.save(name,clone(this.patch));this.refreshHardwarePresetList('u:'+item.id);this.hwDisplay.set(item.name.toUpperCase(),'USER PROGRAM SAVED');}catch(e){alert(e.message);}});hardwareFooter.appendChild(saveProgram);
+  const matrixButton=document.createElement('button');matrixButton.type='button';matrixButton.textContent='MOD MATRIX · 32 ROUTES';matrixButton.className='hp-pro3-action';hardwareFooter.appendChild(matrixButton);
+  const waveButton=document.createElement('label');waveButton.textContent='LOAD WAVETABLE';waveButton.className='hp-pro3-action hp-pro3-wave-import';
+  const waveInput=document.createElement('input');waveInput.type='file';waveInput.accept='.wav,audio/wav';waveInput.style.cssText='position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer';
+  waveInput.addEventListener('change',async()=>{const file=waveInput.files?.[0];if(!file)return;try{if(!this.engine.ctx)throw new Error('Power on audio first.');const decoded=await this.engine.ctx.decodeAudioData(await file.arrayBuffer()),data=decoded.getChannelData(0);if(data.length<64||data.length>65536)throw new Error('Use a single-cycle WAV between 64 and 65,536 samples.');this.engine.post({t:'wavetable',data:Array.from(data)});this.hwDisplay.set('WAVETABLE LOADED','USER SINGLE CYCLE');}catch(e){this.hwDisplay.set('WAVETABLE FAILED',e.message);alert(e.message);}});
+  waveButton.appendChild(waveInput);hardwareFooter.appendChild(waveButton);
+  this.matrixDialog=document.createElement('dialog');this.matrixDialog.className='hp-pro3-matrix-dialog';
+  this.matrixDialog.innerHTML='<form method="dialog"><header><strong>MODULATION MATRIX · 32 ROUTES</strong><button aria-label="Close">×</button></header><p>32 freely assignable modulation routes. Depth is bipolar and may be positive or negative.</p><div class="hp-pro3-matrix-routes"></div></form>';
+  const matrixRows=this.matrixDialog.querySelector('.hp-pro3-matrix-routes');this.hwMatrixRows=[];
+  for(let i=0;i<32;i++){
+   const route=document.createElement('div');route.className='hp-pro3-matrix-route';
+   const num=document.createElement('strong');num.textContent=String(i+1).padStart(2,'0');
+   const src=document.createElement('select');SOURCES.forEach(value=>{const o=document.createElement('option');o.value=value;o.textContent=value;src.appendChild(o);});
+   const dst=document.createElement('select');DESTS.forEach(value=>{const o=document.createElement('option');o.value=value;o.textContent=value;dst.appendChild(o);});
+   const amount=document.createElement('input');amount.type='range';amount.min='-1';amount.max='1';amount.step='.01';
+   const val=document.createElement('output');
+   const update=()=>{this.patch.modRoutes[i]={source:src.value,destination:dst.value,amount:Number(amount.value)};val.value=Number(amount.value).toFixed(2);this.postPatch();};
+   src.addEventListener('change',update);dst.addEventListener('change',update);amount.addEventListener('input',update);
+   route.append(num,src,dst,amount,val);matrixRows.appendChild(route);this.hwMatrixRows.push({src,dst,amount,val});
+  }
+  this.refreshHardwareMatrix=()=>this.hwMatrixRows.forEach((row,i)=>{const route=this.patch.modRoutes[i];row.src.value=route.source;row.dst.value=route.destination;row.amount.value=String(route.amount);row.val.value=Number(route.amount).toFixed(2);});
+  this.refreshHardwareMatrix();document.body.appendChild(this.matrixDialog);
+  matrixButton.addEventListener('click',()=>{this.refreshHardwareMatrix();this.matrixDialog.showModal();});
+  this.refreshHardwarePresetList('f:0');
   if(!this._hardwareMidiCleanup)this._hardwareMidiCleanup=registerMidiTargetProvider(()=>this.hwControls.all.map(control=>{
    const m=control.el?._oiMidi||control._oiMidi;if(!m)return null;
    return {id:m.id,label:m.label,group:m.group||'HARDWARE PANEL',get:m.get,set:m.set,el:control.el||null};
