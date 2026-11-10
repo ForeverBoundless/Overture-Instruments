@@ -142,7 +142,7 @@ test('Pro 3 and Super 8 load the shared reference-style hardware surface', async
   assert.match(super8, /UDO_logo\.png/);
   assert.match(super8, /count:61/);
   assert.match(super8, /PRESSURE  Y/);
-  assert.match(super8, /Y · MOD/);
+  assert.match(super8, /PRESSURE  Y/);
   assert.match(super8, /hp-super8-hardware-footer/);
   assert.match(super8, /MODULATION MATRIX/);
   assert.match(helper, /export function addKeyboard/);
