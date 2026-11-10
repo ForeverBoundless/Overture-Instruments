@@ -116,7 +116,7 @@ test('Pro 3 and Super 8 load the shared reference-style hardware surface', async
   assert.match(pro, /OSCILLATOR 1/);
   assert.match(pro, /TUNED FEEDBACK/);
   assert.match(super8, /buildHardwarePanel\(\)/);
-  assert.match(super8, /LAYER UPPER/);
+  assert.match(super8, /label:'UPPER'/);
   assert.match(super8, /BINAURAL/);
   assert.match(super8, /UDO_logo\.png/);
   assert.match(super8, /count:61/);
