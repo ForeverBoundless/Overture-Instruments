@@ -150,10 +150,54 @@ body.pn-body.hp-pro3-body,body.pn-body.hp-super8-body{min-height:100vh;overflow-
 .hp-info-left{flex:1 1 auto;min-width:0}
 .hp-info-mid{flex:0 1 auto;min-width:0;justify-content:flex-end}
 .hp-info-program{min-width:0}
-.hp-instrument{transform-origin:top center}
+.hp-instrument{transform-origin:top left}
 @media(max-width:700px){
  .hp-root{padding:8px 4px 28px}
  .hp-info{gap:5px;padding-inline:6px}
  .hp-info-mid{max-width:42%}
  .hp-info-program{max-width:42vw}
+}
+
+/* Precision control layout: values and legends occupy separate rows. */
+.hp-instrument{transform-origin:top left}
+.hp-stage{box-sizing:border-box;min-width:0}
+.hp-info{min-width:0;flex:0 0 auto}
+.hp-knob{box-sizing:border-box;overflow:visible}
+.hp-knob-value{
+ position:static!important;
+ inset:auto!important;
+ display:block;
+ order:2;
+ min-height:7px;
+ margin-top:1px;
+ font:6px/1 'DM Mono',monospace;
+ text-align:center;
+}
+.hp-knob>.hp-control-label{
+ order:3;
+ display:block;
+ width:max-content;
+ max-width:calc(100% + 16px);
+ margin-top:1px;
+ line-height:1.05;
+}
+.hp-fader{box-sizing:border-box;overflow:visible}
+.hp-fader-vertical .hp-fader-track{
+ height:calc(100% - 24px);
+ box-sizing:border-box;
+}
+.hp-fader-label{display:block;line-height:1;min-height:8px}
+.hp-fader-value{display:block;line-height:1;min-height:7px;text-align:center}
+.hp-button-label{line-height:1.1;z-index:6}
+.hp-pro3-hardware-footer,.hp-super8-hardware-footer{
+ min-width:0;
+ max-width:100%;
+ box-sizing:border-box;
+}
+@media(max-width:700px){
+ .hp-stage{max-width:calc(100vw - 8px)}
+ .hp-pro3-hardware-footer,.hp-super8-hardware-footer{
+  gap:5px!important;
+  padding:5px!important;
+ }
 }
