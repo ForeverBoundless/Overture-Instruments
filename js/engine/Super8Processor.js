@@ -119,9 +119,15 @@ class Super8Processor extends AudioWorkletProcessor{
  }
  noteOff(note,channel,source='ui'){
   const matches=this.voices.filter(v=>v.active&&v.inputNote===note&&!v.seqVoice&&!v.arpVoice&&(source==='midi'?v.channel===channel:true));
-  const owningLayers=new Set(matches.map(v=>v.layer));
-  if(!owningLayers.size)owningLayers.add(this.layerFor(note));
-  owningLayers.forEach(layer=>{const p=this.layers[layer];if(p.arpEnabled&&p.arpHold){this.arpLatched[layer].add(note);}else{this.held[layer].delete(note);this.arpLatched[layer].delete(note);}});
+  let layers;
+  if(source==='midi')layers=[this.global.mode==='dual'&&this.global.mpe&&channel===2?1:this.global.activeLayer|0];
+  else if(this.global.mode==='dual')layers=[0,1];
+  else layers=[this.layerFor(note)];
+  layers.forEach(layer=>{
+   const p=this.layers[layer];
+   if(p.arpEnabled&&p.arpHold){this.arpLatched[layer].add(note);return;}
+   this.held[layer].delete(note);this.arpLatched[layer].delete(note);
+  });
   matches.forEach(v=>{
    const p=this.layers[v.layer];
    if(p.arpEnabled&&p.arpHold)return;
