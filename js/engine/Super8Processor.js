@@ -329,13 +329,13 @@ class Super8Processor extends AudioWorkletProcessor{
      if(v.age<(p.lfo1Delay||0)*10){lf1L=0;lf1R=0;}if(v.age<(p.lfo2Delay||0)*5)lf2=0;
      const mods=this.mod(p,v,lf1L,lf2);this.currentMods[layer]=mods;
      const channelBend=this.global.mpe&&v.channel>1?(this.mpeBend.get(v.channel)||0):(this.pitchBend[layer]||0);
-     const benderX=clamp(this.global.benderX+(p.lfo2Mode==='onAtBend'?v.aftertouch*.5:0),-1,1);
+     const benderX=clamp(this.global.benderX,-1,1);
      const benderSemis=benderX*clamp(p.benderDds)*12;
      const benderTarget=p.oscPitchDestination||'1+2';
      const benderPitch1=(benderTarget==='DDS 1'||benderTarget==='1+2')?benderSemis:0;
      const benderPitch2=(benderTarget==='DDS 2'||benderTarget==='1+2')?benderSemis:0;
-     const trigPressure=p.lfo2Mode==='trig'||p.lfo2Mode==='onAtBend'?1:Math.max(this.global.benderY,v.aftertouch);
-     const lfo2Active=p.lfo2Mode==='onAtBend'||trigPressure>.015;
+     const trigPressure=p.lfo2Mode==='trig'?1:Math.max(this.global.benderY,v.aftertouch);
+     const lfo2Active=p.lfo2Mode==='trig'||trigPressure>.015;
      if(lfo2Active&&!v.lfo2Gate)v.lfo2=0;
      v.lfo2Gate=lfo2Active;v.lfo2Pressure=trigPressure;
      const lfo2Signal=lfo2Active?lf2*trigPressure:0;
@@ -402,7 +402,7 @@ class Super8Processor extends AudioWorkletProcessor{
      const channelExpression=this.global.mpe&&v.channel>1?(this.channelExpression.get(v.channel)??this.expression):this.expression;
      const lfoVca=1+lfo2Signal*clamp(p.lfo2Vca);
      const amp=v.env2*velocityDepth*(.35+channelExpression*.65)*lfoVca;
-     sampleL=Math.tanh(sampleL*amp*.25);sampleR=Math.tanh(sampleR*amp*.25);
+     sampleL=Math.tanh(sampleL*amp*.72);sampleR=Math.tanh(sampleR*amp*.72);
      const pan=clamp(.5+v.pan*.35+(p.pan-.5)*.8,0,1);l+=sampleL*Math.cos(pan*Math.PI*.5);r+=sampleR*Math.sin(pan*Math.PI*.5);
     }
     [l,r]=this.effects(l,r,p,layer,dt);
