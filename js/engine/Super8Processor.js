@@ -49,7 +49,7 @@ const SOURCE_NAMES=['DDS 2','LFO 2','ENV 1','VELOCITY','AFTERTOUCH','EXPRESSION'
 const DEST_NAMES=['LFO 1 RATE','CROSS MOD','WAVE MOD','OSC MIX','HPF CUTOFF','LPF RESONANCE','ENV 1 DECAY','DELAY TIME'];
 class Voice{
  constructor(i){this.i=i;this.reset();}
- reset(){this.active=false;this.gate=false;this.note=60;this.inputNote=60;this.layer=0;this.order=0;this.velocity=.8;this.aftertouch=0;this.pitch=60;this.targetPitch=60;this.ph1L=Array(7).fill(0);this.ph1R=Array(7).fill(0);this.ph2L=0;this.ph2R=0;this.subPhaseL=0;this.subPhaseR=0;this.env1=0;this.env2=0;this.e1Stage='idle';this.e2Stage='idle';this.e1Time=0;this.e2Time=0;this.lfo1L=0;this.lfo1R=0;this.lfo1Done=false;this.lfo1Held=0;this.lfo2=0;this.lfo2Held=0;this.lfo2Gate=false;this.lpL=Array(4).fill(0);this.lpR=Array(4).fill(0);this.hpL=0;this.hpR=0;this.delayL=0;this.delayR=0;this.pan=(Math.random()-.5)*.3;this.noise=Math.random()*1000;}
+ reset(){this.active=false;this.gate=false;this.note=60;this.inputNote=60;this.layer=0;this.order=0;this.velocity=.8;this.aftertouch=0;this.pitch=60;this.targetPitch=60;this.ph1L=Array(7).fill(0);this.ph1R=Array(7).fill(0);this.ph2L=0;this.ph2R=0;this.subPhaseL=0;this.subPhaseR=0;this.env1=0;this.env2=0;this.e1Stage='idle';this.e2Stage='idle';this.e1Time=0;this.e2Time=0;this.lfo1L=0;this.lfo1R=0;this.lfo1Done=false;this.lfo1Held=0;this.lfo2=0;this.lfo2Held=0;this.lfo2Gate=false;this.lpL=Array(4).fill(0);this.lpR=Array(4).fill(0);this.hpL=0;this.hpR=0;this.delayL=0;this.delayR=0;this.pan=(Math.random()-.5)*.3;this.noise=Math.random()*1000;this.dds2Lfo=0;}
 }
 class Super8Processor extends AudioWorkletProcessor{
  constructor(){
@@ -141,7 +141,7 @@ class Super8Processor extends AudioWorkletProcessor{
   const p=this.layers[layer],last=v.pitch;v.layer=layer;v.note=note;v.inputNote=note;v.channel=channel;v.source=source;v.seqVoice=!!sequence;v.arpVoice=false;v.age=0;v.targetPitch=note+(p.transpose||0);v.pitch=legato?last:v.targetPitch;v.active=true;v.gate=true;v.order=++this.order;v.velocity=vel;v.aftertouch=0;
   if(!legato){v.e1Stage='attack';v.e2Stage='attack';v.e1Time=v.e2Time=0;v.env1=v.env2=0;if(p.lfo1Mode==='reset'||p.lfo1Mode==='once'){v.lfo1L=0;v.lfo1R=0;v.lfo1Done=false;}v.lfo2Gate=false;}
   v.noise=Math.random()*999;v.pan=size>1?(index-(size-1)/2)/Math.max(1,size):v.pan;
-  v.ph1L.fill(Math.random());v.ph1R.fill(Math.random());v.ph2L=Math.random();v.ph2R=Math.random();
+  if(p.superMode==='half'){v.ph1L.fill(0);v.ph1R.fill(0);}else{v.ph1L.fill(Math.random());v.ph1R.fill(Math.random());}v.ph2L=0;v.ph2R=0;
  }
  noteOff(note,channel,source='ui'){
   const matches=this.voices.filter(v=>v.active&&v.inputNote===note&&!v.seqVoice&&!v.arpVoice&&(source==='midi'?v.channel===channel:true));
@@ -208,7 +208,7 @@ class Super8Processor extends AudioWorkletProcessor{
   const offset=side==='R'&&which===1?(p.lrPhase||0)*Math.PI*2:0;
   return Math.sin(v[phaseKey]+offset);
  }
- source(index,v,p,lf1,lf2){return [v.note/127*2-1,lf2,v.env1,v.velocity*2-1,v.aftertouch,this.expression,this.global.benderY,v.note/127*2-1][index]||0;}
+ source(index,v,p,lf1,lf2){return [v.dds2Lfo||0,lf2,v.env1,v.velocity*2-1,v.aftertouch,this.expression,this.global.benderY,v.note/127*2-1][index]||0;}
  mod(p,v,lf1,lf2){
   let out={};const mat=p.modMatrix||[];
   for(let s=0;s<8;s++)for(let d=0;d<8;d++){const amt=Number(mat[s*8+d])||0;if(!amt)continue;const src=this.source(s,v,p,lf1,lf2);const key=['lfo1Rate','crossMod','waveMod','mix','hpf','resonance','env1Decay','delayTime'][d];out[key]=(out[key]||0)+src*amt;}
@@ -326,7 +326,7 @@ class Super8Processor extends AudioWorkletProcessor{
      if(v.e2Stage==='idle'&&v.env2===0&&!v.gate){v.active=false;continue;}
      v.aftertouch=this.polyPressure.get(v.channel+':'+v.inputNote)??this.channelPressure.get(v.channel)??this.aftertouch[layer]??0;
      let lf1L=this.lfo(v,p,dt,1,'L'),lf1R=this.lfo(v,p,dt,1,'R'),lf2=this.lfo(v,p,dt,2,'L');
-     if(v.age<(p.lfo1Delay||0)*3){lf1L=0;lf1R=0;}if(v.age<(p.lfo2Delay||0)*3)lf2=0;
+     if(v.age<(p.lfo1Delay||0)*10){lf1L=0;lf1R=0;}if(v.age<(p.lfo2Delay||0)*5)lf2=0;
      const mods=this.mod(p,v,lf1L,lf2);this.currentMods[layer]=mods;
      const channelBend=this.global.mpe&&v.channel>1?(this.mpeBend.get(v.channel)||0):(this.pitchBend[layer]||0);
      const benderX=clamp(this.global.benderX+(p.lfo2Mode==='onAtBend'?v.aftertouch*.5:0),-1,1);
@@ -339,13 +339,13 @@ class Super8Processor extends AudioWorkletProcessor{
      if(lfo2Active&&!v.lfo2Gate)v.lfo2=0;
      v.lfo2Gate=lfo2Active;v.lfo2Pressure=trigPressure;
      const lfo2Signal=lfo2Active?lf2*trigPressure:0;
-     const pitch1=benderPitch1+(p.benderOsc==='DDS 2'?0:lfo2Signal*clamp(p.lfo2Dds)*12);
-     const pitch2=benderPitch2+(p.benderOsc==='DDS 1'?0:lfo2Signal*clamp(p.lfo2Dds)*12);
+     const pitch1=benderPitch1+(benderTarget==='DDS 2'?0:lfo2Signal*clamp(p.lfo2Dds)*12)+(lf1L*clamp(p.lfo1PitchAmount)*12)+(v.env1*clamp(p.env1PitchAmount)*12);
+     const pitch2=benderPitch2+(benderTarget==='DDS 1'?0:lfo2Signal*clamp(p.lfo2Dds)*12)+(lf1L*clamp(p.lfo1PitchAmount)*12)+(v.env1*clamp(p.env1PitchAmount)*12);
      const midiBend=channelBend*p.bendRange;
      const dds1Foot=Math.log2(8/Math.max(2,Number(p.dds1Range)||8))*12;
      const dds2Foot=Math.log2(8/Math.max(2,Number(p.dds2Range)||8))*12;
      const base=midiHz(v.pitch+midiBend+dds1Foot+(this.global.masterTune||0)+(p.transpose||0)+pitch1),pw=.5+.42*Math.sin(v.noise+i*.0002*p.pwDrift*300);
-     const waveSource=p.waveModSource==='LFO 1'?(lf1L+1)*.5:p.waveModSource==='ENV 1'?v.env1:p.waveMod;const waveDepth=clamp(waveSource+this.modWheel*.12+(mods.waveMod||0)+lfo2Depth*lf2);
+     const waveSource=p.waveModSource==='LFO 1'?(lf1L+1)*.5:p.waveModSource==='ENV 1'?v.env1:p.waveMod;const waveDepth=clamp(waveSource+this.modWheel*.12+(mods.waveMod||0)+lfo2Signal*clamp(p.lfo2Dds));
      const superMode=p.superMode==='on'?1:p.superMode==='half'?.5:0;
      const dds1=(side)=>{
       const lr=side==='L'?-1:1,phase=side==='L'?v.ph1L:v.ph1R;let signal=0,masterWrap=false;
@@ -385,7 +385,7 @@ class Super8Processor extends AudioWorkletProcessor{
       o2L=o2R=0;
      }
      let sampleL=lerp(o1L,o2L,clamp(p.mix)),sampleR=lerp(o1R,o2R,clamp(p.mix));
-     const envMod=p.filterMod==='env2'?v.env2:p.filterMod==='both'?Math.max(v.env1,v.env2):v.env1;
+     const envMod=p.filterMod==='env2'?v.env2:p.filterMod==='both'?clamp(v.env1+v.env2):v.env1;
      const track=p.keyTrack==='on'?((v.note-60)/48)*.2:p.keyTrack==='half'?((v.note-60)/48)*.1:0;
      const lfoVcf=lfo2Signal*clamp(p.lfo2Vcf)*.5;
      const benderVcf=benderX*clamp(p.benderVcf)*.5;
@@ -405,8 +405,7 @@ class Super8Processor extends AudioWorkletProcessor{
     [l,r]=this.effects(l,r,p,layer,dt);
     lMix+=l;rMix+=r;
    }
-   const masterDrive=1+Math.pow(clamp(this.global.distortion||0),1.6)*19;
-   L[i]=Math.tanh(lMix*masterDrive)*this.global.volume;R[i]=Math.tanh(rMix*masterDrive)*this.global.volume;
+   L[i]=lMix*this.global.volume;R[i]=rMix*this.global.volume;
   }
   return true;
  }
