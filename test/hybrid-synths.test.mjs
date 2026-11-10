@@ -91,6 +91,27 @@ test('UDO Super 8 dual binaural mode allocates upper/lower voices and renders st
   assertAudio(render(h), 'Super 8');
 });
 
+
+test('UDO Super 8 allocates separate voices for a multi-note chord', async () => {
+  const h = await createWorklet('../js/engine/Super8Processor.js', 'super8-processor');
+  h.processor.message({ t: 'patch', patch: { mode: 'single', binaural: false, activeLayer: 0, layers: [{ voiceMode: 'poly1', unison: 'off', env2Attack: .001, env2Sustain: .9 }] } });
+  for (const note of [48, 55, 60, 64]) h.processor.message({ t: 'noteOn', note, vel: .8, channel: 1, source: 'midi' });
+  const voices = h.processor.voices.filter((voice) => voice.active && voice.layer === 0);
+  assert.equal(voices.length, 4);
+  assert.deepEqual(voices.map((voice) => voice.inputNote).sort((a, b) => a - b), [48, 55, 60, 64]);
+  assert.equal(h.processor.layerRanges(0).length, 16);
+  assertAudio(render(h), 'Super 8 four-note chord');
+});
+
+test('UDO Super 8 pressure axis is non-negative and maps to the modulation-matrix source', async () => {
+  const h = await createWorklet('../js/engine/Super8Processor.js', 'super8-processor');
+  h.processor.message({ t: 'patch', patch: { mode: 'single', binaural: false, activeLayer: 0 } });
+  h.processor.message({ t: 'bendAxis', x: .25, y: .8 });
+  assert.equal(h.processor.global.benderX, .25);
+  assert.equal(h.processor.global.benderY, .8);
+  assert.equal(h.processor.source(6, { note: 60 }, h.processor.layers[0], 0, 0), .8);
+});
+
 test('UDO Super 8 single mode exposes sixteen mono voices or eight binaural super-voices', async () => {
   const h = await createWorklet('../js/engine/Super8Processor.js', 'super8-processor');
   h.processor.message({ t: 'patch', patch: { mode: 'single', binaural: true, activeLayer: 0 } });
