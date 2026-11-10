@@ -293,7 +293,7 @@ class Super8App{
    const title=document.createElement('span');title.textContent=label;
    const select=document.createElement('select');select.setAttribute('aria-label',label);
    select.style.cssText='width:100%;height:23px;background:var(--hp-control);color:var(--hp-ink);border:1px solid var(--hp-line);border-radius:2px;padding:2px 4px;font:8px DM Mono,monospace';
-   options.forEach(v=>{const o=document.createElement('option');o.value=String(v);o.textContent=String(v).toUpperCase();select.appendChild(o);});
+   options.forEach((v,i)=>{const o=document.createElement('option');o.value=String(v);o.textContent=String(opts.optionLabels?.[i]??v).toUpperCase();select.appendChild(o);});
    select.value=String(current);
    select.addEventListener('change',()=>{const n=typeof current==='number'?Number(select.value):select.value;global?this.setGlobal(key,n):this.set(key,n);});
    wrap.append(title,select);p.appendChild(wrap);
@@ -337,8 +337,8 @@ class Super8App{
   panelSection(414,72,202,226,'DDS 1','FPGA OSCILLATOR · 32 ALTERNATIVE WAVES');
   sel('dds1Wave','WAVEFORM',480,114,['sine','saw','square','triangle','whiteNoise','altA','altB'],{width:116,group:'DDS 1'});
   sel('dds1Range','RANGE',480,162,[64,32,16,8,4,2],{width:86,group:'DDS 1'});
-  sel('altA','WAVE A',460,211,Array.from({length:32},(_,i)=>i+1),{width:78,group:'DDS 1'});
-  sel('altB','WAVE B',562,211,Array.from({length:32},(_,i)=>i+1),{width:78,group:'DDS 1'});
+  sel('altA','WAVE A',460,211,Array.from({length:32},(_,i)=>i),{width:78,group:'DDS 1',optionLabels:Array.from({length:32},(_,i)=>String(i+1).padStart(2,'0'))});
+  sel('altB','WAVE B',562,211,Array.from({length:32},(_,i)=>i),{width:78,group:'DDS 1',optionLabels:Array.from({length:32},(_,i)=>String(i+1).padStart(2,'0'))});
   sel('superMode','SUPER MODE',470,258,['off','half','on'],{width:92,group:'DDS 1'});
   knob('detune','DETUNE',542,276,{group:'DDS 1',size:43});
   knob('pwDrift','PW DRIFT',603,276,{group:'DDS 1',size:43});
