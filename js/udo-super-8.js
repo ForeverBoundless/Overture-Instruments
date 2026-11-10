@@ -21,7 +21,7 @@ const LAYER={
  arpEnabled:false,arpMode:'up',arpDivision:4,arpRange:1,arpSwing:0,arpHold:false,
  portamento:0,transpose:0,bendRange:2,velocity:1,aftertouch:0
 };
-const GLOBAL={mode:'single',activeLayer:0,splitPoint:60,binaural:true,mpe:true,volume:.72,benderX:0,benderY:0,expression:1};
+const GLOBAL={mode:'single',activeLayer:0,splitPoint:60,binaural:true,mpe:true,volume:.72,distortion:0,benderX:0,benderY:0,expression:1};
 function cleanLayer(d={}){const p={...clone(LAYER),...d};p.modMatrix=Array.from({length:64},(_,i)=>Number(d.modMatrix?.[i])||0);p.seqSteps=Array.from({length:64},(_,i)=>d.seqSteps?.[i]??null);return p;}
 function validate(d){
  if(!d||typeof d!=='object')throw new Error('Not a Super 8 performance.');
@@ -255,7 +255,7 @@ class Super8App{
   const knob=(key,label,x,y,opts={})=>{
    const layer=opts.global?false:true,value=layer?this.p()[key]:this.patch[key];
    const control=addKnob(p,{x,y,label,min:opts.min??0,max:opts.max??1,value,step:opts.step,midiId:'SUPER8:'+(layer?'L'+this.active+':':'G:')+key,group:opts.group||'SYNTHESIS',size:opts.size||54,formatValue:v=>opts.max>10?String(Number(v).toFixed(1)):opts.max>5?String(Math.round(v)):Number(v).toFixed(2),onChange:v=>layer?this.set(key,v):this.setGlobal(key,v)});
-   if(layer)this.hwKnobs.push({key,control});return remember('knobs',key,control);
+   this.hwKnobs.push({key,control,global:!layer});return remember('knobs',key,control);
   };
   const fader=(key,label,x,y,opts={})=>{
    const control=addFader(p,{x,y,label,min:opts.min??0,max:opts.max??1,value:this.p()[key],height:opts.height||82,width:opts.width||20,midiId:'SUPER8:L'+this.active+':'+key,formatValue:v=>Number(v).toFixed(2),onChange:v=>this.set(key,v)});
@@ -264,7 +264,7 @@ class Super8App{
   const btn=(key,label,x,y,opts={})=>{
    const global=!!opts.global;
    const control=addButton(p,{x,y,label,value:global?this.patch[key]:this.p()[key],size:opts.size||23,led:opts.led||'red',group:opts.group||'SYNTHESIS',midiId:'SUPER8:'+(global?'G:':'L'+this.active+':')+key,onChange:v=>global?this.setGlobal(key,v):this.set(key,v)});
-   if(!global)this.hwButtons.push({key,control});return remember('buttons',key,control);
+   this.hwButtons.push({key,control,global});return remember('buttons',key,control);
   };
   const sel=(key,label,x,y,options,opts={})=>{
    const global=!!opts.global,current=global?this.patch[key]:this.p()[key],width=opts.width||91;
@@ -278,7 +278,7 @@ class Super8App{
    select.addEventListener('change',()=>{const n=typeof current==='number'?Number(select.value):select.value;global?this.setGlobal(key,n):this.set(key,n);});
    wrap.append(title,select);p.appendChild(wrap);
    const control={el:select,getValue:()=>global?this.patch[key]:this.p()[key],setValue:v=>{select.value=String(v);},_oiMidi:{id:'SUPER8:'+(global?'G:':'L'+this.active+':')+key,label,group:opts.group||'SYNTHESIS',get:()=>{const values=options.map(String),i=values.indexOf(String(global?this.patch[key]:this.p()[key]));return Math.max(0,i)/(values.length-1||1);},set:t=>{const i=Math.round(Math.max(0,Math.min(1,t))*(options.length-1));const n=options[i];global?this.setGlobal(key,n):this.set(key,n);}}};
-   if(!global)this.hwSelects.push({key,select});return remember('selects',key,control);
+   this.hwSelects.push({key,select,global});return remember('selects',key,control);
   };
   const range=(key,label,x,y,width=120,opts={})=>{
    const wrap=document.createElement('label');wrap.className='hp-super8-range';
@@ -300,7 +300,7 @@ class Super8App{
   // Top strip mirrors the silver Super 8's real left-to-right signal path.
   panelSection(15,72,97,226,'MASTER','VOLUME / DISTORTION');
   knob('volume','MASTER VOLUME',63,150,{global:true,group:'MASTER',size:63});
-  knob('distortion','DISTORTION',63,235,{global:false,group:'MASTER',size:54});
+  knob('distortion','DISTORTION',63,235,{global:true,group:'MASTER',size:54});
   panelSection(116,72,140,226,'LFO 1','RATE / DEPTH / SHAPE');
   knob('lfo1Rate','RATE',158,150,{group:'LFO 1'});knob('lfo1Delay','DELAY',215,150,{group:'LFO 1'});
   sel('lfo1Wave','WAVE',185,205,['sine','triangle','saw','reverseSaw','square'],{width:112,group:'LFO 1'});
@@ -313,7 +313,7 @@ class Super8App{
   sel('dds1Wave','WAVE',485,114,['sine','saw','square','triangle','whiteNoise','altA','altB'],{width:120,group:'DDS 1'});
   sel('altA','WAVE A',462,161,Array.from({length:64},(_,i)=>i),{width:82,group:'DDS 1'});
   sel('altB','WAVE B',562,161,Array.from({length:64},(_,i)=>i),{width:82,group:'DDS 1'});
-  btn('superMode','SUPER',470,218,{group:'DDS 1'});knob('detune','DETUNE',550,250,{group:'DDS 1'});
+  sel('superMode','SUPER MODE',470,218,['off','half','on'],{width:100,group:'DDS 1'});knob('detune','DETUNE',550,250,{group:'DDS 1'});
   knob('pwDrift','PW DRIFT',605,250,{group:'DDS 1',size:51});
   panelSection(620,72,204,226,'DDS 2','OSCILLATOR · SUB / CROSS MOD / SYNC');
   sel('dds2Wave','WAVE',685,114,['sine','saw','square','triangle','whiteNoise','pulse'],{width:112,group:'DDS 2'});
@@ -327,10 +327,10 @@ class Super8App{
   fader('mix','DDS BALANCE',854,142,{height:95,width:18});fader('pan','PAN',910,142,{height:95,width:18});
   panelSection(944,72,206,226,'VCF','ANALOG HPF / 4-POLE LPF');
   knob('hpf','HPF',980,172,{group:'VCF',size:55});knob('cutoff','LPF CUTOFF',1045,172,{group:'VCF',size:55});knob('resonance','RESONANCE',1110,172,{group:'VCF',size:55});
-  sel('drive','DRIVE',982,226,['off','1','2'],{width:82,group:'VCF'});sel('keyTrack','KEY TRACK',1080,226,['off','half','on'],{width:92,group:'VCF'});
+  sel('drive','DRIVE',982,226,['off','1','2'],{width:82,group:'VCF'});sel('keyTrack','KEY TRACK',1080,226,['off','half','on'],{width:92,group:'VCF'});sel('filterMod','ENV MOD',1110,265,['env1','env2','both'],{width:85,group:'VCF'});
   panelSection(1154,72,103,226,'VCA','LEVEL / VELOCITY');
   knob('velocity','VELOCITY',1205,160,{group:'VCA',size:60});
-  knob('pan','LAYER PAN',1205,244,{group:'VCA',size:50});
+  btn('velocity','VELOCITY RESPONSE',1205,244,{group:'VCA',size:20});
   panelSection(1261,72,220,226,'ENVELOPES','ENVELOPE 1 MODULATION / ENVELOPE 2 AMP');
   addLabel(p,1310,111,'ENV 1');addLabel(p,1426,111,'ENV 2');
   const env1=[['env1Attack','ATK'],['env1AttackHold','A-HOLD'],['env1DecayHold','D-HOLD'],['env1Decay','DEC'],['env1Sustain','SUS'],['env1Release','REL']];
@@ -382,23 +382,27 @@ class Super8App{
    this.hwSeqButtons.push(step);
   }
   // Lower-left controller block and a continuous 61-note Fatar keybed.
-  panelSection(15,542,160,212,'BENDER / PERFORMANCE','PITCH / MODULATION');
-  const bx=document.createElement('label');bx.className='hp-super8-range';bx.style.cssText='position:absolute;left:28px;top:590px;width:130px;display:grid;gap:7px;z-index:8;color:var(--hp-ink);font:700 8px Saira,sans-serif';p.appendChild(bx);
+  panelSection(15,542,230,212,'LFO 2 / BENDER','MODULATION / TWO-AXIS CONTROL');
+  knob('lfo2Rate','LFO 2 RATE',72,612,{size:48,group:'LFO 2'});knob('lfo2Amount','LFO 2 AMOUNT',180,612,{size:48,group:'LFO 2'});sel('lfo2Wave','LFO 2 SHAPE',125,668,['sine','triangle','saw','reverseSaw','square'],{width:120,group:'LFO 2'});
+  const bx=document.createElement('label');bx.className='hp-super8-range';bx.style.cssText='position:absolute;left:28px;top:706px;width:91px;display:grid;gap:4px;z-index:8;color:var(--hp-ink);font:700 8px Saira,sans-serif';p.appendChild(bx);
   const xLabel=document.createElement('span');xLabel.textContent='X · PITCH BEND';const xInput=document.createElement('input');xInput.type='range';xInput.min='-1';xInput.max='1';xInput.step='.001';xInput.value=String(this.patch.benderX);bx.append(xLabel,xInput);
   xInput.addEventListener('input',()=>{this.patch.benderX=Number(xInput.value);this.engine.post({t:'bendAxis',x:this.patch.benderX,y:this.patch.benderY});});
-  const by=document.createElement('label');by.className='hp-super8-range';by.style.cssText='position:absolute;left:28px;top:650px;width:130px;display:grid;gap:7px;z-index:8;color:var(--hp-ink);font:700 8px Saira,sans-serif';p.appendChild(by);
+  const by=document.createElement('label');by.className='hp-super8-range';by.style.cssText='position:absolute;left:128px;top:706px;width:91px;display:grid;gap:4px;z-index:8;color:var(--hp-ink);font:700 8px Saira,sans-serif';p.appendChild(by);
   const yLabel=document.createElement('span');yLabel.textContent='Y · MODULATION';const yInput=document.createElement('input');yInput.type='range';yInput.min='-1';yInput.max='1';yInput.step='.001';yInput.value=String(this.patch.benderY);by.append(yLabel,yInput);
   yInput.addEventListener('input',()=>{this.patch.benderY=Number(yInput.value);this.engine.post({t:'bendAxis',x:this.patch.benderX,y:this.patch.benderY});});
   this.hwBenderInputs=[xInput,yInput];
-  addKeyboard(p,{x:190,y:548,w:1460,h:202,firstNote:36,count:61,keyColor:'amber',onNoteOn:(n,v)=>this.engine.post({t:'noteOn',note:n,vel:v,source:'ui'}),onNoteOff:n=>this.engine.post({t:'noteOff',note:n,source:'ui'}),onAftertouch:(n,v)=>this.engine.post({t:'polyAt',note:n,value:v,channel:1})});
+  addKeyboard(p,{x:255,y:548,w:1395,h:202,firstNote:36,count:61,keyColor:'amber',onNoteOn:(n,v)=>this.engine.post({t:'noteOn',note:n,vel:v,source:'ui'}),onNoteOff:n=>this.engine.post({t:'noteOff',note:n,source:'ui'}),onAftertouch:(n,v)=>this.engine.post({t:'polyAt',note:n,value:v,channel:1})});
   // Preset and layer-memory controls remain in the visible front panel.
-  panelSection(15,762,1650,1,'','');
-  this.hwPresets=document.createElement('select');this.hwPresets.className='hp-super8-presets';this.hwPresets.style.cssText='position:absolute;left:25px;top:20px;width:260px;height:25px;background:#eef1f2;color:#283238;border:1px solid #8f9a9f;font:9px DM Mono,monospace;z-index:10';p.appendChild(this.hwPresets);
+  const hardwareFooter=document.createElement('div');hardwareFooter.className='hp-super8-hardware-footer';
+  hardwareFooter.style.cssText='display:flex;align-items:center;justify-content:flex-start;gap:8px;flex-wrap:wrap;width:100%;padding:6px 9px;border:1px solid #9aa4a9;border-radius:3px;background:linear-gradient(#d7dde0,#bac3c8);box-shadow:0 2px 5px #0002';
+  this.hw.stage.appendChild(hardwareFooter);
+  this.hwPresets=document.createElement('select');this.hwPresets.className='hp-super8-presets';this.hwPresets.style.cssText='min-width:260px;height:27px;background:#eef1f2;color:#283238;border:1px solid #8f9a9f;font:9px DM Mono,monospace';hardwareFooter.appendChild(this.hwPresets);
   this.hwPresets.addEventListener('change',()=>this.presets.load(this.hwPresets.value));
-  const save=document.createElement('button');save.type='button';save.textContent='SAVE PERFORMANCE';save.className='hp-super8-action';save.style.cssText='position:absolute;left:300px;top:20px;height:25px;z-index:10';save.addEventListener('click',()=>{const name=prompt('Name this performance','My Super 8 Performance');if(name===null)return;try{const item=this.store.save(name,clone(this.patch));this.refreshHardwarePresetList('u:'+item.id);this.displayHardwarePreset?.(item.name);}catch(e){alert(e.message);}});p.appendChild(save);
-  const saveLayer=document.createElement('button');saveLayer.type='button';saveLayer.textContent='SAVE LAYER';saveLayer.className='hp-super8-action';saveLayer.style.cssText='position:absolute;left:440px;top:20px;height:25px;z-index:10';saveLayer.addEventListener('click',()=>{const name=prompt('Name this layer patch','My Layer Patch');if(name===null)return;try{const item=this.layerStores[this.active].save(name,clone(this.p()));this.refreshLayerSelect(item.id);}catch(e){alert(e.message);}});p.appendChild(saveLayer);
-  const matrix=document.createElement('button');matrix.type='button';matrix.textContent='MOD MATRIX';matrix.className='hp-super8-action';matrix.style.cssText='position:absolute;left:550px;top:20px;height:25px;z-index:10';matrix.addEventListener('click',()=>this.toggleHardwareMatrix());p.appendChild(matrix);
-  const loadWaves=document.createElement('button');loadWaves.type='button';loadWaves.textContent='LOAD WAVES';loadWaves.className='hp-super8-action';loadWaves.style.cssText='position:absolute;left:660px;top:20px;height:25px;z-index:10';loadWaves.addEventListener('click',()=>{const file=this.page.querySelector('input[type=file]');file?.click();});p.appendChild(loadWaves);
+  const save=document.createElement('button');save.type='button';save.textContent='SAVE PERFORMANCE';save.className='hp-super8-action';save.style.cssText='height:27px';save.addEventListener('click',()=>{const name=prompt('Name this performance','My Super 8 Performance');if(name===null)return;try{const item=this.store.save(name,clone(this.patch));this.refreshHardwarePresetList('u:'+item.id);this.displayHardwarePreset?.(item.name);}catch(e){alert(e.message);}});hardwareFooter.appendChild(save);
+  const saveLayer=document.createElement('button');saveLayer.type='button';saveLayer.textContent='SAVE LAYER';saveLayer.className='hp-super8-action';saveLayer.style.cssText='height:27px';saveLayer.addEventListener('click',()=>{const name=prompt('Name this layer patch','My Layer Patch');if(name===null)return;try{const item=this.layerStores[this.active].save(name,clone(this.p()));this.refreshLayerSelect(item.id);}catch(e){alert(e.message);}});hardwareFooter.appendChild(saveLayer);
+  this.hwLayerPresets=document.createElement('select');this.hwLayerPresets.style.cssText='min-width:180px;height:27px;background:#eef1f2;color:#283238;border:1px solid #8f9a9f;font:9px DM Mono,monospace';this.hwLayerPresets.addEventListener('change',()=>{const item=this.layerStores[this.active].get(this.hwLayerPresets.value);if(item){this.patch.layers[this.active]=cleanLayer(item.data);this.postPatch();this.refresh();}});hardwareFooter.appendChild(this.hwLayerPresets);
+  const matrix=document.createElement('button');matrix.type='button';matrix.textContent='MOD MATRIX';matrix.className='hp-super8-action';matrix.style.cssText='height:27px';matrix.addEventListener('click',()=>this.toggleHardwareMatrix());hardwareFooter.appendChild(matrix);
+  const loadWaves=document.createElement('button');loadWaves.type='button';loadWaves.textContent='LOAD WAVES';loadWaves.className='hp-super8-action';loadWaves.style.cssText='height:27px';loadWaves.addEventListener('click',()=>{const file=this.page.querySelector('input[type=file]');file?.click();});hardwareFooter.appendChild(loadWaves);
   this.renderHardwareSeq=()=>{const offset=this.hwSeqPage*16;this.hwSeqButtons.forEach((control,i)=>control.setValue(this.p().seqSteps[offset+i]!==null&&this.p().seqSteps[offset+i]!==undefined,true));};
   this.refreshHardwarePresetList=(selected='f:0')=>{
    this.hwPresets.replaceChildren();
@@ -408,21 +412,34 @@ class Super8App{
   };
   this.displayHardwarePreset=name=>this.hwDisplay.set(name.toUpperCase(),'SUPER 8 · PERFORMANCE');
   this.syncHardware=()=>{
-   this.hwKnobs.forEach(({key,control})=>control.setValue(this.p()[key],true));
+   this.hwKnobs.forEach(({key,control,global})=>control.setValue(global?this.patch[key]:this.p()[key],true));
    this.hwFaders.forEach(({key,control})=>control.setValue(this.p()[key],true));
-   this.hwButtons.forEach(({key,control})=>{if(key in this.p())control.setValue(this.p()[key],true);});
-   this.hwSelects.forEach(({key,select})=>{if(key in this.p())select.value=String(this.p()[key]);else if(key in this.patch)select.value=String(this.patch[key]);});
+   this.hwButtons.forEach(({key,control,global})=>{const owner=global?this.patch:this.p();if(key in owner)control.setValue(owner[key],true);});
+   this.hwSelects.forEach(({key,select,global})=>{const owner=global?this.patch:this.p();if(key in owner)select.value=String(owner[key]);});
    this.hwBenderInputs[0].value=String(this.patch.benderX);this.hwBenderInputs[1].value=String(this.patch.benderY);
    this.layerButtonsHardware.forEach((control,i)=>control.setValue(i===this.active,true));
-   this.refreshLayerSelect();this.renderHardwareSeq();
+   this.refreshLayerSelect();this.renderHardwareSeq();this.refreshHardwareLayerList();
   };
-  this.refreshHardwarePresetList('f:0');this.syncHardware();
+  this.refreshHardwarePresetList('f:0');this.refreshHardwareLayerList=()=>{this.hwLayerPresets.replaceChildren();this.layerStores[this.active].items.forEach(item=>{const o=document.createElement('option');o.value=item.id;o.textContent='LAYER · '+item.name;this.hwLayerPresets.appendChild(o);});};this.syncHardware();
   this.matrixDialog=document.createElement('dialog');this.matrixDialog.className='hp-super8-matrix-dialog';
   this.matrixDialog.innerHTML='<form method="dialog"><header><strong>8 × 8 MODULATION MATRIX</strong><button>×</button></header><p>Rows are modulation sources; columns are destinations. Click a cell to cycle + depth, − depth, and off.</p><div class="hp-super8-matrix-grid"></div></form>';
   const grid=this.matrixDialog.querySelector('.hp-super8-matrix-grid');
   SOURCE_NAMES.forEach((source,s)=>{for(let d=0;d<8;d++){const i=s*8+d,b=document.createElement('button');b.type='button';b.textContent=String.fromCharCode(65+d);b.title=source+' → '+DEST_NAMES[d];b.addEventListener('click',()=>{const old=this.p().modMatrix[i]||0;this.p().modMatrix[i]=old===0?.6:old>0?-.6:0;b.dataset.value=String(this.p().modMatrix[i]);b.textContent=this.p().modMatrix[i]>0?'+':this.p().modMatrix[i]<0?'−':String.fromCharCode(65+d);this.engine.post({t:'param',layer:this.active,key:'modMatrix',value:this.p().modMatrix});});grid.appendChild(b);}});
   this.matrixDialog.addEventListener('close',()=>{});
   p.appendChild(this.matrixDialog);
+  this.toggleHardwareMatrix=()=>{if(this.matrixDialog.open)this.matrixDialog.close();else this.matrixDialog.showModal();};
+  this.hwControls.all.push({el:xInput,_oiMidi:{id:'SUPER8:G:benderX',label:'Bender X',group:'PERFORMANCE',get:()=>((this.patch.benderX+1)/2),set:v=>{this.patch.benderX=v*2-1;xInput.value=String(this.patch.benderX);this.engine.post({t:'bendAxis',x:this.patch.benderX,y:this.patch.benderY});}}});
+  this.hwControls.all.push({el:yInput,_oiMidi:{id:'SUPER8:G:benderY',label:'Bender Y',group:'PERFORMANCE',get:()=>((this.patch.benderY+1)/2),set:v=>{this.patch.benderY=v*2-1;yInput.value=String(this.patch.benderY);this.engine.post({t:'bendAxis',x:this.patch.benderX,y:this.patch.benderY});}}});
+  this.matrixDialog=document.createElement('dialog');this.matrixDialog.className='hp-super8-matrix-dialog';
+  this.matrixDialog.innerHTML='<form method="dialog"><header><strong>8 × 8 MODULATION MATRIX</strong><button>×</button></header><p>Rows are modulation sources; columns are destinations. Click a cell to cycle + depth, − depth, and off.</p><div class="hp-super8-matrix-grid"></div></form>';
+  const grid=this.matrixDialog.querySelector('.hp-super8-matrix-grid');grid.style.cssText='display:grid;grid-template-columns:120px repeat(8,minmax(30px,1fr));gap:4px;align-items:center';
+  const destinations=['LFO 1 RATE','CROSS MOD','WAVE MOD','OSC MIX','HPF CUTOFF','LPF RESONANCE','ENV 1 DECAY','DELAY TIME'];
+  grid.appendChild(document.createElement('span'));destinations.forEach(label=>{const h=document.createElement('span');h.textContent=label;h.className='hp-super8-matrix-head';grid.appendChild(h);});
+  this.hwMatrixCells=[];
+  SOURCE_NAMES.forEach((source,s)=>{const label=document.createElement('strong');label.textContent=source;label.className='hp-super8-matrix-source';grid.appendChild(label);for(let d=0;d<8;d++){const i=s*8+d,b=document.createElement('button');b.type='button';b.title=source+' → '+destinations[d];b.dataset.value=String(this.p().modMatrix[i]||0);b.addEventListener('click',()=>{const old=this.p().modMatrix[i]||0;this.p().modMatrix[i]=old===0?.6:old>0?-.6:0;this.renderHardwareMatrix();this.engine.post({t:'param',layer:this.active,key:'modMatrix',value:this.p().modMatrix});});this.hwMatrixCells.push({button:b,index:i});grid.appendChild(b);}});
+  this.matrixDialog.addEventListener('close',()=>{});document.body.appendChild(this.matrixDialog);
+  this.renderHardwareMatrix=()=>this.hwMatrixCells.forEach(({button,index})=>{const v=this.p().modMatrix[index]||0;button.dataset.value=String(v);button.textContent=v>0?'+':v<0?'−':'·';});
+  this.renderHardwareMatrix();
   this.toggleHardwareMatrix=()=>{if(this.matrixDialog.open)this.matrixDialog.close();else this.matrixDialog.showModal();};
   if(!this._hardwareMidiCleanup)this._hardwareMidiCleanup=registerMidiTargetProvider(()=>this.hwControls.all.map(control=>{const m=control.el?._oiMidi||control._oiMidi;if(!m)return null;return {id:m.id,label:m.label,group:m.group||'SUPER 8',get:m.get,set:m.set,el:control.el||null};}).filter(Boolean));
  }
