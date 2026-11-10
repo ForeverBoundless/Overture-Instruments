@@ -146,12 +146,12 @@ test('both new hardware synths start audio directly from their visible power swi
     readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
   ]);
   assert.match(panel, /return go;/);
-  assert.match(pro, /this\\.activateAudio=power\\('pro3-power'/);
-  assert.match(super8, /this\\.activateAudio=power\\('super8-power'/);
+  assert.match(pro, /this\.activateAudio=power\('pro3-power'/);
+  assert.match(super8, /this\.activateAudio=power\('super8-power'/);
   assert.match(pro, /label:'POWER',value:false,toggle:false/);
   assert.match(super8, /label:'POWER',value:false,toggle:false/);
-  assert.doesNotMatch(pro, /getElementById\\('pro3-power'\\)\\.click\\(\\)/);
-  assert.doesNotMatch(super8, /getElementById\\('super8-power'\\)\\.click\\(\\)/);
+  assert.doesNotMatch(pro, /getElementById\('pro3-power'\)\.click\(\)/);
+  assert.doesNotMatch(super8, /getElementById\('super8-power'\)\.click\(\)/);
   assert.match(worker, /overture-shell-v60/);
 });
 
@@ -237,7 +237,7 @@ test('Pro 3 and Super 8 hardware modules parse before browser startup', async ()
   const stripModuleSyntax = (source, className) => source
     .replace(/^import\s+.*?;\s*$/gm, '')
     .replaceAll('import.meta.url', "'https://example.test/'")
-    .replace(new RegExp('new\\s+' + className + '\\(\\);\\s*$'), '');
+    .replace(new RegExp('new\\s+' + className + '\(\);\\s*$'), '');
   assert.doesNotThrow(() => new Function(stripModuleSyntax(pro, 'Pro3App')), 'Pro 3 UI module parses');
   assert.doesNotThrow(() => new Function(stripModuleSyntax(super8, 'Super8App')), 'Super 8 UI module parses');
   const hardwareMethod = super8.slice(super8.indexOf(' buildHardwarePanel(){'), super8.indexOf('\n }\n\n}', super8.indexOf(' buildHardwarePanel(){')));
