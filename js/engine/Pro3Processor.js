@@ -305,7 +305,7 @@ class Pro3Processor extends AudioWorkletProcessor{
   if(this.p.arpEnabled&&this.held.size){
    const arpSwing=clamp(this.p.arpSwing)*.42;
    this.arpPhase+=(clamp(this.p.bpm,30,260)/60)*dt*(4/Math.max(1,Number(this.p.arpDivision)||4))*((this.arpStep%2)?1-arpSwing:1+arpSwing);
-   if(this.arpPhase>=1){this.arpPhase-=1;const notes=[...this.held.keys()].sort((a,b)=>a-b),range=clamp(Math.round(this.p.arpRange||1),1,4),total=notes.length*range,step=this.arpStep++%total,octave=Math.floor(step/notes.length);let idx=step%notes.length;if(this.p.arpMode==="down")idx=notes.length-1-idx;else if(this.p.arpMode==="random")idx=Math.floor(Math.random()*notes.length);else if(this.p.arpMode==="upDown"){const span=Math.max(1,total*2-2),x=this.arpStep%(span);const absolute=x<total?x:span-x;idx=absolute%notes.length;}
+   if(this.arpPhase>=1){this.arpPhase-=1;const notes=this.p.arpMode==="assign"?[...this.held.keys()]:[...this.held.keys()].sort((a,b)=>a-b),range=clamp(Math.round(this.p.arpRange||1),1,4),total=notes.length*range,step=this.arpStep++%total,octave=Math.floor(step/notes.length);let idx=step%notes.length;if(this.p.arpMode==="down")idx=notes.length-1-idx;else if(this.p.arpMode==="random")idx=Math.floor(Math.random()*notes.length);else if(this.p.arpMode==="upDown"){const span=Math.max(1,total*2-2),x=this.arpStep%(span);const absolute=x<total?x:span-x;idx=absolute%notes.length;}
     const n=notes[idx]+octave*12;if(this.arpNote>=0)this.noteOffArp(this.arpNote);this.trigger(n,this.held.get(n)||.8);this.arpNote=n;
    }
   }
@@ -370,15 +370,15 @@ class Pro3Processor extends AudioWorkletProcessor{
    sampleL=Math.tanh(sampleL*drive);sampleR=Math.tanh(sampleR*drive);
    const delaySamples=Math.max(2,Math.floor(sr/(25+clamp(this.p.feedbackTune)*1500)));
    const fbRead=(this.fbWrite-delaySamples+this.fb.length)%this.fb.length,feedback=this.fb[fbRead];
-   const fbAmount=clamp(this.p.feedbackAmount,0,.96),fbIn=this.p.feedbackGrunge?Math.tanh(sample+feedback*fbAmount*4):sample+feedback*fbAmount;
+   const fbAmount=clamp(this.p.feedbackAmount,0,.96),feedbackInput=(sampleL+sampleR)*.5,fbIn=this.p.feedbackGrunge?Math.tanh(feedbackInput+feedback*fbAmount*4):feedbackInput+feedback*fbAmount;
    this.fb[this.fbWrite]=clamp(fbIn,-3,3);this.fbWrite=(this.fbWrite+1)%this.fb.length;
    const amp=env.amp*this.velocity*.22*(1+(mods.ampLevel||0));
    sampleL=(sampleL+feedback*fbAmount*.8)*amp;sampleR=(sampleR+feedback*fbAmount*.78)*amp;
    let left=sampleL,right=sampleR;
    [left,right]=this.fxProcess(left,right,0,this.p,dt);[left,right]=this.fxProcess(left,right,1,this.p,dt);
    const pan=.05*Math.sin(this.touch*Math.PI);
-   L[i]=Math.tanh(left*(1+clamp(this.p.masterDistortion)*8))*(.75-pan)*this.p.volume;
-   R[i]=Math.tanh(right*(1+clamp(this.p.masterDistortion)*8))*(.75+pan)*this.p.volume;
+   L[i]=Math.tanh(left)*(.75-pan)*this.p.volume;
+   R[i]=Math.tanh(right)*(.75+pan)*this.p.volume;
   }
   return true;
  }
