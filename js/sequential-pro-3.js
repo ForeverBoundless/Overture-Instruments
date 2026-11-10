@@ -10,7 +10,7 @@ const BASE={
  mode:'mono',osc1Wave:'saw',osc1Octave:0,osc1Tune:0,osc1Shape:.5,osc1Level:.78,osc1Glide:.04,osc1Slop:.08,osc1Sync:false,
  osc2Wave:'pulse',osc2Octave:0,osc2Tune:0,osc2Shape:.5,osc2Level:.55,osc2Glide:.04,osc2Slop:.08,osc2Sync:false,
  osc3Wave:'wavetable',osc3Octave:0,osc3Tune:0,osc3Shape:.35,osc3ShapeMod:.25,osc3Level:.45,osc3Glide:.02,osc3Slop:.02,
- noiseLevel:0,externalLevel:0,filterType:'prophet6',filterCutoff:.68,resonance:.16,filterState:0,filterKeyTrack:.35,filterEnvAmount:.38,filterDrive:.08,distortion:.08,
+ noiseLevel:0,externalLevel:0,filterType:'prophet6',filterCutoff:.68,resonance:.16,filterState:0,filterBp:false,filterKeyTrack:.35,filterEnvAmount:.38,filterDrive:.08,distortion:.08,
  filterDelay:0,filterAttack:.03,filterDecay:.28,filterSustain:.45,filterRelease:.25,filterLoop:false,
  ampDelay:0,ampAttack:.015,ampDecay:.24,ampSustain:.8,ampRelease:.22,ampLoop:false,
  aux1Delay:0,aux1Attack:.02,aux1Decay:.28,aux1Sustain:0,aux1Release:.2,aux1Loop:false,
@@ -21,7 +21,7 @@ const BASE={
  bpm:120,glide:0,hold:false,mod:0,bend:0,aftertouch:0,touch:0,volume:.72,
  fx1Type:'stereoDelay',fx1Mix:.18,fx1Time:.28,fx1Feedback:.28,fx1Tone:.55,
  fx2Type:'superPlate',fx2Mix:.16,fx2Time:.42,fx2Feedback:.25,fx2Tone:.6,
- feedbackAmount:0,feedbackTune:.5,feedbackGrunge:false,
+ feedbackAmount:0,feedbackTune:24,feedbackGrunge:false,
  arpEnabled:false,arpMode:'up',arpDivision:4,arpRange:1,arpSwing:0,arpLatch:false,
  seqEnabled:false,seqMode:'forward',seqLength:16,seqSwing:0,seqGate:.72,
  seqTracks:Array.from({length:16},()=>Array(64).fill(null)),
@@ -32,6 +32,7 @@ const BASE={
 const clamp=(v,a=0,b=1)=>Math.min(b,Math.max(a,Number(v)||0));
 function clean(data){
  const p={...BASE,...data};
+ if(Number(p.feedbackTune)<=1)p.feedbackTune=Number(p.feedbackTune||0)*48;
  p.seqTracks=Array.from({length:16},(_,i)=>Array.from({length:64},(_,j)=>data.seqTracks?.[i]?.[j]??null));
  p.seqDestinations=Array.from({length:16},(_,i)=>data.seqDestinations?.[i]||BASE.seqDestinations[i]);
  p.modRoutes=Array.from({length:32},(_,i)=>{const r=data.modRoutes?.[i]||BASE.modRoutes[i];return {source:r.source||'LFO 1',destination:r.destination||'filterCutoff',amount:clamp(r.amount,-1,1)};});
@@ -207,7 +208,7 @@ class Pro3App{
   const group=(x,y,w,h,title,sub='')=>addSection(p,{x,y,w,h,title,sub});
   const remember=(type,key,control)=>{this.hwControls[type].push({key,control});this.hwControls.all.push(control);return control;};
   const k=(key,label,x,y,min=0,max=1,step,opts={})=>{
-   const control=addKnob(p,{x,y,label,min,max,value:this.patch[key],step,size:opts.size||62,small:!!opts.small,accent:!!opts.accent,midiId:'PRO3:'+key,group:opts.group||'SYNTHESIS',formatValue:v=>max>10?String(Number(v).toFixed(1)):max>5?String(Math.round(v)):Number(v).toFixed(2),onChange:v=>this.set(key,v)});
+   const control=addKnob(p,{x,y,label,min,max,value:this.patch[key],step,size:opts.size||62,small:!!opts.small,accent:!!opts.accent,midiId:'PRO3:'+key,group:opts.group||'SYNTHESIS',bipolar:!!opts.bipolar,formatValue:v=>max>10?String(Number(v).toFixed(1)):max>5?String(Math.round(v)):Number(v).toFixed(2),onChange:v=>this.set(key,v)});
    return remember('knobs',key,control);
   };
   const fader=(key,label,x,y,min=0,max=1,opts={})=>{
@@ -305,10 +306,11 @@ class Pro3App{
   k('filterDrive','DRIVE',1274,408,0,1,.01,{size:58,group:'FILTER'});
   k('filterEnvAmount','ENV AMOUNT',1145,490,0,1,.01,{size:54,group:'FILTER'});
   k('filterKeyTrack','KEY TRACK',1210,490,0,1,.01,{size:54,group:'FILTER'});
-  sel('filterState','LP / NOTCH / HP',1290,480,[0,.25,.5,.75,1],{width:88,group:'FILTER'});
+  k('filterState','LP / NOTCH / HP',1280,490,0,1,.01,{size:48,group:'FILTER'});
+  btn('filterBp','BAND PASS',1285,350,{group:'FILTER',size:20});
   group(1330,262,336,265,'TUNED FEEDBACK / PERFORMANCE','RESONANT FEEDBACK PATH');
-  k('feedbackAmount','FEEDBACK',1410,410,0,.96,.005,{size:62,group:'TUNED FEEDBACK'});
-  k('feedbackTune','TUNING',1515,410,0,1,.01,{size:62,group:'TUNED FEEDBACK'});
+  k('feedbackAmount','FEEDBACK',1410,410,-1,.96,.005,{size:62,group:'TUNED FEEDBACK',bipolar:true});
+  k('feedbackTune','TUNED FREQUENCY',1515,410,0,48,1,{size:62,group:'TUNED FEEDBACK'});
   btn('feedbackGrunge','GRUNGE',1620,470,{group:'TUNED FEEDBACK'});
   // The four hardware envelope families are grouped as four clear, non-overlapping columns.
   group(14,540,670,150,'ENVELOPES','FILTER · AMPLIFIER · AUXILIARY 1 · AUXILIARY 2');
