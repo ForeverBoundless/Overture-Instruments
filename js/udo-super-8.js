@@ -71,7 +71,7 @@ class Super8App{
   this.shell=this.midiHost;
   this.buildKeyboard();
   this.presets.load('f:0');
-  this.activateAudio=power('super8-power',()=>this.engine.start(),()=>{this.perf.flushPending();this.display.set('SUPER 8 READY','TWO FPGA-STYLE DDS CORES · STEREO OUTPUT');},()=>this.hwPower?.setValue(false,true));
+  this.activateAudio=power('super8-power',()=>this.engine.start(),()=>{this.hwPower?.setValue(true,true);this.perf.flushPending();this.display.set('SUPER 8 READY','TWO FPGA-STYLE DDS CORES · STEREO OUTPUT');},()=>this.hwPower?.setValue(false,true));
   this.postPatch();
  }
  loadPerformance(id){
