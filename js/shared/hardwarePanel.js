@@ -17,11 +17,15 @@ export function createHardwareSurface(root,{id,width,height,skin='pro3',programL
  const frame=node('div','hp-frame',stage),instrument=node('div','hp-instrument hp-'+skin,frame);
  instrument.style.width=width+'px';instrument.style.height=height+'px';instrument.dataset.instrument=id;
  const resize=()=>{
-  const infoH=info.getBoundingClientRect().height||34;
-  const availableWidth=Math.max(320,window.innerWidth-24),availableHeight=Math.max(250,window.innerHeight-infoH-28);
-  const scale=Math.min(availableWidth/width,availableHeight/height);
+  // Preserve the physical proportions and control sizes. The old implementation
+  // also fit the entire chassis to viewport height, shrinking a 61-key bed and
+  // panel legends on laptop screens. The instrument now scales to width only;
+  // document scrolling handles shorter viewports.
+  const availableWidth=Math.max(320,window.innerWidth-32);
+  const scale=Math.min(1,availableWidth/width);
   instrument.style.transform='scale('+scale+')';
-  frame.style.width=(width*scale)+'px';frame.style.height=(height*scale)+'px';
+  frame.style.width=(width*scale)+'px';
+  frame.style.height=(height*scale)+'px';
   info.style.width=(width*scale)+'px';
  };
  window.addEventListener('resize',resize);requestAnimationFrame(resize);
@@ -107,22 +111,44 @@ export function addDisplay(parent,{x,y,w=180,h=48,brand='',skin='amber'}){
  if(brand)node('span','hp-display-brand',d,brand);const main=node('strong','hp-display-main',d,'INIT');const sub=node('small','hp-display-sub',d,'PROGRAM 001');return {el:d,set:(a,b='')=>{main.textContent=a;sub.textContent=b;},main,sub};
 }
 
-export function addKeyboard(parent,{x,y,w,h,firstNote=36,count=37,onNoteOn=()=>{},onNoteOff=()=>{},keyColor='amber'}){
+export function addKeyboard(parent,{x,y,w,h,firstNote=36,count=37,onNoteOn=()=>{},onNoteOff=()=>{},onAftertouch=()=>{},keyColor='amber',labels=true}){
  const bed=node('div','hp-keybed hp-keybed-'+keyColor,parent);Object.assign(bed.style,{left:x+'px',top:y+'px',width:w+'px',height:h+'px'});
  const white=[],black=[],noteToMidi=n=>n;
  for(let n=firstNote;n<firstNote+count;n++){if(![1,3,6,8,10].includes(n%12))white.push(n);}
  const ww=100/white.length,offset={1:.62,3:.78,6:.58,8:.70,10:.84};
  const keyMap=new Map(),pointers=new Map(),active=new Map();
- const create=(n,isBlack)=>{const k=node('button','hp-key '+(isBlack?'hp-key-black':'hp-key-white'),bed);k.type='button';k.dataset.note=String(n);k.dataset.keyName=noteName(n);k.setAttribute('aria-label',noteName(n));if(!isBlack&&n%12===0)node('span','hp-key-mark',k,noteName(n));k.addEventListener('contextmenu',e=>e.preventDefault());keyMap.set(n,k);return k;};
+ const create=(n,isBlack)=>{const k=node('button','hp-key '+(isBlack?'hp-key-black':'hp-key-white'),bed);k.type='button';k.dataset.note=String(n);k.dataset.keyName=noteName(n);k.setAttribute('aria-label',noteName(n));if(labels&&!isBlack&&n%12===0)node('span','hp-key-mark',k,noteName(n));k.addEventListener('contextmenu',e=>e.preventDefault());keyMap.set(n,k);return k;};
  white.forEach((n,i)=>{const k=create(n,false);k.style.left=(i*ww)+'%';k.style.width=ww+'%';});
  for(let n=firstNote;n<firstNote+count;n++){const pc=n%12;if(![1,3,6,8,10].includes(pc))continue;const wi=white.indexOf(n-1);if(wi<0)continue;const k=create(n,true);k.style.left='calc('+(wi+offset[pc])*ww+'% - '+(ww*.29)+'%)';k.style.width=(ww*.58)+'%';}
  const hit=e=>{const found=document.elementFromPoint(e.clientX,e.clientY)?.closest?.('.hp-key');return found&&bed.contains(found)?Number(found.dataset.note):null;};
  const velocity=(e,n)=>{const k=keyMap.get(n),r=k?.getBoundingClientRect();if(!r)return .8;return clamp(.38+((e.clientY-r.top)/(r.height||1))*.62,.05,1);};
  const setActive=(n,on)=>{const k=keyMap.get(Number(n));if(k){k.classList.toggle('active',!!on);if(on)active.set(Number(n),true);else active.delete(Number(n));}};
- bed.addEventListener('pointerdown',e=>{if(e.button!==0)return;e.preventDefault();bed.setPointerCapture?.(e.pointerId);const n=hit(e);if(n===null)return;pointers.set(e.pointerId,n);setActive(n,true);onNoteOn(n,velocity(e,n));});
- bed.addEventListener('pointermove',e=>{if(!pointers.has(e.pointerId))return;const n=hit(e),old=pointers.get(e.pointerId);if(n!==null&&n!==old){setActive(old,false);onNoteOff(old);pointers.set(e.pointerId,n);setActive(n,true);onNoteOn(n,velocity(e,n));}});
- const up=e=>{if(!pointers.has(e.pointerId))return;const n=pointers.get(e.pointerId);pointers.delete(e.pointerId);setActive(n,false);onNoteOff(n);};bed.addEventListener('pointerup',up);bed.addEventListener('pointercancel',up);
- return {el:bed,setActive,has:n=>keyMap.has(Number(n)),keyMap};
+ bed.addEventListener('pointerdown',e=>{
+  if(e.button!==0)return;e.preventDefault();bed.setPointerCapture?.(e.pointerId);
+  const n=hit(e);if(n===null)return;
+  pointers.set(e.pointerId,{note:n,startY:e.clientY});setActive(n,true);
+  onNoteOn(n,velocity(e,n));
+ });
+ bed.addEventListener('pointermove',e=>{
+  const state=pointers.get(e.pointerId);if(!state)return;
+  const n=hit(e);
+  if(n!==null&&n!==state.note){
+   setActive(state.note,false);onAftertouch(state.note,0);onNoteOff(state.note);
+   pointers.set(e.pointerId,{note:n,startY:e.clientY});setActive(n,true);onNoteOn(n,velocity(e,n));
+   return;
+  }
+  const key=keyMap.get(state.note),rect=key?.getBoundingClientRect();
+  const pressure=e.pointerType==='pen'&&e.pressure>0
+    ?clamp(e.pressure)
+    :clamp(.18+((e.clientY-state.startY)/Math.max(1,(rect?.height||h)*.72)),0,1);
+  onAftertouch(state.note,pressure);
+ });
+ const up=e=>{
+  const state=pointers.get(e.pointerId);if(!state)return;
+  pointers.delete(e.pointerId);setActive(state.note,false);onAftertouch(state.note,0);onNoteOff(state.note);
+ };
+ bed.addEventListener('pointerup',up);bed.addEventListener('pointercancel',up);
+ return {el:bed,setActive,has:n=>keyMap.has(Number(n)),keyMap,notes:[...keyMap.keys()]};
 }
 
 export function addWheel(parent,{x,y,label,min=0,max=1,value=0,height=105,onChange=()=>{},spring=false,midiId}){
