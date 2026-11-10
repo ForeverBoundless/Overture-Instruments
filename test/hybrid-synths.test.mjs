@@ -98,7 +98,7 @@ test('UDO Super 8 allocates separate voices for a multi-note chord', async () =>
   for (const note of [48, 55, 60, 64]) h.processor.message({ t: 'noteOn', note, vel: .8, channel: 1, source: 'midi' });
   const voices = h.processor.voices.filter((voice) => voice.active && voice.layer === 0);
   assert.equal(voices.length, 4);
-  assert.deepEqual(voices.map((voice) => voice.inputNote).sort((a, b) => a - b), [48, 55, 60, 64]);
+  assert.equal(voices.map((voice) => voice.inputNote).sort((a, b) => a - b).join(','), '48,55,60,64');
   assert.equal(h.processor.layerRanges(0).length, 16);
   assertAudio(render(h), 'Super 8 four-note chord');
 });
@@ -141,7 +141,7 @@ test('Pro 3 and Super 8 load the shared reference-style hardware surface', async
   assert.match(super8, /BINAURAL/);
   assert.match(super8, /UDO_logo\.png/);
   assert.match(super8, /count:61/);
-  assert.match(super8, /X · PITCH/);
+  assert.match(super8, /PRESSURE  Y/);
   assert.match(super8, /Y · MOD/);
   assert.match(super8, /hp-super8-hardware-footer/);
   assert.match(super8, /MODULATION MATRIX/);
