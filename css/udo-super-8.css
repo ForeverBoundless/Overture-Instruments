@@ -138,15 +138,7 @@
 .hp-super8-bender-caption{pointer-events:none}
 .hp-super8 .hp-button-label{font-size:6px}
 
-
-/* Keep Super 8 front-panel legends legible when its chassis scales to width. */
-.hp-super8 .hp-section-title{font-size:calc(8px / var(--hp-scale,1))!important}
-.hp-super8 .hp-section-sub{font-size:calc(6px / var(--hp-scale,1))!important}
-.hp-super8 .hp-label{font-size:calc(8px / var(--hp-scale,1))!important}
-.hp-super8 .hp-control-label{font-size:calc(7px / var(--hp-scale,1))!important}
-.hp-super8 .hp-knob-value{font-size:calc(6px / var(--hp-scale,1))!important}
-.hp-super8 .hp-button-label{font-size:calc(6px / var(--hp-scale,1))!important}
-.hp-super8 .hp-native-select span{font-size:calc(7px / var(--hp-scale,1))!important}
-.hp-super8 .hp-native-select select{font-size:calc(7px / var(--hp-scale,1))!important}
-.hp-super8 .hp-fader-label{font-size:calc(7px / var(--hp-scale,1))!important}
-.hp-super8 .hp-fader-value{font-size:calc(6px / var(--hp-scale,1))!important}
+/* Hardware legends scale naturally with the complete silver chassis. */
+.hp-super8 .hp-section-head{justify-content:flex-start;overflow:hidden;gap:5px;padding-inline:7px}
+.hp-super8 .hp-section-title{font-size:9px!important;letter-spacing:.07em!important;overflow:hidden;text-overflow:ellipsis}
+.hp-super8 .hp-section-sub{display:none!important}
