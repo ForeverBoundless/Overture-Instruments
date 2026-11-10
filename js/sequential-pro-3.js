@@ -64,7 +64,7 @@ class Pro3App{
   this.engine=new WorkletEngine(new URL('./engine/Pro3Processor.js',import.meta.url).href,'pro3-processor');
   this.patch=clean(BASE);this.store=new PresetStore({key:'overture.sequential-pro-3.programs',version:1,validate:clean});
   this.ui={};this.build();this.buildHardwarePanel();this.buildPerformance();this.presets.load('f:0');
-  power('pro3-power',()=>this.engine.start(),()=>{this.perf.flushPending();this.display.set('PRO 3 READY','OVERTURE PROGRAM · AUDIO ACTIVE');});
+  this.activateAudio=power('pro3-power',()=>this.engine.start(),()=>{this.perf.flushPending();this.display.set('PRO 3 READY','OVERTURE PROGRAM · AUDIO ACTIVE');},()=>this.hwPower?.setValue(false,true));
   this.engine.post({t:'patch',patch:this.patch});
  }
  set(k,v){this.patch[k]=v;this.engine.post({t:'param',key:k,value:v});if(k==='seqTrack')this.updateSequence();this.syncHardware?.();}
@@ -246,6 +246,7 @@ class Pro3App{
   addButton(p,{x:1470,y:54,label:'WRITE',value:false,size:27,onChange:()=>this.hwDisplay.set('WRITE','SELECT A PROGRAM SLOT')});
   addButton(p,{x:1530,y:54,label:'COMPARE',value:false,size:27,onChange:()=>this.hwDisplay.set('COMPARE','PATCH COMPARISON')});
   addButton(p,{x:1590,y:54,label:'GLOBAL',value:false,size:27,onChange:()=>this.hwDisplay.set('GLOBAL','SYSTEM SETTINGS')});
+  this.hwPower=addButton(p,{x:1640,y:54,label:'POWER',value:false,toggle:false,size:25,led:'green',group:'GLOBAL',onChange:async()=>{const ready=await this.activateAudio?.();this.hwPower?.setValue(!!ready,true);}});
   const seq=group(14,140,1652,112,'16-TRACK STEP SEQUENCER','FOUR 16-STEP PHRASES · 64 STEPS · NOTE / MODULATION TRACKS');
   this.hwTrackSelect=sel('seqTrack','TRACK',130,181,Array.from({length:16},(_,i)=>i),{width:86,group:'SEQUENCER'});
   this.hwPhrase=sel('seqPhrase','PHRASE',245,181,['A','B','C','D'],{width:86,group:'SEQUENCER'});
