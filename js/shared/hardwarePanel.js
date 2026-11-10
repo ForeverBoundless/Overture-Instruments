@@ -17,10 +17,8 @@ export function createHardwareSurface(root,{id,width,height,skin='pro3',programL
  const frame=node('div','hp-frame',stage),instrument=node('div','hp-instrument hp-'+skin,frame);
  instrument.style.width=width+'px';instrument.style.height=height+'px';instrument.dataset.instrument=id;
  const resize=()=>{
-  // Preserve the physical proportions and control sizes. The old implementation
-  // also fit the entire chassis to viewport height, shrinking a 61-key bed and
-  // panel legends on laptop screens. The instrument now scales to width only;
-  // document scrolling handles shorter viewports.
+  // Never fit the entire chassis to viewport height. The hardware remains at
+  // its natural proportions and the document scrolls vertically.
   const availableWidth=Math.max(320,window.innerWidth-32);
   const scale=Math.min(1,availableWidth/width);
   instrument.style.transform='scale('+scale+')';
@@ -42,8 +40,8 @@ export function addLabel(parent,x,y,text,className=''){const l=node('div','hp-la
 export function addRule(parent,x,y,w,cls=''){const r=node('div','hp-rule '+cls,parent);Object.assign(r.style,{left:x+'px',top:y+'px',width:w+'px'});return r;}
 export function addLED(parent,x,y,color='red',on=false){const l=node('i','hp-led hp-led-'+color,parent);place(l,x,y);l.classList.toggle('is-on',!!on);return l;}
 
-export function addKnob(parent,{x,y,label,min=0,max=1,value=0,step,small=false,accent=false,bipolar=false,onChange=()=>{},formatValue=v=>max>8?String(Math.round(v)):Number(v).toFixed(2),midiId}){
- const id='hpknob'+(++controlId),size=small?64:82,wrap=node('div','hp-knob'+(small?' hp-knob-small':'')+(accent?' hp-knob-accent':'')+(bipolar?' hp-knob-bipolar':''),parent);
+export function addKnob(parent,{x,y,label,min=0,max=1,value=0,step,size:customSize,small=false,accent=false,bipolar=false,onChange=()=>{},formatValue=v=>max>8?String(Math.round(v)):Number(v).toFixed(2),midiId,group=''}){
+ const id='hpknob'+(++controlId),size=customSize|| (small?58:72),wrap=node('div','hp-knob'+(small?' hp-knob-small':'')+(accent?' hp-knob-accent':'')+(bipolar?' hp-knob-bipolar':''),parent);
  Object.assign(wrap.style,{left:(x-size/2)+'px',top:(y-size/2)+'px',width:size+'px',height:(size+22)+'px'});
  wrap.tabIndex=0;wrap.setAttribute('role','slider');wrap.setAttribute('aria-label',label);wrap.setAttribute('aria-valuemin',min);wrap.setAttribute('aria-valuemax',max);
  const art=svg('svg',{viewBox:'0 0 100 100',class:'hp-knob-art'},wrap),defs=svg('defs',{},art);
@@ -69,7 +67,7 @@ export function addKnob(parent,{x,y,label,min=0,max=1,value=0,step,small=false,a
  wrap.addEventListener('dblclick',()=>setValue(value));
  wrap.addEventListener('keydown',e=>{const d=step||((max-min)/100);if(e.key==='ArrowUp'||e.key==='ArrowRight'){setValue(current+d);e.preventDefault();}if(e.key==='ArrowDown'||e.key==='ArrowLeft'){setValue(current-d);e.preventDefault();}if(e.key==='Home'){setValue(min);e.preventDefault();}if(e.key==='End'){setValue(max);e.preventDefault();}});
  render();
- wrap._oiMidi={id:midiId||('HW:'+label),label,get:()=> (current-min)/(max-min||1),set:v=>setValue(min+v*(max-min))};
+ wrap.dataset.midiGroup=group;wrap._oiMidi={id:midiId||('HW:'+label),label,group,get:()=> (current-min)/(max-min||1),set:v=>setValue(min+v*(max-min))};
  return {el:wrap,getValue:()=>current,setValue,render};
 }
 
@@ -90,19 +88,19 @@ export function addFader(parent,{x,y,label,min=0,max=1,value=0,height=92,width=3
  const up=e=>{if(e.pointerId!==pid)return;pid=null;wrap.classList.remove('is-moving');};wrap.addEventListener('pointerup',up);wrap.addEventListener('pointercancel',up);
  wrap.tabIndex=0;wrap.setAttribute('role','slider');wrap.setAttribute('aria-label',label);wrap.setAttribute('aria-valuemin',min);wrap.setAttribute('aria-valuemax',max);
  wrap.addEventListener('keydown',e=>{const d=(max-min)/100;if(e.key==='ArrowUp'||e.key==='ArrowRight'){setValue(current+d);e.preventDefault();}if(e.key==='ArrowDown'||e.key==='ArrowLeft'){setValue(current-d);e.preventDefault();}});
- render();wrap._oiMidi={id:midiId||('HW:'+label),label,get:()=> (current-min)/(max-min||1),set:v=>setValue(min+v*(max-min))};
+ render();wrap._oiMidi={id:midiId||('HW:'+label),label,group,get:()=> (current-min)/(max-min||1),set:v=>setValue(min+v*(max-min))};
  return {el:wrap,getValue:()=>current,setValue};
 }
 
-export function addButton(parent,{x,y,label='',value=false,toggle=true,kind='square',size=27,led='red',onChange=()=>{},midiId,activeText}){
+export function addButton(parent,{x,y,label='',value=false,toggle=true,kind='square',size=27,led='red',onChange=()=>{},midiId,group=''}){
  const wrap=node('button','hp-button hp-button-'+kind,parent);wrap.type='button';
  Object.assign(wrap.style,{left:(x-size/2)+'px',top:(y-size/2)+'px',width:size+'px',height:size+'px'});
  const face=node('span','hp-button-face',wrap),window_=node('span','hp-button-window',face),ledEl=node('i','hp-button-led hp-button-led-'+led,window_);
  if(label){const l=node('span','hp-button-label',wrap.parentElement,label);place(l,x,y+size*.64);}
- let current=!!value;
- const render=()=>{wrap.classList.toggle('is-on',current);wrap.setAttribute('aria-pressed',String(current));};const setValue=(v,silent=false)=>{const n=!!v;if(n===current)return;current=n;render();if(!silent)onChange(n);};
+ let current=!!value;wrap.tabIndex=0;wrap.setAttribute('role','slider');wrap.setAttribute('aria-label',label||'Switch');wrap.setAttribute('aria-valuemin','0');wrap.setAttribute('aria-valuemax','1');
+ const render=()=>{wrap.classList.toggle('is-on',current);wrap.setAttribute('aria-pressed',String(current));wrap.setAttribute('aria-valuenow',current?'1':'0');};const setValue=(v,silent=false)=>{const n=!!v;if(n===current)return;current=n;render();if(!silent)onChange(n);};
  wrap.addEventListener('click',()=>{if(toggle)setValue(!current);else onChange(true);});
- render();wrap._oiMidi={id:midiId||('HW:'+label),label,get:()=>current?1:0,set:v=>setValue(v>=.5)};
+ render();wrap._oiMidi={id:midiId||('HW:'+label),label,group,get:()=>current?1:0,set:v=>setValue(v>=.5)};
  return {el:wrap,getValue:()=>current,setValue};
 }
 
