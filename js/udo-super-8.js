@@ -8,20 +8,20 @@ const NOTE_NAMES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
 const NOTES=Array.from({length:61},(_,i)=>{const n=36+i;return NOTE_NAMES[n%12]+(Math.floor(n/12)-1);});
 const clone=o=>JSON.parse(JSON.stringify(o));
 const LAYER={
- dds1Wave:'saw',altA:0,altB:1,waveMod:0,waveModSource:'Manual',superMode:'off',detune:.16,pwDrift:.1,
- dds2Wave:'saw',dds2Octave:0,dds2Tune:0,dds2Mode:'normal',crossMod:0,subMode:'off',subLevel:.18,
- mix:.5,pan:.5,hpf:.04,cutoff:.72,resonance:.16,drive:'off',keyTrack:'on',filterMod:'env1',
+ dds1Wave:'saw',dds1Range:8,altA:0,altB:1,waveMod:0,waveModSource:'Manual',superMode:'off',detune:.16,pwDrift:.1,lfo1PitchAmount:0,env1PitchAmount:0,oscPitchDestination:'1+2',
+ dds2Wave:'saw',dds2Range:8,dds2Tune:0,dds2Mode:'normal',crossMod:0,subMode:'sine',
+ mix:.5,pan:.5,hpf:.04,cutoff:.72,resonance:.16,drive:'off',keyTrack:'on',filterMod:'env1',filterLfoAmount:0,filterOscAmount:0,
  env1Attack:.08,env1AttackHold:0,env1DecayHold:0,env1Decay:.25,env1Sustain:.6,env1Release:.35,env1Loop:false,env1KeyTrack:0,
  env2Attack:.02,env2DecayHold:0,env2Decay:.32,env2Sustain:.78,env2Release:.3,
- lfo1Rate:.15,lfo1Delay:0,lfo1Wave:'sine',lfo1Mode:'reset',lfo1HighFreq:false,lrPhase:0,
- lfo2Rate:.15,lfo2Delay:0,lfo2Wave:'triangle',lfo2Destination:'filter',lfo2Amount:0,lfo2Bender:false,lfo2Aftertouch:false,
+ lfo1Rate:.15,lfo1Delay:0,lfo1Wave:'sine',lfo1Mode:'free',lfo1HighFreq:false,lfo1KeyTrack:false,lrPhase:0,
+ lfo2Rate:.15,lfo2Delay:0,lfo2Wave:'sine',lfo2Mode:'trig',lfo2RateAmount:1,lfo2Dds:0,lfo2Vcf:0,lfo2Vca:0,benderDds:.5,benderVcf:0,benderOsc:'1+2',
  chorus:'off',chorusMix:.25,delayTime:.28,delayFeedback:.25,delayMod:.1,delaySync:false,delayFreeze:false,
  voiceMode:'poly1',unison:'off',modMatrix:Array(64).fill(0),
  seqEnabled:false,seqLength:16,seqMode:'step',seqSteps:Array(64).fill(null),seqSlides:Array(64).fill(false),seqAccents:Array(64).fill(false),seqGates:Array(64).fill(.75),seqSwing:0,seqBpm:120,
  arpEnabled:false,arpMode:'up',arpDivision:4,arpRange:1,arpSwing:0,arpHold:false,
- portamento:0,transpose:0,bendRange:2,velocity:1,aftertouch:0
+ portamento:0,transpose:0,bendRange:2,velocity:'off',aftertouch:0
 };
-const GLOBAL={mode:'single',activeLayer:0,splitPoint:60,binaural:true,mpe:true,volume:.72,distortion:0,benderX:0,benderY:0,expression:1};
+const GLOBAL={mode:'single',activeLayer:0,splitPoint:60,binaural:true,mpe:true,volume:.72,benderX:0,benderY:0,expression:1};
 function cleanLayer(d={}){const p={...clone(LAYER),...d};p.modMatrix=Array.from({length:64},(_,i)=>Number(d.modMatrix?.[i])||0);p.seqSteps=Array.from({length:64},(_,i)=>d.seqSteps?.[i]??null);p.seqSlides=Array.from({length:64},(_,i)=>!!d.seqSlides?.[i]);p.seqAccents=Array.from({length:64},(_,i)=>!!d.seqAccents?.[i]);p.seqGates=Array.from({length:64},(_,i)=>Math.max(.05,Math.min(1,Number(d.seqGates?.[i]??.75))));return p;}
 function validate(d){
  if(!d||typeof d!=='object')throw new Error('Not a Super 8 performance.');
@@ -318,50 +318,74 @@ class Super8App{
   this.hwDisplay=addDisplay(p,{x:1115,y:20,w:225,h:36,brand:'PERFORMANCE / PROGRAM',skin:'amber'});this.hwDisplay.set('P 001','OVERTURE PERFORMANCE');
   addButton(p,{x:1550,y:36,label:'POWER',value:false,size:25,group:'GLOBAL',onChange:v=>{if(v)document.getElementById('super8-power').click();}});
   // Top strip mirrors the silver Super 8's real left-to-right signal path.
-  panelSection(15,72,97,226,'MASTER','VOLUME / DISTORTION');
-  knob('volume','MASTER VOLUME',63,150,{global:true,group:'MASTER',size:63});
-  knob('distortion','DISTORTION',63,235,{global:true,group:'MASTER',size:54});
-  panelSection(116,72,140,226,'LFO 1','RATE / DEPTH / SHAPE');
-  knob('lfo1Rate','RATE',158,150,{group:'LFO 1'});knob('lfo1Delay','DELAY',215,150,{group:'LFO 1'});
-  sel('lfo1Wave','WAVE',185,205,['sine','triangle','saw','reverseSaw','square'],{width:112,group:'LFO 1'});
-  btn('lfo1HighFreq','HIGH FREQ',185,269,{group:'LFO 1',size:22});
-  panelSection(260,72,150,226,'DDS MODULATOR','WAVE MORPH / DESTINATION');
-  sel('waveModSource','SOURCE',335,114,['Manual','LFO 1','ENV 1'],{width:104,group:'DDS MODULATOR'});
-  knob('waveMod','WAVE MOD',335,190,{group:'DDS MODULATOR',size:60});
-  btn('lfo2Bender','BENDER',305,268,{group:'DDS MODULATOR'});btn('lfo2Aftertouch','AFTERTOUCH',370,268,{group:'DDS MODULATOR'});
-  panelSection(414,72,202,226,'DDS 1','FPGA OSCILLATOR · SUPER / ALTERNATIVE WAVES');
-  sel('dds1Wave','WAVE',485,114,['sine','saw','square','triangle','whiteNoise','altA','altB'],{width:120,group:'DDS 1'});
-  sel('altA','WAVE A',462,161,Array.from({length:64},(_,i)=>i),{width:82,group:'DDS 1'});
-  sel('altB','WAVE B',562,161,Array.from({length:64},(_,i)=>i),{width:82,group:'DDS 1'});
-  sel('superMode','SUPER MODE',470,218,['off','half','on'],{width:100,group:'DDS 1'});knob('detune','DETUNE',550,250,{group:'DDS 1'});
-  knob('pwDrift','PW DRIFT',605,250,{group:'DDS 1',size:51});
-  panelSection(620,72,204,226,'DDS 2','OSCILLATOR · SUB / CROSS MOD / SYNC');
-  sel('dds2Wave','WAVE',685,114,['sine','saw','square','triangle','whiteNoise','pulse'],{width:112,group:'DDS 2'});
-  sel('dds2Octave','OCTAVE',782,114,[-2,-1,0,1,2],{width:72,group:'DDS 2'});
-  sel('dds2Mode','MODE',685,161,['normal','sync','ring'],{width:112,group:'DDS 2'});
-  sel('subMode','SUB OSC',782,161,['off','sine','square'],{width:72,group:'DDS 2'});
-  knob('dds2Tune','FINE',670,250,{min:-7,max:7,step:.01,group:'DDS 2'});
-  knob('crossMod','CROSS MOD',735,250,{group:'DDS 2'});
-  knob('subLevel','SUB LEVEL',800,250,{group:'DDS 2',size:51});
+  panelSection(15,72,97,226,'MASTER','MASTER VOLUME');
+  knob('volume','MASTER VOLUME',63,173,{global:true,group:'MASTER',size:66});
+  panelSection(116,72,140,226,'LFO 1','RATE · DELAY · PHASE · MODE');
+  knob('lfo1Rate','RATE',149,150,{group:'LFO 1',size:49});
+  knob('lfo1Delay','DELAY',222,150,{group:'LFO 1',size:49});
+  knob('lrPhase','LR PHASE',149,222,{group:'LFO 1',size:46});
+  sel('lfo1Wave','WAVEFORM',222,218,['sine','triangle','reverseSaw','sampleHold','square','saw'],{width:78,group:'LFO 1'});
+  sel('lfo1Mode','MODE',150,269,['free','once','reset'],{width:82,group:'LFO 1'});
+  btn('lfo1HighFreq','HF',222,273,{group:'LFO 1',size:18});
+  btn('lfo1KeyTrack','HF TRACK',179,296,{group:'LFO 1',size:18});
+  panelSection(260,72,150,226,'DDS MODULATOR','LFO 1 / ENV 1 / WAVE MORPH');
+  fader('lfo1PitchAmount','LFO 1 DDS',282,132,{height:84,width:16});
+  fader('env1PitchAmount','ENV 1 DDS',313,132,{height:84,width:16});
+  sel('oscPitchDestination','PITCH DEST',365,114,['DDS 1','1+2','DDS 2'],{width:74,group:'DDS MODULATOR'});
+  sel('waveModSource','WAVE SOURCE',364,168,['Manual','LFO 1','ENV 1'],{width:78,group:'DDS MODULATOR'});
+  knob('waveMod','WAVE / PWM',365,250,{group:'DDS MODULATOR',size:45});
+  panelSection(414,72,202,226,'DDS 1','FPGA OSCILLATOR · 32 ALTERNATIVE WAVES');
+  sel('dds1Wave','WAVEFORM',480,114,['sine','saw','square','triangle','whiteNoise','altA','altB'],{width:116,group:'DDS 1'});
+  sel('dds1Range','RANGE',480,162,[64,32,16,8,4,2],{width:86,group:'DDS 1'});
+  sel('altA','WAVE A',460,211,Array.from({length:32},(_,i)=>i+1),{width:78,group:'DDS 1'});
+  sel('altB','WAVE B',562,211,Array.from({length:32},(_,i)=>i+1),{width:78,group:'DDS 1'});
+  sel('superMode','SUPER MODE',470,258,['off','half','on'],{width:92,group:'DDS 1'});
+  knob('detune','DETUNE',542,276,{group:'DDS 1',size:43});
+  knob('pwDrift','PW DRIFT',603,276,{group:'DDS 1',size:43});
+  panelSection(620,72,204,226,'DDS 2','FPGA OSCILLATOR · MODES / SUB');
+  sel('dds2Wave','WAVEFORM',685,114,['sine','saw','square','triangle','whiteNoise','pulse'],{width:108,group:'DDS 2'});
+  sel('dds2Range','RANGE',782,114,[32,16,8,4,2,'LFO'],{width:72,group:'DDS 2'});
+  sel('dds2Mode','MODE',685,161,['normal','sync','ring','sub'],{width:108,group:'DDS 2'});
+  sel('subMode','SUB WAVE',782,161,['sine','square'],{width:72,group:'DDS 2'});
+  knob('dds2Tune','FINE TUNE',670,252,{min:-7,max:7,step:.01,group:'DDS 2',size:44});
+  knob('crossMod','CROSS MOD',742,252,{group:'DDS 2',size:44});
+  knob('dds2WaveMod','PWM',806,252,{group:'DDS 2',size:40});
   panelSection(828,72,112,226,'MIXER','DDS 1 / DDS 2');
-  fader('mix','DDS BALANCE',854,142,{height:95,width:18});fader('pan','PAN',910,142,{height:95,width:18});
+  this.hwMixPan=false;
+  this.hwMixKnob=addKnob(p,{x:884,y:177,label:'MIX',min:0,max:1,value:this.p().mix,size:62,group:'MIXER',midiId:'SUPER8:L'+this.active+':mix',onChange:v=>this.set(this.hwMixPan?'pan':'mix',v)});
+  this.hwControls.knobs.push({key:'mix-pan',control:this.hwMixKnob});this.hwControls.all.push(this.hwMixKnob);
+  this.hwMixLabel=addLabel(p,884,228,'DDS 1  ←  →  DDS 2');
+  this.hwMixPanButton=addButton(p,{x:884,y:265,label:'SHIFT · PAN',value:false,size:18,group:'MIXER',midiId:'SUPER8:mix-pan-mode',onChange:v=>{this.hwMixPan=v;this.hwMixKnob.setValue(this.p()[v?'pan':'mix'],true);this.hwMixKnob.el._oiMidi.id='SUPER8:L'+this.active+':'+(v?'pan':'mix');this.hwMixKnob.el._oiMidi.label=v?'Layer Pan':'Oscillator Mix';this.hwMixKnob.el._oiMidi.get=()=>this.p()[v?'pan':'mix'];this.hwMixKnob.el._oiMidi.set=x=>this.set(v?'pan':'mix',x);this.hwMixLabel.textContent=v?'PAN · LAYER POSITION':'DDS 1  ←  →  DDS 2';}});
   panelSection(944,72,206,226,'VCF','ANALOG HPF / 4-POLE LPF');
-  knob('hpf','HPF',980,172,{group:'VCF',size:55});knob('cutoff','LPF CUTOFF',1045,172,{group:'VCF',size:55});knob('resonance','RESONANCE',1110,172,{group:'VCF',size:55});
-  sel('drive','DRIVE',982,226,['off','1','2'],{width:82,group:'VCF'});sel('keyTrack','KEY TRACK',1080,226,['off','half','on'],{width:92,group:'VCF'});sel('filterMod','ENV MOD',1110,265,['env1','env2','both'],{width:85,group:'VCF'});
-  panelSection(1154,72,103,226,'VCA','LEVEL / VELOCITY');
-  knob('velocity','VELOCITY',1205,160,{group:'VCA',size:60});
-  panelSection(1261,72,220,226,'ENVELOPES','ENVELOPE 1 MODULATION / ENVELOPE 2 AMP');
-  addLabel(p,1310,111,'ENV 1');addLabel(p,1426,111,'ENV 2');
-  const env1=[['env1Attack','ATK'],['env1AttackHold','A-HOLD'],['env1DecayHold','D-HOLD'],['env1Decay','DEC'],['env1Sustain','SUS'],['env1Release','REL']];
-  const env2=[['env2Attack','ATK'],['env2DecayHold','D-HOLD'],['env2Decay','DEC'],['env2Sustain','SUS'],['env2Release','REL']];
-  env1.forEach(([key,label],i)=>knob(key,label,1278+(i%3)*39,174+Math.floor(i/3)*67,{size:36,group:'ENVELOPE 1'}));
-  env2.forEach(([key,label],i)=>knob(key,label,1390+(i%3)*39,174+Math.floor(i/3)*67,{size:36,group:'ENVELOPE 2'}));
-  addButton(p,{x:1370,y:127,label:'ENV 1 LOOP',value:!!this.p().env1Loop,size:17,group:'ENVELOPE 1',onChange:v=>this.set('env1Loop',v)});
+  fader('hpf','HPF',970,146,{height:88,width:16});
+  fader('cutoff','LPF',1004,146,{height:88,width:16});
+  fader('resonance','RES',1038,146,{height:88,width:16});
+  fader('filterLfoAmount','LFO 1',1072,146,{height:88,width:16});
+  fader('filterOscAmount','DDS 2',1106,146,{height:88,width:16});
+  sel('drive','DRIVE',978,247,['off','1','2'],{width:70,group:'VCF'});
+  sel('keyTrack','KEY TRACK',1060,247,['off','half','on'],{width:80,group:'VCF'});
+  sel('filterMod','ENV SOURCE',1120,269,['env1','both','env2'],{width:76,group:'VCF'});
+  panelSection(1154,72,103,226,'VCA','KEY VELOCITY');
+  sel('velocity','RESPONSE',1205,166,['off','half','on'],{width:84,group:'VCA'});
+  panelSection(1261,72,220,226,'ENVELOPES','ENV 1 MODULATION / ENV 2 AMP');
+  addLabel(p,1310,111,'ENV 1');addLabel(p,1430,111,'ENV 2');
+  const env1=[['env1Attack','A'],['env1Decay','D'],['env1Sustain','S'],['env1Release','R']];
+  const env2=[['env2Attack','A'],['env2Decay','D'],['env2Sustain','S'],['env2Release','R']];
+  env1.forEach(([key,label],i)=>fader(key,label,1284+i*21,160,{height:72,width:13}));
+  env2.forEach(([key,label],i)=>fader(key,label,1398+i*18,160,{height:72,width:13}));
+  knob('env1AttackHold','A HOLD',1304,251,{size:32,group:'ENVELOPE 1'});
+  knob('env1DecayHold','D HOLD',1349,251,{size:32,group:'ENVELOPE 1'});
+  knob('env2DecayHold','D HOLD',1440,251,{size:32,group:'ENVELOPE 2'});
+  sel('env1KeyTrack','KEY TRACK',1304,126,['off','half','on'],{width:75,group:'ENVELOPE 1'});
+  btn('env1Loop','LOOP',1374,126,{group:'ENVELOPE 1',size:18});
   panelSection(1485,72,180,226,'EFFECTS','STEREO CHORUS / DELAY');
   sel('chorus','CHORUS',1530,114,['off','I','II','both'],{width:95,group:'EFFECTS'});
-  knob('chorusMix','CHORUS MIX',1525,188,{size:42,group:'EFFECTS'});knob('delayTime','DELAY TIME',1605,188,{size:42,group:'EFFECTS'});
-  knob('delayFeedback','FEEDBACK',1525,236,{size:34,group:'EFFECTS'});knob('delayMod','DELAY MOD',1605,236,{size:34,group:'EFFECTS'});
-  btn('delaySync','SYNC',1535,287,{group:'EFFECTS',size:16});btn('delayFreeze','FREEZE',1618,287,{group:'EFFECTS',size:16});
+  knob('chorusMix','CHORUS MIX',1525,188,{size:42,group:'EFFECTS'});
+  knob('delayTime','DELAY TIME',1605,188,{size:42,group:'EFFECTS'});
+  knob('delayFeedback','FEEDBACK',1525,236,{size:34,group:'EFFECTS'});
+  knob('delayMod','DELAY MOD',1605,236,{size:34,group:'EFFECTS'});
+  btn('delaySync','SYNC',1535,287,{group:'EFFECTS',size:16});
+  btn('delayFreeze','FREEZE',1618,287,{group:'EFFECTS',size:16});
   // Second hardware row: mode, layers, sequencer, and arpeggiator.
   panelSection(15,310,1650,128,'LAYER / PERFORMANCE / STEP CONTROL','UPPER AND LOWER PARTS · 64-STEPS PER PART · BINAURAL VOICE MODE');
   addLabel(p,85,345,'EDIT PART');
