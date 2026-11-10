@@ -53,9 +53,39 @@ class Super8App{
   this.engine=new WorkletEngine(new URL('./engine/Super8Processor.js',import.meta.url).href,'super8-processor');
   this.patch=validate({});this.store=new PresetStore({key:'overture.udo-super-8.performances',version:1,validate});
   this.layerStores=[0,1].map(i=>new PresetStore({key:'overture.udo-super-8.layer.'+i,version:1,validate:cleanLayer}));
-  this.active=0;this.ui={};this.build();this.buildHardwarePanel();this.presets.load('f:0');
+  this.active=0;this.ui={};
+  // The reference-style hardware panel is the primary instrument. Do not build
+  // the retired card layout first: its partial construction used to prevent the
+  // actual hardware keyboard and lower control row from ever being reached.
+  this.buildHardwarePanel();
+  this.display=this.hwDisplay;
+  this.display.flash=message=>this.hwDisplay.set(String(message).toUpperCase(),'UDO AUDIO · SUPER 8');
+  this.midi=this.hw.midi;
+  this.presets={load:id=>this.loadPerformance(id)};
+  // Preserve computer-keyboard and external MIDI input without drawing the
+  // retired second keyboard over the visible 61-key hardware bed.
+  this.midiHost=document.createElement('div');
+  this.midiHost.setAttribute('aria-hidden','true');
+  this.midiHost.style.cssText='position:fixed;left:-10000px;top:0;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none';
+  document.body.appendChild(this.midiHost);
+  this.shell=this.midiHost;
+  this.buildKeyboard();
+  this.presets.load('f:0');
   power('super8-power',()=>this.engine.start(),()=>{this.perf.flushPending();this.display.set('SUPER 8 READY','TWO FPGA-STYLE DDS CORES · STEREO OUTPUT');});
   this.postPatch();
+ }
+ loadPerformance(id){
+  let item=null,key=String(id||'f:0');
+  if(key.startsWith('f:'))item=FACTORY[Number(key.slice(2))];
+  else if(key.startsWith('u:'))item=this.store.get(key.slice(2));
+  if(!item)return;
+  const name=item.name||'Untitled Performance';
+  this.patch=validate(clone(item.data));
+  this.selectLayer(this.patch.activeLayer||0);
+  this.display.set(name.toUpperCase(),'OVERTURE PERFORMANCE');
+  this.displayHardwarePreset?.(name);
+  this.refreshHardwarePresetList?.(key);
+  this.syncHardware?.();
  }
  p(){return this.patch.layers[this.active];}
  set(key,value){this.p()[key]=value;this.engine.post({t:'param',layer:this.active,key,value});this.syncHardware?.();}
@@ -256,7 +286,7 @@ class Super8App{
  }
  buildKeyboard(){
   this.perf=performance(this.shell,{notes:NOTES,octaves:5,startOctave:1,wheels:false,started:()=>this.engine.started,midiStatusEl:this.midi,handlers:{
-   noteOn:(n,v,source,channel)=>this.engine.post({t:'noteOn',note:n,vel:v,channel,source}),noteOff:(n,source,channel)=>this.engine.post({t:'noteOff',note:n,channel,source}),
+   noteOn:(n,v,source,channel)=>{this.hwKeyboard?.setActive(n,true);this.engine.post({t:'noteOn',note:n,vel:v,channel,source});},noteOff:(n,source,channel)=>{this.hwKeyboard?.setActive(n,false);this.engine.post({t:'noteOff',note:n,channel,source});},
    bend:(v,channel)=>this.engine.post({t:'bend',value:v,channel}),mod:v=>this.engine.setModWheel(v),aftertouch:(v,channel)=>this.engine.post({t:'at',value:v,channel}),expression:(v,channel)=>this.engine.post({t:'expression',value:v,channel}),
    polyAftertouch:(n,v,channel)=>this.engine.post({t:'polyAt',note:n,value:v,channel}),sustain:d=>this.engine.setSustain(d),allOff:()=>this.engine.allNotesOff(),
    program:p=>this.presets.load('f:'+p%FACTORY.length),clock:()=>this.engine.post({t:'clock'}),start:()=>this.engine.post({t:'transport',layer:this.active,play:true}),continue:()=>this.engine.post({t:'transport',layer:this.active,play:true}),stop:()=>this.engine.post({t:'transport',layer:this.active,play:false}),cc:(cc,v,channel)=>{if(cc===7)this.setGlobal('volume',v/127);if(cc===11)this.engine.post({t:'expression',value:v/127,channel});if(cc===74)this.engine.post({t:'mpeSlide',value:v/127,channel});}
@@ -264,7 +294,6 @@ class Super8App{
  }
 
  buildHardwarePanel(){
-  this.page.classList.add('hp-legacy-hidden');
   const root=document.getElementById('super8-root');
   const hw=createHardwareSurface(root,{id:'udo-super-8',width:1680,height:770,skin:'super8',programLabel:'SUPER 8 · INITIAL PERFORMANCE'});
   this.hw=hw;const p=hw.instrument;
@@ -455,7 +484,7 @@ class Super8App{
   const finishBender=e=>{if(e.pointerId!==benderPointer)return;benderPointer=null;this.patch.benderX=0;this.patch.benderY=0;renderBender();this.engine.post({t:'bendAxis',x:0,y:0});};pad.addEventListener('pointerup',finishBender);pad.addEventListener('pointercancel',finishBender);
   pad.addEventListener('keydown',e=>{const step=e.shiftKey?.2:.05;if(e.key==='ArrowLeft')this.patch.benderX-=step;else if(e.key==='ArrowRight')this.patch.benderX+=step;else if(e.key==='ArrowUp')this.patch.benderY+=step;else if(e.key==='ArrowDown')this.patch.benderY-=step;else return;this.patch.benderX=Math.max(-1,Math.min(1,this.patch.benderX));this.patch.benderY=Math.max(0,Math.min(1,this.patch.benderY));renderBender();this.engine.post({t:'bendAxis',x:this.patch.benderX,y:this.patch.benderY});e.preventDefault();});
   this.hwBenderPad=pad;this.renderHardwareBender=renderBender;renderBender();
-  addKeyboard(p,{x:255,y:548,w:1395,h:202,firstNote:36,count:61,keyColor:'amber',onNoteOn:(n,v)=>this.engine.post({t:'noteOn',note:n,vel:v,source:'ui'}),onNoteOff:n=>this.engine.post({t:'noteOff',note:n,source:'ui'}),onAftertouch:(n,v)=>this.engine.post({t:'polyAt',note:n,value:v,channel:1})});
+  this.hwKeyboard=addKeyboard(p,{x:255,y:548,w:1395,h:202,firstNote:36,count:61,keyColor:'amber',onNoteOn:(n,v)=>this.engine.post({t:'noteOn',note:n,vel:v,source:'ui'}),onNoteOff:n=>this.engine.post({t:'noteOff',note:n,source:'ui'}),onAftertouch:(n,v)=>this.engine.post({t:'polyAt',note:n,value:v,channel:1})});
   // Preset and layer-memory controls remain in the visible front panel.
   const hardwareFooter=document.createElement('div');hardwareFooter.className='hp-super8-hardware-footer';
   hardwareFooter.style.cssText='display:flex;align-items:center;justify-content:flex-start;gap:8px;flex-wrap:wrap;width:100%;padding:6px 9px;border:1px solid #9aa4a9;border-radius:3px;background:linear-gradient(#d7dde0,#bac3c8);box-shadow:0 2px 5px #0002';
