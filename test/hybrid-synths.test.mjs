@@ -128,7 +128,7 @@ test('UDO Super 8 single mode exposes sixteen mono voices or eight binaural supe
 
 test('shared hardware faders always have a defined MIDI target group', async () => {
   const helper = await readFile(new URL('../js/shared/hardwarePanel.js', import.meta.url), 'utf8');
-  assert.match(helper, /export function addFader\(parent,\{[^}]*group=''/);
+  assert.ok(helper.includes("export function addFader(parent,{x,y,label,min=0,max=1,value=0,height=92,width=32,orientation='vertical',small=false,onChange=()=>{},formatValue=v=>Number(v).toFixed(2),midiId,group=''}){"), 'addFader defines a default MIDI target group');
   assert.match(helper, /wrap\._oiMidi=\{id:midiId\|\|\('HW:'\+label\),label,group,get:/);
   const [pro, super8] = await Promise.all([
     readFile(new URL('../js/sequential-pro-3.js', import.meta.url), 'utf8'),
