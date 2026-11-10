@@ -151,7 +151,7 @@ export function addKeyboard(parent,{x,y,w,h,firstNote=36,count=37,onNoteOn=()=>{
 
 export function addWheel(parent,{x,y,label,min=0,max=1,value=0,height=105,onChange=()=>{},spring=false,midiId}){
  const wrap=node('div','hp-wheel-wrap',parent);Object.assign(wrap.style,{left:(x-21)+'px',top:y+'px',width:'42px',height:(height+25)+'px'});
- const slot=node('div','hp-wheel-slot',wrap),track=node('div','hp-wheel-track',slot),cap=node('div','hp-wheel-cap',track);
+ const slot=node('div','hp-wheel-slot',wrap),track=node('div','hp-wheel-track',slot),cap=node('div','hp-wheel-cap',track);wrap.tabIndex=0;wrap.setAttribute('role','slider');wrap.setAttribute('aria-label',label);wrap.setAttribute('aria-valuemin',min);wrap.setAttribute('aria-valuemax',max);
  for(let i=0;i<9;i++)node('i','hp-wheel-ridge',cap);
  node('span','hp-control-label hp-wheel-label',wrap,label);
  let current=clamp(value,min,max),pid=null;
@@ -160,12 +160,13 @@ export function addWheel(parent,{x,y,label,min=0,max=1,value=0,height=105,onChan
  const move=e=>{if(pid!==e.pointerId)return;const r=slot.getBoundingClientRect();const scale=slot.closest('.hp-instrument')?.getBoundingClientRect().width/(Number(slot.closest('.hp-instrument')?.style.width.replace('px',''))||1)||1;const t=1-clamp((e.clientY-r.top)/(r.height||1),0,1);setValue(min+t*(max-min));};
  slot.addEventListener('pointerdown',e=>{if(e.button!==0)return;pid=e.pointerId;slot.setPointerCapture?.(pid);move(e);e.preventDefault();});slot.addEventListener('pointermove',move);
  const release=e=>{if(e.pointerId!==pid)return;pid=null;if(spring)setValue(0);};slot.addEventListener('pointerup',release);slot.addEventListener('pointercancel',release);
- wrap._oiMidi={id:midiId||('HW:'+label),label,get:()=> (current-min)/(max-min||1),set:v=>setValue(min+v*(max-min))};
+ wrap.addEventListener('keydown',e=>{const step=(max-min)*.02;if(e.key==='ArrowUp'||e.key==='ArrowRight'){setValue(current+step);e.preventDefault();}else if(e.key==='ArrowDown'||e.key==='ArrowLeft'){setValue(current-step);e.preventDefault();}else return;});
+ wrap._oiMidi={id:midiId||('HW:'+label),label,group:'PERFORMANCE',get:()=> (current-min)/(max-min||1),set:v=>setValue(min+v*(max-min))};
  render();return {el:wrap,getValue:()=>current,setValue};
 }
 
 export function addTouchStrip(parent,{x,y,w=25,h=120,value=0,onChange=()=>{},label='TOUCH'}){
- const wrap=node('div','hp-touch-wrap',parent);Object.assign(wrap.style,{left:(x-w/2)+'px',top:y+'px',width:w+'px',height:(h+23)+'px'});
+ const wrap=node('div','hp-touch-wrap',parent);Object.assign(wrap.style,{left:(x-w/2)+'px',top:y+'px',width:w+'px',height:(h+23)+'px'});wrap.tabIndex=0;wrap.setAttribute('role','slider');wrap.setAttribute('aria-label',label);wrap.setAttribute('aria-valuemin','0');wrap.setAttribute('aria-valuemax','1');
  const rail=node('div','hp-touch-rail',wrap),levels=node('div','hp-touch-levels',rail),dot=node('i','hp-touch-dot',rail);for(let i=0;i<9;i++)node('i','hp-touch-led',levels);
  node('span','hp-control-label hp-touch-label',wrap,label);
  let current=clamp(value),pid=null;
@@ -173,6 +174,8 @@ export function addTouchStrip(parent,{x,y,w=25,h=120,value=0,onChange=()=>{},lab
  const setValue=(v,silent=false)=>{current=clamp(v);render();if(!silent)onChange(current);};
  const move=e=>{if(pid!==e.pointerId)return;const r=rail.getBoundingClientRect();setValue(1-clamp((e.clientY-r.top)/(r.height||1),0,1));};
  rail.addEventListener('pointerdown',e=>{pid=e.pointerId;rail.setPointerCapture?.(pid);move(e);e.preventDefault();});rail.addEventListener('pointermove',move);const up=e=>{if(e.pointerId!==pid)return;pid=null;};rail.addEventListener('pointerup',up);rail.addEventListener('pointercancel',up);
+ wrap.addEventListener('keydown',e=>{const step=e.shiftKey?.1:.02;if(e.key==='ArrowUp'||e.key==='ArrowRight'){setValue(current+step);e.preventDefault();}else if(e.key==='ArrowDown'||e.key==='ArrowLeft'){setValue(current-step);e.preventDefault();}});
+ wrap._oiMidi={id:'HW:'+label,label,group:'PERFORMANCE',get:()=>current,set:v=>setValue(v)};
  return {el:wrap,getValue:()=>current,setValue};
 }
 
