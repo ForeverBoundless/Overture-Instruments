@@ -20,7 +20,8 @@ export function createHardwareSurface(root,{id,width,height,skin='pro3',programL
   // Never fit the entire chassis to viewport height. The hardware remains at
   // its natural proportions and the document scrolls vertically.
   const availableWidth=Math.max(320,window.innerWidth-32);
-  const scale=Math.min(1,availableWidth/width);
+  const availableHeight=Math.max(420,window.innerHeight-80);
+  const scale=Math.min(1,availableWidth/width,availableHeight/height);
   instrument.style.transform='scale('+scale+')';instrument.style.setProperty('--hp-scale',String(scale));
   frame.style.width=(width*scale)+'px';
   frame.style.height=(height*scale)+'px';
