@@ -75,3 +75,64 @@
 .hp-surface-model{font:800 22px InterLocal,sans-serif;letter-spacing:.1em;color:var(--hp-ink)}
 .hp-power{position:fixed;left:-10000px}
 @media(max-width:700px){.hp-info{font-size:8px;gap:6px}.hp-info-program{max-width:34vw}.hp-preset-strip select{min-width:100px}}
+
+
+/* -------------------------------------------------------------------------
+   Hardware-panel layout correction (v2)
+   The chassis is scaled to width, never height. Short screens scroll vertically.
+   ------------------------------------------------------------------------- */
+html,body{min-height:100%;height:auto;overflow-x:hidden;overflow-y:auto}
+body.pn-body.hp-pro3-body,body.pn-body.hp-super8-body{min-height:100vh;overflow-x:hidden;overflow-y:auto}
+.hp-root{width:100%;min-height:100vh;height:auto;display:flex;align-items:flex-start;justify-content:center;padding:12px 8px 36px;box-sizing:border-box}
+.hp-stage{display:flex;flex:0 0 auto;flex-direction:column;align-items:center;width:max-content;max-width:100%;gap:8px}
+.hp-info{min-height:34px;padding:5px 11px;gap:12px;border-radius:5px;font-size:10px}
+.hp-info-left{flex:1;min-width:0}
+.hp-info-mid{flex:0 0 auto}
+.hp-info-program{font-size:12px;letter-spacing:.02em}
+.hp-overture-mark{width:22px;height:22px}
+.hp-instrument{overflow:hidden;contain:layout paint;box-sizing:border-box}
+.hp-section{box-sizing:border-box;overflow:visible;z-index:1}
+.hp-section-head{height:26px;padding:0 7px;gap:7px}
+.hp-section-title{font-size:10px;letter-spacing:.13em}
+.hp-section-sub{font-size:7px;letter-spacing:.04em}
+.hp-section-inner{height:calc(100% - 27px);overflow:visible}
+.hp-label{font-size:9px;line-height:1.1;letter-spacing:.04em;z-index:3}
+.hp-knob{z-index:3;height:auto;min-height:0}
+.hp-knob-art{display:block;width:100%;height:auto;overflow:visible}
+.hp-knob-value{top:auto;bottom:13px;font-size:7px;line-height:1}
+.hp-control-label{display:block;max-width:100%;font-size:8px;line-height:1.08;letter-spacing:.045em}
+.hp-knob:focus-visible,.hp-fader:focus-visible,.hp-button:focus-visible{outline:2px solid var(--hp-accent);outline-offset:2px}
+.hp-fader{z-index:3}
+.hp-fader-track{width:18px}
+.hp-fader-cap{width:34px;height:14px}
+.hp-fader-label{font-size:8px}
+.hp-fader-value{font-size:7px}
+.hp-button{z-index:4;cursor:pointer;touch-action:manipulation}
+.hp-button-label{z-index:5;top:calc(100% + 5px);font-size:7px;letter-spacing:.04em}
+.hp-display{z-index:5}
+.hp-native-select{z-index:5}
+.hp-native-select span{font-size:7px;letter-spacing:.07em}
+.hp-native-select select{height:24px!important;padding:2px 4px!important;max-width:100%;border-radius:2px}
+.hp-keybed{z-index:15;display:block;overflow:hidden;box-sizing:border-box;touch-action:none}
+.hp-key{box-sizing:border-box;appearance:none;-webkit-appearance:none;outline:none;touch-action:none}
+.hp-key-white{z-index:1}
+.hp-key-black{z-index:2}
+.hp-key:focus-visible{outline:2px solid var(--hp-accent);outline-offset:-2px}
+.hp-key-mark{font-size:7px;font-weight:600}
+.hp-wheel-wrap{z-index:8}
+.hp-wheel-slot{touch-action:none}
+.hp-wheel-label{font-size:8px}
+.hp-touch-wrap{z-index:8}
+.hp-preset-strip{z-index:20}
+.hp-preset-strip button,.hp-preset-strip select{height:26px;font-size:8px}
+.hp-preset-strip select{min-width:185px}
+.hp-surface-brand{z-index:5}
+.hp-legacy-hidden{display:none!important}
+@media(max-width:700px){
+ .hp-root{padding:8px 4px 24px;justify-content:flex-start}
+ .hp-info{font-size:8px;gap:5px}
+ .hp-info-program{font-size:9px;max-width:40vw}
+ .hp-info-midi{font-size:7px}
+ .hp-info-status{display:none}
+ .hp-preset-strip select{min-width:110px}
+}
