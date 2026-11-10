@@ -408,7 +408,9 @@ class Super8Processor extends AudioWorkletProcessor{
     [l,r]=this.effects(l,r,p,layer,dt);
     lMix+=l;rMix+=r;
    }
-   L[i]=lMix*this.global.volume;R[i]=rMix*this.global.volume;
+   const masterDrive=1+Math.pow(clamp(this.global.distortion||0),1.6)*19;
+   L[i]=Math.tanh(lMix*masterDrive*.85)*this.global.volume;
+   R[i]=Math.tanh(rMix*masterDrive*.85)*this.global.volume;
   }
   return true;
  }
