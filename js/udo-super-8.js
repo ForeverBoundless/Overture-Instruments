@@ -492,13 +492,6 @@ class Super8App{
    this.refreshLayerSelect();this.renderHardwareSeq();this.refreshHardwareLayerList();this.renderHardwareMatrix?.();
   };
   this.refreshHardwarePresetList('f:0');this.refreshHardwareLayerList=()=>{this.hwLayerPresets.replaceChildren();this.layerStores[this.active].items.forEach(item=>{const o=document.createElement('option');o.value=item.id;o.textContent='LAYER · '+item.name;this.hwLayerPresets.appendChild(o);});};this.syncHardware();
-  this.matrixDialog=document.createElement('dialog');this.matrixDialog.className='hp-super8-matrix-dialog';
-  this.matrixDialog.innerHTML='<form method="dialog"><header><strong>8 × 8 MODULATION MATRIX</strong><button>×</button></header><p>Rows are modulation sources; columns are destinations. Click a cell to cycle + depth, − depth, and off.</p><div class="hp-super8-matrix-grid"></div></form>';
-  const grid=this.matrixDialog.querySelector('.hp-super8-matrix-grid');
-  SOURCE_NAMES.forEach((source,s)=>{for(let d=0;d<8;d++){const i=s*8+d,b=document.createElement('button');b.type='button';b.textContent=String.fromCharCode(65+d);b.title=source+' → '+DEST_NAMES[d];b.addEventListener('click',()=>{const old=this.p().modMatrix[i]||0;this.p().modMatrix[i]=old===0?.6:old>0?-.6:0;b.dataset.value=String(this.p().modMatrix[i]);b.textContent=this.p().modMatrix[i]>0?'+':this.p().modMatrix[i]<0?'−':String.fromCharCode(65+d);this.engine.post({t:'param',layer:this.active,key:'modMatrix',value:this.p().modMatrix});});grid.appendChild(b);}});
-  this.matrixDialog.addEventListener('close',()=>{});
-  p.appendChild(this.matrixDialog);
-  this.toggleHardwareMatrix=()=>{if(this.matrixDialog.open)this.matrixDialog.close();else this.matrixDialog.showModal();};
   this.hwControls.all.push({el:pad,_oiMidi:{id:'SUPER8:G:benderX',label:'Bender X · Pitch',group:'PERFORMANCE',get:()=>((this.patch.benderX+1)/2),set:v=>{this.patch.benderX=v*2-1;this.renderHardwareBender();this.engine.post({t:'bendAxis',x:this.patch.benderX,y:this.patch.benderY});}}});
   this.hwControls.all.push({el:pad,_oiMidi:{id:'SUPER8:G:benderY',label:'Bender Y · Modulation',group:'PERFORMANCE',get:()=>this.patch.benderY,set:v=>{this.patch.benderY=Math.max(0,Math.min(1,v));this.renderHardwareBender();this.engine.post({t:'bendAxis',x:this.patch.benderX,y:this.patch.benderY});}}});
   this.matrixDialog=document.createElement('dialog');this.matrixDialog.className='hp-super8-matrix-dialog';
