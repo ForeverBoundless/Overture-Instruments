@@ -382,7 +382,7 @@ class Super8App{
   }
   // Lower-left controller block and a continuous 61-note Fatar keybed.
   panelSection(15,542,230,212,'LFO 2 / BENDER','MODULATION / TWO-AXIS CONTROL');
-  knob('lfo2Rate','LFO 2 RATE',72,606,{size:45,group:'LFO 2'});knob('lfo2Amount','LFO 2 AMOUNT',180,606,{size:45,group:'LFO 2'});
+  knob('lfo2Rate','RATE',58,606,{size:42,group:'LFO 2'});knob('lfo2Delay','DELAY',130,606,{size:42,group:'LFO 2'});knob('lfo2Amount','AMOUNT',202,606,{size:42,group:'LFO 2'});
   sel('lfo2Wave','LFO 2 SHAPE',70,658,['sine','triangle','saw','reverseSaw','square'],{width:92,group:'LFO 2'});
   sel('lfo2Destination','DESTINATION',174,658,['DDS 1 pitch','DDS 2 pitch','Both pitch','Filter','Amp'],{width:108,group:'LFO 2'});
   // The Super 8's bender is a two-axis touch surface, not two independent sliders.
@@ -394,7 +394,7 @@ class Super8App{
   p.appendChild(pad);p.appendChild(padCaption);
   padCaption.style.cssText='position:absolute;left:80px;top:747px;width:100px;text-align:center;font:6px DM Mono,monospace;color:var(--hp-muted)';
   const renderBender=()=>{padDot.style.left=((this.patch.benderX+1)*50)+'%';padDot.style.top=((1-this.patch.benderY)*50)+'%';pad.setAttribute('aria-label','Bender X '+this.patch.benderX.toFixed(2)+', Y '+this.patch.benderY.toFixed(2));};
-  const updateBender=(e)=>{const rect=pad.getBoundingClientRect();this.patch.benderX=Math.max(-1,Math.min(1,((e.clientX-rect.left)/(rect.width||1))*2-1));this.patch.benderY=Math.max(-1,Math.min(1),1-((e.clientY-rect.top)/(rect.height||1))*2);renderBender();this.engine.post({t:'bendAxis',x:this.patch.benderX,y:this.patch.benderY});};
+  const updateBender=(e)=>{const rect=pad.getBoundingClientRect();this.patch.benderX=Math.max(-1,Math.min(1,((e.clientX-rect.left)/(rect.width||1))*2-1));this.patch.benderY=Math.max(-1,Math.min(1,1-((e.clientY-rect.top)/(rect.height||1))*2));renderBender();this.engine.post({t:'bendAxis',x:this.patch.benderX,y:this.patch.benderY});};
   let benderPointer=null;
   pad.addEventListener('pointerdown',e=>{benderPointer=e.pointerId;pad.setPointerCapture?.(e.pointerId);updateBender(e);e.preventDefault();});
   pad.addEventListener('pointermove',e=>{if(e.pointerId===benderPointer)updateBender(e);});
