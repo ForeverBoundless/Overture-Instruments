@@ -9,12 +9,12 @@ const NOTES=Array.from({length:61},(_,i)=>{const n=36+i;return NOTE_NAMES[n%12]+
 const clone=o=>JSON.parse(JSON.stringify(o));
 const LAYER={
  dds1Wave:'saw',dds1Range:8,altA:0,altB:1,waveMod:0,waveModSource:'Manual',superMode:'off',detune:.16,pwDrift:.1,lfo1PitchAmount:0,env1PitchAmount:0,oscPitchDestination:'1+2',
- dds2Wave:'saw',dds2Range:8,dds2Tune:0,dds2Mode:'normal',crossMod:0,subMode:'sine',dds2WaveMod:0,
+ dds2Wave:'saw',dds2Range:8,dds2Tune:0,dds2Mode:'normal',crossMod:0,subMode:'sine',dds2WaveMod:.5,
  mix:.5,pan:.5,hpf:.04,cutoff:.72,resonance:.16,drive:'off',keyTrack:'on',filterMod:'env1',filterLfoAmount:0,filterOscAmount:0,
  env1Attack:.08,env1AttackHold:0,env1DecayHold:0,env1Decay:.25,env1Sustain:.6,env1Release:.35,env1Loop:false,env1KeyTrack:0,
  env2Attack:.02,env2DecayHold:0,env2Decay:.32,env2Sustain:.78,env2Release:.3,
  lfo1Rate:.15,lfo1Delay:0,lfo1Wave:'sine',lfo1Mode:'free',lfo1HighFreq:false,lfo1KeyTrack:false,lrPhase:0,
- lfo2Rate:.15,lfo2Delay:0,lfo2Wave:'sine',lfo2Mode:'trig',lfo2RateAmount:1,lfo2Dds:0,lfo2Vcf:0,lfo2Vca:0,benderDds:.5,benderVcf:0,benderOsc:'1+2',
+ lfo2Rate:.15,lfo2Delay:0,lfo2Wave:'sine',lfo2Mode:'trig',lfo2RateAmount:1,lfo2Dds:0,lfo2Vcf:0,lfo2Vca:0,benderDds:.5,benderVcf:0,
  chorus:'off',chorusMix:.25,delayTime:.28,delayFeedback:.25,delayMod:.1,delaySync:false,delayFreeze:false,
  voiceMode:'poly1',unison:'off',modMatrix:Array(64).fill(0),
  seqEnabled:false,seqLength:16,seqMode:'step',seqSteps:Array(64).fill(null),seqSlides:Array(64).fill(false),seqAccents:Array(64).fill(false),seqGates:Array(64).fill(.75),seqSwing:0,seqBpm:120,
@@ -400,8 +400,7 @@ class Super8App{
   knob('portamento','PORTAMENTO',990,380,{size:49,group:'PERFORMANCE'});
   knob('transpose','TRANSPOSE',1065,380,{min:-24,max:24,step:1,size:49,group:'PERFORMANCE'});
   knob('bendRange','BEND RANGE',1140,380,{min:1,max:12,step:1,size:49,group:'PERFORMANCE'});
-  sel('benderOsc','PITCH TARGET',638,345,['DDS 1','1+2','DDS 2'],{width:100,group:'PERFORMANCE'});
-  sel('arpMode','ARP MODE',1260,345,['up','down','upDown','random','seq'],{width:105,group:'ARPEGGIATOR'});
+    sel('arpMode','ARP MODE',1260,345,['up','down','upDown','random','seq'],{width:105,group:'ARPEGGIATOR'});
   sel('arpDivision','ARP CLOCK',1380,345,['1','2','4','8','16'],{width:96,group:'ARPEGGIATOR'});
   knob('arpRange','ARP RANGE',1510,380,{min:1,max:4,step:1,size:50,group:'ARPEGGIATOR'});
   knob('arpSwing','ARP SWING',1590,380,{size:50,group:'ARPEGGIATOR'});
@@ -427,30 +426,30 @@ class Super8App{
   }
   // Lower-left controller block and a continuous 61-note Fatar keybed.
   panelSection(15,542,230,212,'LFO 2 / BENDER','MODULATION / TWO-AXIS CONTROL');
-  knob('lfo2Rate','LFO 2 RATE',64,596,{size:40,group:'LFO 2'});
-  knob('lfo2Delay','DELAY',136,596,{size:40,group:'LFO 2'});
-  sel('lfo2Wave','WAVEFORM',74,646,['sine','reverseSaw','sampleHold','square','saw','noise'],{width:88,group:'LFO 2'});
-  sel('lfo2Mode','TRIGGER',174,646,['trig','atTrig','onAtBend'],{width:100,group:'LFO 2'});
-  fader('lfo2RateAmount','RATE MOD',35,676,{height:48,width:12});
-  fader('lfo2Dds','DDS',69,676,{height:48,width:12});
-  fader('lfo2Vcf','VCF',103,676,{height:48,width:12});
-  fader('lfo2Vca','VCA',137,676,{height:48,width:12});
-  fader('benderDds','PITCH RANGE',171,676,{height:48,width:12});
-  fader('benderVcf','VCF RANGE',205,676,{height:48,width:12});
+  knob('lfo2Rate','LFO 2 RATE',64,587,{size:38,group:'LFO 2'});
+  knob('lfo2Delay','DELAY',136,587,{size:38,group:'LFO 2'});
+  sel('lfo2Wave','WAVEFORM',74,636,['sine','reverseSaw','sampleHold','square','saw','noise'],{width:88,group:'LFO 2'});
+  sel('lfo2Mode','TRIGGER',174,636,['trig','atTrig','onAtBend'],{width:100,group:'LFO 2'});
+  fader('lfo2RateAmount','RATE MOD',35,658,{height:46,width:12});
+  fader('lfo2Dds','DDS',69,658,{height:46,width:12});
+  fader('lfo2Vcf','VCF',103,658,{height:46,width:12});
+  fader('lfo2Vca','VCA',137,658,{height:46,width:12});
+  fader('benderDds','PITCH',171,658,{height:46,width:12});
+  fader('benderVcf','VCF',205,658,{height:46,width:12});
   // The Super 8 bender is horizontal pitch plus a pressure-sensitive vertical sensor.
   const pad=document.createElement('div');pad.className='hp-super8-bender-pad';pad.tabIndex=0;pad.setAttribute('role','group');pad.setAttribute('aria-label','Bender X pitch, Y pressure');
   const padCross=document.createElement('i');padCross.className='hp-super8-bender-cross';
   const padDot=document.createElement('i');padDot.className='hp-super8-bender-dot';pad.append(padCross,padDot);
   const padCaption=document.createElement('span');padCaption.className='hp-super8-bender-caption';padCaption.textContent='PITCH  ←  X  →    ·    PRESSURE  Y';
-  pad.style.cssText='position:absolute;left:25px;top:728px;width:190px;height:22px;z-index:8;touch-action:none';
+  pad.style.cssText='position:absolute;left:25px;top:710px;width:190px;height:36px;z-index:8;touch-action:none';
   p.appendChild(pad);p.appendChild(padCaption);
-  padCaption.style.cssText='position:absolute;left:25px;top:751px;width:190px;text-align:center;font:6px DM Mono,monospace;color:var(--hp-muted)';
+  padCaption.style.cssText='position:absolute;left:25px;top:747px;width:190px;text-align:center;font:6px DM Mono,monospace;color:var(--hp-muted)';
   const renderBender=()=>{padDot.style.left=((this.patch.benderX+1)*50)+'%';padDot.style.top=((1-this.patch.benderY)*100)+'%';pad.setAttribute('aria-label','Bender pitch '+this.patch.benderX.toFixed(2)+', pressure '+this.patch.benderY.toFixed(2));};
   const updateBender=(e)=>{const rect=pad.getBoundingClientRect();this.patch.benderX=Math.max(-1,Math.min(1,((e.clientX-rect.left)/(rect.width||1))*2-1));this.patch.benderY=Math.max(0,Math.min(1,1-((e.clientY-rect.top)/(rect.height||1))));renderBender();this.engine.post({t:'bendAxis',x:this.patch.benderX,y:this.patch.benderY});};
   let benderPointer=null;
   pad.addEventListener('pointerdown',e=>{benderPointer=e.pointerId;pad.setPointerCapture?.(e.pointerId);updateBender(e);e.preventDefault();});
   pad.addEventListener('pointermove',e=>{if(e.pointerId===benderPointer)updateBender(e);});
-  const finishBender=e=>{if(e.pointerId===benderPointer)benderPointer=null;};pad.addEventListener('pointerup',finishBender);pad.addEventListener('pointercancel',finishBender);
+  const finishBender=e=>{if(e.pointerId!==benderPointer)return;benderPointer=null;this.patch.benderX=0;this.patch.benderY=0;renderBender();this.engine.post({t:'bendAxis',x:0,y:0});};pad.addEventListener('pointerup',finishBender);pad.addEventListener('pointercancel',finishBender);
   pad.addEventListener('keydown',e=>{const step=e.shiftKey?.2:.05;if(e.key==='ArrowLeft')this.patch.benderX-=step;else if(e.key==='ArrowRight')this.patch.benderX+=step;else if(e.key==='ArrowUp')this.patch.benderY+=step;else if(e.key==='ArrowDown')this.patch.benderY-=step;else return;this.patch.benderX=Math.max(-1,Math.min(1,this.patch.benderX));this.patch.benderY=Math.max(0,Math.min(1,this.patch.benderY));renderBender();this.engine.post({t:'bendAxis',x:this.patch.benderX,y:this.patch.benderY});e.preventDefault();});
   this.hwBenderPad=pad;this.renderHardwareBender=renderBender;renderBender();
   addKeyboard(p,{x:255,y:548,w:1395,h:202,firstNote:36,count:61,keyColor:'amber',onNoteOn:(n,v)=>this.engine.post({t:'noteOn',note:n,vel:v,source:'ui'}),onNoteOff:n=>this.engine.post({t:'noteOff',note:n,source:'ui'}),onAftertouch:(n,v)=>this.engine.post({t:'polyAt',note:n,value:v,channel:1})});
