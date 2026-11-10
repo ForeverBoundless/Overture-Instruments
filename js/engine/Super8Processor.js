@@ -37,8 +37,8 @@ function wav(kind,p,pw,dt=0){
  if(kind==='alt')return 0;
  return 2*p-1-polyBlep(p,d);
 }
-function altWave(index,phase){
- const p=((phase%1)+1)%1,shape=index%8,partials=2+(index%23);let v=0;
+function altWave(index,phase,maxHarmonics=24){
+ const p=((phase%1)+1)%1,shape=index%8,partials=Math.max(1,Math.min(2+(index%23),Math.floor(maxHarmonics)));let v=0;
  for(let h=1;h<=partials;h++){
   const amp=(1/h)*(shape===0?1:shape===1?Math.exp(-h*.17):shape===2?(h%2?1:0):shape===3?Math.cos(h*.37):shape===4?Math.sin(h*.13):shape===5?((h%3)?1:.15):shape===6?Math.pow(.78,h):Math.cos(h*h*.015));
   v+=amp*Math.sin(2*Math.PI*h*p);
@@ -53,7 +53,7 @@ class Voice{
 }
 class Super8Processor extends AudioWorkletProcessor{
  constructor(){
-  super();this.layers=[clone(LAYER_DEFAULT),clone(LAYER_DEFAULT)];this.global={mode:'single',activeLayer:0,splitPoint:60,binaural:true,volume:.72,benderX:0,benderY:0,expression:1,sustain:false,masterTune:0};
+  super();this.layers=[clone(LAYER_DEFAULT),clone(LAYER_DEFAULT)];this.global={mode:'single',activeLayer:0,splitPoint:60,binaural:true,volume:.72,distortion:0,benderX:0,benderY:0,expression:1,sustain:false,masterTune:0};
   this.voices=Array.from({length:16},(_,i)=>new Voice(i));this.order=0;this.held=[new Map(),new Map()];this.sustain=false;this.pitchBend=[0,0];this.mpeBend=new Map();this.modWheel=0;this.expression=1;this.channelExpression=new Map();this.aftertouch=[0,0];this.channelPressure=new Map();this.polyPressure=new Map();this.mpeSlide=new Map();this.currentMods=[{},{}];this.scheduled=[];
   this.chorus=[{phase:0,bufL:new Float32Array(sampleRate),bufR:new Float32Array(sampleRate),write:0},{phase:0,bufL:new Float32Array(sampleRate),bufR:new Float32Array(sampleRate),write:0}];
   this.delay=[{bufL:new Float32Array(sampleRate*2),bufR:new Float32Array(sampleRate*2),write:0},{bufL:new Float32Array(sampleRate*2),bufR:new Float32Array(sampleRate*2),write:0}];
@@ -113,7 +113,12 @@ class Super8Processor extends AudioWorkletProcessor{
  }
  noteOff(note,channel,source='ui'){
   const matches=this.voices.filter(v=>v.active&&v.inputNote===note&&!v.seqVoice&&!v.arpVoice&&(source==='midi'?v.channel===channel:true));
-  matches.forEach(v=>{this.held[v.layer].delete(note);if(!this.sustain){v.gate=false;if(this.layers[v.layer].voiceMode==='poly2')v.e2Stage='release';}});
+  matches.forEach(v=>{
+   const p=this.layers[v.layer];
+   if(p.arpEnabled&&p.arpHold)return;
+   this.held[v.layer].delete(note);
+   if(!this.sustain){v.gate=false;if(p.voiceMode==='poly2')v.e2Stage='release';}
+  });
  }
  releaseUnheld(){this.voices.forEach(v=>{if(v.active&&!this.held[v.layer].has(v.inputNote))v.gate=false;});}
  envTick(v,p,dt){
@@ -147,20 +152,24 @@ class Super8Processor extends AudioWorkletProcessor{
   return out;
  }
  osc1(p,v,phase,superIndex,tablePos,pw,lr,dt){
-  const sampleAlt=index=>{const user=p.userWaves?.[index];if(user?.length){const pos=phase*user.length,i=pos|0,f=pos-i;return lerp(user[i%user.length],user[(i+1)%user.length],f);}return altWave(index,phase);};
+  const maxHarmonics=Math.max(1,Math.min(24,Math.floor(.48/Math.max(dt,1e-6))));
+  const sampleAlt=index=>{const user=p.userWaves?.[index];if(user?.length){const pos=phase*user.length,i=pos|0,f=pos-i;return lerp(user[i%user.length],user[(i+1)%user.length],f);}return altWave(index,phase,maxHarmonics);};
   if(p.dds1Wave==='altA'||p.dds1Wave==='altB'){return lerp(sampleAlt(p.altA|0),sampleAlt(p.altB|0),clamp(tablePos));}
   const waveName=p.dds1Wave==='whiteNoise'?'noise':p.dds1Wave;
   if(waveName==='noise')return wav('noise',phase,pw,dt);
   let x=wav(waveName,phase,pw,dt);
-  if(p.waveMod>0&&waveName!=='sine'){const alt=altWave(p.altA||0,phase);x=lerp(x,alt,clamp(tablePos));}
+  if(p.waveMod>0&&waveName!=='sine'){const alt=altWave(p.altA||0,phase,maxHarmonics);x=lerp(x,alt,clamp(tablePos));}
   return x;
  }
  filter(x,v,p,channel,cutoff,res,hpf=p.hpf){
   const sr=sampleRate,fc=30*Math.pow(2,clamp(cutoff)*9),g=1-Math.exp(-2*Math.PI*fc/sr);
   const hpfc=20*Math.pow(2,clamp(hpf)*9),hg=1-Math.exp(-2*Math.PI*hpfc/sr);
-  const lp=channel==='L'?v.lpL:v.lpR;const lowIn=Math.tanh(x+lp[3]*res*3);
-  let y=lowIn;for(let i=0;i<4;i++){lp[i]+=g*(y-lp[i]);y=lp[i];}
-  const hstate=channel==='L'?'hpL':'hpR';v[hstate]+=hg*(y-v[hstate]);let out=y-v[hstate];
+  const hstate=channel==='L'?'hpL':'hpR';
+  // The Super 8's one-pole high-pass precedes its four-pole resonant low-pass.
+  // Keeping independent states per voice and ear preserves the binaural paths.
+  v[hstate]+=hg*(x-v[hstate]);const highPassed=x-v[hstate];
+  const lp=channel==='L'?v.lpL:v.lpR;const lowIn=Math.tanh(highPassed+lp[3]*res*3);
+  let out=lowIn;for(let i=0;i<4;i++){lp[i]+=g*(out-lp[i]);out=lp[i];}
   const drive=p.drive==='2'?2.4:p.drive==='1'?1.35:1;return Math.tanh(out*drive);
  }
  effects(L,R,p,layer,dt){
@@ -173,7 +182,10 @@ class Super8Processor extends AudioWorkletProcessor{
    wetL=c.bufL[rl];wetR=c.bufR[rr];c.bufL[c.write]=L; c.bufR[c.write]=R;c.write=(c.write+1)%c.bufL.length;
    const mix=clamp(p.chorusMix);L=lerp(L,wetL,mix);R=lerp(R,wetR,mix);
   }
-  const time=clamp(p.delayTime+(this.currentMods?.[layer]?.delayTime||0)*.1,.001,1),length=Math.max(1,Math.floor(time*sampleRate)),read=(d.write-length+d.bufL.length)%d.bufL.length;
+  const divisions=[4,2,1,.5,.25,.125],division=divisions[Math.round(clamp(p.delayTime)*5)];
+  const delaySeconds=p.delaySync?(60/Math.max(30,Number(p.seqBpm)||120))*division:clamp(p.delayTime,.001,1);
+  d.phase=(d.phase||0)+dt*(.17+clamp(p.delayMod)*2.8)*2*Math.PI;
+  const time=clamp(delaySeconds+(this.currentMods?.[layer]?.delayTime||0)*.1+Math.sin(d.phase)*.004*clamp(p.delayMod),.001,1.8),length=Math.max(1,Math.floor(time*sampleRate)),read=(d.write-length+d.bufL.length)%d.bufL.length;
   const dl=d.bufL[read],dr=d.bufR[read],fb=clamp(p.delayFeedback,0,.96);
   if(!p.delayFreeze){d.bufL[d.write]=L+dl*fb;d.bufR[d.write]=R+dr*fb;}else{d.bufL[d.write]=dl;d.bufR[d.write]=dr;}
   d.write=(d.write+1)%d.bufL.length;
@@ -181,8 +193,8 @@ class Super8Processor extends AudioWorkletProcessor{
  }
  tickSequencers(dt,layer){
   const p=this.layers[layer],s=this.seq[layer],a=this.arp[layer],held=[...this.held[layer].entries()].sort((x,y)=>x[0]-y[0]);
-  if(p.seqEnabled){s.phase+=(p.seqBpm/60)*dt;if(s.phase>=1){s.phase-=1;const n=p.seqSteps[s.step%p.seqLength];if(s.note>=0){this.voices.forEach(v=>{if(v.active&&v.layer===layer&&v.seqVoice){v.gate=false;v.seqVoice=false;}});s.note=-1;}if(n!==null&&n!==undefined){s.note=n;this.allocateNote(n,.85,layer,1,'sequence');this.voices.forEach(v=>{if(v.active&&v.layer===layer&&v.inputNote===n&&v.order===this.order)v.seqVoice=true;});}s.step=(s.step+1)%clamp(p.seqLength,1,64);}}
-  if(p.arpEnabled&&held.length){a.phase+=(p.seqBpm/60)*dt*(4/Math.max(1,p.arpDivision));if(a.phase>=1){a.phase-=1;let index=a.index++%held.length;if(p.arpMode==='down')index=held.length-1-index;else if(p.arpMode==='random')index=Math.floor(Math.random()*held.length);else if(p.arpMode==='upDown'){const span=Math.max(1,held.length*2-2),z=a.index%span;index=z<held.length?z:span-z;}const n=held[index][0];this.voices.forEach(v=>{if(v.active&&v.layer===layer&&v.arpVoice){v.gate=false;v.arpVoice=false;}});this.allocateNote(n,held[index][1],layer,1,'arp');this.voices.forEach(v=>{if(v.active&&v.layer===layer&&v.inputNote===n&&v.order===this.order)v.arpVoice=true;});}else if(p.arpEnabled&&!held.length){this.voices.forEach(v=>{if(v.active&&v.layer===layer&&v.arpVoice){v.gate=false;v.arpVoice=false;}});}}
+  if(p.seqEnabled){const swing=clamp(p.seqSwing)*.42;s.phase+=(p.seqBpm/60)*dt*((s.step%2)?1-swing:1+swing);if(s.phase>=1){s.phase-=1;const n=p.seqSteps[s.step%p.seqLength];if(s.note>=0){this.voices.forEach(v=>{if(v.active&&v.layer===layer&&v.seqVoice){v.gate=false;v.seqVoice=false;}});s.note=-1;}if(n!==null&&n!==undefined){s.note=n;this.allocateNote(n,.85,layer,1,'sequence');this.voices.forEach(v=>{if(v.active&&v.layer===layer&&v.inputNote===n&&v.order===this.order)v.seqVoice=true;});}s.step=(s.step+1)%clamp(p.seqLength,1,64);}}
+  if(p.arpEnabled&&held.length){const arpSwing=clamp(p.arpSwing)*.42;a.phase+=(p.seqBpm/60)*dt*(4/Math.max(1,p.arpDivision))*((a.index%2)?1-arpSwing:1+arpSwing);if(a.phase>=1){a.phase-=1;const total=held.length*Math.max(1,Math.min(4,Math.round(p.arpRange||1)));const step=a.index++%total;const octave=Math.floor(step/held.length);let index=step%held.length;if(p.arpMode==='down')index=held.length-1-index;else if(p.arpMode==='random')index=Math.floor(Math.random()*held.length);else if(p.arpMode==='upDown'){const span=Math.max(1,held.length*2-2),z=a.index%span;index=z<held.length?z:span-z;}const n=held[index][0]+12*octave;this.voices.forEach(v=>{if(v.active&&v.layer===layer&&v.arpVoice){v.gate=false;v.arpVoice=false;}});this.allocateNote(n,held[index][1],layer,1,'arp');this.voices.forEach(v=>{if(v.active&&v.layer===layer&&v.inputNote===n&&v.order===this.order)v.arpVoice=true;});}else if(p.arpEnabled&&!held.length){this.voices.forEach(v=>{if(v.active&&v.layer===layer&&v.arpVoice){v.gate=false;v.arpVoice=false;}});}}
  }
  process(_inputs,outputs){
   const out=outputs[0],L=out[0],R=out[1]||out[0],dt=1/sampleRate;
@@ -201,8 +213,9 @@ class Super8Processor extends AudioWorkletProcessor{
      if(v.age<(p.lfo1Delay||0)*3){lf1L=0;lf1R=0;}if(v.age<(p.lfo2Delay||0)*3)lf2=0;
      const mods=this.mod(p,v,lf1L,lf2);this.currentMods[layer]=mods;
      const channelBend=this.global.mpe&&v.channel>1?(this.mpeBend.get(v.channel)||0):(this.pitchBend[layer]||0);const pitchBend=channelBend*p.bendRange+this.global.benderX*3;
-     const lfoPitch=(p.lfo2Amount||0)*lf2*7, dest=p.lfo2Destination||'filter';const pitch1=(dest==='DDS 1 pitch'||dest==='Both pitch')?lfoPitch:0;const pitch2=(dest==='DDS 2 pitch'||dest==='Both pitch')?lfoPitch:0;const base=midiHz(v.pitch+pitchBend+(this.global.masterTune||0)+(p.transpose||0)+pitch1),pw=.5+.42*Math.sin(v.noise+i*.0002*p.pwDrift*300);
-     const waveSource=p.waveModSource==='LFO 1'?(lf1L+1)*.5:p.waveModSource==='ENV 1'?v.env1:p.waveMod;const waveDepth=clamp(waveSource+this.modWheel*.12+(mods.waveMod||0)+(p.lfo2Amount||0)*lf2);
+     const lfo2Depth=clamp((p.lfo2Amount||0)+(p.lfo2Bender?this.global.benderY*.5:0)+(p.lfo2Aftertouch?v.aftertouch*.5:0));
+     const lfoPitch=lfo2Depth*lf2*7, dest=p.lfo2Destination||'filter';const pitch1=(dest==='DDS 1 pitch'||dest==='Both pitch')?lfoPitch:0;const pitch2=(dest==='DDS 2 pitch'||dest==='Both pitch')?lfoPitch:0;const base=midiHz(v.pitch+pitchBend+(this.global.masterTune||0)+(p.transpose||0)+pitch1),pw=.5+.42*Math.sin(v.noise+i*.0002*p.pwDrift*300);
+     const waveSource=p.waveModSource==='LFO 1'?(lf1L+1)*.5:p.waveModSource==='ENV 1'?v.env1:p.waveMod;const waveDepth=clamp(waveSource+this.modWheel*.12+(mods.waveMod||0)+lfo2Depth*lf2);
      const superMode=p.superMode==='on'?1:p.superMode==='half'?.5:0;
      const dds1=(side)=>{
       const lr=side==='L'?-1:1,phase=side==='L'?v.ph1L:v.ph1R;let signal=0,masterWrap=false;
@@ -224,24 +237,26 @@ class Super8Processor extends AudioWorkletProcessor{
      if(p.dds2Mode==='sync'&&v.syncResetL)v.ph2L=0;
      if(p.dds2Mode==='sync'&&v.syncResetR)v.ph2R=0;
      v.ph2L=(v.ph2L+f2/sampleRate)%1;v.ph2R=(v.ph2R+f2/sampleRate)%1;
-     let o2L=wav(p.dds2Wave,v.ph2L,pw,f2/sampleRate),o2R=this.global.binaural?wav(p.dds2Wave,v.ph2R,pw,f2/sampleRate):o2L;
-     if(p.dds2Mode==='sync'){o2L=wav(p.dds2Wave,v.ph2L,pw,f2/sampleRate);o2R=wav(p.dds2Wave,v.ph2R,pw,f2/sampleRate);}
-     else if(p.dds2Mode==='ring'){o2L*=o1L;o2R*=o1R;}
-     if(p.dds2Mode==='sync'){o2L*=1+clamp(p.crossMod)*o1L*2;o2R*=1+clamp(p.crossMod)*o1R*2;}
-     const sub=p.subMode==='sine'?Math.sin(v.ph2L*Math.PI*2):p.subMode==='square'?wav('square',v.ph2L,.5):0;
-     let sampleL=lerp(o1L+sub*clamp(p.subLevel),o2L,clamp(p.mix)),sampleR=lerp(o1R+sub*clamp(p.subLevel),o2R,clamp(p.mix));
+     const crossDepth=clamp(p.crossMod)*.12;
+     const phase2L=(v.ph2L+o1L*crossDepth+1)%1,phase2R=(v.ph2R+o1R*crossDepth+1)%1;
+     let o2L=wav(p.dds2Wave,phase2L,pw,f2/sampleRate),o2R=this.global.binaural?wav(p.dds2Wave,phase2R,pw,f2/sampleRate):o2L;
+     if(p.dds2Mode==='ring'){o2L*=o1L;o2R*=o1R;}
+     const subL=p.subMode==='sine'?Math.sin(v.ph2L*Math.PI*2):p.subMode==='square'?wav('square',v.ph2L,.5,f2/sampleRate):0;
+     const subR=p.subMode==='sine'?Math.sin(v.ph2R*Math.PI*2):p.subMode==='square'?wav('square',v.ph2R,.5,f2/sampleRate):subL;
+     let sampleL=lerp(o1L+subL*clamp(p.subLevel),o2L,clamp(p.mix)),sampleR=lerp(o1R+subR*clamp(p.subLevel),o2R,clamp(p.mix));
      const envMod=p.filterMod==='env2'?v.env2:p.filterMod==='both'?Math.max(v.env1,v.env2):v.env1;
      const track=p.keyTrack==='on'?((v.note-60)/48)*.2:p.keyTrack==='half'?((v.note-60)/48)*.1:0;
-     const channelSlide=this.global.mpe&&v.channel>1?(this.mpeSlide.get(v.channel)||0):0;const cutoff=clamp(p.cutoff+(lf1L*p.lfo1Rate*.05)+(dest==='Filter'?lf2*(p.lfo2Amount||0)*.18:0)+envMod*.35+track+channelSlide*.22),hpf=clamp(p.hpf+(mods.hpf||0)*.5),res=clamp(p.resonance+(mods.resonance||0)*.5);
+     const channelSlide=this.global.mpe&&v.channel>1?(this.mpeSlide.get(v.channel)||0):0;const cutoff=clamp(p.cutoff+(lf1L*p.lfo1Rate*.05)+(dest==='Filter'?lf2*lfo2Depth*.18:0)+envMod*.35+track+channelSlide*.22),hpf=clamp(p.hpf+(mods.hpf||0)*.5),res=clamp(p.resonance+(mods.resonance||0)*.5);
      sampleL=this.filter(sampleL,v,p,'L',cutoff,res,hpf);sampleR=this.global.binaural?this.filter(sampleR,v,p,'R',cutoff,res,hpf):sampleL;
-     const vel=clamp(v.velocity*p.velocity,0,1.5),channelExpression=this.global.mpe&&v.channel>1?(this.channelExpression.get(v.channel)??this.expression):this.expression,amp=v.env2*vel*(.35+channelExpression*.65)*(dest==='Amp'?1+lf2*(p.lfo2Amount||0):1)*(1+(this.global.benderY||0)*.1);
+     const vel=clamp(v.velocity*p.velocity,0,1.5),channelExpression=this.global.mpe&&v.channel>1?(this.channelExpression.get(v.channel)??this.expression):this.expression,amp=v.env2*vel*(.35+channelExpression*.65)*(dest==='Amp'?1+lf2*lfo2Depth:1)*(1+(this.global.benderY||0)*.1);
      sampleL=Math.tanh(sampleL*amp*.25);sampleR=Math.tanh(sampleR*amp*.25);
      const pan=clamp(.5+v.pan*.35+(p.pan-.5)*.8,0,1);l+=sampleL*Math.cos(pan*Math.PI*.5);r+=sampleR*Math.sin(pan*Math.PI*.5);
     }
     [l,r]=this.effects(l,r,p,layer,dt);
     lMix+=l;rMix+=r;
    }
-   L[i]=Math.tanh(lMix)*this.global.volume;R[i]=Math.tanh(rMix)*this.global.volume;
+   const masterDrive=1+Math.pow(clamp(this.global.distortion||0),1.6)*19;
+   L[i]=Math.tanh(lMix*masterDrive)*this.global.volume;R[i]=Math.tanh(rMix*masterDrive)*this.global.volume;
   }
   return true;
  }
