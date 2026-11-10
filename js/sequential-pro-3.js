@@ -330,9 +330,10 @@ class Pro3App{
   k('arpRange','OCTAVE RANGE',1280,654,1,4,1,{size:46,group:'ARPEGGIATOR'});k('arpSwing','SWING',1380,654,0,1,.01,{size:46,group:'ARPEGGIATOR'});
   // Front performance area and the real 37-note keybed.
   group(14,704,174,132,'PERFORMANCE','PITCH · MOD · TOUCH');
-  addWheel(p,{x:53,y:724,label:'PITCH',min:-1,max:1,value:0,height:78,spring:true,onChange:v=>this.engine.post({t:'bend',value:v}),midiId:'PRO3:Pitch Bend'});
-  addWheel(p,{x:110,y:724,label:'MOD',value:0,height:78,onChange:v=>this.engine.post({t:'mod',value:v}),midiId:'PRO3:Mod Wheel'});
-  addTouchStrip(p,{x:168,y:726,w:15,h:78,label:'TOUCH',onChange:v=>{this.patch.touch=v;this.engine.post({t:'touch',value:v});}});
+  const pitchWheel=addWheel(p,{x:53,y:724,label:'PITCH',min:-1,max:1,value:0,height:78,spring:true,onChange:v=>this.engine.post({t:'bend',value:v}),midiId:'PRO3:Pitch Bend'});
+  const modWheel=addWheel(p,{x:110,y:724,label:'MOD',value:0,height:78,onChange:v=>this.engine.post({t:'mod',value:v}),midiId:'PRO3:Mod Wheel'});
+  const touchStrip=addTouchStrip(p,{x:168,y:726,w:15,h:78,label:'TOUCH',onChange:v=>{this.patch.touch=v;this.engine.post({t:'touch',value:v});}});
+  this.hwControls.all.push(pitchWheel,modWheel,touchStrip);
   addKeyboard(p,{x:196,y:712,w:1468,h:130,firstNote:36,count:37,keyColor:'amber',onNoteOn:(n,v)=>this.engine.noteOn(n,v),onNoteOff:n=>this.engine.noteOff(n),onAftertouch:(n,v)=>this.engine.post({t:'at',value:v})});
   this.hwTrackSelect.addEventListener('change',()=>{this.hwDestSelect.value=this.patch.seqDestinations[Number(this.patch.seqTrack)||0]||'note';this.patch.seqDestination=this.hwDestSelect.value;this.renderHardwareSteps();});
   this.hwPhrase.addEventListener('change',()=>{this.seqPage=['A','B','C','D'].indexOf(this.patch.seqPhrase||'A');this.renderHardwareSteps();});
