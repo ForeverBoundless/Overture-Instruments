@@ -175,27 +175,40 @@ export function performance(parent, { octaves = 4, startOctave = 2, notes = null
 }
 
 /** Starts audio from a trusted pointer or keyboard gesture, with retry feedback. */
-export function power(id, start, onReady) {
+export function power(id, start, onReady, onError) {
   const node = document.getElementById(id);
   if (!node) throw new Error('Power control #' + id + ' is missing from the page.');
   let busy = false; const status = node.querySelector('small');
   const go = async (event) => {
-    if (event?.type === 'keydown' && !['Enter', ' '].includes(event.key)) return;
+    if (event?.type === 'keydown' && !['Enter', ' '].includes(event.key)) return false;
     if (event?.type === 'keydown') event.preventDefault();
-    if (busy || node.classList.contains('is-off')) return;
+    if (busy) return false;
+    if (node.classList.contains('is-off')) return true;
     busy = true; node.classList.add('is-starting'); node.setAttribute('aria-busy', 'true');
     if (status) status.textContent = 'STARTING AUDIO ENGINE…';
-    try { await start(); node.classList.add('is-off'); onReady?.(); }
-    catch (err) {
+    try {
+      await start();
+      node.classList.add('is-off');
+      node.classList.remove('is-starting');
+      node.removeAttribute('aria-busy');
+      onReady?.();
+      return true;
+    } catch (err) {
       const detail = String(err?.message || err || 'Unknown audio error');
       if (status) status.textContent = 'AUDIO START FAILED · ' + detail;
       node.setAttribute('aria-label', 'Retry power on. ' + detail);
       node.classList.remove('is-starting'); node.removeAttribute('aria-busy'); busy = false;
+      onError?.(err);
+      return false;
     }
   };
   node.addEventListener('pointerdown', (event) => { if (event.button !== undefined && event.button !== 0) return; void go(event); });
   node.addEventListener('click', (event) => { void go(event); });
   node.addEventListener('keydown', (event) => { void go(event); });
+  // Hardware-panel switches call this same handler directly from their trusted
+  // click callback. This avoids synthetic clicks on the visually hidden button,
+  // which browsers may reject as an AudioContext user-activation gesture.
+  return go;
 }
 
 /**
