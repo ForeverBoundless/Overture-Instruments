@@ -136,3 +136,23 @@ body.pn-body.hp-pro3-body,body.pn-body.hp-super8-body{min-height:100vh;overflow-
  .hp-info-status{display:none}
  .hp-preset-strip select{min-width:110px}
 }
+
+
+/* Counter-transform legend sizes so a wide physical chassis remains readable
+   when the complete instrument is fitted to a narrower browser window. */
+.hp-instrument{--hp-scale:1}
+.hp-section-title{font-size:calc(8px / var(--hp-scale,1))}
+.hp-section-sub{font-size:calc(6px / var(--hp-scale,1))}
+.hp-label{font-size:calc(8px / var(--hp-scale,1))}
+.hp-control-label{font-size:calc(7px / var(--hp-scale,1))}
+.hp-knob-value{font-size:calc(6px / var(--hp-scale,1))}
+.hp-button-label{font-size:calc(6px / var(--hp-scale,1))}
+.hp-wheel-label,.hp-touch-label{font-size:calc(7px / var(--hp-scale,1))}
+.hp-key-mark{font-size:calc(6px / var(--hp-scale,1))}
+.hp-native-select span{font-size:calc(7px / var(--hp-scale,1))}
+.hp-native-select select{font-size:calc(7px / var(--hp-scale,1))}
+.hp-fader-label{font-size:calc(7px / var(--hp-scale,1))}
+.hp-fader-value{font-size:calc(6px / var(--hp-scale,1))}
+.hp-display-brand{font-size:calc(6px / var(--hp-scale,1))}
+.hp-display-main{font-size:calc(12px / var(--hp-scale,1))}
+.hp-display-sub{font-size:calc(6px / var(--hp-scale,1))}
