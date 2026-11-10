@@ -108,7 +108,7 @@ test('Pro 3 and Super 8 load the shared reference-style hardware surface', async
     readFile(new URL('../css/hardware-panel.css', import.meta.url), 'utf8'),
     readFile(new URL('../html/sequential-pro-3.html', import.meta.url), 'utf8'),
     readFile(new URL('../html/udo-super-8.html', import.meta.url), 'utf8'),
-    readFile(new URL('../ui/Logos/UDO_logo.svg', import.meta.url), 'utf8'),
+    readFile(new URL('../ui/Logos/UDO_logo.png', import.meta.url)),
     readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
   ]);
   assert.match(pro, /buildHardwarePanel\(\)/);
@@ -118,12 +118,17 @@ test('Pro 3 and Super 8 load the shared reference-style hardware surface', async
   assert.match(super8, /buildHardwarePanel\(\)/);
   assert.match(super8, /LAYER UPPER/);
   assert.match(super8, /BINAURAL/);
-  assert.match(super8, /UDO_logo\.svg/);
+  assert.match(super8, /UDO_logo\.png/);
+  assert.match(super8, /count:61/);
+  assert.match(super8, /BENDER \/ PERFORMANCE/);
+  assert.match(super8, /hp-super8-hardware-footer/);
+  assert.match(super8, /MODULATION MATRIX/);
   assert.match(helper, /export function addKeyboard/);
   assert.match(helper, /export function addFader/);
   assert.match(styles, /hp-key-black/);
   assert.match(proPage, /hardware-panel\.css/);
   assert.match(superPage, /hardware-panel\.css/);
-  assert.match(logo, /UDO Audio/);
+  assert.ok(logo.byteLength > 1000, 'UDO wordmark should be the real image asset');
+  assert.match(worker, /UDO_logo\.png/);
   assert.match(worker, /UDO_logo\.svg/);
 });
