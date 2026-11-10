@@ -196,6 +196,7 @@ class Pro3Processor extends AudioWorkletProcessor{
    const a1=1/(1+g*(g+k)),v1=a1*(svf[0]+g*(x-svf[1])),v2=svf[1]+g*v1;
    svf[0]=2*v1-svf[0];svf[1]=2*v2-svf[1];
    const lp=v2,bp=v1,hp=x-k*v1-v2,notch=lp+hp,n=clamp(state);
+   if(this.p.filterBp)return bp;
    if(n<.25)return smooth(lp,notch,n*4);
    if(n<.5)return smooth(notch,hp,(n-.25)*4);
    if(n<.75)return smooth(hp,bp,(n-.5)*4);
@@ -383,7 +384,7 @@ class Pro3Processor extends AudioWorkletProcessor{
    const fbRead=(this.fbWrite-delaySamples+this.fb.length)%this.fb.length,feedback=this.fb[fbRead];
    const fbAmount=clamp(this.p.feedbackAmount,-1,.96),feedbackInput=(sampleL+sampleR)*.5,fbIn=this.p.feedbackGrunge?Math.tanh(feedbackInput+feedback*fbAmount*4):feedbackInput+feedback*fbAmount;
    this.fb[this.fbWrite]=clamp(fbIn,-3,3);this.fbWrite=(this.fbWrite+1)%this.fb.length;
-   const amp=(this.p.mode==="paraphonic"?1:env.amp)*this.velocity*.22*(1+(mods.ampLevel||0));
+   const amp=(this.p.mode==="paraphonic"?1:env.amp)*this.velocity*.72*(1+(mods.ampLevel||0));
    sampleL=(sampleL+feedback*fbAmount*.8)*amp;sampleR=(sampleR+feedback*fbAmount*.78)*amp;
    let left=sampleL,right=sampleR;
    [left,right]=this.fxProcess(left,right,0,this.p,dt);[left,right]=this.fxProcess(left,right,1,this.p,dt);
