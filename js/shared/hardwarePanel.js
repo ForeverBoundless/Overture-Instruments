@@ -21,7 +21,7 @@ export function createHardwareSurface(root,{id,width,height,skin='pro3',programL
   // its natural proportions and the document scrolls vertically.
   const availableWidth=Math.max(320,window.innerWidth-32);
   const scale=Math.min(1,availableWidth/width);
-  instrument.style.transform='scale('+scale+')';
+  instrument.style.transform='scale('+scale+')';instrument.style.setProperty('--hp-scale',String(scale));
   frame.style.width=(width*scale)+'px';
   frame.style.height=(height*scale)+'px';
   info.style.width=(width*scale)+'px';
