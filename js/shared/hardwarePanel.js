@@ -20,12 +20,18 @@ export function createHardwareSurface(root,{id,width,height,skin='pro3',programL
   // Preserve the hardware's proportions and scale to available width only.
   // The document scrolls vertically when the complete chassis is taller than
   // the viewport; the keyboard is never shrunk or clipped to make it fit.
-  const availableWidth=Math.max(320,window.innerWidth-32);
+  const availableWidth=Math.max(200,window.innerWidth-32);
   const scale=Math.min(1,availableWidth/width);
-  instrument.style.transform='scale('+scale+')';instrument.style.setProperty('--hp-scale',String(scale));
-  frame.style.width=(width*scale)+'px';
+  const scaledWidth=Math.round(width*scale*100)/100;
+  instrument.style.transform='scale('+scale+')';
+  instrument.style.setProperty('--hp-scale',String(scale));
+  frame.style.width=scaledWidth+'px';
   frame.style.height=(height*scale)+'px';
-  info.style.width=(width*scale)+'px';
+  // Keep the info strip and preset/action footer exactly aligned with the
+  // scaled chassis. The chassis itself uses a top-left transform origin.
+  stage.style.width=scaledWidth+'px';
+  stage.style.maxWidth='calc(100vw - 16px)';
+  info.style.width=scaledWidth+'px';
  };
  window.addEventListener('resize',resize);requestAnimationFrame(resize);
  return {stage,info,frame,instrument,program:prog,midi,status,fit:resize,scale:()=>instrument.getBoundingClientRect().width/width||1};
