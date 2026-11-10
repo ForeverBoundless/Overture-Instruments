@@ -137,3 +137,16 @@
 .hp-super8-bender-dot{position:absolute;left:50%;top:50%;width:13px;height:13px;border:2px solid #f5f7f6;border-radius:50%;background:#d45d3d;box-shadow:0 1px 3px #0007,0 0 5px #cf573caa;transform:translate(-50%,-50%);pointer-events:none}
 .hp-super8-bender-caption{pointer-events:none}
 .hp-super8 .hp-button-label{font-size:6px}
+
+
+/* Keep Super 8 front-panel legends legible when its chassis scales to width. */
+.hp-super8 .hp-section-title{font-size:calc(8px / var(--hp-scale,1))!important}
+.hp-super8 .hp-section-sub{font-size:calc(6px / var(--hp-scale,1))!important}
+.hp-super8 .hp-label{font-size:calc(8px / var(--hp-scale,1))!important}
+.hp-super8 .hp-control-label{font-size:calc(7px / var(--hp-scale,1))!important}
+.hp-super8 .hp-knob-value{font-size:calc(6px / var(--hp-scale,1))!important}
+.hp-super8 .hp-button-label{font-size:calc(6px / var(--hp-scale,1))!important}
+.hp-super8 .hp-native-select span{font-size:calc(7px / var(--hp-scale,1))!important}
+.hp-super8 .hp-native-select select{font-size:calc(7px / var(--hp-scale,1))!important}
+.hp-super8 .hp-fader-label{font-size:calc(7px / var(--hp-scale,1))!important}
+.hp-super8 .hp-fader-value{font-size:calc(6px / var(--hp-scale,1))!important}
