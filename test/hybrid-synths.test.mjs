@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { runInNewContext } from 'node:vm';
+import { addFader } from '../js/shared/hardwarePanel.js';
 
 async function createWorklet(path, expectedName) {
   const source = await readFile(new URL(path, import.meta.url), 'utf8');
@@ -125,6 +126,29 @@ test('UDO Super 8 single mode exposes sixteen mono voices or eight binaural supe
   assert.equal(h.processor.layerRanges(0).length, 16);
 });
 
+
+test('shared hardware fader can construct and expose MIDI metadata at runtime', () => {
+  class FakeNode {
+    constructor(tag) { this.tagName = tag; this.style = {}; this.children = []; this.attributes = {}; this.listeners = {}; }
+    appendChild(child) { this.children.push(child); child.parentNode = this; return child; }
+    setAttribute(name, value) { this.attributes[name] = String(value); }
+    addEventListener(name, callback) { this.listeners[name] = callback; }
+    closest() { return null; }
+  }
+  const previousDocument = globalThis.document;
+  globalThis.document = { createElement: (tag) => new FakeNode(tag) };
+  try {
+    const parent = new FakeNode('div');
+    const control = addFader(parent, { x: 10, y: 20, label: 'FILTER', value: .4, group: 'FILTER', onChange() {} });
+    assert.equal(control.el._oiMidi.group, 'FILTER');
+    assert.equal(control.el._oiMidi.label, 'FILTER');
+    assert.ok(Number.isFinite(control.getValue()));
+    assert.ok(parent.children.length > 0);
+  } finally {
+    if (previousDocument === undefined) delete globalThis.document;
+    else globalThis.document = previousDocument;
+  }
+});
 
 test('shared hardware faders always have a defined MIDI target group', async () => {
   const helper = await readFile(new URL('../js/shared/hardwarePanel.js', import.meta.url), 'utf8');
