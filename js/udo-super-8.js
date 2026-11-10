@@ -295,7 +295,9 @@ class Super8App{
    select.style.cssText='width:100%;height:23px;background:var(--hp-control);color:var(--hp-ink);border:1px solid var(--hp-line);border-radius:2px;padding:2px 4px;font:8px DM Mono,monospace';
    options.forEach((v,i)=>{const o=document.createElement('option');o.value=String(v);o.textContent=String(opts.optionLabels?.[i]??v).toUpperCase();select.appendChild(o);});
    select.value=String(current);
-   select.addEventListener('change',()=>{const n=typeof current==='number'?Number(select.value):select.value;global?this.setGlobal(key,n):this.set(key,n);});
+   select.addEventListener('change',()=>{const selected=options.find(value=>String(value)===select.value);
+   const n=typeof selected==='number'?Number(select.value):selected;
+   global?this.setGlobal(key,n):this.set(key,n);});
    wrap.append(title,select);p.appendChild(wrap);
    const control={el:select,getValue:()=>global?this.patch[key]:this.p()[key],setValue:v=>{select.value=String(v);},_oiMidi:{id:'SUPER8:'+(global?'G:':'L'+this.active+':')+key,label,group:opts.group||'SYNTHESIS',get:()=>{const values=options.map(String),i=values.indexOf(String(global?this.patch[key]:this.p()[key]));return Math.max(0,i)/(values.length-1||1);},set:t=>{const i=Math.round(Math.max(0,Math.min(1,t))*(options.length-1));const n=options[i];global?this.setGlobal(key,n):this.set(key,n);}}};
    this.hwSelects.push({key,select,global});return remember('selects',key,control);
@@ -400,7 +402,7 @@ class Super8App{
   knob('portamento','PORTAMENTO',990,380,{size:49,group:'PERFORMANCE'});
   knob('transpose','TRANSPOSE',1065,380,{min:-24,max:24,step:1,size:49,group:'PERFORMANCE'});
   knob('bendRange','BEND RANGE',1140,380,{min:1,max:12,step:1,size:49,group:'PERFORMANCE'});
-    sel('arpMode','ARP MODE',1260,345,['up','down','upDown','random','seq'],{width:105,group:'ARPEGGIATOR'});
+    sel('arpMode','ARP MODE',1260,345,['up','down','upDown','random','assign'],{width:105,group:'ARPEGGIATOR'});
   sel('arpDivision','ARP CLOCK',1380,345,['1','2','4','8','16'],{width:96,group:'ARPEGGIATOR'});
   knob('arpRange','ARP RANGE',1510,380,{min:1,max:4,step:1,size:50,group:'ARPEGGIATOR'});
   knob('arpSwing','ARP SWING',1590,380,{size:50,group:'ARPEGGIATOR'});
@@ -496,11 +498,11 @@ class Super8App{
   this.hwControls.all.push({el:pad,_oiMidi:{id:'SUPER8:G:benderY',label:'Bender Y · Modulation',group:'PERFORMANCE',get:()=>this.patch.benderY,set:v=>{this.patch.benderY=Math.max(0,Math.min(1,v));this.renderHardwareBender();this.engine.post({t:'bendAxis',x:this.patch.benderX,y:this.patch.benderY});}}});
   this.matrixDialog=document.createElement('dialog');this.matrixDialog.className='hp-super8-matrix-dialog';
   this.matrixDialog.innerHTML='<form method="dialog"><header><strong>8 × 8 MODULATION MATRIX</strong><button>×</button></header><p>Rows are modulation sources; columns are destinations. Click a cell to cycle + depth, − depth, and off.</p><div class="hp-super8-matrix-grid"></div></form>';
-  const grid=this.matrixDialog.querySelector('.hp-super8-matrix-grid');grid.style.cssText='display:grid;grid-template-columns:120px repeat(8,minmax(30px,1fr));gap:4px;align-items:center';
+  const hardwareGrid=this.matrixDialog.querySelector('.hp-super8-matrix-grid');hardwareGrid.style.cssText='display:grid;grid-template-columns:120px repeat(8,minmax(30px,1fr));gap:4px;align-items:center';
   const destinations=['LFO 1 RATE','CROSS MOD','WAVE MOD','OSC MIX','HPF CUTOFF','LPF RESONANCE','ENV 1 DECAY','DELAY TIME'];
-  grid.appendChild(document.createElement('span'));destinations.forEach(label=>{const h=document.createElement('span');h.textContent=label;h.className='hp-super8-matrix-head';grid.appendChild(h);});
+  hardwareGrid.appendChild(document.createElement('span'));destinations.forEach(label=>{const h=document.createElement('span');h.textContent=label;h.className='hp-super8-matrix-head';hardwareGrid.appendChild(h);});
   this.hwMatrixCells=[];
-  SOURCE_NAMES.forEach((source,s)=>{const label=document.createElement('strong');label.textContent=source;label.className='hp-super8-matrix-source';grid.appendChild(label);for(let d=0;d<8;d++){const i=s*8+d,b=document.createElement('button');b.type='button';b.title=source+' → '+destinations[d];b.dataset.value=String(this.p().modMatrix[i]||0);b.addEventListener('click',()=>{const old=this.p().modMatrix[i]||0;this.p().modMatrix[i]=old===0?.6:old>0?-.6:0;this.renderHardwareMatrix();this.engine.post({t:'param',layer:this.active,key:'modMatrix',value:this.p().modMatrix});});this.hwMatrixCells.push({button:b,index:i});grid.appendChild(b);}});
+  SOURCE_NAMES.forEach((source,s)=>{const label=document.createElement('strong');label.textContent=source;label.className='hp-super8-matrix-source';hardwareGrid.appendChild(label);for(let d=0;d<8;d++){const i=s*8+d,b=document.createElement('button');b.type='button';b.title=source+' → '+destinations[d];b.dataset.value=String(this.p().modMatrix[i]||0);b.addEventListener('click',()=>{const old=this.p().modMatrix[i]||0;this.p().modMatrix[i]=old===0?.6:old>0?-.6:0;this.renderHardwareMatrix();this.engine.post({t:'param',layer:this.active,key:'modMatrix',value:this.p().modMatrix});});this.hwMatrixCells.push({button:b,index:i});hardwareGrid.appendChild(b);}});
   this.matrixDialog.addEventListener('close',()=>{});document.body.appendChild(this.matrixDialog);
   this.renderHardwareMatrix=()=>this.hwMatrixCells.forEach(({button,index})=>{const v=this.p().modMatrix[index]||0;button.dataset.value=String(v);button.textContent=v>0?'+':v<0?'−':'·';button.setAttribute('aria-label',button.title+' · '+(v>0?'positive depth':v<0?'negative depth':'off'));});
   this.renderHardwareMatrix();
