@@ -7,11 +7,11 @@ const lerp=(a,b,t)=>a+(b-a)*t;
 const midiHz=n=>440*Math.pow(2,(n-69)/12);
 const LAYER_DEFAULT={
  dds1Wave:'saw',dds1Range:8,altA:0,altB:1,waveMod:0,waveModSource:'Manual',superMode:'off',detune:.16,pwDrift:.1,lfo1PitchAmount:0,env1PitchAmount:0,oscPitchDestination:'1+2',
- dds2Wave:'saw',dds2Range:8,dds2Tune:0,dds2Mode:'normal',crossMod:0,subMode:'off',dds2WaveMod:0,dds2LfoMode:false,
+ dds2Wave:'saw',dds2Range:8,dds2Tune:0,dds2Mode:'normal',crossMod:0,subMode:'sine',dds2WaveMod:.5,dds2LfoMode:false,
  mix:.5,pan:.5,hpf:.04,cutoff:.72,resonance:.16,drive:'off',keyTrack:'on',filterMod:'env1',filterLfoAmount:0,filterOscAmount:0,
  env1Attack:.08,env1AttackHold:0,env1DecayHold:0,env1Decay:.25,env1Sustain:.6,env1Release:.35,env1Loop:false,env1KeyTrack:0,
  env2Attack:.02,env2DecayHold:0,env2Decay:.32,env2Sustain:.78,env2Release:.3,
- lfo1Rate:.15,lfo1Delay:0,lfo1Wave:'sine',lfo1Mode:'reset',lfo1HighFreq:false,lfo1KeyTrack:false,lrPhase:0,
+ lfo1Rate:.15,lfo1Delay:0,lfo1Wave:'sine',lfo1Mode:'free',lfo1HighFreq:false,lfo1KeyTrack:false,lrPhase:0,
  lfo2Rate:.15,lfo2Delay:0,lfo2Wave:'sine',lfo2Mode:'trig',lfo2RateAmount:1,lfo2Dds:0,lfo2Vcf:0,lfo2Vca:0,
  benderDds:.5,benderVcf:0,benderOsc:'1+2',
  chorus:'off',chorusMix:.25,delayTime:.28,delayFeedback:.25,delayMod:.1,delaySync:false,delayFreeze:false,
@@ -331,16 +331,18 @@ class Super8Processor extends AudioWorkletProcessor{
      const channelBend=this.global.mpe&&v.channel>1?(this.mpeBend.get(v.channel)||0):(this.pitchBend[layer]||0);
      const benderX=clamp(this.global.benderX+(p.lfo2Mode==='onAtBend'?v.aftertouch*.5:0),-1,1);
      const benderSemis=benderX*clamp(p.benderDds)*12;
-     const benderTarget=p.benderOsc||'1+2';
+     const benderTarget=p.oscPitchDestination||'1+2';
      const benderPitch1=(benderTarget==='DDS 1'||benderTarget==='1+2')?benderSemis:0;
      const benderPitch2=(benderTarget==='DDS 2'||benderTarget==='1+2')?benderSemis:0;
-     const trigPressure=p.lfo2Mode==='onAtBend'?1:p.lfo2Mode==='atTrig'?Math.max(this.global.benderY,v.aftertouch):this.global.benderY;
+     const trigPressure=p.lfo2Mode==='trig'||p.lfo2Mode==='onAtBend'?1:Math.max(this.global.benderY,v.aftertouch);
      const lfo2Active=p.lfo2Mode==='onAtBend'||trigPressure>.015;
      if(lfo2Active&&!v.lfo2Gate)v.lfo2=0;
      v.lfo2Gate=lfo2Active;v.lfo2Pressure=trigPressure;
      const lfo2Signal=lfo2Active?lf2*trigPressure:0;
-     const pitch1=benderPitch1+(benderTarget==='DDS 2'?0:lfo2Signal*clamp(p.lfo2Dds)*12)+(lf1L*clamp(p.lfo1PitchAmount)*12)+(v.env1*clamp(p.env1PitchAmount)*12);
-     const pitch2=benderPitch2+(benderTarget==='DDS 1'?0:lfo2Signal*clamp(p.lfo2Dds)*12)+(lf1L*clamp(p.lfo1PitchAmount)*12)+(v.env1*clamp(p.env1PitchAmount)*12);
+     const lfo1Pitch=(lf1L*clamp(p.lfo1PitchAmount)+v.env1*clamp(p.env1PitchAmount))*12;
+     const lfo2Pitch=lfo2Signal*clamp(p.lfo2Dds)*12;
+     const pitch1=benderPitch1+(benderTarget==='DDS 2'?0:lfo2Pitch)+((benderTarget==='DDS 1'||benderTarget==='1+2')?lfo1Pitch:0);
+     const pitch2=benderPitch2+(benderTarget==='DDS 1'?0:lfo2Pitch)+((benderTarget==='DDS 2'||benderTarget==='1+2')?lfo1Pitch:0);
      const midiBend=channelBend*p.bendRange;
      const dds1Foot=Math.log2(8/Math.max(2,Number(p.dds1Range)||8))*12;
      const dds2Foot=Math.log2(8/Math.max(2,Number(p.dds2Range)||8))*12;
@@ -371,7 +373,8 @@ class Super8Processor extends AudioWorkletProcessor{
      v.ph2L=(v.ph2L+f2/sampleRate)%1;v.ph2R=(v.ph2R+f2/sampleRate)%1;
      const crossDepth=clamp(p.crossMod)*.12;
      const phase2L=(v.ph2L+o1L*crossDepth+1)%1,phase2R=(v.ph2R+o1R*crossDepth+1)%1;
-     let o2L=wav(p.dds2Wave,phase2L,pw,f2/sampleRate),o2R=this.global.binaural?wav(p.dds2Wave,phase2R,pw,f2/sampleRate):o2L;
+     const dds2PulseWidth=clamp(.02+.96*clamp(p.dds2WaveMod??.5));
+     let o2L=wav(p.dds2Wave,phase2L,dds2PulseWidth,f2/sampleRate),o2R=this.global.binaural?wav(p.dds2Wave,phase2R,dds2PulseWidth,f2/sampleRate):o2L;
      if(p.dds2Mode==='ring'){o2L*=o1L;o2R*=o1R;}
      v.subPhaseL=(v.subPhaseL+base*.5/sampleRate)%1;v.subPhaseR=(v.subPhaseR+base*.5/sampleRate)%1;
      if(p.dds2Mode==='sub'){
