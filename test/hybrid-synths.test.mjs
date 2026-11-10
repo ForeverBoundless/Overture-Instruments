@@ -162,6 +162,17 @@ test('shared hardware faders always have a defined MIDI target group', async () 
   assert.match(super8, /addFader\(p,\{[^}]*group:opts\.group/);
 });
 
+test('Super 8 starts with the complete hardware surface, not the retired card build', async () => {
+  const source = await readFile(new URL('../js/udo-super-8.js', import.meta.url), 'utf8');
+  const constructor = source.slice(source.indexOf(' constructor(){'), source.indexOf('\n }\n p(){'));
+  assert.match(constructor, /this\.buildHardwarePanel\(\)/);
+  assert.doesNotMatch(constructor, /this\.build\(\)/);
+  assert.match(constructor, /this\.buildKeyboard\(\)/);
+  assert.match(source, /addKeyboard\(p,\{x:255,y:548,w:1395,h:202,firstNote:36,count:61/);
+  assert.match(source, /this\.hwKeyboard=addKeyboard/);
+  assert.match(source, /this\.hwKeyboard\?\.setActive\(n,true\)/);
+});
+
 test('Pro 3 and Super 8 hardware modules parse before browser startup', async () => {
   const [pro, super8] = await Promise.all([
     readFile(new URL('../js/sequential-pro-3.js', import.meta.url), 'utf8'),
