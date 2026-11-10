@@ -345,7 +345,7 @@ class Super8App{
   // Header carries the actual UDO logo asset, patch display and status lights.
   panelSection(15,12,1650,50,'UDO AUDIO · SUPER 8','16-VOICE · TWO-PART BINAURAL ANALOG-HYBRID KEYBOARD');
   const logo=document.createElement('img');logo.src='/ui/Logos/UDO_logo.png';logo.alt='UDO Audio';logo.draggable=false;
-  logo.style.cssText='position:absolute;left:27px;top:27px;width:122px;height:28px;object-fit:contain;z-index:7';p.appendChild(logo);
+  logo.style.cssText='position:absolute;left:27px;top:40px;width:122px;height:18px;object-fit:contain;z-index:7';p.appendChild(logo);
   this.hwDisplay=addDisplay(p,{x:1115,y:20,w:225,h:36,brand:'PERFORMANCE / PROGRAM',skin:'amber'});this.hwDisplay.set('P 001','OVERTURE PERFORMANCE');
   this.hwPower=addButton(p,{x:1550,y:36,label:'POWER',value:false,toggle:false,size:25,led:'green',group:'GLOBAL',onChange:async()=>{const ready=await this.activateAudio?.();this.hwPower?.setValue(!!ready,true);}});
   // Top strip mirrors the silver Super 8's real left-to-right signal path.
