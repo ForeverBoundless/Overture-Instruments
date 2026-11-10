@@ -16,7 +16,7 @@ const LAYER_DEFAULT={
  lfo2Bender:false,lfo2Aftertouch:false,
  chorus:'off',chorusMix:.25,delayTime:.28,delayFeedback:.25,delayMod:.1,delaySync:false,delayFreeze:false,
  voiceMode:'poly1',unison:'off',modMatrix:Array.from({length:64},()=>0),
- seqEnabled:false,seqLength:16,seqPage:0,seqMode:'step',seqSteps:Array(64).fill(null),seqSwing:0,seqBpm:120,
+ seqEnabled:false,seqLength:16,seqPage:0,seqMode:'step',seqSteps:Array(64).fill(null),seqSlides:Array(64).fill(false),seqAccents:Array(64).fill(false),seqGates:Array(64).fill(.75),seqSwing:0,seqBpm:120,
  arpEnabled:false,arpMode:'up',arpDivision:4,arpRange:1,arpSwing:0,arpHold:false,
  portamento:0,transpose:0,bendRange:2,volume:.85,velocity:1,aftertouch:0
 };
@@ -80,7 +80,7 @@ class Super8Processor extends AudioWorkletProcessor{
   else if(m.t==='sustain'){this.sustain=!!m.down;if(!this.sustain)this.releaseUnheld();}
   else if(m.t==='allOff'){this.held.forEach(h=>h.clear());this.voices.forEach(v=>{v.gate=false;});}
   else if(m.t==='freeze'){this.layers[m.layer||0].delayFreeze=!!m.value;}
-  else if(m.t==='transport'){const layer=m.layer??this.global.activeLayer;this.layers[layer].seqEnabled=!!m.play;this.seq[layer].step=0;this.seq[layer].phase=0;}
+  else if(m.t==='transport'){const layer=m.layer??this.global.activeLayer;this.layers[layer].seqEnabled=!!m.play;this.seq[layer].step=0;this.seq[layer].phase=0;if(!m.play){this.voices.forEach(v=>{if(v.active&&v.layer===layer&&v.seqVoice){v.gate=false;v.seqVoice=false;}});this.seq[layer].note=-1;}}
   else if(m.t==='waves'){const l=this.layers[m.layer??this.global.activeLayer];if(Array.isArray(m.waves))l.userWaves=m.waves.map(a=>Float32Array.from(a));}
   else if(m.t==='clock'){this.clockPulse++;if(this.clockPulse%24===0){this.seq.forEach(x=>x.phase=1);this.arp.forEach(x=>x.phase=1);}}
  }
@@ -206,9 +206,62 @@ class Super8Processor extends AudioWorkletProcessor{
   const mix=p.delayFreeze?1:.3;return [L*(1-mix)+dl*mix,R*(1-mix)+dr*mix];
  }
  tickSequencers(dt,layer){
-  const p=this.layers[layer],s=this.seq[layer],a=this.arp[layer],held=[...this.held[layer].entries()].sort((x,y)=>x[0]-y[0]);
-  if(p.seqEnabled){const swing=clamp(p.seqSwing)*.42;s.phase+=(p.seqBpm/60)*dt*((s.step%2)?1-swing:1+swing);if(s.phase>=1){s.phase-=1;const n=p.seqSteps[s.step%p.seqLength];if(s.note>=0){this.voices.forEach(v=>{if(v.active&&v.layer===layer&&v.seqVoice){v.gate=false;v.seqVoice=false;}});s.note=-1;}if(n!==null&&n!==undefined){s.note=n;this.allocateNote(n,.85,layer,1,'sequence');this.voices.forEach(v=>{if(v.active&&v.layer===layer&&v.inputNote===n&&v.order===this.order)v.seqVoice=true;});}s.step=(s.step+1)%clamp(p.seqLength,1,64);}}
-  if(p.arpEnabled&&held.length){const arpSwing=clamp(p.arpSwing)*.42;a.phase+=(p.seqBpm/60)*dt*(4/Math.max(1,p.arpDivision))*((a.index%2)?1-arpSwing:1+arpSwing);if(a.phase>=1){a.phase-=1;const total=held.length*Math.max(1,Math.min(4,Math.round(p.arpRange||1)));const step=a.index++%total;const octave=Math.floor(step/held.length);let index=step%held.length;if(p.arpMode==='down')index=held.length-1-index;else if(p.arpMode==='random')index=Math.floor(Math.random()*held.length);else if(p.arpMode==='upDown'){const span=Math.max(1,held.length*2-2),z=a.index%span;index=z<held.length?z:span-z;}const n=held[index][0]+12*octave;this.voices.forEach(v=>{if(v.active&&v.layer===layer&&v.arpVoice){v.gate=false;v.arpVoice=false;}});this.allocateNote(n,held[index][1],layer,1,'arp');this.voices.forEach(v=>{if(v.active&&v.layer===layer&&v.inputNote===n&&v.order===this.order)v.arpVoice=true;});}else if(p.arpEnabled&&!held.length){this.voices.forEach(v=>{if(v.active&&v.layer===layer&&v.arpVoice){v.gate=false;v.arpVoice=false;}});}}
+  const p=this.layers[layer],s=this.seq[layer],a=this.arp[layer];
+  const held=[...this.held[layer].entries()];
+  if(p.seqEnabled){
+   const length=clamp(p.seqLength,1,64),nextStep=s.step%length;
+   const swing=clamp(p.seqSwing)*.42;
+   s.phase+=(p.seqBpm/60)*dt*((s.step%2)?1-swing:1+swing);
+   // A note's gate closes at its programmed fraction unless the next step is
+   // marked as a slide, in which case the oscillator/envelope remains tied.
+   if(s.note>=0&&s.phase>=clamp(s.gate??.75,.05,1)&&!p.seqSlides[nextStep]){
+    this.voices.forEach(v=>{if(v.active&&v.layer===layer&&v.seqVoice){v.gate=false;v.seqVoice=false;}});
+    s.note=-1;
+   }
+   if(s.phase>=1){
+    s.phase-=1;
+    const step=s.step%length,n=p.seqSteps[step],slide=!!p.seqSlides[step]&&n!==null&&n!==undefined;
+    const accent=!!p.seqAccents[step],gate=clamp(p.seqGates?.[step]??.75,.05,1);
+    const tied=this.voices.filter(v=>v.active&&v.layer===layer&&v.seqVoice&&v.gate);
+    if(s.note>=0&&slide&&tied.length){
+     // Glide the existing sequencer voice(s) to the new pitch without retriggering.
+     tied.forEach(v=>{v.note=n;v.inputNote=n;v.targetPitch=n+(p.transpose||0);v.velocity=accent?1:.82;v.gate=true;});
+     s.note=n;s.gate=gate;
+    }else{
+     if(s.note>=0){
+      this.voices.forEach(v=>{if(v.active&&v.layer===layer&&v.seqVoice){v.gate=false;v.seqVoice=false;}});
+      s.note=-1;
+     }
+     if(n!==null&&n!==undefined){
+      const velocity=accent?1:.82;
+      this.allocateNote(n,velocity,layer,1,'sequence');
+      this.voices.forEach(v=>{if(v.active&&v.layer===layer&&v.inputNote===n&&v.order===this.order)v.seqVoice=true;});
+      s.note=n;s.gate=gate;
+     }
+    }
+    s.step=(s.step+1)%length;
+   }
+  }
+  if(p.arpEnabled&&held.length){
+   const arpSwing=clamp(p.arpSwing)*.42;
+   a.phase+=(p.seqBpm/60)*dt*(4/Math.max(1,p.arpDivision))*((a.index%2)?1-arpSwing:1+arpSwing);
+   if(a.phase>=1){
+    a.phase-=1;
+    const ordered=p.arpMode==='assign'?held:held.slice().sort((x,y)=>x[0]-y[0]);
+    const total=ordered.length*Math.max(1,Math.min(4,Math.round(p.arpRange||1)));
+    const step=a.index++%total,octave=Math.floor(step/ordered.length);
+    let index=step%ordered.length;
+    if(p.arpMode==='down')index=ordered.length-1-index;
+    else if(p.arpMode==='random')index=Math.floor(Math.random()*ordered.length);
+    else if(p.arpMode==='upDown'){const span=Math.max(1,total*2-2),z=a.index%span,absolute=z<total?z:span-z;index=absolute%ordered.length;}
+    const n=ordered[index][0]+12*octave;
+    this.voices.forEach(v=>{if(v.active&&v.layer===layer&&v.arpVoice){v.gate=false;v.arpVoice=false;}});
+    this.allocateNote(n,ordered[index][1],layer,1,'arp');
+    this.voices.forEach(v=>{if(v.active&&v.layer===layer&&v.inputNote===n&&v.order===this.order)v.arpVoice=true;});
+   }
+  }else if(p.arpEnabled&&!held.length){
+   this.voices.forEach(v=>{if(v.active&&v.layer===layer&&v.arpVoice){v.gate=false;v.arpVoice=false;}});
+  }
  }
  process(_inputs,outputs){
   const out=outputs[0],L=out[0],R=out[1]||out[0],dt=1/sampleRate;
