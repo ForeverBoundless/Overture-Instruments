@@ -49,9 +49,10 @@ export function addLED(parent,x,y,color='red',on=false){const l=node('i','hp-led
 
 export function addKnob(parent,{x,y,label,min=0,max=1,value=0,step,size:customSize,small=false,accent=false,bipolar=false,onChange=()=>{},formatValue=v=>max>8?String(Math.round(v)):Number(v).toFixed(2),midiId,group=''}){
  const id='hpknob'+(++controlId),size=customSize|| (small?58:72),wrap=node('div','hp-knob'+(small?' hp-knob-small':'')+(accent?' hp-knob-accent':'')+(bipolar?' hp-knob-bipolar':''),parent);
- Object.assign(wrap.style,{left:(x-size/2)+'px',top:(y-size/2)+'px',width:size+'px',height:(size+22)+'px'});
+ Object.assign(wrap.style,{left:(x-size/2)+'px',top:(y-size/2)+'px',width:size+'px',height:(size+38)+'px'});
  wrap.tabIndex=0;wrap.setAttribute('role','slider');wrap.setAttribute('aria-label',label);wrap.setAttribute('aria-valuemin',min);wrap.setAttribute('aria-valuemax',max);
  const art=svg('svg',{viewBox:'0 0 100 100',class:'hp-knob-art'},wrap),defs=svg('defs',{},art);
+ art.style.width=size+'px';art.style.height=size+'px';
  const grad=svg('radialGradient',{id:id+'g',cx:'38%',cy:'30%',r:'75%'},defs);
  [['0%','#62666a'],['42%','#33373b'],['100%','#111417']].forEach(([o,c])=>svg('stop',{offset:o,'stop-color':c},grad));
  const rim=svg('linearGradient',{id:id+'r',x1:'0',y1:'0',x2:'1',y2:'1'},defs);
@@ -82,7 +83,8 @@ export function addKnob(parent,{x,y,label,min=0,max=1,value=0,step,size:customSi
 export function addFader(parent,{x,y,label,min=0,max=1,value=0,height=92,width=32,orientation='vertical',small=false,onChange=()=>{},formatValue=v=>Number(v).toFixed(2),midiId,group=''}){
  const vertical=orientation==='vertical',wrap=node('div','hp-fader '+(vertical?'hp-fader-vertical':'hp-fader-horizontal')+(small?' hp-fader-small':''),parent);
  const totalW=vertical?width:height,totalH=vertical?height:width;
- Object.assign(wrap.style,{left:(x-totalW/2)+'px',top:(y-totalH/2)+'px',width:totalW+'px',height:(totalH+(vertical?28:24))+'px'});
+ Object.assign(wrap.style,{left:(x-totalW/2)+'px',top:(y-totalH/2)+'px',width:Math.max(totalW,38)+'px',height:(totalH+(vertical?44:34))+'px'});
+ if(vertical)wrap.style.setProperty('--hp-fader-track-height',height+'px');
  wrap.dataset.labelWidth=String(Math.max(18,width*2));
  const track=node('div','hp-fader-track',wrap),scale=node('div','hp-fader-scale',track);
  for(let i=0;i<=10;i++)node('i','hp-fader-tick',scale);
