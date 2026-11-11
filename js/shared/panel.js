@@ -202,9 +202,10 @@ export function power(id, start, onReady, onError) {
       return false;
     }
   };
-  node.addEventListener('pointerdown', (event) => { if (event.button !== undefined && event.button !== 0) return; void go(event); });
+  // A native button click is trusted for mouse, touch, and keyboard activation.
+  // Avoid starting on pointerdown and then receiving a second click for the same
+  // gesture; the single click path is especially reliable on touch devices.
   node.addEventListener('click', (event) => { void go(event); });
-  node.addEventListener('keydown', (event) => { void go(event); });
   // Hardware-panel switches call this same handler directly from their trusted
   // click callback. This avoids synthetic clicks on the visually hidden button,
   // which browsers may reject as an AudioContext user-activation gesture.
