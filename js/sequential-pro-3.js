@@ -63,8 +63,20 @@ class Pro3App{
  constructor(){
   this.engine=new WorkletEngine(new URL('./engine/Pro3Processor.js',import.meta.url).href,'pro3-processor');
   this.patch=clean(BASE);this.store=new PresetStore({key:'overture.sequential-pro-3.programs',version:1,validate:clean});
+  // Queue the real synth state before any UI construction. If a visual control
+  // throws during startup, the power overlay can still start a playable engine.
+  this.engine.post({t:'patch',patch:this.patch});
+  this.activateAudio=power('pro3-power',()=>this.engine.start(),()=>{
+   this.engine.post({t:'patch',patch:this.patch});
+   this.hwPower?.setValue(true,true);
+   this.perf?.flushPending();
+   this.hwDisplay?.set('PRO 3 READY','OVERTURE PROGRAM · AUDIO ACTIVE');
+  },error=>{
+   this.hwPower?.setValue(false,true);
+   this.hwDisplay?.set('AUDIO START FAILED',String(error?.message||error||'Unknown audio error').slice(0,58));
+  });
+  this.engine.onProcessorError=error=>this.hwDisplay?.set('AUDIO PROCESSOR ERROR',String(error?.message||error).slice(0,58));
   this.ui={};this.build();this.buildHardwarePanel();this.buildPerformance();this.presets.load('f:0');
-  this.activateAudio=power('pro3-power',()=>this.engine.start(),()=>{this.hwPower?.setValue(true,true);this.perf.flushPending();this.display.set('PRO 3 READY','OVERTURE PROGRAM · AUDIO ACTIVE');},()=>this.hwPower?.setValue(false,true));
   this.engine.post({t:'patch',patch:this.patch});
  }
  set(k,v){this.patch[k]=v;this.engine.post({t:'param',key:k,value:v});if(k==='seqTrack')this.updateSequence();this.syncHardware?.();}
