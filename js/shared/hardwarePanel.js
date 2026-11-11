@@ -83,7 +83,8 @@ export function addKnob(parent,{x,y,label,min=0,max=1,value=0,step,size:customSi
 export function addFader(parent,{x,y,label,min=0,max=1,value=0,height=92,width=32,orientation='vertical',small=false,onChange=()=>{},formatValue=v=>Number(v).toFixed(2),midiId,group=''}){
  const vertical=orientation==='vertical',wrap=node('div','hp-fader '+(vertical?'hp-fader-vertical':'hp-fader-horizontal')+(small?' hp-fader-small':''),parent);
  const totalW=vertical?width:height,totalH=vertical?height:width;
- Object.assign(wrap.style,{left:(x-totalW/2)+'px',top:(y-totalH/2)+'px',width:Math.max(totalW,38)+'px',height:(totalH+(vertical?44:34))+'px'});
+ const footprint=vertical?Math.max(totalW,Math.min(24,width*1.4)):totalW;
+ Object.assign(wrap.style,{left:(x-footprint/2)+'px',top:(y-totalH/2)+'px',width:footprint+'px',height:(totalH+(vertical?38:30))+'px'});
  if(vertical)wrap.style.setProperty?.('--hp-fader-track-height',height+'px');
  const track=node('div','hp-fader-track',wrap),scale=node('div','hp-fader-scale',track);
  for(let i=0;i<=10;i++)node('i','hp-fader-tick',scale);
