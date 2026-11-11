@@ -152,7 +152,7 @@ test('both new hardware synths start audio directly from their visible power swi
   assert.match(super8, /label:'POWER',value:false,toggle:false/);
   assert.ok(!pro.includes("getElementById('pro3-power').click()"));
   assert.ok(!super8.includes("getElementById('super8-power').click()"));
-  assert.match(worker, /overture-shell-v64/);
+  assert.match(worker, /overture-shell-v65/);
 });
 
 test('Pro 3 and Super 8 expose their click-to-power-on overlays', async () => {
