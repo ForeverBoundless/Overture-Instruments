@@ -164,9 +164,9 @@ test('Pro 3 and Super 8 expose their click-to-power-on overlays', async () => {
     readFile(new URL('../js/shared/workletEngine.js', import.meta.url), 'utf8'),
   ]);
   assert.match(proPage, /id="pro3-power"/);
-  assert.match(proPage, /<small>Click to power on<\\/small>/);
+  assert.ok(proPage.includes('<small>Click to power on</small>'));
   assert.match(superPage, /id="super8-power"/);
-  assert.match(superPage, /<small>Click to power on<\\/small>/);
+  assert.ok(superPage.includes('<small>Click to power on</small>'));
   assert.ok(!proCss.includes('#pro3-power{display:none!important}'));
   assert.ok(!superCss.includes('#super8-power{display:none!important}'));
   assert.ok(engine.includes("ctx.state !== 'running'"));
