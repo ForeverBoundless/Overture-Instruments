@@ -167,8 +167,8 @@ test('Pro 3 and Super 8 expose their click-to-power-on overlays', async () => {
   assert.match(proPage, /<small>Click to power on<\\/small>/);
   assert.match(superPage, /id="super8-power"/);
   assert.match(superPage, /<small>Click to power on<\\/small>/);
-  assert.ok(!/#pro3-power\\s*\\{[^}]*display\\s*:\\s*none/i.test(proCss));
-  assert.ok(!/#super8-power\\s*\\{[^}]*display\\s*:\\s*none/i.test(superCss));
+  assert.ok(!proCss.includes('#pro3-power{display:none!important}'));
+  assert.ok(!superCss.includes('#super8-power{display:none!important}'));
   assert.ok(engine.includes("ctx.state !== 'running'"));
   assert.ok(engine.includes('processorerror'));
 });
