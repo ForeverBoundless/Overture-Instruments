@@ -64,6 +64,7 @@ export function addKnob(parent,{x,y,label,min=0,max=1,value=0,step,size:customSi
  const pointer=svg('g',{},art);svg('line',{x1:50,y1:48,x2:50,y2:22,stroke:'#f5f3e9','stroke-width':2.5,'stroke-linecap':'round'},pointer);
  svg('circle',{cx:50,cy:50,r:5,fill:'#697075',stroke:'#9da2a4','stroke-width':.7},art);
  const val=node('span','hp-knob-value',wrap);const legend=node('span','hp-control-label',wrap,label);
+ legend.title=label;
  let current=clamp(value,min,max),startY=0,startX=0,startValue=0,pid=null;
  const render=()=>{const t=(current-min)/(max-min||1);pointer.setAttribute('transform','rotate('+(-138+t*276)+' 50 50)');wrap.setAttribute('aria-valuenow',String(current));val.textContent=formatValue(current);};
  const setValue=(next,silent=false)=>{const v=clamp(next,min,max);if(Math.abs(v-current)<1e-8)return;current=v;render();if(!silent)onChange(v);};
@@ -81,11 +82,13 @@ export function addKnob(parent,{x,y,label,min=0,max=1,value=0,step,size:customSi
 export function addFader(parent,{x,y,label,min=0,max=1,value=0,height=92,width=32,orientation='vertical',small=false,onChange=()=>{},formatValue=v=>Number(v).toFixed(2),midiId,group=''}){
  const vertical=orientation==='vertical',wrap=node('div','hp-fader '+(vertical?'hp-fader-vertical':'hp-fader-horizontal')+(small?' hp-fader-small':''),parent);
  const totalW=vertical?width:height,totalH=vertical?height:width;
- Object.assign(wrap.style,{left:(x-totalW/2)+'px',top:(y-totalH/2)+'px',width:totalW+'px',height:(totalH+(vertical?24:22))+'px'});
+ Object.assign(wrap.style,{left:(x-totalW/2)+'px',top:(y-totalH/2)+'px',width:totalW+'px',height:(totalH+(vertical?28:24))+'px'});
+ wrap.dataset.labelWidth=String(Math.max(18,width*2));
  const track=node('div','hp-fader-track',wrap),scale=node('div','hp-fader-scale',track);
  for(let i=0;i<=10;i++)node('i','hp-fader-tick',scale);
  const cap=node('div','hp-fader-cap',track),pointer=node('div','hp-fader-cap-line',cap);
  const legend=node('span','hp-control-label hp-fader-label',wrap,label),valueEl=node('span','hp-fader-value',wrap);
+ legend.title=label;
  let current=clamp(value,min,max),pid=null,start=0,startValue=0;
  const render=()=>{const t=(current-min)/(max-min||1);if(vertical)cap.style.top=(100-t*100)+'%';else cap.style.left=(t*100)+'%';wrap.setAttribute('aria-valuenow',String(current));valueEl.textContent=formatValue(current);};
  const setValue=(v,silent=false)=>{const n=clamp(v,min,max);if(Math.abs(n-current)<1e-8)return;current=n;render();if(!silent)onChange(n);};
@@ -103,7 +106,7 @@ export function addButton(parent,{x,y,label='',value=false,toggle=true,kind='squ
  const wrap=node('button','hp-button hp-button-'+kind,parent);wrap.type='button';
  Object.assign(wrap.style,{left:(x-size/2)+'px',top:(y-size/2)+'px',width:size+'px',height:size+'px'});
  const face=node('span','hp-button-face',wrap),window_=node('span','hp-button-window',face),ledEl=node('i','hp-button-led hp-button-led-'+led,window_);
- if(label){const l=node('span','hp-button-label',wrap.parentElement,label);place(l,x,y+size*.64);}
+ if(label){const l=node('span','hp-button-label',wrap.parentElement,label);place(l,x,y+size/2+5);l.title=label;}
  let current=!!value;wrap.tabIndex=0;wrap.setAttribute('role','slider');wrap.setAttribute('aria-label',label||'Switch');wrap.setAttribute('aria-valuemin','0');wrap.setAttribute('aria-valuemax','1');
  const render=()=>{wrap.classList.toggle('is-on',current);wrap.setAttribute('aria-pressed',String(current));wrap.setAttribute('aria-valuenow',current?'1':'0');};const setValue=(v,silent=false)=>{const n=!!v;if(n===current)return;current=n;render();if(!silent)onChange(n);};
  wrap.addEventListener('click',()=>{if(toggle)setValue(!current);else onChange(true);});
@@ -120,11 +123,21 @@ export function addKeyboard(parent,{x,y,w,h,firstNote=36,count=37,onNoteOn=()=>{
  const bed=node('div','hp-keybed hp-keybed-'+keyColor,parent);Object.assign(bed.style,{left:x+'px',top:y+'px',width:w+'px',height:h+'px'});
  const white=[],black=[],noteToMidi=n=>n;
  for(let n=firstNote;n<firstNote+count;n++){if(![1,3,6,8,10].includes(n%12))white.push(n);}
- const ww=100/white.length,offset={1:.62,3:.78,6:.58,8:.70,10:.84};
+ const ww=100/white.length;
+ const blackPitchClasses=new Set([1,3,6,8,10]);
  const keyMap=new Map(),pointers=new Map(),active=new Map();
  const create=(n,isBlack)=>{const k=node('button','hp-key '+(isBlack?'hp-key-black':'hp-key-white'),bed);k.type='button';k.dataset.note=String(n);k.dataset.keyName=noteName(n);k.setAttribute('aria-label',noteName(n));if(labels&&!isBlack&&n%12===0)node('span','hp-key-mark',k,noteName(n));k.addEventListener('contextmenu',e=>e.preventDefault());keyMap.set(n,k);return k;};
  white.forEach((n,i)=>{const k=create(n,false);k.style.left=(i*ww)+'%';k.style.width=ww+'%';});
- for(let n=firstNote;n<firstNote+count;n++){const pc=n%12;if(![1,3,6,8,10].includes(pc))continue;const wi=white.indexOf(n-1);if(wi<0)continue;const k=create(n,true);k.style.left='calc('+(wi+offset[pc])*ww+'% - '+(ww*.29)+'%)';k.style.width=(ww*.58)+'%';}
+ for(let n=firstNote;n<firstNote+count;n++){
+  const pc=n%12;if(!blackPitchClasses.has(pc))continue;
+  const wi=white.indexOf(n-1);if(wi<0)continue;
+  const k=create(n,true),blackWidth=ww*.58;
+  // A black key belongs at the boundary between its two adjacent white keys.
+  // Centering every accidental on that boundary keeps the pattern consistent
+  // across the entire 37- and 61-note keyboards.
+  k.style.left=((wi+1)*ww-blackWidth/2)+'%';
+  k.style.width=blackWidth+'%';
+ }
  const hit=e=>{const found=document.elementFromPoint(e.clientX,e.clientY)?.closest?.('.hp-key');return found&&bed.contains(found)?Number(found.dataset.note):null;};
  const velocity=(e,n)=>{const k=keyMap.get(n),r=k?.getBoundingClientRect();if(!r)return .8;return clamp(.38+((e.clientY-r.top)/(r.height||1))*.62,.05,1);};
  const setActive=(n,on)=>{const k=keyMap.get(Number(n));if(k){k.classList.toggle('active',!!on);if(on)active.set(Number(n),true);else active.delete(Number(n));}};
