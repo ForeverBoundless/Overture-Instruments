@@ -505,7 +505,7 @@ test('Both emulator power overlays use a working button and gesture-first startu
   assert.match(d6Page, /<button type="button" id="hohner-power"/);
   assert.match(panel, /addEventListener\('click'/);
   assert.ok(obApp.indexOf("power('obxa-power'") < obApp.indexOf('this.build()'));
-  assert.match(worklet, /ctx\\.audioWorklet\\.addModule/);
+  assert.ok(worklet.includes('ctx.audioWorklet.addModule'));
 });
 
 
