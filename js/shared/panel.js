@@ -183,7 +183,6 @@ export function power(id, start, onReady, onError) {
     if (event?.type === 'keydown' && !['Enter', ' '].includes(event.key)) return false;
     if (event?.type === 'keydown') event.preventDefault();
     if (busy) return false;
-    if (node.classList.contains('is-off')) return true;
     busy = true; node.classList.add('is-starting'); node.setAttribute('aria-busy', 'true');
     if (status) status.textContent = 'STARTING AUDIO ENGINE…';
     try {
@@ -192,6 +191,7 @@ export function power(id, start, onReady, onError) {
       node.classList.remove('is-starting');
       node.removeAttribute('aria-busy');
       onReady?.();
+      busy = false;
       return true;
     } catch (err) {
       const detail = String(err?.message || err || 'Unknown audio error');
