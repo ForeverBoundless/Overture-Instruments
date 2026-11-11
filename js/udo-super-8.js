@@ -53,15 +53,20 @@ class Super8App{
   this.engine=new WorkletEngine(new URL('./engine/Super8Processor.js',import.meta.url).href,'super8-processor');
   // Bind the overlay before building the large hardware UI. This way a UI
   // construction exception cannot leave the Super 8 power screen inert.
+  this.patch=validate({});
+  // Queue a playable factory state before building the extensive hardware
+  // surface; the overlay remains useful even if a visual module fails.
+  this.engine.post({t:'patch',patch:this.patch});
   this.activateAudio=power('super8-power',()=>this.engine.start(),()=>{
+   this.engine.post({t:'patch',patch:this.patch});
    this.hwPower?.setValue(true,true);
    this.perf?.flushPending();
-   this.display?.set('SUPER 8 READY','TWO FPGA-STYLE DDS CORES · STEREO OUTPUT');
+   this.hwDisplay?.set('SUPER 8 READY','TWO FPGA-STYLE DDS CORES · STEREO OUTPUT');
   },error=>{
    this.hwPower?.setValue(false,true);
-   this.display?.set('AUDIO START FAILED',String(error?.message||error||'Unknown audio error').slice(0,58));
+   this.hwDisplay?.set('AUDIO START FAILED',String(error?.message||error||'Unknown audio error').slice(0,58));
   });
-  this.patch=validate({});this.store=new PresetStore({key:'overture.udo-super-8.performances',version:1,validate});
+  this.engine.onProcessorError=error=>this.hwDisplay?.set('AUDIO PROCESSOR ERROR',String(error?.message||error).slice(0,58));this.store=new PresetStore({key:'overture.udo-super-8.performances',version:1,validate});
   this.layerStores=[0,1].map(i=>new PresetStore({key:'overture.udo-super-8.layer.'+i,version:1,validate:cleanLayer}));
   this.active=0;this.ui={};
   // The reference-style hardware panel is the primary instrument. Do not build
