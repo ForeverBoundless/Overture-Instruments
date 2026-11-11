@@ -85,7 +85,6 @@ export function addFader(parent,{x,y,label,min=0,max=1,value=0,height=92,width=3
  const totalW=vertical?width:height,totalH=vertical?height:width;
  Object.assign(wrap.style,{left:(x-totalW/2)+'px',top:(y-totalH/2)+'px',width:Math.max(totalW,38)+'px',height:(totalH+(vertical?44:34))+'px'});
  if(vertical)wrap.style.setProperty?.('--hp-fader-track-height',height+'px');
- wrap.dataset.labelWidth=String(Math.max(18,width*2));
  const track=node('div','hp-fader-track',wrap),scale=node('div','hp-fader-scale',track);
  for(let i=0;i<=10;i++)node('i','hp-fader-tick',scale);
  const cap=node('div','hp-fader-cap',track),pointer=node('div','hp-fader-cap-line',cap);
