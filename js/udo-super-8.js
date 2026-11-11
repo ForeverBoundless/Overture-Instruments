@@ -51,6 +51,16 @@ const KNOBS=[
 class Super8App{
  constructor(){
   this.engine=new WorkletEngine(new URL('./engine/Super8Processor.js',import.meta.url).href,'super8-processor');
+  // Bind the overlay before building the large hardware UI. This way a UI
+  // construction exception cannot leave the Super 8 power screen inert.
+  this.activateAudio=power('super8-power',()=>this.engine.start(),()=>{
+   this.hwPower?.setValue(true,true);
+   this.perf?.flushPending();
+   this.display?.set('SUPER 8 READY','TWO FPGA-STYLE DDS CORES · STEREO OUTPUT');
+  },error=>{
+   this.hwPower?.setValue(false,true);
+   this.display?.set('AUDIO START FAILED',String(error?.message||error||'Unknown audio error').slice(0,58));
+  });
   this.patch=validate({});this.store=new PresetStore({key:'overture.udo-super-8.performances',version:1,validate});
   this.layerStores=[0,1].map(i=>new PresetStore({key:'overture.udo-super-8.layer.'+i,version:1,validate:cleanLayer}));
   this.active=0;this.ui={};
@@ -71,7 +81,6 @@ class Super8App{
   this.shell=this.midiHost;
   this.buildKeyboard();
   this.presets.load('f:0');
-  this.activateAudio=power('super8-power',()=>this.engine.start(),()=>{this.hwPower?.setValue(true,true);this.perf.flushPending();this.display.set('SUPER 8 READY','TWO FPGA-STYLE DDS CORES · STEREO OUTPUT');},()=>this.hwPower?.setValue(false,true));
   this.postPatch();
  }
  loadPerformance(id){
