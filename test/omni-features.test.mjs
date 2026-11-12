@@ -27,10 +27,10 @@ test('OMNI chord interval sliders expose the complete ±32-semitone range', asyn
   assert.ok(worker.includes(`/js/omni/graph.js?v=20261104-sem-mellotron`));
   assert.ok(worker.includes(`/js/omni/modules.js?v=20261104-sem-mellotron`));
   assert.ok(page.includes('omni.css?v=20261104-boot-centering'));
-  assert.ok(page.includes('omni.js?v=20261105-module-info'));
+  assert.ok(page.includes('omni.js?v=20261112-community-edit-r1'));
   assert.match(worker, /overture-shell-v\d+/);
   assert.ok(worker.includes('/css/omni.css?v=20261104-boot-centering'));
-  assert.ok(worker.includes('/js/omni.js?v=20261105-module-info'));
+  assert.ok(worker.includes('/js/omni.js?v=20261112-community-edit-r1'));
 });
 
 test('OMNI exposes recording, searchable modules and editing shortcuts', async () => {
@@ -105,7 +105,7 @@ test('OMNI performance deck keeps octave controls in the keyboard header and giv
   assert.match(page, /omni\.js\?v=20261105-module-info/);
   assert.match(worker, /overture-shell-v\d+/);
   assert.match(worker, /omni\.css\?v=20261104-boot-centering/);
-  assert.ok(worker.includes('/js/omni.js?v=20261105-module-info'));
+  assert.ok(worker.includes('/js/omni.js?v=20261112-community-edit-r1'));
 });
 
 
@@ -131,8 +131,8 @@ test('community publish login link honours Supabase hidden state in every respon
     readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
   ]);
   assert.match(css, /#community-account-link\[hidden\][\s\S]*display:none !important/);
-  assert.match(page, /community\.css\?v=20261103-auth-hidden/);
-  assert.match(worker, /community\.css\?v=20261103-auth-hidden/);
+  assert.match(page, /community\.css\?v=20261112-community-moderation-r1/);
+  assert.match(worker, /community\.css\?v=20261112-community-moderation-r1/);
 });
 
 test('light-mode accent effects retain the original luminous brand colours', async () => {
@@ -262,7 +262,7 @@ test('OMNI exposes native SEM and Mellotron instrument modules and refreshes off
   assert.match(worker, /overture-shell-v\d+/);
   assert.match(worker, /OberheimEightVoiceProcessor\.js/);
   assert.match(worker, /MellotronProcessor\.js/);
-  assert.ok(worker.includes('/js/omni.js?v=20261105-module-info'));
+  assert.ok(worker.includes('/js/omni.js?v=20261112-community-edit-r1'));
 });
 
 
