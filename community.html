@@ -172,11 +172,22 @@
               <option value="unlisted">Unlisted — accessible by direct link</option>
             </select>
           </label>
-          <label>
-            <span>AUDIO PREVIEW (OPTIONAL, 8 MB MAX)</span>
+          <label class="community-audio-field">
+            <span class="community-audio-label">
+              <span>AUDIO PREVIEW (OPTIONAL, 8 MB MAX)</span>
+              <span class="community-warning-wrap">
+                <button class="community-warning-trigger" type="button" aria-label="Audio upload rules" aria-describedby="community-audio-warning">!</button>
+                <span class="community-warning-tooltip" id="community-audio-warning" role="tooltip">Only upload audio you created or have permission to share. Inappropriate, abusive, hateful, sexual, threatening, or infringing audio will be removed. Serious or repeated violations can lead to a patch being taken down or the account being suspended or terminated.</span>
+              </span>
+            </span>
             <input type="file" id="community-audio-file" accept="audio/webm,audio/ogg,audio/mp4,audio/mpeg,audio/wav">
+            <small>Leave this blank and Overture will generate a short preview from the patch. Your own uploaded recording takes priority.</small>
           </label>
         </div>
+        <label class="community-guidelines-check">
+          <input type="checkbox" id="community-content-confirmation" required>
+          <span>I confirm that this patch and any audio I upload follow Overture's community rules, and that I have the rights needed to share the audio.</span>
+        </label>
         <div class="community-form-actions">
           <p id="community-publish-status" role="status" aria-live="polite"></p>
           <button class="community-button community-button--primary" type="submit">PUBLISH PATCH</button>
