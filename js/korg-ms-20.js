@@ -4,7 +4,7 @@ import { PresetStore, num } from './shared/presetStore.js';
 import { el, section, knob, button, toggle, select, display, performance, power, presetBar, footer } from './shared/panel.js';
 import { MS20_DEFAULT as DEF, MS20_JACKS as JACKS } from './data/ms20Jacks.js';
 import { MS20_PRESETS } from './data/ms20Presets.js';
-import { consumeCommunityInstrumentPreset } from './shared/communityPreset.js';
+import { consumeCommunityInstrumentPreset, createCommunityShareButton } from './shared/communityPreset.js';
 
 const ENUMS = { vco1Wave: ['tri', 'saw', 'pulse', 'noise'], vco2Wave: ['saw', 'sqr', 'pulse', 'ring'], vco1Scale: [32, 16, 8, 4], vco2Scale: [16, 8, 4, 2] };
 export function validateCables(list) {
@@ -117,6 +117,12 @@ class MS20App {
       apply: (data, name) => { this.patch = validate(data); this.disp.set(`PATCH  ${name}`, `${this.patch.cables.length} CABLE${this.patch.cables.length === 1 ? '' : 'S'}`); this.send(); this.refresh(); },
       capture: () => JSON.parse(JSON.stringify(this.patch)),
     });
+    createCommunityShareButton(pre.body, {
+      instrumentId: 'ms-20', className: 'pn-btn',
+      getData: () => ({ ...this.patch, params: { ...this.patch.params }, cables: this.patch.cables.map((c) => ({ ...c })) }),
+      getTitle: () => 'MS-20 patch',
+    });
+    //
     button(el('div', 'pn-buttons', pre.body), 'REMOVE ALL CABLES', () => { this.patch.cables = []; this.send(); this.drawCables(); });
   }
 
