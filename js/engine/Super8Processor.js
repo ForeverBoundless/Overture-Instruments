@@ -145,11 +145,12 @@ class Super8Processor extends AudioWorkletProcessor{
   this.layers.forEach((p,i)=>{const s=this.sm[i];s.mix=clamp(p.mix);s.pan=clamp(p.pan);s.cut=clamp(p.cutoff);s.res=clamp(p.resonance);s.hpf=clamp(p.hpf);});
  }
  message(m){
-  if(m.t==='patch'){this.global={...this.global,...m.patch};this.layers=[clone(LAYER_DEFAULT),clone(LAYER_DEFAULT)].map((d,i)=>({...d,...(m.patch.layers?.[i]||{})}));this.snapSmooth();return;}
+  if(m.t==='patch'){this.global={...this.global,...m.patch};this.layers=[clone(LAYER_DEFAULT),clone(LAYER_DEFAULT)].map((d,i)=>({...d,...(m.patch.layers?.[i]||{})}));this.layers.forEach(layer=>{if(Array.isArray(layer.userWaves))layer.userWaves=layer.userWaves.map(w=>Array.isArray(w)?Float32Array.from(w):null);});this.snapSmooth();return;}
   if(m.t==='param'){
    if(m.layer===0||m.layer===1){
     const old=this.layers[m.layer][m.key];this.layers[m.layer][m.key]=m.value;
     if(m.key==='arpHold'&&old&&!m.value){this.arpLatched[m.layer].forEach(note=>this.held[m.layer].delete(note));this.arpLatched[m.layer].clear();}
+    if(m.key==='hold'&&old&&!m.value){this.held[m.layer].clear();this.arpLatched[m.layer].clear();this.voices.forEach(v=>{if(v.active&&v.layer===m.layer&&!v.seqVoice&&!v.arpVoice){v.gate=false;v.e2Stage='release';}});}
    }else this.global[m.key]=m.value;
    return;
   }
@@ -242,12 +243,13 @@ class Super8Processor extends AudioWorkletProcessor{
  noteOff(note,channel,source='ui'){
   const matches=this.voices.filter(v=>v.active&&v.inputNote===note&&!v.seqVoice&&!v.arpVoice&&(source==='midi'?v.channel===channel:true));
   let layers;
-  if(source==='midi')layers=[this.global.mode==='dual'&&this.global.mpe&&channel===2?1:this.global.activeLayer|0];
+  if(source==='midi')layers=[this.global.mode==='dual'&&this.global.mpe&&channel===2?1:this.global.mode==='split'?this.layerFor(note):this.global.activeLayer|0];
   else if(this.global.mode==='dual')layers=[0,1];
   else layers=[this.layerFor(note)];
   layers.forEach(layer=>{
    const p=this.layers[layer];
    if(p.arpEnabled&&p.arpHold){this.arpLatched[layer].add(note);return;}
+   if(p.hold)return;
    this.held[layer].delete(note);this.arpLatched[layer].delete(note);
   });
   matches.forEach(v=>{
