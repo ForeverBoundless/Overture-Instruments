@@ -100,8 +100,6 @@ class Super8App{
  }
  loadPerformance(id){
   clearCommunitySource();
-  const fromCommunity = this.communityPreset;
-  if (fromCommunity && this._communityLoadInProgress) this.communityPreset = null;
   let item=null,key=String(id||'f:0');
   if(key.startsWith('f:'))item=FACTORY[Number(key.slice(2))];
   else if(key.startsWith('u:'))item=this.store.get(key.slice(2));
