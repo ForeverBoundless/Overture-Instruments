@@ -860,7 +860,7 @@ async function submitReport(event) {
 
 async function refreshModerationReports() {
   const list = byId('community-moderation-list');
-  const status = byId('community-moderation-panel').querySelector('#community-moderation-status');
+  const status = byId('community-moderation-queue-status');
   const empty = byId('community-moderation-empty');
   list.replaceChildren();
   status.textContent = 'Loading open reports…';
