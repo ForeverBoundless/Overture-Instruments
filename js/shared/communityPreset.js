@@ -89,6 +89,10 @@ export function createCommunityShareButton(parent, {
   return button;
 }
 
+export function clearCommunitySource() {
+  try { getSessionStorage()?.removeItem(SOURCE_KEY); } catch { /* storage unavailable */ }
+}
+
 /** One-shot handoff from the Community library into the selected emulator. */
 export function consumeCommunityInstrumentPreset(instrumentId, validate = (value) => value) {
   try {
