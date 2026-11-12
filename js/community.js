@@ -115,7 +115,7 @@ function extractInstrumentPreset(raw, instrumentId) {
       if (!has('mode','voiceCount','layerB','master') || !isObject(data.layerB)) throw new Error('This is not a complete OB-Xa program.');
       break;
     case 'sequential-pro-3':
-      if (!has('seqTracks','modRoutes','osc1Wave','filterModel') || !Array.isArray(data.seqTracks) || !Array.isArray(data.modRoutes)) throw new Error('This is not a Sequential Pro 3 program.');
+      if (!has('seqTracks','modRoutes','osc1Wave','filterType') || !Array.isArray(data.seqTracks) || data.seqTracks.length !== 16 || !Array.isArray(data.modRoutes) || data.modRoutes.length !== 32) throw new Error('This is not a complete Sequential Pro 3 program.');
       break;
     case 'udo-super-8':
       if (!Array.isArray(data.layers) || data.layers.length !== 2 || !data.layers.every((layer) => isObject(layer) && Array.isArray(layer.modMatrix) && layer.modMatrix.length === 64)) throw new Error('This is not a complete UDO Super 8 performance.');
