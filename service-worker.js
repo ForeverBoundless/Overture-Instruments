@@ -1,4 +1,4 @@
-const CACHE = 'overture-shell-v64';
+const CACHE = 'overture-shell-v65';
 const APP_SHELL = [
   '/account',
   '/login',
@@ -100,6 +100,8 @@ const APP_SHELL = [
   '/js/data/prophet10Programs.js',
   '/js/data/prophet10Tunings.js',
   '/js/data/sub37Presets.js',
+  '/js/data/pro3Presets.js',
+  '/js/data/super8Presets.js',
   '/js/data/tr808Patterns.js',
   '/js/engine/AudioEngine.js',
   '/js/engine/DAHDSREnvelope.js',

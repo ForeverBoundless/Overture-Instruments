@@ -152,7 +152,7 @@ test('both new hardware synths start audio directly from their visible power swi
   assert.match(super8, /label:'POWER',value:false,toggle:false/);
   assert.ok(!pro.includes("getElementById('pro3-power').click()"));
   assert.ok(!super8.includes("getElementById('super8-power').click()"));
-  assert.match(worker, /overture-shell-v64/);
+  assert.match(worker, /overture-shell-v65/);
 });
 
 test('Pro 3 and Super 8 expose their click-to-power-on overlays', async () => {
@@ -178,8 +178,8 @@ test('both visible hardware keyboards use the pending-note performance input pat
     readFile(new URL('../js/sequential-pro-3.js', import.meta.url), 'utf8'),
     readFile(new URL('../js/udo-super-8.js', import.meta.url), 'utf8'),
   ]);
-  assert.match(pro, /this\.hwKeyboard=addKeyboard\(p,\{[^}]*onNoteOn:\(n,v\)=>this\.perf\.noteOn\(n,v,'ui'\),onNoteOff:n=>this\.perf\.noteOff\(n,'ui'\)/);
-  assert.match(super8, /this\.hwKeyboard=addKeyboard\(p,\{[^}]*onNoteOn:\(n,v\)=>this\.perf\.noteOn\(n,v,'ui'\),onNoteOff:n=>this\.perf\.noteOff\(n,'ui'\)/);
+  assert.match(pro, /this\.hwKeyboard=addKeyboard\((?:p|play|playRow),\{[^}]*onNoteOn:\(n,v\)=>this\.perf\.noteOn\(n,v,'ui'\),onNoteOff:n=>this\.perf\.noteOff\(n,'ui'\)/);
+  assert.match(super8, /this\.hwKeyboard=addKeyboard\((?:p|play|playRow),\{[^}]*onNoteOn:\(n,v\)=>this\.perf\.noteOn\(n,v,'ui'\),onNoteOff:n=>this\.perf\.noteOff\(n,'ui'\)/);
   assert.match(pro, /this\.hwKeyboard\?\.setActive\(n,true\)/);
   assert.match(super8, /this\.hwKeyboard\?\.setActive\(n,true\)/);
 });
@@ -192,18 +192,19 @@ test('Pro 3 and Super 8 hardware panel sections and keybeds stay within their ch
   ]);
   const proHardware = pro.slice(pro.indexOf(' buildHardwarePanel(){'), pro.indexOf('\n }\n\n}', pro.indexOf(' buildHardwarePanel(){')));
   const superHardware = super8.slice(super8.indexOf(' buildHardwarePanel(){'), super8.indexOf('\n }\n\n}', super8.indexOf(' buildHardwarePanel(){')));
-  assert.match(proHardware, /createHardwareSurface\(root,\{id:'sequential-pro-3',width:1680,height:850/);
-  assert.match(proHardware, /x:196,y:712,w:1468,h:130,firstNote:36,count:37/);
-  assert.match(superHardware, /createHardwareSurface\(root,\{id:'udo-super-8',width:1680/);
-  assert.match(superHardware, /x:255,y:548,w:1395,h:202,firstNote:36,count:61/);
-  assert.match(superHardware, /panelSection\(15,542,230,212,'LFO 2 \/ BENDER'/);
+  assert.match(proHardware, /createHardwareSurface\(root,\{id:'sequential-pro-3',skin:'pro3'/);
+  assert.match(proHardware, /addKeyboard\(play,\{firstNote:36,count:37/);
+  assert.match(superHardware, /createHardwareSurface\(root,\{id:'udo-super-8',skin:'super8'/);
+  assert.match(superHardware, /addKeyboard\(playRow,\{firstNote:36,count:61/);
+  assert.match(superHardware, /s8-mod/);
   const styles = await readFile(new URL('../css/hardware-panel.css', import.meta.url), 'utf8');
-  assert.match(styles, /\.hp-root\{padding:8px 4px 24px;justify-content:center/);
+  assert.doesNotMatch(styles, /!important/);
+  assert.doesNotMatch(styles, /\.hp-root\{[^}]*transform:scale/);
 });
 
 test('shared hardware fader can construct and expose MIDI metadata at runtime', () => {
   class FakeNode {
-    constructor(tag) { this.tagName = tag; this.style = {}; this.children = []; this.attributes = {}; this.listeners = {}; }
+    constructor(tag) { this.tagName = tag; this.style = { setProperty() {} }; this.children = []; this.attributes = {}; this.listeners = {}; }
     appendChild(child) { this.children.push(child); child.parentNode = this; return child; }
     setAttribute(name, value) { this.attributes[name] = String(value); }
     addEventListener(name, callback) { this.listeners[name] = callback; }
@@ -213,7 +214,7 @@ test('shared hardware fader can construct and expose MIDI metadata at runtime', 
   globalThis.document = { createElement: (tag) => new FakeNode(tag) };
   try {
     const parent = new FakeNode('div');
-    const control = addFader(parent, { x: 10, y: 20, label: 'FILTER', value: .4, group: 'FILTER', onChange() {} });
+    const control = addFader(parent, { label: 'FILTER', value: .4, group: 'FILTER', onChange() {} });
     assert.equal(control.el._oiMidi.group, 'FILTER');
     assert.equal(control.el._oiMidi.label, 'FILTER');
     assert.ok(Number.isFinite(control.getValue()));
@@ -226,14 +227,14 @@ test('shared hardware fader can construct and expose MIDI metadata at runtime', 
 
 test('shared hardware faders always have a defined MIDI target group', async () => {
   const helper = await readFile(new URL('../js/shared/hardwarePanel.js', import.meta.url), 'utf8');
-  assert.ok(helper.includes("export function addFader(parent,{x,y,label,min=0,max=1,value=0,height=92,width=32,orientation='vertical',small=false,onChange=()=>{},formatValue=v=>Number(v).toFixed(2),midiId,group=''}){"), 'addFader defines a default MIDI target group');
+  assert.match(helper, /export function addFader\(parent,\{.*group=''\}\)/, 'addFader defines a default MIDI target group');
   assert.match(helper, /wrap\._oiMidi=\{id:midiId\|\|\('HW:'\+label\),label,group,get:/);
   const [pro, super8] = await Promise.all([
     readFile(new URL('../js/sequential-pro-3.js', import.meta.url), 'utf8'),
     readFile(new URL('../js/udo-super-8.js', import.meta.url), 'utf8'),
   ]);
-  assert.match(pro, /addFader\(p,\{[^}]*group:opts\.group/);
-  assert.match(super8, /addFader\(p,\{[^}]*group:opts\.group/);
+  assert.match(pro, /addFader\(parent,\{[^}]*group:o\.group/);
+  assert.match(super8, /addFader\(parent,\{[^}]*group:o\.group/);
 });
 
 test('Super 8 starts with the complete hardware surface, not the retired card build', async () => {
@@ -242,7 +243,7 @@ test('Super 8 starts with the complete hardware surface, not the retired card bu
   assert.match(constructor, /this\.buildHardwarePanel\(\)/);
   assert.doesNotMatch(constructor, /this\.build\(\)/);
   assert.match(constructor, /this\.buildKeyboard\(\)/);
-  assert.match(source, /addKeyboard\(p,\{x:255,y:548,w:1395,h:202,firstNote:36,count:61/);
+  assert.match(source, /addKeyboard\(playRow,\{firstNote:36,count:61/);
   assert.match(source, /this\.hwKeyboard=addKeyboard/);
   assert.match(source, /this\.hwKeyboard\?\.setActive\(n,true\)/);
 });
@@ -275,17 +276,17 @@ test('Pro 3 and Super 8 load the shared reference-style hardware surface', async
   ]);
   assert.match(pro, /buildHardwarePanel\(\)/);
   assert.match(pro, /SEQUENCER/);
-  assert.match(pro, /OSCILLATOR 1/);
-  assert.match(pro, /TUNED FEEDBACK/);
-  assert.match(pro, /addKeyboard\(p,\{x:196,y:712,w:1468,h:130,firstNote:36,count:37/);
+  assert.match(pro, /Oscillator 1/i);
+  assert.match(pro, /Tuned feedback/i);
+  assert.match(pro, /addKeyboard\(play,\{firstNote:36,count:37/);
   assert.match(super8, /buildHardwarePanel\(\)/);
   assert.match(super8, /label:'UPPER'/);
-  assert.match(super8, /BINAURAL/);
+  assert.match(super8, /Binaural/);
   assert.match(super8, /UDO_logo\.png/);
   assert.match(super8, /count:61/);
   assert.match(super8, /PRESSURE  Y/);
   assert.match(super8, /hp-super8-hardware-footer/);
-  assert.match(super8, /MODULATION MATRIX/);
+  assert.match(super8, /MODULATION MATRIX/i);
   assert.match(helper, /export function addKeyboard/);
   assert.match(helper, /export function addFader/);
   assert.match(styles, /hp-key-black/);

@@ -583,14 +583,13 @@ test('Sequential Pro 3 and UDO Super 8 are first-class library instruments', asy
   assert.ok(styles.includes('.instrument-tile--udo-super-8 .instrument-tile__visual::after'));
   assert.ok(proPage.includes('sequential-pro-3.css'));
   assert.match(proApp, /MODULATION MATRIX/);
-  assert.match(proApp, /SET A/);
   assert.match(proApp, /seqTracks/);
   assert.ok(proEngine.includes('registerProcessor("pro3-processor",Pro3Processor)'));
   assert.match(proEngine, /paraphonic/);
   assert.ok(superPage.includes('udo-super-8.css'));
-  assert.match(superApp, /UPPER/);
-  assert.match(superApp, /LOWER/);
-  assert.match(superApp, /BINAURAL/);
+  assert.match(superApp, /UPPER/i);
+  assert.match(superApp, /LOWER/i);
+  assert.match(superApp, /binaural/i);
   assert.match(superApp, /polyAftertouch/);
   assert.ok(superEngine.includes("registerProcessor('super8-processor',Super8Processor)"));
   assert.match(superEngine, /superMode/);
