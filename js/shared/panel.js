@@ -7,6 +7,7 @@ import { Keyboard } from '../../ui/Keyboard.js';
 import { PitchWheel, ModWheel } from '../../ui/Wheel.js';
 import { MidiManager, midiNoteName } from '../engine/MidiManager.js';
 import { downloadText, pickFile } from './presetStore.js';
+import { clearCommunitySource } from './communityPreset.js';
 
 export const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 export const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
@@ -227,6 +228,7 @@ export function presetBar(parent, opts) {
   const sel = select(body, 'PRESET', options(), 'f:0', (v) => load(v));
   const refresh = (value) => { const s = sel.select; s.replaceChildren(); options().forEach((o) => { const opt = el('option', '', s, o.label); opt.value = o.value; }); if (value) s.value = value; };
   function load(v) {
+    clearCommunitySource();
     if (v.startsWith('f:')) { const i = Number(v.slice(2)); current = { kind: 'factory', index: i }; apply(JSON.parse(JSON.stringify(factory[i].data)), factory[i].name); }
     else { const it = store.get(v.slice(2)); if (!it) return; current = { kind: 'user', id: it.id }; apply(JSON.parse(JSON.stringify(it.data)), it.name); }
     sel.select.value = v;
