@@ -15,6 +15,8 @@
 10. Configure custom SMTP for reliable confirmation and password-reset email delivery before public launch; Supabase's default mail service is rate-limited.
 11. Deploy the site. Visit `/account`, create an account with email/password or Google, then edit the username, optional name and profile picture. Visit `/community` and verify that the same account can publish, edit/delete only its own patches, and that signed-out visitors can discover and download public patches.
 
+For an existing Community installation that has already applied `20261102000000_community_patches.sql`, apply only the additive migration `20261112000000_community_all_instruments.sql`. A fresh installation should apply both migrations in the order shown above.
+
 The browser only uses the publishable/anon key. Never place a service-role key in a page, JavaScript file, Vercel public variable, or repository. The migration creates RLS policies for public patch reads, owner-only publishing/editing/deletion, and owner-scoped audio uploads. Public audio preview URLs are readable by anyone because the bucket is intentionally public; do not upload private recordings.
 
 
