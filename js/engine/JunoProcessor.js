@@ -26,13 +26,18 @@ class JunoProcessor extends AudioWorkletProcessor {
     this.p = { ...DEFAULT };
     this.voices = Array.from({ length: NV }, () => new Voice());
     this.order = 0; this.bend = 0; this.mod = 0; this.sustain = false; this.volume = 0.7; this.gain = 0;
-    this.lfoPh = 0; this.lfoFade = 0; this.lastNoteTime = 0; this.held = 0;
+    this.lfoPh = 0; this.lfoFade = 0; this.lastNoteTime = 0; this.held = 0; this.scheduled = [];
     const len = Math.ceil(this.sr * 0.05);
     this.dl = new Float32Array(len); this.dw = 0; this.dlen = len; this.chPh = 0; this.chMix = 0;
     this.port.onmessage = (e) => this._msg(e.data);
   }
 
   _msg(m) {
+    if ((m.t === 'noteOn' || m.t === 'noteOff') && Number.isFinite(m.frame) && m.frame > currentFrame) {
+      this.scheduled.push(m);
+      this.scheduled.sort((a, b) => a.frame - b.frame);
+      return;
+    }
     switch (m.t) {
       case 'patch': this.p = { ...DEFAULT, ...m.patch }; break;
       case 'param': if (m.key in DEFAULT) this.p[m.key] = m.value; break;
@@ -83,6 +88,11 @@ class JunoProcessor extends AudioWorkletProcessor {
     const chDepth = (p.chorus === 2 ? 0.0024 : 0.0018) * sr;
     const chBase = (p.chorus === 2 ? 0.0045 : 0.0035) * sr;
     for (let n = 0; n < L.length; n += 1) {
+      while (this.scheduled.length && this.scheduled[0].frame <= currentFrame + n) {
+        const message = this.scheduled.shift();
+        delete message.frame;
+        this._msg(message);
+      }
       this.lfoPh += lfoInc; if (this.lfoPh >= 1) this.lfoPh -= 1;
       this.lfoFade = Math.min(1, this.lfoFade + fadeInc);
       const lfo = (this.lfoPh < 0.5 ? 4 * this.lfoPh - 1 : 3 - 4 * this.lfoPh) * this.lfoFade;
