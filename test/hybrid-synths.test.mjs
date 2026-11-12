@@ -314,3 +314,26 @@ test('flow hardware surface defines its group, control, and keyboard layout prim
   assert.match(styles, /\.hp-keybed\{[^}]*height:/);
   assert.match(styles, /\.hp-key-white\{[^}]*position:absolute|\.hp-key\{[^}]*position:absolute/);
 });
+
+
+test('UDO Super 8 routes MIDI note-off to the same split layer as note-on', async () => {
+  const h = await createWorklet('../js/engine/Super8Processor.js', 'super8-processor');
+  h.processor.message({ t: 'patch', patch: { mode: 'split', splitPoint: 60, binaural: false, layers: [{}, {}] } });
+  h.processor.message({ t: 'noteOn', note: 72, vel: .8, channel: 1, source: 'midi' });
+  const upper = h.processor.voices.find(v => v.active && v.layer === 1 && v.inputNote === 72);
+  assert.ok(upper, 'notes above the split point are allocated to the upper layer');
+  h.processor.message({ t: 'noteOff', note: 72, channel: 1, source: 'midi' });
+  assert.equal(upper.gate, false, 'note-off releases the voice on the same upper layer');
+});
+
+test('UDO Super 8 layer hold sustains notes until hold is switched off', async () => {
+  const h = await createWorklet('../js/engine/Super8Processor.js', 'super8-processor');
+  h.processor.message({ t: 'patch', patch: { mode: 'single', binaural: false, layers: [{}, {}] } });
+  h.processor.message({ t: 'param', layer: 0, key: 'hold', value: true });
+  h.processor.message({ t: 'noteOn', note: 60, vel: .8, channel: 1, source: 'midi' });
+  h.processor.message({ t: 'noteOff', note: 60, channel: 1, source: 'midi' });
+  const held = h.processor.voices.find(v => v.active && v.layer === 0 && v.inputNote === 60);
+  assert.ok(held?.gate, 'hold keeps the voice gated after key release');
+  h.processor.message({ t: 'param', layer: 0, key: 'hold', value: false });
+  assert.equal(held.gate, false, 'disabling hold releases held voices');
+});
