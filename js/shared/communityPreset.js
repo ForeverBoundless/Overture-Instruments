@@ -20,6 +20,7 @@ export function createCommunityShareButton(parent, {
   const button = document.createElement('button');
   button.type = 'button';
   button.className = className;
+  button.classList.add('oi-community-share');
   button.textContent = label;
   button.title = 'Share the current instrument patch to the Overture Community library';
   button.addEventListener('click', () => {
