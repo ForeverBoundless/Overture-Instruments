@@ -37,6 +37,8 @@ const state = {
   editingId: null,
   editingOriginalPreviewPath: null,
   activePreview: null,
+  moderationStatus: null,
+  reportingItemId: null,
   searchTimer: null,
   authorProfiles: new Map(),
 };
@@ -401,6 +403,9 @@ function renderCard(item) {
   const top = addText(card, 'div', 'community-card__top', isInstrument ? instrumentName : 'OMNI PATCH');
   addText(top, 'span', '', friendlyDate(item.created_at));
   addText(card, 'h3', '', item.title);
+  if (item.moderation_status === 'hidden' && state.user?.id === item.owner_id) {
+    addText(card, 'span', 'community-moderation-hidden', 'HIDDEN FROM PUBLIC · UNDER REVIEW');
+  }
   addText(card, 'p', 'community-card__description', item.description || 'No description provided.');
 
   const meta = addText(card, 'div', 'community-card__meta', '');
@@ -473,6 +478,12 @@ function renderCard(item) {
   share.type = 'button';
   share.addEventListener('click', () => shareItem(item));
 
+  if (item.owner_id !== state.user?.id) {
+    const report = addText(actions, 'button', 'community-button community-button--report', 'REPORT');
+    report.type = 'button';
+    report.addEventListener('click', () => openReport(item));
+  }
+
   if (state.user?.id && item.owner_id === state.user.id) {
     const edit = addText(actions, 'button', 'community-button', 'EDIT');
     edit.type = 'button'; edit.addEventListener('click', () => beginEdit(item));
@@ -513,7 +524,7 @@ async function loadPatches({ append = false } = {}) {
   message('community-result-count', 'Loading community items…');
   try {
     let query = supabase.from('community_patches')
-      .select('id,owner_id,record_type,instrument_id,title,description,author_name,tags,visibility,patch_data,preview_path,downloads,created_at');
+      .select('id,owner_id,record_type,instrument_id,title,description,author_name,tags,visibility,moderation_status,patch_data,preview_path,downloads,created_at');
     if (state.mine && state.user) query = query.eq('owner_id', state.user.id);
     else query = query.eq('visibility', 'public');
     const search = byId('community-search').value.trim().toLowerCase().replace(/[^a-z0-9\s-]/g, '').slice(0, 50);
@@ -610,6 +621,10 @@ async function publishItem(event) {
     return;
   }
   const submit = byId('community-publish-form').querySelector('[type="submit"]');
+  if (state.moderationStatus?.can_publish === false) {
+    message('community-publish-status', 'Your account is currently restricted from Community publishing.', true);
+    return;
+  }
   submit.disabled = true;
   message('community-publish-status', 'Publishing…');
   let uploadedPath = null;
@@ -750,6 +765,167 @@ async function updateAccount() {
   const { data, error } = await supabase.auth.getSession();
   if (error) message('community-account-status', error.message, true);
   renderAccount(data?.session || null);
+  await refreshModerationStatus();
+}
+
+function formatStrikeStatus(status) {
+  if (!status) return '';
+  if (status.protected) return 'Protected maintainer account · exempt from Community strikes, suspensions and moderation takedowns.';
+  if (status.banned) return 'Community publishing is permanently disabled for this account.';
+  if (status.suspended_until && new Date(status.suspended_until).getTime() > Date.now()) {
+    return `Community publishing is suspended until ${new Date(status.suspended_until).toLocaleString()}.`;
+  }
+  if (status.strikes === 1) return 'Community warning: one upheld violation. A further upheld report will result in a 7-day publishing suspension.';
+  if (status.strikes > 1) return `${status.strikes} upheld Community violations. Further violations may result in a longer suspension or permanent ban.`;
+  return 'Community account in good standing.';
+}
+
+async function refreshModerationStatus() {
+  const statusNode = byId('community-moderation-status');
+  const moderationPanel = byId('community-moderation-panel');
+  const publishButton = byId('community-publish-form').querySelector('[type="submit"]');
+  state.moderationStatus = null;
+  if (!state.user) {
+    statusNode.textContent = '';
+    moderationPanel.hidden = true;
+    publishButton.disabled = false;
+    return;
+  }
+
+  const { data, error } = await supabase.rpc('get_community_account_status');
+  if (error) {
+    statusNode.textContent = 'Community moderation status is unavailable. Please contact Overture support if publishing is blocked.';
+    console.warn('Could not load Community moderation status:', error.message);
+    moderationPanel.hidden = true;
+    return;
+  }
+
+  state.moderationStatus = data || null;
+  statusNode.textContent = formatStrikeStatus(state.moderationStatus);
+  publishButton.disabled = state.moderationStatus?.can_publish === false;
+
+  if (state.moderationStatus?.protected) {
+    moderationPanel.hidden = false;
+    await refreshModerationReports();
+  } else {
+    moderationPanel.hidden = true;
+  }
+}
+
+const REPORT_REASONS = {
+  inappropriate_audio: 'Inappropriate audio',
+  hate_or_harassment: 'Hate speech or harassment',
+  sexual_content: 'Sexual content',
+  threats_or_violence: 'Threats or violence',
+  copyright_or_ownership: 'Copyright or ownership',
+  spam_or_misleading: 'Spam or misleading content',
+  other: 'Other',
+};
+
+function openReport(item) {
+  if (!state.user) {
+    window.location.assign('/account?returnTo=%2Fcommunity');
+    return;
+  }
+  state.reportingItemId = item.id;
+  byId('community-report-reason').value = 'inappropriate_audio';
+  byId('community-report-details').value = '';
+  message('community-report-status', '');
+  byId('community-report-dialog').showModal();
+}
+
+async function submitReport(event) {
+  event.preventDefault();
+  if (!state.reportingItemId || !state.user) return;
+  const submit = byId('community-report-form').querySelector('[type="submit"]');
+  submit.disabled = true;
+  message('community-report-status', 'Submitting report…');
+  try {
+    const { data, error } = await supabase.rpc('submit_community_patch_report', {
+      p_patch_id: state.reportingItemId,
+      p_reason: byId('community-report-reason').value,
+      p_details: byId('community-report-details').value.trim(),
+    });
+    if (error) throw error;
+    if (!data?.ok) throw new Error('The report could not be submitted.');
+    byId('community-report-dialog').close();
+    state.reportingItemId = null;
+    message('community-result-count', 'Report submitted privately. An Overture moderator will review it.');
+  } catch (error) {
+    message('community-report-status', error.message || 'Could not submit this report.', true);
+  } finally {
+    submit.disabled = false;
+  }
+}
+
+async function refreshModerationReports() {
+  const list = byId('community-moderation-list');
+  const status = byId('community-moderation-panel').querySelector('#community-moderation-status');
+  const empty = byId('community-moderation-empty');
+  list.replaceChildren();
+  status.textContent = 'Loading open reports…';
+  empty.hidden = true;
+  try {
+    const { data, error } = await supabase.rpc('get_community_moderation_reports');
+    if (error) throw error;
+    const reports = Array.isArray(data) ? data : [];
+    status.textContent = `${reports.length} open report${reports.length === 1 ? '' : 's'}`;
+    empty.hidden = reports.length !== 0;
+    reports.forEach((report) => {
+      const card = addText(list, 'article', 'community-moderation-card', '');
+      addText(card, 'h3', '', report.patch_title || 'Deleted Community item');
+      addText(card, 'p', 'community-moderation-meta',
+        `${REPORT_REASONS[report.reason] || report.reason} · reported by @${report.reporter_username || 'unknown'} · creator @${report.patch_owner_username || 'unknown'} · ${friendlyDate(report.reported_at)}`);
+      if (report.details) addText(card, 'p', 'community-moderation-details', report.details);
+      const actions = addText(card, 'div', 'community-moderation-actions', '');
+      [
+        ['DISMISS', 'dismiss'],
+        ['ISSUE STRIKE', 'strike'],
+        ['STRIKE + HIDE PATCH', 'strike_and_hide'],
+      ].forEach(([label, action]) => {
+        const button = addText(actions, 'button', 'community-button', label);
+        button.type = 'button';
+        button.addEventListener('click', () => reviewReport(report, action, button));
+      });
+    });
+  } catch (error) {
+    status.textContent = error.message || 'Could not load moderation reports.';
+  }
+}
+
+async function reviewReport(report, action, button) {
+  const prompts = {
+    dismiss: 'Dismiss this report without issuing a strike?',
+    strike: 'Uphold this report and issue an account strike?',
+    strike_and_hide: 'Uphold this report, issue an account strike, and hide the patch?',
+  };
+  if (!confirm(prompts[action])) return;
+  const note = prompt('Optional private moderator note:', '') ?? '';
+  button.disabled = true;
+  try {
+    const { data, error } = await supabase.rpc('review_community_patch_report', {
+      p_report_id: report.report_id,
+      p_action: action,
+      p_note: note,
+    });
+    if (error) throw error;
+    if (data?.status === 'protected') {
+      message('community-moderation-status', 'The creator is a protected account. No strike or content action was applied.');
+    } else if (data?.status === 'dismissed') {
+      message('community-moderation-status', 'Report dismissed. No strike was issued.');
+    } else if (data?.status === 'actioned') {
+      const consequence = data.banned ? 'The creator is permanently banned from Community publishing.'
+        : data.suspended_until && new Date(data.suspended_until).getTime() > Date.now()
+          ? `Publishing suspended until ${new Date(data.suspended_until).toLocaleString()}.`
+          : 'A warning was recorded.';
+      message('community-moderation-status', `Strike ${data.strikes}. ${consequence}`);
+    }
+    await refreshModerationReports();
+    await loadPatches();
+  } catch (error) {
+    message('community-moderation-status', error.message || 'Could not review this report.', true);
+    button.disabled = false;
+  }
 }
 
 async function initialise() {
@@ -782,6 +958,10 @@ async function initialise() {
   byId('community-publish-open').addEventListener('click', () => setPublishOpen(true));
   byId('community-publish-close').addEventListener('click', () => setPublishOpen(false));
   byId('community-publish-form').addEventListener('submit', publishItem);
+  byId('community-report-form').addEventListener('submit', submitReport);
+  byId('community-report-close').addEventListener('click', () => byId('community-report-dialog').close());
+  byId('community-report-cancel').addEventListener('click', () => byId('community-report-dialog').close());
+  byId('community-moderation-refresh').addEventListener('click', () => refreshModerationReports());
   byId('community-record-type').addEventListener('change', syncContentType);
   byId('community-instrument').addEventListener('change', () => {
     state.draftType = 'instrument_preset';
@@ -826,9 +1006,10 @@ async function initialise() {
   // state changes and recursive auth calls can deadlock its internal lock.
   supabase.auth.onAuthStateChange((event, session) => {
     renderAccount(session);
-    // INITIAL_SESSION is already covered by the first explicit feed load below.
-    // Refresh only for subsequent sign-in, sign-out or token-change events.
-    if (!state.mine && event !== 'INITIAL_SESSION') setTimeout(() => loadPatches(), 0);
+    if (event !== 'INITIAL_SESSION') setTimeout(() => {
+      void refreshModerationStatus();
+      if (!state.mine) void loadPatches();
+    }, 0);
   });
 
   await updateAccount();
