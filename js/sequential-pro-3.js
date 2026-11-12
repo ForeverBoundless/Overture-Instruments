@@ -4,6 +4,7 @@ import { performance, power } from './shared/panel.js';
 import { registerMidiTargetProvider } from './shared/midiMap.js';
 import { createHardwareSurface,addPanel,addRow,addLabel,addKnob,addFader,addButton,addSelect,addSlider,addDisplay,addKeyboard,addWheel,addTouchStrip } from './shared/hardwarePanel.js';
 import { PRO3_PRESETS } from './data/pro3Presets.js';
+import { consumeCommunityInstrumentPreset, createCommunityShareButton } from './shared/communityPreset.js';
 
 const NOTES=Array.from({length:37},(_,i)=>{const n=36+i;return ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'][n%12]+(Math.floor(n/12)-1);});
 const clone=v=>JSON.parse(JSON.stringify(v));
@@ -79,6 +80,8 @@ class Pro3App{
    this.buildPerformance();
    this.presets.load('f:0');
   this.engine.post({t:'patch',patch:this.patch});
+  const community=consumeCommunityInstrumentPreset('sequential-pro-3',clean);
+  if(community){this.patch=community.data;this.refresh();this.displayHardwarePreset(community.title);this.refreshHardwarePresetList('f:0');}
  }
  set(k,v){this.patch[k]=v;this.engine.post({t:'param',key:k,value:v});if(k==='seqTrack')this.updateSequence();this.syncHardware?.();}
  postPatch(){this.engine.post({t:'patch',patch:this.patch});}
@@ -251,6 +254,7 @@ class Pro3App{
   this.hwPresets.addEventListener('change',()=>this.presets.load(this.hwPresets.value));
   const action=(label,fn)=>{const a=document.createElement('button');a.type='button';a.className='hp-action';a.textContent=label;a.addEventListener('click',fn);footer.appendChild(a);return a;};
   action('Save program',()=>{const name=prompt('Name this Pro 3 program','My Pro 3 Program');if(name===null)return;try{const item=this.store.save(name,clone(this.patch));this.refreshHardwarePresetList('u:'+item.id);this.hwDisplay.set(item.name.toUpperCase(),'USER PROGRAM SAVED');}catch(e){alert(e.message);}});
+  createCommunityShareButton(footer,{instrumentId:'sequential-pro-3',className:'hp-action',getData:()=>clean(clone(this.patch)),getTitle:()=> 'Sequential Pro 3 program'});
   const matrixButton=action('Mod matrix · 32 routes',()=>{this.refreshMatrix();this.matrixDialog.showModal();});
   const waveButton=document.createElement('label');waveButton.className='hp-action';waveButton.textContent='Load wavetable';
   const waveInput=document.createElement('input');waveInput.type='file';waveInput.accept='.wav,audio/wav';waveButton.appendChild(waveInput);footer.appendChild(waveButton);
