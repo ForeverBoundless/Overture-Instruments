@@ -275,10 +275,14 @@ function scheduleKeyboardNote(context, output, instrumentId, patch, note, start,
   const rawSawB = prophetRawValue(patch, 5, 0);
   const rawTriangleB = prophetRawValue(patch, 6, 0);
   const rawSquareB = prophetRawValue(patch, 7, 0);
-  const firstWave = firstValue(patch, ['osc1Wave', 'dds1Wave', 'vco1Wave', 'osc1Shape'], rawProgram ? (rawSquareA > rawSawA ? 'pulse' : 'saw') : undefined);
-  const secondWave = firstValue(patch, ['osc2Wave', 'dds2Wave', 'vco2Wave', 'osc2Shape'], rawProgram
-    ? (rawTriangleB > rawSawB && rawTriangleB > rawSquareB ? 'triangle' : rawSquareB > rawSawB ? 'pulse' : 'saw')
-    : firstWave);
+  const firstWave = instrumentId === 'juno-106'
+    ? (patch.saw ? 'saw' : patch.pulse ? 'pulse' : 'saw')
+    : firstValue(patch, ['osc1Wave', 'dds1Wave', 'vco1Wave', 'osc1Shape'], rawProgram ? (rawSquareA > rawSawA ? 'pulse' : 'saw') : undefined);
+  const secondWave = instrumentId === 'juno-106'
+    ? (patch.pulse ? 'pulse' : firstWave)
+    : firstValue(patch, ['osc2Wave', 'dds2Wave', 'vco2Wave', 'osc2Shape'], rawProgram
+      ? (rawTriangleB > rawSawB && rawTriangleB > rawSquareB ? 'triangle' : rawSquareB > rawSawB ? 'pulse' : 'saw')
+      : firstWave);
   const shape = firstValue(patch, ['osc1Shape'], undefined);
   const secondShape = firstValue(patch, ['osc2Shape'], undefined);
   const wave1 = waveType(firstWave, shape, 'sawtooth');
