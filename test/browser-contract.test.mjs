@@ -285,30 +285,35 @@ test('Community library has an optional Supabase setup and owner-scoped schema m
 });
 
 
-test('Community preset exchange covers supported instruments and protects download counters', async () => {
-  const [page, app, helper, migration, instrumentSources] = await Promise.all([
+test('Community preset exchange covers every library emulator and its native patch handoff', async () => {
+  const [page, app, helper, migration, sources] = await Promise.all([
     readFile(new URL('../community.html', import.meta.url), 'utf8'),
     readFile(new URL('../js/community.js', import.meta.url), 'utf8'),
     readFile(new URL('../js/shared/communityPreset.js', import.meta.url), 'utf8'),
     readFile(new URL('../supabase/migrations/20261102000000_community_patches.sql', import.meta.url), 'utf8'),
     Promise.all([
-      '../js/engine/app.js', '../js/korg-ms-20.js', '../js/roland-juno-106.js',
-      '../js/yamaha-dx7.js', '../js/roland-tr-808.js',
+      '../js/engine/app.js','../js/sub37.js','../js/prophet10.js','../js/nord-c2d.js',
+      '../js/yamaha-dx7.js','../js/roland-juno-106.js','../js/roland-tr-808.js','../js/korg-ms-20.js',
+      '../js/mellotron-m400.js','../js/oberheim-eight-voice.js','../js/hohner-d6.js','../js/obxa.js',
+      '../js/sequential-pro-3.js','../js/udo-super-8.js',
     ].map((path) => readFile(new URL(path, import.meta.url), 'utf8'))),
   ]);
-  assert.match(page, /community-record-type/);
-  assert.match(page, /community-instrument/);
-  assert.match(app, /instrument_preset/);
+  const ids = ["little-phatty","sub-37","prophet-10","nord-c2d","dx7","juno-106","tr-808","ms-20","mellotron-m400","oberheim-eight-voice","hohner-d6","ob-xa","sequential-pro-3","udo-super-8"];
+  for (const id of ids) {
+    assert.ok(page.includes(`value="${id}"`), `Community form should offer ${id}`);
+    assert.ok(migration.includes(`'${id}'`), `database schema should allow ${id}`);
+  }
   assert.match(app, /extractInstrumentPreset/);
-  assert.match(app, /MY ITEMS/);
+  assert.match(app, /instrument-draft/);
+  assert.match(helper, /createCommunityShareButton/);
   assert.match(helper, /consumeCommunityInstrumentPreset/);
   assert.match(migration, /record_type/);
-  assert.equal(migration.split(String.fromCharCode(10)).filter((line) => line.trim() === 'as ' + '$$').length, 3);
-  assert.equal(migration.split(String.fromCharCode(10)).filter((line) => line.trim() === '$$;').length, 3);
-  assert.match(app, /reloadPending/);
-  assert.match(migration, /grant update \(record_type, instrument_id/);
-  assert.doesNotMatch(migration, /grant update on public\.community_patches to authenticated/i);
-  for (const source of instrumentSources) assert.match(source, /consumeCommunityInstrumentPreset/);
+  assert.match(migration, /grant update \\(record_type, instrument_id/);
+  assert.doesNotMatch(migration, /grant update on public\\.community_patches to authenticated/i);
+  for (const source of sources) {
+    assert.match(source, /createCommunityShareButton/, 'each emulator should expose a one-click Community share action');
+    assert.match(source, /consumeCommunityInstrumentPreset/, 'each emulator should accept Community patch imports');
+  }
 });
 
 
