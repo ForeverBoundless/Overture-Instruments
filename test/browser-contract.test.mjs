@@ -73,7 +73,7 @@ test('Hohner D6 and Oberheim OB-Xa are complete first-class emulator entries', a
   assert.match(obEngine, /width=clamp\(\.5-p\.pulseWidth\*\.45/);
   assert.doesNotMatch(obEngine, /lfoVca/);
   assert.match(obPage, /Oberheim OB-Xa from Overture Instruments/);
-  assert.match(worker, /overture-shell-v68/);
+  assert.match(worker, /overture-shell-v69/);
   assert.match(worker, /hohner-d6/);
   assert.match(worker, /ob-xa/);
 });
@@ -426,7 +426,7 @@ test('Contribution profiles respect profile ownership and expose edit actions on
   assert.ok(community.includes('/contributions?username='));
   assert.ok(css.includes('.contributions-profile'));
   assert.ok(worker.includes("'/contributions'"));
-  assert.ok(worker.includes('/js/contributions.js?v=20261102-profile-3'));
+  assert.ok(worker.includes('/js/contributions.js?v=20261112-community-edit-r1'));
 });
 
 
@@ -446,7 +446,7 @@ test('Contribution page profile, toolbar and result counts have responsive align
     readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
   ]);
   assert.ok(page.includes('contributions.css?v=20261102-profile-3'));
-  assert.ok(page.includes('contributions.js?v=20261102-profile-3'));
+  assert.ok(page.includes('contributions.js?v=20261112-community-edit-r1'));
   assert.ok(css.includes('#contributions-count'));
   assert.ok(css.includes('.contributions-toolbar.is-owner'));
   assert.ok(css.includes('@media (max-width:380px)'));
