@@ -1,8 +1,46 @@
 import { Keyboard } from '../ui/Keyboard.js';
 import { NordC2DEngine } from './engine/NordC2DEngine.js';
 import { MidiManager } from './engine/MidiManager.js';
+import { consumeCommunityInstrumentPreset, createCommunityShareButton } from './shared/communityPreset.js';
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+
+function validateCommunityNord(data) {
+  if (!data || typeof data !== 'object' || !Array.isArray(data.manuals) || data.manuals.length !== 2) {
+    throw new Error('This is not a Nord C2D registration.');
+  }
+  const manual = (source) => {
+    if (!source || !Array.isArray(source.drawbars) || source.drawbars.length !== 9 || !source.banks) {
+      throw new Error('A Nord C2D manual must contain two nine-drawbar banks.');
+    }
+    const bank = (key) => {
+      const values = source.banks[key];
+      if (!Array.isArray(values) || values.length !== 9) throw new Error('A Nord C2D drawbar bank is incomplete.');
+      return values.map((value) => clamp(Number(value) || 0, 0, 8));
+    };
+    return {
+      ...source,
+      drawbars: source.drawbars.map((value) => clamp(Number(value) || 0, 0, 8)),
+      banks: { A: bank('A'), B: bank('B') },
+      vibrato: ['OFF','V1','V2','V3','C1','C2','C3'].includes(source.vibrato) ? source.vibrato : 'C3',
+      activeBank: source.activeBank === 'B' ? 'B' : 'A',
+      percussion: !!source.percussion,
+    };
+  };
+  const copy = JSON.parse(JSON.stringify(data));
+  return {
+    ...copy,
+    model: ['B3','VX','Farf','Pipe'].includes(copy.model) ? copy.model : 'B3',
+    manuals: copy.manuals.map(manual),
+    pipe: {
+      stops: Array.from({ length: 21 }, (_, i) => !!copy.pipe?.stops?.[i]),
+      couplers: Array.from({ length: 7 }, (_, i) => !!copy.pipe?.couplers?.[i]),
+      tremulant: !!copy.pipe?.tremulant,
+    },
+    pedal: { drawbars: Array.from({ length: 2 }, (_, i) => clamp(Number(copy.pedal?.drawbars?.[i]) || 0, 0, 8)), synthBass: !!copy.pedal?.synthBass, pluck: clamp(Number(copy.pedal?.pluck) || 0, 0, 8), release: clamp(Number(copy.pedal?.release) || 0, 0, 8) },
+    octaveShift: Array.from({ length: 2 }, (_, i) => clamp(Number(copy.octaveShift?.[i]) || 0, -2, 2)),
+  };
+}
 // Tonewheel, transistor and pipe organs are not touch sensitive: every key
 // speaks at the same level whatever its MIDI velocity or input method.
 const ORGAN_VELOCITY = 0.85;
@@ -25,6 +63,8 @@ class NordC2D {
     this.pendingMidiNotes = new Map();
     this.sliderSetters = {};
     this._build();
+    const community = consumeCommunityInstrumentPreset('nord-c2d', validateCommunityNord);
+    if (community) this.applyCommunityPatch(community.data, community.title);
     this._bindComputerKeyboard();
     this._bindPower();
     this.midi = new MidiManager({
@@ -65,6 +105,7 @@ class NordC2D {
     const root = document.getElementById('nord-c2d-root');
     const shell = document.createElement('main');
     shell.className = 'nord-shell';
+    this.shell = shell;
     shell.innerHTML = `<header class="nord-header"><img src="/ui/Logos/Nord_logo.png" alt="Nord" class="nord-logo"><div class="nord-title"><strong><b>c2d</b></strong><span>DUAL MANUAL ORGAN</span></div></header><section class="nord-top-panel"><div class="nord-brand-display"><small>PROGRAM <b class="nord-program-number">001</b></small><strong class="nord-program-name">B3 DRAWBAR PANEL</strong><span>LIVE MEMORY</span></div><div class="nord-global-controls"><label>ORGAN MODEL<select class="nord-model"><option>B3</option><option>VX</option><option>Farf</option><option>Pipe</option></select></label><button data-action="rotary">ROTARY</button><button data-action="reverb">REVERB</button><button data-action="drive">DRIVE</button><button data-action="split">TO GREAT</button><button data-action="pedal">PEDAL</button><button data-action="store">STORE</button></div><div class="nord-global-knobs"><label class="nord-control-slider"><span>MASTER LEVEL</span><i class="nord-slider-face" data-control="master" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="1" aria-valuenow=".55" aria-label="Master level"><b></b></i><output>55</output></label><label class="nord-control-slider"><span>REVERB</span><i class="nord-slider-face" data-control="reverb" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="1" aria-valuenow=".18" aria-label="Reverb"><b></b></i><output>18</output></label><label class="nord-control-slider"><span>DRIVE</span><i class="nord-slider-face" data-control="drive" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="1" aria-valuenow="0" aria-label="Drive"><b></b></i><output>0</output></label></div></section><section class="nord-system-row"><label>CROSSTALK<select class="nord-crosstalk"><option>Clean</option><option>Vintage 1</option><option>Vintage 2</option><option selected>Vintage 3</option></select></label><label>KEY CLICK<select class="nord-click"><option>Low</option><option selected>Normal</option><option>High</option><option>Higher</option></select></label><label>ROTARY SPEED<select class="nord-rotary-speed"><option>Slow</option><option selected>Stop</option><option>Fast</option></select></label><label>PROGRAM <button data-program="previous">−</button><output class="nord-program-readout">001</output><button data-program="next">+</button></label></section><section class="nord-model-panel"></section><section class="nord-manuals"></section><footer class="nord-footer">NORD C2D • DUAL 37-KEY MANUALS • B3 / VX / FARF / PIPE • COMPUTER KEYBOARD READY</footer>`;
     root.appendChild(shell);
     shell.querySelectorAll('[data-action]').forEach((button) => button.addEventListener('click', () => {
@@ -119,6 +160,11 @@ class NordC2D {
     const manuals = shell.querySelector('.nord-manuals');
     manuals.appendChild(this._buildManual('UPPER MANUAL', 1));
     manuals.appendChild(this._buildManual('LOWER MANUAL', 0));
+    createCommunityShareButton(shell.querySelector('.nord-system-row'), {
+      instrumentId: 'nord-c2d', className: 'nord-community-share',
+      getData: () => this.captureCommunityPatch(),
+      getTitle: () => 'Nord C2D registration',
+    });
   }
 
   _buildModelPanel(panel) {
@@ -367,6 +413,104 @@ const banks = section.querySelector('.nord-manual-banks');
     }
     this._noteOff(held.manual, held.note);
     this.computerNotes.delete(`midi:${channel}:${note}`);
+  }
+
+  captureCommunityPatch() {
+    return validateCommunityNord({
+      model: this.engine.model,
+      manuals: this.engine.manuals.map((manual) => ({
+        ...manual,
+        drawbars: [...manual.drawbars],
+        banks: { A: [...manual.banks.A], B: [...manual.banks.B] },
+      })),
+      pedal: { drawbars: [...this.engine.pedal.drawbars], synthBass: this.engine.pedal.synthBass, pluck: this.engine.pedal.pluck, release: this.engine.pedal.release },
+      greatSplit: this.engine.greatSplit,
+      crosstalk: this.engine.crosstalk,
+      keyClick: this.engine.keyClick,
+      keyBounce: this.engine.keyBounce,
+      pipe: { stops: [...this.engine.pipe.stops], couplers: [...this.engine.pipe.couplers], tremulant: this.engine.pipe.tremulant },
+      rotary: this.engine.rotary,
+      rotaryEnabled: !!this.engine.rotaryEnabled,
+      reverb: this.engine.reverb,
+      drive: this.engine.drive,
+      masterLevel: this.engine.masterLevel,
+      expressionLevel: this.engine.expressionLevel,
+      octaveShift: [...this.engine.octaveShift],
+      programIndex: this.engine.program.index,
+    });
+  }
+
+  applyCommunityPatch(raw, title = 'Community registration') {
+    const patch = validateCommunityNord(raw);
+    const engine = this.engine;
+    engine.setModel(patch.model);
+    engine.setCrosstalk(patch.crosstalk || 'Vintage 3');
+    engine.setKeyClick(patch.keyClick || 'Normal', patch.keyBounce !== false);
+    engine.greatSplit = !!patch.greatSplit;
+    engine.pedal = { ...engine.pedal, ...patch.pedal, drawbars: [...patch.pedal.drawbars], notes: new Map() };
+    engine.pipe = { stops: [...patch.pipe.stops], couplers: [...patch.pipe.couplers], tremulant: patch.pipe.tremulant };
+    patch.manuals.forEach((source, index) => {
+      const manual = engine.manuals[index];
+      Object.assign(manual, source, {
+        drawbars: [...source.drawbars],
+        banks: { A: [...source.banks.A], B: [...source.banks.B] },
+      });
+      manual.activeBank = source.activeBank === 'B' ? 'B' : 'A';
+      manual.percussion = !!source.percussion;
+      engine.setDrawbarBank(index, manual.activeBank);
+      engine.setVibrato(index, manual.vibrato);
+      engine.octaveShift[index] = patch.octaveShift[index];
+    });
+    patch.pipe.stops.forEach((enabled, index) => engine.setPipeStop(index, enabled));
+    patch.pipe.couplers.forEach((enabled, index) => {
+      if (index === 5) engine.setTremulant(enabled);
+      else engine.setPipeCoupler(index, enabled);
+    });
+    engine.setGreatSplit(patch.greatSplit);
+    engine.setExpression(patch.expressionLevel ?? 1);
+    engine.setReverb(patch.reverb ?? .18);
+    engine.setDrive(patch.drive ?? 0);
+    engine.masterLevel = clamp(Number(patch.masterLevel) || 0, 0, 1);
+    if (engine.output) engine.output.gain.value = engine.masterLevel;
+    engine.rotary = !!patch.rotary;
+    engine.setRotaryEnabled(!!patch.rotaryEnabled);
+    if (patch.rotaryEnabled) engine.setRotary(!!patch.rotary);
+    engine.program.index = clamp(Number(patch.programIndex) || 1, 1, 126);
+    this.octaves = [...patch.octaveShift];
+    this.sliderSetters.master?.(engine.masterLevel);
+    this.sliderSetters.reverb?.(engine.reverb);
+    this.sliderSetters.drive?.(engine.drive);
+    const shell = this.shell;
+    shell.querySelector('.nord-model').value = patch.model;
+    shell.querySelector('.nord-crosstalk').value = engine.crosstalk;
+    shell.querySelector('.nord-click').value = engine.keyClick;
+    shell.querySelector('.nord-rotary-speed').value = engine.rotaryEnabled ? (engine.rotary ? 'Fast' : 'Slow') : 'Stop';
+    shell.querySelector('[data-action="rotary"]').classList.toggle('active', engine.rotaryEnabled);
+    shell.querySelector('[data-action="reverb"]').classList.toggle('active', engine.reverb > .2);
+    shell.querySelector('[data-action="split"]').classList.toggle('active', engine.greatSplit);
+    shell.querySelector('.nord-program-number').textContent = String(engine.program.index).padStart(3, '0');
+    shell.querySelector('.nord-program-readout').textContent = String(engine.program.index).padStart(3, '0');
+    shell.querySelector('.nord-program-name').textContent = String(title).slice(0, 40).toUpperCase();
+    patch.manuals.forEach((manual, index) => {
+      const section = shell.querySelector(`.nord-manual--${index ? 'upper' : 'lower'}`);
+      section.querySelectorAll('[data-bank]').forEach((button) => button.classList.toggle('active', button.dataset.bank === manual.activeBank));
+      section.querySelectorAll('[data-vibrato]').forEach((button) => button.classList.toggle('active', button.dataset.vibrato === manual.vibrato));
+      section.querySelector('[data-percussion]')?.classList.toggle('active', !!manual.percussion);
+      section.querySelectorAll('.nord-drawbar-bank').forEach((bankPanel) => {
+        const bank = bankPanel.classList.contains('nord-drawbar-bank--b') ? 'B' : 'A';
+        bankPanel.querySelectorAll('.nord-drawbar').forEach((drawbar, drawbarIndex) => {
+          const value = manual.banks[bank][drawbarIndex];
+          drawbar.setAttribute('aria-valuenow', value);
+          drawbar.style.setProperty('--drawbar', value);
+          const output = drawbar.parentElement.querySelector('output');
+          if (output) output.textContent = 8 - value;
+        });
+      });
+      const octaveOutput = section.querySelector('.nord-octave output');
+      if (octaveOutput) octaveOutput.textContent = `OCT ${this.octaves[index] > 0 ? '+' : ''}${this.octaves[index]}`;
+    });
+    shell.querySelectorAll('[data-stop]').forEach((button) => button.classList.toggle('active', !!engine.pipe.stops[Number(button.dataset.stop)]));
+    shell.querySelectorAll('[data-coupler]').forEach((button) => button.classList.toggle('active', button.dataset.coupler === '5' ? !!engine.pipe.tremulant : !!engine.pipe.couplers[Number(button.dataset.coupler)]));
   }
 
   _storeProgram() {
