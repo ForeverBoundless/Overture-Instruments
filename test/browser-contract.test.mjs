@@ -317,8 +317,8 @@ test('Community preset exchange covers every library emulator and its native pat
   assert.match(app, /data\.name = title\.slice\(0, 60\)/);
   assert.match(app, /\.update\(record\)[\s\S]*?\.eq\('owner_id', state\.user\.id\)/);
   assert.match(app, /editingId[\s\S]*?\.insert\(/);
-  assert.match(app, /communityItemId: item\.id/);
-  assert.match(contributions, /communityItemId: item\.id/);
+  assert.match(app, /communityItemId: state\.user\?\.id === item\.owner_id \? item\.id : null/);
+  assert.match(contributions, /communityItemId: state\.user\?\.id === item\.owner_id \? item\.id : null/);
   assert.match(omni, /communitySource/);
   assert.match(omni, /editingItemId: source\?\.id/);
   assert.match(migration, /record_type/);
