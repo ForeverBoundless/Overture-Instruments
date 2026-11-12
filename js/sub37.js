@@ -4,7 +4,7 @@ import { PitchWheel, ModWheel } from '../ui/Wheel.js';
 import { Sub37Engine } from './engine/Sub37Engine.js';
 import { MidiManager, midiNoteName } from './engine/MidiManager.js';
 import { SUB37_PRESETS } from './data/sub37Presets.js';
-import { consumeCommunityInstrumentPreset, createCommunityShareButton } from './shared/communityPreset.js';
+import { consumeCommunityInstrumentPreset, createCommunityShareButton, clearCommunitySource } from './shared/communityPreset.js';
 
 const KEY_TO_NOTE = { a: 'C3', w: 'C#3', s: 'D3', e: 'D#3', d: 'E3', f: 'F3', t: 'F#3', g: 'G3', y: 'G#3', h: 'A3', u: 'A#3', j: 'B3', k: 'C4', o: 'C#4', l: 'D4', p: 'D#4', ';': 'E4', "'": 'F4' };
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
@@ -371,6 +371,8 @@ class Sub37 {
   }
 
   _applyPreset(index) {
+    clearCommunitySource();
+    this.communityPreset = null;
     const preset = SUB37_PRESETS[clamp(index, 0, SUB37_PRESETS.length - 1)];
     this.currentPreset = preset.id;
     this.presetSelect?.setValue(String(preset.id), true);
