@@ -29,11 +29,17 @@ class MS20Processor extends AudioWorkletProcessor {
     this.pitchDecimSum = 0; this.pitchDecimCount = 0; this.pitchTargetCv = 0; this.pitchCv = 0;
     this.pitchSlew = 1 - Math.exp(-1 / (this.sr * 0.02)); this.pitchLostSamples = 0;
     this.pitchValid = false; this.pitchHz = 0; this.pitchMidi = 60; this.pitchConfidence = 0; this.pitchMessageCounter = 0;
+    this.scheduled = [];
     this.trigPrev = { EG1_TRIG_IN: 0, EG2_TRIG_IN: 0 }; this.src = {};
     this.port.onmessage = (e) => this._msg(e.data);
   }
 
   _msg(m) {
+    if ((m.t === 'noteOn' || m.t === 'noteOff') && Number.isFinite(m.frame) && m.frame > currentFrame) {
+      this.scheduled.push(m);
+      this.scheduled.sort((a, b) => a.frame - b.frame);
+      return;
+    }
     switch (m.t) {
       case 'patch': this.p = { ...MS20_DEFAULT, ...m.patch }; break;
       case 'param': if (m.key in MS20_DEFAULT) this.p[m.key] = m.value; break;
@@ -75,6 +81,11 @@ class MS20Processor extends AudioWorkletProcessor {
     const espLow = 40 * Math.pow(100, p.espLow); const espHigh = 200 * Math.pow(60, p.espHigh);
     const eLo = Math.exp(-2 * Math.PI * espLow / sr); const eHi = 1 - Math.exp(-2 * Math.PI * espHigh / sr);
     for (let n = 0; n < L.length; n += 1) {
+      while (this.scheduled.length && this.scheduled[0].frame <= currentFrame + n) {
+        const message = this.scheduled.shift();
+        delete message.frame;
+        this._msg(message);
+      }
       // ---- sources computed first from previous-sample state
       let s = this.noise; s ^= s << 13; s ^= s >>> 17; s ^= s << 5; this.noise = s >>> 0;
       const white = (this.noise / 4294967296) * 2 - 1;
