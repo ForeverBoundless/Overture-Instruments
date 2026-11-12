@@ -366,7 +366,7 @@ test('Community reports, moderator review, strike escalation and protected accou
     readFile(new URL('../community.html', import.meta.url), 'utf8'),
     readFile(new URL('../js/community.js', import.meta.url), 'utf8'),
     readFile(new URL('../css/community.css', import.meta.url), 'utf8'),
-    readFile(new URL('../supabase/migrations/20261112000000_community_moderation.sql', import.meta.url), 'utf8'),
+    readFile(new URL('../supabase/migrations/20261112010000_community_moderation.sql', import.meta.url), 'utf8'),
     readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
   ]);
   assert.match(page, /community-report-dialog/);
