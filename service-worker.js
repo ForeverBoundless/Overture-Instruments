@@ -1,4 +1,4 @@
-const CACHE = 'overture-shell-v68';
+const CACHE = 'overture-shell-v69';
 const APP_SHELL = [
   '/account',
   '/login',
@@ -10,9 +10,11 @@ const APP_SHELL = [
   '/contributions',
   '/css/contributions.css?v=20261102-profile-3',
   '/js/contributions.js?v=20261102-profile-3',
+  '/js/contributions.js?v=20261112-community-edit-r1',
   '/css/community.css?v=20261103-auth-hidden',
   '/css/community.css',
   '/js/community.js?v=20261103-auth-hidden',
+  '/js/community.js?v=20261112-community-title-edit-r1',
   '/js/shared/supabase-config.js',
   '/js/shared/account-shell.js?v=20261102-contributions-menu',
   '/js/shared/supabaseClient.js',
@@ -143,6 +145,7 @@ const APP_SHELL = [
   '/js/omni-launch.js?v=20261105-single-loader',
   '/js/omni.js',
   '/js/omni.js?v=20261105-module-info',
+  '/js/omni.js?v=20261112-community-edit-r1',
   '/ui/Wheel.js',
   '/js/omni/graph.js',
   '/js/omni/graph.js?v=20261104-sem-mellotron',
