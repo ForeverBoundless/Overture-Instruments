@@ -4,7 +4,7 @@ import { PresetStore, num } from './shared/presetStore.js';
 import { MidiManager } from './engine/MidiManager.js';
 import { el, section, knob, button, toggle, display, presetBar, footer, clamp } from './shared/panel.js';
 import { TR808_PATTERNS } from './data/tr808Patterns.js';
-import { consumeCommunityInstrumentPreset } from './shared/communityPreset.js';
+import { consumeCommunityInstrumentPreset, createCommunityShareButton } from './shared/communityPreset.js';
 
 function validatePattern(d) {
   if (!d || typeof d !== 'object') throw new Error('Not a TR-808 pattern.');
@@ -113,6 +113,12 @@ class TR808App {
       apply: (data, name) => this.loadPattern(validatePattern(data), name),
       capture: () => JSON.parse(JSON.stringify(this._pattern)),
     });
+    createCommunityShareButton(pat.body, {
+      instrumentId: 'tr-808', className: 'pn-btn',
+      getData: () => validatePattern(this._pattern),
+      getTitle: () => 'TR-808 pattern',
+    });
+    //
     footer(this.shell, 'SYNTHESIZED PERCUSSION • 16/32-STEP SEQUENCER • 40–300 BPM • GM DRUM NOTES VIA MIDI');
   }
 
