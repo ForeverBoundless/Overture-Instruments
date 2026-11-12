@@ -4,10 +4,19 @@ import { supabase, supabaseConfigured, configureSupabase, previewPublicUrl } fro
 const byId = (id) => document.getElementById(id);
 const INSTRUMENTS = {
   'little-phatty': { name: 'Moog Little Phatty', route: '/html/little-phatty' },
-  'ms-20': { name: 'Korg MS-20', route: '/html/korg-ms-20' },
-  'juno-106': { name: 'Roland Juno-106', route: '/html/roland-juno-106' },
+  'sub-37': { name: 'Moog Sub 37', route: '/html/sub37' },
+  'prophet-10': { name: 'Sequential Prophet-10', route: '/html/prophet10' },
+  'nord-c2d': { name: 'Nord C2D', route: '/html/nord-c2d' },
   'dx7': { name: 'Yamaha DX7', route: '/html/yamaha-dx7' },
+  'juno-106': { name: 'Roland Juno-106', route: '/html/roland-juno-106' },
   'tr-808': { name: 'Roland TR-808', route: '/html/roland-tr-808' },
+  'ms-20': { name: 'Korg MS-20', route: '/html/korg-ms-20' },
+  'mellotron-m400': { name: 'Mellotron M400', route: '/html/mellotron-m400' },
+  'oberheim-eight-voice': { name: 'Oberheim Eight Voice', route: '/html/oberheim-eight-voice' },
+  'hohner-d6': { name: 'Hohner Clavinet D6', route: '/html/hohner-d6' },
+  'ob-xa': { name: 'Oberheim OB-Xa', route: '/html/ob-xa' },
+  'sequential-pro-3': { name: 'Sequential Pro 3', route: '/html/sequential-pro-3' },
+  'udo-super-8': { name: 'UDO Super 8', route: '/html/udo-super-8' },
 };
 
 const state = {
@@ -60,49 +69,78 @@ function extractInstrumentPreset(raw, instrumentId) {
   if (Array.isArray(object.presets)) data = object.presets[0];
   if (Array.isArray(object.items)) data = object.items[0]?.data;
   if (data && Array.isArray(data.presets)) data = data.presets[0];
-
   if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('No instrument preset was found in that file.');
 
+  const isObject = (value) => value && typeof value === 'object' && !Array.isArray(value);
+  const has = (...keys) => keys.every((key) => Object.prototype.hasOwnProperty.call(data, key));
   switch (instrumentId) {
-    case 'little-phatty': {
-      const required = ['osc1Shape', 'osc2Shape', 'osc1Level', 'osc2Level', 'noiseLevel', 'cutoff', 'resonance', 'drive', 'keyTrack', 'filterEnvAmount', 'ampEnv', 'filterEnv', 'lfoRate', 'lfoWaveform', 'glideTime'];
-      if (required.some((key) => !(key in data))) throw new Error('This is not a Little Phatty user preset.');
-      for (const env of ['ampEnv', 'filterEnv']) {
-        if (!data[env] || ['attack', 'decay', 'sustain', 'release'].some((key) => !Number.isFinite(Number(data[env][key])))) {
-          throw new Error('The Little Phatty envelope data is incomplete.');
-        }
+    case 'little-phatty':
+      if (!has('osc1Shape','osc2Shape','osc1Level','osc2Level','noiseLevel','cutoff','resonance','drive','keyTrack','filterEnvAmount','ampEnv','filterEnv','lfoRate','lfoWaveform','glideTime')
+        || !['ampEnv','filterEnv'].every((key) => isObject(data[key]) && ['attack','decay','sustain','release'].every((part) => Number.isFinite(Number(data[key][part]))))) {
+        throw new Error('This is not a complete Little Phatty user preset.');
       }
       break;
-    }
+    case 'sub-37':
+      if (!has('osc1Shape','osc2Shape','osc1Level','osc2Level','cutoff','resonance','filterEnv','ampEnv','mod1','mod2')
+        || !isObject(data.filterEnv) || !isObject(data.ampEnv) || !isObject(data.mod1) || !isObject(data.mod2)) throw new Error('This is not a Sub 37 program.');
+      break;
+    case 'prophet-10':
+      if (!Array.isArray(data.layers) || data.layers.length !== 2 || data.layers.some((layer) => !isObject(layer) || !Array.isArray(layer.values) || layer.values.length !== 67 || !isObject(layer.extras))) throw new Error('A Prophet-10 program needs two complete 67-parameter layers.');
+      break;
+    case 'nord-c2d':
+      if (!Array.isArray(data.manuals) || data.manuals.length !== 2 || data.manuals.some((manual) => !isObject(manual) || !Array.isArray(manual.drawbars) || manual.drawbars.length !== 9 || !isObject(manual.banks))) throw new Error('This is not a complete Nord C2D registration.');
+      break;
     case 'ms-20':
-      if (!data.params || typeof data.params !== 'object' || !Array.isArray(data.cables)) throw new Error('This is not an MS-20 patch (expected parameters and patch cables).');
+      if (!isObject(data.params) || !Array.isArray(data.cables)) throw new Error('This is not an MS-20 patch (expected parameters and patch cables).');
       break;
     case 'juno-106':
-      if (!['cutoff', 'res', 'lfoRate', 'vcaLevel', 'chorus'].some((key) => key in data)) throw new Error('This does not look like a Juno-106 patch.');
+      if (!['cutoff','res','lfoRate','vcaLevel','chorus'].some((key) => key in data)) throw new Error('This does not look like a Juno-106 patch.');
+      break;
+    case 'tr-808':
+      if (!isObject(data.lanes) || !Number.isFinite(Number(data.tempo))) throw new Error('This is not a TR-808 pattern.');
       break;
     case 'dx7':
       if (!Array.isArray(data.ops) || data.ops.length !== 6) throw new Error('A DX7 voice must contain six operators.');
       break;
-    case 'tr-808':
-      if (!data.lanes || typeof data.lanes !== 'object' || !Number.isFinite(Number(data.tempo))) throw new Error('This is not a TR-808 pattern.');
+    case 'mellotron-m400':
+      if (!has('frame','track','volume','tone','pitch')) throw new Error('This is not a Mellotron M400 frame.');
+      break;
+    case 'oberheim-eight-voice':
+      if (!has('cutoff','resonance','voices') || !Array.isArray(data.voices) || data.voices.length !== 8) throw new Error('An Eight Voice program must contain eight voice settings.');
+      break;
+    case 'hohner-d6':
+      if (!has('toneFilters','pickup','volume','damping','pedalboardEnabled','pedals') || !Array.isArray(data.toneFilters) || !isObject(data.pedals)) throw new Error('This is not a complete Hohner D6 program.');
+      break;
+    case 'ob-xa':
+      if (!has('mode','voiceCount','layerB','master') || !isObject(data.layerB)) throw new Error('This is not a complete OB-Xa program.');
+      break;
+    case 'sequential-pro-3':
+      if (!has('seqTracks','modRoutes','osc1Wave','filterModel') || !Array.isArray(data.seqTracks) || !Array.isArray(data.modRoutes)) throw new Error('This is not a Sequential Pro 3 program.');
+      break;
+    case 'udo-super-8':
+      if (!Array.isArray(data.layers) || data.layers.length !== 2 || !data.layers.every((layer) => isObject(layer) && Array.isArray(layer.modMatrix) && layer.modMatrix.length === 64)) throw new Error('This is not a complete UDO Super 8 performance.');
       break;
     default:
       throw new Error('This instrument preset format is not supported yet.');
   }
   return safeJsonCopy(data);
 }
-
 function readDraft() {
   try {
+    const instrumentRaw = sessionStorage.getItem('overture.community.instrument-draft');
+    if (instrumentRaw) {
+      const payload = parseJsonFileObject(instrumentRaw);
+      const data = extractInstrumentPreset(payload, payload.instrumentId);
+      sessionStorage.removeItem('overture.community.instrument-draft');
+      return { data, type: 'instrument_preset', instrumentId: payload.instrumentId, title: payload.title || data.name || 'Community preset' };
+    }
     const raw = sessionStorage.getItem('overture.community.draft');
     if (!raw) return null;
     const patch = extractOmniPatch(raw);
-    state.draftType = 'omni_patch';
-    state.draftInstrument = null;
-    byId('community-draft-status').textContent = `Attached from OMNI: ${patch.name} (${patch.modules.length} modules).`;
-    return patch;
+    return { data: patch, type: 'omni_patch', instrumentId: null, title: patch.name || 'Untitled OMNI patch' };
   } catch (error) {
-    byId('community-draft-status').textContent = `The OMNI draft could not be read: ${error.message}`;
+    try { sessionStorage.removeItem('overture.community.instrument-draft'); } catch { /* storage unavailable */ }
+    byId('community-draft-status').textContent = `The shared draft could not be read: ${error.message}`;
     return null;
   }
 }
@@ -119,7 +157,9 @@ function syncContentType() {
   } else {
     state.draftType = 'instrument_preset';
     state.draftInstrument = instrument.value;
-    byId('community-draft-status').textContent = 'Choose a supported instrument and upload its exported preset JSON file.';
+    byId('community-draft-status').textContent = state.draft && state.draftType === 'instrument_preset' && state.draftInstrument === instrument.value
+      ? `${INSTRUMENTS[instrument.value]?.name || 'Instrument'} preset ready.`
+      : 'Choose an instrument and export its current patch to Community, or upload a preset JSON file.';
   }
 }
 
@@ -637,8 +677,8 @@ async function initialise() {
     return;
   }
 
-  state.draft = readDraft();
-  if (state.draft) setDraft(state.draft, 'omni_patch', null);
+  const importedDraft = readDraft();
+  if (importedDraft) setDraft(importedDraft.data, importedDraft.type, importedDraft.instrumentId, importedDraft.title);
   if (new URLSearchParams(window.location.search).get('publish') === '1') setPublishOpen(true);
   byId('community-publish-open').addEventListener('click', () => setPublishOpen(true));
   byId('community-publish-close').addEventListener('click', () => setPublishOpen(false));
