@@ -385,7 +385,7 @@ test('Community reports, moderator review, strike escalation and protected accou
   assert.match(migration, /current_strikes >= 4[\s\S]*?banned_at/);
   assert.match(migration, /lower\(username\) = 'michaelcarpiano'/);
   assert.match(migration, /community_is_protected_user\(patch_owner_id\)/);
-  assert.match(migration, /status = 'protected'[\s\S]*?'hidden', false/);
+  assert.match(migration, /jsonb_build_object\('status', 'protected'[\s\S]*?'hidden', false\)/);
   assert.match(migration, /community_can_publish/);
   assert.match(css, /community-report-dialog/);
   assert.match(css, /community-moderation-actions/);
