@@ -36,6 +36,12 @@ function firstValue(root, keys, fallback) {
   return fallback;
 }
 
+function prophetRawValue(patch, index, fallback) {
+  const values = patch?.layers?.[0]?.values;
+  const value = Array.isArray(values) ? Number(values[index]) : NaN;
+  return Number.isFinite(value) ? value : fallback;
+}
+
 function normalized(value, fallback = 0.5) {
   const number = Number(value);
   if (!Number.isFinite(number)) return fallback;
@@ -180,7 +186,7 @@ function scheduleOscillator(context, destination, frequency, type, start, stop, 
   return oscillator;
 }
 
-function scheduleOrganVoice(context, destination, frequency, start, stop, envelope, velocity) {
+function scheduleOrganVoice(context, destination, frequency, start, stop, velocity) {
   const partials = [1, 2, 3, 4, 6, 8];
   const levels = [0.42, 0.24, 0.18, 0.12, 0.08, 0.055];
   const sum = context.createGain();
@@ -221,7 +227,7 @@ function scheduleKeyboardNote(context, output, instrumentId, patch, note, start,
   } else envelope.connect(output);
 
   if (instrumentId === 'nord-c2d') {
-    scheduleOrganVoice(context, filter, frequency, start, stop, envelope, velocity * controls.volume);
+    scheduleOrganVoice(context, filter, frequency, start, stop, velocity * controls.volume);
     return;
   }
 
@@ -263,8 +269,16 @@ function scheduleKeyboardNote(context, output, instrumentId, patch, note, start,
     return;
   }
 
-  const firstWave = firstValue(patch, ['osc1Wave', 'dds1Wave', 'vco1Wave', 'osc1Shape'], undefined);
-  const secondWave = firstValue(patch, ['osc2Wave', 'dds2Wave', 'vco2Wave', 'osc2Shape'], firstWave);
+  const rawProgram = instrumentId === 'prophet-10';
+  const rawSawA = prophetRawValue(patch, 3, 0);
+  const rawSquareA = prophetRawValue(patch, 4, 0);
+  const rawSawB = prophetRawValue(patch, 5, 0);
+  const rawTriangleB = prophetRawValue(patch, 6, 0);
+  const rawSquareB = prophetRawValue(patch, 7, 0);
+  const firstWave = firstValue(patch, ['osc1Wave', 'dds1Wave', 'vco1Wave', 'osc1Shape'], rawProgram ? (rawSquareA > rawSawA ? 'pulse' : 'saw') : undefined);
+  const secondWave = firstValue(patch, ['osc2Wave', 'dds2Wave', 'vco2Wave', 'osc2Shape'], rawProgram
+    ? (rawTriangleB > rawSawB && rawTriangleB > rawSquareB ? 'triangle' : rawSquareB > rawSawB ? 'pulse' : 'saw')
+    : firstWave);
   const shape = firstValue(patch, ['osc1Shape'], undefined);
   const wave1 = waveType(firstWave, shape, 'sawtooth');
   const wave2 = waveType(secondWave, firstWave, wave1);
@@ -282,18 +296,19 @@ function scheduleKeyboardNote(context, output, instrumentId, patch, note, start,
 function scheduleKeyboard(context, output, instrumentId, patch) {
   const beat = 60 / 112;
   const eighth = beat / 2;
-  const rawCutoff = Number(firstValue(patch, ['cutoff', 'filterCutoff', 'lpCut'], 0.56));
-  const cutoff = rawCutoff > 24 ? clamp(rawCutoff, 220, 10500) : 180 * (16000 / 180) ** normalized(rawCutoff, 0.56);
-  const rawAttack = firstValue(patch, ['ampAttack', 'attack', 'env1Attack', 'env2Attack'], undefined);
-  const rawDecay = firstValue(patch, ['ampDecay', 'decay', 'env1Decay'], undefined);
-  const rawSustain = firstValue(patch, ['ampSustain', 'sustain', 'env1Sustain', 'env2Sustain'], undefined);
-  const rawRelease = firstValue(patch, ['ampRelease', 'release', 'env1Release', 'env2Release'], undefined);
+  const rawProgram = instrumentId === 'prophet-10';
+  const rawCutoff = Number(firstValue(patch, ['cutoff', 'filterCutoff', 'lpCut'], rawProgram ? prophetRawValue(patch, 17, 70) : 0.56));
+  const cutoff = rawCutoff > 24 ? clamp(rawProgram ? 180 * (16000 / 180) ** (rawCutoff / 127) : rawCutoff, 220, 10500) : 180 * (16000 / 180) ** normalized(rawCutoff, 0.56);
+  const rawAttack = firstValue(patch, ['ampAttack', 'attack', 'env1Attack', 'env2Attack'], rawProgram ? prophetRawValue(patch, 44, undefined) : undefined);
+  const rawDecay = firstValue(patch, ['ampDecay', 'decay', 'env1Decay'], rawProgram ? prophetRawValue(patch, 46, undefined) : undefined);
+  const rawSustain = firstValue(patch, ['ampSustain', 'sustain', 'env1Sustain', 'env2Sustain'], rawProgram ? prophetRawValue(patch, 48, undefined) : undefined);
+  const rawRelease = firstValue(patch, ['ampRelease', 'release', 'env1Release', 'env2Release'], rawProgram ? prophetRawValue(patch, 50, undefined) : undefined);
   const profile = {
     attack: instrumentId === 'mellotron-m400' ? 0.065 : instrumentId === 'hohner-d6' ? 0.004 : instrumentId === 'nord-c2d' ? 0.006 : 0.014,
   };
   const controls = {
     cutoff: clamp(cutoff, 250, 10000),
-    resonance: 0.7 + normalized(firstValue(patch, ['resonance', 'res', 'lpPeak'], 0.12)) * 5.5,
+    resonance: 0.7 + normalized(firstValue(patch, ['resonance', 'res', 'lpPeak'], rawProgram ? prophetRawValue(patch, 18, 16) : 0.12)) * 5.5,
     attack: Math.min(0.15, seconds(rawAttack, profile.attack, 0.65)),
     decay: seconds(rawDecay, instrumentId === 'hohner-d6' ? 0.12 : 0.24, 1),
     sustain: instrumentId === 'hohner-d6' ? 0.15 : normalized(rawSustain, instrumentId === 'nord-c2d' ? 0.92 : 0.68),
