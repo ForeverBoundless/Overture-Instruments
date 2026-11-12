@@ -568,6 +568,11 @@ async function publishItem(event) {
   try {
     const recordType = byId('community-record-type').value;
     const instrumentId = recordType === 'instrument_preset' ? byId('community-instrument').value : null;
+    const editingId = state.editingId || byId('community-edit-id').value || null;
+    if (editingId && (!state.user?.id || state.editingId !== editingId)) {
+      throw new Error('The original Community item could not be verified for editing. Reopen it from your contributions and try again.');
+    }
+    const editingOriginalPreviewPath = state.editingOriginalPreviewPath;
     let data = state.draft;
     let file = byId('community-patch-file').files?.[0];
     if (file) {
@@ -584,19 +589,13 @@ async function publishItem(event) {
       : 'Choose an exported instrument preset JSON file.');
     if (recordType === 'omni_patch') data = validatePatch(data);
     else data = extractInstrumentPreset(data, instrumentId);
-    const bytes = new TextEncoder().encode(JSON.stringify(data)).byteLength;
-    if (bytes > 500000) throw new Error('This preset is too large to publish (maximum 500 KB).');
-
     const title = byId('community-title').value.trim();
     if (title.length < 3 || title.length > 80) throw new Error('The title must be between 3 and 80 characters.');
     // Keep the user-facing Community title in instrument formats that carry
     // their own patch name, rather than letting a factory name win on import.
     if (Object.prototype.hasOwnProperty.call(data, 'name')) data.name = title.slice(0, 60);
-    const editingId = state.editingId || byId('community-edit-id').value || null;
-    if (editingId && (!state.user?.id || state.editingId !== editingId)) {
-      throw new Error('The original Community item could not be verified for editing. Reopen it from your contributions and try again.');
-    }
-    const editingOriginalPreviewPath = state.editingOriginalPreviewPath;
+    const bytes = new TextEncoder().encode(JSON.stringify(data)).byteLength;
+    if (bytes > 500000) throw new Error('This preset is too large to publish (maximum 500 KB).');
     const tags = [...new Set(byId('community-tags').value.split(',').map((tag) => tag.trim().toLowerCase()).filter(Boolean))].slice(0, 8);
     const previewFile = byId('community-audio-file').files?.[0];
     let previewPath = null;
