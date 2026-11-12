@@ -77,7 +77,6 @@ class DX7App {
       getData: () => JSON.parse(JSON.stringify(this.patch)),
       getTitle: () => 'DX7 voice',
     });
-    //
     const g = section(row1, 'ALGORITHM', 'TOPOLOGY & FEEDBACK');
     g.body.classList.add('dx7-alg-body');
     const gc = el('div', 'dx7-alg-controls', g.body);
