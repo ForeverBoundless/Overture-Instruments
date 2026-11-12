@@ -3,7 +3,7 @@ import { WorkletEngine } from './shared/workletEngine.js';
 import { PresetStore, num } from './shared/presetStore.js';
 import { el, section, knob, toggle, select, display, performance, power, presetBar, footer } from './shared/panel.js';
 import { JUNO_PRESETS } from './data/junoPresets.js';
-import { consumeCommunityInstrumentPreset } from './shared/communityPreset.js';
+import { consumeCommunityInstrumentPreset, createCommunityShareButton } from './shared/communityPreset.js';
 
 const DEF = { lfoRate: 0.4, lfoDelay: 0, dcoLfo: 0, pwm: 0.3, pwmMode: 'man', range: 8, saw: true, pulse: false, sub: 0, noise: 0, hpf: 1, cutoff: 0.7, res: 0.1, envAmt: 0.3, envPolarity: 1, vcfLfo: 0, kbd: 0.5, vcaMode: 'env', vcaLevel: 0.8, attack: 0.05, decay: 0.3, sustain: 0.7, release: 0.3, chorus: 0, portamento: 0, bendRange: 2, benderLfo: 0.1 };
 function validate(d) {
@@ -97,6 +97,12 @@ class JunoApp {
       apply: (data, name) => { this.patch = validate(data); this.disp.set(`PATCH  ${name}`, `CHORUS ${['OFF', 'I', 'II'][this.patch.chorus]}  HPF ${this.patch.hpf}`); this.send(); this.refresh(); },
       capture: () => ({ ...this.patch }),
     });
+    createCommunityShareButton(pre.body, {
+      instrumentId: 'juno-106', className: 'pn-btn',
+      getData: () => ({ ...this.patch }),
+      getTitle: () => 'Juno-106 patch',
+    });
+    //
   }
 
   setChorus(n) { this.patch.chorus = n; this.engine.post({ t: 'param', key: 'chorus', value: n }); this.chorusButtons.forEach((b, i) => b.setValue(i === n, true)); }
