@@ -588,7 +588,7 @@ class Super8Processor extends AudioWorkletProcessor{
    }
    if(s.phase>=1){
     s.phase-=1;
-    const step=s.step%length,n=p.seqSteps[step],slide=!!p.seqSlides[step]&&n!==null&&n!==undefined;
+    const step=s.step%length,n=p.seqSteps[step],chord=Array.isArray(p.seqChords?.[step])&&p.seqChords[step].length?p.seqChords[step]:n===null||n===undefined?[]:[n],slide=!!p.seqSlides[step]&&chord.length>0;
     const accent=!!p.seqAccents[step],gate=clamp(p.seqGates?.[step]??.75,.05,1);
     const tied=this.voices.filter(v=>v.active&&v.layer===layer&&v.seqVoice&&v.gate);
     if(s.note>=0&&slide&&tied.length){
@@ -599,11 +599,10 @@ class Super8Processor extends AudioWorkletProcessor{
       this.voices.forEach(v=>{if(v.active&&v.layer===layer&&v.seqVoice){v.gate=false;v.seqVoice=false;}});
       s.note=-1;
      }
-     if(n!==null&&n!==undefined){
+     if(chord.length){
       const velocity=accent?1:.82;
-      this.allocateNote(n,velocity,layer,1,'sequence');
-      this.voices.forEach(v=>{if(v.active&&v.layer===layer&&v.inputNote===n&&v.order===this.order)v.seqVoice=true;});
-      s.note=n;s.gate=gate;
+      chord.forEach(note=>{this.allocateNote(note,velocity,layer,1,'sequence');this.voices.forEach(v=>{if(v.active&&v.layer===layer&&v.inputNote===note&&v.order===this.order)v.seqVoice=true;});});
+      s.note=n??chord[0];s.gate=gate;
      }
     }
     s.step=(s.step+1)%length;
