@@ -21,7 +21,7 @@ import { PitchWheel, ModWheel } from '../../ui/Wheel.js';
 import { Keyboard } from '../../ui/Keyboard.js';
 import { OLEDDisplay } from '../../ui/OLEDDisplay.js';
 import { PRESETS } from '../data/presets.js';
-import { consumeCommunityInstrumentPreset, createCommunityShareButton } from '../shared/communityPreset.js';
+import { consumeCommunityInstrumentPreset, createCommunityShareButton, clearCommunitySource } from '../shared/communityPreset.js';
 
 const MIDI_NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 function midiNoteToName(midi) {
@@ -919,6 +919,8 @@ class App {
   // -------------------------------------------------------------------
 
   _loadFactoryPreset(id) {
+    clearCommunitySource();
+    this.communityPreset = null;
     const patch = this.presetManager.loadFactory(id);
     this._presetSelect.value = id;
     this.oled.showPreset(id, patch.name);

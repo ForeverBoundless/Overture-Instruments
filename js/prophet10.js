@@ -28,7 +28,7 @@ import { Prophet10Engine } from './engine/Prophet10Engine.js';
 import { MidiManager, midiNoteName } from './engine/MidiManager.js';
 import { PROPHET10_FACTORY_RAW } from './data/prophet10Programs.js';
 import { buildTuning, PROPHET10_TUNING_NAMES } from './data/prophet10Tunings.js';
-import { consumeCommunityInstrumentPreset, createCommunityShareButton } from './shared/communityPreset.js';
+import { consumeCommunityInstrumentPreset, createCommunityShareButton, clearCommunitySource } from './shared/communityPreset.js';
 
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 const SVG = 'http://www.w3.org/2000/svg';
@@ -847,6 +847,7 @@ class Prophet10App {
   }
 
   _recall(set, index) {
+    clearCommunitySource();
     const target = clamp(index, 0, 199);
     if (this.activeLayer === 1 && this.layerMode !== 'normal') {
       // Selecting programs while Layer B is active re-points layer B.

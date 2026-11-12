@@ -51,8 +51,15 @@ class OmniApp {
       const communityImport = sessionStorage.getItem('overture.community.import');
       if (communityImport) {
         sessionStorage.removeItem('overture.community.import');
-        this.patch = validatePatch(JSON.parse(communityImport));
-        this.msgOnLoad = `Loaded "${this.patch.name}" from the community library.`;
+        const payload = JSON.parse(communityImport);
+        const patchData = payload?.data && payload?.communityItemId ? payload.data : payload;
+        this.patch = validatePatch(patchData);
+        this.communitySource = payload?.communityItemId ? {
+          id: payload.communityItemId,
+          title: payload.title || this.patch.name,
+          previewPath: payload.previewPath || null,
+        } : null;
+        this.msgOnLoad = `Loaded "${this.communitySource?.title || this.patch.name}" from the community library.`;
       }
     } catch (error) {
       try { sessionStorage.removeItem('overture.community.import'); } catch { /* storage may be unavailable */ }
@@ -599,8 +606,22 @@ class OmniApp {
 
   publishToCommunity() {
     try {
-      sessionStorage.setItem('overture.community.draft', JSON.stringify(this.patch));
-      window.location.assign('/community?publish=1');
+      const source = this.communitySource;
+      const payload = {
+        format: 'overture-omni-community-draft',
+        version: 1,
+        title: source?.title || this.patch.name,
+        editingItemId: source?.id || null,
+        editingOriginalPreviewPath: source?.previewPath || null,
+        data: this.patch,
+      };
+      sessionStorage.setItem('overture.community.draft', JSON.stringify(payload));
+      const query = new URLSearchParams({ publish: '1' });
+      if (source?.id) {
+        query.set('patch', source.id);
+        query.set('edit', '1');
+      }
+      window.location.assign(`/community?${query.toString()}`);
     } catch (error) {
       this.msg(`Could not prepare this patch for publishing: ${error.message}`, true);
     }
@@ -868,7 +889,7 @@ class OmniApp {
   undo() { if (this.history.length <= 1) return; this.future.push(this.history.pop()); this.patch = JSON.parse(this.history[this.history.length - 1]); this.afterLoad(); }
   redo() { if (!this.future.length) return; const s = this.future.pop(); this.history.push(s); this.patch = JSON.parse(s); this.afterLoad(); }
   afterLoad() { this.selected = null; this.selectedModules.clear(); this.selectedWire = null; this.nameInput.value = this.patch.name; this.masterInput.value = this.patch.global.master; this.render(); this.scheduleRebuild(); this.refreshHistoryButtons(); }
-  load(patch, id = null) { try { this.patch = validatePatch(patch); this.currentId = id; this.afterLoad(); this.setInitialView(); this.pushHistory(); } catch (err) { this.msg(err.message, true); } }
+  load(patch, id = null) { try { this.patch = validatePatch(patch); this.currentId = id; this.communitySource = null; this.afterLoad(); this.setInitialView(); this.pushHistory(); } catch (err) { this.msg(err.message, true); } }
   save() { const existing = this.currentId ? this.store.get(this.currentId) : null; const name = prompt('Instrument name', existing?.name || this.patch.name); if (name === null) return; this.patch.name = name.slice(0, 60) || 'Untitled'; this.nameInput.value = this.patch.name; const it = this.store.save(this.patch.name, this.patch, existing?.id); this.currentId = it.id; this.refreshLoadList(); this.msg(`Saved "${it.name}".`); }
 
   addModule(type, x, y) {

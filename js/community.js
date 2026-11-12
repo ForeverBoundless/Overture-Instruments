@@ -132,12 +132,27 @@ function readDraft() {
       const payload = parseJsonFileObject(instrumentRaw);
       const data = extractInstrumentPreset(payload, payload.instrumentId);
       sessionStorage.removeItem('overture.community.instrument-draft');
-      return { data, type: 'instrument_preset', instrumentId: payload.instrumentId, title: payload.title || data.name || 'Community preset' };
+      return {
+        data,
+        type: 'instrument_preset',
+        instrumentId: payload.instrumentId,
+        title: payload.title || data.name || 'Community preset',
+        editingItemId: payload.editingItemId || null,
+        editingOriginalPreviewPath: payload.editingOriginalPreviewPath || null,
+      };
     }
     const raw = sessionStorage.getItem('overture.community.draft');
     if (!raw) return null;
-    const patch = extractOmniPatch(raw);
-    return { data: patch, type: 'omni_patch', instrumentId: null, title: patch.name || 'Untitled OMNI patch' };
+    const payload = parseJsonFileObject(raw);
+    const patch = extractOmniPatch(payload);
+    return {
+      data: patch,
+      type: 'omni_patch',
+      instrumentId: null,
+      title: payload.title || patch.name || 'Untitled OMNI patch',
+      editingItemId: payload.editingItemId || null,
+      editingOriginalPreviewPath: payload.editingOriginalPreviewPath || null,
+    };
   } catch (error) {
     try { sessionStorage.removeItem('overture.community.instrument-draft'); } catch { /* storage unavailable */ }
     byId('community-draft-status').textContent = `The shared draft could not be read: ${error.message}`;
@@ -293,11 +308,18 @@ function openItem(item) {
       sessionStorage.setItem('overture.community.instrument-import', JSON.stringify({
         instrumentId: item.instrument_id,
         title: item.title,
+        communityItemId: state.user?.id === item.owner_id ? item.id : null,
+        previewPath: state.user?.id === item.owner_id ? item.preview_path || null : null,
         data: item.patch_data,
       }));
       window.location.assign(INSTRUMENTS[item.instrument_id].route);
     } else {
-      sessionStorage.setItem('overture.community.import', JSON.stringify(item.patch_data));
+      sessionStorage.setItem('overture.community.import', JSON.stringify({
+        data: item.patch_data,
+        title: item.title,
+        communityItemId: state.user?.id === item.owner_id ? item.id : null,
+        previewPath: state.user?.id === item.owner_id ? item.preview_path || null : null,
+      }));
       window.location.assign('/omni');
     }
   } catch (error) {
@@ -496,12 +518,17 @@ async function loadPatches({ append = false } = {}) {
   }
 }
 
-function beginEdit(item) {
+function beginEdit(item, { preserveDraft = false } = {}) {
   state.editingId = item.id;
   state.editingOriginalPreviewPath = item.preview_path || null;
+  byId('community-edit-id').value = String(item.id);
   const type = item.record_type || 'omni_patch';
-  setDraft(item.patch_data, type, item.instrument_id, item.title);
-  byId('community-title').value = item.title;
+  if (!preserveDraft) setDraft(item.patch_data, type, item.instrument_id, item.title);
+  else {
+    state.draftType = type;
+    state.draftInstrument = item.instrument_id || null;
+  }
+  if (!preserveDraft) byId('community-title').value = item.title;
   byId('community-description').value = item.description || '';
   byId('community-tags').value = (item.tags || []).join(', ');
   byId('community-visibility').value = item.visibility;
@@ -541,6 +568,11 @@ async function publishItem(event) {
   try {
     const recordType = byId('community-record-type').value;
     const instrumentId = recordType === 'instrument_preset' ? byId('community-instrument').value : null;
+    const editingId = state.editingId || byId('community-edit-id').value || null;
+    if (editingId && (!state.user?.id || state.editingId !== editingId)) {
+      throw new Error('The original Community item could not be verified for editing. Reopen it from your contributions and try again.');
+    }
+    const editingOriginalPreviewPath = state.editingOriginalPreviewPath;
     let data = state.draft;
     let file = byId('community-patch-file').files?.[0];
     if (file) {
@@ -557,11 +589,13 @@ async function publishItem(event) {
       : 'Choose an exported instrument preset JSON file.');
     if (recordType === 'omni_patch') data = validatePatch(data);
     else data = extractInstrumentPreset(data, instrumentId);
-    const bytes = new TextEncoder().encode(JSON.stringify(data)).byteLength;
-    if (bytes > 500000) throw new Error('This preset is too large to publish (maximum 500 KB).');
-
     const title = byId('community-title').value.trim();
     if (title.length < 3 || title.length > 80) throw new Error('The title must be between 3 and 80 characters.');
+    // Keep the user-facing Community title in instrument formats that carry
+    // their own patch name, rather than letting a factory name win on import.
+    if (Object.prototype.hasOwnProperty.call(data, 'name')) data.name = title.slice(0, 60);
+    const bytes = new TextEncoder().encode(JSON.stringify(data)).byteLength;
+    if (bytes > 500000) throw new Error('This preset is too large to publish (maximum 500 KB).');
     const tags = [...new Set(byId('community-tags').value.split(',').map((tag) => tag.trim().toLowerCase()).filter(Boolean))].slice(0, 8);
     const previewFile = byId('community-audio-file').files?.[0];
     let previewPath = null;
@@ -570,7 +604,7 @@ async function publishItem(event) {
       const mime = (previewFile.type || '').split(';')[0].toLowerCase();
       const allowed = ['audio/webm', 'audio/ogg', 'audio/mp4', 'audio/mpeg', 'audio/wav', 'audio/x-wav'];
       if (!allowed.includes(mime)) throw new Error('Choose a WebM, Ogg, MP4, MP3 or WAV audio preview.');
-      const itemId = state.editingId || crypto.randomUUID();
+      const itemId = editingId || crypto.randomUUID();
       const extension = ({ 'audio/webm': 'webm', 'audio/ogg': 'ogg', 'audio/mp4': 'm4a', 'audio/mpeg': 'mp3', 'audio/wav': 'wav', 'audio/x-wav': 'wav' })[mime];
       previewPath = `${state.user.id}/${itemId}/preview-${Date.now()}-${Math.random().toString(36).slice(2, 7)}.${extension}`;
       const { error: uploadError } = await supabase.storage.from('community-previews').upload(previewPath, previewFile, { contentType: mime });
@@ -591,20 +625,22 @@ async function publishItem(event) {
       patch_data: data,
     };
     if (previewPath) record.preview_path = previewPath;
-    else if (!state.editingId) record.preview_path = null;
+    else if (!editingId) record.preview_path = null;
 
     let result;
-    if (state.editingId) {
-      result = await supabase.from('community_patches').update(record).eq('id', state.editingId).select('id').single();
+    if (editingId) {
+      result = await supabase.from('community_patches').update(record)
+        .eq('id', editingId).eq('owner_id', state.user.id).select('id').single();
     } else {
       result = await supabase.from('community_patches').insert({ ...record, owner_id: state.user.id }).select('id').single();
     }
     if (result.error) throw result.error;
 
-    if (previewPath && state.editingOriginalPreviewPath && previewPath !== state.editingOriginalPreviewPath) {
-      await supabase.storage.from('community-previews').remove([state.editingOriginalPreviewPath]);
+    if (previewPath && editingOriginalPreviewPath && previewPath !== editingOriginalPreviewPath) {
+      await supabase.storage.from('community-previews').remove([editingOriginalPreviewPath]);
     }
     state.editingId = null;
+    byId('community-edit-id').value = '';
     state.editingOriginalPreviewPath = null;
     state.draft = data;
     state.draftType = recordType;
@@ -613,7 +649,9 @@ async function publishItem(event) {
     byId('community-patch-file').value = '';
     byId('community-audio-file').value = '';
     byId('community-publish-form').querySelector('[type="submit"]').textContent = 'PUBLISH ITEM';
-    message('community-publish-status', 'Published. Your item is now available in the community library.');
+    message('community-publish-status', editingId
+      ? 'Updated. Your changes are saved to the existing Community item.'
+      : 'Published. Your item is now available in the community library.');
     state.mine = false;
     byId('community-my-items').textContent = 'MY ITEMS';
     await loadPatches();
@@ -678,7 +716,16 @@ async function initialise() {
   }
 
   const importedDraft = readDraft();
-  if (importedDraft) setDraft(importedDraft.data, importedDraft.type, importedDraft.instrumentId, importedDraft.title);
+  if (importedDraft) {
+    setDraft(importedDraft.data, importedDraft.type, importedDraft.instrumentId, importedDraft.title);
+    if (importedDraft.editingItemId) {
+      state.editingId = importedDraft.editingItemId;
+      state.editingOriginalPreviewPath = importedDraft.editingOriginalPreviewPath || null;
+      byId('community-edit-id').value = String(importedDraft.editingItemId);
+      byId('community-publish-form').querySelector('[type="submit"]').textContent = 'UPDATE ITEM';
+      message('community-publish-status', 'Editing the existing Community item. Its description, tags, visibility and preview will be retained.');
+    }
+  }
   if (new URLSearchParams(window.location.search).get('publish') === '1') setPublishOpen(true);
   byId('community-publish-open').addEventListener('click', () => setPublishOpen(true));
   byId('community-publish-close').addEventListener('click', () => setPublishOpen(false));
@@ -755,8 +802,11 @@ async function initialise() {
       renderCardOnce(item, { prepend: true });
     }
     if (item && editRequested) {
-      if (state.user?.id && item.owner_id === state.user.id) beginEdit(item);
-      else message('community-result-count', 'Only the owner can edit this contribution.', true);
+      if (state.user?.id && item.owner_id === state.user.id) {
+        const preserveDraft = !!importedDraft?.editingItemId
+          && String(importedDraft.editingItemId) === String(item.id);
+        beginEdit(item, { preserveDraft });
+      } else message('community-result-count', 'Only the owner can edit this contribution.', true);
     }
   }
 }

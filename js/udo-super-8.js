@@ -4,7 +4,7 @@ import { performance, power } from './shared/panel.js';
 import { registerMidiTargetProvider } from './shared/midiMap.js';
 import { createHardwareSurface,addPanel,addRow,addLabel,addKnob,addFader,addButton,addSelect,addDisplay,addKeyboard } from './shared/hardwarePanel.js';
 import { SUPER8_PRESETS } from './data/super8Presets.js';
-import { consumeCommunityInstrumentPreset, createCommunityShareButton } from './shared/communityPreset.js';
+import { consumeCommunityInstrumentPreset, createCommunityShareButton, clearCommunitySource } from './shared/communityPreset.js';
 
 const NOTE_NAMES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
 const NOTES=Array.from({length:61},(_,i)=>{const n=36+i;return NOTE_NAMES[n%12]+(Math.floor(n/12)-1);});
@@ -99,6 +99,7 @@ class Super8App{
   if(community){this.patch=community.data;this.active=this.patch.activeLayer?1:0;this.refresh();this.displayHardwarePreset(community.title);this.refreshHardwarePresetList('f:0');}
  }
  loadPerformance(id){
+  clearCommunitySource();
   let item=null,key=String(id||'f:0');
   if(key.startsWith('f:'))item=FACTORY[Number(key.slice(2))];
   else if(key.startsWith('u:'))item=this.store.get(key.slice(2));

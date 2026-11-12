@@ -73,7 +73,7 @@ test('Hohner D6 and Oberheim OB-Xa are complete first-class emulator entries', a
   assert.match(obEngine, /width=clamp\(\.5-p\.pulseWidth\*\.45/);
   assert.doesNotMatch(obEngine, /lfoVca/);
   assert.match(obPage, /Oberheim OB-Xa from Overture Instruments/);
-  assert.match(worker, /overture-shell-v68/);
+  assert.match(worker, /overture-shell-v69/);
   assert.match(worker, /hohner-d6/);
   assert.match(worker, /ob-xa/);
 });
@@ -286,11 +286,13 @@ test('Community library has an optional Supabase setup and owner-scoped schema m
 
 
 test('Community preset exchange covers every library emulator and its native patch handoff', async () => {
-  const [page, app, helper, migration, sources] = await Promise.all([
+  const [page, app, helper, migration, contributions, omni, sources] = await Promise.all([
     readFile(new URL('../community.html', import.meta.url), 'utf8'),
     readFile(new URL('../js/community.js', import.meta.url), 'utf8'),
     readFile(new URL('../js/shared/communityPreset.js', import.meta.url), 'utf8'),
     readFile(new URL('../supabase/migrations/20261102000000_community_patches.sql', import.meta.url), 'utf8'),
+    readFile(new URL('../js/contributions.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/omni.js', import.meta.url), 'utf8'),
     Promise.all([
       '../js/engine/app.js','../js/sub37.js','../js/prophet10.js','../js/nord-c2d.js',
       '../js/yamaha-dx7.js','../js/roland-juno-106.js','../js/roland-tr-808.js','../js/korg-ms-20.js',
@@ -307,6 +309,18 @@ test('Community preset exchange covers every library emulator and its native pat
   assert.match(app, /instrument-draft/);
   assert.match(helper, /createCommunityShareButton/);
   assert.match(helper, /consumeCommunityInstrumentPreset/);
+  assert.match(helper, /consumeCommunitySource/);
+  assert.match(helper, /editingItemId/);
+  assert.equal((page.match(/id="community-title"/g) || []).length, 1, 'the form title input must have a unique ID');
+  assert.match(page, /<h1 id="community-hero-title">/);
+  assert.match(app, /community-edit-id/);
+  assert.match(app, /data\.name = title\.slice\(0, 60\)/);
+  assert.match(app, /\.update\(record\)[\s\S]*?\.eq\('owner_id', state\.user\.id\)/);
+  assert.match(app, /editingId[\s\S]*?\.insert\(/);
+  assert.match(app, /communityItemId: state\.user\?\.id === item\.owner_id \? item\.id : null/);
+  assert.match(contributions, /communityItemId: state\.user\?\.id === item\.owner_id \? item\.id : null/);
+  assert.match(omni, /communitySource/);
+  assert.match(omni, /editingItemId: source\?\.id/);
   assert.match(migration, /record_type/);
   assert.ok(migration.includes('grant update (record_type, instrument_id'));
   assert.doesNotMatch(migration, /grant update on public\.community_patches to authenticated/i);
@@ -412,7 +426,7 @@ test('Contribution profiles respect profile ownership and expose edit actions on
   assert.ok(community.includes('/contributions?username='));
   assert.ok(css.includes('.contributions-profile'));
   assert.ok(worker.includes("'/contributions'"));
-  assert.ok(worker.includes('/js/contributions.js?v=20261102-profile-3'));
+  assert.ok(worker.includes('/js/contributions.js?v=20261112-community-edit-r1'));
 });
 
 
@@ -432,7 +446,7 @@ test('Contribution page profile, toolbar and result counts have responsive align
     readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
   ]);
   assert.ok(page.includes('contributions.css?v=20261102-profile-3'));
-  assert.ok(page.includes('contributions.js?v=20261102-profile-3'));
+  assert.ok(page.includes('contributions.js?v=20261112-community-edit-r1'));
   assert.ok(css.includes('#contributions-count'));
   assert.ok(css.includes('.contributions-toolbar.is-owner'));
   assert.ok(css.includes('@media (max-width:380px)'));

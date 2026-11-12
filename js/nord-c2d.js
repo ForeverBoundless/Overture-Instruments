@@ -1,7 +1,7 @@
 import { Keyboard } from '../ui/Keyboard.js';
 import { NordC2DEngine } from './engine/NordC2DEngine.js';
 import { MidiManager } from './engine/MidiManager.js';
-import { consumeCommunityInstrumentPreset, createCommunityShareButton } from './shared/communityPreset.js';
+import { consumeCommunityInstrumentPreset, createCommunityShareButton, clearCommunitySource } from './shared/communityPreset.js';
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
@@ -359,6 +359,7 @@ const banks = section.querySelector('.nord-manual-banks');
   }
 
   _changeProgram(direction) {
+    clearCommunitySource();
     this.engine.program.index = clamp(this.engine.program.index + (direction === 'next' ? 1 : -1), 1, 126);
     const value = String(this.engine.program.index).padStart(3, '0');
     document.querySelector('.nord-program-number').textContent = value;
@@ -367,6 +368,7 @@ const banks = section.querySelector('.nord-manual-banks');
   }
 
   _selectMidiProgram(program) {
+    clearCommunitySource();
     this.engine.program.index = clamp(Number(program) + 1, 1, 126);
     const value = String(this.engine.program.index).padStart(3, '0');
     document.querySelector('.nord-program-number').textContent = value;

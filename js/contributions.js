@@ -141,11 +141,18 @@ function openItem(item) {
       sessionStorage.setItem('overture.community.instrument-import', JSON.stringify({
         instrumentId: item.instrument_id,
         title: item.title,
+        communityItemId: state.user?.id === item.owner_id ? item.id : null,
+        previewPath: state.user?.id === item.owner_id ? item.preview_path || null : null,
         data: item.patch_data,
       }));
       window.location.assign(instrument.route);
     } else {
-      sessionStorage.setItem('overture.community.import', JSON.stringify(item.patch_data));
+      sessionStorage.setItem('overture.community.import', JSON.stringify({
+        data: item.patch_data,
+        title: item.title,
+        communityItemId: state.user?.id === item.owner_id ? item.id : null,
+        previewPath: state.user?.id === item.owner_id ? item.preview_path || null : null,
+      }));
       window.location.assign('/omni');
     }
   } catch (error) {
