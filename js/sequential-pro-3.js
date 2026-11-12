@@ -183,7 +183,7 @@ class Pro3App{
   for(let i=1;i<=3;i++){
    const col=document.createElement('div');col.className='p3-col';lfo.body.appendChild(col);addLabel(col,'LFO '+i);
    k(col,'lfo'+i+'Rate','Rate',{size:44,group:'LFO '+i});k(col,'lfo'+i+'Amount','Amount',{size:44,group:'LFO '+i});
-   s(col,'lfo'+i+'Wave','Shape',['triangle','saw','reverseSaw','square','sampleHold'],{group:'LFO '+i});b(col,'lfo'+i+'Sync','Sync',{group:'LFO '+i});
+   s(col,'lfo'+i+'Wave','Shape',['triangle','saw','reverseSaw','square','sampleHold'],{group:'LFO '+i});k(col,'lfo'+i+'Phase','Phase',{size:38,group:'LFO '+i});k(col,'lfo'+i+'Slew','Slew',{size:38,group:'LFO '+i});b(col,'lfo'+i+'Sync','Sync',{group:'LFO '+i});
   }
   const osc=(n,title,sub,waves)=>{
    const g=addPanel(main,{title,sub,className:'p3-osc'});const grp=title;
