@@ -526,7 +526,7 @@ async function loadPatches({ append = false } = {}) {
     let query = supabase.from('community_patches')
       .select('id,owner_id,record_type,instrument_id,title,description,author_name,tags,visibility,moderation_status,patch_data,preview_path,downloads,created_at');
     if (state.mine && state.user) query = query.eq('owner_id', state.user.id);
-    else query = query.eq('visibility', 'public');
+    else query = query.eq('visibility', 'public').eq('moderation_status', 'visible');
     const search = byId('community-search').value.trim().toLowerCase().replace(/[^a-z0-9\s-]/g, '').slice(0, 50);
     if (search) {
       const tagTerms = [...new Set(search.split(/\\s+/).filter(Boolean))].map((term) => `tags.cs.{${term}}`);
