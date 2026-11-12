@@ -648,7 +648,7 @@ async function publishItem(event) {
     const previewFile = byId('community-audio-file').files?.[0];
     let previewPath = null;
     const itemId = editingId || crypto.randomUUID();
-    const existingPreviewIsGenerated = /\\/auto-preview-[^/]+\\.wav$/i.test(editingOriginalPreviewPath || '');
+    const existingPreviewIsGenerated = String(editingOriginalPreviewPath || '').includes('/auto-preview-');
     if (previewFile) {
       const mime = await validateUserAudioFile(previewFile);
       message('community-publish-status', 'Uploading your audio preview…');
