@@ -1,4 +1,4 @@
-const CACHE = 'overture-shell-v69';
+const CACHE = 'overture-shell-v70';
 const APP_SHELL = [
   '/account',
   '/login',
@@ -12,13 +12,16 @@ const APP_SHELL = [
   '/js/contributions.js?v=20261102-profile-3',
   '/js/contributions.js?v=20261112-community-edit-r1',
   '/css/community.css?v=20261103-auth-hidden',
+  '/css/community.css?v=20261112-audio-moderation-r1',
   '/css/community.css',
   '/js/community.js?v=20261103-auth-hidden',
   '/js/community.js?v=20261112-community-title-edit-r1',
+  '/js/community.js?v=20261112-auto-preview-r1',
   '/js/shared/supabase-config.js',
   '/js/shared/account-shell.js?v=20261102-contributions-menu',
   '/js/shared/supabaseClient.js',
   '/js/shared/communityPreset.js',
+  '/js/shared/instrumentPreview.js',
   '/',
   '/about',
   '/css/about.css',
