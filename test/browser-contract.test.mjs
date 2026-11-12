@@ -73,7 +73,7 @@ test('Hohner D6 and Oberheim OB-Xa are complete first-class emulator entries', a
   assert.match(obEngine, /width=clamp\(\.5-p\.pulseWidth\*\.45/);
   assert.doesNotMatch(obEngine, /lfoVca/);
   assert.match(obPage, /Oberheim OB-Xa from Overture Instruments/);
-  assert.match(worker, /overture-shell-v70/);
+  assert.match(worker, /overture-shell-v71/);
   assert.match(worker, /hohner-d6/);
   assert.match(worker, /ob-xa/);
 });
@@ -355,9 +355,42 @@ test('Community instrument patches receive automatic previews and clear upload m
   assert.match(page, /Inappropriate, abusive, hateful, sexual, threatening, or infringing audio will be removed/);
   assert.match(css, /community-warning-tooltip/);
   assert.match(css, /\.community-warning-wrap:focus-within/);
-  assert.match(worker, /overture-shell-v70/);
+  assert.match(worker, /overture-shell-v71/);
   assert.match(worker, /instrumentPreview\.js/);
   assert.match(worker, /20261112-auto-preview-r1/);
+});
+
+
+test('Community reports, moderator review, strike escalation and protected account rules are enforced', async () => {
+  const [page, app, css, migration, worker] = await Promise.all([
+    readFile(new URL('../community.html', import.meta.url), 'utf8'),
+    readFile(new URL('../js/community.js', import.meta.url), 'utf8'),
+    readFile(new URL('../css/community.css', import.meta.url), 'utf8'),
+    readFile(new URL('../supabase/migrations/20261112000000_community_moderation.sql', import.meta.url), 'utf8'),
+    readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
+  ]);
+  assert.match(page, /community-report-dialog/);
+  assert.match(page, /community-moderation-panel/);
+  assert.match(page, /community-moderation-queue-status/);
+  assert.match(app, /submit_community_patch_report/);
+  assert.match(app, /get_community_moderation_reports/);
+  assert.match(app, /review_community_patch_report/);
+  assert.match(app, /get_community_account_status/);
+  assert.match(app, /communityItemId/);
+  assert.match(app, /REPORT/);
+  assert.match(migration, /unique \(patch_id, reporter_id\)/);
+  assert.match(migration, /recent_reports >= 10/);
+  assert.match(migration, /current_strikes = 2[\s\S]*?interval '7 days'/);
+  assert.match(migration, /current_strikes = 3[\s\S]*?interval '30 days'/);
+  assert.match(migration, /current_strikes >= 4[\s\S]*?banned_at/);
+  assert.match(migration, /lower\(username\) = 'michaelcarpiano'/);
+  assert.match(migration, /community_is_protected_user\(patch_owner_id\)/);
+  assert.match(migration, /status = 'protected'[\s\S]*?'hidden', false/);
+  assert.match(migration, /community_can_publish/);
+  assert.match(css, /community-report-dialog/);
+  assert.match(css, /community-moderation-actions/);
+  assert.match(worker, /overture-shell-v71/);
+  assert.match(worker, /20261112-community-moderation-r1/);
 });
 
 
