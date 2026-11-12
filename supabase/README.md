@@ -20,6 +20,8 @@ The browser only uses the publishable/anon key. Never place a service-role key i
 
 ## Supported shared content
 
-The current one-click instrument preset handoff supports Little Phatty user-preset JSON, MS-20, Juno-106, DX7 and TR-808 preset JSON. These are the models with a usable JSON export/import path in the current emulator build. Prophet-10 SysEx, Sub 37 panel states and Nord C2D drawbar/register snapshots are not yet handled by the one-click importer; keep those in their native files until their exporters/importers are added. OMNI patches use OMNI's validated patch schema and are imported directly into the workspace.
+The Community exchange supports patch and performance data for every emulator in the Overture instrument library: Little Phatty, Sub 37, Prophet-10, Nord C2D, DX7, Juno-106, TR-808, MS-20, Mellotron M400, Oberheim Eight Voice, Hohner Clavinet D6, OB-Xa, Sequential Pro 3 and UDO Super 8. OMNI patches use OMNI's validated graph schema. Every instrument import is passed through that emulator's own validator before the sound is applied.
 
-Public items can be unlisted for direct-link sharing. Public audio previews are intentionally readable by anyone with the item link. The database counter is updated through an RPC; authenticated users do not receive direct write permission to the `downloads` or `updated_at` columns.
+Use the **COMMUNITY** control in an emulator to send its current patch or performance directly to the Community publishing form. Users can also upload the instrument's JSON preset export. Multi-layer and multi-voice instruments retain their complete supported patch state; the Prophet-10, Nord C2D, Sub 37 and pattern-based TR-808 use their native instrument-specific data structures.
+
+Public items can be unlisted for direct-link sharing. Public audio preview URLs are intentionally readable by anyone with the item link. The database counter is updated through an RPC; authenticated users do not receive direct write permission to the `downloads` or `updated_at` columns.
