@@ -118,7 +118,6 @@ class TR808App {
       getData: () => validatePattern(this._pattern),
       getTitle: () => 'TR-808 pattern',
     });
-    //
     footer(this.shell, 'SYNTHESIZED PERCUSSION • 16/32-STEP SEQUENCER • 40–300 BPM • GM DRUM NOTES VIA MIDI');
   }
 
