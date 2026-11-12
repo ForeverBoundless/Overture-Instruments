@@ -107,6 +107,20 @@
       </div>
     </section>
 
+    <section class="community-moderation-panel" id="community-moderation-panel" hidden aria-labelledby="community-moderation-title">
+      <div class="community-section-heading">
+        <div>
+          <p class="community-overline">MODERATOR TOOLS</p>
+          <h2 id="community-moderation-title">Community reports</h2>
+        </div>
+        <button class="community-button community-button--quiet" id="community-moderation-refresh" type="button">REFRESH</button>
+      </div>
+      <p id="community-moderation-status" role="status" aria-live="polite"></p>
+      <div id="community-moderation-list" class="community-moderation-list"></div>
+      <p id="community-moderation-empty" class="community-empty" hidden>No open reports.</p>
+      <p class="community-moderation-policy">Strike policy: first upheld report is a warning; second is a 7-day publishing suspension; third is a 30-day suspension; fourth and later upheld reports result in a permanent Community ban. Every report is reviewed before action.</p>
+    </section>
+
     <section class="community-publish-panel" id="community-publish-panel" hidden>
       <div class="community-section-heading">
         <div>
@@ -226,6 +240,37 @@
       <a href="#top" class="back-to-top">BACK TO TOP ↑</a>
     </div>
   </footer>
+
+
+  <dialog class="community-report-dialog" id="community-report-dialog" aria-labelledby="community-report-title">
+    <form id="community-report-form" class="community-report-panel">
+      <div class="community-section-heading">
+        <div>
+          <p class="community-overline">COMMUNITY SAFETY</p>
+          <h2 id="community-report-title">Report this patch</h2>
+        </div>
+        <button class="community-close" id="community-report-close" type="button" aria-label="Close report form">×</button>
+      </div>
+      <p class="community-report-copy">Reports are private and reviewed by an Overture moderator. Reporting does not automatically penalize the creator.</p>
+      <label><span>REASON</span>
+        <select id="community-report-reason" required>
+          <option value="inappropriate_audio">Inappropriate audio</option>
+          <option value="hate_or_harassment">Hate speech or harassment</option>
+          <option value="sexual_content">Sexual content</option>
+          <option value="threats_or_violence">Threats or violence</option>
+          <option value="copyright_or_ownership">Copyright or ownership issue</option>
+          <option value="spam_or_misleading">Spam or misleading content</option>
+          <option value="other">Other</option>
+        </select>
+      </label>
+      <label><span>DETAILS (OPTIONAL)</span><textarea id="community-report-details" maxlength="600" rows="3" placeholder="Share any context that will help us review this report."></textarea></label>
+      <p id="community-report-status" role="status" aria-live="polite"></p>
+      <div class="community-form-actions">
+        <button class="community-button community-button--quiet" id="community-report-cancel" type="button">CANCEL</button>
+        <button class="community-button community-button--primary" type="submit">SUBMIT REPORT</button>
+      </div>
+    </form>
+  </dialog>
 
   <div class="contact-modal" id="contact-modal" hidden>
     <div class="contact-modal__backdrop" data-contact-close></div>
