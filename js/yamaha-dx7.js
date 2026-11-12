@@ -7,7 +7,7 @@ import { PresetStore, num } from './shared/presetStore.js';
 import { el, section, knob, button, toggle, select, display, performance, power, presetBar, footer, clamp } from './shared/panel.js';
 import { ALGORITHMS } from './data/dx7Algorithms.js';
 import { DX7_PRESETS, DX7_INIT } from './data/dx7Presets.js';
-import { consumeCommunityInstrumentPreset } from './shared/communityPreset.js';
+import { consumeCommunityInstrumentPreset, createCommunityShareButton } from './shared/communityPreset.js';
 
 const LFO_WAVES = ['tri', 'saw', 'sqr', 'sine', 'sh'];
 function validateDX7(d) {
@@ -72,6 +72,12 @@ class DX7App {
       apply: (data, name) => { this.patch = validateDX7(data); this.disp.set(`VOICE  ${name}`, `ALG ${this.patch.algorithm}  FB ${this.patch.feedback}`); this.send(); this.refresh(); },
       capture: () => JSON.parse(JSON.stringify(this.patch)),
     });
+    createCommunityShareButton(presets.body, {
+      instrumentId: 'dx7', className: 'pn-btn',
+      getData: () => JSON.parse(JSON.stringify(this.patch)),
+      getTitle: () => 'DX7 voice',
+    });
+    //
     const g = section(row1, 'ALGORITHM', 'TOPOLOGY & FEEDBACK');
     g.body.classList.add('dx7-alg-body');
     const gc = el('div', 'dx7-alg-controls', g.body);
