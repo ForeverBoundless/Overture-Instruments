@@ -331,6 +331,36 @@ test('Community preset exchange covers every library emulator and its native pat
 });
 
 
+test('Community instrument patches receive automatic previews and clear upload moderation guidance', async () => {
+  const [page, app, renderer, css, worker] = await Promise.all([
+    readFile(new URL('../community.html', import.meta.url), 'utf8'),
+    readFile(new URL('../js/community.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/shared/instrumentPreview.js', import.meta.url), 'utf8'),
+    readFile(new URL('../css/community.css', import.meta.url), 'utf8'),
+    readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
+  ]);
+  assert.match(app, /generateInstrumentPreview\(instrumentId, data\)/);
+  assert.match(app, /auto-preview-/);
+  assert.match(app, /existingPreviewIsGenerated/);
+  assert.match(app, /validateUserAudioFile/);
+  assert.match(app, /GENERATE & PLAY/);
+  assert.match(renderer, /OfflineAudioContext/);
+  assert.match(renderer, /schedule808/);
+  assert.match(renderer, /scheduleKick/);
+  assert.match(renderer, /scheduleSnare/);
+  assert.match(renderer, /scheduleTom/);
+  assert.match(renderer, /prophetRawValue/);
+  assert.match(page, /id="community-audio-warning"/);
+  assert.match(page, /id="community-content-confirmation" required/);
+  assert.match(page, /Inappropriate, abusive, hateful, sexual, threatening, or infringing audio will be removed/);
+  assert.match(css, /community-warning-tooltip/);
+  assert.match(css, /\.community-warning-wrap:focus-within/);
+  assert.match(worker, /overture-shell-v70/);
+  assert.match(worker, /instrumentPreview\.js/);
+  assert.match(worker, /20261112-auto-preview-r1/);
+});
+
+
 test('Account and Community use the shared Overture CSS design system', async () => {
   const [theme, accountCss, communityCss, accountPage, communityPage, communityApp] = await Promise.all([
     readFile(new URL('../css/site-theme.css', import.meta.url), 'utf8'),
