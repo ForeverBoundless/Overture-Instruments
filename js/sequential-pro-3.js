@@ -4,7 +4,7 @@ import { performance, power } from './shared/panel.js';
 import { registerMidiTargetProvider } from './shared/midiMap.js';
 import { createHardwareSurface,addPanel,addRow,addLabel,addKnob,addFader,addButton,addSelect,addSlider,addDisplay,addKeyboard,addWheel,addTouchStrip } from './shared/hardwarePanel.js';
 import { PRO3_PRESETS } from './data/pro3Presets.js';
-import { consumeCommunityInstrumentPreset, createCommunityShareButton } from './shared/communityPreset.js';
+import { consumeCommunityInstrumentPreset, createCommunityShareButton, clearCommunitySource } from './shared/communityPreset.js';
 
 const NOTES=Array.from({length:37},(_,i)=>{const n=36+i;return ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'][n%12]+(Math.floor(n/12)-1);});
 const clone=v=>JSON.parse(JSON.stringify(v));
@@ -251,7 +251,7 @@ class Pro3App{
   // ---- program memory ----
   const footer=document.createElement('div');footer.className='hp-footer';p.appendChild(footer);
   this.hwPresets=document.createElement('select');this.hwPresets.setAttribute('aria-label','Program');footer.appendChild(this.hwPresets);
-  this.hwPresets.addEventListener('change',()=>this.presets.load(this.hwPresets.value));
+  this.hwPresets.addEventListener('change',()=>{clearCommunitySource();this.presets.load(this.hwPresets.value);});
   const action=(label,fn)=>{const a=document.createElement('button');a.type='button';a.className='hp-action';a.textContent=label;a.addEventListener('click',fn);footer.appendChild(a);return a;};
   action('Save program',()=>{const name=prompt('Name this Pro 3 program','My Pro 3 Program');if(name===null)return;try{const item=this.store.save(name,clone(this.patch));this.refreshHardwarePresetList('u:'+item.id);this.hwDisplay.set(item.name.toUpperCase(),'USER PROGRAM SAVED');}catch(e){alert(e.message);}});
   createCommunityShareButton(footer,{instrumentId:'sequential-pro-3',className:'hp-action',getData:()=>clean(clone(this.patch)),getTitle:()=> 'Sequential Pro 3 program'});
