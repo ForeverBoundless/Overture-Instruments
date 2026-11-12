@@ -139,12 +139,13 @@ class Super8Processor extends AudioWorkletProcessor{
   this.b1kind=0;this.bPW=.5;this.bTP=0;this.bAltA=0;this.bAltB=1;this.bUserA=null;this.bUserB=null;
   this.b2kind=0;this.b2inc=0;this.b2pw=.5;this.b2mode=0;this.b2cross=0;this.b2sub=0;this.b2subInc=0;this.b2lfo=false;this.b2subSquare=false;
   this.sumM=0;this.sumL=0;this.sumR=0;this.wrapU=-1;this.lfoRateMul=1;
-  this.port.onmessage=e=>this.message(e.data);
+  this.scheduled=[];this.port.onmessage=e=>this.message(e.data);
  }
  snapSmooth(){
   this.layers.forEach((p,i)=>{const s=this.sm[i];s.mix=clamp(p.mix);s.pan=clamp(p.pan);s.cut=clamp(p.cutoff);s.res=clamp(p.resonance);s.hpf=clamp(p.hpf);});
  }
  message(m){
+  if((m.t==='noteOn'||m.t==='noteOff')&&Number.isFinite(m.frame)&&m.frame>currentFrame){this.scheduled.push(m);this.scheduled.sort((a,b)=>a.frame-b.frame);return;}
   if(m.t==='patch'){this.global={...this.global,...m.patch};this.layers=[clone(LAYER_DEFAULT),clone(LAYER_DEFAULT)].map((d,i)=>({...d,...(m.patch.layers?.[i]||{})}));this.layers.forEach(layer=>{if(Array.isArray(layer.userWaves))layer.userWaves=layer.userWaves.map(w=>Array.isArray(w)?Float32Array.from(w):null);});this.snapSmooth();return;}
   if(m.t==='param'){
    if(m.layer===0||m.layer===1){
@@ -639,6 +640,7 @@ class Super8Processor extends AudioWorkletProcessor{
   const gl=this.global,drive=1+Math.pow(clamp(gl.distortion||0),1.6)*19,volTarget=clamp(gl.volume,0,1.5);
   const volCoef=1-Math.exp(-1/(sr*.015));
   for(let start=0;start<n;start+=CTL){
+   while(this.scheduled.length&&this.scheduled[0].frame<=currentFrame+start){const message=this.scheduled.shift();delete message.frame;this.message(message);}
    const len=Math.min(CTL,n-start),dtc=len/sr;
    // voices of a layer that is not being rendered are silenced
    if(single)for(let i=0;i<16;i++){const v=this.voices[i];if(v.active&&v.layer!==active){v.active=false;v.gate=false;}}
