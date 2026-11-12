@@ -152,7 +152,7 @@ test('both new hardware synths start audio directly from their visible power swi
   assert.match(super8, /label:'POWER',value:false,toggle:false/);
   assert.ok(!pro.includes("getElementById('pro3-power').click()"));
   assert.ok(!super8.includes("getElementById('super8-power').click()"));
-  assert.match(worker, /overture-shell-v65/);
+  assert.match(worker, /overture-shell-v66/);
 });
 
 test('Pro 3 and Super 8 expose their click-to-power-on overlays', async () => {
@@ -294,4 +294,23 @@ test('Pro 3 and Super 8 load the shared reference-style hardware surface', async
   assert.ok(logo.byteLength > 1000, 'UDO wordmark should be the real image asset');
   assert.match(worker, /UDO_logo\.png/);
   assert.match(worker, /UDO_logo\.svg/);
+});
+
+
+test('Pro 3 startup initializes the rebuilt UI instead of calling the removed legacy builder', async () => {
+  const source = await readFile(new URL('../js/sequential-pro-3.js', import.meta.url), 'utf8');
+  assert.doesNotMatch(source, /this\\.build\\(\\)/, 'the removed legacy build method must not be called');
+  assert.match(source, /this\\.hwControls=\\{knobs:\\[\\],faders:\\[\\],buttons:\\[\\],selects:\\[\\],all:\\[\\]\\}/);
+  assert.match(source, /this\\.presets=\\{load:id=>this\\.loadProgram\\(id\\)\\}/);
+  assert.match(source, /this\\.shell=this\\.midiHost/);
+});
+
+test('flow hardware surface defines its group, control, and keyboard layout primitives', async () => {
+  const styles = await readFile(new URL('../css/hardware-panel.css', import.meta.url), 'utf8');
+  assert.match(styles, /\\.hp-group\\{[^}]*display:flex/);
+  assert.match(styles, /\\.hp-group-body\\{[^}]*display:flex/);
+  assert.match(styles, /\\.hp-row\\{[^}]*display:flex/);
+  assert.match(styles, /\\.hp-knob\\{[^}]*width:var\\(--size/);
+  assert.match(styles, /\\.hp-keybed\\{[^}]*height:/);
+  assert.match(styles, /\\.hp-key-white\\{[^}]*position:absolute|\\.hp-key\\{[^}]*position:absolute/);
 });

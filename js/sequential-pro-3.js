@@ -65,7 +65,19 @@ class Pro3App{
    this.hwDisplay?.set('AUDIO START FAILED',String(error?.message||error||'Unknown audio error').slice(0,58));
   });
   this.engine.onProcessorError=error=>this.hwDisplay?.set('AUDIO PROCESSOR ERROR',String(error?.message||error).slice(0,58));
-  this.ui={};this.build();this.buildHardwarePanel();this.buildPerformance();this.presets.load('f:0');
+  this.ui={};this.seqPage=0;
+   this.hwControls={knobs:[],faders:[],buttons:[],selects:[],all:[]};
+   this.buildHardwarePanel();
+   // Keep computer-keyboard and MIDI input plumbing off-screen; the visible
+   // hardware keybed is the only keyboard rendered for this instrument.
+   this.midiHost=document.createElement('div');
+   this.midiHost.setAttribute('aria-hidden','true');
+   this.midiHost.style.cssText='position:fixed;left:-10000px;top:0;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none';
+   document.body.appendChild(this.midiHost);
+   this.shell=this.midiHost;
+   this.presets={load:id=>this.loadProgram(id)};
+   this.buildPerformance();
+   this.presets.load('f:0');
   this.engine.post({t:'patch',patch:this.patch});
  }
  set(k,v){this.patch[k]=v;this.engine.post({t:'param',key:k,value:v});if(k==='seqTrack')this.updateSequence();this.syncHardware?.();}
