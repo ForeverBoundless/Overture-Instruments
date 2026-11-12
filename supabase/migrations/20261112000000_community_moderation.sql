@@ -163,7 +163,7 @@ $$;
 revoke all on function public.community_is_protected_user(uuid) from public;
 revoke all on function public.community_is_moderator(uuid) from public;
 revoke all on function public.community_can_publish(uuid) from public;
-grant execute on function public.community_is_moderator(uuid) to authenticated;
+grant execute on function public.community_is_moderator(uuid) to anon, authenticated;
 grant execute on function public.community_can_publish(uuid) to authenticated;
 
 -- Replace the original owner policies with sanction-aware policies.
