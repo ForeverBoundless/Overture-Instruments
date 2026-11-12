@@ -3,6 +3,7 @@ import { PresetStore } from './shared/presetStore.js';
 import { el, section, knob, select, toggle, display, performance, power, presetBar, footer } from './shared/panel.js';
 import { registerMidiTargetProvider, registerMidiTarget } from './shared/midiMap.js';
 import { HOHNER_D6_PRESETS } from './data/hohnerD6Presets.js';
+import { consumeCommunityInstrumentPreset, createCommunityShareButton } from './shared/communityPreset.js';
 
 const NOTE_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
 const NOTES = Array.from({ length: 60 }, (_, i) => {
@@ -68,6 +69,8 @@ class HohnerD6App {
       this.perf.flushPending(); this.display.set('D6 READY','60 STRINGS · PICKUPS ONLINE');
     });
     this.presets.load('f:0');
+    const community = consumeCommunityInstrumentPreset('hohner-d6', validate);
+    if (community) { this.patch = community.data; this.refresh(); this.display.set(community.title.toUpperCase(), 'COMMUNITY D6 PROGRAM'); }
     registerMidiTargetProvider(() => Object.entries(this.pedalSwitches).map(([id, button]) => ({
       id: 'pedal:' + id + ':bypass', label: PEDAL_DEFS[id].name + ' bypass', group: 'PEDALBOARD',
       get: () => this.patch.pedals[id].enabled ? 1 : 0,
@@ -120,6 +123,10 @@ class HohnerD6App {
     this.presets = presetBar(memory.body,{factory:HOHNER_D6_PRESETS,store:this.store,display:this.display,filename:'hohner-d6-program',
       panic:()=>this.perf.allOff(),apply:(data,name)=>{this.patch=validate(data);this.refresh();this.display.set(name.toUpperCase(),'CLAVINET D6 PROGRAM');},
       capture:()=>clone(this.patch)});
+    createCommunityShareButton(memory.body, {
+      instrumentId: 'hohner-d6', className: 'pn-btn',
+      getData: () => validate(clone(this.patch)), getTitle: () => 'Hohner D6 program',
+    });
     
     this.updateToneButtons();
   }
