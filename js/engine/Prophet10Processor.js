@@ -431,13 +431,20 @@ class Prophet10Processor extends AudioWorkletProcessor {
     this.osBuf = new Float64Array(63 + 256 * OS);
     this.osLen = 63;
     this.port.onmessage = (event) => this._onMessage(event.data);
+    this.scheduled = [];
     this._activity = 0;
   }
 
   // ------------------------------------------------------------- messages
   _onMessage(m) {
     if (!m || typeof m !== 'object') return;
+    if ((m.t === 'noteOn' || m.t === 'noteOff') && Number.isFinite(m.frame) && m.frame > currentFrame) {
+      this.scheduled.push(m);
+      this.scheduled.sort((a, b) => a.frame - b.frame);
+      return;
+    }
     switch (m.t) {
+      case 'transpose': this.transpose = clamp(Math.round(m.semis) || 0, -12, 12); break;
       case 'program': {
         const layer = this.layers[m.layer === 1 ? 1 : 0];
         layer.setRaw(m.values, m.extras);
@@ -747,6 +754,11 @@ class Prophet10Processor extends AudioWorkletProcessor {
 
     let activeCount = 0;
     for (let i = 0; i < frames; i += 1) {
+      while (this.scheduled.length && this.scheduled[0].frame <= currentFrame + i) {
+        const message = this.scheduled.shift();
+        delete message.frame;
+        this._onMessage(message);
+      }
       layers[0].tickMod(this.modWheel, this.aftertouch);
       if (this.mode !== 'normal') layers[1].tickMod(this.modWheel, this.aftertouch);
       for (let vi = 0; vi < NUM_VOICES; vi += 1) {
