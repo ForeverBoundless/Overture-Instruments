@@ -28,6 +28,7 @@ import { Prophet10Engine } from './engine/Prophet10Engine.js';
 import { MidiManager, midiNoteName } from './engine/MidiManager.js';
 import { PROPHET10_FACTORY_RAW } from './data/prophet10Programs.js';
 import { buildTuning, PROPHET10_TUNING_NAMES } from './data/prophet10Tunings.js';
+import { consumeCommunityInstrumentPreset, createCommunityShareButton } from './shared/communityPreset.js';
 
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 const SVG = 'http://www.w3.org/2000/svg';
@@ -561,6 +562,13 @@ class Prophet10App {
     this._recall(def.set, def.index);
     this._refreshAll();
     this._applyGlobalsToEngine();
+    const community = consumeCommunityInstrumentPreset('prophet-10', (data) => {
+      if (!data || !Array.isArray(data.layers) || data.layers.length !== 2
+        || data.layers.some((layer) => !layer || !Array.isArray(layer.values) || layer.values.length !== RAW_LENGTH || !layer.extras)
+        || !data.globals || typeof data.globals !== 'object') throw new Error('This is not a complete Prophet-10 program.');
+      return JSON.parse(JSON.stringify(data));
+    });
+    if (community) this._applyCommunityPatch(community.data, community.title);
   }
 
   // ------------------------------------------------------------ persistence
@@ -683,6 +691,11 @@ class Prophet10App {
     const help = el('button', 'p10-info-help', right, 'HELP');
     help.type = 'button';
     help.addEventListener('click', () => this._toggleHelp());
+    createCommunityShareButton(right, {
+      instrumentId: 'prophet-10', className: 'p10-info-share',
+      getData: () => this._captureCommunityPatch(),
+      getTitle: () => this.edit?.[0]?.name || 'Prophet-10 program',
+    });
     return bar;
   }
 
@@ -1374,6 +1387,34 @@ class Prophet10App {
     if (def.key === 'altTuning') return PROPHET10_TUNING_NAMES[v];
     if (def.key === 'midiChannel') return v === 0 ? 'all channels' : `channel ${v}`;
     return def.show(v);
+  }
+
+  _captureCommunityPatch() {
+    return {
+      layers: [cloneProgram(this.edit[0]), cloneProgram(this.edit[1])],
+      globals: { ...this.globals },
+      activeLayer: this.activeLayer,
+      linkLayers: !!this.linkLayers,
+      presetMode: !!this.presetMode,
+    };
+  }
+
+  _applyCommunityPatch(data, title = 'Community preset') {
+    this.edit = data.layers.map((program) => cloneProgram(program));
+    this.saved = this.edit.map((program) => cloneProgram(program));
+    this.activeLayer = data.activeLayer === 1 ? 1 : 0;
+    this.linkLayers = !!data.linkLayers;
+    this.compare = false;
+    this.recording = false;
+    this.presetMode = true;
+    this.globals = { ...DEFAULT_GLOBALS, ...this.globals, ...data.globals };
+    this.set = 'user';
+    this.programIndex = 0;
+    this._sendAllLayers();
+    this._applyGlobalsToEngine();
+    this._refreshAll();
+    this._saveGlobals();
+    this.infoStatus.textContent = `COMMUNITY · ${String(title).slice(0, 48)}`;
   }
 
   _applyGlobalsToEngine() {
