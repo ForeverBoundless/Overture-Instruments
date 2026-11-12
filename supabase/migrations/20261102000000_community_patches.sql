@@ -5,7 +5,7 @@ create table if not exists public.community_patches (
   id uuid primary key default gen_random_uuid(),
   owner_id uuid not null references auth.users(id) on delete cascade,
   record_type text not null default 'omni_patch' check (record_type in ('omni_patch', 'instrument_preset')),
-  instrument_id text check (instrument_id in ('little-phatty', 'sub-37', 'prophet-10', 'nord-c2d', 'ms-20', 'juno-106', 'tr-808', 'dx7')),
+  instrument_id text check (instrument_id in ('little-phatty', 'sub-37', 'prophet-10', 'nord-c2d', 'ms-20', 'juno-106', 'tr-808', 'dx7', 'mellotron-m400', 'oberheim-eight-voice', 'hohner-d6', 'ob-xa', 'sequential-pro-3', 'udo-super-8')),
   title text not null check (char_length(title) between 3 and 80),
   description text not null default '' check (char_length(description) <= 600),
   author_name text not null default 'Overture user' check (char_length(author_name) <= 48),
@@ -29,6 +29,9 @@ create table if not exists public.community_patches (
 -- was created before instrument presets were introduced.
 alter table public.community_patches add column if not exists record_type text not null default 'omni_patch';
 alter table public.community_patches add column if not exists instrument_id text;
+alter table public.community_patches drop constraint if exists community_patches_instrument_id_check;
+alter table public.community_patches add constraint community_patches_instrument_id_check
+  check (instrument_id is null or instrument_id in ('little-phatty', 'sub-37', 'prophet-10', 'nord-c2d', 'ms-20', 'juno-106', 'tr-808', 'dx7', 'mellotron-m400', 'oberheim-eight-voice', 'hohner-d6', 'ob-xa', 'sequential-pro-3', 'udo-super-8'));
 alter table public.community_patches drop constraint if exists community_record_instrument_consistency;
 alter table public.community_patches add constraint community_record_instrument_consistency check (
   record_type in ('omni_patch', 'instrument_preset')
