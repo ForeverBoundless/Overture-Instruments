@@ -110,7 +110,7 @@ class Pro3Processor extends AudioWorkletProcessor{
     aL:al.map(n=>({b:new Float32Array(n),i:0})),aR:al.map(n=>({b:new Float32Array(n+len(23)),i:0}))};};
   this.fx=[mk(),mk()];this.outL=0;this.outR=0;
   this.seqStep=0;this.seqPhase=0;this.seqRunning=false;this.arpPhase=0;this.arpStep=0;this.arpNote=-1;this.seqNote=-1;this.externalClock=0;
-  this.auto={};this.port.onmessage=e=>this.message(e.data);
+  this.auto={};this.scheduled=[];this.port.onmessage=e=>this.message(e.data);
  }
  parseRoutes(){
   this.routeSrc=[];this.routeDst=[];this.routeAmt=[];
@@ -121,6 +121,7 @@ class Pro3Processor extends AudioWorkletProcessor{
   }
  }
  message(m){
+  if((m.t==="noteOn"||m.t==="noteOff")&&Number.isFinite(m.frame)&&m.frame>currentFrame){this.scheduled.push(m);this.scheduled.sort((a,b)=>a.frame-b.frame);return;}
   if(m.t==="patch"){
    this.p={...DEFAULT,...m.patch};this.p.seqTracks=m.patch.seqTracks||DEFAULT.seqTracks;this.p.seqDestinations=m.patch.seqDestinations||DEFAULT.seqDestinations;this.p.modRoutes=m.patch.modRoutes||[];
    if(Number(this.p.feedbackTune)<=1)this.p.feedbackTune=Number(this.p.feedbackTune||0)*48;
@@ -414,6 +415,7 @@ class Pro3Processor extends AudioWorkletProcessor{
  process(_inputs,outputs){
   const out=outputs[0],L=out[0],R=out[1]||out[0],N=L.length,sr=sampleRate,P=this.p,para=P.mode==="paraphonic";
   for(let b=0;b<N;b+=CTL){
+   while(this.scheduled.length&&this.scheduled[0].frame<=currentFrame+b){const message=this.scheduled.shift();delete message.frame;this.message(message);}
    const n=Math.min(CTL,N-b);this.control(n/sr);
    const ampA=this.ampPrev,ampB=this.ampT,volA=this.volPrev,volB=this.volT;
    const gA=this.G,gB=this.Gt,kA=this.k,kB=this.kt;
