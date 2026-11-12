@@ -122,7 +122,6 @@ class MS20App {
       getData: () => ({ ...this.patch, params: { ...this.patch.params }, cables: this.patch.cables.map((c) => ({ ...c })) }),
       getTitle: () => 'MS-20 patch',
     });
-    //
     button(el('div', 'pn-buttons', pre.body), 'REMOVE ALL CABLES', () => { this.patch.cables = []; this.send(); this.drawCables(); });
   }
 
