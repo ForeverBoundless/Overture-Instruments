@@ -20,11 +20,35 @@ export class WorkletEngine {
   }
 
   start() {
-    if (this.started) return Promise.resolve(true);
     if (this._starting) return this._starting;
+    if (this.started && this.ctx?.state === 'running' && !this.processorError) return Promise.resolve(true);
+    // AudioContext can be suspended by browser policy after initial activation.
+    // Resume it synchronously from the new trusted power-button gesture instead
+    // of treating the old "started" flag as proof that sound is still available.
+    if (this.started && this.ctx?.state === 'suspended' && !this.processorError) {
+      const ctx = this.ctx;
+      const resumeAttempt = ctx.resume().then(() => {
+        if (ctx.state !== 'running') throw new Error('The browser suspended audio again. Check this site\'s sound permissions and press Power once more.');
+        return true;
+      }).catch((error) => {
+        this.started = false;
+        throw error;
+      });
+      this._starting = resumeAttempt;
+      resumeAttempt.finally(() => { if (this._starting === resumeAttempt) this._starting = null; }).catch(() => {});
+      return resumeAttempt;
+    }
     const attempt = (async () => {
       const AC = window.AudioContext || window.webkitAudioContext;
       if (!AC) throw new Error('Web Audio is not supported in this browser.');
+      // Dispose of a stale or failed graph before rebuilding it. Do not await
+      // close() before constructing the new context: construction and resume
+      // must happen inside the trusted user gesture.
+      const oldCtx = this.ctx;
+      try { this.node?.disconnect(); } catch {}
+      try { this.output?.disconnect(); } catch {}
+      if (oldCtx && oldCtx.state !== 'closed') { try { void oldCtx.close(); } catch {} }
+      this.node = null; this.output = null; this.started = false;
       const ctx = new AC({ latencyHint: 'interactive' }); this.ctx = ctx;
       try {
         if (!ctx.audioWorklet) throw new Error('AudioWorklet is unavailable (use a secure https:// page or localhost).');
@@ -44,7 +68,8 @@ export class WorkletEngine {
         node.connect(output);
         output.connect(ctx.destination);
         node.addEventListener('processorerror', () => {
-          this.processorError = new Error('The audio processor stopped unexpectedly. Reload this instrument and try again.');
+          this.processorError = new Error('The audio processor stopped unexpectedly. Press Power to rebuild the audio engine.');
+          this.started = false;
           this.onProcessorError?.(this.processorError);
         });
         this.node = node; this.output = output; this.started = true;

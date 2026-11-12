@@ -52,16 +52,37 @@ class Pro3App{
  constructor(){
   this.engine=new WorkletEngine(new URL('./engine/Pro3Processor.js',import.meta.url).href,'pro3-processor');
   this.patch=clean(BASE);this.store=new PresetStore({key:'overture.sequential-pro-3.programs',version:1,validate:clean});
-  this.seqPage=0;this.hwControls={knobs:[],faders:[],buttons:[],selects:[],all:[]};
-  this.activateAudio=power('pro3-power',()=>this.engine.start(),()=>{this.hwPower?.setValue(true,true);this.perf.flushPending();this.display.set('PRO 3 READY','OVERTURE PROGRAM · AUDIO ACTIVE');},()=>this.hwPower?.setValue(false,true));
-  this.buildHardwarePanel();
-  // Computer-keyboard and MIDI input run through a hidden host; the visible keybed is the hardware surface.
-  this.shell=document.createElement('div');this.shell.setAttribute('aria-hidden','true');
-  this.shell.style.cssText='position:fixed;left:-10000px;top:0;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none';
-  document.body.appendChild(this.shell);
-  this.buildPerformance();
-  this.presets={load:id=>this.loadProgram(id)};
-  this.loadProgram('f:0');
+  // Queue the real synth state before any UI construction. If a visual control
+  // throws during startup, the power overlay can still start a playable engine.
+  this.engine.post({t:'patch',patch:this.patch});
+  this.activateAudio=power('pro3-power',()=>this.engine.start(),()=>{
+   this.engine.post({t:'patch',patch:this.patch});
+   this.hwPower?.setValue(true,true);
+   this.perf?.flushPending();
+   this.hwDisplay?.set('PRO 3 READY','OVERTURE PROGRAM · AUDIO ACTIVE');
+  },error=>{
+   this.hwPower?.setValue(false,true);
+   this.hwDisplay?.set('AUDIO START FAILED',String(error?.message||error||'Unknown audio error').slice(0,58));
+  });
+  this.engine.onProcessorError=error=>this.hwDisplay?.set('AUDIO PROCESSOR ERROR',String(error?.message||error).slice(0,58));
+  this.ui={};this.build();this.buildHardwarePanel();this.buildPerformance();this.presets.load('f:0');
+  this.engine.post({t:'patch',patch:this.patch});
+ }
+ set(k,v){this.patch[k]=v;this.engine.post({t:'param',key:k,value:v});if(k==='seqTrack')this.updateSequence();this.syncHardware?.();}
+ postPatch(){this.engine.post({t:'patch',patch:this.patch});}
+ makeKnobs(parent,defs){
+  const row=el('div','pn-knobs',parent);
+  defs.forEach(([key,label,min=0,max=1])=>{
+   const item=knob(row,{label,min,max,value:this.patch[key],size:45,formatValue:v=>Number(v).toFixed(max>5?1:2),onChange:v=>this.set(key,v)});
+   this.ui[key]=item;
+  });
+ }
+ makeSelect(parent,key,label,options){
+  const item=select(parent,label,options,this.patch[key],v=>this.set(key,typeof this.patch[key]==='number'?Number(v):v));
+  this.ui[key]=item;return item;
+ }
+ makeToggle(parent,key,label){
+  const item=toggle(parent,label,this.patch[key],v=>this.set(key,v));this.ui[key]=item;return item;
  }
  loadProgram(id){
   const key=String(id||'f:0');let item=null;

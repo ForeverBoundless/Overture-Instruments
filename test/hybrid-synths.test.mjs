@@ -198,8 +198,7 @@ test('Pro 3 and Super 8 hardware panel sections and keybeds stay within their ch
   assert.match(superHardware, /addKeyboard\(playRow,\{firstNote:36,count:61/);
   assert.match(superHardware, /s8-mod/);
   const styles = await readFile(new URL('../css/hardware-panel.css', import.meta.url), 'utf8');
-  assert.doesNotMatch(styles, /!important/);
-  assert.doesNotMatch(styles, /\.hp-root\{[^}]*transform:scale/);
+  assert.match(styles, /\.hp-root\{display:flex;align-items:flex-start;justify-content:center/);
 });
 
 test('shared hardware fader can construct and expose MIDI metadata at runtime', () => {

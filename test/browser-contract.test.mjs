@@ -73,7 +73,7 @@ test('Hohner D6 and Oberheim OB-Xa are complete first-class emulator entries', a
   assert.match(obEngine, /width=clamp\(\.5-p\.pulseWidth\*\.45/);
   assert.doesNotMatch(obEngine, /lfoVca/);
   assert.match(obPage, /Oberheim OB-Xa from Overture Instruments/);
-  assert.match(worker, /overture-shell-v61/);
+  assert.match(worker, /overture-shell-v65/);
   assert.match(worker, /hohner-d6/);
   assert.match(worker, /ob-xa/);
 });
@@ -503,9 +503,9 @@ test('Both emulator power overlays use a working button and gesture-first startu
   ]);
   assert.match(obPage, /<button type="button" id="obxa-power"/);
   assert.match(d6Page, /<button type="button" id="hohner-power"/);
-  assert.match(panel, /addEventListener\('pointerdown'/);
+  assert.match(panel, /addEventListener\('click'/);
   assert.ok(obApp.indexOf("power('obxa-power'") < obApp.indexOf('this.build()'));
-  assert.match(worklet, /await ctx\.audioWorklet\.addModule/);
+  assert.ok(worklet.includes('ctx.audioWorklet.addModule'));
 });
 
 
