@@ -1,7 +1,7 @@
 # Supabase setup for the Overture Community Library
 
 1. Create a Supabase project.
-2. Open **SQL Editor** and run the complete migration in `migrations/20261102000000_community_patches.sql`.
+2. Open **SQL Editor** and run the Community migrations in order: `migrations/20261102000000_community_patches.sql`, then `migrations/20261112000000_community_all_instruments.sql`. The second migration expands an existing Community installation to accept all emulator presets.
 3. In **Project Settings → API**, copy the Project URL and the publishable/anon public key. Do not copy a secret or service-role key.
 4. Edit `js/shared/supabase-config.js` and set `url` and `anonKey`. The publishable/anon key is intended for browser use; Row Level Security is the security boundary.
 5. In **Authentication → URL Configuration**, set the Site URL to your deployed Overture domain and add your Vercel preview/development origins to the allowed Redirect URLs. For example:
