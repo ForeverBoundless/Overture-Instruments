@@ -102,7 +102,6 @@ class JunoApp {
       getData: () => ({ ...this.patch }),
       getTitle: () => 'Juno-106 patch',
     });
-    //
   }
 
   setChorus(n) { this.patch.chorus = n; this.engine.post({ t: 'param', key: 'chorus', value: n }); this.chorusButtons.forEach((b, i) => b.setValue(i === n, true)); }
