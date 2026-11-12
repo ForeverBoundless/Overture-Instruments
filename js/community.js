@@ -1,4 +1,5 @@
 import { validatePatch, LiveGraph } from './omni/graph.js';
+import { generateInstrumentPreview } from './shared/instrumentPreview.js';
 import { supabase, supabaseConfigured, configureSupabase, previewPublicUrl } from './shared/supabaseClient.js';
 
 const byId = (id) => document.getElementById(id);
@@ -225,6 +226,34 @@ function downloadJSON(item) {
   void supabase.rpc('increment_community_patch_downloads', { p_patch_id: item.id });
 }
 
+async function validateUserAudioFile(file) {
+  if (!file || file.size > 8388608) throw new Error('Audio previews must be 8 MB or smaller.');
+  const mime = (file.type || '').split(';')[0].toLowerCase();
+  const allowed = ['audio/webm', 'audio/ogg', 'audio/mp4', 'audio/mpeg', 'audio/wav', 'audio/x-wav'];
+  if (!allowed.includes(mime)) throw new Error('Choose a WebM, Ogg, MP4, MP3 or WAV audio preview.');
+  const bytes = new Uint8Array(await file.slice(0, 16).arrayBuffer());
+  const text = (start, length) => String.fromCharCode(...bytes.slice(start, start + length));
+  const signatures = {
+    'audio/webm': bytes[0] === 0x1a && bytes[1] === 0x45 && bytes[2] === 0xdf && bytes[3] === 0xa3,
+    'audio/ogg': text(0, 4) === 'OggS',
+    'audio/mp4': text(4, 4) === 'ftyp',
+    'audio/mpeg': text(0, 3) === 'ID3' || (bytes[0] === 0xff && (bytes[1] & 0xe0) === 0xe0),
+    'audio/wav': text(0, 4) === 'RIFF' && text(8, 4) === 'WAVE',
+    'audio/x-wav': text(0, 4) === 'RIFF' && text(8, 4) === 'WAVE',
+  };
+  if (!signatures[mime]) throw new Error('The selected file does not match its audio format. Please choose a valid audio recording.');
+  return mime;
+}
+
+async function uploadCommunityPreview(blob, itemId, prefix, mime) {
+  if (!blob || blob.size > 8388608) throw new Error('The audio preview is larger than the 8 MB limit.');
+  const extension = mime === 'audio/mpeg' ? 'mp3' : mime === 'audio/ogg' ? 'ogg' : mime === 'audio/mp4' ? 'm4a' : mime === 'audio/webm' ? 'webm' : 'wav';
+  const path = `${state.user.id}/${itemId}/${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}.${extension}`;
+  const { error } = await supabase.storage.from('community-previews').upload(path, blob, { contentType: mime });
+  if (error) throw error;
+  return path;
+}
+
 async function stopPreview() {
   const active = state.activePreview;
   if (!active) return;
@@ -401,17 +430,36 @@ function renderCard(item) {
   }
 
   const actions = addText(card, 'div', 'community-card__actions', '');
-  const listen = addText(actions, 'button', 'community-button', isInstrument ? (audio ? 'PLAY PREVIEW' : 'NO AUDIO PREVIEW') : 'LISTEN');
+  const listen = addText(actions, 'button', 'community-button', isInstrument ? (audio ? 'PLAY PREVIEW' : 'GENERATE & PLAY') : 'LISTEN');
   listen.type = 'button';
   listen.dataset.previewButton = item.id;
   if (isInstrument) {
-    listen.disabled = !audio;
     listen.addEventListener('click', async () => {
-      if (!audio) return;
+      if (audio) {
+        try {
+          if (audio.paused) await audio.play();
+          else audio.pause();
+        } catch (error) { message('community-result-count', error.message, true); }
+        return;
+      }
+      listen.disabled = true;
+      listen.textContent = 'RENDERING…';
       try {
-        if (audio.paused) await audio.play();
-        else audio.pause();
-      } catch (error) { message('community-result-count', error.message, true); }
+        const blob = await generateInstrumentPreview(item.instrument_id, item.patch_data);
+        audio = document.createElement('audio');
+        audio.controls = true;
+        audio.preload = 'none';
+        audio.src = URL.createObjectURL(blob);
+        audio.setAttribute('aria-label', `Generated audio preview for ${item.title}`);
+        card.insertBefore(audio, actions);
+        listen.textContent = 'PLAY PREVIEW';
+        await audio.play();
+      } catch (error) {
+        listen.textContent = 'GENERATE & PLAY';
+        message('community-result-count', error.message || 'Could not generate this instrument preview.', true);
+      } finally {
+        listen.disabled = false;
+      }
     });
   } else listen.addEventListener('click', () => auditionOmniPatch(item, listen));
 
@@ -599,17 +647,21 @@ async function publishItem(event) {
     const tags = [...new Set(byId('community-tags').value.split(',').map((tag) => tag.trim().toLowerCase()).filter(Boolean))].slice(0, 8);
     const previewFile = byId('community-audio-file').files?.[0];
     let previewPath = null;
+    const itemId = editingId || crypto.randomUUID();
+    const existingPreviewIsGenerated = /\\/auto-preview-[^/]+\\.wav$/i.test(editingOriginalPreviewPath || '');
     if (previewFile) {
-      if (previewFile.size > 8388608) throw new Error('Audio previews must be 8 MB or smaller.');
-      const mime = (previewFile.type || '').split(';')[0].toLowerCase();
-      const allowed = ['audio/webm', 'audio/ogg', 'audio/mp4', 'audio/mpeg', 'audio/wav', 'audio/x-wav'];
-      if (!allowed.includes(mime)) throw new Error('Choose a WebM, Ogg, MP4, MP3 or WAV audio preview.');
-      const itemId = editingId || crypto.randomUUID();
-      const extension = ({ 'audio/webm': 'webm', 'audio/ogg': 'ogg', 'audio/mp4': 'm4a', 'audio/mpeg': 'mp3', 'audio/wav': 'wav', 'audio/x-wav': 'wav' })[mime];
-      previewPath = `${state.user.id}/${itemId}/preview-${Date.now()}-${Math.random().toString(36).slice(2, 7)}.${extension}`;
-      const { error: uploadError } = await supabase.storage.from('community-previews').upload(previewPath, previewFile, { contentType: mime });
-      if (uploadError) throw uploadError;
+      const mime = await validateUserAudioFile(previewFile);
+      message('community-publish-status', 'Uploading your audio preview…');
+      previewPath = await uploadCommunityPreview(previewFile, itemId, 'preview', mime);
       uploadedPath = previewPath;
+    } else if (recordType === 'instrument_preset' && (!editingId || !editingOriginalPreviewPath || existingPreviewIsGenerated)) {
+      message('community-publish-status', 'Rendering an automatic instrument preview…');
+      const generatedAudio = await generateInstrumentPreview(instrumentId, data);
+      previewPath = await uploadCommunityPreview(generatedAudio, itemId, 'auto-preview', 'audio/wav');
+      uploadedPath = previewPath;
+    } else if (editingId && editingOriginalPreviewPath) {
+      // Existing user-uploaded recordings are retained unless replaced.
+      previewPath = editingOriginalPreviewPath;
     }
 
     const { data: authorProfile } = await supabase.from('profiles').select('username,display_name').eq('id', state.user.id).maybeSingle();
