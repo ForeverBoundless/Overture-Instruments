@@ -4,6 +4,7 @@ import { performance, power } from './shared/panel.js';
 import { registerMidiTargetProvider } from './shared/midiMap.js';
 import { createHardwareSurface,addPanel,addRow,addLabel,addKnob,addFader,addButton,addSelect,addDisplay,addKeyboard } from './shared/hardwarePanel.js';
 import { SUPER8_PRESETS } from './data/super8Presets.js';
+import { consumeCommunityInstrumentPreset, createCommunityShareButton } from './shared/communityPreset.js';
 
 const NOTE_NAMES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
 const NOTES=Array.from({length:61},(_,i)=>{const n=36+i;return NOTE_NAMES[n%12]+(Math.floor(n/12)-1);});
@@ -69,6 +70,8 @@ class Super8App{
   this.shell=this.midiHost;
   this.buildKeyboard();
   this.presets.load('f:0');
+  const community=consumeCommunityInstrumentPreset('udo-super-8',validate);
+  if(community){this.patch=community.data;this.active=this.patch.activeLayer?1:0;this.refresh();this.displayHardwarePreset(community.title);this.refreshHardwarePresetList('f:0');}
  }
  loadPerformance(id){
   let item=null,key=String(id||'f:0');
@@ -239,6 +242,7 @@ class Super8App{
   this.hwPresets.addEventListener('change',()=>this.presets.load(this.hwPresets.value));
   const action=(label,fn)=>{const a=document.createElement('button');a.type='button';a.className='hp-action';a.textContent=label;a.addEventListener('click',fn);footer.appendChild(a);return a;};
   action('Save performance',()=>{const name=prompt('Name this performance','My Super 8 Performance');if(name===null)return;try{const item=this.store.save(name,clone(this.patch));this.refreshHardwarePresetList('u:'+item.id);this.displayHardwarePreset(item.name);}catch(e){alert(e.message);}});
+  createCommunityShareButton(footer,{instrumentId:'udo-super-8',className:'hp-action',getData:()=>validate(clone(this.patch)),getTitle:()=> 'UDO Super 8 performance'});
   action('Save layer',()=>{const name=prompt('Name this layer patch','My Layer Patch');if(name===null)return;try{const item=this.layerStores[this.active].save(name,clone(this.p()));this.refreshHardwareLayerList(item.id);}catch(e){alert(e.message);}});
   this.hwLayerPresets=document.createElement('select');this.hwLayerPresets.setAttribute('aria-label','Layer patch');footer.appendChild(this.hwLayerPresets);
   this.hwLayerPresets.addEventListener('change',()=>{const item=this.layerStores[this.active].get(this.hwLayerPresets.value);if(item){this.patch.layers[this.active]=cleanLayer(item.data);this.refresh();}});
