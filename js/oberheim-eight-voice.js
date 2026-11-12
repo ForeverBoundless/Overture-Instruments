@@ -2,6 +2,7 @@ import { WorkletEngine } from './shared/workletEngine.js';
 import { PresetStore, num } from './shared/presetStore.js';
 import { el, section, knob, select, display, performance, power, presetBar, footer } from './shared/panel.js';
 import { OBERHEIM_EIGHT_VOICE_PRESETS } from './data/oberheimEightVoicePresets.js';
+import { consumeCommunityInstrumentPreset, createCommunityShareButton } from './shared/communityPreset.js';
 
 const DEF = { cutoff: .53, resonance: .06, filterEnv: .2, filterMode: 'low', osc1: .8, osc2: .68, tune: 0, pulse: .5, wave1: 'saw', wave2: 'saw', attack: .16, decay: .42, sustain: .72, release: .52, master: .64, lfoRate: .13, lfoAmount: 0, lfoTarget: 'pitch', bendRange: 2 };
 const validate = (data) => {
@@ -25,6 +26,8 @@ class EightVoiceApp {
     } });
     power('oberheim-power', () => this.engine.start(), () => { this.perf.flushPending(); this.display.set('EIGHT VOICE READY', '8 SEM VOICES ONLINE'); });
     this.presets.load('f:0');
+    const community = consumeCommunityInstrumentPreset('oberheim-eight-voice', validate);
+    if (community) { this.patch = community.data; this.refresh(); this.display.set('COMMUNITY PROGRAM', community.title); }
   }
   set(key, value) {
     this.patch[key] = value;
@@ -74,6 +77,11 @@ class EightVoiceApp {
     for (let i = 0; i < 8; i += 1) this.buildVoice(voices, i);
     const memory = section(rows, 'PROGRAMMER', 'OVERTURE VOICE PROGRAMS');
     this.presets = presetBar(memory.body, { factory: OBERHEIM_EIGHT_VOICE_PRESETS, store: this.store, display: this.display, filename: 'oberheim-eight-voice-program', panic: () => this.perf.allOff(), apply: (data, name) => { this.patch = validate(data); this.refresh(); this.display.set(`PROGRAM  ${name}`, 'EIGHT VOICE PROGRAMMER'); }, capture: () => ({ ...this.patch, voices: this.voiceUi.map((v) => Object.fromEntries(Object.entries(v).map(([key, control]) => [key, control.select ? control.select.value : control.value]))) }) });
+    createCommunityShareButton(memory.body, {
+      instrumentId: 'oberheim-eight-voice', className: 'pn-btn',
+      getData: () => validate({ ...this.patch, voices: this.patch.voices.map((voice) => ({ ...voice })) }),
+      getTitle: () => 'Oberheim Eight Voice program',
+    });
     footer(this.shell, 'EIGHT VOICE · 8 INDEPENDENT SEMs · 49 KEYS · STATE VARIABLE FILTER · ESC PANIC');
   }
   buildVoice(parent, index) {
