@@ -337,3 +337,12 @@ test('UDO Super 8 layer hold sustains notes until hold is switched off', async (
   h.processor.message({ t: 'param', layer: 0, key: 'hold', value: false });
   assert.equal(held.gate, false, 'disabling hold releases held voices');
 });
+
+
+test('UDO Super 8 sequencer can trigger recorded chord steps', async () => {
+  const h = await createWorklet('../js/engine/Super8Processor.js', 'super8-processor');
+  h.processor.message({ t: 'patch', patch: { mode: 'single', binaural: false, layers: [{ seqEnabled: true, seqLength: 1, seqBpm: 120, seqSteps: [60], seqChords: [[60, 64, 67]], env2Attack: .001, env2Sustain: .9 }, {}] } });
+  h.processor.tickSequencers(1, 0);
+  const notes = h.processor.voices.filter(v => v.active && v.layer === 0 && v.seqVoice).map(v => v.inputNote).sort((a, b) => a - b);
+  assert.equal(notes.join(','), '60,64,67', 'the recorded triad is allocated as three simultaneous voices');
+});
