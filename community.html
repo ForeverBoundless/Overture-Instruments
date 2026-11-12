@@ -99,7 +99,10 @@
     </section>
 
     <section class="community-account" id="community-account" aria-label="Community account">
-      <div id="community-account-status" role="status" aria-live="polite">Checking community connection…</div>
+      <div class="community-account__copy">
+        <div id="community-account-status" role="status" aria-live="polite">Checking community connection…</div>
+        <p id="community-moderation-status" class="community-moderation-status" role="status" aria-live="polite"></p>
+      </div>
       <div class="community-account__actions">
         <a class="community-button community-button--primary" id="community-account-link" href="/account?returnTo=%2Fcommunity">LOG IN TO PUBLISH</a>
         <button class="community-button community-button--quiet" id="community-my-items" type="button" hidden>MY ITEMS</button>
