@@ -280,8 +280,9 @@ function scheduleKeyboardNote(context, output, instrumentId, patch, note, start,
     ? (rawTriangleB > rawSawB && rawTriangleB > rawSquareB ? 'triangle' : rawSquareB > rawSawB ? 'pulse' : 'saw')
     : firstWave);
   const shape = firstValue(patch, ['osc1Shape'], undefined);
+  const secondShape = firstValue(patch, ['osc2Shape'], undefined);
   const wave1 = waveType(firstWave, shape, 'sawtooth');
-  const wave2 = waveType(secondWave, firstWave, wave1);
+  const wave2 = waveType(secondWave, secondShape, wave1);
   const osc1Level = normalized(firstValue(patch, ['osc1Level', 'dds1Level', 'mix1'], 0.8), 0.8);
   const osc2Level = normalized(firstValue(patch, ['osc2Level', 'dds2Level', 'mix2'], 0.42), 0.42);
   const detuneValue = Number(firstValue(patch, ['osc2Detune', 'osc2FineCents', 'osc2Tune'], 7));
