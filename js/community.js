@@ -85,10 +85,10 @@ function extractInstrumentPreset(raw, instrumentId) {
         || !isObject(data.filterEnv) || !isObject(data.ampEnv) || !isObject(data.mod1) || !isObject(data.mod2)) throw new Error('This is not a Sub 37 program.');
       break;
     case 'prophet-10':
-      if (!Array.isArray(data.layers) || data.layers.length !== 2 || data.layers.some((layer) => !isObject(layer) || !Array.isArray(layer.values) || layer.values.length !== 67 || !isObject(layer.extras))) throw new Error('A Prophet-10 program needs two complete 67-parameter layers.');
+      if (!Array.isArray(data.layers) || data.layers.length !== 2 || data.layers.some((layer) => !isObject(layer) || !Array.isArray(layer.values) || layer.values.length !== 67 || !isObject(layer.extras)) || !isObject(data.globals)) throw new Error('A Prophet-10 program needs two complete 67-parameter layers and global settings.');
       break;
     case 'nord-c2d':
-      if (!Array.isArray(data.manuals) || data.manuals.length !== 2 || data.manuals.some((manual) => !isObject(manual) || !Array.isArray(manual.drawbars) || manual.drawbars.length !== 9 || !isObject(manual.banks))) throw new Error('This is not a complete Nord C2D registration.');
+      if (!Array.isArray(data.manuals) || data.manuals.length !== 2 || data.manuals.some((manual) => !isObject(manual) || !Array.isArray(manual.drawbars) || manual.drawbars.length !== 9 || !isObject(manual.banks) || !['A','B'].every((bank) => Array.isArray(manual.banks[bank]) && manual.banks[bank].length === 9))) throw new Error('This is not a complete Nord C2D registration.');
       break;
     case 'ms-20':
       if (!isObject(data.params) || !Array.isArray(data.cables)) throw new Error('This is not an MS-20 patch (expected parameters and patch cables).');
