@@ -526,3 +526,166 @@ html[data-theme="light"] .community-card__author:focus-visible { color:#087f9f; 
 #community-publish-panel[hidden] {
   display:none !important;
 }
+
+
+/* Community reporting and moderation */
+.community-account__copy {
+  display:grid;
+  gap:5px;
+  min-width:0;
+}
+.community-moderation-status {
+  margin:0;
+  color:var(--faint);
+  font-size:10px;
+  line-height:1.55;
+}
+.community-moderation-status:empty { display:none; }
+.community-button--report {
+  color:var(--muted);
+  border-color:rgba(255,183,94,.22);
+}
+.community-button--report:hover,
+.community-button--report:focus-visible {
+  color:#ffc27d;
+  border-color:rgba(255,183,94,.58);
+}
+.community-moderation-panel {
+  margin:22px 0 8px;
+  padding:22px;
+  border:1px solid rgba(255,183,94,.3);
+  border-radius:var(--oi-panel-radius);
+  background:var(--oi-panel-background);
+  box-shadow:var(--oi-panel-shadow);
+}
+.community-moderation-panel > p { color:var(--muted); font-size:11px; line-height:1.6; }
+.community-moderation-list {
+  display:grid;
+  gap:12px;
+  margin-top:15px;
+}
+.community-moderation-card {
+  min-width:0;
+  padding:15px;
+  border:1px solid var(--oi-panel-border);
+  border-radius:10px;
+  background:var(--oi-panel-background);
+}
+.community-moderation-card h3 {
+  margin:0 0 7px;
+  color:var(--ink);
+  font-size:13px;
+  font-weight:600;
+}
+.community-moderation-card p {
+  margin:0 0 8px;
+  color:var(--muted);
+  font-size:10px;
+  line-height:1.65;
+  overflow-wrap:anywhere;
+}
+.community-moderation-meta { color:var(--faint) !important; }
+.community-moderation-details {
+  padding:9px 11px;
+  border-left:2px solid rgba(255,183,94,.42);
+  background:rgba(255,183,94,.045);
+}
+.community-moderation-actions {
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:12px;
+}
+.community-moderation-actions .community-button {
+  min-height:32px;
+  font-size:8px;
+}
+.community-moderation-policy {
+  margin:14px 0 0;
+  color:var(--faint);
+  font-size:10px;
+  line-height:1.6;
+}
+.community-moderation-hidden {
+  display:inline-flex;
+  align-self:flex-start;
+  margin:0 0 9px;
+  padding:4px 7px;
+  border:1px solid rgba(255,183,94,.32);
+  border-radius:5px;
+  color:#ffc27d;
+  background:rgba(255,159,10,.07);
+  font:8px/1.4 var(--font-mono);
+  letter-spacing:.06em;
+}
+.community-report-dialog {
+  width:min(520px,calc(100vw - 32px));
+  max-width:520px;
+  max-height:min(88vh,760px);
+  padding:0;
+  overflow:auto;
+  border:1px solid var(--oi-panel-border);
+  border-radius:var(--oi-panel-radius);
+  color:var(--ink);
+  background:var(--oi-panel-background);
+  box-shadow:0 24px 80px rgba(0,0,0,.48);
+}
+.community-report-dialog::backdrop {
+  background:rgba(4,7,11,.78);
+  backdrop-filter:blur(5px);
+}
+.community-report-panel {
+  display:grid;
+  gap:16px;
+  padding:24px;
+}
+.community-report-panel .community-section-heading { margin-bottom:0; }
+.community-report-panel h2 { margin:0; font-size:20px; }
+.community-report-copy {
+  margin:0;
+  color:var(--muted);
+  font-size:11px;
+  line-height:1.65;
+}
+.community-report-panel label {
+  display:grid;
+  gap:7px;
+}
+.community-report-panel label > span {
+  color:var(--faint);
+  font:9px/1.4 var(--font-mono);
+  letter-spacing:.1em;
+}
+.community-report-panel textarea {
+  min-height:90px;
+  resize:vertical;
+}
+#community-report-status {
+  min-height:16px;
+  margin:0;
+  color:var(--muted);
+  font-size:11px;
+  line-height:1.55;
+}
+#community-report-status.is-error { color:#ff9a9a; }
+#community-moderation-queue-status {
+  margin:12px 0 0;
+  color:var(--muted);
+  font-size:10px;
+}
+#community-moderation-queue-status.is-error { color:#ff9a9a; }
+.community-moderation-panel[hidden] { display:none !important; }
+
+html[data-theme="light"] .community-moderation-hidden {
+  color:#8b5100;
+  background:rgba(255,159,10,.09);
+}
+html[data-theme="light"] .community-report-dialog::backdrop {
+  background:rgba(18,28,40,.52);
+}
+@media (max-width:560px) {
+  .community-report-panel { padding:19px; }
+  .community-moderation-panel { padding:16px; }
+  .community-moderation-actions { display:grid; grid-template-columns:1fr; }
+  .community-moderation-actions .community-button { width:100%; }
+}
