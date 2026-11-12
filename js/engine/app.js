@@ -21,7 +21,7 @@ import { PitchWheel, ModWheel } from '../../ui/Wheel.js';
 import { Keyboard } from '../../ui/Keyboard.js';
 import { OLEDDisplay } from '../../ui/OLEDDisplay.js';
 import { PRESETS } from '../data/presets.js';
-import { consumeCommunityInstrumentPreset } from '../shared/communityPreset.js';
+import { consumeCommunityInstrumentPreset, createCommunityShareButton } from '../shared/communityPreset.js';
 
 const MIDI_NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 function midiNoteToName(midi) {
@@ -199,6 +199,15 @@ class App {
     row2.appendChild(saveBtn);
     row2.appendChild(exportBtn);
     row2.appendChild(importBtn);
+    createCommunityShareButton(row2, {
+      instrumentId: 'little-phatty',
+      className: 'lp-btn',
+      getData: () => {
+        if (!this.engine.started) throw new Error('Power on the Little Phatty before sharing its current sound.');
+        return this.presetManager.captureCurrentPatch();
+      },
+      getTitle: () => this.presetManager._lastAppliedPatch?.name || 'Little Phatty patch',
+    });
 
     wrap.appendChild(row1);
     wrap.appendChild(select);
