@@ -2,6 +2,7 @@ import { WorkletEngine } from './shared/workletEngine.js';
 import { PresetStore, num } from './shared/presetStore.js';
 import { el, section, knob, select, display, performance, power, presetBar, footer } from './shared/panel.js';
 import { MELLOTRON_PRESETS } from './data/mellotronPresets.js';
+import { consumeCommunityInstrumentPreset, createCommunityShareButton } from './shared/communityPreset.js';
 
 const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 const NOTES = Array.from({ length: 47 }, (_, i) => {
@@ -53,6 +54,12 @@ class MellotronApp {
     } });
     power('mellotron-power', () => this.engine.start(), () => { this.perf.flushPending(); this.display.set('M400 READY', 'TAPE TRANSPORT ENGAGED'); });
     this.presets.load('f:0');
+    const community = consumeCommunityInstrumentPreset('mellotron-m400', validate);
+    if (community) {
+      this.patch = community.data;
+      this.refresh();
+      this.display.set('COMMUNITY FRAME', community.title);
+    }
   }
   set(key, value) {
     this.patch[key] = value;
@@ -89,6 +96,10 @@ class MellotronApp {
     this.ui.pitch = knob(ck, { label: 'PITCH', min: -1, max: 1, value: DEF.pitch, formatValue: (v) => `${v >= 0 ? '+' : ''}${(v * 8).toFixed(1)}%`, onChange: (v) => this.set('pitch', v) });
     const memory = section(rows, 'FRAME MEMORY', 'OVERTURE TAPE REGISTRATIONS');
     this.presets = presetBar(memory.body, { factory: MELLOTRON_PRESETS, store: this.store, display: this.display, filename: 'mellotron-m400-frame', panic: () => this.perf.allOff(), apply: (data, name) => { this.patch = validate(data); this.refresh(); this.display.set(`FRAME  ${name}`, 'TAPE HEAD READY'); }, capture: () => ({ ...this.patch }) });
+    createCommunityShareButton(memory.body, {
+      instrumentId: 'mellotron-m400', className: 'pn-btn',
+      getData: () => validate(this.patch), getTitle: () => 'Mellotron M400 frame',
+    });
     footer(this.shell, 'M400 · 47 ON-SCREEN NOTES · G2–F6 · 35-KEY TAPE RANGE · THREE SELECTABLE TAPE TRACKS · FINITE 8-SECOND REPLAY · ESC PANIC');
     this.updateTapeReadout();
   }
