@@ -189,8 +189,8 @@ function scheduleOrganVoice(context, destination, frequency, start, stop, envelo
   partials.forEach((ratio, index) => {
     scheduleOscillator(context, sum, frequency * ratio, 'sine', start, stop, 0, levels[index] * velocity);
   });
-  envelope.connect(sum);
 }
+
 
 function scheduleKeyboardNote(context, output, instrumentId, patch, note, start, gate, velocity, controls) {
   const frequency = midiFrequency(note);
