@@ -158,15 +158,11 @@ The labs run directly in the browser. Audio starts in response to a user action 
 
 ## Community patch library
 
-The Community page is a shared catalogue for OMNI patches and supported instrument presets. Anyone can browse public submissions without signing in. The page supports search across titles, descriptions and tags; filtering by OMNI patches or instrument presets; and sorting by newest or download count. Each item shows its author and download count, with an optional audio preview.
+The Community page is a shared catalogue for OMNI patches and instrument presets from every emulator in the Overture library. Anyone can browse public submissions without signing in. The page supports search across titles, descriptions and tags; filtering by OMNI patches or instrument presets; sorting by newest or download count; author profiles; optional audio previews; and public or unlisted sharing.
 
-OMNI patches can be auditioned directly in the browser when they contain a keyboard or running sequencer, opened in the OMNI workspace, downloaded as JSON, and shared through a direct link. Instrument presets can be opened in their corresponding emulator, downloaded, and shared. An uploaded audio preview can be played when one is available.
+Each emulator's **COMMUNITY** control captures its current validated patch or performance and opens the Community publishing form with the correct instrument selected. The exchange preserves instrument-native data, including dual-layer and multi-voice programs, organ registrations, sequencer patterns, and multi-part performances. Imported presets are passed through the destination emulator's own validator before being applied.
 
-Publishing requires an Overture account. Owners can publish, edit, or delete their own items, choose public or unlisted visibility, and attach an optional audio preview of up to 8 MB. Public items appear in discovery; unlisted items are reached through their direct links.
-
-The current instrument-preset importers accept **Little Phatty user-preset JSON, Korg MS-20 JSON, Roland Juno-106 JSON, Yamaha DX7 JSON, and Roland TR-808 JSON**. Each format is validated and loaded through the corresponding emulator's existing preset code. Prophet-10 SysEx files, Sub 37 panel snapshots, and Nord C2D registrations are not supported by the Community importer yet.
-
-Community data and preview uploads use Supabase. See [the Supabase setup guide](supabase/README.md) for the database migrations, authentication providers, storage policies, and browser configuration. Never put a service-role key in client-side code or publish private recordings as public audio previews.
+Community items can be auditioned where a native browser preview is available, opened in their corresponding emulator, downloaded as JSON, and shared through a direct link.
 
 ## Overture Accounts
 
