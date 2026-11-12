@@ -308,8 +308,8 @@ test('Community preset exchange covers every library emulator and its native pat
   assert.match(helper, /createCommunityShareButton/);
   assert.match(helper, /consumeCommunityInstrumentPreset/);
   assert.match(migration, /record_type/);
-  assert.match(migration, /grant update \\(record_type, instrument_id/);
-  assert.doesNotMatch(migration, /grant update on public\\.community_patches to authenticated/i);
+  assert.ok(migration.includes('grant update (record_type, instrument_id'));
+  assert.doesNotMatch(migration, /grant update on public\.community_patches to authenticated/i);
   for (const source of sources) {
     assert.match(source, /createCommunityShareButton/, 'each emulator should expose a one-click Community share action');
     assert.match(source, /consumeCommunityInstrumentPreset/, 'each emulator should accept Community patch imports');
