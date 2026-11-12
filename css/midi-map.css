@@ -258,3 +258,152 @@ html[data-theme="light"] body.omni-page .oi-midi-pane {
 @media (prefers-reduced-motion:reduce) {
   body.omni-page .oi-midi-pane {animation:none;transform:translate(-50%,-50%);opacity:1}
 }
+
+
+
+/* -------------------------------------------------------------------------
+   Shared Overture Community action
+   Used by every emulator so preset sharing looks like a deliberate part of
+   the instrument UI rather than an unstyled browser-default button.
+   ------------------------------------------------------------------------- */
+button.oi-community-share {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  position: relative !important;
+  display: inline-flex !important;
+  flex: 0 0 auto !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  min-width: 0 !important;
+  min-height: 34px !important;
+  max-width: 100%;
+  margin: 2px 0 !important;
+  padding: 7px 13px !important;
+  overflow: hidden;
+  border: 1px solid rgba(255, 183, 94, .48) !important;
+  border-radius: 7px !important;
+  background:
+    linear-gradient(180deg, rgba(255, 196, 125, .17), rgba(255, 159, 10, .075)) !important;
+  color: #ffd5a2 !important;
+  font-family: 'Inter Variable', Inter, Figtree, sans-serif !important;
+  font-size: 9px !important;
+  font-weight: 800 !important;
+  line-height: 1 !important;
+  letter-spacing: .13em !important;
+  text-align: center !important;
+  text-decoration: none !important;
+  text-transform: uppercase !important;
+  white-space: nowrap !important;
+  text-shadow: 0 0 12px rgba(255, 170, 72, .2);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .09),
+    inset 0 -1px 0 rgba(0, 0, 0, .18),
+    0 2px 7px rgba(0, 0, 0, .22),
+    0 0 0 1px rgba(0, 0, 0, .12);
+  cursor: pointer !important;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    color .16s ease,
+    border-color .16s ease,
+    background .16s ease,
+    box-shadow .16s ease,
+    transform .16s ease !important;
+}
+
+button.oi-community-share::before {
+  content: '↗';
+  display: inline-grid;
+  flex: 0 0 17px;
+  width: 17px;
+  height: 17px;
+  place-items: center;
+  border: 1px solid rgba(255, 198, 132, .48);
+  border-radius: 50%;
+  background: rgba(255, 176, 83, .11);
+  color: #ffd39a;
+  font-family: 'Inter Variable', Inter, sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0;
+  text-shadow: 0 0 8px rgba(255, 184, 102, .35);
+  transition: transform .16s ease, background .16s ease, border-color .16s ease;
+}
+
+button.oi-community-share:hover:not(:disabled) {
+  border-color: rgba(255, 199, 133, .82) !important;
+  background:
+    linear-gradient(180deg, rgba(255, 203, 145, .25), rgba(255, 159, 10, .13)) !important;
+  color: #fff0dc !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .14),
+    0 3px 12px rgba(0, 0, 0, .26),
+    0 0 0 1px rgba(255, 176, 83, .09),
+    0 0 17px rgba(255, 159, 10, .12);
+  transform: translateY(-1px);
+}
+
+button.oi-community-share:hover:not(:disabled)::before {
+  border-color: rgba(255, 217, 171, .76);
+  background: rgba(255, 186, 103, .2);
+  transform: translate(1px, -1px);
+}
+
+button.oi-community-share:active:not(:disabled) {
+  background: linear-gradient(180deg, rgba(255, 176, 83, .13), rgba(255, 159, 10, .08)) !important;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, .28);
+  transform: translateY(0);
+}
+
+button.oi-community-share:focus-visible {
+  outline: 2px solid #7de4ff !important;
+  outline-offset: 3px !important;
+}
+
+button.oi-community-share:disabled {
+  opacity: .48;
+  cursor: not-allowed !important;
+  filter: saturate(.55);
+}
+
+html[data-theme="light"] button.oi-community-share {
+  border-color: rgba(151, 91, 23, .36) !important;
+  background: linear-gradient(180deg, rgba(255, 220, 177, .95), rgba(255, 202, 139, .9)) !important;
+  color: #56330e !important;
+  text-shadow: none;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .9),
+    inset 0 -1px 0 rgba(149, 88, 20, .08),
+    0 2px 6px rgba(64, 77, 92, .13);
+}
+
+html[data-theme="light"] button.oi-community-share::before {
+  border-color: rgba(151, 91, 23, .32);
+  background: rgba(255, 255, 255, .48);
+  color: #71420d;
+  text-shadow: none;
+}
+
+html[data-theme="light"] button.oi-community-share:hover:not(:disabled) {
+  border-color: rgba(151, 91, 23, .58) !important;
+  background: linear-gradient(180deg, #ffe6c6, #ffd19c) !important;
+  color: #3f270e !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .95),
+    0 4px 12px rgba(64, 77, 92, .16),
+    0 0 0 1px rgba(151, 91, 23, .07);
+}
+
+html[data-theme="light"] button.oi-community-share:hover:not(:disabled)::before {
+  border-color: rgba(151, 91, 23, .52);
+  background: rgba(255, 255, 255, .68);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button.oi-community-share,
+  button.oi-community-share::before {
+    transition: none !important;
+  }
+}
