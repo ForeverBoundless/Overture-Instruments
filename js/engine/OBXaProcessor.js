@@ -11,8 +11,21 @@ const GLOBAL_KEYS=new Set(['mode','voiceCount','splitPoint','unison','unisonDetu
 class XaVoice{
  constructor(i){this.i=i;this.note=-1;this.inputNote=-1;this.pitch=60;this.targetPitch=60;this.glideAccumulator=0;this.hasPlayed=false;this.layer=0;this.active=false;this.gate=false;this.order=0;this.phase1=Math.random();this.phase2=Math.random();this.amp=0;this.filterEnv=0;this.ampStage='idle';this.filterStage='idle';this.ic1a=0;this.ic2a=0;this.ic1b=0;this.ic2b=0;this.pan=0;this.vel=.8;this.rand=(Math.random()-.5)*.0005;this.tune1=(Math.random()-.5)*.055;this.tune2=(Math.random()-.5)*.085;this.filterTrim=(Math.random()-.5)*.018;this.ampTrim=.975+Math.random()*.05;this.driftPhase=Math.random()*Math.PI*2;this.driftRate=.035+Math.random()*.045;this.noiseSeed=((i+1)*17117)|0;this.pink=[0,0,0,0,0,0,0];this.glide=0;}
 }
+function seedPreviewMessages(processor, messages, dispatch) {
+  if (!Array.isArray(messages)) return;
+  messages.forEach((message) => {
+    if (message?.t === 'noteOn' || message?.t === 'noteOff') {
+      processor.scheduled.push({ ...message });
+    } else {
+      dispatch.call(processor, message);
+    }
+  });
+  processor.scheduled.sort((a, b) => a.frame - b.frame);
+}
+
 class OBXaProcessor extends AudioWorkletProcessor{
- constructor(){super();this.p={...DEFAULT};this.pB={...DEFAULT};this.voices=Array.from({length:8},(_,i)=>new XaVoice(i));this.order=0;this.bend=0;this.mod=0;this.sustain=false;this.hold=false;this.heldNotes=new Map();this.scheduled=[];this.lfos=[{phase:0,hold:0},{phase:0,hold:0}];this.chordMemory=[[],[]];this.port.onmessage=e=>this.message(e.data);}
+ constructor(options = {}){super();this.p={...DEFAULT};this.pB={...DEFAULT};this.voices=Array.from({length:8},(_,i)=>new XaVoice(i));this.order=0;this.bend=0;this.mod=0;this.sustain=false;this.hold=false;this.heldNotes=new Map();this.scheduled=[];this.lfos=[{phase:0,hold:0},{phase:0,hold:0}];this.chordMemory=[[],[]];this.port.onmessage=e=>this.message(e.data);
+    seedPreviewMessages(this, options?.processorOptions?.messages, this.message);}
  message(m){
     if (m?.t === '__preview_flush') { this.port.postMessage({ t: '__preview_flush_ack', id: m.id }); return; }
 if((m.t==='noteOn'||m.t==='noteOff')&&Number.isFinite(m.frame)&&m.frame>currentFrame){this.scheduled.push(m);this.scheduled.sort((a,b)=>a.frame-b.frame);return;}this.dispatch(m);}
