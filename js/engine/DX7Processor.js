@@ -29,8 +29,20 @@ class Voice {
   constructor() { this.note = -1; this.vel = 1; this.gate = false; this.order = 0; this.ops = Array.from({ length: 6 }, () => new OpState()); this.active = false; this.pitch = 60; }
 }
 
+function seedPreviewMessages(processor, messages, dispatch) {
+  if (!Array.isArray(messages)) return;
+  messages.forEach((message) => {
+    if (message?.t === 'noteOn' || message?.t === 'noteOff') {
+      processor.scheduled.push({ ...message });
+    } else {
+      dispatch.call(processor, message);
+    }
+  });
+  processor.scheduled.sort((a, b) => a.frame - b.frame);
+}
+
 class DX7Processor extends AudioWorkletProcessor {
-  constructor() {
+  constructor(options = {}) {
     super();
     this.sr = sampleRate;
     this.patch = null;
@@ -42,6 +54,7 @@ class DX7Processor extends AudioWorkletProcessor {
     this.volume = 0.7; this.gain = 0;
     this.scheduled = [];
     this.port.onmessage = (e) => this._msg(e.data);
+    seedPreviewMessages(this, options?.processorOptions?.messages, this._msg);
   }
 
   _msg(m) {
