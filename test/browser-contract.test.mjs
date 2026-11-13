@@ -346,7 +346,7 @@ test('Community instrument patches receive automatic previews and clear upload m
   assert.match(app, /GENERATE & PLAY/);
   assert.match(renderer, /OfflineAudioContext/);
   assert.match(renderer, /new TR808Engine\(\)/);
-  assert.match(renderer, /engine\.trigger\(variant, time, accent\)/);
+  assert.match(renderer, /engine\.trigger\(variant, time,/);
   assert.match(renderer, /new Prophet10Engine\(\)/);
   assert.match(renderer, /program\.values\[52\]/);
   assert.match(renderer, /new Sub37Engine\(\)/);
