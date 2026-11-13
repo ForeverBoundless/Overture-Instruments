@@ -57,11 +57,11 @@ export class Sub37Engine {
     ];
   }
 
-  async start() {
+  async start(context = null) {
     if (this.started) return;
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-    this.ctx = new AudioContextClass();
-    if (this.ctx.state === 'suspended') await this.ctx.resume();
+    this.ctx = context || new AudioContextClass();
+    if (!context && this.ctx.state === 'suspended') await this.ctx.resume();
 
     this.master = this.ctx.createGain();
     this.master.gain.value = 0.24;
@@ -294,31 +294,31 @@ export class Sub37Engine {
     this._voiceFromHeld(false);
   }
 
-  noteOn(note, velocity = 0.9) {
+  noteOn(note, velocity = 0.9, when = this.ctx.currentTime) {
     if (!this.started) return;
     const prior = this._held.length;
     this._held = this._held.filter((item) => item.note !== note);
     this._held.push({ note, velocity });
     this._sustained.delete(note);
-    this._voiceFromHeld(prior > 0, velocity);
+    this._voiceFromHeld(prior > 0, velocity, when);
   }
 
-  noteOff(note) {
+  noteOff(note, when = this.ctx.currentTime) {
     if (!this.started) return;
     if (this._sustainDown) {
       this._sustained.add(note);
       return;
     }
-    this._release(note);
+    this._release(note, when);
   }
 
-  _release(note) {
+  _release(note, when = this.ctx.currentTime) {
     this._held = this._held.filter((item) => item.note !== note);
     if (!this._held.length) {
-      this.voice.noteOff();
+      this.voice.noteOff(when);
       return;
     }
-    this._voiceFromHeld(true);
+    this._voiceFromHeld(true, 0.9, when);
   }
 
   setSustain(down) {
@@ -335,7 +335,7 @@ export class Sub37Engine {
     if (this.voice) this.voice.noteOff();
   }
 
-  _voiceFromHeld(legato, velocity = 0.9) {
+  _voiceFromHeld(legato, velocity = 0.9, when = this.ctx.currentTime) {
     if (!this.voice || !this._held.length) return;
     const held = this.duoMode ? this._held.slice(-2) : [this._held[this._held.length - 1]];
     const a = held[0];
@@ -348,14 +348,14 @@ export class Sub37Engine {
     const tc = glideDuration ? this.glide.timeConstantFor(glideDuration) : 0;
     this.voice._currentMidiNote = midiA;
     this.voice._currentFreq = f1;
-    this.voice.osc1.setFrequency(f1, tc);
-    this.voice.osc2.setFrequency(f2, tc);
-    this.subOsc.frequency.setTargetAtTime(Math.max(10, f1 * Math.pow(2, this.subOctave)), this.ctx.currentTime, Math.max(tc, 0.002));
-    this.voice._updateCutoff(0.01);
+    this.voice.osc1.setFrequency(f1, tc, when);
+    this.voice.osc2.setFrequency(f2, tc, when);
+    this.subOsc.frequency.setTargetAtTime(Math.max(10, f1 * Math.pow(2, this.subOctave)), when, Math.max(tc, 0.002));
+    this.voice._updateCutoff(0.01, when);
     if (!legato || !this.legato) {
       this.lfos.forEach((lfo) => lfo.retriggerNow());
-      this.voice.ampEnv.triggerAttack(velocity);
-      this.voice.filterEnv.triggerAttack(velocity);
+      this.voice.ampEnv.triggerAttack(velocity, when);
+      this.voice.filterEnv.triggerAttack(velocity, when);
     }
   }
 
