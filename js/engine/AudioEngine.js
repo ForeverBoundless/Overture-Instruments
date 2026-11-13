@@ -217,7 +217,7 @@ export class AudioEngine {
       // does NOT glide in, exactly as specified. A fresh trigger is also
       // the correct moment to retrigger the LFO's phase/fade-in, if the
       // LFO's retrigger mode is enabled (no-ops otherwise).
-      this.lfos.main?.retriggerNow();
+      this.lfos.main?.retriggerNow(when);
       this.voice.noteOn(noteName, velocity, 0, this._octaveShift, this._semitoneShift, when);
     } else {
       // Legato: another key was already down when this one was pressed, so
