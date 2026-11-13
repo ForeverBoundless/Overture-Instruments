@@ -45,11 +45,11 @@ export class TR808Engine {
     this.onStep = null; this._timer = null; this._noise = null; this.openHat = null;
   }
 
-  async start() {
+  async start(context = null) {
     if (this.started) return;
     const AC = window.AudioContext || window.webkitAudioContext;
-    this.ctx = new AC({ latencyHint: 'interactive' });
-    if (this.ctx.state === 'suspended') await this.ctx.resume();
+    this.ctx = context || new AC({ latencyHint: 'interactive' });
+    if (!context && this.ctx.state === 'suspended') await this.ctx.resume();
     this.master = this.ctx.createGain(); this.master.gain.value = this.masterLevel;
     this.comp = this.ctx.createDynamicsCompressor(); this.comp.threshold.value = -6; this.comp.ratio.value = 6; this.comp.attack.value = 0.002; this.comp.release.value = 0.12;
     this.master.connect(this.comp); this.comp.connect(this.ctx.destination);
