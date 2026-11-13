@@ -73,7 +73,7 @@ test('Hohner D6 and Oberheim OB-Xa are complete first-class emulator entries', a
   assert.match(obEngine, /width=clamp\(\.5-p\.pulseWidth\*\.45/);
   assert.doesNotMatch(obEngine, /lfoVca/);
   assert.match(obPage, /Oberheim OB-Xa from Overture Instruments/);
-  assert.match(worker, /overture-shell-v71/);
+  assert.match(worker, /overture-shell-v72/);
   assert.match(worker, /hohner-d6/);
   assert.match(worker, /ob-xa/);
 });
@@ -355,7 +355,7 @@ test('Community instrument patches receive automatic previews and clear upload m
   assert.match(page, /Inappropriate, abusive, hateful, sexual, threatening, or infringing audio will be removed/);
   assert.match(css, /community-warning-tooltip/);
   assert.match(css, /\.community-warning-wrap:focus-within/);
-  assert.match(worker, /overture-shell-v71/);
+  assert.match(worker, /overture-shell-v72/);
   assert.match(worker, /instrumentPreview\.js/);
   assert.match(worker, /20261112-auto-preview-r1/);
 });
@@ -389,7 +389,7 @@ test('Community reports, moderator review, strike escalation and protected accou
   assert.match(migration, /community_can_publish/);
   assert.match(css, /community-report-dialog/);
   assert.match(css, /community-moderation-actions/);
-  assert.match(worker, /overture-shell-v71/);
+  assert.match(worker, /overture-shell-v72/);
   assert.match(worker, /20261112-community-moderation-r1/);
 });
 
