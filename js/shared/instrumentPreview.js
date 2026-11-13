@@ -256,9 +256,6 @@ async function renderTR808(context, patch) {
 }
 
 async function renderProphet10(context, patch) {
-  const engine = new Prophet10Engine();
-  await engine.start(context);
-
   const programs = patch.layers.map((program) => ({
     values: program.values,
     extras: {
@@ -268,25 +265,26 @@ async function renderProphet10(context, patch) {
       polyUnison: !!program.extras.polyUnison && !program.values[52],
     },
   }));
-  engine.loadProgram(0, programs[0].values, programs[0].extras);
   const layerState = patch.layers[0].extras || {};
   const mode = ['stack', 'split'].includes(layerState.layerMode) ? layerState.layerMode : 'normal';
-  if (mode !== 'normal') engine.loadProgram(1, programs[1].values, programs[1].extras);
   const balance = clamp(layerState.balance ?? 0.5, 0, 1);
   const volumes = mode === 'normal'
     ? [1, 1]
     : [Math.min(1, (1 - balance) * 2), Math.min(1, balance * 2)];
-  engine.setMode(mode, layerState.splitPoint ?? 60, volumes);
   const globals = patch.globals || {};
-  engine.setGlobals({
-    releaseMode: globals.releaseMode === 'rel' ? 'rel' : 'hold',
-    fiveVoice: !!globals.fiveVoice,
-    roundRobin: globals.voiceAlloc === 'rr',
-    qCompMode: globals.qCompMode === 'prg' ? 'prg' : 'vin',
-  });
-  engine.setTranspose(Number(globals.transpose) || 0);
-  engine.setVolume(0.72);
-  queueWorkletPhrase(engine, context);
+  const messages = [
+    { t: 'globals', releaseMode: globals.releaseMode === 'rel' ? 'rel' : 'hold',
+      fiveVoice: !!globals.fiveVoice, roundRobin: globals.voiceAlloc === 'rr',
+      qCompMode: globals.qCompMode === 'prg' ? 'prg' : 'vin' },
+    { t: 'mode', mode, splitPoint: layerState.splitPoint ?? 60, volumes },
+    { t: 'program', layer: 0, values: programs[0].values, extras: programs[0].extras },
+    ...(mode !== 'normal' ? [{ t: 'program', layer: 1, values: programs[1].values, extras: programs[1].extras }] : []),
+    { t: 'transpose', semis: Number(globals.transpose) || 0 },
+    { t: 'volume', value: 0.72 },
+    ...buildWorkletPhrase(context.sampleRate),
+  ];
+  const engine = new Prophet10Engine();
+  await engine.start(context, { messages });
   return render(context, engine);
 }
 
