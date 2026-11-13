@@ -47,15 +47,17 @@ export function postWorkletMessage(engine, message) {
   throw new TypeError('The preview engine is missing its AudioWorklet message port.');
 }
 
-function queueWorkletPhrase(engine, context, notes = MELODY, { startOffset = START_OFFSET, gate = NOTE_GATE, spacing = EIGHTH } = {}) {
+function buildWorkletPhrase(sampleRate, notes = MELODY, { startOffset = START_OFFSET, gate = NOTE_GATE, spacing = EIGHTH } = {}) {
+  const events = [];
   notes.forEach((note, index) => {
     const start = startOffset + index * spacing;
-    const frame = Math.round(start * context.sampleRate);
-    const offFrame = Math.round((start + gate) * context.sampleRate);
+    const frame = Math.round(start * sampleRate);
+    const offFrame = Math.round((start + gate) * sampleRate);
     const velocity = [0.78, 0.62, 0.7, 0.88][index % 4];
-    postWorkletMessage(engine, { t: 'noteOn', note, vel: velocity, frame });
-    postWorkletMessage(engine, { t: 'noteOff', note, frame: offFrame });
+    events.push({ t: 'noteOn', note, vel: velocity, frame });
+    events.push({ t: 'noteOff', note, frame: offFrame });
   });
+  return events;
 }
 
 function queueNativePhrase(engine, notes = MELODY, { startOffset = START_OFFSET, gate = NOTE_GATE, spacing = EIGHTH } = {}) {
@@ -286,20 +288,18 @@ async function renderWorklet(context, processorPath, processorName, patch, instr
   const workletOptions = { ...instrumentOptions };
   if (instrumentId === 'ms-20') workletOptions.inputs = 1;
 
+  const messages = instrumentId === 'ms-20'
+    ? [{ t: 'patch', patch: patch.params }, { t: 'cables', cables: patch.cables || [] }]
+    : [{ t: 'patch', patch }];
+  messages.push(...buildWorkletPhrase(context.sampleRate));
+
+  // AudioWorkletProcessor receives processorOptions in its constructor,
+  // before OfflineAudioContext starts advancing its render clock.
+  workletOptions.processorOptions = { messages };
   const engine = new WorkletEngine(new URL(processorPath, import.meta.url).href, processorName, workletOptions);
   await engine.start(context);
 
-  switch (instrumentId) {
-    case 'ms-20':
-      postWorkletMessage(engine, { t: 'patch', patch: patch.params });
-      postWorkletMessage(engine, { t: 'cables', cables: patch.cables || [] });
-      break;
-    default:
-      postWorkletMessage(engine, { t: 'patch', patch });
-      break;
-  }
   if (Number.isFinite(Number(instrumentOptions.volume))) engine.setVolume(Number(instrumentOptions.volume));
-  queueWorkletPhrase(engine, context);
   return render(context, engine);
 }
 
