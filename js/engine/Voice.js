@@ -128,16 +128,16 @@ export class Voice {
    * @param {number} [octaveShift=0] - applied semitone shift in whole octaves.
    * @param {number} [semitoneShift=0]
    */
-  noteOn(noteName, velocity = 1, glideTimeConstant = 0, octaveShift = 0, semitoneShift = 0) {
+  noteOn(noteName, velocity = 1, glideTimeConstant = 0, octaveShift = 0, semitoneShift = 0, when = this.ctx.currentTime) {
     const midi = noteNameToMidi(noteName) + octaveShift * 12 + semitoneShift;
     this._currentMidiNote = midi;
     const freq = midiToFreq(midi);
     this._currentFreq = freq;
 
-    this.osc1.setFrequency(freq * this._osc1RatioMultiplier(), glideTimeConstant);
-    this.osc2.setFrequency(freq * this._osc2RatioMultiplier(), glideTimeConstant);
+    this.osc1.setFrequency(freq * this._osc1RatioMultiplier(), glideTimeConstant, when);
+    this.osc2.setFrequency(freq * this._osc2RatioMultiplier(), glideTimeConstant, when);
 
-    this._updateCutoff(0.01);
+    this._updateCutoff(0.01, when);
 
     const velToFilterEnv = 1 - this._velocityToFilterEnv * (1 - velocity);
 
@@ -148,20 +148,20 @@ export class Voice {
     this.filterEnv.peak = originalPeak;
   }
 
-  noteOff() {
-    this.ampEnv.triggerRelease();
-    this.filterEnv.triggerRelease();
+  noteOff(when = this.ctx.currentTime) {
+    this.ampEnv.triggerRelease(when);
+    this.filterEnv.triggerRelease(when);
   }
 
   /** Immediately re-pitch the currently sounding voice (used for legato note changes without re-triggering envelopes). */
-  glideToNote(noteName, glideTimeConstant, octaveShift = 0, semitoneShift = 0) {
+  glideToNote(noteName, glideTimeConstant, octaveShift = 0, semitoneShift = 0, when = this.ctx.currentTime) {
     const midi = noteNameToMidi(noteName) + octaveShift * 12 + semitoneShift;
     this._currentMidiNote = midi;
     const freq = midiToFreq(midi);
     this._currentFreq = freq;
-    this.osc1.setFrequency(freq * this._osc1RatioMultiplier(), glideTimeConstant);
-    this.osc2.setFrequency(freq * this._osc2RatioMultiplier(), glideTimeConstant);
-    this._updateCutoff(0.01);
+    this.osc1.setFrequency(freq * this._osc1RatioMultiplier(), glideTimeConstant, when);
+    this.osc2.setFrequency(freq * this._osc2RatioMultiplier(), glideTimeConstant, when);
+    this._updateCutoff(0.01, when);
   }
 
   _osc1RatioMultiplier() {
@@ -194,12 +194,12 @@ export class Voice {
    * turning the Cutoff knob while a key-tracked note was held would drop
    * the tracking offset until the next note-on.
    */
-  _updateCutoff(glideSec = 0.01) {
+  _updateCutoff(glideSec = 0.01, when = this.ctx.currentTime) {
     const semitoneOffset = this._currentMidiNote - 60; // reference at C4
     const trackHz = this._keyTrackAmount === 0
       ? 0
       : this._baseCutoffHz * (Math.pow(2, (semitoneOffset * this._keyTrackAmount) / 12) - 1);
-    this.filter.setCutoff(this._baseCutoffHz + trackHz, glideSec);
+    this.filter.setCutoff(this._baseCutoffHz + trackHz, glideSec, when);
   }
 
   setBaseCutoff(hz) {
