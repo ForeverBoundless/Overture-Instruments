@@ -63,7 +63,7 @@
         <span class="site-brand__wordmark">OVERTURE INSTRUMENTS</span>
       </a>
       <nav class="main-nav" id="main-nav" aria-label="Main navigation">
-        <a href="/about">About</a><a href="/library">Instrument library</a><a href="/#omni">OMNI</a><a href="/community">Community</a><a href="/experiments" aria-current="page">Experiments</a>
+        <a href="/about">About</a><a href="/library">Library</a><a href="/#omni">OMNI</a><a href="/community">Community</a><a href="/experiments" aria-current="page">Experiments</a>
       </nav>
       <a class="header-account" href="/login" aria-label="Log in to your Overture account"><span class="header-account__label">LOG IN</span></a>
       <button class="menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="main-nav"><span></span><span></span></button>`;
