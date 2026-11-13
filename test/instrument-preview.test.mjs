@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { audioBufferToWav } from '../js/shared/instrumentPreview.js';
+import { Prophet10Engine } from '../js/engine/Prophet10Engine.js';
 
 test('Community preview WAV output has a valid PCM RIFF/WAVE header', async () => {
   const samples = [
@@ -70,4 +71,16 @@ test('Native synth engines expose offline contexts and scheduled note times', as
   assert.match(sub, /noteOn\(note, velocity = 0\.9, when = this\.ctx\.currentTime\)/);
   assert.match(nord, /noteOn\(manual, note, velocity = 0\.9, when = this\.ctx\.currentTime\)/);
   assert.match(drums, /trigger\(id, time = this\.ctx\?\.currentTime/);
+});
+
+test('Prophet-10 preview engine exposes the public post API used by shared worklet scheduling', () => {
+  const engine = new Prophet10Engine();
+  const messages = [];
+  engine.node = { port: { postMessage: (message) => messages.push(message) } };
+  const noteOn = { t: 'noteOn', note: 60, vel: 0.78, frame: 2646 };
+  const noteOff = { t: 'noteOff', note: 60, frame: 4263 };
+  assert.equal(typeof engine.post, 'function');
+  engine.post(noteOn);
+  engine.post(noteOff);
+  assert.deepEqual(messages, [noteOn, noteOff]);
 });

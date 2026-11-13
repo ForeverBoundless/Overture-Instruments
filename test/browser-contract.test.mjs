@@ -722,14 +722,24 @@ test('Shared emulator power cards support both span and div markup', async () =>
 });
 
 
-test('Granular lab creates its audio buffer only after Play has initialized audio', async () => {
-  const source = await readFile(new URL('../js/experiments/labs.js', import.meta.url), 'utf8');
+test('Granular lab initializes without AudioContext and its note keys start/stop pitch-mapped grains', async () => {
+  const [source, page, worker] = await Promise.all([
+    readFile(new URL('../js/experiments/labs.js', import.meta.url), 'utf8'),
+    readFile(new URL('../experiments/granular-lab.html', import.meta.url), 'utf8'),
+    readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
+  ]);
   const granular = source.slice(source.indexOf('class GranularLab'), source.indexOf('const LABS'));
   const constructor = granular.slice(granular.indexOf('  constructor(){'), granular.indexOf('  makeSourceData('));
-  assert.match(constructor, /this\.sourceData=this\.makeSourceData\(44100\)/);
+  assert.match(constructor, /this\.sourceData\s*=\s*this\.makeSourceData\(44100\)/);
   assert.doesNotMatch(constructor, /this\.makeSource\(/);
+  assert.match(granular, /makeSourceData\(sampleRate\)/);
   assert.match(granular, /start\(\)\{this\.makeSource\(\);this\.nextGrain=this\.audio\.ctx\.currentTime;\}/);
   assert.match(granular, /this\.buffer\?\.getChannelData\(0\)\|\|this\.sourceData/);
+  assert.match(granular, /this\.keyInput\(this\.controls,m=>this\.noteOn\(m\),m=>this\.noteOff\(m\)\)/);
+  assert.match(granular, /this\.noteRate=Math\.pow\(2,\(midi-45\)\/12\)/);
+  assert.match(granular, /source\.playbackRate\.value=\(this\.p\.reverse\?-1:1\)\*rate/);
+  assert.match(page, /labs\.js\?v=20261112-granular-note-r2/);
+  assert.match(worker, /labs\.js\?v=20261112-granular-note-r2/);
 });
 
 test('Community confirmation is required only when an audio file is attached', async () => {

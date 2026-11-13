@@ -69,6 +69,12 @@ export class Prophet10Engine {
     if (this.node) this.node.port.postMessage(message);
   }
 
+  /** Public message API shared with WorkletEngine and used by scheduled previews. */
+  post(message) {
+    if (!message || typeof message !== 'object') throw new TypeError('A worklet message object is required.');
+    this._post(message);
+  }
+
   _sendAll() {
     const s = this.state;
     this._post({ t: 'globals', ...s.globals });

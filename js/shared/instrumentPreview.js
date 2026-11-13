@@ -237,7 +237,7 @@ async function renderProphet10(context, patch) {
   return render(context);
 }
 
-async function renderWorklet(context, processorPath, processorName, patch, instrumentId) {
+async function renderWorklet(context, processorPath, processorName, patch, instrumentId, options = {}) {
   const options = instrumentId === 'ms-20' ? { inputs: 1 } : {};
   const engine = new WorkletEngine(new URL(processorPath, import.meta.url).href, processorName, options);
   await engine.start(context);
@@ -251,6 +251,7 @@ async function renderWorklet(context, processorPath, processorName, patch, instr
       engine.post({ t: 'patch', patch });
       break;
   }
+  if (Number.isFinite(Number(options.volume))) engine.setVolume(Number(options.volume));
   queueWorkletPhrase(engine, context);
   return render(context);
 }

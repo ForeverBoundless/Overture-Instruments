@@ -142,12 +142,70 @@ class Lab {
     plot.line(pts, GREEN, 1.5);
   }
   keyInput(parent, onDown, onUp) {
-    const keys = el('div', 'lab-keys', parent); const notes = [['C3', 48], ['D3', 50], ['E3', 52], ['F3', 53], ['G3', 55], ['A3', 57], ['B3', 59], ['C4', 60], ['D4', 62], ['E4', 64]];
-    notes.forEach(([n, m]) => { const b = el('button', 'lab-key', keys, n); b.type = 'button'; const down = (e) => { e.preventDefault(); b.classList.add('is-down'); onDown(m); }; const up = () => { if (!b.classList.contains('is-down')) return; b.classList.remove('is-down'); onUp(m); }; b.addEventListener('pointerdown', down); b.addEventListener('pointerup', up); b.addEventListener('pointerleave', up); b.addEventListener('pointercancel', up); b.addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && !e.repeat) down(e); }); b.addEventListener('keyup', (e) => { if (e.key === 'Enter' || e.key === ' ') up(); }); });
+    const keys = el('div', 'lab-keys', parent);
+    const notes = [['C3', 48], ['D3', 50], ['E3', 52], ['F3', 53], ['G3', 55], ['A3', 57], ['B3', 59], ['C4', 60], ['D4', 62], ['E4', 64]];
+    const buttonByNote = new Map();
+    notes.forEach(([name, midi]) => {
+      const button = el('button', 'lab-key', keys, name);
+      button.type = 'button';
+      button.setAttribute('aria-pressed', 'false');
+      buttonByNote.set(midi, button);
+      let pressed = false;
+      const down = (event) => {
+        event?.preventDefault?.();
+        if (pressed) return;
+        pressed = true;
+        button.classList.add('is-down');
+        button.setAttribute('aria-pressed', 'true');
+        onDown(midi);
+      };
+      const up = () => {
+        if (!pressed) return;
+        pressed = false;
+        button.classList.remove('is-down');
+        button.setAttribute('aria-pressed', 'false');
+        onUp(midi);
+      };
+      button.addEventListener('pointerdown', (event) => {
+        if (event.button !== 0) return;
+        try { button.setPointerCapture?.(event.pointerId); } catch { /* pointer capture may be unavailable */ }
+        down(event);
+      });
+      ['pointerup', 'pointercancel', 'lostpointercapture'].forEach((type) => button.addEventListener(type, up));
+      button.addEventListener('keydown', (event) => {
+        if ((event.key === 'Enter' || event.key === ' ') && !event.repeat) down(event);
+      });
+      button.addEventListener('keyup', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') up();
+      });
+      button.addEventListener('blur', up);
+    });
     el('p', 'lab-hint', parent, 'Keys A S D F G H J K L ; also play these notes.');
-    const map = { a: 48, s: 50, d: 52, f: 53, g: 55, h: 57, j: 59, k: 60, l: 62, ';': 64 }; const held = new Set();
-    window.addEventListener('keydown', (e) => { const m = map[e.key]; if (m === undefined || e.repeat || ['INPUT'].includes(e.target?.tagName)) return; held.add(m); onDown(m); });
-    window.addEventListener('keyup', (e) => { const m = map[e.key]; if (m === undefined || !held.has(m)) return; held.delete(m); onUp(m); });
+    const map = { a: 48, s: 50, d: 52, f: 53, g: 55, h: 57, j: 59, k: 60, l: 62, ';': 64 };
+    const held = new Set();
+    const typing = (target) => ['INPUT', 'TEXTAREA', 'SELECT'].includes(target?.tagName) || target?.isContentEditable;
+    const releaseAll = () => {
+      held.forEach((midi) => { onUp(midi); buttonByNote.get(midi)?.classList.remove('is-down'); buttonByNote.get(midi)?.setAttribute('aria-pressed', 'false'); });
+      held.clear();
+    };
+    window.addEventListener('keydown', (event) => {
+      const midi = map[event.key.toLowerCase()];
+      if (midi === undefined || event.repeat || typing(event.target) || held.has(midi)) return;
+      event.preventDefault();
+      held.add(midi);
+      buttonByNote.get(midi)?.classList.add('is-down');
+      buttonByNote.get(midi)?.setAttribute('aria-pressed', 'true');
+      onDown(midi);
+    });
+    window.addEventListener('keyup', (event) => {
+      const midi = map[event.key.toLowerCase()];
+      if (midi === undefined || !held.has(midi)) return;
+      held.delete(midi);
+      buttonByNote.get(midi)?.classList.remove('is-down');
+      buttonByNote.get(midi)?.setAttribute('aria-pressed', 'false');
+      onUp(midi);
+    });
+    window.addEventListener('blur', releaseAll);
   }
 }
 
@@ -452,14 +510,114 @@ class GranularLab extends Lab {
     this.sourceCanvas.style.display='none';
     this.wavePlot.canvas.style.touchAction='none';
     this.wavePlot.canvas.addEventListener('pointerdown',e=>{const rect=this.wavePlot.canvas.getBoundingClientRect();this.p.position=clamp((e.clientX-rect.left)/rect.width,0,1);this.positionControl.set(this.p.position);this.drawSource();});
-    this.keyInput(this.controls,m=>{this.p.position=(m-48)/16;this.positionControl.set(this.p.position);this.play();},()=>{});
-    this.makeSource();this.drawSource();
+    this.sourceData=this.makeSourceData(44100);
+    this.buffer=null;
+    this.heldNotes=[];
+    this.noteRate=1;
+    this.noteStartPromise=null;
+    this.noteStartToken=0;
+    this.noteStreamOwned=false;
+    this.keyInput(this.controls,m=>this.noteOn(m),m=>this.noteOff(m));
+    this.drawSource();
   }
-  makeSource(){const c=this.audio.ctx;const length=2*c.sampleRate;this.buffer=c.createBuffer(1,length,c.sampleRate);const data=this.buffer.getChannelData(0);for(let i=0;i<length;i++){const t=i/c.sampleRate;const env=.55+.25*Math.sin(2*Math.PI*.5*t);data[i]=env*(.55*Math.sin(2*Math.PI*110*t)+.25*Math.sin(2*Math.PI*221*t)+.12*Math.sin(2*Math.PI*331*t)+.08*Math.sin(2*Math.PI*503*t));}}
-  drawSource(){const b=this.wavePlot.frame([[0,'0 s'],[.5,'1 s'],[1,'2 s']],[[-1,'-1'],[0,'0'],[1,'1']]);const data=this.buffer?.getChannelData(0);if(!data)return;const pts=[];for(let i=0;i<1000;i++){const x=i/(999);pts.push([b.L+x*(b.R-b.L),b.B-(data[Math.floor(x*(data.length-1))]+1)/2*(b.B-b.T)]);}this.wavePlot.line(pts,ACCENT,1.5);const x=b.L+this.p.position*(b.R-b.L);this.wavePlot.line([[x,b.T],[x,b.B]],AMBER,2);}
-  launchGrain(){if(!this.audio.ctx||!this.buffer)return;const c=this.audio.ctx;const source=c.createBufferSource(),gain=c.createGain();source.buffer=this.buffer;source.playbackRate.value=(this.p.reverse?-1:1)*this.p.speed;const duration=this.p.size/this.p.speed;const start=this.p.position*this.buffer.duration;const offset=this.p.reverse?Math.max(0,start-duration*this.p.speed):start;const safeOffset=Math.min(this.buffer.duration-.01,Math.max(0,offset));const now=c.currentTime;gain.gain.setValueAtTime(0,now);gain.gain.linearRampToValueAtTime(.12,now+duration*.5);gain.gain.linearRampToValueAtTime(0,now+duration);source.connect(gain);gain.connect(this.audio.master);source.start(now,safeOffset,duration*this.p.speed);source.stop(now+duration+.01);source.onended=()=>{source.disconnect();gain.disconnect();};this.grains.push({at:now,duration});this.grains=this.grains.slice(-60);}
+  makeSourceData(sampleRate){
+    const length=2*sampleRate;
+    const data=new Float32Array(length);
+    for(let i=0;i<length;i++){
+      const t=i/sampleRate;
+      const env=.55+.25*Math.sin(2*Math.PI*.5*t);
+      data[i]=env*(.55*Math.sin(2*Math.PI*110*t)+.25*Math.sin(2*Math.PI*221*t)+.12*Math.sin(2*Math.PI*331*t)+.08*Math.sin(2*Math.PI*503*t));
+    }
+    return data;
+  }
+  makeSource(){
+    const context=this.audio.ctx;
+    if(!context)throw new Error('Start audio before creating the granular source buffer.');
+    const sampleRate=context.sampleRate;
+    const sourceData=this.sourceData||this.makeSourceData(44100);
+    const ratio=sampleRate/44100;
+    const length=Math.round(2*sampleRate);
+    this.buffer=context.createBuffer(1,length,sampleRate);
+    const channel=this.buffer.getChannelData(0);
+    for(let i=0;i<length;i++)channel[i]=sourceData[Math.min(sourceData.length-1,Math.round(i/ratio))]||0;
+  }
+  applySourcePosition(position){
+    this.p.position=clamp(position,0,1);
+    this.positionControl.set(this.p.position);
+    this.drawSource();
+  }
+  applyNote(midi){
+    this.noteRate=Math.pow(2,(midi-45)/12);
+    this.applySourcePosition((midi-48)/16);
+  }
+  async noteOn(midi){
+    this.heldNotes=this.heldNotes.filter(note=>note!==midi);
+    this.heldNotes.push(midi);
+    this.applyNote(midi);
+    if(this.playing||this.noteStartPromise)return;
+    const token=++this.noteStartToken;
+    this.noteStreamOwned=true;
+    const startPromise=(async()=>{
+      await this.audio.ensure();
+      if(token!==this.noteStartToken||!this.heldNotes.length)return;
+      if(this.playing){this.noteStreamOwned=false;return;}
+      this.audio.master.gain.setTargetAtTime(this.level,this.audio.ctx.currentTime,.02);
+      this.playing=true;
+      this.playBtn.textContent='PAUSE';
+      this.playBtn.classList.add('is-on');
+      this.start();
+      this.loop();
+    })();
+    this.noteStartPromise=startPromise;
+    try{await startPromise;}
+    catch(error){this.noteStreamOwned=false;this.playBtn.title=error?.message||'Could not start granular playback';}
+    finally{if(this.noteStartPromise===startPromise)this.noteStartPromise=null;}
+  }
+  noteOff(midi){
+    this.heldNotes=this.heldNotes.filter(note=>note!==midi);
+    const active=this.heldNotes[this.heldNotes.length-1];
+    if(active!==undefined){this.applyNote(active);return;}
+    this.noteRate=1;
+    if(this.noteStreamOwned){
+      this.noteStreamOwned=false;
+      this.noteStartToken++;
+      if(this.playing)this.stop();
+    }
+  }
+  drawSource(){
+    const b=this.wavePlot.frame([[0,'0 s'],[.5,'1 s'],[1,'2 s']],[[-1,'-1'],[0,'0'],[1,'1']]);
+    const data=this.buffer?.getChannelData(0)||this.sourceData;
+    if(!data)return;
+    const pts=[];
+    for(let i=0;i<1000;i++){const x=i/999;pts.push([b.L+x*(b.R-b.L),b.B-(data[Math.floor(x*(data.length-1))]+1)/2*(b.B-b.T)]);}
+    this.wavePlot.line(pts,ACCENT,1.5);
+    const x=b.L+this.p.position*(b.R-b.L);
+    this.wavePlot.line([[x,b.T],[x,b.B]],AMBER,2);
+  }
+  launchGrain(){
+    if(!this.audio.ctx||!this.buffer)return;
+    const context=this.audio.ctx;
+    const source=context.createBufferSource(),gain=context.createGain();
+    const rate=clamp(this.p.speed*this.noteRate,.0625,8);
+    source.buffer=this.buffer;
+    source.playbackRate.value=(this.p.reverse?-1:1)*rate;
+    const duration=this.p.size/rate;
+    const maxStart=Math.max(0,this.buffer.duration-this.p.size);
+    const start=clamp(this.p.position*maxStart,0,maxStart);
+    const offset=this.p.reverse?start+this.p.size:start;
+    const now=context.currentTime;
+    gain.gain.setValueAtTime(0,now);
+    gain.gain.linearRampToValueAtTime(.12,now+duration*.5);
+    gain.gain.linearRampToValueAtTime(0,now+duration);
+    source.connect(gain);gain.connect(this.audio.master);
+    source.start(now,offset,this.p.size);
+    source.stop(now+duration+.01);
+    source.onended=()=>{source.disconnect();gain.disconnect();};
+    this.grains.push({at:now,duration});
+    this.grains=this.grains.slice(-60);
+  }
   start(){this.makeSource();this.nextGrain=this.audio.ctx.currentTime;}
-  end(){}
+  end(){this.noteRate=1;}
   draw(){const now=this.audio.ctx.currentTime,interval=1/this.p.density;while(this.nextGrain<now+.05){this.launchGrain();this.nextGrain+=interval;}this.drawSource();const b=this.activity.frame([[0,'now'],[1,'recent']],[ [0,'0'],[1,'1'] ]);const pts=[];this.grains.forEach(g=>{const x=clamp(1-(now-g.at)/2,0,1);const y=Math.max(0,1-Math.abs(now-g.at-g.duration/2)/(g.duration/2));pts.push([b.L+x*(b.R-b.L),b.B-y*(b.B-b.T)]);});if(pts.length)this.activity.line(pts,GREEN,1.5);}
 }
 

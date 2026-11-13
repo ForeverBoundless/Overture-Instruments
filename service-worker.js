@@ -1,4 +1,4 @@
-const CACHE = 'overture-shell-v75';
+const CACHE = 'overture-shell-v76';
 const APP_SHELL = [
   '/account',
   '/login',
@@ -26,6 +26,7 @@ const APP_SHELL = [
   '/js/shared/supabaseClient.js',
   '/js/shared/communityPreset.js',
   '/js/shared/instrumentPreview.js',
+  '/js/experiments/labs.js?v=20261112-granular-note-r2',
   '/',
   '/about',
   '/css/about.css',
