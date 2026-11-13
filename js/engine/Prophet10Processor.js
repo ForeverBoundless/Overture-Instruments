@@ -437,6 +437,8 @@ class Prophet10Processor extends AudioWorkletProcessor {
 
   // ------------------------------------------------------------- messages
   _onMessage(m) {
+    if (m?.t === '__preview_flush') { this.port.postMessage({ t: '__preview_flush_ack', id: m.id }); return; }
+
     if (!m || typeof m !== 'object') return;
     if ((m.t === 'noteOn' || m.t === 'noteOff') && Number.isFinite(m.frame) && m.frame > currentFrame) {
       this.scheduled.push(m);
