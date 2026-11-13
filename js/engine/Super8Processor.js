@@ -117,8 +117,20 @@ class Voice{
  }
 }
 
+function seedPreviewMessages(processor, messages, dispatch) {
+  if (!Array.isArray(messages)) return;
+  messages.forEach((message) => {
+    if (message?.t === 'noteOn' || message?.t === 'noteOff') {
+      processor.scheduled.push({ ...message });
+    } else {
+      dispatch.call(processor, message);
+    }
+  });
+  processor.scheduled.sort((a, b) => a.frame - b.frame);
+}
+
 class Super8Processor extends AudioWorkletProcessor{
- constructor(){
+ constructor(options = {}){
   super();this.layers=[clone(LAYER_DEFAULT),clone(LAYER_DEFAULT)];this.global={mode:'single',activeLayer:0,splitPoint:60,binaural:true,volume:.72,distortion:0,benderX:0,benderY:0,expression:1,sustain:false,masterTune:0};
   this.voices=Array.from({length:16},(_,i)=>new Voice(i));this.order=0;this.held=[new Map(),new Map()];this.arpLatched=[new Set(),new Set()];this.sustain=false;this.pitchBend=[0,0];this.mpeBend=new Map();this.modWheel=0;this.expression=1;this.channelExpression=new Map();this.aftertouch=[0,0];this.channelPressure=new Map();this.polyPressure=new Map();this.mpeSlide=new Map();this.currentMods=[{delayTime:0},{delayTime:0}];this.scheduled=[];
   const sr=sampleRate,pow2=n=>{let p=1;while(p<n)p<<=1;return p;};
@@ -140,6 +152,7 @@ class Super8Processor extends AudioWorkletProcessor{
   this.b2kind=0;this.b2inc=0;this.b2pw=.5;this.b2mode=0;this.b2cross=0;this.b2sub=0;this.b2subInc=0;this.b2lfo=false;this.b2subSquare=false;
   this.sumM=0;this.sumL=0;this.sumR=0;this.wrapU=-1;this.lfoRateMul=1;
   this.scheduled=[];this.port.onmessage=e=>this.message(e.data);
+    seedPreviewMessages(this, options?.processorOptions?.messages, this.message);
  }
  snapSmooth(){
   this.layers.forEach((p,i)=>{const s=this.sm[i];s.mix=clamp(p.mix);s.pan=clamp(p.pan);s.cut=clamp(p.cutoff);s.res=clamp(p.resonance);s.hpf=clamp(p.hpf);});
