@@ -45,6 +45,8 @@ class DX7Processor extends AudioWorkletProcessor {
   }
 
   _msg(m) {
+    if (m?.t === '__preview_flush') { this.port.postMessage({ t: '__preview_flush_ack', id: m.id }); return; }
+
     // The main thread may send note events ahead of time. Keep them in the
     // worklet until their target sample frame instead of triggering them when
     // a JavaScript timer happens to wake up.
