@@ -389,7 +389,7 @@ function designDecimator(taps, cutoff) {
 // The processor
 // ---------------------------------------------------------------------------
 class Prophet10Processor extends AudioWorkletProcessor {
-  constructor() {
+  constructor(options = {}) {
     super();
     this.sr = sampleRate;
     this.fsOS = sampleRate * OS;
@@ -433,6 +433,7 @@ class Prophet10Processor extends AudioWorkletProcessor {
     this.port.onmessage = (event) => this._onMessage(event.data);
     this.scheduled = [];
     this._activity = 0;
+    (options?.processorOptions?.messages || []).forEach((message) => this._onMessage(message));
   }
 
   // ------------------------------------------------------------- messages
