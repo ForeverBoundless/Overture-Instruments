@@ -58,8 +58,13 @@ export class DAHDSREnvelope {
     this._gate = false;
     this._clearLoop();
     const now = when;
-    this.param.cancelScheduledValues(now);
-    this.param.setValueAtTime(Math.max(this.param.value || 0, EPSILON), now);
+    if (typeof this.param.cancelAndHoldAtTime === 'function') {
+      // Preserve the scheduled envelope level when notes are rendered offline.
+      this.param.cancelAndHoldAtTime(now);
+    } else {
+      this.param.cancelScheduledValues(now);
+      this.param.setValueAtTime(Math.max(this.param.value || 0, EPSILON), now);
+    }
     this.param.exponentialRampToValueAtTime(EPSILON, now + Math.max(0.001, this.release));
   }
 
