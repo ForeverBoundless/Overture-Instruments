@@ -85,8 +85,20 @@ function buildFrame(bank,frame){
  const g=peak>1e-6?.95/peak:1;levels.forEach(t=>{for(let i=0;i<TS;i++)t[i]*=g;});
  return levels;
 }
+function seedPreviewMessages(processor, messages, dispatch) {
+  if (!Array.isArray(messages)) return;
+  messages.forEach((message) => {
+    if (message?.t === 'noteOn' || message?.t === 'noteOff') {
+      processor.scheduled.push({ ...message });
+    } else {
+      dispatch.call(processor, message);
+    }
+  });
+  processor.scheduled.sort((a, b) => a.frame - b.frame);
+}
+
 class Pro3Processor extends AudioWorkletProcessor{
- constructor(){
+ constructor(options = {}){
   super();this.p={...DEFAULT};this.userTable=null;this.frames=new Map();
   this.voices=Array.from({length:3},()=>({note:60,gate:false,order:0,phase:0,drift:Math.random()*6.28,driftRate:.05+Math.random()*.05,slop:(rnd())*.2,ampEnv:makeEnv(),velocity:.8,glideHz:0,ampPrev:0,ampNow:0,ss:new Float64Array(7)}));
   this.currentNote=60;this.lastNote=60;this.order=0;this.held=new Map();this.arpLatched=new Set();this.sustain=false;this.bend=0;this.mod=0;this.at=0;this.touch=0;this.velocity=.8;
@@ -111,6 +123,7 @@ class Pro3Processor extends AudioWorkletProcessor{
   this.fx=[mk(),mk()];this.outL=0;this.outR=0;
   this.seqStep=0;this.seqPhase=0;this.seqRunning=false;this.arpPhase=0;this.arpStep=0;this.arpNote=-1;this.seqNote=-1;this.externalClock=0;
   this.auto={};this.scheduled=[];this.port.onmessage=e=>this.message(e.data);
+    seedPreviewMessages(this, options?.processorOptions?.messages, this.message);
  }
  parseRoutes(){
   this.routeSrc=[];this.routeDst=[];this.routeAmt=[];
