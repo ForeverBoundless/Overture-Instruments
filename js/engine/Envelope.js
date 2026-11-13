@@ -74,9 +74,16 @@ export class Envelope {
    */
   triggerRelease(when) {
     const now = when ?? this.ctx.currentTime;
-    const current = this._currentValue(now);
-    this.param.cancelScheduledValues(now);
-    this.param.setValueAtTime(Math.max(current, EPSILON), now);
+    if (typeof this.param.cancelAndHoldAtTime === 'function') {
+      // Holds the actual automation value at the requested audio-clock time.
+      // This is essential for OfflineAudioContext, where note-off events are
+      // often queued before rendering begins and AudioParam.value is stale.
+      this.param.cancelAndHoldAtTime(now);
+    } else {
+      const current = this._currentValue(now);
+      this.param.cancelScheduledValues(now);
+      this.param.setValueAtTime(Math.max(current, EPSILON), now);
+    }
     this.param.exponentialRampToValueAtTime(EPSILON, now + Math.max(this.release, 0.001));
     this._stage = 'release';
   }
@@ -84,9 +91,13 @@ export class Envelope {
   /** Hard, click-minimized cutoff — used only for voice stealing under extreme polyphony pressure. */
   forceOff(when) {
     const now = when ?? this.ctx.currentTime;
-    const current = this._currentValue(now);
-    this.param.cancelScheduledValues(now);
-    this.param.setValueAtTime(current, now);
+    if (typeof this.param.cancelAndHoldAtTime === 'function') {
+      this.param.cancelAndHoldAtTime(now);
+    } else {
+      const current = this._currentValue(now);
+      this.param.cancelScheduledValues(now);
+      this.param.setValueAtTime(current, now);
+    }
     this.param.linearRampToValueAtTime(EPSILON, now + 0.008);
     this._stage = 'idle';
   }
