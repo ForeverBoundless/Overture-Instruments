@@ -60,6 +60,8 @@ class MellotronProcessor extends AudioWorkletProcessor {
   }
 
   message(m) {
+    if (m?.t === '__preview_flush') { this.port.postMessage({ t: '__preview_flush_ack', id: m.id }); return; }
+
     // Honour OMNI's look-ahead timestamps instead of waking notes on receipt.
     if ((m.t === 'noteOn' || m.t === 'noteOff') && Number.isFinite(m.frame) && m.frame > currentFrame) {
       this.scheduled.push(m);
