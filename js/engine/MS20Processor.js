@@ -15,8 +15,20 @@ const sat = (x) => (x > 3 ? 1 : x < -3 ? -1 : (x * (27 + x * x)) / (27 + 9 * x *
 import { MS20_DEFAULT, MS20_JACKS } from '../data/ms20Jacks.js';
 
 
+function seedPreviewMessages(processor, messages, dispatch) {
+  if (!Array.isArray(messages)) return;
+  messages.forEach((message) => {
+    if (message?.t === 'noteOn' || message?.t === 'noteOff') {
+      processor.scheduled.push({ ...message });
+    } else {
+      dispatch.call(processor, message);
+    }
+  });
+  processor.scheduled.sort((a, b) => a.frame - b.frame);
+}
+
 class MS20Processor extends AudioWorkletProcessor {
-  constructor() {
+  constructor(options = {}) {
     super();
     this.sr = sampleRate; this.p = { ...MS20_DEFAULT }; this.cables = [];
     this.keys = []; this.gate = false; this.pitch = 60; this.target = 60; this.bend = 0; this.mod = 0;
@@ -32,6 +44,7 @@ class MS20Processor extends AudioWorkletProcessor {
     this.scheduled = [];
     this.trigPrev = { EG1_TRIG_IN: 0, EG2_TRIG_IN: 0 }; this.src = {};
     this.port.onmessage = (e) => this._msg(e.data);
+    seedPreviewMessages(this, options?.processorOptions?.messages, this._msg);
   }
 
   _msg(m) {
