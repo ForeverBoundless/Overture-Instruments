@@ -166,19 +166,24 @@ function readDraft() {
 function syncContentType() {
   const type = byId('community-record-type').value;
   const instrument = byId('community-instrument');
-  instrument.hidden = type !== 'instrument_preset';
-  byId('community-instrument-wrap').hidden = type !== 'instrument_preset';
-  if (type === 'omni_patch') {
+  const isInstrumentPreset = type === 'instrument_preset';
+  instrument.hidden = !isInstrumentPreset;
+  byId('community-instrument-wrap').hidden = !isInstrumentPreset;
+  if (!isInstrumentPreset) {
+    instrument.value = 'omni';
     state.draftType = 'omni_patch';
     state.draftInstrument = null;
     if (state.draft) byId('community-draft-status').textContent = `OMNI patch ready: ${state.draft.name || 'Untitled'}.`;
-  } else {
-    state.draftType = 'instrument_preset';
-    state.draftInstrument = instrument.value;
-    byId('community-draft-status').textContent = state.draft && state.draftType === 'instrument_preset' && state.draftInstrument === instrument.value
-      ? `${INSTRUMENTS[instrument.value]?.name || 'Instrument'} preset ready.`
-      : 'Choose an instrument and export its current patch to Community, or upload a preset JSON file.';
+    return;
   }
+  // An OMNI draft has no instrument. When the user changes its content type
+  // to an instrument preset, select a real supported instrument explicitly.
+  if (!INSTRUMENTS[instrument.value]) instrument.value = 'little-phatty';
+  state.draftType = 'instrument_preset';
+  state.draftInstrument = instrument.value;
+  byId('community-draft-status').textContent = state.draft && state.draftType === 'instrument_preset' && state.draftInstrument === instrument.value
+    ? `${INSTRUMENTS[instrument.value]?.name || 'Instrument'} preset ready.`
+    : 'Choose an instrument and export its current patch to Community, or upload a preset JSON file.';
 }
 
 function setDraft(data, type, instrumentId = null, title = '') {
@@ -186,7 +191,7 @@ function setDraft(data, type, instrumentId = null, title = '') {
   state.draftType = type;
   state.draftInstrument = instrumentId;
   byId('community-record-type').value = type;
-  byId('community-instrument').value = instrumentId || 'little-phatty';
+  byId('community-instrument').value = type === 'omni_patch' ? 'omni' : (instrumentId || 'little-phatty');
   syncContentType();
   byId('community-draft-status').textContent = type === 'omni_patch'
     ? `OMNI patch ready: ${data.name || title || 'Untitled'} · ${data.modules.length} modules.`
@@ -586,7 +591,10 @@ function beginEdit(item, { preserveDraft = false } = {}) {
   else {
     state.draftType = type;
     state.draftInstrument = item.instrument_id || null;
+    byId('community-record-type').value = type;
+    byId('community-instrument').value = type === 'omni_patch' ? 'omni' : (item.instrument_id || 'little-phatty');
   }
+  syncContentType();
   if (!preserveDraft) byId('community-title').value = item.title;
   byId('community-description').value = item.description || '';
   byId('community-tags').value = (item.tags || []).join(', ');
@@ -967,6 +975,7 @@ async function initialise() {
     state.draftType = 'instrument_preset';
     state.draftInstrument = byId('community-instrument').value;
   });
+  syncContentType();
   byId('community-patch-file').addEventListener('change', async (event) => {
     const file = event.target.files?.[0];
     if (!file) return;

@@ -685,3 +685,33 @@ test('Sequential Pro 3 and UDO Super 8 are first-class library instruments', asy
   assert.ok(worker.includes('/js/engine/Pro3Processor.js'));
   assert.ok(worker.includes('/js/engine/Super8Processor.js'));
 });
+
+
+test('Community OMNI drafts use an explicit not-applicable instrument value', async () => {
+  const [page, source, worker] = await Promise.all([
+    readFile(new URL('../community.html', import.meta.url), 'utf8'),
+    readFile(new URL('../js/community.js', import.meta.url), 'utf8'),
+    readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
+  ]);
+  assert.ok(page.includes('<option value="omni">Not applicable — OMNI patch</option>'));
+  assert.ok(source.includes("instrument.value = 'omni'"));
+  assert.ok(source.includes("type === 'omni_patch' ? 'omni' : (instrumentId || 'little-phatty')"));
+  assert.ok(source.includes("if (!INSTRUMENTS[instrument.value]) instrument.value = 'little-phatty'"));
+  assert.ok(source.includes('function beginEdit'));
+  assert.ok(worker.includes('/js/community.js?v=20261112-omni-instrument-select-r1'));
+  assert.ok(page.includes('/js/community.js?v=20261112-omni-instrument-select-r1'));
+});
+
+test('Shared emulator power cards support both span and div markup', async () => {
+  const [styles, pages] = await Promise.all([
+    readFile(new URL('../css/panel.css', import.meta.url), 'utf8'),
+    Promise.all([
+      '../html/mellotron-m400.html', '../html/yamaha-dx7.html', '../html/korg-ms-20.html',
+      '../html/roland-juno-106.html', '../html/roland-tr-808.html', '../html/hohner-d6.html',
+      '../html/ob-xa.html', '../html/sequential-pro-3.html', '../html/udo-super-8.html',
+    ].map((file) => readFile(new URL(file, import.meta.url), 'utf8'))),
+  ]);
+  assert.ok(styles.includes('.pn-power > :is(span, div)'));
+  assert.ok(styles.includes('.pn-power.is-starting > :is(span, div)'));
+  for (const page of pages) assert.match(page, /class="pn-power"/);
+});
