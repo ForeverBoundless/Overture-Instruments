@@ -68,9 +68,36 @@ function queueNativePhrase(engine, notes = MELODY, { startOffset = START_OFFSET,
   });
 }
 
-async function render(context) {
-  const buffer = await context.startRendering();
-  return audioBufferToWav(buffer);
+let previewFlushId = 0;
+
+async function render(context, engine = null) {
+  if (!engine?.node?.port) {
+    const buffer = await context.startRendering();
+    return audioBufferToWav(buffer);
+  }
+
+  const port = engine.node.port;
+  const id = ++previewFlushId;
+  const acknowledged = new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      port.removeEventListener('message', onMessage);
+      reject(new Error('The instrument audio processor did not acknowledge its preview events.'));
+    }, 3000);
+    const onMessage = (event) => {
+      if (event.data?.t !== '__preview_flush_ack' || event.data.id !== id) return;
+      clearTimeout(timeout);
+      port.removeEventListener('message', onMessage);
+      resolve();
+    };
+    port.addEventListener('message', onMessage);
+    port.postMessage({ t: '__preview_flush', id });
+  });
+
+  // Starting the offline render lets the AudioWorklet receive its queued
+  // messages. Wait for its acknowledgement before considering the buffer ready.
+  const rendering = context.startRendering();
+  await acknowledged;
+  return audioBufferToWav(await rendering);
 }
 
 async function renderLittlePhatty(context, patch) {
