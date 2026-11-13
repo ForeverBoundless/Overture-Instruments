@@ -270,19 +270,18 @@ function audioBufferToWav(buffer) {
   writeText(0, 'RIFF');
   view.setUint32(4, 36 + dataSize, true);
   writeText(8, 'WAVE');
-  view.setUint32(12, 16, true);
-  writeText(16, 'fmt ');
-  view.setUint32(20, 16, true);
-  view.setUint16(24, 1, true);
-  view.setUint16(26, channels, true);
-  view.setUint32(28, sampleRate, true);
-  view.setUint32(32, sampleRate * blockAlign, true);
-  view.setUint16(36, blockAlign, true);
-  view.setUint16(38, 16, true);
-  writeText(40, 'data');
-  view.setUint32(44, dataSize, true);
+  writeText(12, 'fmt ');
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true);
+  view.setUint16(22, channels, true);
+  view.setUint32(24, sampleRate, true);
+  view.setUint32(28, sampleRate * blockAlign, true);
+  view.setUint16(32, blockAlign, true);
+  view.setUint16(34, 16, true);
+  writeText(36, 'data');
+  view.setUint32(40, dataSize, true);
   const channelData = Array.from({ length: channels }, (_, channel) => buffer.getChannelData(channel));
-  let offset = 48;
+  let offset = 44;
   for (let frame = 0; frame < frames; frame += 1) {
     for (let channel = 0; channel < channels; channel += 1) {
       const sample = clamp(channelData[channel][frame], -1, 1);
