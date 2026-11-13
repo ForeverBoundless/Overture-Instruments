@@ -278,7 +278,7 @@ async function renderProphet10(context, patch) {
   engine.setTranspose(Number(globals.transpose) || 0);
   engine.setVolume(0.72);
   queueWorkletPhrase(engine, context);
-  return render(context);
+  return render(context, engine);
 }
 
 async function renderWorklet(context, processorPath, processorName, patch, instrumentId, instrumentOptions = {}) {
@@ -299,7 +299,7 @@ async function renderWorklet(context, processorPath, processorName, patch, instr
   }
   if (Number.isFinite(Number(instrumentOptions.volume))) engine.setVolume(Number(instrumentOptions.volume));
   queueWorkletPhrase(engine, context);
-  return render(context);
+  return render(context, engine);
 }
 
 export function audioBufferToWav(buffer) {
