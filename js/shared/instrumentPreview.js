@@ -30,14 +30,31 @@ function offlineContext(duration, channels = 2) {
   return new Offline(channels, Math.ceil(duration * SAMPLE_RATE), SAMPLE_RATE);
 }
 
+export function postWorkletMessage(engine, message) {
+  if (typeof engine?.post === 'function') {
+    engine.post(message);
+    return;
+  }
+
+  // Older or instrument-specific wrappers may expose the AudioWorkletNode
+  // without forwarding the shared .post() convenience method.
+  const port = engine?.node?.port;
+  if (typeof port?.postMessage === 'function') {
+    port.postMessage(message);
+    return;
+  }
+
+  throw new TypeError('The preview engine is missing its AudioWorklet message port.');
+}
+
 function queueWorkletPhrase(engine, context, notes = MELODY, { startOffset = START_OFFSET, gate = NOTE_GATE, spacing = EIGHTH } = {}) {
   notes.forEach((note, index) => {
     const start = startOffset + index * spacing;
     const frame = Math.round(start * context.sampleRate);
     const offFrame = Math.round((start + gate) * context.sampleRate);
     const velocity = [0.78, 0.62, 0.7, 0.88][index % 4];
-    engine.post({ t: 'noteOn', note, vel: velocity, frame });
-    engine.post({ t: 'noteOff', note, frame: offFrame });
+    postWorkletMessage(engine, { t: 'noteOn', note, vel: velocity, frame });
+    postWorkletMessage(engine, { t: 'noteOff', note, frame: offFrame });
   });
 }
 
@@ -237,21 +254,23 @@ async function renderProphet10(context, patch) {
   return render(context);
 }
 
-async function renderWorklet(context, processorPath, processorName, patch, instrumentId, options = {}) {
-  const options = instrumentId === 'ms-20' ? { inputs: 1 } : {};
-  const engine = new WorkletEngine(new URL(processorPath, import.meta.url).href, processorName, options);
+async function renderWorklet(context, processorPath, processorName, patch, instrumentId, instrumentOptions = {}) {
+  const workletOptions = { ...instrumentOptions };
+  if (instrumentId === 'ms-20') workletOptions.inputs = 1;
+
+  const engine = new WorkletEngine(new URL(processorPath, import.meta.url).href, processorName, workletOptions);
   await engine.start(context);
 
   switch (instrumentId) {
     case 'ms-20':
-      engine.post({ t: 'patch', patch: patch.params });
-      engine.post({ t: 'cables', cables: patch.cables || [] });
+      postWorkletMessage(engine, { t: 'patch', patch: patch.params });
+      postWorkletMessage(engine, { t: 'cables', cables: patch.cables || [] });
       break;
     default:
-      engine.post({ t: 'patch', patch });
+      postWorkletMessage(engine, { t: 'patch', patch });
       break;
   }
-  if (Number.isFinite(Number(options.volume))) engine.setVolume(Number(options.volume));
+  if (Number.isFinite(Number(instrumentOptions.volume))) engine.setVolume(Number(instrumentOptions.volume));
   queueWorkletPhrase(engine, context);
   return render(context);
 }
