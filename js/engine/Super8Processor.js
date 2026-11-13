@@ -255,7 +255,7 @@ class Super8Processor extends AudioWorkletProcessor{
   });
   matches.forEach(v=>{
    const p=this.layers[v.layer];
-   if(p.arpEnabled&&p.arpHold)return;
+   if((p.arpEnabled&&p.arpHold)||p.hold)return;
    if(!this.sustain){v.gate=false;if(p.voiceMode==='poly2')v.e2Stage='release';}
   });
  }
