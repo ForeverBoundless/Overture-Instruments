@@ -255,7 +255,7 @@ async function renderWorklet(context, processorPath, processorName, patch, instr
   return render(context);
 }
 
-function audioBufferToWav(buffer) {
+export function audioBufferToWav(buffer) {
   const channels = buffer.numberOfChannels;
   const sampleRate = buffer.sampleRate;
   const frames = buffer.length;
