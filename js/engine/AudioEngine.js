@@ -58,11 +58,11 @@ export class AudioEngine {
   }
 
   /** Must be called from a user gesture (click) per browser autoplay policy. */
-  async start() {
+  async start(context = null) {
     if (this.started) return;
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-    this.ctx = new AudioContextClass();
-    if (this.ctx.state === 'suspended') {
+    this.ctx = context || new AudioContextClass();
+    if (!context && this.ctx.state === 'suspended') {
       await this.ctx.resume();
     }
 
@@ -202,7 +202,7 @@ export class AudioEngine {
    * @param {string} noteName - e.g. "C4"
    * @param {number} [velocity=1]
    */
-  noteOn(noteName, velocity = 1) {
+  noteOn(noteName, velocity = 1, when = this.ctx.currentTime) {
     if (!this.started) return;
 
     const wasAnyHeld = this._heldNotes.length > 0;
@@ -218,18 +218,18 @@ export class AudioEngine {
       // the correct moment to retrigger the LFO's phase/fade-in, if the
       // LFO's retrigger mode is enabled (no-ops otherwise).
       this.lfos.main?.retriggerNow();
-      this.voice.noteOn(noteName, velocity, 0, this._octaveShift, this._semitoneShift);
+      this.voice.noteOn(noteName, velocity, 0, this._octaveShift, this._semitoneShift, when);
     } else {
       // Legato: another key was already down when this one was pressed, so
       // glide from the currently sounding pitch to the new one and do NOT
       // re-trigger the envelopes (real analog legato behavior).
       const glideDur = this.glide.timeFor(this.voice._currentFreq, midiToFreq(noteNameToMidi(noteName) + this._octaveShift * 12 + this._semitoneShift), true);
       const tc = Math.max(0.003, Math.min(0.08, this.glide.timeConstantFor(glideDur)));
-      this.voice.glideToNote(noteName, tc, this._octaveShift, this._semitoneShift);
+      this.voice.glideToNote(noteName, tc, this._octaveShift, this._semitoneShift, when);
     }
   }
 
-  noteOff(noteName) {
+  noteOff(noteName, when = this.ctx.currentTime) {
     if (!this.started) return;
 
     if (this._sustainDown) {
@@ -240,17 +240,17 @@ export class AudioEngine {
       return;
     }
 
-    this._releaseNote(noteName);
+    this._releaseNote(noteName, when);
   }
 
-  _releaseNote(noteName) {
+  _releaseNote(noteName, when = this.ctx.currentTime) {
     const wasTop = this._heldNotes.length > 0 && this._heldNotes[this._heldNotes.length - 1].note === noteName;
     this._heldNotes = this._heldNotes.filter((n) => n.note !== noteName);
 
     if (this._heldNotes.length === 0) {
       // Everything released: portamento fully resets (per spec), and the
       // voice's envelopes begin release.
-      this.voice.noteOff();
+      this.voice.noteOff(when);
       return;
     }
 
@@ -261,7 +261,7 @@ export class AudioEngine {
       const next = this._heldNotes[this._heldNotes.length - 1];
       const glideDur = this.glide.timeFor(this.voice._currentFreq, midiToFreq(noteNameToMidi(next.note) + next.octaveShift * 12 + next.semitoneShift), true);
       const tc = Math.max(0.003, Math.min(0.08, this.glide.timeConstantFor(glideDur)));
-      this.voice.glideToNote(next.note, tc, next.octaveShift, next.semitoneShift);
+      this.voice.glideToNote(next.note, tc, next.octaveShift, next.semitoneShift, when);
     }
     // If a lower-priority (non-sounding) held note was released, the
     // currently sounding note is unaffected.
