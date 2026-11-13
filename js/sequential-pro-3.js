@@ -182,8 +182,14 @@ class Pro3App{
   const lfo=addPanel(main,{title:'LFO 1–3',sub:'clockable modulators',className:'p3-lfo'});
   for(let i=1;i<=3;i++){
    const col=document.createElement('div');col.className='p3-col';lfo.body.appendChild(col);addLabel(col,'LFO '+i);
-   k(col,'lfo'+i+'Rate','Rate',{size:44,group:'LFO '+i});k(col,'lfo'+i+'Amount','Amount',{size:44,group:'LFO '+i});
-   s(col,'lfo'+i+'Wave','Shape',['triangle','saw','reverseSaw','square','sampleHold'],{group:'LFO '+i});k(col,'lfo'+i+'Phase','Phase',{size:38,group:'LFO '+i});k(col,'lfo'+i+'Slew','Slew',{size:38,group:'LFO '+i});b(col,'lfo'+i+'Sync','Sync',{group:'LFO '+i});
+   const primary=addRow(col,'p3-lfo-row');
+   k(primary,'lfo'+i+'Rate','Rate',{size:40,group:'LFO '+i});
+   k(primary,'lfo'+i+'Amount','Amount',{size:40,group:'LFO '+i});
+   s(primary,'lfo'+i+'Wave','Shape',['triangle','saw','reverseSaw','square','sampleHold'],{group:'LFO '+i});
+   const secondary=addRow(col,'p3-lfo-row');
+   k(secondary,'lfo'+i+'Phase','Phase',{size:36,group:'LFO '+i});
+   k(secondary,'lfo'+i+'Slew','Slew',{size:36,group:'LFO '+i});
+   b(secondary,'lfo'+i+'Sync','Sync',{group:'LFO '+i});
   }
   const osc=(n,title,sub,waves)=>{
    const g=addPanel(main,{title,sub,className:'p3-osc'});const grp=title;

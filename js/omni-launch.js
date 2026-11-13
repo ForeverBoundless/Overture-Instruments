@@ -37,6 +37,12 @@
         // The animation still works if history replacement is restricted.
       }
 
+      let introSeen = false;
+      try { introSeen = localStorage.getItem('overture.omni.intro-seen') === 'true'; } catch { /* storage may be unavailable */ }
+      if (introSeen) {
+        window.location.assign('/omni');
+        return;
+      }
       document.body.classList.add('omni-launch-active');
       const rect = showcase.getBoundingClientRect();
       const overlay = document.createElement('div');

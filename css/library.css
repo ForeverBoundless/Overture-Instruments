@@ -4462,3 +4462,24 @@ html[data-theme="light"] .instrument-tile--ob-xa .instrument-tile__hint { color:
 .instrument-tile--udo-super-8 .instrument-tile__content { min-width:0; }
 .instrument-tile--sequential-pro-3 .instrument-specs,
 .instrument-tile--udo-super-8 .instrument-specs { flex-wrap:wrap; }
+
+/* Give every library instrument the same footprint, including the four newest tiles. */
+.instrument-grid{grid-auto-rows:275px}
+.instrument-tile{height:275px;min-height:275px;min-width:0;box-sizing:border-box}
+.instrument-tile__visual,.instrument-tile__content{min-width:0;min-height:0}
+.instrument-tile__content{height:100%;overflow:hidden}
+.instrument-tile__description{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;overflow-wrap:anywhere}
+.instrument-specs{min-width:0;flex-wrap:wrap;gap:7px 10px}
+.instrument-spec{min-width:0;max-width:100%;overflow-wrap:anywhere}
+.instrument-spec strong{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;overflow-wrap:anywhere}
+@media(max-width:560px){
+ .instrument-grid{grid-auto-rows:275px}
+ .instrument-tile{height:275px;min-height:275px}
+ .instrument-tile__content{padding:15px 12px}
+ .instrument-tile h2{font-size:21px;line-height:1.08;overflow-wrap:anywhere}
+ .instrument-tile__description{-webkit-line-clamp:2;font-size:10.5px;line-height:1.4}
+ .instrument-specs{gap:5px 7px;margin-top:9px}
+ .instrument-spec{font-size:8px;grid-template-columns:12px minmax(0,1fr)}
+ .instrument-spec strong{font-size:9px}
+ .instrument-tile__actions{padding-top:8px}
+}

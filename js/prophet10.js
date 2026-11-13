@@ -1401,7 +1401,8 @@ class Prophet10App {
   }
 
   _applyCommunityPatch(data, title = 'Community preset') {
-    this.edit = data.layers.map((program) => cloneProgram(program));
+    const communityName = String(title || 'Community preset').slice(0, 60);
+    this.edit = data.layers.map((program) => ({ ...cloneProgram(program), name: communityName }));
     this.saved = this.edit.map((program) => cloneProgram(program));
     this.activeLayer = data.activeLayer === 1 ? 1 : 0;
     this.linkLayers = !!data.linkLayers;

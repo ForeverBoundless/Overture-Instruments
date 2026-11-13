@@ -152,3 +152,6 @@ body.pn-body.hp-pro3-body,body.pn-body.hp-super8-body{min-height:100vh;overflow-
 .hp-super8-matrix-grid button{min-width:0}
 @media(max-width:900px){.hp-play{flex-wrap:wrap}.hp-keybed{flex-basis:100%}.hp-display{min-width:180px}}
 @media(max-width:700px){.hp-instrument{padding:7px;gap:7px}.hp-group{padding:6px}.hp-group-body{gap:8px;padding:7px 1px 0}.hp-row-tight{flex-wrap:wrap}.hp-knob{flex-basis:var(--size,42px);width:var(--size,42px)}.hp-knob-art{width:var(--size,42px);height:var(--size,42px)}.hp-keybed{height:112px;flex-basis:100%}.hp-wheel-wrap,.hp-touch-wrap{height:84px}.hp-info{gap:5px;flex-wrap:wrap}.hp-info-left,.hp-info-mid{flex-wrap:wrap}.hp-display{min-width:160px;flex:1 1 160px}}
+
+/* Position dot is specific to the Pro 3 faceplate; leave Super 8 knob artwork unchanged. */
+.hp-pro3 .hp-knob-indicator{fill:#fff;stroke:#20262b;stroke-width:1.2;filter:drop-shadow(0 0 1px rgba(255,255,255,.48))}

@@ -121,3 +121,10 @@ html[data-theme="light"] .ex-hero-art__orbit--two {border-color:rgba(41,139,91,.
   .ex-card, .lab-explain, .lab-tasks { padding: 20px 18px; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+/* Reuse the exact green radial-ring motif from the homepage Experiments section. */
+.ex-page::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.72;background:radial-gradient(ellipse at 0% 50%,rgba(130,230,168,.13),transparent 22%) -22% 0 / 52% 100% no-repeat,repeating-radial-gradient(ellipse at 50% 100%,transparent 0 20px,rgba(130,230,168,.06) 21px 22px,transparent 23px 42px);mask-image:linear-gradient(90deg,transparent,#000 18%,#000 83%,transparent);animation:experiment-signal-drift 13s linear infinite}
+@keyframes experiment-signal-drift{to{background-position:122% 0,0 44px}}
+html[data-theme="light"] .ex-page::after{opacity:.48;background-image:radial-gradient(ellipse at 0% 50%,rgba(46,159,105,.12),transparent 22%),repeating-radial-gradient(ellipse at 50% 100%,transparent 0 20px,rgba(46,159,105,.055) 21px 22px,transparent 23px 42px)}
+html[data-theme="light"] .lab-plot,html[data-theme="light"] .lab-controls,html[data-theme="light"] .lab-explain,html[data-theme="light"] .lab-tasks{border-color:rgba(43,59,78,.16)}
+.granular-source{width:100%;height:auto}

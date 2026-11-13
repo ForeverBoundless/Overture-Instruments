@@ -63,16 +63,41 @@ const VOWELS = { names: ['A', 'E', 'I', 'O', 'U'], f: [[800, 1150, 2900], [400, 
 export const MODULES = {
   keyboard: {
     name: 'Keyboard & MIDI', category: 'Performance', color: '#82e6a8',
-    params: [P('octave', 'Octave shift', -3, 3, 0, { step: 1 })],
+    params: [P('octave', 'Octave shift', -3, 3, 0, { step: 1 }), P('mode', 'Voice mode', 0, 1, 0, { step: 1, options: ['Poly', 'Mono'] })],
+    getVisibleParams() { return this.params.filter((parameter) => parameter.key !== 'mode'); },
     inputs: [], outputs: [{ id: 'note', label: 'Note', type: 'note' }, { id: 'velocity', label: 'Velocity', type: 'cv' }],
     create(ctx) {
       const inst = new Instance(this, ctx);
       const vel = inst.track(ctx.createConstantSource()); vel.offset.value = 0; vel.start();
       inst.outputs.velocity = vel;
       inst.held = [];
-      inst.noteOn = (note, velocity, channel = 1) => { const n = note + inst.params.octave * 12; inst.held = inst.held.filter((h) => h.note !== n); inst.held.push({ note: n, velocity, channel }); vel.offset.setTargetAtTime(velocity, now(ctx), 0.005); inst.emit('note', { note: n, velocity, channel, on: true, legato: inst.held.length > 1, time: now(ctx) }); };
-      inst.noteOff = (note, channel = 1) => { const n = note + inst.params.octave * 12; const was = inst.held.length; inst.held = inst.held.filter((h) => !(h.note === n && h.channel === channel)); if (!was || inst.held.length === was) return; if (inst.held.length) { const top = inst.held[inst.held.length - 1]; inst.emit('note', { note: top.note, velocity: top.velocity, channel: top.channel, on: true, legato: true, time: now(ctx) }); } else inst.emit('note', { note: n, velocity: 0, channel, on: false, time: now(ctx) }); };
-      inst.allOff = () => { const held = [...inst.held]; inst.held = []; held.forEach((h) => inst.emit('note', { note: h.note, velocity: 0, channel: h.channel || 1, on: false, time: now(ctx) })); };
+      inst.noteOn = (note, velocity, channel = 1) => {
+        const n = note + inst.params.octave * 12;
+        const poly = Math.round(Number(inst.params.mode) || 0) === 0;
+        const duplicate = inst.held.find((h) => h.note === n && h.channel === channel);
+        if (duplicate && poly) inst.emit('note', { note: n, velocity: 0, channel, on: false, poly: true, time: now(ctx) });
+        inst.held = inst.held.filter((h) => !(h.note === n && h.channel === channel));
+        inst.held.push({ note: n, velocity, channel });
+        vel.offset.setTargetAtTime(velocity, now(ctx), 0.005);
+        inst.emit('note', { note: n, velocity, channel, on: true, poly, legato: !poly && inst.held.length > 1, time: now(ctx) });
+      };
+      inst.noteOff = (note, channel = 1) => {
+        const n = note + inst.params.octave * 12;
+        const poly = Math.round(Number(inst.params.mode) || 0) === 0;
+        const was = inst.held.length;
+        inst.held = inst.held.filter((h) => !(h.note === n && h.channel === channel));
+        if (!was || inst.held.length === was) return;
+        if (poly) inst.emit('note', { note: n, velocity: 0, channel, on: false, poly: true, time: now(ctx) });
+        else if (inst.held.length) {
+          const top = inst.held[inst.held.length - 1];
+          inst.emit('note', { note: top.note, velocity: top.velocity, channel: top.channel, on: true, poly: false, legato: true, time: now(ctx) });
+        } else inst.emit('note', { note: n, velocity: 0, channel, on: false, poly: false, time: now(ctx) });
+      };
+      inst.allOff = () => {
+        const held = [...inst.held]; inst.held = [];
+        const poly = Math.round(Number(inst.params.mode) || 0) === 0;
+        held.forEach((h) => inst.emit('note', { note: h.note, velocity: 0, channel: h.channel || 1, on: false, poly, time: now(ctx) }));
+      };
       return inst;
     },
   },
@@ -84,27 +109,73 @@ export const MODULES = {
     outputs: [{ id: 'out', label: 'Audio', type: 'audio' }],
     create(ctx) {
       const inst = new Instance(this, ctx);
-      const osc = inst.track(ctx.createOscillator()); const level = inst.track(ctx.createGain()); const modGain = inst.track(ctx.createGain());
-      // Variable pulse: two sawtooths, one phase-offset via a short delay, subtracted.
-      const osc2 = inst.track(ctx.createOscillator()); const inv = inst.track(ctx.createGain()); inv.gain.value = -1; const delay = inst.track(ctx.createDelay(0.05)); const pulseGain = inst.track(ctx.createGain()); const mainGain = inst.track(ctx.createGain());
-      osc.type = 'sawtooth'; osc2.type = 'sawtooth'; osc.connect(mainGain); mainGain.connect(level);
-      osc.connect(pulseGain); osc2.connect(delay); delay.connect(inv); inv.connect(pulseGain); pulseGain.connect(level);
-      modGain.connect(osc.detune); modGain.connect(osc2.detune);
-      osc.start(); osc2.start();
+      const level = inst.track(ctx.createGain());
+      const modGain = inst.track(ctx.createGain());
+      const voices = Array.from({ length: 8 }, () => {
+        const voiceOut = inst.track(ctx.createGain()); voiceOut.gain.value = 0; voiceOut.connect(level);
+        const osc = inst.track(ctx.createOscillator()); const osc2 = inst.track(ctx.createOscillator());
+        const inv = inst.track(ctx.createGain()); inv.gain.value = -1;
+        const delay = inst.track(ctx.createDelay(0.05)); const pulseGain = inst.track(ctx.createGain()); const mainGain = inst.track(ctx.createGain());
+        osc.type = 'sawtooth'; osc2.type = 'sawtooth';
+        osc.connect(mainGain); mainGain.connect(voiceOut);
+        osc.connect(pulseGain); osc2.connect(delay); delay.connect(inv); inv.connect(pulseGain); pulseGain.connect(voiceOut);
+        modGain.connect(osc.detune); modGain.connect(osc2.detune);
+        osc.start(); osc2.start();
+        return { osc, osc2, delay, pulseGain, mainGain, voiceOut, note: null, channel: 1, startedAt: 0, active: false };
+      });
       inst.outputs.out = level; inst.inputs.pitchMod = modGain;
-      inst.freq = 110;
       inst.pitchBend = 0; inst.modWheel = 0;
+      const setVoicePitch = (voice, note, t, glide = 0) => {
+        const hz = midiHz(note) * Math.pow(2, inst.params.octave + inst.pitchBend / 12);
+        [voice.osc, voice.osc2].forEach((osc) => {
+          osc.frequency.cancelScheduledValues(t);
+          if (glide > 0) osc.frequency.setTargetAtTime(hz, t, glide / 4);
+          else osc.frequency.setValueAtTime(hz, t);
+          osc.detune.value = inst.params.detune;
+        });
+        voice.delay.delayTime.setTargetAtTime(Math.min(0.05, inst.params.pulseWidth / Math.max(20, hz)), t, 0.005);
+      };
+      const releaseVoice = (voice, t) => {
+        voice.voiceOut.gain.cancelScheduledValues(t);
+        voice.voiceOut.gain.setTargetAtTime(0, t, 0.012);
+        voice.active = false;
+      };
       const apply = (t = now(ctx)) => {
         const p = inst.params; const pulse = p.wave === 3;
-        osc.type = pulse ? 'sawtooth' : WAVES[p.wave]; mainGain.gain.setTargetAtTime(pulse ? 0 : 1, t, 0.01); pulseGain.gain.setTargetAtTime(pulse ? 1 : 0, t, 0.01);
-        const hz = inst.freq * Math.pow(2, p.octave + inst.pitchBend / 12);
-        [osc, osc2].forEach((o) => { o.frequency.cancelScheduledValues(t); if (p.glide > 0) o.frequency.setTargetAtTime(hz, t, p.glide / 4); else o.frequency.setValueAtTime(hz, t); o.detune.value = p.detune; });
-        delay.delayTime.setTargetAtTime(Math.min(0.05, p.pulseWidth / Math.max(20, hz)), t, 0.005);
-        modGain.gain.value = p.modDepth * 100 * inst.modWheel; level.gain.setTargetAtTime(p.level * 0.5, t, 0.01);
+        voices.forEach((voice) => {
+          voice.osc.type = pulse ? 'sawtooth' : WAVES[p.wave];
+          voice.osc2.type = 'sawtooth';
+          voice.mainGain.gain.setTargetAtTime(pulse ? 0 : 1, t, 0.01);
+          voice.pulseGain.gain.setTargetAtTime(pulse ? 1 : 0, t, 0.01);
+          if (voice.active && Number.isFinite(voice.note)) setVoicePitch(voice, voice.note, t);
+        });
+        modGain.gain.value = p.modDepth * 100 * inst.modWheel;
+        level.gain.setTargetAtTime(p.level * 0.5, t, 0.01);
       };
-      inst.inputs.pitch = { kind: 'note', handle: (ev) => { if (ev.on) { inst.freq = midiHz(ev.note); apply(eventTime(ctx, ev)); } } };
-      inst.setPitchBend = (semitones) => { inst.pitchBend = semitones; apply(); };
-      inst.setModWheel = (value) => { inst.modWheel = value; apply(); };
+      inst.inputs.pitch = { kind: 'note', handle: (ev) => {
+        const t = eventTime(ctx, ev);
+        if (ev.on) {
+          const voice = ev.legato
+            ? (voices.find((item) => item.active) || voices[0])
+            : (voices.find((item) => !item.active) || voices.reduce((oldest, item) => item.startedAt <= oldest.startedAt ? item : oldest, voices[0]));
+          voice.voiceOut.gain.cancelScheduledValues(t);
+          if (ev.legato) voice.voiceOut.gain.setValueAtTime(voice.voiceOut.gain.value, t);
+          else voice.voiceOut.gain.setValueAtTime(0, t);
+          setVoicePitch(voice, ev.note, t, ev.legato ? inst.params.glide : 0);
+          voice.note = ev.note; voice.channel = ev.channel || 1; voice.startedAt = t; voice.active = true;
+          voice.voiceOut.gain.setTargetAtTime(Math.max(0, Math.min(1, Number(ev.velocity) || 0)), t + 0.004, 0.008);
+        } else {
+          const voice = voices.filter((item) => item.active && item.note === ev.note && item.channel === (ev.channel || 1))
+            .sort((left, right) => right.startedAt - left.startedAt)[0];
+          if (voice) releaseVoice(voice, t);
+        }
+      } };
+      inst.allOff = () => voices.forEach((voice) => { if (voice.active) releaseVoice(voice, now(ctx)); });
+      inst.setPitchBend = (semitones) => {
+        inst.pitchBend = semitones; const t = now(ctx);
+        voices.filter((voice) => voice.active).forEach((voice) => setVoicePitch(voice, voice.note, t));
+      };
+      inst.setModWheel = (value) => { inst.modWheel = value; modGain.gain.value = inst.params.modDepth * 100 * value; };
       inst.apply = apply;
       return inst;
     },
@@ -167,11 +238,40 @@ export const MODULES = {
     inputs: [{ id: 'gate', label: 'Gate', type: 'note' }], outputs: [{ id: 'out', label: 'CV', type: 'cv' }],
     create(ctx) {
       const inst = new Instance(this, ctx); const cs = inst.track(ctx.createConstantSource()); cs.offset.value = 0; cs.start(); inst.outputs.out = cs;
+      inst.polyGateNotes = new Set();
+      const trigger = (t) => {
+        const p = inst.params; const o = cs.offset;
+        o.cancelScheduledValues(t); o.setValueAtTime(o.value, t);
+        o.linearRampToValueAtTime(p.amount, t + p.attack);
+        o.setTargetAtTime(p.sustain * p.amount, t + p.attack, p.decay / 3);
+      };
+      const release = (t) => {
+        const p = inst.params; const o = cs.offset;
+        o.cancelScheduledValues(t); o.setValueAtTime(o.value, t);
+        o.setTargetAtTime(0, t, p.release / 4);
+      };
       inst.inputs.gate = { kind: 'note', handle: (ev) => {
-        const p = inst.params; const t = eventTime(ctx, ev); const o = cs.offset;
-        if (ev.on) { if (ev.legato && inst.gateOn) return; inst.gateOn = true; o.cancelScheduledValues(t); o.setValueAtTime(o.value, t); o.linearRampToValueAtTime(p.amount, t + p.attack); o.setTargetAtTime(p.sustain * p.amount, t + p.attack, p.decay / 3); }
-        else { inst.gateOn = false; o.cancelScheduledValues(t); o.setValueAtTime(o.value, t); o.setTargetAtTime(0, t, p.release / 4); }
+        const t = eventTime(ctx, ev);
+        if (ev.poly) {
+          const key = `${ev.channel || 1}:${ev.note}`;
+          if (ev.on) {
+            const first = inst.polyGateNotes.size === 0;
+            inst.polyGateNotes.add(key);
+            if (first) trigger(t);
+          } else {
+            inst.polyGateNotes.delete(key);
+            if (!inst.polyGateNotes.size) release(t);
+          }
+          return;
+        }
+        if (ev.on) {
+          if (ev.legato && inst.gateOn) return;
+          inst.gateOn = true; trigger(t);
+        } else {
+          inst.gateOn = false; release(t);
+        }
       } };
+      inst.allOff = () => { inst.polyGateNotes.clear(); inst.gateOn = false; release(now(ctx)); };
       inst.apply = () => {};
       return inst;
     },

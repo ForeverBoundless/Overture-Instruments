@@ -46,7 +46,7 @@ export function addKnob(parent,{label,min=0,max=1,value=0,step,size:customSize,s
  svg('circle',{cx:50,cy:50,r:33,fill:'var(--hp-skirt)'},art);
  svg('circle',{cx:50,cy:50,r:27,fill:'url(#'+id+'c)',stroke:'var(--hp-cap-edge)','stroke-width':1.2},art);
  for(let i=0;i<24;i++){const a=i/24*Math.PI*2;svg('line',{x1:50+Math.cos(a)*27,y1:50+Math.sin(a)*27,x2:50+Math.cos(a)*24.5,y2:50+Math.sin(a)*24.5,stroke:'#000',opacity:.35,'stroke-width':.8},art);}
- const pointer=svg('g',{},art);svg('line',{x1:50,y1:50,x2:50,y2:27,class:'hp-knob-pointer','stroke-linecap':'round'},pointer);
+ const pointer=svg('g',{},art);svg('line',{x1:50,y1:50,x2:50,y2:27,class:'hp-knob-pointer','stroke-linecap':'round'},pointer);svg('circle',{cx:50,cy:27,r:3.8,class:'hp-knob-indicator'},pointer);
  const val=node('span','hp-knob-value',wrap);const legend=node('span','hp-control-label',wrap,label);legend.title=label;
  let current=clamp(value,min,max),startY=0,startX=0,startValue=0,pid=null;
  const render=()=>{

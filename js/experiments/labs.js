@@ -402,5 +402,66 @@ class ModulationLab extends Lab {
   draw() { this.drawMeasured(this.wavePlot, 0.1); this.drawSpectrum(this.specPlot, 6000); }
 }
 
-const LABS = { oscillator: OscillatorLab, filter: FilterLab, envelope: EnvelopeLab, fm: FMLab, harmonics: HarmonicsLab, beats: BeatsLab, space: SpaceLab, modulation: ModulationLab };
+
+/* ============================================================================
+   009 Wavefolding: fold a moving waveform back into the audible range.
+   ============================================================================ */
+class WavefoldingLab extends Lab {
+  constructor() {
+    super();
+    this.p={hz:110,fold:1.5,bias:0,shape:'sine',phase:0};
+    this.setText('Experiment 009 - Wavefolding Lab',
+      'Wavefolding pushes a waveform beyond a boundary, then reflects the excess back into range. Move the fold threshold and bias to hear a simple tone grow into a complex, animated spectrum.',
+      '<p>A wavefolder is a nonlinear waveshaper. Instead of clipping the waveform at a ceiling, it folds the part that crosses the threshold back down. Each fold adds bends and new harmonics. A sine wave can become bright and buzzy without changing its fundamental frequency.</p><p>The moving point shows the input signal; the folded trace shows the output transfer curve. Bias shifts the signal before it reaches the folder, changing where the folds happen.</p>',
+      ['Start with a high fold threshold and listen to the near-sine output.', 'Lower the threshold to add more folds and watch the spectrum gain harmonics.', 'Move the bias slowly. The fold pattern becomes asymmetric.', 'Switch the input waveform and compare the number and strength of folds.']);
+    this.plot=new Plot(this.vis,{title:'Wavefolder transfer curve (theoretical)',xLabel:'input amplitude',yLabel:'folded output'});
+    this.wavePlot=new Plot(this.vis,{title:'Output waveform (measured)',xLabel:'time',yLabel:'amplitude'});
+    choice(this.controls,{label:'Input waveform',options:['sine','triangle','sawtooth'].map(v=>({value:v,label:v})),value:'sine',onChange:v=>{this.p.shape=v;if(this.osc)this.osc.type=v;}});
+    slider(this.controls,{label:'Frequency',min:35,max:880,value:110,log:true,format:v=>v.toFixed(1)+' Hz',onInput:v=>{this.p.hz=v;this.osc?.frequency.setTargetAtTime(v,this.audio.ctx.currentTime,.02);}});
+    slider(this.controls,{label:'Fold threshold',min:.12,max:1,value:.58,format:v=>v.toFixed(2),onInput:v=>{this.p.fold=v;this.apply();}});
+    slider(this.controls,{label:'Bias',min:-1,max:1,value:0,format:v=>v.toFixed(2),onInput:v=>{this.p.bias=v;this.apply();}});
+    this.keyInput(this.controls,m=>{this.p.hz=440*Math.pow(2,(m-69)/12);this.osc?.frequency.setTargetAtTime(this.p.hz,this.audio.ctx.currentTime,.02);this.play();},()=>{});
+    this.drawCurve();
+  }
+  fold(x){const threshold=this.p.fold;let y=x+this.p.bias;const period=4*threshold;y=((y+threshold+period/2)%period+period)%period-period/2;return Math.abs(y)<=threshold?y:Math.sign(y)*(2*threshold-Math.abs(y));}
+  drawCurve(){const b=this.plot.frame([[-1,'-1'],[-.5,'-.5'],[0,'0'],[.5,'.5'],[1,'1']],[[-1,'-1'],[0,'0'],[1,'1']]);const pts=[];for(let i=0;i<=500;i++){const x=-1+2*i/500;pts.push([b.L+(x+1)/2*(b.R-b.L),b.B-(this.fold(x)+1)/2*(b.B-b.T)]);}this.plot.line(pts,GREEN,2);}
+  apply(){this.drawCurve();if(!this.shaper)return;const curve=new Float32Array(2048);for(let i=0;i<curve.length;i++)curve[i]=this.fold(i/(curve.length-1)*2-1);this.shaper.curve=curve;}
+  start(){const c=this.audio.ctx;this.osc=c.createOscillator();this.osc.type=this.p.shape;this.osc.frequency.value=this.p.hz;this.shaper=c.createWaveShaper();this.shaper.oversample='4x';this.amp=c.createGain();this.amp.gain.value=.0;this.osc.connect(this.shaper);this.shaper.connect(this.amp);this.amp.connect(this.audio.master);this.osc.start();this.apply();this.amp.gain.setTargetAtTime(.35,c.currentTime,.025);}
+  end(){const c=this.audio.ctx;this.amp.gain.setTargetAtTime(0,c.currentTime,.025);this.osc.stop(c.currentTime+.15);this.osc=this.shaper=this.amp=null;}
+  draw(){this.drawMeasured(this.wavePlot,.025);}
+}
+
+/* ============================================================================
+   010 Granular synthesis: a draggable grain position over a looping source.
+   ============================================================================ */
+class GranularLab extends Lab {
+  constructor(){
+    super();this.p={position:.25,size:.12,density:14,speed:1,reverse:false};this.grains=[];this.nextGrain=0;
+    this.setText('Experiment 010 - Granular Synthesis Lab',
+      'Granular synthesis plays many tiny slices of a sound. Drag the playhead across the source waveform, change grain size and density, and hear the texture shift from a recognizable sample into a cloud of sound.',
+      '<p>A grain is a short windowed fragment of a source buffer. Grain position chooses where it starts, grain size sets its duration, density controls how often new grains appear, and playback speed changes the direction and pitch inside each grain. Overlapping grains create a continuous texture.</p><p>This lab builds a small synthetic source from several partials, then launches short Hann-windowed grains from it. The position control is a movable read head, not a conventional oscillator frequency control.</p>',
+      ['Drag the read head across the source and listen to the different sections.', 'Make grains shorter and increase density for a smoother cloud.', 'Slow the playback speed to lower the pitch inside each grain.', 'Reverse the grains and compare the texture.']);
+    this.wavePlot=new Plot(this.vis,{title:'Source waveform and movable grain read head',xLabel:'source time',yLabel:'amplitude'});
+    this.activity=new Plot(this.vis,{title:'Recently launched grains',xLabel:'time',yLabel:'grain envelope'});
+    this.positionControl=slider(this.controls,{label:'Source position',min:0,max:1,value:.25,format:v=>Math.round(v*100)+'%',onInput:v=>{this.p.position=v;this.drawSource();}});
+    slider(this.controls,{label:'Grain size',min:.025,max:.35,value:.12,format:v=>Math.round(v*1000)+' ms',onInput:v=>{this.p.size=v;}});
+    slider(this.controls,{label:'Grains per second',min:2,max:40,value:14,step:1,format:v=>v.toFixed(0)+' grains/s',onInput:v=>{this.p.density=v;}});
+    slider(this.controls,{label:'Playback speed',min:.25,max:2,value:1,format:v=>v.toFixed(2)+'×',onInput:v=>{this.p.speed=v;}});
+    choice(this.controls,{label:'Grain direction',options:[{value:false,label:'Forward'},{value:true,label:'Reverse'}],value:false,onChange:v=>{this.p.reverse=v;}});
+    this.sourceCanvas=el('canvas','granular-source',this.vis);this.sourceCanvas.width=800;this.sourceCanvas.height=130;
+    this.sourceCanvas.style.display='none';
+    this.wavePlot.canvas.style.touchAction='none';
+    this.wavePlot.canvas.addEventListener('pointerdown',e=>{const rect=this.wavePlot.canvas.getBoundingClientRect();this.p.position=clamp((e.clientX-rect.left)/rect.width,0,1);this.positionControl.set(this.p.position);this.drawSource();});
+    this.keyInput(this.controls,m=>{this.p.position=(m-48)/16;this.positionControl.set(this.p.position);this.play();},()=>{});
+    this.makeSource();this.drawSource();
+  }
+  makeSource(){const c=this.audio.ctx;const length=2*c.sampleRate;this.buffer=c.createBuffer(1,length,c.sampleRate);const data=this.buffer.getChannelData(0);for(let i=0;i<length;i++){const t=i/c.sampleRate;const env=.55+.25*Math.sin(2*Math.PI*.5*t);data[i]=env*(.55*Math.sin(2*Math.PI*110*t)+.25*Math.sin(2*Math.PI*221*t)+.12*Math.sin(2*Math.PI*331*t)+.08*Math.sin(2*Math.PI*503*t));}}
+  drawSource(){const b=this.wavePlot.frame([[0,'0 s'],[.5,'1 s'],[1,'2 s']],[[-1,'-1'],[0,'0'],[1,'1']]);const data=this.buffer?.getChannelData(0);if(!data)return;const pts=[];for(let i=0;i<1000;i++){const x=i/(999);pts.push([b.L+x*(b.R-b.L),b.B-(data[Math.floor(x*(data.length-1))]+1)/2*(b.B-b.T)]);}this.wavePlot.line(pts,ACCENT,1.5);const x=b.L+this.p.position*(b.R-b.L);this.wavePlot.line([[x,b.T],[x,b.B]],AMBER,2);}
+  launchGrain(){if(!this.audio.ctx||!this.buffer)return;const c=this.audio.ctx;const source=c.createBufferSource(),gain=c.createGain();source.buffer=this.buffer;source.playbackRate.value=(this.p.reverse?-1:1)*this.p.speed;const duration=this.p.size/this.p.speed;const start=this.p.position*this.buffer.duration;const offset=this.p.reverse?Math.max(0,start-duration*this.p.speed):start;const safeOffset=Math.min(this.buffer.duration-.01,Math.max(0,offset));const now=c.currentTime;gain.gain.setValueAtTime(0,now);gain.gain.linearRampToValueAtTime(.12,now+duration*.5);gain.gain.linearRampToValueAtTime(0,now+duration);source.connect(gain);gain.connect(this.audio.master);source.start(now,safeOffset,duration*this.p.speed);source.stop(now+duration+.01);source.onended=()=>{source.disconnect();gain.disconnect();};this.grains.push({at:now,duration});this.grains=this.grains.slice(-60);}
+  start(){this.makeSource();this.nextGrain=this.audio.ctx.currentTime;}
+  end(){}
+  draw(){const now=this.audio.ctx.currentTime,interval=1/this.p.density;while(this.nextGrain<now+.05){this.launchGrain();this.nextGrain+=interval;}this.drawSource();const b=this.activity.frame([[0,'now'],[1,'recent']],[ [0,'0'],[1,'1'] ]);const pts=[];this.grains.forEach(g=>{const x=clamp(1-(now-g.at)/2,0,1);const y=Math.max(0,1-Math.abs(now-g.at-g.duration/2)/(g.duration/2));pts.push([b.L+x*(b.R-b.L),b.B-y*(b.B-b.T)]);});if(pts.length)this.activity.line(pts,GREEN,1.5);}
+}
+
+const LABS = { oscillator: OscillatorLab, filter: FilterLab, envelope: EnvelopeLab, fm: FMLab, harmonics: HarmonicsLab, beats: BeatsLab, space: SpaceLab, modulation: ModulationLab, wavefolding: WavefoldingLab, granular: GranularLab };
 document.addEventListener('DOMContentLoaded', () => { const L = LABS[document.body.dataset.lab]; if (L) window.__lab = new L(); });

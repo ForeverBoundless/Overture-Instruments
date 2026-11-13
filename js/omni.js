@@ -47,6 +47,26 @@ class OmniApp {
   constructor() {
     this.store = new PresetStore({ key: 'overture.omni.patches', version: 2, validate: validatePatch, migrations: { 1: (stored) => ({ ...stored, version: 2 }) } });
     this.patch = defaultPatch();
+    this.workspaceRestored = false;
+    this.currentId = null;
+    this.view = { x: 20, y: 20, scale: 0.66 };
+    let savedWorkspace = null;
+    try {
+      const raw = localStorage.getItem('overture.omni.workspace.v1');
+      if (raw) {
+        const candidate = JSON.parse(raw);
+        if (candidate?.version === 1 && candidate.patch) {
+          const patch = validatePatch(candidate.patch);
+          savedWorkspace = candidate;
+          this.patch = patch;
+          if (candidate.view && ['x', 'y', 'scale'].every((key) => Number.isFinite(Number(candidate.view[key])))) {
+            this.view = { x: Number(candidate.view.x), y: Number(candidate.view.y), scale: Math.min(2.5, Math.max(0.3, Number(candidate.view.scale))) };
+          }
+          this.currentId = candidate.currentId || null;
+          this.workspaceRestored = true;
+        }
+      }
+    } catch (error) { console.warn('Could not restore the local OMNI workspace.', error); }
     try {
       const communityImport = sessionStorage.getItem('overture.community.import');
       if (communityImport) {
@@ -54,10 +74,10 @@ class OmniApp {
         const payload = JSON.parse(communityImport);
         const patchData = payload?.data && payload?.communityItemId ? payload.data : payload;
         this.patch = validatePatch(patchData);
+        this.currentId = null;
+        this.workspaceRestored = false;
         this.communitySource = payload?.communityItemId ? {
-          id: payload.communityItemId,
-          title: payload.title || this.patch.name,
-          previewPath: payload.previewPath || null,
+          id: payload.communityItemId, title: payload.title || this.patch.name, previewPath: payload.previewPath || null,
         } : null;
         this.msgOnLoad = `Loaded "${this.communitySource?.title || this.patch.name}" from the community library.`;
       }
@@ -67,14 +87,19 @@ class OmniApp {
     }
     try { this.performanceVisible = localStorage.getItem('overture.omni.performance-visible') !== 'false'; }
     catch { this.performanceVisible = true; }
-    this.octaveShift = 0; this.keyboardPointerNotes = new Map();
+    if (savedWorkspace && typeof savedWorkspace.performanceVisible === 'boolean' && !this.communitySource) this.performanceVisible = savedWorkspace.performanceVisible;
+    const keyboardModule = this.patch.modules.find((module) => module.type === 'keyboard');
+    this.voiceMode = keyboardModule ? (Number(keyboardModule.params?.mode) === 1 ? 'mono' : 'poly') : (savedWorkspace?.voiceMode === 'mono' ? 'mono' : 'poly');
+    this.octaveShift = Number.isFinite(Number(savedWorkspace?.octaveShift)) ? Math.min(3, Math.max(-3, Number(savedWorkspace.octaveShift))) : 0;
+    this.keyboardPointerNotes = new Map();
     this.pitchBend = 0; this.modWheelValue = 0; this._modKeyDirection = 0; this._modRampRAF = null;
     this._wireResizeObserver = typeof ResizeObserver === 'function' ? new ResizeObserver(() => this.renderWires()) : null;
     this.ctx = null; this.live = null; this.selected = null; this.selectedWire = null; this.pending = null;
     this.selectedModules = new Set(); this.clipboard = null; this.snapEnabled = true;
     this.audioRecorder = null; this.midiRecorder = new MidiRecorder();
-    this.view = { x: 20, y: 20, scale: 0.66 }; this.history = []; this.future = []; this.rebuildTimer = null;
+    this.view = this.view || { x: 20, y: 20, scale: 0.66 }; this.history = []; this.future = []; this.rebuildTimer = null;
     this._build();
+    window.addEventListener('pagehide', () => this.persistWorkspace());
   }
 
   initialize() {
@@ -226,6 +251,17 @@ class OmniApp {
       if (openMenu) { openMenu.open = false; openMenu.querySelector('summary')?.focus(); }
     });
     const main = el('div', 'omni-main', root);
+    this.main = main;
+    main.dataset.mobileView = 'canvas';
+    const mobileNav = el('nav', 'omni-mobile-nav', main);
+    mobileNav.setAttribute('aria-label', 'Workspace panels');
+    this.mobileNavButtons = new Map();
+    [['canvas', 'CANVAS'], ['modules', 'MODULES'], ['controls', 'CONTROLS']].forEach(([view, label]) => {
+      const button = el('button', 'omni-mobile-nav__button', mobileNav, label);
+      button.type = 'button'; button.setAttribute('aria-pressed', String(view === 'canvas'));
+      button.addEventListener('click', () => this.setMobileView(view));
+      this.mobileNavButtons.set(view, button);
+    });
     // Library
     const lib = el('aside', 'omni-library', main);
     el('h2', '', lib, 'MODULES');
@@ -348,6 +384,7 @@ class OmniApp {
     this.masterInput.addEventListener('input', () => {
       this.patch.global.master = Number(this.masterInput.value);
       if (this.master && this.ctx) this.master.gain.setTargetAtTime(this.patch.global.master, this.ctx.currentTime, 0.01);
+      this.persistWorkspace();
     });
     registerMidiTarget(this.masterInput, {
       id: 'omni::master', label: 'MASTER', group: 'OUTPUT',
@@ -357,6 +394,16 @@ class OmniApp {
     const panic = el('button', 'omni-tb omni-panic', perfTools, 'PANIC');
     panic.type = 'button';
     panic.addEventListener('click', () => this.allOff());
+    const voiceMode = el('div', 'omni-voice-mode', perfTools);
+    el('span', 'omni-voice-mode__label', voiceMode, 'VOICE');
+    const voiceButtons = el('div', 'omni-voice-mode__buttons', voiceMode);
+    this.voiceModeButtons = new Map();
+    [['mono', 'MONO'], ['poly', 'POLY']].forEach(([mode, label]) => {
+      const button = el('button', 'omni-voice-mode__button', voiceButtons, label);
+      button.type = 'button'; button.setAttribute('aria-pressed', String(this.voiceMode === mode));
+      button.addEventListener('click', () => this.setVoiceMode(mode));
+      this.voiceModeButtons.set(mode, button);
+    });
     this.midiEl = el('span', 'omni-midi', perfTop, 'MIDI: searching…');
 
     const perfDeck = el('div', 'omni-perf__deck', perf);
@@ -421,7 +468,7 @@ class OmniApp {
     this.octaveUpBtn.setAttribute('aria-label', 'Shift keyboard up one octave');
     this.octaveUpBtn.addEventListener('click', () => this.setKeyboardOctave(this.octaveShift + 1));
     el('span', 'omni-octave__hint', octavePanel, '− / +');
-    this.setKeyboardOctave(0);
+    this.setKeyboardOctave(this.octaveShift);
     registerMidiTargetProvider(() => [{
       id: 'omni::keyboard-octave', label: 'KEYBOARD OCTAVE', group: 'PERFORMANCE',
       get: () => (this.octaveShift + 3) / 6,
@@ -477,6 +524,35 @@ class OmniApp {
     });
   }
 
+  setMobileView(view) {
+    if (!['canvas', 'modules', 'controls'].includes(view)) return;
+    this.main.dataset.mobileView = view;
+    this.mobileNavButtons.forEach((button, key) => button.setAttribute('aria-pressed', String(key === view)));
+    if (view === 'canvas') requestAnimationFrame(() => { this.applyView(); this.renderWires(); });
+  }
+  updateVoiceModeButtons() {
+    this.voiceModeButtons?.forEach((button, mode) => button.setAttribute('aria-pressed', String(mode === this.voiceMode)));
+  }
+  setVoiceMode(mode) {
+    if (!['mono', 'poly'].includes(mode) || mode === this.voiceMode) return;
+    this.allOff(); this.voiceMode = mode;
+    const value = mode === 'mono' ? 1 : 0; let changed = false;
+    this.patch.modules.filter((module) => module.type === 'keyboard').forEach((module) => {
+      if (Number(module.params.mode) !== value) { module.params.mode = value; changed = true; this.live?.setParam(module.id, 'mode', value); }
+    });
+    this.updateVoiceModeButtons();
+    if (changed) this.pushHistory(); else this.persistWorkspace();
+    this.msg(mode === 'mono' ? 'Mono mode: last-note priority is active. Set an oscillator Glide value for portamento.' : 'Poly mode: simultaneous notes can form chords; oscillator glide is bypassed.');
+  }
+  persistWorkspace() {
+    try {
+      localStorage.setItem('overture.omni.workspace.v1', JSON.stringify({
+        version: 1, patch: this.patch, view: this.view, currentId: this.currentId || null,
+        performanceVisible: this.performanceVisible, octaveShift: this.octaveShift, voiceMode: this.voiceMode,
+      }));
+    } catch (error) { console.warn('Could not save the local OMNI workspace.', error); }
+  }
+
   togglePerformancePane() {
     this.performanceVisible = !this.performanceVisible;
     this.performancePane.hidden = !this.performanceVisible;
@@ -484,6 +560,7 @@ class OmniApp {
     this.performanceToggleBtn.setAttribute('aria-pressed', String(this.performanceVisible));
     try { localStorage.setItem('overture.omni.performance-visible', String(this.performanceVisible)); }
     catch { /* UI toggle works even when local storage is unavailable */ }
+    this.persistWorkspace();
     requestAnimationFrame(() => { this.applyView(); this.renderWires(); });
   }
 
@@ -503,12 +580,14 @@ class OmniApp {
     // workspace has entered its normal grid layout during initial startup.
     this.fitView();
     this.renderWires();
+    this.persistWorkspace();
   }
   fitView() {
     const modules = [...this.cards.querySelectorAll('.omni-module')];
     if (!modules.length) {
       this.view = { x: 20, y: 20, scale: 1 };
       this.applyView();
+      this.persistWorkspace();
       return;
     }
     const bounds = modules.map((card) => ({
@@ -884,13 +963,19 @@ class OmniApp {
   }
 
   // ------------------------------------------------------------------ patch editing
-  pushHistory() { this.history.push(JSON.stringify(this.patch)); if (this.history.length > 60) this.history.shift(); this.future = []; this.refreshHistoryButtons(); }
+  pushHistory() { this.history.push(JSON.stringify(this.patch)); if (this.history.length > 60) this.history.shift(); this.future = []; this.refreshHistoryButtons(); this.persistWorkspace(); }
   refreshHistoryButtons() { this.undoBtn.disabled = this.history.length <= 1; this.redoBtn.disabled = !this.future.length; }
   undo() { if (this.history.length <= 1) return; this.future.push(this.history.pop()); this.patch = JSON.parse(this.history[this.history.length - 1]); this.afterLoad(); }
   redo() { if (!this.future.length) return; const s = this.future.pop(); this.history.push(s); this.patch = JSON.parse(s); this.afterLoad(); }
-  afterLoad() { this.selected = null; this.selectedModules.clear(); this.selectedWire = null; this.nameInput.value = this.patch.name; this.masterInput.value = this.patch.global.master; this.render(); this.scheduleRebuild(); this.refreshHistoryButtons(); }
+  afterLoad() {
+    this.selected = null; this.selectedModules.clear(); this.selectedWire = null;
+    this.nameInput.value = this.patch.name; this.masterInput.value = this.patch.global.master;
+    const keyboardModule = this.patch.modules.find((module) => module.type === 'keyboard');
+    this.voiceMode = keyboardModule ? (Number(keyboardModule.params?.mode) === 1 ? 'mono' : 'poly') : (this.voiceMode || 'poly');
+    this.updateVoiceModeButtons(); this.render(); this.scheduleRebuild(); this.refreshHistoryButtons(); this.persistWorkspace();
+  }
   load(patch, id = null) { try { this.patch = validatePatch(patch); this.currentId = id; this.communitySource = null; this.afterLoad(); this.setInitialView(); this.pushHistory(); } catch (err) { this.msg(err.message, true); } }
-  save() { const existing = this.currentId ? this.store.get(this.currentId) : null; const name = prompt('Instrument name', existing?.name || this.patch.name); if (name === null) return; this.patch.name = name.slice(0, 60) || 'Untitled'; this.nameInput.value = this.patch.name; const it = this.store.save(this.patch.name, this.patch, existing?.id); this.currentId = it.id; this.refreshLoadList(); this.msg(`Saved "${it.name}".`); }
+  save() { const existing = this.currentId ? this.store.get(this.currentId) : null; const name = prompt('Instrument name', existing?.name || this.patch.name); if (name === null) return; this.patch.name = name.slice(0, 60) || 'Untitled'; this.nameInput.value = this.patch.name; const it = this.store.save(this.patch.name, this.patch, existing?.id); this.currentId = it.id; this.refreshLoadList(); this.persistWorkspace(); this.msg(`Saved "${it.name}".`); }
 
   addModule(type, x, y) {
     const def = MODULES[type];
@@ -899,6 +984,7 @@ class OmniApp {
     const rawX = x ?? centre.x - 90 + (this.patch.modules.length % 4) * 18;
     const rawY = y ?? centre.y - 40 + (this.patch.modules.length % 4) * 18;
     const m = { id: uid(type.slice(0, 3)), type, x: this.snapCoordinate(rawX), y: this.snapCoordinate(rawY), params: defaultParams(type) };
+    if (type === 'keyboard') m.params.mode = this.voiceMode === 'mono' ? 1 : 0;
     this.patch.modules.push(m); this.selected = m.id; this.selectedModules = new Set([m.id]); this.render(); this.scheduleRebuild(); this.pushHistory(); this.msg(`Added ${def.name}.`);
   }
   removeModule(id) {
@@ -1005,6 +1091,7 @@ class OmniApp {
     const portCountChanged = (m.type === 'chord' && key === 'voices') || (m.type === 'mixer' && key === 'channels');
     if (commit && portCountChanged) this.syncModulePorts(id);
     if (commit) this.pushHistory();
+    else this.persistWorkspace();
   }
 
   // ------------------------------------------------------------------ canvas
@@ -1025,7 +1112,7 @@ class OmniApp {
     this.canvas.style.setProperty('--omni-grid-y', `${this.view.y}px`);
     this.canvas.style.setProperty('--omni-grid-size', `${gridSize}px`);
   }
-  zoom(f, cx, cy) { const r = this.canvas.getBoundingClientRect(); const px = cx ?? r.width / 2; const py = cy ?? r.height / 2; const next = Math.min(2.5, Math.max(0.3, this.view.scale * f)); this.view.x = px - (px - this.view.x) * (next / this.view.scale); this.view.y = py - (py - this.view.y) * (next / this.view.scale); this.view.scale = next; this.applyView(); }
+  zoom(f, cx, cy) { const r = this.canvas.getBoundingClientRect(); const px = cx ?? r.width / 2; const py = cy ?? r.height / 2; const next = Math.min(2.5, Math.max(0.3, this.view.scale * f)); this.view.x = px - (px - this.view.x) * (next / this.view.scale); this.view.y = py - (py - this.view.y) * (next / this.view.scale); this.view.scale = next; this.applyView(); this.persistWorkspace(); }
 
   _bindCanvas() {
     let drag = null;
@@ -1373,7 +1460,10 @@ const startOmni = async () => {
 
     // Read the now-uncovered canvas dimensions and fit every default module
     // inside the real viewport before the browser paints the workspace.
-    app.setInitialView();
+    if (app.workspaceRestored) {
+      app.applyView(); app.renderWires(); app.persistWorkspace();
+    } else app.setInitialView();
+    try { localStorage.setItem('overture.omni.intro-seen', 'true'); } catch { /* optional first-visit marker */ }
     window.dispatchEvent(new CustomEvent('overture:omni-ready'));
   } catch (error) {
     console.error('OMNI could not initialize.', error);

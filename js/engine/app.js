@@ -84,7 +84,7 @@ class App {
     const initial = this.presetManager.peekLastSession();
     if (this.communityPreset?.data) {
       this._syncKnobsToPatch(this.communityPreset.data);
-      this.oled?.showParameter('PRESET', 'COMMUNITY', 1600);
+      this.oled?.showPreset(0, this.communityPreset.title);
     } else if (initial?.patch) {
       this._syncKnobsToPatch(initial.patch);
       if (initial.source === 'factory' && this._presetSelect) { this._presetSelect.value = initial.presetId; this.oled?.showPreset(initial.presetId, initial.patch.name); }
@@ -539,9 +539,12 @@ class App {
       this._unlockPromise = (async () => {
         await this.engine.start();
         if (this.communityPreset?.data) {
-          this.presetManager.userPresets.push({ ...this.communityPreset.data, name: this.communityPreset.title });
+          const communityTitle = this.communityPreset.title;
+          this.presetManager.userPresets.push({ ...this.communityPreset.data, name: communityTitle });
           this.presetManager._saveUserPresets();
-          this.presetManager.loadUser(this.presetManager.userPresets.length - 1);
+          const communityIndex = this.presetManager.userPresets.length - 1;
+          this.presetManager.loadUser(communityIndex);
+          this.oled?.showPreset(communityIndex, communityTitle);
           this.communityPreset = null;
         } else this.presetManager.restoreLastSession();
         this._flushPendingMidiNotes();

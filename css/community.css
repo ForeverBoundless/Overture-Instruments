@@ -689,3 +689,15 @@ html[data-theme="light"] .community-report-dialog::backdrop {
   .community-moderation-actions { display:grid; grid-template-columns:1fr; }
   .community-moderation-actions .community-button { width:100%; }
 }
+
+/* On mobile, community cards get the full available width and a shorter content stack. */
+@media(max-width:760px){
+ .community-grid{grid-template-columns:minmax(0,1fr);grid-auto-rows:auto;align-items:stretch;gap:13px}
+ .community-card{height:auto;min-height:0;padding:16px 17px}
+ .community-card__top{gap:8px;margin-bottom:9px}
+ .community-card h3{font-size:21px;line-height:1.18}
+ .community-card__description{min-height:0;-webkit-line-clamp:2;line-height:1.45;margin-bottom:9px}
+ .community-tags{gap:5px;margin-bottom:9px}
+ .community-card__meta{gap:6px 10px;padding-top:8px}
+ .community-card__actions{padding-top:9px}
+}
