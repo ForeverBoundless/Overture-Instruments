@@ -8,7 +8,7 @@ import { consumeCommunityInstrumentPreset, createCommunityShareButton } from './
 
 function validatePattern(d) {
   if (!d || typeof d !== 'object') throw new Error('Not a TR-808 pattern.');
-  const out = { tempo: num(d.tempo, TEMPO_MIN, TEMPO_MAX, 120), length: Number(d.length) === 32 ? 32 : 16, lanes: {}, params: DEFAULT_PARAMS(), variants: { LT: 'LT', MT: 'MT', HT: 'HT', RS: 'RS', CP: 'CP' } };
+  const out = { tempo: num(d.tempo, TEMPO_MIN, TEMPO_MAX, 120), length: Number(d.length) === 32 ? 32 : 16, masterLevel: num(d.masterLevel, 0, 1, 0.8), lanes: {}, params: DEFAULT_PARAMS(), variants: { LT: 'LT', MT: 'MT', HT: 'HT', RS: 'RS', CP: 'CP' } };
   LANES.forEach((l) => { const src = Array.isArray(d.lanes?.[l.id]) ? d.lanes[l.id] : []; out.lanes[l.id] = Array.from({ length: 32 }, (_, i) => (src[i] === 2 ? 2 : src[i] ? 1 : 0)); });
   if (d.params && typeof d.params === 'object') LANES.forEach((l) => l.params.forEach((p) => { if (d.params[l.id] && d.params[l.id][p] !== undefined) out.params[l.id][p] = num(d.params[l.id][p], 0, 1, out.params[l.id][p]); }));
   if (d.variants && typeof d.variants === 'object') Object.keys(out.variants).forEach((k) => { const lane = LANES.find((l) => l.id === k); if (d.variants[k] === lane.alt) out.variants[k] = lane.alt; });
@@ -115,7 +115,7 @@ class TR808App {
     });
     createCommunityShareButton(pat.body, {
       instrumentId: 'tr-808', className: 'pn-btn',
-      getData: () => validatePattern(this._pattern),
+      getData: () => validatePattern({ ...this._pattern, masterLevel: this.engine.masterLevel }),
       getTitle: () => 'TR-808 pattern',
     });
     footer(this.shell, 'SYNTHESIZED PERCUSSION • 16/32-STEP SEQUENCER • 40–300 BPM • GM DRUM NOTES VIA MIDI');
@@ -126,10 +126,12 @@ class TR808App {
     this.engine.params = JSON.parse(JSON.stringify(p.params));
     this.engine.variants = { ...p.variants };
     this.engine.setTempo(p.tempo); this.engine.length = p.length;
+    this.engine.setMaster(p.masterLevel);
     this.syncEngine();
     LANES.forEach((l) => l.params.forEach((k) => this.knobs[`${l.id}.${k}`].setValue(p.params[l.id][k], true)));
     Object.entries(this.variantButtons).forEach(([id, b]) => { b.textContent = p.variants[id]; });
     this.knobs.tempo.setValue(p.tempo, true);
+    this.knobs.master.setValue(p.masterLevel, true);
     this.lengthToggle.setValue(p.length === 32, true); this.barButtons[1].disabled = p.length !== 32;
     if (p.length !== 32 && this.bar === 1) { this.bar = 0; this.barButtons.forEach((x, i) => x.setValue(i === 0, true)); }
     this.disp.sub = `PATTERN ${name}`;

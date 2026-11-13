@@ -44,13 +44,19 @@
 
 /* LFO panel geometry remains unchanged; its controls are paired into two compact rows per LFO. */
 .p3-lfo .hp-group-body{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;align-items:start}
-.p3-lfo .p3-col{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1.3fr);align-items:start;justify-items:center;gap:5px 4px;min-width:0;padding:2px 3px 7px;border-right:1px solid color-mix(in srgb,var(--hp-line) 55%,transparent)}
+.p3-lfo .p3-col{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:start;justify-items:center;gap:5px 6px;min-width:0;padding:2px 5px 5px;border-right:1px solid color-mix(in srgb,var(--hp-line) 55%,transparent)}
 .p3-lfo .p3-col:last-child{border-right:0}
 .p3-lfo .p3-col>.hp-label{grid-column:1/-1;width:100%;margin:0 0 2px;text-align:center}
 .p3-lfo .p3-lfo-row{display:contents}
-.p3-lfo .hp-knob{justify-self:center;max-width:100%;min-width:0}
-.p3-lfo select{justify-self:stretch;width:100%;min-width:0;max-width:100%;font-size:7px}
-.p3-lfo .hp-btn{justify-self:center;align-self:center;min-width:0}
+.p3-lfo .hp-knob{justify-self:center;width:100%;max-width:40px;min-width:0}
+.p3-lfo .hp-knob>.hp-control-label{font-size:6px!important;line-height:1.1;white-space:nowrap!important;overflow-wrap:normal!important}
+.p3-lfo .hp-knob-value{font-size:5.5px!important}
+.p3-lfo .hp-select{display:flex;flex-direction:column;justify-self:stretch;width:100%;min-width:0;max-width:100%}
+.p3-lfo .hp-select>.hp-control-label{white-space:nowrap!important;text-align:center}
+.p3-lfo .hp-select select{box-sizing:border-box;width:100%;min-width:0;max-width:100%;height:22px!important;padding:2px!important;font-size:6px!important}
+.p3-lfo .hp-btn{justify-self:stretch;align-self:center;width:100%;min-width:0}
+.p3-lfo .hp-btn .hp-button{width:100%;height:24px}
+.p3-lfo .hp-btn .hp-button-label{max-width:100%;font-size:6px!important;white-space:nowrap!important}
 @media(max-width:760px){
  .p3-lfo .hp-group-body{gap:5px}
  .p3-lfo .p3-col{gap:5px 3px;padding-inline:1px}

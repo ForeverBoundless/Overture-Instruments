@@ -728,3 +728,34 @@ test('Granular lab creates its audio buffer only after Play has initialized audi
   assert.match(granular, /start\(\)\{this\.makeSource\(\);this\.nextGrain=this\.audio\.ctx\.currentTime;\}/);
   assert.match(granular, /this\.buffer\?\.getChannelData\(0\)\|\|this\.sourceData/);
 });
+
+test('Community confirmation is required only when an audio file is attached', async () => {
+  const [page, app] = await Promise.all([
+    readFile(new URL('../community.html', import.meta.url), 'utf8'),
+    readFile(new URL('../js/community.js', import.meta.url), 'utf8'),
+  ]);
+  assert.match(page, /community-guidelines-check" hidden/);
+  assert.doesNotMatch(page, /community-content-confirmation" required/);
+  assert.match(app, /checkbox\.required = hasUploadedAudio/);
+  assert.match(app, /label\.hidden = !hasUploadedAudio/);
+});
+
+test('Community serializers preserve output levels and Pro 3 LFO controls stay within their panel', async () => {
+  const [lp, dx7, juno, p10, drums, pro3, styles] = await Promise.all([
+    readFile(new URL('../js/engine/PresetManager.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/yamaha-dx7.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/roland-juno-106.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/prophet10.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/roland-tr-808.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/sequential-pro-3.js', import.meta.url), 'utf8'),
+    readFile(new URL('../css/sequential-pro-3.css', import.meta.url), 'utf8'),
+  ]);
+  assert.match(lp, /masterVolume: this\.engine\._masterVolume/);
+  assert.match(dx7, /volume: num\(d\.volume/);
+  assert.match(juno, /volume: 0\.7/);
+  assert.match(p10, /masterTune: this\.engine\.state\.masterTune/);
+  assert.match(drums, /masterLevel: num\(d\.masterLevel/);
+  assert.match(drums, /masterLevel: this\.engine\.masterLevel/);
+  assert.match(pro3, /labels:\['TRI','SAW','R\.SAW','SQR','S&H'\]/);
+  assert.match(styles, /grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
+});

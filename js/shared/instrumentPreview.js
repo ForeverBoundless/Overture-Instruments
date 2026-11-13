@@ -310,8 +310,8 @@ export async function generateInstrumentPreview(instrumentId, patch) {
     case 'sub-37': return renderSub37(context, patch);
     case 'prophet-10': return renderProphet10(context, patch);
     case 'nord-c2d': return renderNord(context, patch);
-    case 'dx7': return renderWorklet(context, '../engine/DX7Processor.js', 'dx7-processor', patch, instrumentId);
-    case 'juno-106': return renderWorklet(context, '../engine/JunoProcessor.js', 'juno-processor', patch, instrumentId);
+    case 'dx7': return renderWorklet(context, '../engine/DX7Processor.js', 'dx7-processor', patch, instrumentId, { volume: patch.volume ?? 0.7 });
+    case 'juno-106': return renderWorklet(context, '../engine/JunoProcessor.js', 'juno-processor', patch, instrumentId, { volume: patch.volume ?? 0.7 });
     case 'ms-20': return renderWorklet(context, '../engine/MS20Processor.js', 'ms20-processor', patch, instrumentId);
     case 'sequential-pro-3': return renderWorklet(context, '../engine/Pro3Processor.js', 'pro3-processor', patch, instrumentId);
     case 'udo-super-8': return renderWorklet(context, '../engine/Super8Processor.js', 'super8-processor', patch, instrumentId);

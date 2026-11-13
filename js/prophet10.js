@@ -1394,6 +1394,10 @@ class Prophet10App {
     return {
       layers: [cloneProgram(this.edit[0]), cloneProgram(this.edit[1])],
       globals: { ...this.globals },
+      masterTune: this.engine.state.masterTune,
+      a440: !!this.engine.state.a440,
+      mute: !!this.engine.state.mute,
+      volume: this.engine.state.volume,
       activeLayer: this.activeLayer,
       linkLayers: !!this.linkLayers,
       presetMode: !!this.presetMode,
@@ -1414,6 +1418,10 @@ class Prophet10App {
     this.programIndex = 0;
     this._sendAllLayers();
     this._applyGlobalsToEngine();
+    this.engine.setMasterTune(Number(data.masterTune) || 0);
+    this.engine.setA440(!!data.a440);
+    this.engine.setMute(!!data.mute);
+    this.engine.setVolume(Number.isFinite(Number(data.volume)) ? Number(data.volume) : 0.7);
     this._refreshAll();
     this._saveGlobals();
     this.infoStatus.textContent = `COMMUNITY · ${String(title).slice(0, 48)}`;

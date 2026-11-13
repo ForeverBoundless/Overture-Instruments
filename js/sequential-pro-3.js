@@ -185,7 +185,7 @@ class Pro3App{
    const primary=addRow(col,'p3-lfo-row');
    k(primary,'lfo'+i+'Rate','Rate',{size:40,group:'LFO '+i});
    k(primary,'lfo'+i+'Amount','Amount',{size:40,group:'LFO '+i});
-   s(primary,'lfo'+i+'Wave','Shape',['triangle','saw','reverseSaw','square','sampleHold'],{group:'LFO '+i});
+   s(primary,'lfo'+i+'Wave','Shape',['triangle','saw','reverseSaw','square','sampleHold'],{group:'LFO '+i,labels:['TRI','SAW','R.SAW','SQR','S&H']});
    const secondary=addRow(col,'p3-lfo-row');
    k(secondary,'lfo'+i+'Phase','Phase',{size:36,group:'LFO '+i});
    k(secondary,'lfo'+i+'Slew','Slew',{size:36,group:'LFO '+i});
