@@ -91,9 +91,9 @@ export class LadderFilter {
   connect(dest) { this.output.connect(dest); return dest; }
   disconnect() { this.output.disconnect(); }
 
-  setCutoff(hz, glideSec = 0.003) {
+  setCutoff(hz, glideSec = 0.003, when = this.ctx.currentTime) {
     this._cutoff = Math.min(20000, Math.max(20, hz));
-    this.poles.forEach((p) => glideTo(p.frequency, this._cutoff, glideSec, this.ctx));
+    this.poles.forEach((p) => glideTo(p.frequency, this._cutoff, glideSec, this.ctx, when));
   }
   getCutoff() { return this._cutoff; }
 
