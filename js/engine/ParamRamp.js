@@ -1,8 +1,8 @@
 export const EPSILON = 1e-6;
 
-export function setImmediate(param, value, ctx) {
+export function setImmediate(param, value, ctx, when) {
   if (!param) return;
-  const now = ctx?.currentTime ?? 0;
+  const now = when ?? ctx?.currentTime ?? 0;
 
   if (typeof param.setValueAtTime === 'function') {
     param.setValueAtTime(value, now);
@@ -14,9 +14,9 @@ export function setImmediate(param, value, ctx) {
   }
 }
 
-export function glideTo(param, target, seconds, ctx) {
+export function glideTo(param, target, seconds, ctx, when) {
   if (!param) return;
-  const now = ctx?.currentTime ?? 0;
+  const now = when ?? ctx?.currentTime ?? 0;
   const safeSec = Math.max(seconds ?? 0, 0.0001);
 
   if (typeof param.cancelScheduledValues === 'function') {
