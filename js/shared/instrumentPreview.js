@@ -47,6 +47,12 @@ export function postWorkletMessage(engine, message) {
   throw new TypeError('The preview engine is missing its AudioWorklet message port.');
 }
 
+function queueWorkletPhrase(engine, context, notes = MELODY, { startOffset = START_OFFSET, gate = NOTE_GATE, spacing = EIGHTH } = {}) {
+  buildWorkletPhrase(context.sampleRate, notes, { startOffset, gate, spacing }).forEach((message) => {
+    postWorkletMessage(engine, message);
+  });
+}
+
 function buildWorkletPhrase(sampleRate, notes = MELODY, { startOffset = START_OFFSET, gate = NOTE_GATE, spacing = EIGHTH } = {}) {
   const events = [];
   notes.forEach((note, index) => {
