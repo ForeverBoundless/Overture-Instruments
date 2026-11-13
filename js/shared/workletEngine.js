@@ -19,13 +19,13 @@ export class WorkletEngine {
     this.onProcessorError = null;
   }
 
-  start() {
+  start(context = null) {
     if (this._starting) return this._starting;
-    if (this.started && this.ctx?.state === 'running' && !this.processorError) return Promise.resolve(true);
+    if (this.started && (context || this.ctx?.state === 'running') && !this.processorError) return Promise.resolve(true);
     // AudioContext can be suspended by browser policy after initial activation.
     // Resume it synchronously from the new trusted power-button gesture instead
     // of treating the old "started" flag as proof that sound is still available.
-    if (this.started && this.ctx?.state === 'suspended' && !this.processorError) {
+    if (!context && this.started && this.ctx?.state === 'suspended' && !this.processorError) {
       const ctx = this.ctx;
       const resumeAttempt = ctx.resume().then(() => {
         if (ctx.state !== 'running') throw new Error('The browser suspended audio again. Check this site\'s sound permissions and press Power once more.');
@@ -40,26 +40,26 @@ export class WorkletEngine {
     }
     const attempt = (async () => {
       const AC = window.AudioContext || window.webkitAudioContext;
-      if (!AC) throw new Error('Web Audio is not supported in this browser.');
+      if (!context && !AC) throw new Error('Web Audio is not supported in this browser.');
       // Dispose of a stale or failed graph before rebuilding it. Do not await
       // close() before constructing the new context: construction and resume
       // must happen inside the trusted user gesture.
-      const oldCtx = this.ctx;
+      const oldCtx = context ? null : this.ctx;
       try { this.node?.disconnect(); } catch {}
       try { this.output?.disconnect(); } catch {}
       if (oldCtx && oldCtx.state !== 'closed') { try { void oldCtx.close(); } catch {} }
       this.node = null; this.output = null; this.started = false;
-      const ctx = new AC({ latencyHint: 'interactive' }); this.ctx = ctx;
+      const ctx = context || new AC({ latencyHint: 'interactive' }); this.ctx = ctx;
       try {
         if (!ctx.audioWorklet) throw new Error('AudioWorklet is unavailable (use a secure https:// page or localhost).');
         // Call resume immediately inside the user's trusted gesture. Load the
         // processor at the same time, then verify the browser actually resumed.
-        const resume = ctx.state === 'running' ? Promise.resolve() : ctx.resume();
+        const resume = context || ctx.state === 'running' ? Promise.resolve() : ctx.resume();
         await Promise.all([ctx.audioWorklet.addModule(this.moduleUrl), resume]);
-        if (ctx.state !== 'running') {
+        if (!context && ctx.state !== 'running') {
           await ctx.resume();
         }
-        if (ctx.state !== 'running') {
+        if (!context && ctx.state !== 'running') {
           throw new Error('The browser kept the audio engine suspended. Check site sound permissions and try Power again.');
         }
         const node = new AudioWorkletNode(ctx, this.processorName, { numberOfInputs: this.inputs, numberOfOutputs: 1, outputChannelCount: [this.channels] });
@@ -81,7 +81,7 @@ export class WorkletEngine {
         try { this.node?.disconnect(); } catch {}
         try { this.output?.disconnect(); } catch {}
         this.node = null; this.output = null;
-        if (ctx.state !== 'closed') { try { await ctx.close(); } catch {} }
+        if (!context && ctx.state !== 'closed') { try { await ctx.close(); } catch {} }
         if (this.ctx === ctx) this.ctx = null;
         throw error;
       }
