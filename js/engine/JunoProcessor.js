@@ -19,8 +19,20 @@ class Voice {
   constructor() { this.note = -1; this.gate = false; this.active = false; this.order = 0; this.rel = 0; this.pitch = 60; this.target = 60; this.ph = Math.random(); this.subPh = 0; this.prev = 0; this.env = 0; this.stage = 'idle'; this.s = [0, 0, 0, 0]; this.hp1 = 0; this.hp2 = 0; this.ls = 0; this.seed = (Math.random() * 2 ** 31) | 0; this.vel = 1; }
 }
 
+function seedPreviewMessages(processor, messages, dispatch) {
+  if (!Array.isArray(messages)) return;
+  messages.forEach((message) => {
+    if (message?.t === 'noteOn' || message?.t === 'noteOff') {
+      processor.scheduled.push({ ...message });
+    } else {
+      dispatch.call(processor, message);
+    }
+  });
+  processor.scheduled.sort((a, b) => a.frame - b.frame);
+}
+
 class JunoProcessor extends AudioWorkletProcessor {
-  constructor() {
+  constructor(options = {}) {
     super();
     this.sr = sampleRate;
     this.p = { ...DEFAULT };
@@ -30,6 +42,7 @@ class JunoProcessor extends AudioWorkletProcessor {
     const len = Math.ceil(this.sr * 0.05);
     this.dl = new Float32Array(len); this.dw = 0; this.dlen = len; this.chPh = 0; this.chMix = 0;
     this.port.onmessage = (e) => this._msg(e.data);
+    seedPreviewMessages(this, options?.processorOptions?.messages, this._msg);
   }
 
   _msg(m) {
