@@ -4,8 +4,9 @@
  * provides a shared performance-message API.
  */
 export class WorkletEngine {
-  constructor(moduleUrl, processorName, { channels = 2, inputs = 0 } = {}) {
+  constructor(moduleUrl, processorName, { channels = 2, inputs = 0, processorOptions = undefined } = {}) {
     this.inputs = inputs;
+    this.processorOptions = processorOptions;
     this.moduleUrl = moduleUrl;
     this.processorName = processorName;
     this.channels = channels;
@@ -62,7 +63,12 @@ export class WorkletEngine {
         if (!context && ctx.state !== 'running') {
           throw new Error('The browser kept the audio engine suspended. Check site sound permissions and try Power again.');
         }
-        const node = new AudioWorkletNode(ctx, this.processorName, { numberOfInputs: this.inputs, numberOfOutputs: 1, outputChannelCount: [this.channels] });
+        const node = new AudioWorkletNode(ctx, this.processorName, {
+          numberOfInputs: this.inputs,
+          numberOfOutputs: 1,
+          outputChannelCount: [this.channels],
+          ...(this.processorOptions !== undefined ? { processorOptions: this.processorOptions } : {}),
+        });
         const output = ctx.createGain();
         output.gain.value = 1;
         node.connect(output);
