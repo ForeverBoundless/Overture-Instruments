@@ -212,7 +212,7 @@ async function renderProphet10(context, patch) {
       velAmount: program.extras.velAmount,
       atAmount: program.extras.atAmount,
       qComp: program.extras.qComp,
-      polyUnison: !!program.extras.polyUnison && !program.values[0],
+      polyUnison: !!program.extras.polyUnison && !program.values[52],
     },
   }));
   engine.loadProgram(0, programs[0].values, programs[0].extras);
