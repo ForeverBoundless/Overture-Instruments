@@ -35,6 +35,8 @@ class MS20Processor extends AudioWorkletProcessor {
   }
 
   _msg(m) {
+    if (m?.t === '__preview_flush') { this.port.postMessage({ t: '__preview_flush_ack', id: m.id }); return; }
+
     if ((m.t === 'noteOn' || m.t === 'noteOff') && Number.isFinite(m.frame) && m.frame > currentFrame) {
       this.scheduled.push(m);
       this.scheduled.sort((a, b) => a.frame - b.frame);
