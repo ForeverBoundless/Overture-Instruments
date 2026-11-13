@@ -25,10 +25,23 @@ class Voice {
   }
 }
 
+function seedPreviewMessages(processor, messages, dispatch) {
+  if (!Array.isArray(messages)) return;
+  messages.forEach((message) => {
+    if (message?.t === 'noteOn' || message?.t === 'noteOff') {
+      processor.scheduled.push({ ...message });
+    } else {
+      dispatch.call(processor, message);
+    }
+  });
+  processor.scheduled.sort((a, b) => a.frame - b.frame);
+}
+
 class EightVoiceProcessor extends AudioWorkletProcessor {
-  constructor() {
+  constructor(options = {}) {
     super(); this.p = { ...DEF }; this.v = Array.from({ length: 8 }, (_, i) => new Voice(i));
     this.bend = 0; this.mod = 0; this.sustain = false; this.order = 0; this.scheduled = []; this.port.onmessage = (e) => this.message(e.data);
+    seedPreviewMessages(this, options?.processorOptions?.messages, this.message);
   }
   message(m) {
     if (m?.t === '__preview_flush') { this.port.postMessage({ t: '__preview_flush_ack', id: m.id }); return; }
