@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { audioBufferToWav } from '../js/shared/instrumentPreview.js';
 import { Prophet10Engine } from '../js/engine/Prophet10Engine.js';
+import { postWorkletMessage } from '../js/shared/instrumentPreview.js';
 
 test('Community preview WAV output has a valid PCM RIFF/WAVE header', async () => {
   const samples = [
@@ -83,4 +84,21 @@ test('Prophet-10 preview engine exposes the public post API used by shared workl
   engine.post(noteOn);
   engine.post(noteOff);
   assert.deepEqual(messages, [noteOn, noteOff]);
+});
+
+
+test('Shared preview message dispatch supports both engine wrappers and raw worklet ports', () => {
+  const message = { t: 'noteOn', note: 60, vel: 0.8, frame: 2646 };
+  const wrapperMessages = [];
+  postWorkletMessage({ post: (value) => wrapperMessages.push(value) }, message);
+  assert.deepEqual(wrapperMessages, [message]);
+
+  const portMessages = [];
+  postWorkletMessage({ node: { port: { postMessage: (value) => portMessages.push(value) } } }, message);
+  assert.deepEqual(portMessages, [message]);
+
+  assert.throws(
+    () => postWorkletMessage({}, message),
+    /missing its AudioWorklet message port/,
+  );
 });
