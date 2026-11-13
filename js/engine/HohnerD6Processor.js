@@ -17,8 +17,20 @@ class ClavString{
   this.knock=0;this.knockState=0;this.loopGain=.999;
  }
 }
+function seedPreviewMessages(processor, messages, dispatch) {
+  if (!Array.isArray(messages)) return;
+  messages.forEach((message) => {
+    if (message?.t === 'noteOn' || message?.t === 'noteOff') {
+      processor.scheduled.push({ ...message });
+    } else {
+      dispatch.call(processor, message);
+    }
+  });
+  processor.scheduled.sort((a, b) => a.frame - b.frame);
+}
+
 class HohnerD6Processor extends AudioWorkletProcessor{
- constructor(){
+ constructor(options = {}){
   super();this.p={...DEFAULT};this.voices=Array.from({length:60},()=>new ClavString());
   this.order=0;this.bend=0;this.sustain=false;this.scheduled=[];
   this.pedals={
@@ -39,6 +51,7 @@ class HohnerD6Processor extends AudioWorkletProcessor{
    springLP_L:new Float32Array(4),springLP_R:new Float32Array(4)
   };
   this.port.onmessage=e=>this.message(e.data);
+    seedPreviewMessages(this, options?.processorOptions?.messages, this.message);
  }
  message(m){
     if (m?.t === '__preview_flush') { this.port.postMessage({ t: '__preview_flush_ack', id: m.id }); return; }
