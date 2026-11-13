@@ -353,7 +353,7 @@ export class Sub37Engine {
     this.subOsc.frequency.setTargetAtTime(Math.max(10, f1 * Math.pow(2, this.subOctave)), when, Math.max(tc, 0.002));
     this.voice._updateCutoff(0.01, when);
     if (!legato || !this.legato) {
-      this.lfos.forEach((lfo) => lfo.retriggerNow());
+      this.lfos.forEach((lfo) => lfo.retriggerNow(when));
       this.voice.ampEnv.triggerAttack(velocity, when);
       this.voice.filterEnv.triggerAttack(velocity, when);
     }
