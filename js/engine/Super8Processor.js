@@ -145,6 +145,8 @@ class Super8Processor extends AudioWorkletProcessor{
   this.layers.forEach((p,i)=>{const s=this.sm[i];s.mix=clamp(p.mix);s.pan=clamp(p.pan);s.cut=clamp(p.cutoff);s.res=clamp(p.resonance);s.hpf=clamp(p.hpf);});
  }
  message(m){
+    if (m?.t === '__preview_flush') { this.port.postMessage({ t: '__preview_flush_ack', id: m.id }); return; }
+
   if((m.t==='noteOn'||m.t==='noteOff')&&Number.isFinite(m.frame)&&m.frame>currentFrame){this.scheduled.push(m);this.scheduled.sort((a,b)=>a.frame-b.frame);return;}
   if(m.t==='patch'){this.global={...this.global,...m.patch};this.layers=[clone(LAYER_DEFAULT),clone(LAYER_DEFAULT)].map((d,i)=>({...d,...(m.patch.layers?.[i]||{})}));this.layers.forEach(layer=>{if(Array.isArray(layer.userWaves))layer.userWaves=layer.userWaves.map(w=>Array.isArray(w)?Float32Array.from(w):null);});this.snapSmooth();return;}
   if(m.t==='param'){
