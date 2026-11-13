@@ -50,6 +50,17 @@ function message(id, text, error = false) {
   node.classList.toggle('is-error', error);
 }
 
+function syncAudioConfirmationRequirement() {
+  const audioInput = byId('community-audio-file');
+  const checkbox = byId('community-content-confirmation');
+  const label = checkbox?.closest('.community-guidelines-check');
+  if (!audioInput || !checkbox || !label) return;
+  const hasUploadedAudio = !!audioInput.files?.length;
+  checkbox.required = hasUploadedAudio;
+  label.hidden = !hasUploadedAudio;
+  if (!hasUploadedAudio) checkbox.checked = false;
+}
+
 function safeJsonCopy(value) {
   return JSON.parse(JSON.stringify(value));
 }
@@ -966,6 +977,8 @@ async function initialise() {
   byId('community-publish-open').addEventListener('click', () => setPublishOpen(true));
   byId('community-publish-close').addEventListener('click', () => setPublishOpen(false));
   byId('community-publish-form').addEventListener('submit', publishItem);
+  byId('community-audio-file').addEventListener('change', syncAudioConfirmationRequirement);
+  syncAudioConfirmationRequirement();
   byId('community-report-form').addEventListener('submit', submitReport);
   byId('community-report-close').addEventListener('click', () => byId('community-report-dialog').close());
   byId('community-report-cancel').addEventListener('click', () => byId('community-report-dialog').close());

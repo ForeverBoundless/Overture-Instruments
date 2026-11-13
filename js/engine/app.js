@@ -962,6 +962,7 @@ class App {
     set('lfoToMix', patch.lfoToMix);
     set('lfoToAmp', patch.lfoToAmp);
     set('glideTime', patch.glideTime);
+    set('masterVolume', patch.masterVolume ?? 0.25);
 
     if (this._lfoWaveButtons) {
       const waveMap = { triangle: 0, square: 1, sine: 2, saw: 3, reverseSaw: 4, sh: 5 };

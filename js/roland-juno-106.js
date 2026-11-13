@@ -5,7 +5,7 @@ import { el, section, knob, toggle, select, display, performance, power, presetB
 import { JUNO_PRESETS } from './data/junoPresets.js';
 import { consumeCommunityInstrumentPreset, createCommunityShareButton } from './shared/communityPreset.js';
 
-const DEF = { lfoRate: 0.4, lfoDelay: 0, dcoLfo: 0, pwm: 0.3, pwmMode: 'man', range: 8, saw: true, pulse: false, sub: 0, noise: 0, hpf: 1, cutoff: 0.7, res: 0.1, envAmt: 0.3, envPolarity: 1, vcfLfo: 0, kbd: 0.5, vcaMode: 'env', vcaLevel: 0.8, attack: 0.05, decay: 0.3, sustain: 0.7, release: 0.3, chorus: 0, portamento: 0, bendRange: 2, benderLfo: 0.1 };
+const DEF = { volume: 0.7, lfoRate: 0.4, lfoDelay: 0, dcoLfo: 0, pwm: 0.3, pwmMode: 'man', range: 8, saw: true, pulse: false, sub: 0, noise: 0, hpf: 1, cutoff: 0.7, res: 0.1, envAmt: 0.3, envPolarity: 1, vcfLfo: 0, kbd: 0.5, vcaMode: 'env', vcaLevel: 0.8, attack: 0.05, decay: 0.3, sustain: 0.7, release: 0.3, chorus: 0, portamento: 0, bendRange: 2, benderLfo: 0.1 };
 function validate(d) {
   if (!d || typeof d !== 'object') throw new Error('Not a Juno patch.');
   const o = { ...DEF };
@@ -46,8 +46,15 @@ class JunoApp {
     if (community) { this.patch = community.data; this.disp.set(`PATCH  ${community.title}`, 'COMMUNITY PRESET'); this.refresh(); }
   }
 
-  send() { this.engine.post({ t: 'patch', patch: this.patch }); }
-  set(key, value) { this.patch[key] = value; this.engine.post({ t: 'param', key, value }); }
+  send() {
+    this.engine.post({ t: 'patch', patch: this.patch });
+    this.engine.setVolume(this.patch.volume);
+  }
+  set(key, value) {
+    this.patch[key] = value;
+    if (key === 'volume') this.engine.setVolume(value);
+    else this.engine.post({ t: 'param', key, value });
+  }
 
   _build() {
     const page = el('div', 'pn-page', document.getElementById('juno-root'));
@@ -90,7 +97,7 @@ class JunoApp {
     const perf = section(r2, 'PERFORMANCE');
     const pk = el('div', 'pn-knobs', perf.body); K(pk, 'portamento', 'PORTAMENTO', tfmt(1.5)); K(pk, 'benderLfo', 'BENDER→LFO');
     this.ui.bendRange = select(perf.body, 'BEND RANGE', [1, 2, 3, 5, 7, 12].map((n) => ({ value: n, label: `${n} st` })), 2, (v) => this.set('bendRange', Number(v)));
-    this.ui.volume = knob(pk, { label: 'VOLUME', min: 0, max: 1, value: 0.7, formatValue: (v) => `${Math.round(v * 100)}%`, onChange: (v) => this.engine.setVolume(v) });
+    this.ui.volume = knob(pk, { label: 'VOLUME', min: 0, max: 1, value: this.patch.volume, formatValue: (v) => `${Math.round(v * 100)}%`, onChange: (v) => this.set('volume', v) });
     const pre = section(r2, 'PATCH MEMORY', 'ORIGINAL OVERTURE PATCHES');
     this.presets = presetBar(pre.body, {
       factory: JUNO_PRESETS, store: this.store, display: this.disp, filename: 'juno-106-patch', panic: () => this.perf.allOff(),
@@ -116,6 +123,7 @@ class JunoApp {
       else c.setValue(p[k], true);
     });
     this.chorusButtons.forEach((b, i) => b.setValue(i === p.chorus, true));
+    this.engine.setVolume(p.volume);
   }
 }
 document.addEventListener('DOMContentLoaded', () => { window.__junoApp = new JunoApp(); });

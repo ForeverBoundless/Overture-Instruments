@@ -13,7 +13,7 @@ const LFO_WAVES = ['tri', 'saw', 'sqr', 'sine', 'sh'];
 function validateDX7(d) {
   if (!d || typeof d !== 'object' || !Array.isArray(d.ops) || d.ops.length !== 6) throw new Error('Not a DX7 voice.');
   const out = {
-    algorithm: num(d.algorithm, 1, 32, 1), feedback: num(d.feedback, 0, 7, 0), transpose: num(d.transpose, -24, 24, 0), bendRange: num(d.bendRange, 0, 12, 2),
+    algorithm: num(d.algorithm, 1, 32, 1), feedback: num(d.feedback, 0, 7, 0), transpose: num(d.transpose, -24, 24, 0), bendRange: num(d.bendRange, 0, 12, 2), volume: num(d.volume, 0, 1, 0.7),
     wheelPitch: num(d.wheelPitch, 0, 1, 1), wheelAmp: num(d.wheelAmp, 0, 1, 0), atPitch: num(d.atPitch, 0, 1, 0),
     lfo: { speed: num(d.lfo?.speed, 0, 99, 35), delay: num(d.lfo?.delay, 0, 99, 0), pmd: num(d.lfo?.pmd, 0, 99, 0), amd: num(d.lfo?.amd, 0, 99, 0), wave: LFO_WAVES.includes(d.lfo?.wave) ? d.lfo.wave : 'tri', sync: !!d.lfo?.sync, pms: num(d.lfo?.pms, 0, 7, 3) },
     ops: d.ops.map((o) => ({
@@ -51,7 +51,10 @@ class DX7App {
     if (community) { this.patch = community.data; this.disp.set(`VOICE  ${community.title}`, `ALG ${this.patch.algorithm} · COMMUNITY`); this.refresh(); }
   }
 
-  send() { this.engine.post({ t: 'patch', patch: JSON.parse(JSON.stringify(this.patch)) }); }
+  send() {
+    this.engine.post({ t: 'patch', patch: JSON.parse(JSON.stringify(this.patch)) });
+    this.engine.setVolume(this.patch.volume);
+  }
   edit(fn) { fn(this.patch); this.send(); this.drawAlgorithm(); this.drawEnvelope(); }
 
   _build() {
@@ -84,7 +87,7 @@ class DX7App {
     const gk = el('div', 'pn-knobs', gc);
     this.knobs.feedback = knob(gk, { label: 'FEEDBACK', min: 0, max: 7, value: 5, formatValue: (v) => String(Math.round(v)), onChange: (v) => this.edit((p) => { p.feedback = Math.round(v); }) });
     this.knobs.transpose = knob(gk, { label: 'TRANSPOSE', min: -24, max: 24, value: 0, bipolar: true, formatValue: (v) => `${Math.round(v)} st`, onChange: (v) => this.edit((p) => { p.transpose = Math.round(v); }) });
-    this.knobs.volume = knob(gk, { label: 'VOLUME', min: 0, max: 1, value: 0.7, formatValue: (v) => `${Math.round(v * 100)}%`, onChange: (v) => this.engine.setVolume(v) });
+    this.knobs.volume = knob(gk, { label: 'VOLUME', min: 0, max: 1, value: this.patch.volume, formatValue: (v) => `${Math.round(v * 100)}%`, onChange: (v) => { this.patch.volume = v; this.engine.setVolume(v); } });
     this.algSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     this.algSvg.setAttribute('viewBox', '0 -8 240 130');
     this.algSvg.classList.add('dx7-alg');
@@ -151,6 +154,7 @@ class DX7App {
     const p = this.patch;
     this.algSelect.setValue(p.algorithm, true);
     this.knobs.feedback.setValue(p.feedback, true); this.knobs.transpose.setValue(p.transpose, true);
+    this.knobs.volume.setValue(p.volume, true); this.engine.setVolume(p.volume);
     ['speed', 'delay', 'pmd', 'amd', 'pms'].forEach((k) => this.knobs[k].setValue(p.lfo[k], true));
     this.lfoWave.setValue(p.lfo.wave, true); this.lfoSync.setValue(p.lfo.sync, true);
     this.knobs.wheelPitch.setValue(p.wheelPitch, true); this.knobs.wheelAmp.setValue(p.wheelAmp, true); this.knobs.atPitch.setValue(p.atPitch, true);

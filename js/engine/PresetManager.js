@@ -82,6 +82,7 @@ export class PresetManager {
     engine.setLFODestinationBaseAmount('amplitude', patch.lfoToAmp);
 
     engine.glide.setTime(patch.glideTime);
+    engine.setMasterVolume(patch.masterVolume ?? 0.25);
     this._lastAppliedPatch = { ...patch };
     if (this.currentPresetSource === 'factory') {
       this._factorySnapshots.set(this.currentPresetId, JSON.parse(JSON.stringify(patch)));
@@ -146,6 +147,7 @@ export class PresetManager {
       lfoToMix: this.engine._lfoDestinationBaseAmounts?.mix ?? 0,
       lfoToAmp: this.engine._lfoDestinationBaseAmounts?.amplitude ?? 0,
       glideTime: this.engine.glide.timeSec,
+      masterVolume: this.engine._masterVolume ?? 0.25,
     };
   }
 
