@@ -50,11 +50,11 @@ export class NordC2DEngine {
     return { drawbars: [...DEFAULT_DRAWBARS], vibrato: 'C3', vibratoEnabled: true, percussion: false, percussionHarmonic: 3, percussionLevel: 'Normal', percussionDecayMode: 'Slow', percussionDecay: 0.35, preset: 1, activeBank: 'A', banks: { A: [...DEFAULT_DRAWBARS], B: [...DEFAULT_DRAWBARS] } };
   }
 
-  async start() {
+  async start(context = null) {
     if (this.started) return;
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-    this.ctx = new AudioContextClass();
-    if (this.ctx.state === 'suspended') await this.ctx.resume();
+    this.ctx = context || new AudioContextClass();
+    if (!context && this.ctx.state === 'suspended') await this.ctx.resume();
     this.output = this.ctx.createGain();
     this.output.gain.value = this.masterLevel;
     this.driveNode = this.ctx.createWaveShaper();
@@ -233,7 +233,7 @@ export class NordC2DEngine {
       return frequency / midiToFreq(midi);
     }
 
-  _click(voice, amount, release = false) {
+  _click(voice, amount, release = false, when = this.ctx.currentTime) {
       const click = this.ctx.createOscillator();
       const filter = this.ctx.createBiquadFilter();
       const gain = this.ctx.createGain();
@@ -242,9 +242,9 @@ export class NordC2DEngine {
       filter.frequency.value = release ? 1550 : 2400;
       filter.Q.value = 2.2;
       click.frequency.value = release ? 1700 : 2300;
-      gain.gain.setValueAtTime(amount, this.ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + (release ? 0.022 : 0.012));
-      click.connect(filter); filter.connect(gain); gain.connect(this.output); click.start(); click.stop(this.ctx.currentTime + 0.03);
+      gain.gain.setValueAtTime(amount, when);
+      gain.gain.exponentialRampToValueAtTime(0.0001, when + (release ? 0.022 : 0.012));
+      click.connect(filter); filter.connect(gain); gain.connect(this.output); click.start(when); click.stop(when + 0.03);
   }
 
   setOctave(manual, value) {
@@ -324,13 +324,13 @@ export class NordC2DEngine {
     return this.model === 'B3' ? B3_DRAWBAR_LEVELS[step] : ((8 - step) / 8) * 0.095;
   }
 
-  _percussion(manual, midi, velocity) {
+  _percussion(manual, midi, velocity, when = this.ctx.currentTime) {
     const state = this.manuals[manual];
     if (manual !== 1 || !state.percussion || state.activeBank !== 'B' || this.voices[manual].size > 0) return;
     const partialIndex = state.percussionHarmonic === 2 ? 1 : 2;
     const oscillator = this.ctx.createOscillator();
     const gain = this.ctx.createGain();
-    const now = this.ctx.currentTime;
+    const now = when;
     const ratio = (MODEL_RATIOS.B3 ?? PARTIAL_RATIOS)[partialIndex];
     const level = state.percussionLevel === 'Soft' ? 0.045 : 0.085;
     const decay = state.percussionDecayMode === 'Fast' ? 0.12 : 0.32;
@@ -344,12 +344,12 @@ export class NordC2DEngine {
     oscillator.stop(now + decay + 0.03);
   }
 
-  noteOn(manual, note, velocity = 0.9) {
+  noteOn(manual, note, velocity = 0.9, when = this.ctx.currentTime) {
     if (!this.started) return;
     this.sustainedNotes[manual].delete(note);
-    this.noteOff(manual, note);
+    this.noteOff(manual, note, when);
     const midi = noteNameToMidi(note) + this.octaveShift[manual] * 12;
-    const now = this.ctx.currentTime;
+    const now = when;
     const voice = { partials: [], gain: this.ctx.createGain(), note };
     voice.gain.gain.setValueAtTime(0.0001, now);
     voice.gain.gain.exponentialRampToValueAtTime(Math.max(0.018, velocity * 0.58), now + 0.008);
@@ -374,21 +374,21 @@ export class NordC2DEngine {
     voice.baseFrequency = midiToFreq(midi);
     voice.midi = midi;
     if (this.model === 'B3' && this.manuals[manual].drawbars.some((value) => value < 8)) {
-      this._click(voice, { Low: 0.015, Normal: 0.03, High: 0.05, Higher: 0.08 }[this.keyClick] ?? 0.03);
-      this._percussion(manual, midi, velocity);
+      this._click(voice, { Low: 0.015, Normal: 0.03, High: 0.05, Higher: 0.08 }[this.keyClick] ?? 0.03, false, now);
+      this._percussion(manual, midi, velocity, now);
     }
     this.voices[manual].set(note, voice);
   }
 
-  noteOff(manual, note) {
+  noteOff(manual, note, when = this.ctx.currentTime) {
     const voice = this.voices[manual].get(note);
     if (!voice || !this.started) return;
     if (this.sustain) {
       this.sustainedNotes[manual].add(note);
       return;
     }
-    const now = this.ctx.currentTime;
-    if (this.model === 'B3' && this.keyBounce) this._click(voice, 0.018, true);
+    const now = when;
+    if (this.model === 'B3' && this.keyBounce) this._click(voice, 0.018, true, now);
     voice.gain.gain.cancelScheduledValues(now);
     voice.gain.gain.setTargetAtTime(0.0001, now, 0.09);
     voice.partials.forEach(({ oscillator }) => oscillator.stop(now + 0.45));
