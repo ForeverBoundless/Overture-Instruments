@@ -249,15 +249,15 @@ export class Oscillator {
   }
 
   /** Base pitch in Hz, before drift/detune/glide/bend are summed. */
-  setFrequency(hz, glideTimeConstant = 0) {
+  setFrequency(hz, glideTimeConstant = 0, when = this.ctx.currentTime) {
     this._baseFrequency = hz;
     this._updatePulse(glideTimeConstant);
     [this.oscA, this.oscB, this.pwmOscA, this.pwmOscB].forEach((osc) => {
       if (glideTimeConstant > 0) {
-        osc.frequency.cancelScheduledValues(this.ctx.currentTime);
-        osc.frequency.setTargetAtTime(hz, this.ctx.currentTime, glideTimeConstant);
+        osc.frequency.cancelScheduledValues(when);
+        osc.frequency.setTargetAtTime(hz, when, glideTimeConstant);
       } else {
-        setImmediate(osc.frequency, hz, this.ctx);
+        setImmediate(osc.frequency, hz, this.ctx, when);
       }
     });
   }
