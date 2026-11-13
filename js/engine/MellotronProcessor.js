@@ -50,13 +50,26 @@ class TapeVoice {
   }
 }
 
+function seedPreviewMessages(processor, messages, dispatch) {
+  if (!Array.isArray(messages)) return;
+  messages.forEach((message) => {
+    if (message?.t === 'noteOn' || message?.t === 'noteOff') {
+      processor.scheduled.push({ ...message });
+    } else {
+      dispatch.call(processor, message);
+    }
+  });
+  processor.scheduled.sort((a, b) => a.frame - b.frame);
+}
+
 class MellotronProcessor extends AudioWorkletProcessor {
-  constructor() {
+  constructor(options = {}) {
     super();
     this.p = { ...DEFAULT };
     this.voices = Array.from({ length: 35 }, () => new TapeVoice());
     this.bend = 0; this.last = 0; this.master = 0; this.tone = DEFAULT.tone; this.scheduled = [];
     this.port.onmessage = (e) => this.message(e.data);
+    seedPreviewMessages(this, options?.processorOptions?.messages, this.message);
   }
 
   message(m) {
