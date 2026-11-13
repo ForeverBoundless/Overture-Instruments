@@ -102,3 +102,19 @@ test('Shared preview message dispatch supports both engine wrappers and raw work
     /missing its AudioWorklet message port/,
   );
 });
+
+test('Worklet previews wait for the processor to receive queued events before accepting the render', async () => {
+  const preview = await readFile(new URL('../js/shared/instrumentPreview.js', import.meta.url), 'utf8');
+  assert.match(preview, /__preview_flush_ack/);
+  assert.match(preview, /await acknowledged/);
+  assert.match(preview, /queueWorkletPhrase\(engine, context\);\s*return render\(context, engine\);/);
+  const processors = [
+    'Prophet10Processor.js', 'DX7Processor.js', 'JunoProcessor.js', 'MS20Processor.js',
+    'Pro3Processor.js', 'Super8Processor.js', 'OBXaProcessor.js', 'HohnerD6Processor.js',
+    'OberheimEightVoiceProcessor.js', 'MellotronProcessor.js',
+  ];
+  for (const file of processors) {
+    const source = await readFile(new URL(`../js/engine/${file}`, import.meta.url), 'utf8');
+    assert.match(source, /__preview_flush_ack/, `${file} should acknowledge preview message delivery`);
+  }
+});
