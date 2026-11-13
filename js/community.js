@@ -167,8 +167,11 @@ function syncContentType() {
   const type = byId('community-record-type').value;
   const instrument = byId('community-instrument');
   const isInstrumentPreset = type === 'instrument_preset';
-  instrument.hidden = !isInstrumentPreset;
-  byId('community-instrument-wrap').hidden = !isInstrumentPreset;
+  // Keep the selector visible in both modes: OMNI has no hardware instrument,
+  // so show its explicit N/A value rather than silently falling back to LP.
+  instrument.hidden = false;
+  instrument.disabled = !isInstrumentPreset;
+  byId('community-instrument-wrap').hidden = false;
   if (!isInstrumentPreset) {
     instrument.value = 'omni';
     state.draftType = 'omni_patch';

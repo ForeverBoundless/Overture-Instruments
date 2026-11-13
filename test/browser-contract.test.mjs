@@ -695,6 +695,7 @@ test('Community OMNI drafts use an explicit not-applicable instrument value', as
   ]);
   assert.ok(page.includes('<option value="omni">Not applicable — OMNI patch</option>'));
   assert.ok(source.includes("instrument.value = 'omni'"));
+  assert.ok(source.includes("instrument.disabled = !isInstrumentPreset"));
   assert.ok(source.includes("type === 'omni_patch' ? 'omni' : (instrumentId || 'little-phatty')"));
   assert.ok(source.includes("if (!INSTRUMENTS[instrument.value]) instrument.value = 'little-phatty'"));
   assert.ok(source.includes('function beginEdit'));
