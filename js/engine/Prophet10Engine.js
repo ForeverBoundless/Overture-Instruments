@@ -39,7 +39,7 @@ export class Prophet10Engine {
   }
 
   /** Must be called from a user gesture (browser autoplay policy). */
-  start(context = null) {
+  start(context = null, processorOptions = undefined) {
     if (this.started) return Promise.resolve(true);
     if (this._starting) return this._starting;
     this._starting = (async () => {
@@ -53,12 +53,13 @@ export class Prophet10Engine {
         numberOfInputs: 0,
         numberOfOutputs: 1,
         outputChannelCount: [2],
+        ...(processorOptions !== undefined ? { processorOptions } : {}),
       });
       this.node.connect(this.ctx.destination);
       await resume;
       if (!context && this.ctx.state !== 'running') throw new Error('The browser kept the audio engine suspended. Check site sound permissions and try Power again.');
       this.started = true;
-      this._sendAll();
+      if (processorOptions === undefined) this._sendAll();
       return true;
     })();
     this._starting.catch(() => { this._starting = null; });
