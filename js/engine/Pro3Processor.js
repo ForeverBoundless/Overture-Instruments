@@ -121,6 +121,8 @@ class Pro3Processor extends AudioWorkletProcessor{
   }
  }
  message(m){
+    if (m?.t === '__preview_flush') { this.port.postMessage({ t: '__preview_flush_ack', id: m.id }); return; }
+
   if((m.t==="noteOn"||m.t==="noteOff")&&Number.isFinite(m.frame)&&m.frame>currentFrame){this.scheduled.push(m);this.scheduled.sort((a,b)=>a.frame-b.frame);return;}
   if(m.t==="patch"){
    this.p={...DEFAULT,...m.patch};this.p.seqTracks=m.patch.seqTracks||DEFAULT.seqTracks;this.p.seqDestinations=m.patch.seqDestinations||DEFAULT.seqDestinations;this.p.modRoutes=m.patch.modRoutes||[];
