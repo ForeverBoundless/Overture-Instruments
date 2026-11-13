@@ -1,333 +1,258 @@
 /**
- * Generate a short WAV preview for an instrument preset without requiring the
- * emulator page or an unlocked live AudioContext. The tone follows the patch's
- * oscillator/filter/envelope settings where those values are available.
+ * Render Community previews with the same instrument engines and saved patch
+ * formats used by the live emulator pages. Preview note events are scheduled
+ * into the offline audio clock; no generic oscillator substitute is used.
  */
-const SAMPLE_RATE = 22050;
+import { WorkletEngine } from './workletEngine.js';
+import { AudioEngine } from '../engine/AudioEngine.js';
+import { PresetManager } from '../engine/PresetManager.js';
+import { Sub37Engine } from '../engine/Sub37Engine.js';
+import { NordC2DEngine } from '../engine/NordC2DEngine.js';
+import { TR808Engine, LANES } from '../engine/TR808Engine.js';
+import { Prophet10Engine } from '../engine/Prophet10Engine.js';
+
+const SAMPLE_RATE = 44100;
+const TEMPO = 112;
+const EIGHTH = 60 / TEMPO / 2;
+const NOTE_GATE = EIGHTH * 0.82;
+const START_OFFSET = 0.06;
 const MELODY = [60, 64, 67, 72, 71, 67, 69, 64, 62, 65, 69, 74, 72, 67, 65, 64];
-
+const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 const clamp = (value, min, max) => Math.min(max, Math.max(min, Number(value) || 0));
-const midiFrequency = (note) => 440 * (2 ** ((note - 69) / 12));
 
-function findValue(root, wantedKey, depth = 0) {
-  if (!root || typeof root !== 'object' || depth > 8) return undefined;
-  if (Array.isArray(root)) {
-    for (const item of root) {
-      const found = findValue(item, wantedKey, depth + 1);
-      if (found !== undefined) return found;
-    }
-    return undefined;
-  }
-  for (const [key, value] of Object.entries(root)) {
-    if (key.toLowerCase() === wantedKey.toLowerCase() && value !== undefined && value !== null) return value;
-  }
-  for (const value of Object.values(root)) {
-    const found = findValue(value, wantedKey, depth + 1);
-    if (found !== undefined) return found;
-  }
-  return undefined;
+function noteName(midi) {
+  return NOTE_NAMES[midi % 12] + (Math.floor(midi / 12) - 1);
 }
 
-function firstValue(root, keys, fallback) {
-  for (const key of keys) {
-    const value = findValue(root, key);
-    if (value !== undefined) return value;
-  }
-  return fallback;
+function offlineContext(duration, channels = 2) {
+  const Offline = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+  if (!Offline) throw new Error('Automatic previews need Web Audio OfflineAudioContext, which is unavailable in this browser.');
+  return new Offline(channels, Math.ceil(duration * SAMPLE_RATE), SAMPLE_RATE);
 }
 
-function prophetRawValue(patch, index, fallback) {
-  const values = patch?.layers?.[0]?.values;
-  const value = Array.isArray(values) ? Number(values[index]) : NaN;
-  return Number.isFinite(value) ? value : fallback;
-}
-
-function normalized(value, fallback = 0.5) {
-  const number = Number(value);
-  if (!Number.isFinite(number)) return fallback;
-  if (number > 1.5) return clamp(number / 127, 0, 1);
-  return clamp(number, 0, 1);
-}
-
-function seconds(value, fallback, max = 1) {
-  const number = Number(value);
-  if (!Number.isFinite(number)) return fallback;
-  return clamp(number > 2 ? number / 127 * max : number, 0.002, max);
-}
-
-function waveType(value, shapeValue, fallback = 'sawtooth') {
-  const name = String(value ?? '').toLowerCase();
-  if (name.includes('sine') || name === 'sin') return 'sine';
-  if (name.includes('tri')) return 'triangle';
-  if (name.includes('square') || name.includes('sqr') || name.includes('pulse') || name.includes('rect')) return 'square';
-  if (name.includes('saw') || name.includes('ramp')) return 'sawtooth';
-  if (name.includes('noise')) return 'sawtooth';
-  const shape = Number(shapeValue);
-  if (Number.isFinite(shape)) {
-    if (shape < 0.22) return 'triangle';
-    if (shape < 0.7) return 'sawtooth';
-    return 'square';
-  }
-  return fallback;
-}
-
-function makeNoiseBuffer(context, lengthSeconds = 0.45) {
-  const buffer = context.createBuffer(1, Math.ceil(context.sampleRate * lengthSeconds), context.sampleRate);
-  const samples = buffer.getChannelData(0);
-  let seed = 0x6d2b79f5;
-  for (let i = 0; i < samples.length; i += 1) {
-    seed = Math.imul(seed ^ (seed >>> 15), seed | 1);
-    seed ^= seed + Math.imul(seed ^ (seed >>> 7), seed | 61);
-    samples[i] = ((seed ^ (seed >>> 14)) >>> 0) / 2147483648 - 1;
-  }
-  return buffer;
-}
-
-function scheduleNoise(context, output, noiseBuffer, start, duration, frequency, level, type = 'highpass') {
-  const source = context.createBufferSource();
-  source.buffer = noiseBuffer;
-  const filter = context.createBiquadFilter();
-  filter.type = type;
-  filter.frequency.setValueAtTime(frequency, start);
-  filter.Q.value = 0.7;
-  const gain = context.createGain();
-  gain.gain.setValueAtTime(Math.max(0.0001, level), start);
-  gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
-  source.connect(filter);
-  filter.connect(gain);
-  gain.connect(output);
-  source.start(start);
-  source.stop(start + duration + 0.015);
-}
-
-function scheduleKick(context, output, start, velocity = 1) {
-  const oscillator = context.createOscillator();
-  oscillator.type = 'sine';
-  oscillator.frequency.setValueAtTime(148, start);
-  oscillator.frequency.exponentialRampToValueAtTime(43, start + 0.16);
-  const gain = context.createGain();
-  gain.gain.setValueAtTime(0.88 * velocity, start);
-  gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.42);
-  oscillator.connect(gain);
-  gain.connect(output);
-  oscillator.start(start);
-  oscillator.stop(start + 0.44);
-}
-
-function scheduleSnare(context, output, noiseBuffer, start, velocity = 1) {
-  scheduleNoise(context, output, noiseBuffer, start, 0.19, 1450, 0.34 * velocity);
-  const oscillator = context.createOscillator();
-  oscillator.type = 'triangle';
-  oscillator.frequency.setValueAtTime(190, start);
-  oscillator.frequency.exponentialRampToValueAtTime(112, start + 0.08);
-  const gain = context.createGain();
-  gain.gain.setValueAtTime(0.24 * velocity, start);
-  gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.15);
-  oscillator.connect(gain);
-  gain.connect(output);
-  oscillator.start(start);
-  oscillator.stop(start + 0.17);
-}
-
-function scheduleHat(context, output, noiseBuffer, start, velocity = 1, open = false) {
-  scheduleNoise(context, output, noiseBuffer, start, open ? 0.24 : 0.055, 7200, (open ? 0.13 : 0.085) * velocity, 'highpass');
-}
-
-function scheduleTom(context, output, start, frequency, velocity = 1) {
-  const oscillator = context.createOscillator();
-  oscillator.type = 'sine';
-  oscillator.frequency.setValueAtTime(frequency * 1.45, start);
-  oscillator.frequency.exponentialRampToValueAtTime(frequency, start + 0.12);
-  const gain = context.createGain();
-  gain.gain.setValueAtTime(0.26 * velocity, start);
-  gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.24);
-  oscillator.connect(gain);
-  gain.connect(output);
-  oscillator.start(start);
-  oscillator.stop(start + 0.26);
-}
-
-function schedule808(context, output, patch) {
-  const tempo = clamp(firstValue(patch, ['tempo', 'bpm'], 110), 70, 160);
-  const beat = 60 / tempo;
-  const sixteenth = beat / 4;
-  const noiseBuffer = makeNoiseBuffer(context);
-  const at = (step) => step * sixteenth;
-
-  // Two bars: kick on beats 1 and 3, snare on 2 and 4, eighth-note hats.
-  for (let step = 0; step < 32; step += 1) {
-    const barStep = step % 16;
-    const time = at(step);
-    if (barStep === 0 || barStep === 8) scheduleKick(context, output, time, barStep === 0 ? 1 : 0.82);
-    if (barStep === 4) scheduleSnare(context, output, noiseBuffer, time, 0.88);
-    if (step < 28 && barStep % 2 === 0) scheduleHat(context, output, noiseBuffer, time, barStep === 0 ? 0.85 : 0.72);
-    if (barStep === 14) scheduleHat(context, output, noiseBuffer, time, 0.72, true);
-  }
-
-  // A short tom/snare pickup in the final beat of bar two.
-  scheduleSnare(context, output, noiseBuffer, at(28), 0.82);
-  scheduleTom(context, output, at(29), 115, 0.7);
-  scheduleTom(context, output, at(30), 155, 0.82);
-  scheduleSnare(context, output, noiseBuffer, at(31), 0.9);
-  return { duration: 8 * beat + 0.55 };
-}
-
-function scheduleOscillator(context, destination, frequency, type, start, stop, detune = 0, level = 1) {
-  const oscillator = context.createOscillator();
-  oscillator.type = type;
-  oscillator.frequency.setValueAtTime(frequency, start);
-  oscillator.detune.setValueAtTime(detune, start);
-  const gain = context.createGain();
-  gain.gain.value = level;
-  oscillator.connect(gain);
-  gain.connect(destination);
-  oscillator.start(start);
-  oscillator.stop(stop);
-  return oscillator;
-}
-
-function scheduleOrganVoice(context, destination, frequency, start, stop, velocity) {
-  const partials = [1, 2, 3, 4, 6, 8];
-  const levels = [0.42, 0.24, 0.18, 0.12, 0.08, 0.055];
-  const sum = context.createGain();
-  sum.gain.value = 1;
-  sum.connect(destination);
-  partials.forEach((ratio, index) => {
-    scheduleOscillator(context, sum, frequency * ratio, 'sine', start, stop, 0, levels[index] * velocity);
-  });
-}
-
-
-function scheduleKeyboardNote(context, output, instrumentId, patch, note, start, gate, velocity, controls) {
-  const frequency = midiFrequency(note);
-  const profile = controls.profile;
-  const stop = start + gate + controls.release + 0.04;
-  const filter = context.createBiquadFilter();
-  filter.type = instrumentId === 'hohner-d6' ? 'bandpass' : 'lowpass';
-  filter.Q.value = controls.resonance;
-  filter.frequency.setValueAtTime(controls.cutoff * 0.68, start);
-  filter.frequency.exponentialRampToValueAtTime(controls.cutoff, start + Math.min(0.18, controls.attack + 0.04));
-  const envelope = context.createGain();
-  const peak = (instrumentId === 'nord-c2d' ? 0.54 : 0.2) * velocity * controls.volume;
-  const attackEnd = start + Math.max(0.003, controls.attack);
-  const releaseStart = start + gate;
-  const sustainLevel = Math.max(0.0001, peak * controls.sustain);
-  envelope.gain.setValueAtTime(0.0001, start);
-  envelope.gain.exponentialRampToValueAtTime(Math.max(0.0002, peak), attackEnd);
-  envelope.gain.setTargetAtTime(sustainLevel, attackEnd + 0.01, Math.max(0.02, controls.decay / 3));
-  envelope.gain.setValueAtTime(sustainLevel, releaseStart);
-  envelope.gain.exponentialRampToValueAtTime(0.0001, releaseStart + controls.release);
-  filter.connect(envelope);
-
-  const panner = context.createStereoPanner ? context.createStereoPanner() : null;
-  if (panner) {
-    panner.pan.setValueAtTime(((note % 5) - 2) * 0.075, start);
-    panner.connect(output);
-    envelope.connect(panner);
-  } else envelope.connect(output);
-
-  if (instrumentId === 'nord-c2d') {
-    scheduleOrganVoice(context, filter, frequency, start, stop, velocity * controls.volume);
-    return;
-  }
-
-  if (instrumentId === 'dx7') {
-    const operators = Array.isArray(patch.ops) ? patch.ops : [];
-    const modulator = context.createOscillator();
-    modulator.type = 'sine';
-    const modCoarse = clamp(operators[0]?.coarse ?? 2, 0.5, 14);
-    modulator.frequency.setValueAtTime(frequency * modCoarse, start);
-    const depth = context.createGain();
-    const modLevel = normalized(operators[0]?.level ?? 64, 0.5);
-    depth.gain.value = frequency * (0.5 + modLevel * 3.2);
-    modulator.connect(depth);
-    const carrier = context.createOscillator();
-    carrier.type = 'sine';
-    carrier.frequency.setValueAtTime(frequency, start);
-    depth.connect(carrier.frequency);
-    carrier.connect(filter);
-    modulator.start(start);
-    carrier.start(start);
-    modulator.stop(stop);
-    carrier.stop(stop);
-    return;
-  }
-
-  if (instrumentId === 'mellotron-m400') {
-    const tone = normalized(firstValue(patch, ['tone'], 0.6));
-    scheduleOscillator(context, filter, frequency, 'sawtooth', start, stop, -5, 0.48 + tone * 0.1);
-    scheduleOscillator(context, filter, frequency, 'triangle', start, stop, 4, 0.38);
-    scheduleOscillator(context, filter, frequency * 2, 'sine', start, stop, 0, 0.12);
-    return;
-  }
-
-  if (instrumentId === 'hohner-d6') {
-    const tone = Number(firstValue(patch, ['tone'], 0));
-    const type = tone === 2 ? 'triangle' : 'square';
-    scheduleOscillator(context, filter, frequency, type, start, stop, 0, 0.7);
-    scheduleOscillator(context, filter, frequency * 2.01, 'sine', start, stop, 0, 0.18);
-    return;
-  }
-
-  const rawProgram = instrumentId === 'prophet-10';
-  const rawSawA = prophetRawValue(patch, 3, 0);
-  const rawSquareA = prophetRawValue(patch, 4, 0);
-  const rawSawB = prophetRawValue(patch, 5, 0);
-  const rawTriangleB = prophetRawValue(patch, 6, 0);
-  const rawSquareB = prophetRawValue(patch, 7, 0);
-  const firstWave = instrumentId === 'juno-106'
-    ? (patch.saw ? 'saw' : patch.pulse ? 'pulse' : 'saw')
-    : firstValue(patch, ['osc1Wave', 'dds1Wave', 'vco1Wave', 'osc1Shape'], rawProgram ? (rawSquareA > rawSawA ? 'pulse' : 'saw') : undefined);
-  const secondWave = instrumentId === 'juno-106'
-    ? (patch.pulse ? 'pulse' : firstWave)
-    : firstValue(patch, ['osc2Wave', 'dds2Wave', 'vco2Wave', 'osc2Shape'], rawProgram
-      ? (rawTriangleB > rawSawB && rawTriangleB > rawSquareB ? 'triangle' : rawSquareB > rawSawB ? 'pulse' : 'saw')
-      : firstWave);
-  const shape = firstValue(patch, ['osc1Shape'], undefined);
-  const secondShape = firstValue(patch, ['osc2Shape'], undefined);
-  const wave1 = waveType(firstWave, shape, 'sawtooth');
-  const wave2 = waveType(secondWave, secondShape, wave1);
-  const osc1Level = normalized(firstValue(patch, ['osc1Level', 'dds1Level', 'mix1'], 0.8), 0.8);
-  const osc2Level = normalized(firstValue(patch, ['osc2Level', 'dds2Level', 'mix2'], 0.42), 0.42);
-  const detuneValue = Number(firstValue(patch, ['osc2Detune', 'osc2FineCents', 'osc2Tune'], 7));
-  const detune = Number.isFinite(detuneValue) ? clamp(Math.abs(detuneValue) <= 1 ? detuneValue * 100 : detuneValue, -900, 900) : 7;
-  scheduleOscillator(context, filter, frequency, wave1, start, stop, 0, 0.58 + osc1Level * 0.35);
-  if (osc2Level > 0.015) scheduleOscillator(context, filter, frequency, wave2, start, stop, detune, osc2Level * 0.65);
-  if (instrumentId === 'juno-106' || instrumentId === 'udo-super-8') {
-    scheduleOscillator(context, filter, frequency, wave1, start, stop, -8, 0.18);
-  }
-}
-
-function scheduleKeyboard(context, output, instrumentId, patch) {
-  const beat = 60 / 112;
-  const eighth = beat / 2;
-  const rawProgram = instrumentId === 'prophet-10';
-  const rawCutoff = Number(firstValue(patch, ['cutoff', 'filterCutoff', 'lpCut'], rawProgram ? prophetRawValue(patch, 17, 70) : 0.56));
-  const cutoff = rawCutoff > 24 ? clamp(rawProgram ? 180 * (16000 / 180) ** (rawCutoff / 127) : rawCutoff, 220, 10500) : 180 * (16000 / 180) ** normalized(rawCutoff, 0.56);
-  const rawAttack = firstValue(patch, ['ampAttack', 'attack', 'env1Attack', 'env2Attack'], rawProgram ? prophetRawValue(patch, 44, undefined) : undefined);
-  const rawDecay = firstValue(patch, ['ampDecay', 'decay', 'env1Decay'], rawProgram ? prophetRawValue(patch, 46, undefined) : undefined);
-  const rawSustain = firstValue(patch, ['ampSustain', 'sustain', 'env1Sustain', 'env2Sustain'], rawProgram ? prophetRawValue(patch, 48, undefined) : undefined);
-  const rawRelease = firstValue(patch, ['ampRelease', 'release', 'env1Release', 'env2Release'], rawProgram ? prophetRawValue(patch, 50, undefined) : undefined);
-  const profile = {
-    attack: instrumentId === 'mellotron-m400' ? 0.065 : instrumentId === 'hohner-d6' ? 0.004 : instrumentId === 'nord-c2d' ? 0.006 : 0.014,
-  };
-  const controls = {
-    cutoff: clamp(cutoff, 250, 10000),
-    resonance: 0.7 + normalized(firstValue(patch, ['resonance', 'res', 'lpPeak'], rawProgram ? prophetRawValue(patch, 18, 16) : 0.12)) * 5.5,
-    attack: Math.min(0.15, seconds(rawAttack, profile.attack, 0.65)),
-    decay: seconds(rawDecay, instrumentId === 'hohner-d6' ? 0.12 : 0.24, 1),
-    sustain: instrumentId === 'hohner-d6' ? 0.15 : normalized(rawSustain, instrumentId === 'nord-c2d' ? 0.92 : 0.68),
-    release: seconds(rawRelease, instrumentId === 'mellotron-m400' ? 0.24 : 0.12, 0.8),
-    volume: clamp(normalized(firstValue(patch, ['master', 'volume'], 0.8), 0.8), 0.35, 1),
-    profile,
-  };
-  const noteGate = eighth * 0.82;
-  MELODY.forEach((note, index) => {
-    const start = index * eighth;
+function queueWorkletPhrase(engine, context, notes = MELODY, { startOffset = START_OFFSET, gate = NOTE_GATE, spacing = EIGHTH } = {}) {
+  notes.forEach((note, index) => {
+    const start = startOffset + index * spacing;
+    const frame = Math.round(start * context.sampleRate);
+    const offFrame = Math.round((start + gate) * context.sampleRate);
     const velocity = [0.78, 0.62, 0.7, 0.88][index % 4];
-    scheduleKeyboardNote(context, output, instrumentId, patch, note, start, noteGate, velocity, controls);
+    engine.post({ t: 'noteOn', note, vel: velocity, frame });
+    engine.post({ t: 'noteOff', note, frame: offFrame });
   });
-  return { duration: 8 * beat + controls.release + 0.45 };
+}
+
+function queueNativePhrase(engine, notes = MELODY, { startOffset = START_OFFSET, gate = NOTE_GATE, spacing = EIGHTH } = {}) {
+  notes.forEach((note, index) => {
+    const start = startOffset + index * spacing;
+    const name = noteName(note);
+    const velocity = [0.78, 0.62, 0.7, 0.88][index % 4];
+    engine.noteOn(name, velocity, start);
+    engine.noteOff(name, start + gate);
+  });
+}
+
+async function render(context) {
+  const buffer = await context.startRendering();
+  return audioBufferToWav(buffer);
+}
+
+async function renderLittlePhatty(context, patch) {
+  const engine = new AudioEngine();
+  await engine.start(context);
+  const presets = new PresetManager(engine);
+  presets.applyPatch(patch);
+  queueNativePhrase(engine);
+  return render(context);
+}
+
+async function renderSub37(context, patch) {
+  const engine = new Sub37Engine();
+  await engine.start(context);
+
+  engine.setOscillator(0, {
+    shape: patch.osc1Shape, level: patch.osc1Level,
+    semitones: patch.osc1Semitones ?? 0, fineCents: patch.osc1FineCents ?? 0,
+  });
+  engine.setOscillator(1, {
+    shape: patch.osc2Shape, level: patch.osc2Level,
+    semitones: patch.osc2Semitones ?? 0, fineCents: patch.osc2FineCents ?? 0,
+  });
+  engine.setMixer({ sub: patch.subLevel, noise: patch.noiseLevel });
+  engine.setFilter({
+    cutoff: patch.cutoff, resonance: patch.resonance, drive: patch.drive,
+    keyTrack: patch.keyTrack, envAmount: patch.filterEnvAmount,
+    slope: Number(patch.communityState?.filterSlope ?? 24),
+  });
+  engine.setEnvelope('filter', patch.filterEnv);
+  engine.setEnvelope('amp', patch.ampEnv);
+  engine.setLFO(0, { rate: patch.lfo1Rate, waveform: patch.lfo1Wave });
+  engine.setLFO(1, { rate: patch.lfo2Rate });
+  engine.setModulation(0, patch.mod1);
+  engine.setModulation(1, patch.mod2);
+  engine.setDuoMode(!!patch.duo);
+  engine.voice?.setOsc2SyncEnabled(!!patch.sync);
+
+  const extra = patch.communityState || {};
+  if (extra.osc1Octave !== undefined) engine.setOscillator(0, { octave: Number(extra.osc1Octave) });
+  if (extra.osc2Octave !== undefined) engine.setOscillator(1, { octave: Number(extra.osc2Octave) });
+  if (extra.fineTune !== undefined) engine.setFineTune(extra.fineTune);
+  if (extra.glideTime !== undefined) engine.setGlide(undefined, extra.glideTime);
+  if (extra.glideEnabled !== undefined) engine.setGlide(!!extra.glideEnabled);
+  if (extra.legato !== undefined) engine.legato = !!extra.legato;
+  if (extra.bendRange !== undefined) engine.setPitchBendRange(extra.bendRange);
+  if (extra.masterVolume !== undefined) engine.setMasterVolume(extra.masterVolume);
+  if (Array.isArray(extra.lfoWaves)) extra.lfoWaves.forEach((wave, index) => engine.setLFO(index, { waveform: wave }));
+
+  queueNativePhrase(engine);
+  return render(context);
+}
+
+function applyNordRegistration(engine, patch) {
+  engine.setModel(patch.model);
+  engine.setCrosstalk(patch.crosstalk || 'Vintage 3');
+  engine.setKeyClick(patch.keyClick || 'Normal', patch.keyBounce !== false);
+  engine.greatSplit = !!patch.greatSplit;
+  engine.pedal = {
+    ...engine.pedal, ...patch.pedal,
+    drawbars: [...patch.pedal.drawbars], notes: new Map(),
+  };
+  engine.pipe = {
+    stops: [...patch.pipe.stops],
+    couplers: [...patch.pipe.couplers],
+    tremulant: !!patch.pipe.tremulant,
+  };
+  patch.manuals.forEach((source, index) => {
+    const manual = engine.manuals[index];
+    Object.assign(manual, source, {
+      drawbars: [...source.drawbars],
+      banks: { A: [...source.banks.A], B: [...source.banks.B] },
+    });
+    manual.activeBank = source.activeBank === 'B' ? 'B' : 'A';
+    manual.percussion = !!source.percussion;
+    engine.setDrawbarBank(index, manual.activeBank);
+    engine.setVibrato(index, manual.vibrato);
+    engine.octaveShift[index] = patch.octaveShift[index] || 0;
+  });
+  patch.pipe.stops.forEach((enabled, index) => engine.setPipeStop(index, enabled));
+  patch.pipe.couplers.forEach((enabled, index) => {
+    if (index === 5) engine.setTremulant(enabled);
+    else engine.setPipeCoupler(index, enabled);
+  });
+  engine.setGreatSplit(!!patch.greatSplit);
+  engine.expressionLevel = clamp(patch.expressionLevel ?? 1, 0, 1);
+  engine.setReverb(patch.reverb ?? 0.18);
+  engine.setDrive(patch.drive ?? 0);
+  engine.masterLevel = clamp(patch.masterLevel ?? 0.55, 0, 1);
+  engine.rotary = !!patch.rotary;
+  engine.rotaryEnabled = !!patch.rotaryEnabled;
+}
+
+async function renderNord(context, patch) {
+  const engine = new NordC2DEngine();
+  applyNordRegistration(engine, patch);
+  await engine.start(context);
+  engine.setExpression(patch.expressionLevel ?? 1);
+  if (patch.rotaryEnabled) engine.setRotary(!!patch.rotary);
+  else engine.setRotaryEnabled(false);
+
+  // Use both manuals, as the registration stores two independent drawbar and
+  // vibrato states. The left-hand part is deliberately sparse so it does not
+  // obscure the patch's upper-manual tone.
+  const bassNotes = [48, 48, 50, 45];
+  bassNotes.forEach((midi, index) => {
+    const start = START_OFFSET + index * (EIGHTH * 4);
+    const name = noteName(midi);
+    engine.noteOn(0, name, 0.72, start);
+    engine.noteOff(0, name, start + EIGHTH * 1.5);
+  });
+  MELODY.forEach((midi, index) => {
+    const start = START_OFFSET + index * EIGHTH;
+    const name = noteName(midi);
+    engine.noteOn(1, name, [0.78, 0.62, 0.7, 0.88][index % 4], start);
+    engine.noteOff(1, name, start + NOTE_GATE);
+  });
+  return render(context);
+}
+
+async function renderTR808(context, patch) {
+  const engine = new TR808Engine();
+  await engine.start(context);
+  engine.params = JSON.parse(JSON.stringify(patch.params));
+  engine.variants = { ...patch.variants };
+  engine.length = Number(patch.length) === 32 ? 32 : 16;
+  engine.setTempo(patch.tempo);
+  engine.setMaster(0.8);
+
+  const steps = engine.length === 32 ? 32 : 32;
+  const stepDuration = 60 / clamp(patch.tempo, 40, 300) / 4;
+  for (let step = 0; step < steps; step += 1) {
+    const sourceStep = step % engine.length;
+    const time = START_OFFSET + step * stepDuration;
+    const accent = !!patch.lanes.AC?.[sourceStep];
+    LANES.filter((lane) => lane.id !== 'AC').forEach((lane) => {
+      const value = patch.lanes[lane.id]?.[sourceStep] || 0;
+      if (!value) return;
+      const variant = patch.variants?.[lane.id] || lane.id;
+      engine.trigger(variant, time, accent || value === 2);
+    });
+  }
+  const length = START_OFFSET + steps * stepDuration + 0.8;
+  // Extend a little beyond the fixed context to preserve the longest cymbal tail.
+  if (length > context.length / context.sampleRate) throw new Error('The TR-808 preview pattern is too long to render.');
+  return render(context);
+}
+
+async function renderProphet10(context, patch) {
+  const engine = new Prophet10Engine();
+  await engine.start(context);
+
+  const programs = patch.layers.map((program) => ({
+    values: program.values,
+    extras: {
+      velAmount: program.extras.velAmount,
+      atAmount: program.extras.atAmount,
+      qComp: program.extras.qComp,
+      polyUnison: !!program.extras.polyUnison && !program.values[0],
+    },
+  }));
+  engine.loadProgram(0, programs[0].values, programs[0].extras);
+  const layerState = patch.layers[0].extras || {};
+  const mode = ['stack', 'split'].includes(layerState.layerMode) ? layerState.layerMode : 'normal';
+  if (mode !== 'normal') engine.loadProgram(1, programs[1].values, programs[1].extras);
+  const balance = clamp(layerState.balance ?? 0.5, 0, 1);
+  const volumes = mode === 'normal'
+    ? [1, 1]
+    : [Math.min(1, (1 - balance) * 2), Math.min(1, balance * 2)];
+  engine.setMode(mode, layerState.splitPoint ?? 60, volumes);
+  const globals = patch.globals || {};
+  engine.setGlobals({
+    releaseMode: globals.releaseMode === 'rel' ? 'rel' : 'hold',
+    fiveVoice: !!globals.fiveVoice,
+    roundRobin: globals.voiceAlloc === 'rr',
+    qCompMode: globals.qCompMode === 'prg' ? 'prg' : 'vin',
+  });
+  engine.setTranspose(Number(globals.transpose) || 0);
+  engine.setVolume(0.72);
+  queueWorkletPhrase(engine, context);
+  return render(context);
+}
+
+async function renderWorklet(context, processorPath, processorName, patch, instrumentId) {
+  const options = instrumentId === 'ms-20' ? { inputs: 1 } : {};
+  const engine = new WorkletEngine(new URL(processorPath, import.meta.url).href, processorName, options);
+  await engine.start(context);
+
+  switch (instrumentId) {
+    case 'ms-20':
+      engine.post({ t: 'patch', patch: patch.params });
+      engine.post({ t: 'cables', cables: patch.cables || [] });
+      break;
+    default:
+      engine.post({ t: 'patch', patch });
+      break;
+  }
+  queueWorkletPhrase(engine, context);
+  return render(context);
 }
 
 function audioBufferToWav(buffer) {
@@ -345,18 +270,19 @@ function audioBufferToWav(buffer) {
   writeText(0, 'RIFF');
   view.setUint32(4, 36 + dataSize, true);
   writeText(8, 'WAVE');
-  writeText(12, 'fmt ');
-  view.setUint32(16, 16, true);
-  view.setUint16(20, 1, true);
-  view.setUint16(22, channels, true);
-  view.setUint32(24, sampleRate, true);
-  view.setUint32(28, sampleRate * blockAlign, true);
-  view.setUint16(32, blockAlign, true);
-  view.setUint16(34, 16, true);
-  writeText(36, 'data');
-  view.setUint32(40, dataSize, true);
+  view.setUint32(12, 16, true);
+  writeText(16, 'fmt ');
+  view.setUint32(20, 16, true);
+  view.setUint16(24, 1, true);
+  view.setUint16(26, channels, true);
+  view.setUint32(28, sampleRate, true);
+  view.setUint32(32, sampleRate * blockAlign, true);
+  view.setUint16(36, blockAlign, true);
+  view.setUint16(38, 16, true);
+  writeText(40, 'data');
+  view.setUint32(44, dataSize, true);
   const channelData = Array.from({ length: channels }, (_, channel) => buffer.getChannelData(channel));
-  let offset = 44;
+  let offset = 48;
   for (let frame = 0; frame < frames; frame += 1) {
     for (let channel = 0; channel < channels; channel += 1) {
       const sample = clamp(channelData[channel][frame], -1, 1);
@@ -368,28 +294,32 @@ function audioBufferToWav(buffer) {
 }
 
 export async function generateInstrumentPreview(instrumentId, patch) {
-  if (!instrumentId || !patch || typeof patch !== 'object') throw new Error('A valid instrument preset is required to generate its preview.');
-  const OfflineContext = window.OfflineAudioContext || window.webkitOfflineAudioContext;
-  if (!OfflineContext) throw new Error('Automatic previews need Web Audio OfflineAudioContext, which is unavailable in this browser.');
-  const tempo = instrumentId === 'tr-808' ? clamp(firstValue(patch, ['tempo', 'bpm'], 110), 70, 160) : 112;
-  const beat = 60 / tempo;
-  const tail = instrumentId === 'tr-808' ? 0.65 : 1.0;
-  const duration = 8 * beat + tail;
-  const context = new OfflineContext(2, Math.ceil(duration * SAMPLE_RATE), SAMPLE_RATE);
-  const master = context.createGain();
-  master.gain.value = instrumentId === 'tr-808' ? 0.62 : 0.82;
-  const compressor = context.createDynamicsCompressor();
-  compressor.threshold.value = -14;
-  compressor.knee.value = 18;
-  compressor.ratio.value = 3.2;
-  compressor.attack.value = 0.004;
-  compressor.release.value = 0.16;
-  master.connect(compressor);
-  compressor.connect(context.destination);
+  if (!instrumentId || !patch || typeof patch !== 'object' || Array.isArray(patch)) {
+    throw new Error('A valid instrument preset is required to generate its preview.');
+  }
+  if (instrumentId === 'tr-808') {
+    const tempo = clamp(patch.tempo, 40, 300);
+    const duration = START_OFFSET + 32 * (60 / tempo / 4) + 2.8;
+    const context = offlineContext(duration);
+    return renderTR808(context, patch);
+  }
 
-  if (instrumentId === 'tr-808') schedule808(context, master, patch);
-  else scheduleKeyboard(context, master, instrumentId, patch);
-
-  const rendered = await context.startRendering();
-  return audioBufferToWav(rendered);
+  const duration = START_OFFSET + MELODY.length * EIGHTH + 1.4;
+  const context = offlineContext(duration);
+  switch (instrumentId) {
+    case 'little-phatty': return renderLittlePhatty(context, patch);
+    case 'sub-37': return renderSub37(context, patch);
+    case 'prophet-10': return renderProphet10(context, patch);
+    case 'nord-c2d': return renderNord(context, patch);
+    case 'dx7': return renderWorklet(context, '../engine/DX7Processor.js', 'dx7-processor', patch, instrumentId);
+    case 'juno-106': return renderWorklet(context, '../engine/JunoProcessor.js', 'juno-processor', patch, instrumentId);
+    case 'ms-20': return renderWorklet(context, '../engine/MS20Processor.js', 'ms20-processor', patch, instrumentId);
+    case 'sequential-pro-3': return renderWorklet(context, '../engine/Pro3Processor.js', 'pro3-processor', patch, instrumentId);
+    case 'udo-super-8': return renderWorklet(context, '../engine/Super8Processor.js', 'super8-processor', patch, instrumentId);
+    case 'ob-xa': return renderWorklet(context, '../engine/OBXaProcessor.js?v=20261106-audio-r1', 'obxa-processor', patch, instrumentId);
+    case 'hohner-d6': return renderWorklet(context, '../engine/HohnerD6Processor.js?v=20261106-audio-r1', 'hohner-d6-processor', patch, instrumentId);
+    case 'oberheim-eight-voice': return renderWorklet(context, '../engine/OberheimEightVoiceProcessor.js?v=20261104-eightvoice-stable', 'oberheim-eight-voice-processor', patch, instrumentId);
+    case 'mellotron-m400': return renderWorklet(context, '../engine/MellotronProcessor.js?v=20261104-declick', 'mellotron-processor', patch, instrumentId);
+    default: throw new Error(`Previews are not supported for the instrument "${instrumentId}".`);
+  }
 }
