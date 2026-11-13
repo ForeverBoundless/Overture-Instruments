@@ -31,6 +31,8 @@ class EightVoiceProcessor extends AudioWorkletProcessor {
     this.bend = 0; this.mod = 0; this.sustain = false; this.order = 0; this.scheduled = []; this.port.onmessage = (e) => this.message(e.data);
   }
   message(m) {
+    if (m?.t === '__preview_flush') { this.port.postMessage({ t: '__preview_flush_ack', id: m.id }); return; }
+
     // OMNI look-ahead sources timestamp note events ahead of the render clock.
     // Queue them here so the SEM voices start and release on the intended sample.
     if ((m.t === 'noteOn' || m.t === 'noteOff') && Number.isFinite(m.frame) && m.frame > currentFrame) {
