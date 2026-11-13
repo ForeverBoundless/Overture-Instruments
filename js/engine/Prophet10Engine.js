@@ -39,15 +39,15 @@ export class Prophet10Engine {
   }
 
   /** Must be called from a user gesture (browser autoplay policy). */
-  start() {
+  start(context = null) {
     if (this.started) return Promise.resolve(true);
     if (this._starting) return this._starting;
     this._starting = (async () => {
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-      if (!AudioContextClass) throw new Error('Web Audio is not supported in this browser.');
-      this.ctx = new AudioContextClass({ latencyHint: 'interactive' });
+      if (!context && !AudioContextClass) throw new Error('Web Audio is not supported in this browser.');
+      this.ctx = context || new AudioContextClass({ latencyHint: 'interactive' });
       if (!this.ctx.audioWorklet) throw new Error('AudioWorklet is not available (a secure https:// or localhost page is required).');
-      const resume = this.ctx.state === 'suspended' ? this.ctx.resume() : Promise.resolve();
+      const resume = context || this.ctx.state === 'running' ? Promise.resolve() : this.ctx.resume();
       await this.ctx.audioWorklet.addModule(PROCESSOR_URL.href);
       this.node = new AudioWorkletNode(this.ctx, 'prophet10-processor', {
         numberOfInputs: 0,
@@ -56,6 +56,7 @@ export class Prophet10Engine {
       });
       this.node.connect(this.ctx.destination);
       await resume;
+      if (!context && this.ctx.state !== 'running') throw new Error('The browser kept the audio engine suspended. Check site sound permissions and try Power again.');
       this.started = true;
       this._sendAll();
       return true;
