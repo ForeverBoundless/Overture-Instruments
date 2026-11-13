@@ -90,6 +90,7 @@ async function render(context, engine = null) {
       resolve();
     };
     port.addEventListener('message', onMessage);
+    port.start?.();
     port.postMessage({ t: '__preview_flush', id });
   });
 
