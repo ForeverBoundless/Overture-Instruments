@@ -13,7 +13,9 @@ class XaVoice{
 }
 class OBXaProcessor extends AudioWorkletProcessor{
  constructor(){super();this.p={...DEFAULT};this.pB={...DEFAULT};this.voices=Array.from({length:8},(_,i)=>new XaVoice(i));this.order=0;this.bend=0;this.mod=0;this.sustain=false;this.hold=false;this.heldNotes=new Map();this.scheduled=[];this.lfos=[{phase:0,hold:0},{phase:0,hold:0}];this.chordMemory=[[],[]];this.port.onmessage=e=>this.message(e.data);}
- message(m){if((m.t==='noteOn'||m.t==='noteOff')&&Number.isFinite(m.frame)&&m.frame>currentFrame){this.scheduled.push(m);this.scheduled.sort((a,b)=>a.frame-b.frame);return;}this.dispatch(m);}
+ message(m){
+    if (m?.t === '__preview_flush') { this.port.postMessage({ t: '__preview_flush_ack', id: m.id }); return; }
+if((m.t==='noteOn'||m.t==='noteOff')&&Number.isFinite(m.frame)&&m.frame>currentFrame){this.scheduled.push(m);this.scheduled.sort((a,b)=>a.frame-b.frame);return;}this.dispatch(m);}
  dispatch(m){
   if(m.t==='patch'){const wasHold=this.hold;this.p={...DEFAULT,...m.patch};this.pB={...DEFAULT,...(m.patch.layerB||m.patch)};this.hold=!!this.p.hold;if(wasHold&&!this.hold)this.releaseUnheld();}
   else if(m.t==='clearChord'){this.chordMemory=[[],[]];}
