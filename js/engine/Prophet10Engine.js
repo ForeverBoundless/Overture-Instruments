@@ -69,6 +69,12 @@ export class Prophet10Engine {
     if (this.node) this.node.port.postMessage(message);
   }
 
+  // Match WorkletEngine's public message API. Offline Community previews use
+  // frame-timed messages so Prophet-10 notes remain sample-accurately scheduled.
+  post(message) {
+    this._post(message);
+  }
+
   _sendAll() {
     const s = this.state;
     this._post({ t: 'globals', ...s.globals });

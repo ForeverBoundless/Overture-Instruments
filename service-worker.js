@@ -1,4 +1,4 @@
-const CACHE = 'overture-shell-v73';
+const CACHE = 'overture-shell-v74';
 const APP_SHELL = [
   '/account',
   '/login',
@@ -70,6 +70,8 @@ const APP_SHELL = [
   '/experiments/modulation-lab',
   '/experiments/oscillator-lab',
   '/experiments/space-lab',
+  '/experiments/wavefolding-lab',
+  '/experiments/granular-lab',
   '/experiments/beats-lab.html',
   '/experiments/envelope-lab.html',
   '/experiments/filter-lab.html',
@@ -78,6 +80,8 @@ const APP_SHELL = [
   '/experiments/modulation-lab.html',
   '/experiments/oscillator-lab.html',
   '/experiments/space-lab.html',
+  '/experiments/wavefolding-lab.html',
+  '/experiments/granular-lab.html',
   '/html/korg-ms-20',
   '/html/library',
   '/html/little-phatty',

@@ -73,7 +73,7 @@ test('Hohner D6 and Oberheim OB-Xa are complete first-class emulator entries', a
   assert.match(obEngine, /width=clamp\(\.5-p\.pulseWidth\*\.45/);
   assert.doesNotMatch(obEngine, /lfoVca/);
   assert.match(obPage, /Oberheim OB-Xa from Overture Instruments/);
-  assert.match(worker, /overture-shell-v72/);
+  assert.match(worker, /overture-shell-v74/);
   assert.match(worker, /hohner-d6/);
   assert.match(worker, /ob-xa/);
 });
@@ -168,6 +168,7 @@ test('instrument and experiment pages register the shared offline app shell', as
     '../experiments/filter-lab.html', '../experiments/fm-lab.html',
     '../experiments/harmonics-lab.html', '../experiments/modulation-lab.html',
     '../experiments/oscillator-lab.html', '../experiments/space-lab.html',
+    '../experiments/wavefolding-lab.html', '../experiments/granular-lab.html',
   ];
   const pages = await Promise.all(paths.map((path) => readFile(new URL(path, import.meta.url), 'utf8')));
   for (const page of pages) {
@@ -358,7 +359,7 @@ test('Community instrument patches receive automatic previews and clear upload m
   assert.match(page, /Inappropriate, abusive, hateful, sexual, threatening, or infringing audio will be removed/);
   assert.match(css, /community-warning-tooltip/);
   assert.match(css, /\.community-warning-wrap:focus-within/);
-  assert.match(worker, /overture-shell-v72/);
+  assert.match(worker, /overture-shell-v74/);
   assert.match(worker, /instrumentPreview\.js/);
   assert.match(worker, /20261112-auto-preview-r1/);
 });
@@ -392,7 +393,7 @@ test('Community reports, moderator review, strike escalation and protected accou
   assert.match(migration, /community_can_publish/);
   assert.match(css, /community-report-dialog/);
   assert.match(css, /community-moderation-actions/);
-  assert.match(worker, /overture-shell-v72/);
+  assert.match(worker, /overture-shell-v74/);
   assert.match(worker, /20261112-community-moderation-r1/);
 });
 
@@ -715,4 +716,15 @@ test('Shared emulator power cards support both span and div markup', async () =>
   assert.ok(styles.includes('.pn-power > :is(span, div)'));
   assert.ok(styles.includes('.pn-power.is-starting > :is(span, div)'));
   for (const page of pages) assert.match(page, /class="pn-power"/);
+});
+
+
+test('Granular lab creates its audio buffer only after Play has initialized audio', async () => {
+  const source = await readFile(new URL('../js/experiments/labs.js', import.meta.url), 'utf8');
+  const granular = source.slice(source.indexOf('class GranularLab'), source.indexOf('const LABS'));
+  const constructor = granular.slice(granular.indexOf('  constructor(){'), granular.indexOf('  makeSourceData('));
+  assert.match(constructor, /this\.sourceData=this\.makeSourceData\(44100\)/);
+  assert.doesNotMatch(constructor, /this\.makeSource\(/);
+  assert.match(granular, /start\(\)\{this\.makeSource\(\);this\.nextGrain=this\.audio\.ctx\.currentTime;\}/);
+  assert.match(granular, /this\.buffer\?\.getChannelData\(0\)\|\|this\.sourceData/);
 });
