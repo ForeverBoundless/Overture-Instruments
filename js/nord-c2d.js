@@ -163,7 +163,8 @@ class NordC2D {
     createCommunityShareButton(shell.querySelector('.nord-system-row'), {
       instrumentId: 'nord-c2d', className: 'nord-community-share',
       getData: () => this.captureCommunityPatch(),
-      getTitle: () => 'Nord C2D registration',
+      getAudioOutput: () => this.engine.expression,
+       getTitle: () => 'Nord C2D registration',
     });
   }
 
