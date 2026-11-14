@@ -178,6 +178,21 @@ class App {
     });
     select.addEventListener('change', () => this._loadFactoryPreset(parseInt(select.value, 10)));
     this._presetSelect = select;
+     select.dataset.overturePresetSelector = 'true';
+     select.getCommunityPresetSelection = () => {
+       const preset = PRESETS.find((item) => String(item.id) === String(select.value));
+       return preset ? { kind: 'factory', value: String(preset.id), index: PRESETS.indexOf(preset), name: preset.name } : null;
+     };
+     select.restoreCommunityPresetSelection = (selection) => {
+       const preset = PRESETS.find((item, index) =>
+         String(item.id) === String(selection.value)
+         || (selection.name && item.name === selection.name)
+         || (Number.isInteger(selection.index) && index === selection.index && (!selection.name || item.name === selection.name)));
+       if (!preset) return false;
+       select.value = String(preset.id);
+       return true;
+     };
+     if (this.communityPreset?.presetSelection) select.restoreCommunityPresetSelection(this.communityPreset.presetSelection);
 
     const row2 = document.createElement('div');
     row2.className = 'preset-row';
