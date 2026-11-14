@@ -785,3 +785,33 @@ test('Community serializers preserve output levels and Pro 3 LFO controls stay w
   assert.match(pro3, /labels:\['TRI','SAW','R\.SAW','SQR','S&H'\]/);
   assert.match(styles, /grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
 });
+
+
+test('Community supports short direct instrument-output preview recordings', async () => {
+  const [helper, community, page, worker, ...emulators] = await Promise.all([
+    readFile(new URL('../js/shared/communityPreset.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/community.js', import.meta.url), 'utf8'),
+    readFile(new URL('../community.html', import.meta.url), 'utf8'),
+    readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
+    ...[
+      '../js/engine/app.js', '../js/sub37.js', '../js/prophet10.js', '../js/nord-c2d.js',
+      '../js/roland-tr-808.js', '../js/yamaha-dx7.js', '../js/roland-juno-106.js',
+      '../js/korg-ms-20.js', '../js/mellotron-m400.js', '../js/oberheim-eight-voice.js',
+      '../js/hohner-d6.js', '../js/obxa.js', '../js/sequential-pro-3.js', '../js/udo-super-8.js',
+    ].map((file) => readFile(new URL(file, import.meta.url), 'utf8')),
+  ]);
+  assert.match(helper, /COMMUNITY_PREVIEW_MAX_DURATION_MS = 10_000/);
+  assert.match(helper, /createMediaStreamDestination/);
+  assert.match(helper, /getAudioOutput/);
+  assert.match(helper, /MediaRecorder/);
+  assert.match(helper, /overture-community-preview-recorded/);
+  assert.match(community, /openCommunityInstrumentRecorder/);
+  assert.match(community, /receiveCommunityPreviewRecording/);
+  assert.match(community, /renderRecordedPreview/);
+  assert.match(page, /community-record-preview/);
+  assert.match(page, /community-recorded-preview/);
+  assert.match(worker, /overture-shell-v78/);
+  assert.match(worker, /20261113-recorded-preview-r1/);
+  assert.equal(emulators.every((source) => source.includes('getAudioOutput:')), true,
+    'all 14 emulator pages must expose their final output node to the recorder');
+});
