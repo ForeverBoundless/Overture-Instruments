@@ -287,13 +287,16 @@ test('Community library has an optional Supabase setup and owner-scoped schema m
 
 
 test('Community preset exchange covers every library emulator and its native patch handoff', async () => {
-  const [page, app, helper, migration, contributions, omni, sources] = await Promise.all([
+  const [page, app, helper, migration, contributions, omni, registry, panel, d6, sources] = await Promise.all([
     readFile(new URL('../community.html', import.meta.url), 'utf8'),
     readFile(new URL('../js/community.js', import.meta.url), 'utf8'),
     readFile(new URL('../js/shared/communityPreset.js', import.meta.url), 'utf8'),
     readFile(new URL('../supabase/migrations/20261102000000_community_patches.sql', import.meta.url), 'utf8'),
     readFile(new URL('../js/contributions.js', import.meta.url), 'utf8'),
     readFile(new URL('../js/omni.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/data/communityInstruments.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/shared/panel.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/hohner-d6.js', import.meta.url), 'utf8'),
     Promise.all([
       '../js/engine/app.js','../js/sub37.js','../js/prophet10.js','../js/nord-c2d.js',
       '../js/yamaha-dx7.js','../js/roland-juno-106.js','../js/roland-tr-808.js','../js/korg-ms-20.js',
@@ -312,6 +315,16 @@ test('Community preset exchange covers every library emulator and its native pat
   assert.match(helper, /consumeCommunityInstrumentPreset/);
   assert.match(helper, /consumeCommunitySource/);
   assert.match(helper, /editingItemId/);
+  assert.match(helper, /attachCommunityPresetMetadata/);
+  assert.match(helper, /restoreCommunityPresetSelection/);
+  assert.match(registry, /COMMUNITY_INSTRUMENTS/);
+  assert.match(contributions, /COMMUNITY_INSTRUMENT_BY_ID/);
+  assert.match(app, /draftPresetSelection/);
+  assert.ok(panel.includes('dataset.overturePresetSelector'));
+  assert.ok(panel.includes('restoreCommunityPresetSelection'));
+  assert.ok(d6.includes('capture:()=>clone(validate(this.patch))'));
+  assert.ok(d6.includes("this.set('damping',value)"));
+  assert.ok(d6.includes('Number.isFinite(damping)'));
   assert.equal((page.match(/id="community-title"/g) || []).length, 1, 'the form title input must have a unique ID');
   assert.match(page, /<h1 id="community-hero-title">/);
   assert.match(app, /community-edit-id/);
