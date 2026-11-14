@@ -2,7 +2,9 @@
  * Shared exchange between every Overture emulator and the Community library.
  * Community records are validated again by the receiving emulator before use.
  */
-const IMPORT_KEY = 'overture.community.instrument-import';
+export const COMMUNITY_INSTRUMENT_IMPORT_KEY = 'overture.community.instrument-import';
+const IMPORT_KEY = COMMUNITY_INSTRUMENT_IMPORT_KEY;
+export const COMMUNITY_PREVIEW_MAX_DURATION_MS = 10_000;
 const DRAFT_KEY = 'overture.community.instrument-draft';
 const SOURCE_KEY = 'overture.community.source-item';
 export const COMMUNITY_PRESET_SELECTION_KEY = '__overturePresetSelection';
@@ -87,8 +89,151 @@ export function consumeCommunitySource(recordType, instrumentId = null) {
   }
 }
 
+function installCommunityPreviewRecorder({ instrumentId, getAudioOutput }) {
+  const token = new URLSearchParams(window.location.search).get('communityPreviewRecording');
+  if (!token) return null;
+
+  const style = document.createElement('style');
+  style.textContent = `
+    .oi-community-recorder{position:fixed;z-index:2147483000;right:18px;top:18px;width:min(360px,calc(100vw - 36px));padding:16px;border:1px solid rgba(125,228,255,.35);border-radius:14px;background:rgba(11,14,19,.96);color:#edf3f8;box-shadow:0 16px 48px rgba(0,0,0,.45);font:14px/1.45 Inter,system-ui,sans-serif;backdrop-filter:blur(16px)}
+    .oi-community-recorder strong{display:block;font:600 11px/1.3 'DM Mono',monospace;letter-spacing:.12em;color:#7de4ff;margin-bottom:7px}
+    .oi-community-recorder p{margin:0 0 12px;color:#b8c2cd;font-size:12px}
+    .oi-community-recorder__status{min-height:20px;margin:10px 0!important;color:#ffb75e!important}
+    .oi-community-recorder__actions{display:flex;gap:8px;flex-wrap:wrap}
+    .oi-community-recorder button{border:1px solid rgba(125,228,255,.42);border-radius:7px;background:#17232c;color:#f3f7fa;padding:8px 11px;font:600 11px 'DM Mono',monospace;cursor:pointer}
+    .oi-community-recorder button:disabled{opacity:.45;cursor:not-allowed}
+    .oi-community-recorder .is-recording{border-color:#ff7777;color:#ffaaaa}
+  `;
+  document.head.appendChild(style);
+
+  const panel = document.createElement('aside');
+  panel.className = 'oi-community-recorder';
+  panel.setAttribute('aria-label', 'Community preview recording');
+  panel.innerHTML = `
+    <strong>COMMUNITY PREVIEW RECORDING</strong>
+    <p>Power on the instrument, press record, then play normally. The recording captures the instrument's actual audio output, not your microphone. Maximum length: 10 seconds.</p>
+    <p class="oi-community-recorder__status" role="status" aria-live="polite">Ready when the instrument is powered on.</p>
+    <div class="oi-community-recorder__actions">
+      <button type="button" data-record-start>START RECORDING</button>
+      <button type="button" class="is-recording" data-record-stop disabled>STOP</button>
+      <button type="button" data-record-return>RETURN TO COMMUNITY</button>
+    </div>`;
+  document.body.appendChild(panel);
+
+  const status = panel.querySelector('.oi-community-recorder__status');
+  const startButton = panel.querySelector('[data-record-start]');
+  const stopButton = panel.querySelector('[data-record-stop]');
+  const returnButton = panel.querySelector('[data-record-return]');
+  let recorder = null;
+  let source = null;
+  let destination = null;
+  let chunks = [];
+  let startedAt = 0;
+  let stopTimer = 0;
+  let displayTimer = 0;
+
+  const cleanup = () => {
+    clearTimeout(stopTimer);
+    clearInterval(displayTimer);
+    if (source && destination) {
+      try { source.disconnect(destination); } catch { /* the audio graph may already be closed */ }
+    }
+    destination?.stream?.getTracks?.().forEach((track) => track.stop());
+    source = null;
+    destination = null;
+    recorder = null;
+    startButton.disabled = false;
+    stopButton.disabled = true;
+  };
+
+  const stop = () => {
+    if (!recorder || recorder.state === 'inactive') return;
+    clearTimeout(stopTimer);
+    clearInterval(displayTimer);
+    stopButton.disabled = true;
+    status.textContent = 'Finishing recording…';
+    recorder.stop();
+  };
+
+  startButton.addEventListener('click', async () => {
+    if (recorder && recorder.state !== 'inactive') return;
+    if (!window.MediaRecorder) {
+      status.textContent = 'This browser does not support in-browser audio recording.';
+      return;
+    }
+    try {
+      source = getAudioOutput?.();
+      const context = source?.context;
+      if (!source || !context || typeof context.createMediaStreamDestination !== 'function') {
+        throw new Error('Power on the instrument first, then start recording.');
+      }
+      if (context.state === 'suspended') await context.resume();
+      if (context.state !== 'running') throw new Error('The instrument audio engine is not running. Press Power and try again.');
+
+      destination = context.createMediaStreamDestination();
+      source.connect(destination);
+      const mimeTypes = ['audio/webm;codecs=opus', 'audio/ogg;codecs=opus', 'audio/webm', 'audio/ogg'];
+      const mimeType = mimeTypes.find((type) => MediaRecorder.isTypeSupported?.(type));
+      recorder = mimeType ? new MediaRecorder(destination.stream, { mimeType }) : new MediaRecorder(destination.stream);
+      chunks = [];
+      recorder.addEventListener('dataavailable', (event) => {
+        if (event.data?.size) chunks.push(event.data);
+      });
+      recorder.addEventListener('error', () => {
+        cleanup();
+        status.textContent = 'Recording failed. Check that the instrument is powered on and try again.';
+      }, { once: true });
+      recorder.addEventListener('stop', () => {
+        const blob = new Blob(chunks, { type: recorder?.mimeType || mimeType || 'audio/webm' });
+        const actualMime = blob.type.split(';')[0] || 'audio/webm';
+        cleanup();
+        if (!blob.size) {
+          status.textContent = 'No audio was captured. Play a few notes while recording and try again.';
+          return;
+        }
+        if (!window.opener || window.opener.closed) {
+          status.textContent = 'The Community publishing tab is no longer available. Reopen the recorder from the publishing form.';
+          return;
+        }
+        window.opener.postMessage({
+          type: 'overture-community-preview-recorded',
+          token,
+          instrumentId,
+          blob,
+          mimeType: actualMime,
+        }, window.location.origin);
+        status.textContent = 'Recording sent to Community. You can record another take or return to the publishing form.';
+        chunks = [];
+      }, { once: true });
+
+      recorder.start(200);
+      startedAt = Date.now();
+      startButton.disabled = true;
+      stopButton.disabled = false;
+      status.textContent = 'Recording… 10.0s remaining';
+      displayTimer = window.setInterval(() => {
+        const remaining = Math.max(0, COMMUNITY_PREVIEW_MAX_DURATION_MS - (Date.now() - startedAt));
+        status.textContent = `Recording… ${(remaining / 1000).toFixed(1)}s remaining`;
+        if (remaining <= 0) stop();
+      }, 100);
+      stopTimer = window.setTimeout(stop, COMMUNITY_PREVIEW_MAX_DURATION_MS);
+    } catch (error) {
+      cleanup();
+      status.textContent = error?.message || 'Could not start recording.';
+    }
+  });
+
+  stopButton.addEventListener('click', stop);
+  returnButton.addEventListener('click', () => {
+    if (recorder && recorder.state !== 'inactive') stop();
+    window.close();
+  });
+  window.addEventListener('pagehide', cleanup, { once: true });
+  return panel;
+}
+
 export function createCommunityShareButton(parent, {
-  instrumentId, getData, getTitle, className = 'pn-btn', label = 'COMMUNITY',
+  instrumentId, getData, getTitle, getAudioOutput, className = 'pn-btn', label = 'COMMUNITY',
 }) {
   if (!parent || typeof getData !== 'function' || !instrumentId) return null;
   const button = document.createElement('button');
@@ -130,6 +275,7 @@ export function createCommunityShareButton(parent, {
     }
   });
   parent.appendChild(button);
+  installCommunityPreviewRecorder({ instrumentId, getAudioOutput });
   return button;
 }
 export function clearCommunitySource() {
