@@ -260,7 +260,8 @@ class Pro3App{
   this.hwPresets.addEventListener('change',()=>{clearCommunitySource();this.presets.load(this.hwPresets.value);});
   const action=(label,fn)=>{const a=document.createElement('button');a.type='button';a.className='hp-action';a.textContent=label;a.addEventListener('click',fn);footer.appendChild(a);return a;};
   action('Save program',()=>{const name=prompt('Name this Pro 3 program','My Pro 3 Program');if(name===null)return;try{const item=this.store.save(name,clone(this.patch));this.refreshHardwarePresetList('u:'+item.id);this.hwDisplay.set(item.name.toUpperCase(),'USER PROGRAM SAVED');}catch(e){alert(e.message);}});
-  createCommunityShareButton(footer,{instrumentId:'sequential-pro-3',className:'hp-action',getData:()=>clean(clone(this.patch)),getTitle:()=> 'Sequential Pro 3 program'});
+  createCommunityShareButton(footer,{instrumentId:'sequential-pro-3',className:'hp-action',getData:()=>clean(clone(this.patch)),getAudioOutput: () => this.engine.output,
+       getTitle:()=> 'Sequential Pro 3 program'});
   const matrixButton=action('Mod matrix · 32 routes',()=>{this.refreshMatrix();this.matrixDialog.showModal();});
   const waveButton=document.createElement('label');waveButton.className='hp-action';waveButton.textContent='Load wavetable';
   const waveInput=document.createElement('input');waveInput.type='file';waveInput.accept='.wav,audio/wav';waveButton.appendChild(waveInput);footer.appendChild(waveButton);
