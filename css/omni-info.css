@@ -112,7 +112,7 @@
 .omni-info-dialog__title {
   margin: 0 0 10px;
   color: #f1f5fa;
-  font: 550 clamp(25px, 4vw, 34px)/1.12 var(--font-body);
+  font: 400 clamp(25px, 4vw, 34px)/1.12 var(--font-display);
   letter-spacing: -.045em;
 }
 .omni-info-dialog__summary {

@@ -192,3 +192,68 @@ html[data-theme="light"] .feature-section--omni .omni-chips span {
   border-color: #000 !important;
   background: transparent !important;
 }
+
+
+/* Experiments and sound labs use the same display face and semantic palette
+   as the rest of Overture. Keep the small technical labels monospace, while
+   ensuring their interactive controls remain readable in light mode. */
+.ex-page h1,
+.lab-header h1,
+.ex-card h2 {
+  font-family:var(--font-display);
+  font-weight:400;
+}
+.ex-card,
+.lab-plot,
+.lab-controls,
+.lab-explain,
+.lab-tasks,
+.lab-diagram {
+  border-radius:var(--oi-panel-radius);
+}
+html[data-theme="light"] .ex-card span.ex-num,
+html[data-theme="light"] .ex-note,
+html[data-theme="light"] .lab-back,
+html[data-theme="light"] .lab-hint,
+html[data-theme="light"] .lab-control-head {
+  color:var(--muted);
+}
+html[data-theme="light"] .ex-card ul { color:var(--ink); }
+html[data-theme="light"] .ex-card li::before { color:var(--faint); }
+html[data-theme="light"] .ex-card b { color:var(--green); }
+html[data-theme="light"] .ex-card:hover b { color:var(--ink); }
+html[data-theme="light"] .lab-play,
+html[data-theme="light"] .lab-stop {
+  border-color:var(--oi-control-border);
+  color:var(--ink);
+  background:var(--oi-button-background);
+}
+html[data-theme="light"] .lab-play:hover,
+html[data-theme="light"] .lab-stop:hover {
+  background:var(--oi-button-hover-background);
+}
+html[data-theme="light"] .lab-play.is-on {
+  border-color:transparent;
+  color:#062012;
+  background:linear-gradient(135deg,#b4f0cb,#82e6a8);
+}
+html[data-theme="light"] .lab-chip {
+  border-color:rgba(8,127,159,.24);
+  color:#087f9f;
+  background:rgba(8,127,159,.055);
+}
+html[data-theme="light"] .lab-chip:hover {
+  color:var(--ink);
+  background:rgba(8,127,159,.1);
+}
+html[data-theme="light"] .lab-chip[aria-pressed="true"] {
+  border-color:#087f9f;
+  color:#fff;
+  background:#087f9f;
+}
+html[data-theme="light"] .lab-box {
+  border-color:var(--oi-panel-border);
+  color:var(--muted);
+  background:var(--oi-panel-background-soft);
+}
+html[data-theme="light"] .lab-box b { color:var(--ink); }

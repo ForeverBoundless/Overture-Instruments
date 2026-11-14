@@ -29,7 +29,7 @@
   <link rel="stylesheet" href="/css/site-footer.css">
   <link rel="stylesheet" href="/css/site-theme.css">
   <link rel="stylesheet" href="/css/site-theme-polish.css?v=20261103-accent-spacing">
-  <link rel="stylesheet" href="/css/community.css?v=20261112-community-moderation-r1">
+  <link rel="stylesheet" href="/css/community.css?v=20261114-publish-layout">
 
   <script src="/js/shared/site-theme.js" defer></script>
   <script src="/js/shared/site-nav.js" defer></script>
@@ -182,17 +182,15 @@
           <span>DESCRIPTION</span>
           <textarea id="community-description" maxlength="600" rows="3" placeholder="Describe the sound and how the patch is built."></textarea>
         </label>
-        <div class="community-form-grid">
-          <label>
-            <span>VISIBILITY</span>
-            <select id="community-visibility">
-              <option value="public">Public — appears in discovery</option>
-              <option value="unlisted">Unlisted — accessible by direct link</option>
-            </select>
-          </label>
+        <section class="community-audio-section" aria-labelledby="community-audio-title">
+          <div class="community-audio-section__heading">
+            <p class="community-overline">OPTIONAL PREVIEW</p>
+            <h3 id="community-audio-title">Audio preview</h3>
+            <p>Give listeners a quick example of the sound before they download your patch.</p>
+          </div>
           <label class="community-audio-field">
             <span class="community-audio-label">
-              <span>AUDIO PREVIEW (OPTIONAL, 8 MB MAX)</span>
+              <span>AUDIO FILE (8 MB MAX)</span>
               <span class="community-warning-wrap">
                 <button class="community-warning-trigger" type="button" aria-label="Audio upload rules" aria-describedby="community-audio-warning">!</button>
                 <span class="community-warning-tooltip" id="community-audio-warning" role="tooltip">Only upload audio you created or have permission to share. Inappropriate, abusive, hateful, sexual, threatening, or infringing audio will be removed. Serious or repeated violations can lead to a patch being taken down or the account being suspended or terminated.</span>
@@ -200,10 +198,25 @@
             </span>
             <input type="file" id="community-audio-file" accept="audio/webm,audio/ogg,audio/mp4,audio/mpeg,audio/wav">
             <button class="community-button community-button--quiet community-record-preview" id="community-record-preview" type="button" hidden>RECORD PREVIEW AUDIO · 10S MAX</button>
-            <small>Record directly from the instrument's audio output in a separate tab, or upload a recording. A manual recording replaces the generated preview.</small>
+            <small>Upload a recording or capture up to 10 seconds from the instrument in a separate tab. A manual recording replaces the generated preview.</small>
             <audio id="community-recorded-preview" class="community-recorded-preview" controls hidden></audio>
           </label>
-        </div>
+        </section>
+
+        <section class="community-publish-settings" aria-label="Publishing visibility">
+          <div class="community-publish-settings__copy">
+            <p class="community-overline">DISCOVERY</p>
+            <h3>Who can find this patch?</h3>
+            <p>Public patches appear in community discovery. Unlisted patches are available only through a direct link.</p>
+          </div>
+          <label class="community-visibility-field">
+            <span>VISIBILITY</span>
+            <select id="community-visibility">
+              <option value="public">Public — appears in discovery</option>
+              <option value="unlisted">Unlisted — accessible by direct link</option>
+            </select>
+          </label>
+        </section>
         <label class="community-guidelines-check" hidden>
           <input type="checkbox" id="community-content-confirmation">
           <span>I confirm that this patch and any audio I upload follow Overture's community rules, and that I have the rights needed to share the audio.</span>
