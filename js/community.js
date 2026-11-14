@@ -1,30 +1,17 @@
 import { validatePatch, LiveGraph } from './omni/graph.js';
 import { generateInstrumentPreview } from './shared/instrumentPreview.js';
+import { COMMUNITY_INSTRUMENT_BY_ID as INSTRUMENTS, COMMUNITY_INSTRUMENTS } from './data/communityInstruments.js';
+import { readCommunityPresetMetadata, stripCommunityPresetMetadata, attachCommunityPresetMetadata } from './shared/communityPreset.js';
 import { supabase, supabaseConfigured, configureSupabase, previewPublicUrl } from './shared/supabaseClient.js';
 
 const byId = (id) => document.getElementById(id);
-const INSTRUMENTS = {
-  'little-phatty': { name: 'Moog Little Phatty', route: '/html/little-phatty' },
-  'sub-37': { name: 'Moog Sub 37', route: '/html/sub37' },
-  'prophet-10': { name: 'Sequential Prophet-10', route: '/html/prophet10' },
-  'nord-c2d': { name: 'Nord C2D', route: '/html/nord-c2d' },
-  'dx7': { name: 'Yamaha DX7', route: '/html/yamaha-dx7' },
-  'juno-106': { name: 'Roland Juno-106', route: '/html/roland-juno-106' },
-  'tr-808': { name: 'Roland TR-808', route: '/html/roland-tr-808' },
-  'ms-20': { name: 'Korg MS-20', route: '/html/korg-ms-20' },
-  'mellotron-m400': { name: 'Mellotron M400', route: '/html/mellotron-m400' },
-  'oberheim-eight-voice': { name: 'Oberheim Eight Voice', route: '/html/oberheim-eight-voice' },
-  'hohner-d6': { name: 'Hohner Clavinet D6', route: '/html/hohner-d6' },
-  'ob-xa': { name: 'Oberheim OB-Xa', route: '/html/ob-xa' },
-  'sequential-pro-3': { name: 'Sequential Pro 3', route: '/html/sequential-pro-3' },
-  'udo-super-8': { name: 'UDO Super 8', route: '/html/udo-super-8' },
-};
 
 const state = {
   user: null,
   draft: null,
   draftType: 'omni_patch',
   draftInstrument: null,
+  draftPresetSelection: null,
   items: [],
   directItem: null,
   offset: 0,
@@ -84,6 +71,7 @@ function extractInstrumentPreset(raw, instrumentId) {
   if (Array.isArray(object.items)) data = object.items[0]?.data;
   if (data && Array.isArray(data.presets)) data = data.presets[0];
   if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('No instrument preset was found in that file.');
+  data = stripCommunityPresetMetadata(data);
 
   const isObject = (value) => value && typeof value === 'object' && !Array.isArray(value);
   const has = (...keys) => keys.every((key) => Object.prototype.hasOwnProperty.call(data, key));
@@ -151,6 +139,7 @@ function readDraft() {
         type: 'instrument_preset',
         instrumentId: payload.instrumentId,
         title: payload.title || data.name || 'Community preset',
+        presetSelection: payload.presetSelection || readCommunityPresetMetadata(payload.data ?? payload.patch ?? payload),
         editingItemId: payload.editingItemId || null,
         editingOriginalPreviewPath: payload.editingOriginalPreviewPath || null,
       };
@@ -174,6 +163,18 @@ function readDraft() {
   }
 }
 
+function ensureCommunityInstrumentOptions() {
+  const select = byId('community-instrument');
+  if (!select) return;
+  const existing = new Set([...select.options].map((option) => option.value));
+  COMMUNITY_INSTRUMENTS.forEach((instrument) => {
+    if (existing.has(instrument.id)) return;
+    const option = document.createElement('option');
+    option.value = instrument.id;
+    option.textContent = instrument.name;
+    select.appendChild(option);
+  });
+}
 function syncContentType() {
   const type = byId('community-record-type').value;
   const instrument = byId('community-instrument');
@@ -197,10 +198,11 @@ function syncContentType() {
     : 'Choose an instrument and export its current patch to Community, or upload a preset JSON file.';
 }
 
-function setDraft(data, type, instrumentId = null, title = '') {
-  state.draft = data;
+function setDraft(data, type, instrumentId = null, title = '', presetSelection = null) {
+  state.draft = type === 'instrument_preset' ? stripCommunityPresetMetadata(data) : data;
   state.draftType = type;
   state.draftInstrument = instrumentId;
+  state.draftPresetSelection = presetSelection || readCommunityPresetMetadata(data);
   byId('community-record-type').value = type;
   byId('community-instrument').value = type === 'omni_patch' ? 'omni' : (instrumentId || 'little-phatty');
   syncContentType();
@@ -474,9 +476,15 @@ function renderCard(item) {
         audio.setAttribute('aria-label', `Generated audio preview for ${item.title}`);
         card.insertBefore(audio, actions);
         listen.textContent = 'PLAY PREVIEW';
-        await audio.play();
+        try {
+          await audio.play();
+        } catch (playError) {
+          // Offline rendering may outlive the click-activation window. The
+          // generated audio remains ready and can be started from its controls.
+          message('community-result-count', 'Preview rendered. Press play on the audio controls to listen.');
+        }
       } catch (error) {
-        listen.textContent = 'GENERATE & PLAY';
+        listen.textContent = audio ? 'PLAY PREVIEW' : 'GENERATE & PLAY';
         message('community-result-count', error.message || 'Could not generate this instrument preview.', true);
       } finally {
         listen.disabled = false;
@@ -598,10 +606,11 @@ function beginEdit(item, { preserveDraft = false } = {}) {
   state.editingOriginalPreviewPath = item.preview_path || null;
   byId('community-edit-id').value = String(item.id);
   const type = item.record_type || 'omni_patch';
-  if (!preserveDraft) setDraft(item.patch_data, type, item.instrument_id, item.title);
+  if (!preserveDraft) setDraft(item.patch_data, type, item.instrument_id, item.title, readCommunityPresetMetadata(item.patch_data));
   else {
     state.draftType = type;
     state.draftInstrument = item.instrument_id || null;
+    state.draftPresetSelection = readCommunityPresetMetadata(item.patch_data);
     byId('community-record-type').value = type;
     byId('community-instrument').value = type === 'omni_patch' ? 'omni' : (item.instrument_id || 'little-phatty');
   }
@@ -656,10 +665,12 @@ async function publishItem(event) {
     }
     const editingOriginalPreviewPath = state.editingOriginalPreviewPath;
     let data = state.draft;
+    let presetSelection = state.draftPresetSelection;
     let file = byId('community-patch-file').files?.[0];
     if (file) {
       if (file.size > 524288) throw new Error('Preset files must be 512 KB or smaller.');
       const parsed = JSON.parse(await file.text());
+      if (recordType === 'instrument_preset') presetSelection = parsed.presetSelection || readCommunityPresetMetadata(parsed.data ?? parsed.patch ?? parsed);
       data = recordType === 'omni_patch'
         ? extractOmniPatch(parsed)
         : extractInstrumentPreset(parsed, instrumentId);
@@ -676,7 +687,8 @@ async function publishItem(event) {
     // Keep the user-facing Community title in instrument formats that carry
     // their own patch name, rather than letting a factory name win on import.
     if (Object.prototype.hasOwnProperty.call(data, 'name')) data.name = title.slice(0, 60);
-    const bytes = new TextEncoder().encode(JSON.stringify(data)).byteLength;
+    const storedPatchData = recordType === 'instrument_preset' ? attachCommunityPresetMetadata(data, presetSelection) : data;
+    const bytes = new TextEncoder().encode(JSON.stringify(storedPatchData)).byteLength;
     if (bytes > 500000) throw new Error('This preset is too large to publish (maximum 500 KB).');
     const tags = [...new Set(byId('community-tags').value.split(',').map((tag) => tag.trim().toLowerCase()).filter(Boolean))].slice(0, 8);
     const previewFile = byId('community-audio-file').files?.[0];
@@ -708,7 +720,7 @@ async function publishItem(event) {
       author_name: String(userName).slice(0, 48),
       tags,
       visibility: byId('community-visibility').value,
-      patch_data: data,
+      patch_data: storedPatchData,
     };
     if (previewPath) record.preview_path = previewPath;
     else if (!editingId) record.preview_path = null;
@@ -731,6 +743,7 @@ async function publishItem(event) {
     state.draft = data;
     state.draftType = recordType;
     state.draftInstrument = instrumentId;
+    state.draftPresetSelection = presetSelection;
     try { sessionStorage.removeItem('overture.community.draft'); } catch { /* optional draft */ }
     byId('community-patch-file').value = '';
     byId('community-audio-file').value = '';
@@ -962,9 +975,10 @@ async function initialise() {
     return;
   }
 
+  ensureCommunityInstrumentOptions();
   const importedDraft = readDraft();
   if (importedDraft) {
-    setDraft(importedDraft.data, importedDraft.type, importedDraft.instrumentId, importedDraft.title);
+    setDraft(importedDraft.data, importedDraft.type, importedDraft.instrumentId, importedDraft.title, importedDraft.presetSelection);
     if (importedDraft.editingItemId) {
       state.editingId = importedDraft.editingItemId;
       state.editingOriginalPreviewPath = importedDraft.editingOriginalPreviewPath || null;
