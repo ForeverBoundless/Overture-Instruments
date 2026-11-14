@@ -5,7 +5,7 @@ import { audioBufferToWav } from '../js/shared/instrumentPreview.js';
 import { Prophet10Engine } from '../js/engine/Prophet10Engine.js';
 import { postWorkletMessage, INSTRUMENT_PREVIEW_RENDERERS } from '../js/shared/instrumentPreview.js';
 import { COMMUNITY_INSTRUMENTS } from '../js/data/communityInstruments.js';
-import { attachCommunityPresetMetadata, readCommunityPresetMetadata, stripCommunityPresetMetadata } from '../js/shared/communityPreset.js';
+import { attachCommunityPresetMetadata, readCommunityPresetMetadata, stripCommunityPresetMetadata, stripCommunityInstrumentTranspose } from '../js/shared/communityPreset.js';
 
 test('Community preview WAV output has a valid PCM RIFF/WAVE header', async () => {
   const samples = [
@@ -49,6 +49,26 @@ test('Every registered Community instrument has a dedicated patch-aware preview 
 test('Default Community preview melody stays in a comfortable middle register', async () => {
   const source = await readFile(new URL('../js/shared/instrumentPreview.js', import.meta.url), 'utf8');
   assert.match(source, /const MELODY = \[48, 52, 55, 60, 59, 55, 57, 52, 50, 53, 57, 62, 60, 55, 53, 52\]/);
+});
+
+test('Community instrument patches omit transpose at every nesting level and preserve other settings', () => {
+  const patch = {
+    name: 'Legacy patch',
+    transpose: 12,
+    cutoff: 0.73,
+    globals: { transpose: -5, midiChannel: 3, altTuning: 2 },
+    layers: [{ transpose: 7, oscillator: { transpose: 2, level: 0.8 } }],
+    transposeUp: true,
+    transposeDown: false,
+  };
+  const normalized = stripCommunityInstrumentTranspose('prophet-10', patch);
+  assert.deepEqual(normalized, {
+    name: 'Legacy patch',
+    cutoff: 0.73,
+    globals: { midiChannel: 3, altTuning: 2 },
+    layers: [{ oscillator: { level: 0.8 } }],
+  });
+  assert.equal(patch.transpose, 12, 'normalization must not mutate the source patch');
 });
 
 test('Community selector metadata does not mutate instrument patch data', () => {
