@@ -257,6 +257,7 @@ class Sub37 {
       instrumentId: 'sub-37', className: 's37-button',
       getData: () => this._captureCommunityPatch(),
       getAudioOutput: () => this.engine.limiter,
+       getAudioOutput: () => this.engine.limiter,
        getTitle: () => 'Sub 37 program',
     });
 
