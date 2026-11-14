@@ -694,7 +694,8 @@ class Prophet10App {
     createCommunityShareButton(right, {
       instrumentId: 'prophet-10', className: 'p10-info-share',
       getData: () => this._captureCommunityPatch(),
-      getTitle: () => this.edit?.[0]?.name || 'Prophet-10 program',
+      getAudioOutput: () => this.engine.node,
+       getTitle: () => this.edit?.[0]?.name || 'Prophet-10 program',
     });
     return bar;
   }
