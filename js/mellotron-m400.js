@@ -98,7 +98,8 @@ class MellotronApp {
     this.presets = presetBar(memory.body, { factory: MELLOTRON_PRESETS, store: this.store, display: this.display, filename: 'mellotron-m400-frame', panic: () => this.perf.allOff(), apply: (data, name) => { this.patch = validate(data); this.refresh(); this.display.set(`FRAME  ${name}`, 'TAPE HEAD READY'); }, capture: () => ({ ...this.patch }) });
     createCommunityShareButton(memory.body, {
       instrumentId: 'mellotron-m400', className: 'pn-btn',
-      getData: () => validate(this.patch), getTitle: () => 'Mellotron M400 frame',
+      getData: () => validate(this.patch), getAudioOutput: () => this.engine.output,
+       getTitle: () => 'Mellotron M400 frame',
     });
     footer(this.shell, 'M400 · 47 ON-SCREEN NOTES · G2–F6 · 35-KEY TAPE RANGE · THREE SELECTABLE TAPE TRACKS · FINITE 8-SECOND REPLAY · ESC PANIC');
     this.updateTapeReadout();
