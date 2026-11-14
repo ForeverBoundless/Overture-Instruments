@@ -33,7 +33,8 @@ const validate = (data) => {
   delete out.tone;
   out.pickup = ['bridge','neck','bothIn','bothOut'].includes(data.pickup) ? data.pickup : 'bothIn';
   out.volume = Math.min(1, Math.max(0, Number(data.volume) || 0));
-  out.damping = Math.min(1, Math.max(0, Number(data.damping) || 0));
+  const damping = Number(data.damping);
+  out.damping = Number.isFinite(damping) ? Math.min(1, Math.max(0, damping)) : DEF.damping;
   out.pedalboardEnabled = data.pedalboardEnabled !== false;
   Object.entries(DEFAULT_PEDALS).forEach(([id, values]) => {
     const supplied = data.pedals && data.pedals[id] ? data.pedals[id] : {};
@@ -122,7 +123,7 @@ class HohnerD6App {
     const memory = section(rows,'PROGRAM MEMORY','OVERTURE CLAVINET REGISTRATIONS');
     this.presets = presetBar(memory.body,{factory:HOHNER_D6_PRESETS,store:this.store,display:this.display,filename:'hohner-d6-program',
       panic:()=>this.perf.allOff(),apply:(data,name)=>{this.patch=validate(data);this.refresh();this.display.set(name.toUpperCase(),'CLAVINET D6 PROGRAM');},
-      capture:()=>clone(this.patch)});
+      capture:()=>clone(validate(this.patch))});
     createCommunityShareButton(memory.body, {
       instrumentId: 'hohner-d6', className: 'pn-btn',
       getData: () => validate(clone(this.patch)), getTitle: () => 'Hohner D6 program',
