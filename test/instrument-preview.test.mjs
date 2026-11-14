@@ -3,7 +3,9 @@ import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { audioBufferToWav } from '../js/shared/instrumentPreview.js';
 import { Prophet10Engine } from '../js/engine/Prophet10Engine.js';
-import { postWorkletMessage } from '../js/shared/instrumentPreview.js';
+import { postWorkletMessage, INSTRUMENT_PREVIEW_RENDERERS } from '../js/shared/instrumentPreview.js';
+import { COMMUNITY_INSTRUMENTS } from '../js/data/communityInstruments.js';
+import { attachCommunityPresetMetadata, readCommunityPresetMetadata, stripCommunityPresetMetadata } from '../js/shared/communityPreset.js';
 
 test('Community preview WAV output has a valid PCM RIFF/WAVE header', async () => {
   const samples = [
@@ -31,18 +33,27 @@ test('Community preview WAV output has a valid PCM RIFF/WAVE header', async () =
   assert.equal(bytes.length, 44 + 16);
 });
 
-test('Every Community instrument ID routes to its matching patch-aware renderer', async () => {
+test('Every registered Community instrument has a dedicated patch-aware preview renderer', async () => {
   const source = await readFile(new URL('../js/shared/instrumentPreview.js', import.meta.url), 'utf8');
-  const ids = [
-    'little-phatty', 'sub-37', 'prophet-10', 'nord-c2d', 'dx7', 'juno-106',
-    'tr-808', 'ms-20', 'mellotron-m400', 'oberheim-eight-voice', 'hohner-d6',
-    'ob-xa', 'sequential-pro-3', 'udo-super-8',
-  ];
-  for (const id of ids) assert.ok(source.includes(`'${id}'`), `missing preview route for ${id}`);
+  const registeredIds = COMMUNITY_INSTRUMENTS.map(({ id }) => id).sort();
+  const rendererIds = Object.keys(INSTRUMENT_PREVIEW_RENDERERS).sort();
+  assert.deepEqual(rendererIds, registeredIds, 'every Community instrument must have exactly one renderer');
+  assert.equal(new Set(registeredIds).size, registeredIds.length, 'instrument IDs must be unique');
+  for (const { route } of COMMUNITY_INSTRUMENTS) assert.ok(route.startsWith('/html/'), 'every emulator needs a route');
   for (const engine of ['AudioEngine', 'Sub37Engine', 'NordC2DEngine', 'TR808Engine', 'Prophet10Engine', 'WorkletEngine']) {
     assert.ok(source.includes(engine), `preview renderer should use ${engine}`);
   }
   assert.doesNotMatch(source, /scheduleKeyboardNote|scheduleOrganVoice/);
+});
+
+test('Community selector metadata does not mutate instrument patch data', () => {
+  const patch = { name: 'Whatever', damping: 0.73, cutoff: 0.42 };
+  const selection = { kind: 'factory', index: 3, value: 'f:3', name: 'Dry Funk' };
+  const stored = attachCommunityPresetMetadata(patch, selection);
+  assert.deepEqual(readCommunityPresetMetadata(stored), selection);
+  assert.deepEqual(stripCommunityPresetMetadata(stored), patch);
+  assert.equal(stored.name, 'Whatever');
+  assert.equal(stored.damping, 0.73);
 });
 
 test('All worklet instruments accept frame-timed preview note events', async () => {
