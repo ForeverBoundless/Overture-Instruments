@@ -221,7 +221,8 @@ class App {
         if (!this.engine.started) throw new Error('Power on the Little Phatty before sharing its current sound.');
         return this.presetManager.captureCurrentPatch();
       },
-      getTitle: () => this.presetManager._lastAppliedPatch?.name || 'Little Phatty patch',
+      getAudioOutput: () => this.engine.limiter,
+       getTitle: () => this.presetManager._lastAppliedPatch?.name || 'Little Phatty patch',
     });
 
     wrap.appendChild(row1);
