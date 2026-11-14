@@ -46,6 +46,11 @@ test('Every registered Community instrument has a dedicated patch-aware preview 
   assert.doesNotMatch(source, /scheduleKeyboardNote|scheduleOrganVoice/);
 });
 
+test('Default Community preview melody stays in a comfortable middle register', async () => {
+  const source = await readFile(new URL('../js/shared/instrumentPreview.js', import.meta.url), 'utf8');
+  assert.match(source, /const MELODY = \[48, 52, 55, 60, 59, 55, 57, 52, 50, 53, 57, 62, 60, 55, 53, 52\]/);
+});
+
 test('Community selector metadata does not mutate instrument patch data', () => {
   const patch = { name: 'Whatever', damping: 0.73, cutoff: 0.42 };
   const selection = { kind: 'factory', index: 3, value: 'f:3', name: 'Dry Funk' };
