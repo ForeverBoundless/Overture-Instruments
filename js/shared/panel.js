@@ -226,7 +226,40 @@ export function presetBar(parent, opts) {
     ...store.items.map((it) => ({ value: `u:${it.id}`, label: `U  ${it.name}` })),
   ];
   const sel = select(body, 'PRESET', options(), 'f:0', (v) => load(v));
+  sel.select.dataset.overturePresetSelector = 'true';
   const refresh = (value) => { const s = sel.select; s.replaceChildren(); options().forEach((o) => { const opt = el('option', '', s, o.label); opt.value = o.value; }); if (value) s.value = value; };
+  sel.select.getCommunityPresetSelection = () => {
+    if (current.kind === 'factory') {
+      const item = factory[current.index];
+      return item ? { kind: 'factory', index: current.index, value: `f:${current.index}`, name: item.name } : null;
+    }
+    const item = store.get(current.id);
+    return item ? { kind: 'user', id: item.id, value: `u:${item.id}`, name: item.name } : null;
+  };
+  sel.select.restoreCommunityPresetSelection = (selection) => {
+    let value = selection.value || '';
+    if (selection.kind === 'factory') {
+      let index = Number.isInteger(selection.index) ? selection.index : -1;
+      if (index < 0 || index >= factory.length || (selection.name && factory[index]?.name !== selection.name)) index = factory.findIndex((item) => item.name === selection.name);
+      if (index < 0) return false;
+      value = `f:${index}`;
+      current = { kind: 'factory', index };
+    } else {
+      const userItem = (selection.id && store.get(selection.id)) || store.items.find((entry) => entry.name === selection.name);
+      if (userItem) {
+        value = `u:${userItem.id}`;
+        current = { kind: 'user', id: userItem.id };
+      } else {
+        const factoryIndex = factory.findIndex((item) => item.name === selection.name);
+        if (factoryIndex < 0) return false;
+        value = `f:${factoryIndex}`;
+        current = { kind: 'factory', index: factoryIndex };
+      }
+    }
+    if (!options().some((option) => option.value === value)) refresh(value);
+    sel.select.value = value;
+    return true;
+  };
   function load(v) {
     clearCommunitySource();
     if (v.startsWith('f:')) { const i = Number(v.slice(2)); current = { kind: 'factory', index: i }; apply(JSON.parse(JSON.stringify(factory[i].data)), factory[i].name); }
