@@ -164,6 +164,7 @@ class NordC2D {
       instrumentId: 'nord-c2d', className: 'nord-community-share',
       getData: () => this.captureCommunityPatch(),
       getAudioOutput: () => this.engine.expression,
+       getAudioOutput: () => this.engine.expression,
        getTitle: () => 'Nord C2D registration',
     });
   }
