@@ -256,7 +256,8 @@ class Sub37 {
     createCommunityShareButton(program.body, {
       instrumentId: 'sub-37', className: 's37-button',
       getData: () => this._captureCommunityPatch(),
-      getTitle: () => 'Sub 37 program',
+      getAudioOutput: () => this.engine.limiter,
+       getTitle: () => 'Sub 37 program',
     });
 
     const arp = this._section('ARPEGGIATOR'); const arpButtons = document.createElement('div'); arpButtons.className = 's37-button-grid';
