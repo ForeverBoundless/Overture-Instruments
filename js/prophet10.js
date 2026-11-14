@@ -695,6 +695,7 @@ class Prophet10App {
       instrumentId: 'prophet-10', className: 'p10-info-share',
       getData: () => this._captureCommunityPatch(),
       getAudioOutput: () => this.engine.node,
+       getAudioOutput: () => this.engine.node,
        getTitle: () => this.edit?.[0]?.name || 'Prophet-10 program',
     });
     return bar;
