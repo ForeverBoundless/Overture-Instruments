@@ -101,10 +101,10 @@ test('OMNI performance deck keeps octave controls in the keyboard header and giv
   assert.match(css, /grid-template-columns:88px minmax\(0,1fr\)/);
   assert.match(css, /\.omni-keys \.lp-keyboard[^}]*width:100%/);
   assert.match(css, /\.omni-keys \.lp-keyboard[^}]*min-width:520px/);
-  assert.match(page, /omni\.css\?v=20261104-boot-centering/);
+  assert.match(page, /omni\.css\?v=20261114-macro-theme/);
   assert.match(page, /omni\.js\?v=20261112-community-edit-r1/);
   assert.match(worker, /overture-shell-v\d+/);
-  assert.match(worker, /omni\.css\?v=20261104-boot-centering/);
+  assert.match(worker, /omni\.css\?v=20261114-macro-theme/);
   assert.ok(worker.includes('/js/omni.js?v=20261112-community-edit-r1'));
 });
 
@@ -131,8 +131,8 @@ test('community publish login link honours Supabase hidden state in every respon
     readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
   ]);
   assert.match(css, /#community-account-link\[hidden\][\s\S]*display:none !important/);
-  assert.match(page, /community\.css\?v=20261112-community-moderation-r1/);
-  assert.match(worker, /community\.css\?v=20261112-community-moderation-r1/);
+  assert.match(page, /community\.css\?v=20261114-publish-layout/);
+  assert.match(worker, /community\.css\?v=20261114-publish-layout/);
 });
 
 test('light-mode accent effects retain the original luminous brand colours', async () => {
@@ -178,7 +178,7 @@ test('OMNI wordmark explicitly uses Inter Variable', async () => {
   const page = await readFile(new URL('../omni.html', import.meta.url), 'utf8');
   const worker = await readFile(new URL('../service-worker.js', import.meta.url), 'utf8');
   assert.match(css, /\.omni-logo-wording strong\s*\{[^}]*font-family:\s*'Inter Variable'/s);
-  assert.match(page, /omni\.css\?v=20261104-boot-centering/);
+  assert.match(page, /omni\.css\?v=20261114-macro-theme/);
   assert.match(worker, /overture-shell-v\d+/);
 });
 
@@ -291,11 +291,11 @@ test('every OMNI module has a complete technical reference and the inspector can
   assert.match(app, /aria-modal/);
   assert.match(styles, /html\[data-theme="light"\] \.omni-info-dialog/);
   assert.match(styles, /\.omni-info-dialog\s*\{/);
-  assert.match(page, /omni-info\.css\?v=20261105-module-info/);
+  assert.match(page, /omni-info\.css\?v=20261114-info-type/);
   assert.match(page, /omni\.js\?v=20261112-community-edit-r1/);
   assert.match(worker, /overture-shell-v\d+/);
-  assert.match(worker, /omni-info\.css\?v=20261105-module-info/);
-  assert.match(worker, /moduleInfo\.js\?v=20261105-module-info/);
+  assert.match(worker, /omni-info\.css\?v=20261114-info-type/);
+  assert.match(worker, /moduleInfo\.js\?v=20261114-info-type/);
   assert.match(contributorGuide, /every module must also have a complete entry in `js\/omni\/moduleInfo\.js`/);
 });
 

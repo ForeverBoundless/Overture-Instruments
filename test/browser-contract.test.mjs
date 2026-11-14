@@ -73,7 +73,7 @@ test('Hohner D6 and Oberheim OB-Xa are complete first-class emulator entries', a
   assert.match(obEngine, /width=clamp\(\.5-p\.pulseWidth\*\.45/);
   assert.doesNotMatch(obEngine, /lfoVca/);
   assert.match(obPage, /Oberheim OB-Xa from Overture Instruments/);
-  assert.match(worker, /overture-shell-v78/);
+  assert.match(worker, /overture-shell-v79/);
   assert.match(worker, /hohner-d6/);
   assert.match(worker, /ob-xa/);
 });
@@ -810,7 +810,7 @@ test('Community supports short direct instrument-output preview recordings', asy
   assert.match(community, /renderRecordedPreview/);
   assert.match(page, /community-record-preview/);
   assert.match(page, /community-recorded-preview/);
-  assert.match(worker, /overture-shell-v78/);
+  assert.match(worker, /overture-shell-v79/);
   assert.match(worker, /20261113-recorded-preview-r1/);
   assert.equal(emulators.every((source) => source.includes('getAudioOutput:')), true,
     'all 14 emulator pages must expose their final output node to the recorder');
