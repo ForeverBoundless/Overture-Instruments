@@ -10,6 +10,8 @@ import { Sub37Engine } from '../engine/Sub37Engine.js';
 import { NordC2DEngine } from '../engine/NordC2DEngine.js';
 import { TR808Engine, LANES } from '../engine/TR808Engine.js';
 import { Prophet10Engine } from '../engine/Prophet10Engine.js';
+import { COMMUNITY_INSTRUMENTS } from '../data/communityInstruments.js';
+import { stripCommunityPresetMetadata } from './communityPreset.js';
 
 const SAMPLE_RATE = 44100;
 const TEMPO = 112;
@@ -344,33 +346,38 @@ export function audioBufferToWav(buffer) {
   return new Blob([output], { type: 'audio/wav' });
 }
 
+/**
+ * Every Community instrument has one patch-aware renderer. New emulator IDs
+ * must be paired with a renderer; tests fail if either list drifts.
+ */
+const STANDARD_PREVIEW_DURATION = START_OFFSET + MELODY.length * EIGHTH + 1.4;
+export const INSTRUMENT_PREVIEW_RENDERERS = Object.freeze({
+  'little-phatty': (patch) => renderLittlePhatty(offlineContext(STANDARD_PREVIEW_DURATION), patch),
+  'sub-37': (patch) => renderSub37(offlineContext(STANDARD_PREVIEW_DURATION), patch),
+  'prophet-10': (patch) => renderProphet10(offlineContext(STANDARD_PREVIEW_DURATION), patch),
+  'nord-c2d': (patch) => renderNord(offlineContext(STANDARD_PREVIEW_DURATION), patch),
+  'dx7': (patch) => renderWorklet(offlineContext(STANDARD_PREVIEW_DURATION), '../engine/DX7Processor.js', 'dx7-processor', patch, 'dx7', { volume: patch.volume ?? 0.7 }),
+  'juno-106': (patch) => renderWorklet(offlineContext(STANDARD_PREVIEW_DURATION), '../engine/JunoProcessor.js', 'juno-processor', patch, 'juno-106', { volume: patch.volume ?? 0.7 }),
+  'tr-808': (patch) => {
+    const tempo = clamp(patch.tempo, 40, 300);
+    return renderTR808(offlineContext(START_OFFSET + 32 * (60 / tempo / 4) + 2.8), patch);
+  },
+  'ms-20': (patch) => renderWorklet(offlineContext(STANDARD_PREVIEW_DURATION), '../engine/MS20Processor.js', 'ms20-processor', patch, 'ms-20'),
+  'mellotron-m400': (patch) => renderWorklet(offlineContext(STANDARD_PREVIEW_DURATION), '../engine/MellotronProcessor.js?v=20261104-declick', 'mellotron-processor', patch, 'mellotron-m400'),
+  'oberheim-eight-voice': (patch) => renderWorklet(offlineContext(STANDARD_PREVIEW_DURATION), '../engine/OberheimEightVoiceProcessor.js?v=20261104-eightvoice-stable', 'oberheim-eight-voice-processor', patch, 'oberheim-eight-voice'),
+  'hohner-d6': (patch) => renderWorklet(offlineContext(STANDARD_PREVIEW_DURATION), '../engine/HohnerD6Processor.js?v=20261106-audio-r1', 'hohner-d6-processor', patch, 'hohner-d6'),
+  'ob-xa': (patch) => renderWorklet(offlineContext(STANDARD_PREVIEW_DURATION), '../engine/OBXaProcessor.js?v=20261106-audio-r1', 'obxa-processor', patch, 'ob-xa'),
+  'sequential-pro-3': (patch) => renderWorklet(offlineContext(STANDARD_PREVIEW_DURATION), '../engine/Pro3Processor.js', 'pro3-processor', patch, 'sequential-pro-3'),
+  'udo-super-8': (patch) => renderWorklet(offlineContext(STANDARD_PREVIEW_DURATION), '../engine/Super8Processor.js', 'super8-processor', patch, 'udo-super-8'),
+});
 export async function generateInstrumentPreview(instrumentId, patch) {
   if (!instrumentId || !patch || typeof patch !== 'object' || Array.isArray(patch)) {
     throw new Error('A valid instrument preset is required to generate its preview.');
   }
-  if (instrumentId === 'tr-808') {
-    const tempo = clamp(patch.tempo, 40, 300);
-    const duration = START_OFFSET + 32 * (60 / tempo / 4) + 2.8;
-    const context = offlineContext(duration);
-    return renderTR808(context, patch);
+  if (!COMMUNITY_INSTRUMENTS.some((instrument) => instrument.id === instrumentId)) {
+    throw new Error(`Previews are not supported for the instrument "${instrumentId}".`);
   }
-
-  const duration = START_OFFSET + MELODY.length * EIGHTH + 1.4;
-  const context = offlineContext(duration);
-  switch (instrumentId) {
-    case 'little-phatty': return renderLittlePhatty(context, patch);
-    case 'sub-37': return renderSub37(context, patch);
-    case 'prophet-10': return renderProphet10(context, patch);
-    case 'nord-c2d': return renderNord(context, patch);
-    case 'dx7': return renderWorklet(context, '../engine/DX7Processor.js', 'dx7-processor', patch, instrumentId, { volume: patch.volume ?? 0.7 });
-    case 'juno-106': return renderWorklet(context, '../engine/JunoProcessor.js', 'juno-processor', patch, instrumentId, { volume: patch.volume ?? 0.7 });
-    case 'ms-20': return renderWorklet(context, '../engine/MS20Processor.js', 'ms20-processor', patch, instrumentId);
-    case 'sequential-pro-3': return renderWorklet(context, '../engine/Pro3Processor.js', 'pro3-processor', patch, instrumentId);
-    case 'udo-super-8': return renderWorklet(context, '../engine/Super8Processor.js', 'super8-processor', patch, instrumentId);
-    case 'ob-xa': return renderWorklet(context, '../engine/OBXaProcessor.js?v=20261106-audio-r1', 'obxa-processor', patch, instrumentId);
-    case 'hohner-d6': return renderWorklet(context, '../engine/HohnerD6Processor.js?v=20261106-audio-r1', 'hohner-d6-processor', patch, instrumentId);
-    case 'oberheim-eight-voice': return renderWorklet(context, '../engine/OberheimEightVoiceProcessor.js?v=20261104-eightvoice-stable', 'oberheim-eight-voice-processor', patch, instrumentId);
-    case 'mellotron-m400': return renderWorklet(context, '../engine/MellotronProcessor.js?v=20261104-declick', 'mellotron-processor', patch, instrumentId);
-    default: throw new Error(`Previews are not supported for the instrument "${instrumentId}".`);
-  }
+  const renderPreview = INSTRUMENT_PREVIEW_RENDERERS[instrumentId];
+  if (typeof renderPreview !== 'function') throw new Error(`No Community preview renderer is registered for "${instrumentId}".`);
+  return renderPreview(stripCommunityPresetMetadata(patch));
 }
