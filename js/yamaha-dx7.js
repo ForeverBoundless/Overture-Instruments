@@ -78,7 +78,8 @@ class DX7App {
     createCommunityShareButton(presets.body, {
       instrumentId: 'dx7', className: 'pn-btn',
       getData: () => JSON.parse(JSON.stringify(this.patch)),
-      getTitle: () => 'DX7 voice',
+      getAudioOutput: () => this.engine.output,
+       getTitle: () => 'DX7 voice',
     });
     const g = section(row1, 'ALGORITHM', 'TOPOLOGY & FEEDBACK');
     g.body.classList.add('dx7-alg-body');
