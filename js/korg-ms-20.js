@@ -120,7 +120,8 @@ class MS20App {
     createCommunityShareButton(pre.body, {
       instrumentId: 'ms-20', className: 'pn-btn',
       getData: () => ({ ...this.patch, params: { ...this.patch.params }, cables: this.patch.cables.map((c) => ({ ...c })) }),
-      getTitle: () => 'MS-20 patch',
+      getAudioOutput: () => this.engine.output,
+       getTitle: () => 'MS-20 patch',
     });
     button(el('div', 'pn-buttons', pre.body), 'REMOVE ALL CABLES', () => { this.patch.cables = []; this.send(); this.drawCables(); });
   }
