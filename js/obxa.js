@@ -156,7 +156,8 @@ const allocation=section(rows,'KEYBOARD & VOICE ALLOCATION','FULL · SPLIT · DO
   this.ui.layerEdit=select(allocation.body,'EDIT TIMBRE',[{value:'0',label:'LOWER / A'},{value:'1',label:'UPPER / B'}],'0',v=>this.selectLayer(v));
   const memory=section(rows,'PROGRAMMER','OVERTURE OB-Xa PROGRAMS');
   this.presets=presetBar(memory.body,{factory:OBXA_PRESETS,store:this.store,display:this.display,filename:'oberheim-obxa-program',panic:()=>this.perf.allOff(),apply:(data,name)=>{this.patch=validate(data);this.layerIndex=0;this.refresh();this.display.set(name.toUpperCase(),'OB-Xa PROGRAM');},capture:()=>({...this.patch,layerB:{...this.patch.layerB}})});
-  createCommunityShareButton(memory.body,{instrumentId:'ob-xa',className:'pn-btn',getData:()=>validate(this.patch),getTitle:()=> 'Oberheim OB-Xa program'});
+  createCommunityShareButton(memory.body,{instrumentId:'ob-xa',className:'pn-btn',getData:()=>validate(this.patch),getAudioOutput: () => this.engine.output,
+       getTitle:()=> 'Oberheim OB-Xa program'});
   footer(this.shell,'OBERHEIM OB-Xa · 4 / 6 / 8 VOICES · DUAL VCO · SELECTABLE 2 / 4-POLE VCF · PINK NOISE · POLYPHONIC GLIDE');this.updateLayoutState();
  }
  refresh(){['mode','voiceCount','splitPoint','unison','unisonDetune','bendNarrow','bendOsc2Only','transposeDown','transposeUp','modLowerEnabled','modUpperEnabled','master','masterTune','hold','layerBalance','chordMode','portamentoMode','portamentoOffset'].forEach(key=>{if(this.ui[key]?.setValue)this.ui[key].setValue(this.patch[key],true);});this.renderLayerControls();this.updateLayoutState();this.engine.post({t:'patch',patch:this.patch});}
