@@ -1,4 +1,4 @@
-const CACHE = 'overture-shell-v78';
+const CACHE = 'overture-shell-v79';
 const APP_SHELL = [
   '/account',
   '/login',
@@ -14,6 +14,7 @@ const APP_SHELL = [
   '/css/community.css?v=20261103-auth-hidden',
   '/css/community.css?v=20261112-audio-moderation-r1',
   '/css/community.css?v=20261112-community-moderation-r1',
+  '/css/community.css?v=20261114-publish-layout',
   '/css/community.css',
   '/js/community.js?v=20261103-auth-hidden',
   '/js/community.js?v=20261112-community-title-edit-r1',
@@ -54,7 +55,9 @@ const APP_SHELL = [
   '/css/omni.css',
   '/css/omni.css?v=20261103-chord-sliders-32',
   '/css/omni.css?v=20261104-boot-centering',
+  '/css/omni.css?v=20261114-macro-theme',
   '/css/omni-info.css?v=20261105-module-info',
+  '/css/omni-info.css?v=20261114-info-type',
   '/css/knobs.css',
   '/css/panel.css',
   '/css/prophet10.css',
@@ -62,6 +65,7 @@ const APP_SHELL = [
   '/css/roland-tr-808.css',
   '/css/site-footer.css',
   '/css/site-theme-polish.css?v=20261103-accent-spacing',
+  '/css/site-theme-polish.css?v=20261114-ui-theme-pass',
   '/css/site-theme.css',
   '/css/sub37.css',
   '/css/yamaha-dx7.css',
