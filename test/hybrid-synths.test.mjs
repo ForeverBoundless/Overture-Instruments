@@ -98,6 +98,23 @@ test('UDO Super 8 dual binaural mode allocates upper/lower voices and renders st
 });
 
 
+test('UDO Super 8 combines MPE master-channel and per-note pitch bend', async () => {
+  const h = await createWorklet('../js/engine/Super8Processor.js', 'super8-processor');
+  h.processor.message({ t: 'patch', patch: { mode: 'single', binaural: false, mpe: true } });
+  h.processor.message({ t: 'noteOn', note: 60, vel: .8, channel: 2, source: 'midi' });
+  const voice = h.processor.voices.find((item) => item.active && item.channel === 2);
+  assert.ok(voice, 'the MPE member-channel note should allocate a voice');
+
+  h.processor.message({ t: 'bend', value: .25, channel: 1 });
+  assert.equal(h.processor.bendForVoice(voice, 0), .25, 'master-channel bend should reach every MPE member voice');
+
+  h.processor.message({ t: 'bend', value: -.5, channel: 2 });
+  assert.equal(h.processor.bendForVoice(voice, 0), -.25, 'per-note bend should add to the master bend');
+
+  h.processor.message({ t: 'bend', value: -1, channel: 2 });
+  assert.equal(h.processor.bendForVoice(voice, 0), -.75, 'the combined bend should remain within the normalized range');
+});
+
 test('UDO Super 8 allocates separate voices for a multi-note chord', async () => {
   const h = await createWorklet('../js/engine/Super8Processor.js', 'super8-processor');
   h.processor.message({ t: 'patch', patch: { mode: 'single', binaural: false, activeLayer: 0, layers: [{ voiceMode: 'poly1', unison: 'off', env2Attack: .001, env2Sustain: .9 }] } });
