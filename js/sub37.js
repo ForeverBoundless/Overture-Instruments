@@ -235,6 +235,22 @@ class Sub37 {
     const program = this._section('PROGRAMMING');
     const bank = this._selector('BANK / PRESET', SUB37_PRESETS.map((preset) => ({ value: preset.id, label: `${preset.bank}.${String(preset.slot).padStart(2, '0')}  ${preset.name}` })), 0, (value) => this._applyPreset(Number(value)));
     this.presetSelect = bank; program.body.appendChild(bank);
+    const presetNode = bank.querySelector('select');
+    presetNode.dataset.overturePresetSelector = 'true';
+    presetNode.getCommunityPresetSelection = () => {
+      const preset = SUB37_PRESETS.find((item) => String(item.id) === String(presetNode.value));
+      return preset ? { kind: 'factory', value: String(preset.id), index: SUB37_PRESETS.indexOf(preset), name: preset.name } : null;
+    };
+    presetNode.restoreCommunityPresetSelection = (selection) => {
+      const preset = SUB37_PRESETS.find((item, index) =>
+        String(item.id) === String(selection.value)
+        || (selection.name && item.name === selection.name)
+        || (Number.isInteger(selection.index) && index === selection.index && (!selection.name || item.name === selection.name)));
+      if (!preset) return false;
+      presetNode.value = String(preset.id);
+      this.currentPreset = SUB37_PRESETS.indexOf(preset);
+      return true;
+    };
     const programButtons = document.createElement('div'); programButtons.className = 's37-button-grid';
     programButtons.append(this._button('PRESET', () => this._showMessage('PRESET MODE')), this._button('PANEL', () => this._showMessage('PANEL MODE')), this._button('SAVE', () => this._savePatch()), this._button('INIT', () => this._initPatch())); program.body.appendChild(programButtons);
     createCommunityShareButton(program.body, {
