@@ -126,7 +126,8 @@ class HohnerD6App {
       capture:()=>clone(validate(this.patch))});
     createCommunityShareButton(memory.body, {
       instrumentId: 'hohner-d6', className: 'pn-btn',
-      getData: () => validate(clone(this.patch)), getTitle: () => 'Hohner D6 program',
+      getData: () => validate(clone(this.patch)), getAudioOutput: () => this.engine.output,
+       getTitle: () => 'Hohner D6 program',
     });
     
     this.updateToneButtons();
