@@ -199,7 +199,9 @@
               </span>
             </span>
             <input type="file" id="community-audio-file" accept="audio/webm,audio/ogg,audio/mp4,audio/mpeg,audio/wav">
-            <small>Leave this blank and Overture will generate a short preview from the patch. Your own uploaded recording takes priority.</small>
+            <button class="community-button community-button--quiet community-record-preview" id="community-record-preview" type="button" hidden>RECORD PREVIEW AUDIO · 10S MAX</button>
+            <small>Record directly from the instrument's audio output in a separate tab, or upload a recording. A manual recording replaces the generated preview.</small>
+            <audio id="community-recorded-preview" class="community-recorded-preview" controls hidden></audio>
           </label>
         </div>
         <label class="community-guidelines-check" hidden>
@@ -309,6 +311,6 @@
     </form>
   </div>
 
-  <script type="module" src="/js/community.js?v=20261112-complete-patch-settings-r1"></script>
+  <script type="module" src="/js/community.js?v=20261113-recorded-preview-r1"></script>
 </body>
 </html>
