@@ -79,6 +79,7 @@ class DX7App {
       instrumentId: 'dx7', className: 'pn-btn',
       getData: () => JSON.parse(JSON.stringify(this.patch)),
       getAudioOutput: () => this.engine.output,
+       getAudioOutput: () => this.engine.output,
        getTitle: () => 'DX7 voice',
     });
     const g = section(row1, 'ALGORITHM', 'TOPOLOGY & FEEDBACK');
