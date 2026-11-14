@@ -81,7 +81,7 @@ class Pro3App{
    this.presets.load('f:0');
   this.engine.post({t:'patch',patch:this.patch});
   const community=consumeCommunityInstrumentPreset('sequential-pro-3',clean);
-  if(community){this.patch=community.data;this.refresh();this.displayHardwarePreset(community.title);this.refreshHardwarePresetList('f:0');}
+  if(community){this.patch=community.data;this.refresh();this.displayHardwarePreset(community.title);this.refreshHardwarePresetList(this.hwPresets?.value||'f:0');}
  }
  set(k,v){this.patch[k]=v;this.engine.post({t:'param',key:k,value:v});if(k==='seqTrack')this.updateSequence();this.syncHardware?.();}
  postPatch(){this.engine.post({t:'patch',patch:this.patch});}
@@ -265,7 +265,18 @@ class Pro3App{
   const waveButton=document.createElement('label');waveButton.className='hp-action';waveButton.textContent='Load wavetable';
   const waveInput=document.createElement('input');waveInput.type='file';waveInput.accept='.wav,audio/wav';waveButton.appendChild(waveInput);footer.appendChild(waveButton);
   waveInput.addEventListener('change',async()=>{const file=waveInput.files?.[0];if(!file)return;try{if(!this.engine.ctx)throw new Error('Power on audio first.');const decoded=await this.engine.ctx.decodeAudioData(await file.arrayBuffer()),data=decoded.getChannelData(0);if(data.length<64||data.length>65536)throw new Error('Use a single-cycle WAV between 64 and 65,536 samples.');this.engine.post({t:'wavetable',data:Array.from(data)});this.hwDisplay.set('WAVETABLE LOADED','USER SINGLE CYCLE · BANK 32');}catch(e){this.hwDisplay.set('WAVETABLE FAILED',e.message);alert(e.message);}});
-  this.refreshHardwarePresetList=(selected='f:0')=>{this.hwPresets.replaceChildren();FACTORY.forEach((item,i)=>{const o=document.createElement('option');o.value='f:'+i;o.textContent=String(i+1).padStart(2,'0')+' · '+item.name;this.hwPresets.appendChild(o);});this.store.items.forEach(item=>{const o=document.createElement('option');o.value='u:'+item.id;o.textContent='User · '+item.name;this.hwPresets.appendChild(o);});this.hwPresets.value=selected;};
+  this.refreshHardwarePresetList=(selected='f:0')=>{this.hwPresets.replaceChildren();FACTORY.forEach((item,i)=>{const o=document.createElement('option');o.value='f:'+i;o.textContent=String(i+1).padStart(2,'0')+' · '+item.name;this.hwPresets.appendChild(o);});this.store.items.forEach(item=>{const o=document.createElement('option');o.value='u:'+item.id;o.textContent='User · '+item.name;this.hwPresets.appendChild(o);});this.hwPresets.value=selected;};this.hwPresets.dataset.overturePresetSelector='true';
+   this.hwPresets.getCommunityPresetSelection=()=>{
+    const value=this.hwPresets.value;
+    if(value.startsWith('f:')){const index=Number(value.slice(2)),item=FACTORY[index];return item?{kind:'factory',index,value,name:item.name}:null;}
+    const item=this.store.get(value.slice(2));return item?{kind:'user',id:item.id,value,name:item.name}:null;
+   };
+   this.hwPresets.restoreCommunityPresetSelection=selection=>{
+    let index=Number.isInteger(selection.index)?selection.index:-1;
+    if(index<0||index>=FACTORY.length||(selection.name&&FACTORY[index]?.name!==selection.name))index=FACTORY.findIndex(item=>item.name===selection.name);
+    if(index<0)return false;
+    this.hwPresets.value='f:'+index;return true;
+   };
   this.displayHardwarePreset=name=>{this.hwDisplay.set(name.toUpperCase(),'PRO 3 · PROGRAM');hw.program.textContent='PRO 3 · '+name;};
 
   // ---- modulation matrix dialog ----
