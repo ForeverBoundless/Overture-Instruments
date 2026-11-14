@@ -1,3 +1,4 @@
+import { COMMUNITY_INSTRUMENT_BY_ID as INSTRUMENTS } from './data/communityInstruments.js';
 import {
   supabase,
   supabaseConfigured,
@@ -7,16 +8,6 @@ import {
 
 const $ = (id) => document.getElementById(id);
 const PAGE_SIZE = 24;
-const INSTRUMENTS = {
-  'little-phatty': { name: 'Moog Little Phatty', route: '/html/little-phatty' },
-  'sub-37': { name: 'Moog Subsequent 37', route: '/html/sub37' },
-  'prophet-10': { name: 'Sequential Prophet-10', route: '/html/prophet10' },
-  'nord-c2d': { name: 'Nord C2D', route: '/html/nord-c2d' },
-  'ms-20': { name: 'Korg MS-20', route: '/html/korg-ms-20' },
-  'juno-106': { name: 'Roland Juno-106', route: '/html/roland-juno-106' },
-  dx7: { name: 'Yamaha DX7', route: '/html/yamaha-dx7' },
-  'tr-808': { name: 'Roland TR-808', route: '/html/roland-tr-808' },
-};
 
 const state = {
   profile: null,
