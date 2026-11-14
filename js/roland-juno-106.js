@@ -107,7 +107,8 @@ class JunoApp {
     createCommunityShareButton(pre.body, {
       instrumentId: 'juno-106', className: 'pn-btn',
       getData: () => ({ ...this.patch }),
-      getTitle: () => 'Juno-106 patch',
+      getAudioOutput: () => this.engine.output,
+       getTitle: () => 'Juno-106 patch',
     });
   }
 
