@@ -309,7 +309,18 @@ class Super8App{
   const waveLabel=document.createElement('label');waveLabel.className='hp-action hp-super8-wave-import';waveLabel.textContent='Load waves';
   const waveInput=document.createElement('input');waveInput.type='file';waveInput.multiple=true;waveInput.accept='.wav,audio/wav';waveLabel.appendChild(waveInput);footer.appendChild(waveLabel);
   waveInput.addEventListener('change',async()=>{try{if(!this.engine.ctx)throw new Error('Power on audio first.');const waves=[];for(const file of [...(waveInput.files||[])].slice(0,64)){const decoded=await this.engine.ctx.decodeAudioData(await file.arrayBuffer());const data=decoded.getChannelData(0);if(data.length<64||data.length>65536)throw new Error(file.name+' is not a supported single-cycle file.');const size=2048,down=Array.from({length:size},(_,i)=>{const pos=i*data.length/size,index=Math.floor(pos),frac=pos-index;return data[index]*(1-frac)+data[(index+1)%data.length]*frac;});waves.push(down);}if(waves.length){const p=this.p();p.userWaves=Array.from({length:64},(_,i)=>waves[i]??p.userWaves?.[i]??null);this.postPatch();this.display.flash(waves.length+' WAVES IMPORTED · SAVED WITH LAYER');}}catch(error){this.display.flash('Wave import failed');alert(error.message);}});
-  this.refreshHardwarePresetList=(selected='f:0')=>{this.hwPresets.replaceChildren();FACTORY.forEach((item,i)=>{const o=document.createElement('option');o.value='f:'+i;o.textContent=String(i+1).padStart(2,'0')+' · '+item.name;this.hwPresets.appendChild(o);});this.store.items.forEach(item=>{const o=document.createElement('option');o.value='u:'+item.id;o.textContent='User · '+item.name;this.hwPresets.appendChild(o);});this.hwPresets.value=selected;};
+  this.refreshHardwarePresetList=(selected='f:0')=>{this.hwPresets.replaceChildren();FACTORY.forEach((item,i)=>{const o=document.createElement('option');o.value='f:'+i;o.textContent=String(i+1).padStart(2,'0')+' · '+item.name;this.hwPresets.appendChild(o);});this.store.items.forEach(item=>{const o=document.createElement('option');o.value='u:'+item.id;o.textContent='User · '+item.name;this.hwPresets.appendChild(o);});this.hwPresets.value=selected;};this.hwPresets.dataset.overturePresetSelector='true';
+   this.hwPresets.getCommunityPresetSelection=()=>{
+    const value=this.hwPresets.value;
+    if(value.startsWith('f:')){const index=Number(value.slice(2)),item=FACTORY[index];return item?{kind:'factory',index,value,name:item.name}:null;}
+    const item=this.store.get(value.slice(2));return item?{kind:'user',id:item.id,value,name:item.name}:null;
+   };
+   this.hwPresets.restoreCommunityPresetSelection=selection=>{
+    let index=Number.isInteger(selection.index)?selection.index:-1;
+    if(index<0||index>=FACTORY.length||(selection.name&&FACTORY[index]?.name!==selection.name))index=FACTORY.findIndex(item=>item.name===selection.name);
+    if(index<0)return false;
+    this.hwPresets.value='f:'+index;return true;
+   };
   this.refreshHardwareLayerList=selected=>{this.hwLayerPresets.replaceChildren();const first=document.createElement('option');first.value='';first.textContent='Layer patches…';this.hwLayerPresets.appendChild(first);this.layerStores[this.active].items.forEach(item=>{const o=document.createElement('option');o.value=item.id;o.textContent='Layer · '+item.name;this.hwLayerPresets.appendChild(o);});this.hwLayerPresets.value=selected||'';};
   this.displayHardwarePreset=name=>{this.hwDisplay.set(name.toUpperCase(),'SUPER 8 · PERFORMANCE');hw.program.textContent='SUPER 8 · '+name;};
 
