@@ -222,6 +222,7 @@ class App {
         return this.presetManager.captureCurrentPatch();
       },
       getAudioOutput: () => this.engine.limiter,
+       getAudioOutput: () => this.engine.limiter,
        getTitle: () => this.presetManager._lastAppliedPatch?.name || 'Little Phatty patch',
     });
 
