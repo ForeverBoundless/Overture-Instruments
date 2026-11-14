@@ -301,7 +301,8 @@ class Super8App{
   this.hwPresets.addEventListener('change',()=>this.presets.load(this.hwPresets.value));
   const action=(label,fn)=>{const a=document.createElement('button');a.type='button';a.className='hp-action';a.textContent=label;a.addEventListener('click',fn);footer.appendChild(a);return a;};
   action('Save performance',()=>{const name=prompt('Name this performance','My Super 8 Performance');if(name===null)return;try{const item=this.store.save(name,clone(this.patch));this.refreshHardwarePresetList('u:'+item.id);this.displayHardwarePreset(item.name);}catch(e){alert(e.message);}});
-  createCommunityShareButton(footer,{instrumentId:'udo-super-8',className:'hp-action',getData:()=>validate(clone(this.patch)),getTitle:()=> 'UDO Super 8 performance'});
+  createCommunityShareButton(footer,{instrumentId:'udo-super-8',className:'hp-action',getData:()=>validate(clone(this.patch)),getAudioOutput: () => this.engine.output,
+       getTitle:()=> 'UDO Super 8 performance'});
   action('Save layer',()=>{const name=prompt('Name this layer patch','My Layer Patch');if(name===null)return;try{const item=this.layerStores[this.active].save(name,clone(this.p()));this.refreshHardwareLayerList(item.id);}catch(e){alert(e.message);}});
   this.hwLayerPresets=document.createElement('select');this.hwLayerPresets.setAttribute('aria-label','Layer patch');footer.appendChild(this.hwLayerPresets);
   this.hwLayerPresets.addEventListener('change',()=>{const item=this.layerStores[this.active].get(this.hwLayerPresets.value);if(item){this.patch.layers[this.active]=cleanLayer(item.data);this.refresh();}});
