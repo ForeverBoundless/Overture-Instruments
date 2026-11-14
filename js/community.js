@@ -1,7 +1,7 @@
 import { validatePatch, LiveGraph } from './omni/graph.js';
 import { generateInstrumentPreview } from './shared/instrumentPreview.js';
 import { COMMUNITY_INSTRUMENT_BY_ID as INSTRUMENTS, COMMUNITY_INSTRUMENTS } from './data/communityInstruments.js';
-import { readCommunityPresetMetadata, stripCommunityPresetMetadata, attachCommunityPresetMetadata, COMMUNITY_INSTRUMENT_IMPORT_KEY } from './shared/communityPreset.js';
+import { readCommunityPresetMetadata, stripCommunityInstrumentTranspose, attachCommunityPresetMetadata, COMMUNITY_INSTRUMENT_IMPORT_KEY } from './shared/communityPreset.js';
 import { supabase, supabaseConfigured, configureSupabase, previewPublicUrl } from './shared/supabaseClient.js';
 
 const byId = (id) => document.getElementById(id);
@@ -55,6 +55,14 @@ function safeJsonCopy(value) {
   return JSON.parse(JSON.stringify(value));
 }
 
+function normalizeCommunityItem(item) {
+  if (!item || item.record_type !== 'instrument_preset' || !item.instrument_id) return item;
+  return {
+    ...item,
+    patch_data: stripCommunityInstrumentTranspose(item.instrument_id, item.patch_data),
+  };
+}
+
 function parseJsonFileObject(raw) {
   const value = typeof raw === 'string' ? JSON.parse(raw) : raw;
   if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('The file must contain a JSON object.');
@@ -74,7 +82,7 @@ function extractInstrumentPreset(raw, instrumentId) {
   if (Array.isArray(object.items)) data = object.items[0]?.data;
   if (data && Array.isArray(data.presets)) data = data.presets[0];
   if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error('No instrument preset was found in that file.');
-  data = stripCommunityPresetMetadata(data);
+  data = stripCommunityInstrumentTranspose(instrumentId, data);
 
   const isObject = (value) => value && typeof value === 'object' && !Array.isArray(value);
   const has = (...keys) => keys.every((key) => Object.prototype.hasOwnProperty.call(data, key));
@@ -247,7 +255,7 @@ function openCommunityInstrumentRecorder() {
     communityItemId: null,
     previewPath: null,
     recordingToken: token,
-    data: stripCommunityPresetMetadata(state.draft),
+    data: stripCommunityInstrumentTranspose(state.draftInstrument, state.draft),
   };
   try {
     sessionStorage.setItem(COMMUNITY_INSTRUMENT_IMPORT_KEY, JSON.stringify(payload));
@@ -295,7 +303,7 @@ function syncContentType() {
 }
 
 function setDraft(data, type, instrumentId = null, title = '', presetSelection = null) {
-  state.draft = type === 'instrument_preset' ? stripCommunityPresetMetadata(data) : data;
+  state.draft = type === 'instrument_preset' ? stripCommunityInstrumentTranspose(instrumentId, data) : data;
   state.draftType = type;
   state.draftInstrument = instrumentId;
   state.draftPresetSelection = presetSelection || readCommunityPresetMetadata(data);
@@ -329,7 +337,7 @@ function safeFilename(value) {
 function downloadJSON(item) {
   const instrument = item.record_type === 'instrument_preset';
   const contents = instrument
-    ? { format: 'overture-community-instrument-preset', version: 1, instrumentId: item.instrument_id, name: item.title, data: item.patch_data }
+    ? { format: 'overture-community-instrument-preset', version: 1, instrumentId: item.instrument_id, name: item.title, data: stripCommunityInstrumentTranspose(item.instrument_id, item.patch_data) }
     : { format: 'overture-omni-patch', version: 1, data: item.patch_data };
   const blob = new Blob([JSON.stringify(contents, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
@@ -660,7 +668,7 @@ async function loadPatches({ append = false } = {}) {
     if (error) throw error;
 
     const rows = data || [];
-    const page = rows.slice(0, state.pageSize);
+    const page = rows.slice(0, state.pageSize).map(normalizeCommunityItem);
     await loadAuthorProfiles(page);
 
     // Keep pagination state unique by record ID, even if requests overlap.
@@ -1168,7 +1176,7 @@ async function initialise() {
     let item = state.items.find((entry) => String(entry.id).toLowerCase() === requestedId);
     if (!item) {
       const { data, error } = await supabase.rpc('get_community_patch_by_id', { p_patch_id: requestedPatch });
-      item = Array.isArray(data) ? data[0] : data;
+      item = normalizeCommunityItem(Array.isArray(data) ? data[0] : data);
       if (error) {
         message('community-result-count', error.message || 'The shared item could not be opened.', true);
       } else if (item) {
