@@ -80,7 +80,8 @@ class EightVoiceApp {
     createCommunityShareButton(memory.body, {
       instrumentId: 'oberheim-eight-voice', className: 'pn-btn',
       getData: () => validate({ ...this.patch, voices: this.voiceUi.map((controls) => Object.fromEntries(Object.entries(controls).map(([key, control]) => [key, control.select ? control.select.value : control.value]))) }),
-      getTitle: () => 'Oberheim Eight Voice program',
+      getAudioOutput: () => this.engine.output,
+       getTitle: () => 'Oberheim Eight Voice program',
     });
     footer(this.shell, 'EIGHT VOICE · 8 INDEPENDENT SEMs · 49 KEYS · STATE VARIABLE FILTER · ESC PANIC');
   }
