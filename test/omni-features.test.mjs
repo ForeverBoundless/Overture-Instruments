@@ -295,7 +295,7 @@ test('every OMNI module has a complete technical reference and the inspector can
   assert.match(page, /omni\.js\?v=20261112-community-edit-r1/);
   assert.match(worker, /overture-shell-v\d+/);
   assert.match(worker, /omni-info\.css\?v=20261114-info-type/);
-  assert.match(worker, /moduleInfo\.js\?v=20261114-info-type/);
+  assert.match(worker, /moduleInfo\.js\?v=20261105-module-info/);
   assert.match(contributorGuide, /every module must also have a complete entry in `js\/omni\/moduleInfo\.js`/);
 });
 
