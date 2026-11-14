@@ -36,6 +36,31 @@ export function stripCommunityPresetMetadata(data) {
   if (copy && typeof copy === 'object' && !Array.isArray(copy)) delete copy[COMMUNITY_PRESET_SELECTION_KEY];
   return copy;
 }
+
+/**
+ * Transpose is a performance control, not part of a shareable instrument patch.
+ * Walk nested patch objects so legacy Prophet-10 globals and layered instruments
+ * are normalized in the same way as patches with root-level transpose settings.
+ */
+export function stripCommunityInstrumentTranspose(instrumentId, data) {
+  const copy = stripCommunityPresetMetadata(data);
+  if (typeof instrumentId !== 'string' || !instrumentId || !copy || typeof copy !== 'object') return copy;
+
+  const excludedKeys = new Set(['transpose', 'transposeUp', 'transposeDown']);
+  const visit = (value) => {
+    if (Array.isArray(value)) {
+      value.forEach(visit);
+      return;
+    }
+    if (!value || typeof value !== 'object') return;
+    Object.keys(value).forEach((key) => {
+      if (excludedKeys.has(key)) delete value[key];
+      else visit(value[key]);
+    });
+  };
+  visit(copy);
+  return copy;
+}
 export function attachCommunityPresetMetadata(data, selection) {
   const copy = stripCommunityPresetMetadata(data);
   const normalized = normalizePresetSelection(selection);
@@ -260,7 +285,7 @@ export function createCommunityShareButton(parent, {
         presetSelection,
         editingItemId: source?.id || null,
         editingOriginalPreviewPath: source?.previewPath || null,
-        data: stripCommunityPresetMetadata(rawData),
+        data: stripCommunityInstrumentTranspose(instrumentId, rawData),
       };
       storage.setItem(DRAFT_KEY, JSON.stringify(payload));
       const query = new URLSearchParams({ publish: '1' });
@@ -292,7 +317,7 @@ export function consumeCommunityInstrumentPreset(instrumentId, validate = (value
     storage.removeItem(IMPORT_KEY);
     const title = String(payload.title || 'Community preset').slice(0, 80);
     const presetSelection = normalizePresetSelection(payload.presetSelection) || readCommunityPresetMetadata(payload.data);
-    const data = validate(stripCommunityPresetMetadata(payload.data));
+    const data = validate(stripCommunityInstrumentTranspose(instrumentId, payload.data));
     restoreCommunityPresetSelection(presetSelection);
     setCommunitySource({
       id: payload.communityItemId || null, recordType: 'instrument_preset', instrumentId,
