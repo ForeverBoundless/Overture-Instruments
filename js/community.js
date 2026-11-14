@@ -1,7 +1,7 @@
 import { validatePatch, LiveGraph } from './omni/graph.js';
 import { generateInstrumentPreview } from './shared/instrumentPreview.js';
 import { COMMUNITY_INSTRUMENT_BY_ID as INSTRUMENTS, COMMUNITY_INSTRUMENTS } from './data/communityInstruments.js';
-import { readCommunityPresetMetadata, stripCommunityPresetMetadata, attachCommunityPresetMetadata } from './shared/communityPreset.js';
+import { readCommunityPresetMetadata, stripCommunityPresetMetadata, attachCommunityPresetMetadata, COMMUNITY_INSTRUMENT_IMPORT_KEY } from './shared/communityPreset.js';
 import { supabase, supabaseConfigured, configureSupabase, previewPublicUrl } from './shared/supabaseClient.js';
 
 const byId = (id) => document.getElementById(id);
@@ -28,6 +28,9 @@ const state = {
   reportingItemId: null,
   searchTimer: null,
   authorProfiles: new Map(),
+  previewRecorderWindow: null,
+  previewRecorderToken: null,
+  recordedPreviewUrl: null,
 };
 
 function message(id, text, error = false) {
@@ -175,6 +178,97 @@ function ensureCommunityInstrumentOptions() {
     select.appendChild(option);
   });
 }
+function syncRecordPreviewOption() {
+  const button = byId('community-record-preview');
+  if (!button) return;
+  const instrumentId = byId('community-instrument')?.value;
+  const canRecord = byId('community-record-type')?.value === 'instrument_preset'
+    && state.draftType === 'instrument_preset'
+    && state.draftInstrument === instrumentId
+    && !!state.draft
+    && !!INSTRUMENTS[instrumentId];
+  button.hidden = !canRecord;
+}
+
+function clearRecordedPreview() {
+  if (state.recordedPreviewUrl) URL.revokeObjectURL(state.recordedPreviewUrl);
+  state.recordedPreviewUrl = null;
+  const player = byId('community-recorded-preview');
+  if (player) { player.pause(); player.removeAttribute('src'); player.hidden = true; }
+}
+
+function renderRecordedPreview(file) {
+  const player = byId('community-recorded-preview');
+  if (!player || !file) return;
+  clearRecordedPreview();
+  state.recordedPreviewUrl = URL.createObjectURL(file);
+  player.src = state.recordedPreviewUrl;
+  player.hidden = false;
+}
+
+function receiveCommunityPreviewRecording(event) {
+  if (event.origin !== window.location.origin || event.source !== state.previewRecorderWindow) return;
+  const payload = event.data;
+  if (!payload || payload.type !== 'overture-community-preview-recorded'
+    || payload.token !== state.previewRecorderToken
+    || payload.instrumentId !== state.draftInstrument
+    || !(payload.blob instanceof Blob)) return;
+  if (!['audio/webm', 'audio/ogg'].includes(String(payload.mimeType || payload.blob.type).split(';')[0].toLowerCase())) {
+    message('community-publish-status', 'The browser returned an unsupported recording format. Try recording again.', true);
+    return;
+  }
+  if (payload.blob.size > 8 * 1024 * 1024) {
+    message('community-publish-status', 'The recording is larger than the 8 MB upload limit.', true);
+    return;
+  }
+  const mime = String(payload.mimeType || payload.blob.type).split(';')[0].toLowerCase();
+  const extension = mime === 'audio/ogg' ? 'ogg' : 'webm';
+  const file = new File([payload.blob], `overture-${payload.instrumentId}-preview.${extension}`, { type: mime });
+  const transfer = new DataTransfer();
+  transfer.items.add(file);
+  byId('community-audio-file').files = transfer.files;
+  byId('community-audio-file').dispatchEvent(new Event('change', { bubbles: true }));
+  renderRecordedPreview(file);
+  message('community-publish-status', 'Your recording is attached. Preview it below, then publish to use it instead of the generated melody.');
+}
+
+function openCommunityInstrumentRecorder() {
+  const instrumentId = byId('community-instrument').value;
+  const instrument = INSTRUMENTS[instrumentId];
+  if (!instrument || state.draftType !== 'instrument_preset' || !state.draft) {
+    message('community-publish-status', 'Choose a valid instrument patch before recording.', true);
+    return;
+  }
+  const token = crypto.randomUUID();
+  const payload = {
+    instrumentId,
+    title: (byId('community-title').value.trim() || state.draft.name || 'Community preset').slice(0, 80),
+    presetSelection: state.draftPresetSelection,
+    communityItemId: null,
+    previewPath: null,
+    recordingToken: token,
+    data: stripCommunityPresetMetadata(state.draft),
+  };
+  try {
+    sessionStorage.setItem(COMMUNITY_INSTRUMENT_IMPORT_KEY, JSON.stringify(payload));
+  } catch {
+    message('community-publish-status', 'Browser storage is unavailable. Allow site storage and try again.', true);
+    return;
+  }
+  state.previewRecorderToken = token;
+  const url = new URL(instrument.route, window.location.origin);
+  url.searchParams.set('communityPreviewRecording', token);
+  const recorderWindow = window.open(url.href, '_blank');
+  if (!recorderWindow) {
+    sessionStorage.removeItem(COMMUNITY_INSTRUMENT_IMPORT_KEY);
+    state.previewRecorderToken = null;
+    message('community-publish-status', 'Your browser blocked the new instrument tab. Allow pop-ups for Overture and try again.', true);
+    return;
+  }
+  state.previewRecorderWindow = recorderWindow;
+  message('community-publish-status', 'The instrument opened in a new tab with this patch loaded. Power it on, record while you play, then return here to review the take.');
+}
+
 function syncContentType() {
   const type = byId('community-record-type').value;
   const instrument = byId('community-instrument');
@@ -186,6 +280,7 @@ function syncContentType() {
     state.draftType = 'omni_patch';
     state.draftInstrument = null;
     if (state.draft) byId('community-draft-status').textContent = `OMNI patch ready: ${state.draft.name || 'Untitled'}.`;
+    syncRecordPreviewOption();
     return;
   }
   // An OMNI draft has no instrument. When the user changes its content type
@@ -196,6 +291,7 @@ function syncContentType() {
   byId('community-draft-status').textContent = state.draft && state.draftType === 'instrument_preset' && state.draftInstrument === instrument.value
     ? `${INSTRUMENTS[instrument.value]?.name || 'Instrument'} preset ready.`
     : 'Choose an instrument and export its current patch to Community, or upload a preset JSON file.';
+  syncRecordPreviewOption();
 }
 
 function setDraft(data, type, instrumentId = null, title = '', presetSelection = null) {
@@ -210,6 +306,7 @@ function setDraft(data, type, instrumentId = null, title = '', presetSelection =
     ? `OMNI patch ready: ${data.name || title || 'Untitled'} · ${data.modules.length} modules.`
     : `${INSTRUMENTS[instrumentId]?.name || 'Instrument'} preset ready.`;
   if (!byId('community-title').value) byId('community-title').value = title || data.name || '';
+  syncRecordPreviewOption();
 }
 
 function setPublishOpen(open) {
@@ -620,6 +717,8 @@ function beginEdit(item, { preserveDraft = false } = {}) {
   byId('community-tags').value = (item.tags || []).join(', ');
   byId('community-visibility').value = item.visibility;
   byId('community-audio-file').value = '';
+  clearRecordedPreview();
+  syncRecordPreviewOption();
   byId('community-publish-form').querySelector('[type="submit"]').textContent = 'UPDATE ITEM';
   byId('community-publish-status').textContent = 'Editing your published item. Its current audio preview is retained unless replaced.';
   setPublishOpen(true);
@@ -747,6 +846,7 @@ async function publishItem(event) {
     try { sessionStorage.removeItem('overture.community.draft'); } catch { /* optional draft */ }
     byId('community-patch-file').value = '';
     byId('community-audio-file').value = '';
+    clearRecordedPreview();
     byId('community-publish-form').querySelector('[type="submit"]').textContent = 'PUBLISH ITEM';
     message('community-publish-status', editingId
       ? 'Updated. Your changes are saved to the existing Community item.'
@@ -991,7 +1091,14 @@ async function initialise() {
   byId('community-publish-open').addEventListener('click', () => setPublishOpen(true));
   byId('community-publish-close').addEventListener('click', () => setPublishOpen(false));
   byId('community-publish-form').addEventListener('submit', publishItem);
-  byId('community-audio-file').addEventListener('change', syncAudioConfirmationRequirement);
+  byId('community-audio-file').addEventListener('change', () => {
+    syncAudioConfirmationRequirement();
+    const file = byId('community-audio-file').files?.[0];
+    if (file) renderRecordedPreview(file);
+    else clearRecordedPreview();
+  });
+  byId('community-record-preview').addEventListener('click', openCommunityInstrumentRecorder);
+  window.addEventListener('message', receiveCommunityPreviewRecording);
   syncAudioConfirmationRequirement();
   byId('community-report-form').addEventListener('submit', submitReport);
   byId('community-report-close').addEventListener('click', () => byId('community-report-dialog').close());
@@ -1001,6 +1108,7 @@ async function initialise() {
   byId('community-instrument').addEventListener('change', () => {
     state.draftType = 'instrument_preset';
     state.draftInstrument = byId('community-instrument').value;
+    syncRecordPreviewOption();
   });
   syncContentType();
   byId('community-patch-file').addEventListener('change', async (event) => {
@@ -1015,6 +1123,7 @@ async function initialise() {
       setDraft(data, type, instrumentId, parsed.name || file.name.replace(/\.json$/i, ''));
     } catch (error) {
       state.draft = null;
+      syncRecordPreviewOption();
       message('community-publish-status', error.message || 'Invalid preset file.', true);
       byId('community-draft-status').textContent = 'The selected file could not be validated for this content type.';
     }
