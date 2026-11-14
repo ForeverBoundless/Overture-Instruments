@@ -343,6 +343,11 @@ class Super8Processor extends AudioWorkletProcessor{
   }
   return 0;
  }
+ bendForVoice(v,layer){
+  const master=this.pitchBend[layer]||0;
+  if(this.global.mpe&&v.channel>1)return clamp(master+(this.mpeBend.get(v.channel)||0),-1,1);
+  return master;
+ }
  computeMods(p,v,lf2){
   const out=this.mods;out.fill(0);const mat=p.modMatrix;if(!mat)return;
   for(let s=0;s<8;s++){
@@ -454,8 +459,7 @@ class Super8Processor extends AudioWorkletProcessor{
   const lfo1Pitch=(lf1L*clamp(p.lfo1PitchAmount)+v.env1*clamp(p.env1PitchAmount))*12,lfo2Pitch=lfo2Signal*clamp(p.lfo2Dds)*12;
   const pitch1=(to1?benderSemis:0)+(tgt==='DDS 2'?0:lfo2Pitch)+(to1?lfo1Pitch:0);
   const pitch2=(to2?benderSemis:0)+(tgt==='DDS 1'?0:lfo2Pitch)+(to2?lfo1Pitch:0);
-  const channelBend=gl.mpe&&v.channel>1?(this.mpeBend.get(v.channel)||0):(this.pitchBend[layer]||0);
-  const midiBend=channelBend*p.bendRange;
+  const midiBend=this.bendForVoice(v,layer)*p.bendRange;
   // slow analogue drift (cents)
   v.driftT-=dtc;if(v.driftT<=0){v.driftT=.4+Math.abs(rnd())*1.2;v.driftTarget=rnd()*2.6;}
   v.drift+=(v.driftTarget-v.drift)*(1-Math.exp(-dtc/.6));
