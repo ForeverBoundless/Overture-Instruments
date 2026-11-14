@@ -117,6 +117,7 @@ class TR808App {
       instrumentId: 'tr-808', className: 'pn-btn',
       getData: () => validatePattern({ ...this._pattern, masterLevel: this.engine.masterLevel }),
       getAudioOutput: () => this.engine.comp,
+       getAudioOutput: () => this.engine.comp,
        getTitle: () => 'TR-808 pattern',
     });
     footer(this.shell, 'SYNTHESIZED PERCUSSION • 16/32-STEP SEQUENCER • 40–300 BPM • GM DRUM NOTES VIA MIDI');
