@@ -18,7 +18,7 @@ const TEMPO = 112;
 const EIGHTH = 60 / TEMPO / 2;
 const NOTE_GATE = EIGHTH * 0.82;
 const START_OFFSET = 0.06;
-const MELODY = [60, 64, 67, 72, 71, 67, 69, 64, 62, 65, 69, 74, 72, 67, 65, 64];
+const MELODY = [48, 52, 55, 60, 59, 55, 57, 52, 50, 53, 57, 62, 60, 55, 53, 52];
 const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 const clamp = (value, min, max) => Math.min(max, Math.max(min, Number(value) || 0));
 
