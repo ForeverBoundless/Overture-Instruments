@@ -311,3 +311,11 @@ test('OMNI dependency import order matches the destructured module bindings', as
   assert.match(source, /\{ MODULES, CATEGORIES, SIGNAL_COLORS, modulePorts \},\s*\{ MODULE_INFO, assertModuleInfoCoverage \},\s*\{ defaultPatch, validatePatch, connectionError, LiveGraph, patchToSVG, defaultParams \},\s*\{ TEMPLATES, templatePreview \}/);
   assert.match(source, /assertModuleInfoCoverage\(MODULES\)/);
 });
+
+
+test('Community share action uses the violet accent in dark and light themes', async () => {
+  const css = await readFile(new URL('../css/midi-map.css', import.meta.url), 'utf8');
+  assert.match(css, /button\.oi-community-share[\s\S]*#e6d2ff/);
+  assert.match(css, /html\[data-theme="light"\] button\.oi-community-share[\s\S]*#eee2ff/);
+  assert.match(css, /html\[data-theme="light"\] button\.oi-community-share:hover:not\(:disabled\)[\s\S]*#dfc9fb/);
+});
