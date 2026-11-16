@@ -1,4 +1,4 @@
-const CACHE = 'overture-shell-v86';
+const CACHE = 'overture-shell-v87';
 const APP_SHELL = [
   '/account',
   '/login',
@@ -16,7 +16,7 @@ const APP_SHELL = [
   '/css/community.css?v=20261112-community-moderation-r1',
   '/css/community.css?v=20261116-community-purple',
   '/css/community.css?v=20261116-community-violet-r1',
-  '/css/emulator-topbar.css?v=20261116-r2',
+  '/css/emulator-topbar.css?v=20261116-r3',
   '/css/community.css',
   '/js/community.js?v=20261103-auth-hidden',
   '/js/community.js?v=20261112-community-title-edit-r1',
