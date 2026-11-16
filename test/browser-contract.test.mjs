@@ -859,7 +859,7 @@ test('Community pages, homepage feature and emulator share action use the violet
   assert.match(homeCss, /html\[data-theme="light"\] \.community-feature-showcase/);
   assert.match(midiCss, /button\.oi-community-share[\s\S]*#e6d2ff/);
   assert.match(midiCss, /html\[data-theme="light"\] button\.oi-community-share[\s\S]*#eee2ff/);
-  assert.match(communityPage, /community\.css\?v=20261116-community-purple/);
+  assert.match(communityPage, /community\.css\?v=20261116-community-violet-r1/);
   assert.match(profilePage, /contributions\.css\?v=20261116-community-purple/);
   assert.match(homePage, /home\.css\?v=20261116-community-purple/);
   assert.match(worker, /overture-shell-v85/);
