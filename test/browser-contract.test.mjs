@@ -73,7 +73,7 @@ test('Hohner D6 and Oberheim OB-Xa are complete first-class emulator entries', a
   assert.match(obEngine, /width=clamp\(\.5-p\.pulseWidth\*\.45/);
   assert.doesNotMatch(obEngine, /lfoVca/);
   assert.match(obPage, /Oberheim OB-Xa from Overture Instruments/);
-  assert.match(worker, /overture-shell-v82/);
+  assert.match(worker, /overture-shell-v83/);
   assert.match(worker, /hohner-d6/);
   assert.match(worker, /ob-xa/);
 });
@@ -375,7 +375,7 @@ test('Community instrument patches receive automatic previews and clear upload m
   assert.match(page, /Inappropriate, abusive, hateful, sexual, threatening, or infringing audio will be removed/);
   assert.match(css, /community-warning-tooltip/);
   assert.match(css, /\.community-warning-wrap:focus-within/);
-  assert.match(worker, /overture-shell-v82/);
+  assert.match(worker, /overture-shell-v83/);
   assert.match(worker, /instrumentPreview\.js/);
   assert.match(worker, /20261112-auto-preview-r1/);
 });
@@ -409,7 +409,7 @@ test('Community reports, moderator review, strike escalation and protected accou
   assert.match(migration, /community_can_publish/);
   assert.match(css, /community-report-dialog/);
   assert.match(css, /community-moderation-actions/);
-  assert.match(worker, /overture-shell-v82/);
+  assert.match(worker, /overture-shell-v83/);
   assert.match(worker, /20261114-publish-layout/);
 });
 
@@ -810,7 +810,7 @@ test('Community supports short direct instrument-output preview recordings', asy
   assert.match(community, /renderRecordedPreview/);
   assert.match(page, /community-record-preview/);
   assert.match(page, /community-recorded-preview/);
-  assert.match(worker, /overture-shell-v82/);
+  assert.match(worker, /overture-shell-v83/);
   assert.match(worker, /20261113-recorded-preview-r1/);
   assert.equal(emulators.every((source) => source.includes('getAudioOutput:')), true,
     'all 14 emulator pages must expose their final output node to the recorder');
@@ -834,4 +834,33 @@ test('Homepage includes a dedicated, theme-aware Community feature after Experim
   assert.match(styles, /html\[data-theme="light"\] \.feature-section--community/);
   assert.match(styles, /@media \(max-width: 760px\)[\s\S]*feature-layout--community/);
   assert.match(worker, /\/css\/home\.css\?v=20261116-community-feature/);
+});
+
+
+test('Community pages, homepage feature and emulator share action use the violet accent', async () => {
+  const [theme, communityCss, contributionsCss, homeCss, midiCss, communityPage, profilePage, homePage, worker] = await Promise.all([
+    readFile(new URL('../css/site-theme.css', import.meta.url), 'utf8'),
+    readFile(new URL('../css/community.css', import.meta.url), 'utf8'),
+    readFile(new URL('../css/contributions.css', import.meta.url), 'utf8'),
+    readFile(new URL('../css/home.css', import.meta.url), 'utf8'),
+    readFile(new URL('../css/midi-map.css', import.meta.url), 'utf8'),
+    readFile(new URL('../community.html', import.meta.url), 'utf8'),
+    readFile(new URL('../contributions.html', import.meta.url), 'utf8'),
+    readFile(new URL('../index.html', import.meta.url), 'utf8'),
+    readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
+  ]);
+  assert.match(theme, /--oi-community-accent:\s*#c493ff/);
+  assert.match(theme, /html\[data-theme="light"\][\s\S]*--oi-community-accent:\s*#743bb8/);
+  assert.match(theme, /\.community-button--primary[\s\S]*var\(--oi-community-button-background\)/);
+  assert.match(communityCss, /\.community-card__top\s*\{\s*color:\s*var\(--oi-community-accent\)/);
+  assert.match(communityCss, /html\[data-theme="light"\] \.community-record-preview/);
+  assert.match(contributionsCss, /\.contributions-profile__summary strong\s*\{\s*color:\s*var\(--oi-community-accent\)/);
+  assert.match(homeCss, /\.feature-section--community \.feature-copy h2 em\s*\{\s*color:\s*var\(--oi-community-accent\)/);
+  assert.match(homeCss, /html\[data-theme="light"\] \.community-feature-showcase/);
+  assert.match(midiCss, /button\.oi-community-share[\s\S]*#e6d2ff/);
+  assert.match(midiCss, /html\[data-theme="light"\] button\.oi-community-share[\s\S]*#eee2ff/);
+  assert.match(communityPage, /community\.css\?v=20261116-community-purple/);
+  assert.match(profilePage, /contributions\.css\?v=20261116-community-purple/);
+  assert.match(homePage, /home\.css\?v=20261116-community-purple/);
+  assert.match(worker, /overture-shell-v83/);
 });
