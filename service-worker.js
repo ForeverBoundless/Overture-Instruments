@@ -1,4 +1,4 @@
-const CACHE = 'overture-shell-v81';
+const CACHE = 'overture-shell-v82';
 const APP_SHELL = [
   '/account',
   '/login',
@@ -36,7 +36,7 @@ const APP_SHELL = [
   '/css/about.css',
   '/css/brand.css',
   '/css/experiments.css',
-  '/css/home.css?v=20261104-home-logo-light',
+  '/css/home.css?v=20261116-community-feature',
   '/css/keyboard.css',
   '/css/hohner-d6.css?v=20261106-audio-r1',
   '/css/hardware-panel.css',
