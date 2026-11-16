@@ -167,7 +167,7 @@ class Super8App{
   this.hwSeqPageButtons?.forEach((c,j)=>c.setValue(j===this.seqPage,true));
  }
  buildKeyboard(){
-  this.perf=performance(this.shell,{notes:NOTES,octaves:5,startOctave:1,wheels:false,started:()=>this.engine.started,midiStatusEl:this.midi,handlers:{
+  this.perf=performance(this.shell,{notes:NOTES,octaves:5,startOctave:1,wheels:false,started:()=>this.engine.started,midiStatusEl:this.midi,extraComputerKeys:{']':18,'\\':20},handlers:{
    noteOn:(n,v,source,channel)=>{this.hwKeyboard?.setActive(n,true);this.recordSequenceNoteOn(n,v);this.engine.post({t:'noteOn',note:n,vel:v,channel,source});},noteOff:(n,source,channel)=>{this.hwKeyboard?.setActive(n,false);this.engine.post({t:'noteOff',note:n,channel,source});this.recordSequenceNoteOff(n);},
    bend:(v,channel)=>this.engine.post({t:'bend',value:v,channel}),mod:v=>this.engine.setModWheel(v),aftertouch:(v,channel)=>this.engine.post({t:'at',value:v,channel}),expression:(v,channel)=>this.engine.post({t:'expression',value:v,channel}),
    polyAftertouch:(n,v,channel)=>this.engine.post({t:'polyAt',note:n,value:v,channel}),sustain:d=>this.engine.setSustain(d),allOff:()=>this.engine.allNotesOff(),
