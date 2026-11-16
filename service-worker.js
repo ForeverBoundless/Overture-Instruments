@@ -1,4 +1,4 @@
-const CACHE = 'overture-shell-v83';
+const CACHE = 'overture-shell-v84';
 const APP_SHELL = [
   '/account',
   '/login',
@@ -66,7 +66,7 @@ const APP_SHELL = [
   '/css/roland-tr-808.css',
   '/css/site-footer.css',
   '/css/site-theme-polish.css?v=20261103-accent-spacing',
-  '/css/site-theme-polish.css?v=20261114-ui-theme-pass',
+  '/css/site-theme-polish.css?v=20261116-community-purple',
   '/css/site-theme.css',
   '/css/site-theme.css?v=20261116-community-purple',
   '/css/sub37.css',
