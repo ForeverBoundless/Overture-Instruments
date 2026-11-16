@@ -1,4 +1,4 @@
-const CACHE = 'overture-shell-v82';
+const CACHE = 'overture-shell-v83';
 const APP_SHELL = [
   '/account',
   '/login',
@@ -8,13 +8,13 @@ const APP_SHELL = [
   '/js/shared/account-shell.js?v=20261102-contributions-menu',
   '/community',
   '/contributions',
-  '/css/contributions.css?v=20261102-profile-3',
+  '/css/contributions.css?v=20261116-community-purple',
   '/js/contributions.js?v=20261102-profile-3',
   '/js/contributions.js?v=20261112-community-edit-r1',
   '/css/community.css?v=20261103-auth-hidden',
   '/css/community.css?v=20261112-audio-moderation-r1',
   '/css/community.css?v=20261112-community-moderation-r1',
-  '/css/community.css?v=20261114-publish-layout',
+  '/css/community.css?v=20261116-community-purple',
   '/css/community.css',
   '/js/community.js?v=20261103-auth-hidden',
   '/js/community.js?v=20261112-community-title-edit-r1',
@@ -36,7 +36,7 @@ const APP_SHELL = [
   '/css/about.css',
   '/css/brand.css',
   '/css/experiments.css',
-  '/css/home.css?v=20261116-community-feature',
+  '/css/home.css?v=20261116-community-purple',
   '/css/keyboard.css',
   '/css/hohner-d6.css?v=20261106-audio-r1',
   '/css/hardware-panel.css',
@@ -68,6 +68,7 @@ const APP_SHELL = [
   '/css/site-theme-polish.css?v=20261103-accent-spacing',
   '/css/site-theme-polish.css?v=20261114-ui-theme-pass',
   '/css/site-theme.css',
+  '/css/site-theme.css?v=20261116-community-purple',
   '/css/sub37.css',
   '/css/yamaha-dx7.css',
   '/experiments',
