@@ -3341,3 +3341,84 @@ html[data-theme="light"] body main .feature-section--community .eyebrow-dot--cya
   background-color: var(--oi-community-accent-strong) !important;
   box-shadow: 0 0 12px var(--oi-community-accent-glow) !important;
 }
+
+
+/* A continuous topographic field carries the Community colour from its
+   feature section through the coming-soon banner, stopping at the footer. */
+.community-feature-region {
+  position: relative;
+  display: flow-root;
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 14% 18%, rgba(180,119,244,.12), transparent 38%),
+    radial-gradient(ellipse at 88% 65%, rgba(142,91,218,.095), transparent 42%),
+    linear-gradient(180deg, #100c18, #0b0a11 72%, #0d0a14);
+}
+
+.community-feature-region::before {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  opacity: .95;
+  background-image:
+    repeating-radial-gradient(ellipse 500px 330px at 14% 20%, transparent 0 25px, rgba(196,147,255,.16) 26px 27px, transparent 28px 43px),
+    repeating-radial-gradient(ellipse 430px 300px at 88% 52%, transparent 0 29px, rgba(180,119,244,.145) 30px 31px, transparent 32px 49px),
+    repeating-radial-gradient(ellipse 600px 380px at 44% 104%, transparent 0 35px, rgba(196,147,255,.11) 36px 37px, transparent 38px 56px),
+    radial-gradient(ellipse at 50% 55%, rgba(145,85,220,.07), transparent 68%);
+  mask-image: linear-gradient(180deg, #000 0%, #000 96%, transparent 100%);
+}
+
+.community-feature-region > .feature-section--community,
+.community-feature-region > .home-coming-soon {
+  position: relative;
+  z-index: 1;
+}
+
+.community-feature-region .home-coming-soon {
+  border-color: rgba(196,147,255,.27);
+  background: linear-gradient(125deg, rgba(33,24,48,.82), rgba(17,14,27,.88));
+  box-shadow:
+    0 18px 45px rgba(0,0,0,.26),
+    0 0 32px rgba(159,100,231,.075),
+    inset 0 1px rgba(255,255,255,.1);
+}
+
+.community-feature-region .home-coming-soon::before {
+  background:
+    radial-gradient(circle at 16% 50%, rgba(180,119,244,.2), transparent 30%),
+    repeating-linear-gradient(115deg, transparent 0 17px, rgba(196,147,255,.035) 18px, transparent 19px);
+}
+
+html[data-theme="light"] .community-feature-region {
+  background:
+    radial-gradient(ellipse at 14% 18%, rgba(116,59,184,.09), transparent 38%),
+    radial-gradient(ellipse at 88% 65%, rgba(116,59,184,.075), transparent 42%),
+    linear-gradient(180deg, #f1edf7, #edf0f5 72%, #f1edf7);
+}
+
+html[data-theme="light"] .community-feature-region::before {
+  opacity: .9;
+  background-image:
+    repeating-radial-gradient(ellipse 500px 330px at 14% 20%, transparent 0 25px, rgba(105,48,170,.17) 26px 27px, transparent 28px 43px),
+    repeating-radial-gradient(ellipse 430px 300px at 88% 52%, transparent 0 29px, rgba(116,59,184,.14) 30px 31px, transparent 32px 49px),
+    repeating-radial-gradient(ellipse 600px 380px at 44% 104%, transparent 0 35px, rgba(105,48,170,.105) 36px 37px, transparent 38px 56px),
+    radial-gradient(ellipse at 50% 55%, rgba(116,59,184,.055), transparent 68%);
+}
+
+html[data-theme="light"] .community-feature-region .home-coming-soon {
+  border-color: rgba(116,59,184,.24);
+  background: linear-gradient(125deg, rgba(250,247,255,.84), rgba(238,233,247,.9));
+  box-shadow:
+    0 18px 42px rgba(45,60,81,.13),
+    0 0 30px rgba(116,59,184,.065),
+    inset 0 1px rgba(255,255,255,.92);
+}
+
+html[data-theme="light"] .community-feature-region .home-coming-soon::before {
+  background:
+    radial-gradient(circle at 16% 50%, rgba(116,59,184,.12), transparent 30%),
+    repeating-linear-gradient(115deg, transparent 0 17px, rgba(116,59,184,.025) 18px, transparent 19px);
+}
