@@ -49,7 +49,7 @@ const APP_SHELL = [
   '/css/mellotron-m400.css',
   '/css/mellotron-m400.css?v=20261104-centered-47key-r2',
   '/css/little-phatty.css?v=20261104-compact-centred',
-  '/css/midi-map.css?v=20261112-community-button-r1',
+  '/css/midi-map.css?v=20261116-community-purple',
   '/css/nord-c2d.css',
   '/css/oberheim-eight-voice.css',
   '/css/oberheim-eight-voice.css?v=20261104-ivory',
