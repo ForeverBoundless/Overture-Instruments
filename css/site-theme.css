@@ -1378,3 +1378,103 @@ html[data-theme="light"] .instrument-tile--oberheim-eight-voice {background:line
 
 html[data-theme="light"] .instrument-tile--hohner-d6 {background:linear-gradient(145deg,rgba(246,229,207,.98),rgba(234,224,211,.97)) !important}
 html[data-theme="light"] .instrument-tile--ob-xa {background:linear-gradient(145deg,rgba(224,235,243,.98),rgba(222,228,232,.97)) !important}
+
+
+/* ============================================================
+   COMMUNITY ACCENT — violet/lavender, independent of the
+   Library amber, OMNI cyan and Experiments green identities.
+   ============================================================ */
+:root {
+  --oi-community-accent: #c493ff;
+  --oi-community-accent-strong: #b477f4;
+  --oi-community-accent-soft: rgba(180, 119, 244, .10);
+  --oi-community-accent-soft-strong: rgba(180, 119, 244, .16);
+  --oi-community-accent-border: rgba(196, 147, 255, .38);
+  --oi-community-accent-glow: rgba(172, 105, 255, .30);
+  --oi-community-button-background: linear-gradient(135deg, #dfc5ff, #b77af0);
+  --oi-community-button-hover-background: linear-gradient(135deg, #ead8ff, #c18af4);
+  --oi-community-button-ink: #28153b;
+  --oi-community-button-border: #c493ff;
+}
+
+html[data-theme="light"] {
+  --oi-community-accent: #743bb8;
+  --oi-community-accent-strong: #6930aa;
+  --oi-community-accent-soft: rgba(116, 59, 184, .065);
+  --oi-community-accent-soft-strong: rgba(116, 59, 184, .11);
+  --oi-community-accent-border: rgba(116, 59, 184, .30);
+  --oi-community-accent-glow: rgba(116, 59, 184, .19);
+  --oi-community-button-background: linear-gradient(135deg, #edddff, #d0b0f4);
+  --oi-community-button-hover-background: linear-gradient(135deg, #f3e9ff, #ddc3fa);
+  --oi-community-button-ink: #39204f;
+  --oi-community-button-border: #b88cde;
+}
+
+.community-overline {
+  color: var(--oi-community-accent) !important;
+  -webkit-text-fill-color: currentColor !important;
+  text-shadow: 0 0 12px var(--oi-community-accent-glow);
+}
+
+.community-hero h1 em {
+  color: var(--oi-community-accent) !important;
+  -webkit-text-fill-color: currentColor !important;
+  text-shadow: 0 0  .08em currentColor, 0 0 .28em var(--oi-community-accent-glow), 0 0 .7em var(--oi-community-accent-glow);
+}
+
+.community-shell::before {
+  background:
+    radial-gradient(ellipse at 22% 30%, var(--oi-community-accent-soft-strong), transparent 36%),
+    radial-gradient(ellipse at 78% 24%, rgba(180, 119, 244, .075), transparent 38%),
+    radial-gradient(ellipse at 50% 76%, rgba(180, 119, 244, .035), transparent 46%);
+}
+
+.community-button:hover:not(:disabled) {
+  border-color: var(--oi-community-accent-border) !important;
+  color: var(--oi-community-accent) !important;
+  background: var(--oi-community-accent-soft) !important;
+  box-shadow: 0 0 0 3px var(--oi-community-accent-soft), 0 0 18px var(--oi-community-accent-glow);
+}
+
+.community-button--primary {
+  border-color: var(--oi-community-button-border) !important;
+  color: var(--oi-community-button-ink) !important;
+  background: var(--oi-community-button-background) !important;
+  box-shadow: 0 6px 18px var(--oi-community-accent-glow), inset 0 1px rgba(255,255,255,.56) !important;
+  text-shadow: none !important;
+}
+
+.community-button--primary:hover:not(:disabled) {
+  border-color: var(--oi-community-accent) !important;
+  color: var(--oi-community-button-ink) !important;
+  background: var(--oi-community-button-hover-background) !important;
+  box-shadow: 0 8px 22px var(--oi-community-accent-glow), inset 0 1px rgba(255,255,255,.68) !important;
+}
+
+.community-button:focus-visible {
+  outline: 2px solid var(--oi-community-accent) !important;
+  outline-offset: 3px !important;
+}
+
+.community-toolbar input:hover,
+.community-toolbar select:hover,
+.community-publish-panel input:hover,
+.community-publish-panel select:hover,
+.community-publish-panel textarea:hover {
+  border-color: var(--oi-community-accent-border) !important;
+}
+
+.community-toolbar input:focus,
+.community-toolbar select:focus,
+.community-publish-panel input:focus,
+.community-publish-panel select:focus,
+.community-publish-panel textarea:focus {
+  border-color: var(--oi-community-accent) !important;
+  box-shadow: 0 0 0 3px var(--oi-community-accent-soft-strong), 0 0 16px var(--oi-community-accent-glow) !important;
+  outline: 0;
+}
+
+html[data-theme="light"] body .community-overline {
+  color: var(--oi-community-accent) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
