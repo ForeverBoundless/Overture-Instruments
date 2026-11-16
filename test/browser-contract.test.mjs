@@ -73,7 +73,7 @@ test('Hohner D6 and Oberheim OB-Xa are complete first-class emulator entries', a
   assert.match(obEngine, /width=clamp\(\.5-p\.pulseWidth\*\.45/);
   assert.doesNotMatch(obEngine, /lfoVca/);
   assert.match(obPage, /Oberheim OB-Xa from Overture Instruments/);
-  assert.match(worker, /overture-shell-v85/);
+  assert.match(worker, /overture-shell-v86/);
   assert.match(worker, /hohner-d6/);
   assert.match(worker, /ob-xa/);
 });
@@ -375,7 +375,7 @@ test('Community instrument patches receive automatic previews and clear upload m
   assert.match(page, /Inappropriate, abusive, hateful, sexual, threatening, or infringing audio will be removed/);
   assert.match(css, /community-warning-tooltip/);
   assert.match(css, /\.community-warning-wrap:focus-within/);
-  assert.match(worker, /overture-shell-v85/);
+  assert.match(worker, /overture-shell-v86/);
   assert.match(worker, /instrumentPreview\.js/);
   assert.match(worker, /20261112-auto-preview-r1/);
 });
@@ -409,7 +409,7 @@ test('Community reports, moderator review, strike escalation and protected accou
   assert.match(migration, /community_can_publish/);
   assert.match(css, /community-report-dialog/);
   assert.match(css, /community-moderation-actions/);
-  assert.match(worker, /overture-shell-v85/);
+  assert.match(worker, /overture-shell-v86/);
   assert.match(worker, /20261114-publish-layout/);
 });
 
@@ -810,7 +810,7 @@ test('Community supports short direct instrument-output preview recordings', asy
   assert.match(community, /renderRecordedPreview/);
   assert.match(page, /community-record-preview/);
   assert.match(page, /community-recorded-preview/);
-  assert.match(worker, /overture-shell-v85/);
+  assert.match(worker, /overture-shell-v86/);
   assert.match(worker, /20261113-recorded-preview-r1/);
   assert.equal(emulators.every((source) => source.includes('getAudioOutput:')), true,
     'all 14 emulator pages must expose their final output node to the recorder');
@@ -862,7 +862,7 @@ test('Community pages, homepage feature and emulator share action use the violet
   assert.match(communityPage, /community\.css\?v=20261116-community-violet-r1/);
   assert.match(profilePage, /contributions\.css\?v=20261116-community-purple/);
   assert.match(homePage, /home\.css\?v=20261116-community-purple/);
-  assert.match(worker, /overture-shell-v85/);
+  assert.match(worker, /overture-shell-v86/);
 });
 
 
@@ -898,5 +898,28 @@ test('Emulator pages use the shared Overture toolbar and the Community preview r
   assert.match(communityCss, /#community-root \.community-hero h1 em[\s\S]*#6930aa/);
   assert.match(communityPage, /community\.css\?v=20261116-community-violet-r1/);
   assert.match(worker, /\/css\/emulator-topbar\.css\?v=20261116-r1/);
-  assert.match(worker, /overture-shell-v85/);
+  assert.match(worker, /overture-shell-v86/);
+});
+
+
+test('The homepage Community section and coming-soon banner share a continuous violet contour field', async () => {
+  const [page, styles, worker, phattyCss, phattyPage, toolbar] = await Promise.all([
+    readFile(new URL('../index.html', import.meta.url), 'utf8'),
+    readFile(new URL('../css/home.css', import.meta.url), 'utf8'),
+    readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
+    readFile(new URL('../css/little-phatty.css', import.meta.url), 'utf8'),
+    readFile(new URL('../html/little-phatty.html', import.meta.url), 'utf8'),
+    readFile(new URL('../css/emulator-topbar.css', import.meta.url), 'utf8'),
+  ]);
+  assert.match(page, /<div class="community-feature-region">[\\s\\S]*feature-section--community[\\s\\S]*home-coming-soon[\\s\\S]*<\\/div>\\s*<\\/main>/);
+  assert.match(styles, /community-feature-region::before[\\s\\S]*repeating-radial-gradient/);
+  assert.match(styles, /community-feature-region \.home-coming-soon/);
+  assert.match(styles, /html\\[data-theme="light"\\] \.community-feature-region::before/);
+  assert.match(page, /home\.css\\?v=20261116-community-contours-r1/);
+  assert.match(toolbar, /grid-template-columns: minmax\\(0, 1\.5fr\\) minmax\\(0, 1fr\\) auto/);
+  assert.match(phattyCss, /body\.little-phatty-body\.oi-emulator-topbar-active #app-root[\\s\\S]*display: block/);
+  assert.match(phattyPage, /little-phatty\.css\\?v=20261116-toolbar-offset-r1/);
+  assert.match(worker, /overture-shell-v86/);
+  assert.match(worker, /community-contours-r1/);
+  assert.match(worker, /toolbar-offset-r1/);
 });
