@@ -120,23 +120,230 @@ function installCommunityPreviewRecorder({ instrumentId, getAudioOutput }) {
 
   const style = document.createElement('style');
   style.textContent = `
-    .oi-community-recorder{position:fixed;z-index:2147483000;right:18px;top:18px;width:min(360px,calc(100vw - 36px));padding:16px;border:1px solid rgba(125,228,255,.35);border-radius:14px;background:rgba(11,14,19,.96);color:#edf3f8;box-shadow:0 16px 48px rgba(0,0,0,.45);font:14px/1.45 Inter,system-ui,sans-serif;backdrop-filter:blur(16px)}
-    .oi-community-recorder strong{display:block;font:600 11px/1.3 'DM Mono',monospace;letter-spacing:.12em;color:#7de4ff;margin-bottom:7px}
-    .oi-community-recorder p{margin:0 0 12px;color:#b8c2cd;font-size:12px}
-    .oi-community-recorder__status{min-height:20px;margin:10px 0!important;color:#ffb75e!important}
-    .oi-community-recorder__actions{display:flex;gap:8px;flex-wrap:wrap}
-    .oi-community-recorder button{border:1px solid rgba(125,228,255,.42);border-radius:7px;background:#17232c;color:#f3f7fa;padding:8px 11px;font:600 11px 'DM Mono',monospace;cursor:pointer}
-    .oi-community-recorder button:disabled{opacity:.45;cursor:not-allowed}
-    .oi-community-recorder .is-recording{border-color:#ff7777;color:#ffaaaa}
+    .oi-community-recorder {
+      --oi-rec-bg: rgba(14,18,26,.97);
+      --oi-rec-border: rgba(196,147,255,.28);
+      --oi-rec-ink: #edf1f7;
+      --oi-rec-muted: #aab4c2;
+      --oi-rec-soft: rgba(196,147,255,.09);
+      position: fixed;
+      z-index: 2147483000;
+      top: 18px;
+      right: 18px;
+      width: min(410px, calc(100vw - 28px));
+      padding: 0;
+      overflow: hidden;
+      border: 1px solid var(--oi-rec-border);
+      border-radius: 13px;
+      background: var(--oi-rec-bg);
+      color: var(--oi-rec-ink);
+      box-shadow: 0 18px 54px rgba(0,0,0,.46), inset 0 1px rgba(255,255,255,.045);
+      font: 13px/1.5 'Inter Variable', Inter, system-ui, sans-serif;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+    .oi-community-recorder__head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 13px 15px 11px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      background: linear-gradient(135deg, rgba(196,147,255,.105), transparent 72%);
+    }
+    .oi-community-recorder__identity {
+      display: flex;
+      min-width: 0;
+      align-items: center;
+      gap: 10px;
+    }
+    .oi-community-recorder__identity img {
+      width: 23px;
+      height: 23px;
+      flex: 0 0 23px;
+      object-fit: contain;
+    }
+    .oi-community-recorder__identity > div {
+      display: grid;
+      min-width: 0;
+      gap: 2px;
+    }
+    .oi-community-recorder__identity strong {
+      color: #dec4ff;
+      font: 650 9px/1.25 'Inter Variable', Inter, sans-serif;
+      letter-spacing: .13em;
+    }
+    .oi-community-recorder__identity span {
+      color: var(--oi-rec-muted);
+      font: 600 9px/1.25 'DM Mono', monospace;
+      letter-spacing: .065em;
+    }
+    .oi-community-recorder__limit {
+      flex: 0 0 auto;
+      padding: 5px 7px;
+      border: 1px solid rgba(196,147,255,.22);
+      border-radius: 5px;
+      background: var(--oi-rec-soft);
+      color: #d9c0f7;
+      font: 600 8px/1 'DM Mono', monospace;
+      letter-spacing: .07em;
+      white-space: nowrap;
+    }
+    .oi-community-recorder__copy {
+      margin: 0 !important;
+      padding: 13px 15px 10px;
+      color: var(--oi-rec-muted);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+    .oi-community-recorder__status {
+      display: flex;
+      min-height: 34px;
+      align-items: center;
+      margin: 0 15px 13px !important;
+      padding: 7px 9px;
+      border: 1px solid rgba(196,147,255,.16);
+      border-radius: 7px;
+      background: var(--oi-rec-soft);
+      color: #d9c0f7 !important;
+      font-size: 11px !important;
+      line-height: 1.35;
+    }
+    .oi-community-recorder__actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 15px 13px;
+      border-top: 1px solid rgba(255,255,255,.075);
+      background: rgba(0,0,0,.13);
+    }
+    .oi-community-recorder button {
+      min-height: 32px;
+      padding: 0 11px;
+      border: 1px solid rgba(196,147,255,.24);
+      border-radius: 6px;
+      background: rgba(196,147,255,.08);
+      color: #e8d8fb;
+      font: 650 9px/1 'Inter Variable', Inter, sans-serif;
+      letter-spacing: .075em;
+      cursor: pointer;
+      transition: background .16s ease, border-color .16s ease, color .16s ease, opacity .16s ease;
+    }
+    .oi-community-recorder button[data-record-start] {
+      border-color: rgba(196,147,255,.7);
+      background: linear-gradient(135deg, #e0caff, #bd91f0);
+      color: #28153b;
+      box-shadow: inset 0 1px rgba(255,255,255,.55), 0 3px 10px rgba(156,93,221,.18);
+    }
+    .oi-community-recorder button[data-record-start]:hover:not(:disabled) {
+      background: linear-gradient(135deg, #ebdcff, #cba8f8);
+    }
+    .oi-community-recorder button[data-record-stop],
+    .oi-community-recorder button.is-recording {
+      border-color: rgba(255,112,112,.35);
+      background: rgba(255,112,112,.08);
+      color: #ffaaaa;
+    }
+    .oi-community-recorder button[data-record-return] {
+      margin-left: auto;
+      border-color: transparent;
+      background: transparent;
+      color: var(--oi-rec-muted);
+    }
+    .oi-community-recorder button:hover:not(:disabled) {
+      border-color: rgba(196,147,255,.55);
+      background: rgba(196,147,255,.15);
+      color: #fff;
+    }
+    .oi-community-recorder button:focus-visible {
+      outline: 2px solid #c493ff;
+      outline-offset: 2px;
+    }
+    .oi-community-recorder button:disabled {
+      opacity: .42;
+      cursor: not-allowed;
+    }
+    html[data-theme="light"] .oi-community-recorder {
+      --oi-rec-bg: rgba(250,252,255,.98);
+      --oi-rec-border: rgba(116,59,184,.22);
+      --oi-rec-ink: #1c2939;
+      --oi-rec-muted: #596b80;
+      --oi-rec-soft: rgba(116,59,184,.07);
+      border-color: var(--oi-rec-border);
+      box-shadow: 0 18px 48px rgba(45,60,81,.2), inset 0 1px rgba(255,255,255,.95);
+    }
+    html[data-theme="light"] .oi-community-recorder__head {
+      border-bottom-color: rgba(43,59,78,.1);
+      background: linear-gradient(135deg, rgba(116,59,184,.09), transparent 72%);
+    }
+    html[data-theme="light"] .oi-community-recorder__identity img { filter: brightness(0); }
+    html[data-theme="light"] .oi-community-recorder__identity strong { color: #6930aa; }
+    html[data-theme="light"] .oi-community-recorder__limit {
+      border-color: rgba(116,59,184,.2);
+      color: #6930aa;
+    }
+    html[data-theme="light"] .oi-community-recorder__status {
+      border-color: rgba(116,59,184,.16);
+      color: #6930aa !important;
+    }
+    html[data-theme="light"] .oi-community-recorder__actions {
+      border-top-color: rgba(43,59,78,.1);
+      background: rgba(230,235,243,.48);
+    }
+    html[data-theme="light"] .oi-community-recorder button {
+      border-color: rgba(116,59,184,.22);
+      background: rgba(116,59,184,.06);
+      color: #54228f;
+    }
+    html[data-theme="light"] .oi-community-recorder button[data-record-start] {
+      border-color: #b88cde;
+      background: linear-gradient(135deg, #ead8ff, #cfb1f1);
+      color: #39204f;
+    }
+    html[data-theme="light"] .oi-community-recorder button[data-record-stop],
+    html[data-theme="light"] .oi-community-recorder button.is-recording {
+      border-color: rgba(178,55,55,.26);
+      background: rgba(178,55,55,.06);
+      color: #a42f2f;
+    }
+    html[data-theme="light"] .oi-community-recorder button[data-record-return] {
+      color: #596b80;
+    }
+    html[data-theme="light"] .oi-community-recorder button:hover:not(:disabled) {
+      border-color: rgba(116,59,184,.42);
+      background: rgba(116,59,184,.12);
+      color: #54228f;
+    }
+    @media (max-width: 480px) {
+      .oi-community-recorder { top: 10px; right: 10px; width: calc(100vw - 20px); }
+      .oi-community-recorder__head { padding-inline: 12px; }
+      .oi-community-recorder__copy { padding-inline: 12px; }
+      .oi-community-recorder__status { margin-inline: 12px !important; }
+      .oi-community-recorder__actions { padding-inline: 12px; }
+      .oi-community-recorder button[data-record-return] { margin-left: 0; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .oi-community-recorder button { transition: none; }
+    }
   `;
-  document.head.appendChild(style);
+);
 
   const panel = document.createElement('aside');
   panel.className = 'oi-community-recorder';
   panel.setAttribute('aria-label', 'Community preview recording');
   panel.innerHTML = `
-    <strong>COMMUNITY PREVIEW RECORDING</strong>
-    <p>Power on the instrument, press record, then play normally. The recording captures the instrument's actual audio output, not your microphone. Maximum length: 10 seconds.</p>
+    <div class="oi-community-recorder__head">
+      <div class="oi-community-recorder__identity">
+        <img src="/ui/Logos/OvertureLogo.png" alt="">
+        <div>
+          <strong>OVERTURE COMMUNITY</strong>
+          <span>PATCH PREVIEW RECORDING</span>
+        </div>
+      </div>
+      <span class="oi-community-recorder__limit">MAX 10 SEC</span>
+    </div>
+    <p class="oi-community-recorder__copy">Power on the instrument, then record yourself playing. This captures the instrument's audio output, not your microphone. You can record up to 10 seconds.</p>
     <p class="oi-community-recorder__status" role="status" aria-live="polite">Ready when the instrument is powered on.</p>
     <div class="oi-community-recorder__actions">
       <button type="button" data-record-start>START RECORDING</button>
@@ -257,6 +464,83 @@ function installCommunityPreviewRecorder({ instrumentId, getAudioOutput }) {
   return panel;
 }
 
+
+const EMULATOR_TOPBAR_LABELS = {
+  'sub-37': 'MOOG SUB 37',
+  'prophet-10': 'SEQUENTIAL PROPHET-10',
+  'nord-c2d': 'NORD C2D',
+  'dx7': 'YAMAHA DX7',
+  'tr-808': 'ROLAND TR-808',
+  'ob-xa': 'OBERHEIM OB-Xa',
+  'udo-super-8': 'UDO SUPER 8',
+  'sequential-pro-3': 'SEQUENTIAL PRO 3',
+  'little-phatty': 'MOOG LITTLE PHATTY',
+  'mellotron-m400': 'MELLOTRON M400',
+  'hohner-d6': 'HOHNER CLAVINET D6',
+  'oberheim-eight-voice': 'OBERHEIM EIGHT VOICE',
+  'juno-106': 'ROLAND JUNO-106',
+  'ms-20': 'KORG MS-20',
+};
+
+function placeCommunityButtonInEmulatorTopbar(button, instrumentId) {
+  // Prophet-10 already has this exact Overture/info-bar pattern built into
+  // its stage, so retain its existing layout and right-hand action slot.
+  if (!button || instrumentId === 'prophet-10' || document.querySelector('.p10-info')) return;
+
+  const root = document.querySelector('body > main[id$="-root"], body > #app-root');
+  if (!root) return;
+
+  document.body.classList.add('oi-emulator-topbar-active');
+
+  if (!document.getElementById('oi-emulator-topbar-styles')) {
+    const stylesheet = document.createElement('link');
+    stylesheet.id = 'oi-emulator-topbar-styles';
+    stylesheet.rel = 'stylesheet';
+    stylesheet.href = '/css/emulator-topbar.css?v=20261116-r1';
+    document.head.appendChild(stylesheet);
+  }
+
+  let bar = document.querySelector('.oi-emulator-topbar');
+  if (!bar) {
+    bar = document.createElement('header');
+    bar.className = 'oi-emulator-topbar';
+    bar.setAttribute('aria-label', 'Overture instrument toolbar');
+
+    const brand = document.createElement('a');
+    brand.className = 'oi-emulator-topbar__brand';
+    brand.href = '/';
+    brand.setAttribute('aria-label', 'Overture Instruments home');
+
+    const logo = document.createElement('img');
+    logo.className = 'oi-emulator-topbar__logo';
+    logo.src = '/ui/Logos/OvertureLogo.png';
+    logo.alt = '';
+    logo.width = 21;
+    logo.height = 21;
+
+    const wording = document.createElement('span');
+    wording.className = 'oi-emulator-topbar__wording';
+    const title = document.createElement('strong');
+    title.textContent = 'OVERTURE INSTRUMENTS';
+    const subtitle = document.createElement('span');
+    subtitle.textContent = EMULATOR_TOPBAR_LABELS[instrumentId] || instrumentId.replace(/-/g, ' ').toUpperCase();
+    wording.append(title, subtitle);
+    brand.append(logo, wording);
+
+    const actions = document.createElement('div');
+    actions.className = 'oi-emulator-topbar__actions';
+    bar.append(brand, actions);
+    root.parentNode.insertBefore(bar, root);
+  }
+
+  const actions = bar.querySelector('.oi-emulator-topbar__actions');
+  if (actions) {
+    button.className = 'oi-community-share oi-emulator-topbar__community';
+    button.textContent = 'COMMUNITY';
+    actions.appendChild(button);
+  }
+}
+
 export function createCommunityShareButton(parent, {
   instrumentId, getData, getTitle, getAudioOutput, className = 'pn-btn', label = 'COMMUNITY',
 }) {
@@ -300,6 +584,7 @@ export function createCommunityShareButton(parent, {
     }
   });
   parent.appendChild(button);
+  placeCommunityButtonInEmulatorTopbar(button, instrumentId);
   installCommunityPreviewRecorder({ instrumentId, getAudioOutput });
   return button;
 }
