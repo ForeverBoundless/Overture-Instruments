@@ -496,7 +496,7 @@ function placeCommunityButtonInEmulatorTopbar(button, instrumentId) {
     const stylesheet = document.createElement('link');
     stylesheet.id = 'oi-emulator-topbar-styles';
     stylesheet.rel = 'stylesheet';
-    stylesheet.href = '/css/emulator-topbar.css?v=20261116-r1';
+    stylesheet.href = '/css/emulator-topbar.css?v=20261116-r2';
     document.head.appendChild(stylesheet);
   }
 
@@ -515,27 +515,41 @@ function placeCommunityButtonInEmulatorTopbar(button, instrumentId) {
     logo.className = 'oi-emulator-topbar__logo';
     logo.src = '/ui/Logos/OvertureLogo.png';
     logo.alt = '';
-    logo.width = 21;
-    logo.height = 21;
+    logo.width = 20;
+    logo.height = 20;
 
-    const wording = document.createElement('span');
-    wording.className = 'oi-emulator-topbar__wording';
-    const title = document.createElement('strong');
-    title.textContent = 'OVERTURE INSTRUMENTS';
-    const subtitle = document.createElement('span');
-    subtitle.textContent = EMULATOR_TOPBAR_LABELS[instrumentId] || instrumentId.replace(/-/g, ' ').toUpperCase();
-    wording.append(title, subtitle);
-    brand.append(logo, wording);
+    const identity = document.createElement('span');
+    identity.className = 'oi-emulator-topbar__identity';
+
+    const wordmark = document.createElement('strong');
+    wordmark.textContent = 'OVERTURE INSTRUMENTS';
+
+    const instrument = document.createElement('span');
+    instrument.textContent = EMULATOR_TOPBAR_LABELS[instrumentId] || instrumentId.replace(/-/g, ' ').toUpperCase();
+
+    identity.append(wordmark, instrument);
+    brand.append(logo, identity);
+
+    const mid = document.createElement('div');
+    mid.className = 'oi-emulator-topbar__mid';
+
+    const primary = document.createElement('span');
+    primary.textContent = 'FREE · OPEN-SOURCE INSTRUMENTS';
+
+    const secondary = document.createElement('span');
+    secondary.textContent = 'PLAYABLE IN YOUR BROWSER';
+
+    mid.append(primary, secondary);
 
     const actions = document.createElement('div');
     actions.className = 'oi-emulator-topbar__actions';
-    bar.append(brand, actions);
+    bar.append(brand, mid, actions);
     root.parentNode.insertBefore(bar, root);
   }
 
   const actions = bar.querySelector('.oi-emulator-topbar__actions');
   if (actions) {
-    button.className = 'oi-community-share oi-emulator-topbar__community';
+    button.className = 'oi-community-share oi-emulator-topbar__share';
     button.textContent = 'COMMUNITY';
     actions.appendChild(button);
   }
