@@ -281,11 +281,10 @@ button.oi-community-share {
   margin: 2px 0 !important;
   padding: 7px 13px !important;
   overflow: hidden;
-  border: 1px solid rgba(255, 183, 94, .48) !important;
+  border: 1px solid rgba(196, 147, 255, .55) !important;
   border-radius: 7px !important;
-  background:
-    linear-gradient(180deg, rgba(255, 196, 125, .17), rgba(255, 159, 10, .075)) !important;
-  color: #ffd5a2 !important;
+  background: linear-gradient(180deg, rgba(207, 169, 255, .20), rgba(163, 105, 237, .12)) !important;
+  color: #e6d2ff !important;
   font-family: 'Inter Variable', Inter, Figtree, sans-serif !important;
   font-size: 9px !important;
   font-weight: 800 !important;
@@ -295,7 +294,7 @@ button.oi-community-share {
   text-decoration: none !important;
   text-transform: uppercase !important;
   white-space: nowrap !important;
-  text-shadow: 0 0 12px rgba(255, 170, 72, .2);
+  text-shadow: 0 0 12px rgba(180, 120, 255, .28);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, .09),
     inset 0 -1px 0 rgba(0, 0, 0, .18),
@@ -304,12 +303,8 @@ button.oi-community-share {
   cursor: pointer !important;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
-  transition:
-    color .16s ease,
-    border-color .16s ease,
-    background .16s ease,
-    box-shadow .16s ease,
-    transform .16s ease !important;
+  transition: color .16s ease, border-color .16s ease, background .16s ease,
+    box-shadow .16s ease, transform .16s ease !important;
 }
 
 button.oi-community-share::before {
@@ -319,46 +314,45 @@ button.oi-community-share::before {
   width: 17px;
   height: 17px;
   place-items: center;
-  border: 1px solid rgba(255, 198, 132, .48);
+  border: 1px solid rgba(206, 169, 255, .50);
   border-radius: 50%;
-  background: rgba(255, 176, 83, .11);
-  color: #ffd39a;
+  background: rgba(168, 107, 244, .13);
+  color: #e6d2ff;
   font-family: 'Inter Variable', Inter, sans-serif;
   font-size: 12px;
   font-weight: 800;
   line-height: 1;
   letter-spacing: 0;
-  text-shadow: 0 0 8px rgba(255, 184, 102, .35);
+  text-shadow: 0 0 8px rgba(187, 141, 255, .4);
   transition: transform .16s ease, background .16s ease, border-color .16s ease;
 }
 
 button.oi-community-share:hover:not(:disabled) {
-  border-color: rgba(255, 199, 133, .82) !important;
-  background:
-    linear-gradient(180deg, rgba(255, 203, 145, .25), rgba(255, 159, 10, .13)) !important;
-  color: #fff0dc !important;
+  border-color: rgba(226, 208, 255, .88) !important;
+  background: linear-gradient(180deg, rgba(221, 194, 255, .27), rgba(157, 92, 234, .17)) !important;
+  color: #fff7ff !important;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, .14),
     0 3px 12px rgba(0, 0, 0, .26),
-    0 0 0 1px rgba(255, 176, 83, .09),
-    0 0 17px rgba(255, 159, 10, .12);
+    0 0 0 1px rgba(177, 115, 255, .12),
+    0 0 18px rgba(161, 96, 240, .24);
   transform: translateY(-1px);
 }
 
 button.oi-community-share:hover:not(:disabled)::before {
-  border-color: rgba(255, 217, 171, .76);
-  background: rgba(255, 186, 103, .2);
+  border-color: rgba(226, 208, 255, .82);
+  background: rgba(186, 133, 255, .23);
   transform: translate(1px, -1px);
 }
 
 button.oi-community-share:active:not(:disabled) {
-  background: linear-gradient(180deg, rgba(255, 176, 83, .13), rgba(255, 159, 10, .08)) !important;
+  background: linear-gradient(180deg, rgba(186, 133, 255, .17), rgba(157, 92, 234, .12)) !important;
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, .28);
   transform: translateY(0);
 }
 
 button.oi-community-share:focus-visible {
-  outline: 2px solid #7de4ff !important;
+  outline: 2px solid #c493ff !important;
   outline-offset: 3px !important;
 }
 
@@ -369,36 +363,37 @@ button.oi-community-share:disabled {
 }
 
 html[data-theme="light"] button.oi-community-share {
-  border-color: rgba(151, 91, 23, .36) !important;
-  background: linear-gradient(180deg, rgba(255, 220, 177, .95), rgba(255, 202, 139, .9)) !important;
-  color: #56330e !important;
+  border-color: rgba(112, 63, 169, .40) !important;
+  background: linear-gradient(180deg, #eee2ff, #d4b9f7) !important;
+  color: #4a2c70 !important;
   text-shadow: none;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .9),
-    inset 0 -1px 0 rgba(149, 88, 20, .08),
+    inset 0 1px 0 rgba(255, 255, 255, .94),
+    inset 0 -1px 0 rgba(112, 63, 169, .08),
     0 2px 6px rgba(64, 77, 92, .13);
 }
 
 html[data-theme="light"] button.oi-community-share::before {
-  border-color: rgba(151, 91, 23, .32);
-  background: rgba(255, 255, 255, .48);
-  color: #71420d;
+  border-color: rgba(112, 63, 169, .34);
+  background: rgba(255, 255, 255, .52);
+  color: #603991;
   text-shadow: none;
 }
 
 html[data-theme="light"] button.oi-community-share:hover:not(:disabled) {
-  border-color: rgba(151, 91, 23, .58) !important;
-  background: linear-gradient(180deg, #ffe6c6, #ffd19c) !important;
-  color: #3f270e !important;
+  border-color: rgba(105, 48, 170, .62) !important;
+  background: linear-gradient(180deg, #f5ebff, #dfc9fb) !important;
+  color: #35204f !important;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .95),
+    inset 0 1px 0 rgba(255, 255, 255, .98),
     0 4px 12px rgba(64, 77, 92, .16),
-    0 0 0 1px rgba(151, 91, 23, .07);
+    0 0 0 1px rgba(112, 63, 169, .08),
+    0 0 16px rgba(116, 59, 184, .15);
 }
 
 html[data-theme="light"] button.oi-community-share:hover:not(:disabled)::before {
-  border-color: rgba(151, 91, 23, .52);
-  background: rgba(255, 255, 255, .68);
+  border-color: rgba(112, 63, 169, .55);
+  background: rgba(255, 255, 255, .72);
 }
 
 @media (prefers-reduced-motion: reduce) {
