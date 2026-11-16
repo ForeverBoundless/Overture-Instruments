@@ -1,4 +1,4 @@
-const CACHE = 'overture-shell-v85';
+const CACHE = 'overture-shell-v86';
 const APP_SHELL = [
   '/account',
   '/login',
@@ -16,7 +16,7 @@ const APP_SHELL = [
   '/css/community.css?v=20261112-community-moderation-r1',
   '/css/community.css?v=20261116-community-purple',
   '/css/community.css?v=20261116-community-violet-r1',
-  '/css/emulator-topbar.css?v=20261116-r1',
+  '/css/emulator-topbar.css?v=20261116-r2',
   '/css/community.css',
   '/js/community.js?v=20261103-auth-hidden',
   '/js/community.js?v=20261112-community-title-edit-r1',
@@ -38,7 +38,7 @@ const APP_SHELL = [
   '/css/about.css',
   '/css/brand.css',
   '/css/experiments.css',
-  '/css/home.css?v=20261116-community-purple',
+  '/css/home.css?v=20261116-community-contours-r1',
   '/css/keyboard.css',
   '/css/hohner-d6.css?v=20261106-audio-r1',
   '/css/hardware-panel.css',
@@ -50,7 +50,7 @@ const APP_SHELL = [
   '/css/korg-ms-20.css',
   '/css/mellotron-m400.css',
   '/css/mellotron-m400.css?v=20261104-centered-47key-r2',
-  '/css/little-phatty.css?v=20261104-compact-centred',
+  '/css/little-phatty.css?v=20261116-toolbar-offset-r1',
   '/css/midi-map.css?v=20261116-community-purple',
   '/css/nord-c2d.css',
   '/css/oberheim-eight-voice.css',
