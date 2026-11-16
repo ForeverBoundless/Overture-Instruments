@@ -73,7 +73,7 @@ test('Hohner D6 and Oberheim OB-Xa are complete first-class emulator entries', a
   assert.match(obEngine, /width=clamp\(\.5-p\.pulseWidth\*\.45/);
   assert.doesNotMatch(obEngine, /lfoVca/);
   assert.match(obPage, /Oberheim OB-Xa from Overture Instruments/);
-  assert.match(worker, /overture-shell-v80/);
+  assert.match(worker, /overture-shell-v82/);
   assert.match(worker, /hohner-d6/);
   assert.match(worker, /ob-xa/);
 });
@@ -375,7 +375,7 @@ test('Community instrument patches receive automatic previews and clear upload m
   assert.match(page, /Inappropriate, abusive, hateful, sexual, threatening, or infringing audio will be removed/);
   assert.match(css, /community-warning-tooltip/);
   assert.match(css, /\.community-warning-wrap:focus-within/);
-  assert.match(worker, /overture-shell-v80/);
+  assert.match(worker, /overture-shell-v82/);
   assert.match(worker, /instrumentPreview\.js/);
   assert.match(worker, /20261112-auto-preview-r1/);
 });
@@ -409,7 +409,7 @@ test('Community reports, moderator review, strike escalation and protected accou
   assert.match(migration, /community_can_publish/);
   assert.match(css, /community-report-dialog/);
   assert.match(css, /community-moderation-actions/);
-  assert.match(worker, /overture-shell-v80/);
+  assert.match(worker, /overture-shell-v82/);
   assert.match(worker, /20261114-publish-layout/);
 });
 
@@ -810,8 +810,28 @@ test('Community supports short direct instrument-output preview recordings', asy
   assert.match(community, /renderRecordedPreview/);
   assert.match(page, /community-record-preview/);
   assert.match(page, /community-recorded-preview/);
-  assert.match(worker, /overture-shell-v80/);
+  assert.match(worker, /overture-shell-v82/);
   assert.match(worker, /20261113-recorded-preview-r1/);
   assert.equal(emulators.every((source) => source.includes('getAudioOutput:')), true,
     'all 14 emulator pages must expose their final output node to the recorder');
+});
+
+
+test('Homepage includes a dedicated, theme-aware Community feature after Experiments', async () => {
+  const [page, styles, worker] = await Promise.all([
+    readFile(new URL('../index.html', import.meta.url), 'utf8'),
+    readFile(new URL('../css/home.css', import.meta.url), 'utf8'),
+    readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
+  ]);
+  const experiments = page.indexOf('class="feature-section feature-section--experiments"');
+  const community = page.indexOf('class="feature-section feature-section--community"');
+  const comingSoon = page.indexOf('class="home-coming-soon"');
+  assert.ok(experiments >= 0 && community > experiments && comingSoon > community);
+  assert.match(page, /href="\/community"/);
+  assert.match(page, /OMNI PATCHES/);
+  assert.match(page, /INSTRUMENT PRESETS/);
+  assert.match(styles, /\.feature-section--community/);
+  assert.match(styles, /html\[data-theme="light"\] \.feature-section--community/);
+  assert.match(styles, /@media \(max-width: 760px\)[\s\S]*feature-layout--community/);
+  assert.match(worker, /\/css\/home\.css\?v=20261116-community-feature/);
 });
