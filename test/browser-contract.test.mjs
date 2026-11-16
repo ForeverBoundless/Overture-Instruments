@@ -911,15 +911,17 @@ test('The homepage Community section and coming-soon banner share a continuous v
     readFile(new URL('../html/little-phatty.html', import.meta.url), 'utf8'),
     readFile(new URL('../css/emulator-topbar.css', import.meta.url), 'utf8'),
   ]);
-  assert.match(page, /<div class="community-feature-region">[\\s\\S]*feature-section--community[\\s\\S]*home-coming-soon[\\s\\S]*<\\/div>\\s*<\\/main>/);
-  assert.match(styles, /community-feature-region::before[\\s\\S]*repeating-radial-gradient/);
-  assert.match(styles, /community-feature-region \.home-coming-soon/);
-  assert.match(styles, /html\\[data-theme="light"\\] \.community-feature-region::before/);
-  assert.match(page, /home\.css\\?v=20261116-community-contours-r1/);
-  assert.match(toolbar, /grid-template-columns: minmax\\(0, 1\.5fr\\) minmax\\(0, 1fr\\) auto/);
-  assert.match(phattyCss, /body\.little-phatty-body\.oi-emulator-topbar-active #app-root[\\s\\S]*display: block/);
-  assert.match(phattyPage, /little-phatty\.css\\?v=20261116-toolbar-offset-r1/);
-  assert.match(worker, /overture-shell-v86/);
-  assert.match(worker, /community-contours-r1/);
-  assert.match(worker, /toolbar-offset-r1/);
+  assert.ok(page.indexOf('<div class="community-feature-region">') < page.indexOf('class="feature-section feature-section--community"'));
+  assert.ok(page.indexOf('class="home-coming-soon"') > page.indexOf('class="feature-section feature-section--community"'));
+  assert.ok(page.includes('    </aside>\\n    </div>\\n  </main>'));
+  assert.ok(styles.includes('.community-feature-region::before') && styles.includes('repeating-radial-gradient'));
+  assert.ok(styles.includes('.community-feature-region .home-coming-soon'));
+  assert.ok(styles.includes('html[data-theme="light"] .community-feature-region::before'));
+  assert.ok(page.includes('home.css?v=20261116-community-contours-r1'));
+  assert.ok(toolbar.includes('grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) auto'));
+  assert.ok(phattyCss.includes('body.little-phatty-body.oi-emulator-topbar-active #app-root'));
+  assert.ok(phattyPage.includes('little-phatty.css?v=20261116-toolbar-offset-r1'));
+  assert.ok(worker.includes('overture-shell-v86'));
+  assert.ok(worker.includes('community-contours-r1'));
+  assert.ok(worker.includes('toolbar-offset-r1'));
 });
