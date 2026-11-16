@@ -85,7 +85,7 @@ export function display(parent) {
  * MIDI with pending notes until the engine starts, and all-notes-off.
  * handlers: { noteOn(midi, vel, source), noteOff(midi, source), bend(v), mod(v), sustain(down), aftertouch(v), cc(cc,val), program(n), allOff() }
  */
-export function performance(parent, { octaves = 4, startOctave = 2, notes = null, wheels = true, started = () => true, handlers, midiStatusEl, octaveShift = true }) {
+export function performance(parent, { octaves = 4, startOctave = 2, notes = null, wheels = true, started = () => true, handlers, midiStatusEl, octaveShift = true, extraComputerKeys = {} }) {
   const keybed = el('section', `pn-keybed${wheels ? '' : ' pn-keybed--nowheels'}`, parent);
   let pitchWheel = null;
   let modWheel = null;
@@ -134,7 +134,7 @@ export function performance(parent, { octaves = 4, startOctave = 2, notes = null
     if (e.repeat) return;
     if (octaveShift && (key === '-' || key === '_')) { compOct = clamp(compOct - 1, -3, 3); return; }
     if (octaveShift && (key === '=' || key === '+')) { compOct = clamp(compOct + 1, -3, 3); return; }
-    const semi = KEY_TO_SEMI[key];
+    const semi = KEY_TO_SEMI[key] ?? extraComputerKeys[key];
     if (semi === undefined || compKeys.has(key)) return;
     e.preventDefault();
     const midi = 48 + compOct * 12 + semi;
