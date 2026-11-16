@@ -340,3 +340,37 @@ html[data-theme="light"] .contributions-card__actions .community-button--danger:
   .contributions-card__actions { grid-template-columns:minmax(0,1fr); }
 }
 html[data-theme="light"] #contributions-count { color:#748193; }
+
+
+/* The public contribution profile uses the same Community violet as its
+   patch cards, labels and publishing controls. */
+.contributions-profile__avatar {
+  border-color: var(--oi-community-accent-border);
+  color: #e5d2ff;
+  background:
+    radial-gradient(circle at 30% 20%, rgba(196,147,255,.20), transparent 65%),
+    linear-gradient(145deg, #2a1d3a, #121624);
+  box-shadow: 0 0 22px var(--oi-community-accent-soft);
+}
+.contributions-profile__summary strong { color: var(--oi-community-accent); }
+.contributions-card__visibility {
+  border-color: var(--oi-community-accent-border);
+  color: var(--oi-community-accent);
+  background: var(--oi-community-accent-soft);
+}
+html[data-theme="light"] .contributions-profile__avatar {
+  border-color: var(--oi-community-accent-border);
+  color: var(--oi-community-accent-strong);
+  background:
+    radial-gradient(circle at 30% 20%, rgba(116,59,184,.10), transparent 65%),
+    linear-gradient(145deg, #f1e9fb, #dfe5ef);
+  box-shadow: 0 5px 15px var(--oi-community-accent-soft);
+}
+html[data-theme="light"] .contributions-profile__summary strong,
+html[data-theme="light"] .contributions-card__visibility {
+  color: var(--oi-community-accent-strong);
+}
+html[data-theme="light"] .contributions-card__visibility {
+  border-color: var(--oi-community-accent-border);
+  background: var(--oi-community-accent-soft);
+}
