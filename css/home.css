@@ -3167,3 +3167,177 @@ html[data-theme="light"] .community-feature-footer b {
   }
 }
 
+
+
+/* Community's homepage section uses the dedicated violet accent, not the
+   cyan/green/amber palette assigned to other Overture features. */
+.feature-section--community {
+  background:
+    radial-gradient(ellipse at 78% 52%, rgba(180, 119, 244, .105), transparent 37%),
+    radial-gradient(ellipse at 12% 80%, rgba(180, 119, 244, .045), transparent 35%);
+}
+.feature-section--community::after {
+  background:
+    radial-gradient(ellipse at 8% 48%, rgba(180, 119, 244, .13), transparent 26%) -12% 0 / 62% 100% no-repeat,
+    repeating-radial-gradient(ellipse at 82% 48%, transparent 0 24px, rgba(180, 119, 244, .055) 25px 26px, transparent 27px 48px);
+}
+.feature-section--community .section-index > span:first-child { color: var(--oi-community-accent); }
+.feature-section--community .index-rule {
+  background: linear-gradient(90deg, var(--oi-community-accent), rgba(180,119,244,0));
+}
+.feature-section--community .feature-copy h2 em {
+  color: var(--oi-community-accent);
+  text-shadow: 0 0 .08em currentColor, 0 0 .3em var(--oi-community-accent-glow), 0 0 .7em var(--oi-community-accent-glow);
+}
+.feature-section--community .eyebrow-dot--cyan {
+  color: var(--oi-community-accent);
+  background: var(--oi-community-accent);
+  box-shadow: 0 0 12px var(--oi-community-accent-glow);
+}
+.feature-section--community .community-feature-signal {
+  background: var(--oi-community-accent);
+  box-shadow: 0 0 12px var(--oi-community-accent-glow);
+}
+.community-feature-showcase {
+  border-color: var(--oi-community-accent-border);
+  box-shadow: 0 26px 68px rgba(0,0,0,.25), 0 0 24px var(--oi-community-accent-soft), inset 0 1px rgba(255,255,255,.055);
+}
+.community-feature-showcase::before {
+  background:
+    radial-gradient(circle at 92% 5%, rgba(180, 119, 244, .13), transparent 34%),
+    radial-gradient(circle at 8% 100%, rgba(180, 119, 244, .055), transparent 35%),
+    repeating-linear-gradient(135deg, transparent 0 24px, rgba(255,255,255,.013) 25px, transparent 26px);
+}
+.community-feature-showcase::after {
+  background: linear-gradient(90deg, rgba(196,147,255,.9), rgba(180,119,244,.3), transparent);
+}
+.community-feature-showcase:hover {
+  border-color: var(--oi-community-accent);
+  box-shadow: 0 30px 76px rgba(0,0,0,.30), 0 0 34px var(--oi-community-accent-glow), inset 0 1px rgba(255,255,255,.07);
+}
+.community-feature-showcase:focus-visible { outline-color: var(--oi-community-accent); }
+.community-feature-mark {
+  border-color: var(--oi-community-accent-border);
+  background: var(--oi-community-accent-soft);
+}
+.community-feature-state {
+  border-color: var(--oi-community-accent-border);
+  color: #d1b3f3;
+  background: var(--oi-community-accent-soft);
+}
+.community-feature-state i {
+  background: var(--oi-community-accent);
+  box-shadow: 0 0 9px var(--oi-community-accent-glow);
+}
+.community-feature-content::before,
+.community-feature-content::after { border-color: var(--oi-community-accent-border); }
+.community-feature-caption i { background: linear-gradient(90deg, var(--oi-community-accent-border), transparent); }
+.community-feature-item--share {
+  border-color: var(--oi-community-accent-border);
+  background: linear-gradient(110deg, var(--oi-community-accent-soft), rgba(255,255,255,.012));
+}
+.community-feature-item__symbol--omni,
+.community-feature-item__symbol--presets,
+.community-feature-item__symbol--share {
+  color: var(--oi-community-accent);
+  border-color: var(--oi-community-accent-border);
+  background: var(--oi-community-accent-soft);
+}
+.community-feature-showcase:hover .community-feature-item__arrow,
+.community-feature-footer b { color: var(--oi-community-accent); }
+.community-feature-showcase:hover .community-feature-footer b {
+  transform: translate(2px, -2px);
+}
+
+html[data-theme="light"] .feature-section--community {
+  background:
+    radial-gradient(ellipse at 78% 52%, rgba(116, 59, 184, .085), transparent 37%),
+    radial-gradient(ellipse at 12% 80%, rgba(116, 59, 184, .04), transparent 35%),
+    linear-gradient(180deg, rgba(244,247,250,.72), rgba(232,237,243,.24));
+}
+html[data-theme="light"] .feature-section--community::after {
+  filter: saturate(1.25) contrast(1.1);
+  opacity: .55;
+}
+html[data-theme="light"] .feature-section--community .section-index > span:first-child {
+  color: var(--oi-community-accent-strong);
+}
+html[data-theme="light"] .feature-section--community .index-rule {
+  background: linear-gradient(90deg, var(--oi-community-accent), rgba(116,59,184,0));
+}
+html[data-theme="light"] .feature-section--community .feature-copy h2 em {
+  color: var(--oi-community-accent-strong) !important;
+  -webkit-text-fill-color: currentColor !important;
+  text-shadow: 0 0 9px var(--oi-community-accent-glow), 0 0 20px var(--oi-community-accent-soft-strong);
+}
+html[data-theme="light"] .feature-section--community .eyebrow-dot--cyan {
+  color: var(--oi-community-accent-strong) !important;
+  background: var(--oi-community-accent-strong) !important;
+  box-shadow: 0 0 12px var(--oi-community-accent-glow) !important;
+}
+html[data-theme="light"] .feature-section--community .community-feature-signal {
+  background: var(--oi-community-accent-strong);
+  box-shadow: 0 0 10px var(--oi-community-accent-glow);
+}
+html[data-theme="light"] .community-feature-showcase {
+  border-color: var(--oi-community-accent-border);
+  box-shadow: 0 22px 54px rgba(45,60,81,.13), 0 0 22px var(--oi-community-accent-soft), inset 0 1px #fff;
+}
+html[data-theme="light"] .community-feature-showcase::before {
+  background:
+    radial-gradient(circle at 92% 5%, rgba(116,59,184,.085), transparent 34%),
+    radial-gradient(circle at 8% 100%, rgba(116,59,184,.045), transparent 35%),
+    repeating-linear-gradient(135deg, transparent 0 24px, rgba(43,59,78,.018) 25px, transparent 26px);
+}
+html[data-theme="light"] .community-feature-showcase::after {
+  background: linear-gradient(90deg, rgba(116,59,184,.78), rgba(116,59,184,.18), transparent);
+}
+html[data-theme="light"] .community-feature-showcase:hover {
+  border-color: var(--oi-community-accent);
+  box-shadow: 0 26px 62px rgba(45,60,81,.16), 0 0 26px var(--oi-community-accent-glow), inset 0 1px #fff;
+}
+html[data-theme="light"] .community-feature-mark {
+  border-color: var(--oi-community-accent-border);
+  background: var(--oi-community-accent-soft);
+}
+html[data-theme="light"] .community-feature-state {
+  border-color: var(--oi-community-accent-border);
+  color: var(--oi-community-accent-strong);
+  background: var(--oi-community-accent-soft);
+}
+html[data-theme="light"] .community-feature-state i {
+  background: var(--oi-community-accent-strong);
+  box-shadow: 0 0 7px var(--oi-community-accent-glow);
+}
+html[data-theme="light"] .community-feature-content::before,
+html[data-theme="light"] .community-feature-content::after {
+  border-color: var(--oi-community-accent-border);
+}
+html[data-theme="light"] .community-feature-caption i {
+  background: linear-gradient(90deg, var(--oi-community-accent-border), transparent);
+}
+html[data-theme="light"] .community-feature-item--share {
+  border-color: var(--oi-community-accent-border);
+  background: linear-gradient(110deg, var(--oi-community-accent-soft), rgba(255,255,255,.55));
+}
+html[data-theme="light"] .community-feature-item__symbol--omni,
+html[data-theme="light"] .community-feature-item__symbol--presets,
+html[data-theme="light"] .community-feature-item__symbol--share {
+  color: var(--oi-community-accent-strong);
+  border-color: var(--oi-community-accent-border);
+  background: var(--oi-community-accent-soft);
+}
+html[data-theme="light"] .community-feature-showcase:hover .community-feature-item__arrow,
+html[data-theme="light"] .community-feature-showcase:hover .community-feature-footer b,
+html[data-theme="light"] .community-feature-footer b {
+  color: var(--oi-community-accent-strong);
+}
+html[data-theme="light"] body main .feature-section--community .section-index > span:first-child {
+  color: var(--oi-community-accent-strong) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+html[data-theme="light"] body main .feature-section--community .eyebrow-dot--cyan {
+  color: var(--oi-community-accent-strong) !important;
+  background-color: var(--oi-community-accent-strong) !important;
+  box-shadow: 0 0 12px var(--oi-community-accent-glow) !important;
+}
