@@ -832,3 +832,118 @@ html[data-theme="light"] .community-record-preview:hover {
   .community-audio-section,
   .community-publish-settings { padding:15px; }
 }
+
+
+/* Community surfaces share one violet accent across discovery, publishing,
+   preview, reporting and moderation. Warning prompts retain their semantic
+   amber treatment. */
+.community-setup code,
+.community-card__top,
+.community-card__author:hover,
+.community-card__author:focus-visible {
+  color: var(--oi-community-accent);
+}
+.community-setup a { color: var(--oi-community-accent); }
+.community-setup a:hover { color: var(--oi-community-accent); }
+.community-card {
+  transition: border-color .2s ease, transform .2s ease, box-shadow .2s ease;
+}
+.community-card:hover {
+  border-color: var(--oi-community-accent-border);
+  box-shadow: 0 16px 42px var(--oi-community-accent-soft), var(--oi-panel-shadow);
+}
+.community-card__top { color: var(--oi-community-accent); }
+.community-tag {
+  border-color: var(--oi-community-accent-border);
+  color: #dfcaff;
+  background: var(--oi-community-accent-soft);
+}
+.community-card audio { accent-color: var(--oi-community-accent-strong); }
+.community-card__author:hover,
+.community-card__author:focus-visible {
+  color: var(--oi-community-accent);
+}
+.community-guidelines-check input { accent-color: var(--oi-community-accent-strong); }
+.community-close:hover,
+.community-close:focus-visible {
+  border-color: var(--oi-community-accent-border);
+  box-shadow: 0 0 0 3px var(--oi-community-accent-soft);
+}
+.community-button--report { border-color: var(--oi-community-accent-border); }
+.community-button--report:hover,
+.community-button--report:focus-visible {
+  color: var(--oi-community-accent);
+  border-color: var(--oi-community-accent);
+  background: var(--oi-community-accent-soft);
+}
+.community-moderation-panel {
+  border-color: var(--oi-community-accent-border);
+  box-shadow: 0 18px 48px var(--oi-community-accent-soft), var(--oi-panel-shadow);
+}
+.community-moderation-details {
+  border-left-color: var(--oi-community-accent);
+  background: var(--oi-community-accent-soft);
+}
+.community-moderation-hidden {
+  border-color: var(--oi-community-accent-border);
+  color: #e2ceff;
+  background: var(--oi-community-accent-soft);
+}
+.community-record-preview {
+  border-color: var(--oi-community-accent-border);
+  color: var(--oi-community-accent);
+  background: var(--oi-community-accent-soft);
+  box-shadow: 0 0 14px var(--oi-community-accent-soft);
+}
+.community-record-preview:hover {
+  border-color: var(--oi-community-accent);
+  color: var(--oi-community-accent);
+  background: var(--oi-community-accent-soft-strong);
+  box-shadow: 0 0 18px var(--oi-community-accent-glow);
+}
+
+html[data-theme="light"] .community-hero h1 em {
+  color: var(--oi-community-accent) !important;
+  -webkit-text-fill-color: currentColor !important;
+  text-shadow: 0 0 9px var(--oi-community-accent-glow), 0 0 20px var(--oi-community-accent-soft-strong);
+}
+html[data-theme="light"] .community-setup code,
+html[data-theme="light"] .community-setup a,
+html[data-theme="light"] .community-card__top,
+html[data-theme="light"] .community-card__author:hover,
+html[data-theme="light"] .community-card__author:focus-visible {
+  color: var(--oi-community-accent-strong) !important;
+}
+html[data-theme="light"] .community-card:hover {
+  border-color: var(--oi-community-accent-border);
+  box-shadow: 0 18px 44px var(--oi-community-accent-soft), var(--oi-panel-shadow);
+}
+html[data-theme="light"] .community-tag {
+  border-color: var(--oi-community-accent-border);
+  color: #6938a3;
+  background: var(--oi-community-accent-soft);
+}
+html[data-theme="light"] .community-guidelines-check input { accent-color: var(--oi-community-accent-strong); }
+html[data-theme="light"] .community-moderation-panel {
+  border-color: var(--oi-community-accent-border);
+  box-shadow: 0 18px 42px var(--oi-community-accent-soft), var(--oi-panel-shadow);
+}
+html[data-theme="light"] .community-moderation-details {
+  border-left-color: var(--oi-community-accent);
+  background: var(--oi-community-accent-soft);
+}
+html[data-theme="light"] .community-moderation-hidden {
+  border-color: var(--oi-community-accent-border);
+  color: #6938a3;
+  background: var(--oi-community-accent-soft);
+}
+html[data-theme="light"] .community-record-preview {
+  border-color: var(--oi-community-accent-border);
+  color: var(--oi-community-accent-strong);
+  background: var(--oi-community-accent-soft);
+}
+html[data-theme="light"] .community-record-preview:hover {
+  border-color: var(--oi-community-accent);
+  color: var(--oi-community-accent-strong);
+  background: var(--oi-community-accent-soft-strong);
+}
