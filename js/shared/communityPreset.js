@@ -327,7 +327,7 @@ function installCommunityPreviewRecorder({ instrumentId, getAudioOutput }) {
       .oi-community-recorder button { transition: none; }
     }
   `;
-);
+  document.head.appendChild(style);
 
   const panel = document.createElement('aside');
   panel.className = 'oi-community-recorder';
