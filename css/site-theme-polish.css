@@ -257,3 +257,38 @@ html[data-theme="light"] .lab-box {
   background:var(--oi-panel-background-soft);
 }
 html[data-theme="light"] .lab-box b { color:var(--ink); }
+
+
+/* Community accents must remain violet after the shared light-theme polish
+   has finished assigning its general amber, cyan and green highlights. */
+html[data-theme="light"] body .community-overline {
+  color: var(--oi-community-accent-strong) !important;
+  -webkit-text-fill-color: currentColor !important;
+  text-shadow: 0 0 9px var(--oi-community-accent-glow);
+}
+html[data-theme="light"] body .community-hero h1 em {
+  color: var(--oi-community-accent-strong) !important;
+  -webkit-text-fill-color: currentColor !important;
+  text-shadow: 0 0 9px var(--oi-community-accent-glow), 0 0 20px var(--oi-community-accent-soft-strong) !important;
+}
+html[data-theme="light"] body .community-button:not(.community-button--primary):hover:not(:disabled),
+html[data-theme="light"] body .community-button:not(.community-button--primary):focus-visible {
+  border-color: var(--oi-community-accent-border) !important;
+  color: var(--oi-community-accent-strong) !important;
+  background: var(--oi-community-accent-soft) !important;
+  box-shadow: 0 0 0 3px var(--oi-community-accent-soft), 0 0 16px var(--oi-community-accent-glow) !important;
+}
+html[data-theme="light"] body main .feature-section--community .feature-copy h2 em {
+  color: var(--oi-community-accent-strong) !important;
+  -webkit-text-fill-color: currentColor !important;
+  text-shadow: 0 0 9px var(--oi-community-accent-glow), 0 0 20px var(--oi-community-accent-soft-strong) !important;
+}
+html[data-theme="light"] body main .feature-section--community .section-index > span:first-child {
+  color: var(--oi-community-accent-strong) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+html[data-theme="light"] body main .feature-section--community .eyebrow-dot--cyan {
+  color: var(--oi-community-accent-strong) !important;
+  background-color: var(--oi-community-accent-strong) !important;
+  box-shadow: 0 0 12px var(--oi-community-accent-glow) !important;
+}
