@@ -947,3 +947,12 @@ html[data-theme="light"] .community-record-preview:hover {
   color: var(--oi-community-accent-strong);
   background: var(--oi-community-accent-soft-strong);
 }
+
+
+/* High-specificity light-mode correction: the shared site polish has a
+   general amber highlight rule, but the Community hero word is violet. */
+html[data-theme="light"] #community-root .community-hero h1 em {
+  color: #6930aa !important;
+  -webkit-text-fill-color: #6930aa !important;
+  text-shadow: 0 0 9px rgba(116,59,184,.19), 0 0 20px rgba(116,59,184,.11) !important;
+}
