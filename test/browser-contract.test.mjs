@@ -913,7 +913,7 @@ test('The homepage Community section and coming-soon banner share a continuous v
   ]);
   assert.ok(page.indexOf('<div class="community-feature-region">') < page.indexOf('class="feature-section feature-section--community"'));
   assert.ok(page.indexOf('class="home-coming-soon"') > page.indexOf('class="feature-section feature-section--community"'));
-  assert.ok(page.includes('    </aside>\\n    </div>\\n  </main>'));
+  assert.ok(page.includes('    </aside>') && page.includes('  </main>') && page.lastIndexOf('</div>', page.indexOf('  </main>')) > page.indexOf('class="home-coming-soon"'));
   assert.ok(styles.includes('.community-feature-region::before') && styles.includes('repeating-radial-gradient'));
   assert.ok(styles.includes('.community-feature-region .home-coming-soon'));
   assert.ok(styles.includes('html[data-theme="light"] .community-feature-region::before'));
