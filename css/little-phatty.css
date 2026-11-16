@@ -1369,3 +1369,20 @@ body.little-phatty-body {
     height: 88px;
   }
 }
+
+
+/* The shared toolbar now occupies the top row of the emulator page. Keep
+   the instrument chassis near the top of the remaining viewport instead
+   of vertically centring it inside a second full-height canvas. */
+body.little-phatty-body.oi-emulator-topbar-active #app-root {
+  display: block !important;
+  min-height: calc(100vh - 58px) !important;
+  height: auto;
+  padding: 14px clamp(10px, 1.8vw, 24px) 20px;
+}
+
+@media (max-width: 760px) {
+  body.little-phatty-body.oi-emulator-topbar-active #app-root {
+    padding: 10px 8px 18px;
+  }
+}
