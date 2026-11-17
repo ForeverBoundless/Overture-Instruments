@@ -962,7 +962,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
     drop-shadow(0 0 12px rgba(65, 190, 255, .7))
     drop-shadow(0 0 24px rgba(65, 190, 255, .35));
 }
-.feature-section--experiments::after { background: radial-gradient(ellipse at 0% 50%, rgba(130,230,168,.13), transparent 22%) -22% 0 / 52% 100% no-repeat, repeating-radial-gradient(ellipse at 50% 100%, transparent 0 20px, rgba(130,230,168,.06) 21px 22px, transparent 23px 42px); mask-image: linear-gradient(90deg, transparent, #000 18%, #000 83%, transparent); animation: experiment-signal-drift 13s linear infinite; }
+.feature-section--experiments::after { opacity: .95; background: radial-gradient(ellipse at 0% 50%, rgba(130,230,168,.17), transparent 22%) -22% 0 / 52% 100% no-repeat, repeating-radial-gradient(ellipse at 50% 100%, transparent 0 20px, rgba(130,230,168,.14) 21px 22px, transparent 23px 42px); mask-image: linear-gradient(90deg, transparent, #000 18%, #000 83%, transparent); animation: experiment-signal-drift 13s linear infinite; }
 @keyframes library-signal-scan { to { background-position: 155% 0, 0 0; } }
 @keyframes omni-field-orbit { to { transform: translateY(-50%) rotate(360deg); } }
 @keyframes omni-sine-drift { to { background-position: -1200px 0, 0 0, 0 0; } }
