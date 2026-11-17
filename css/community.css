@@ -78,20 +78,26 @@ body {
 }
 .community-hero-art__logo {
   position:absolute;
-  left:20%;
-  top:22%;
-  width:31%;
+  z-index:0;
+  left:11%;
+  top:14%;
+  width:40%;
   height:auto;
   object-fit:contain;
   filter:drop-shadow(0 0 18px rgba(196,147,255,.32));
   animation:community-logo-float 6s ease-in-out infinite;
 }
 .community-hero-art__letter {
-  position:relative;
+  position:absolute;
+  z-index:1;
+  left:28%;
+  right:10%;
+  top:50%;
   display:block;
-  margin:2% 0 0 7%;
+  margin:0;
   font-family:var(--font-display,'Inter',sans-serif);
-  font-size:clamp(180px,23vw,305px);
+  font-size:clamp(190px,25vw,330px);
+  transform:translateY(-50%);
   font-weight:650;
   line-height:.78;
   letter-spacing:-.12em;
@@ -174,8 +180,12 @@ html[data-theme="light"] .community-hero-art__orbit--two { border-color:rgba(116
     margin:0 auto -12px;
     aspect-ratio:1.35;
   }
-  .community-hero-art__logo { left:22%;top:19%;width:25%; }
-  .community-hero-art__letter { font-size:clamp(170px,54vw,250px); }
+  .community-hero-art__logo { left:11%;top:14%;width:40%; }
+  .community-hero-art__letter {
+    left:28%;
+    right:10%;
+    font-size:clamp(190px,68vw,250px);
+  }
 }
 
 @media (prefers-reduced-motion:reduce) {
