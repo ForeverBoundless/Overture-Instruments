@@ -1278,7 +1278,7 @@ html[data-theme="light"] body :is(
   .account-hero > p:last-child,.account-auth-heading > p:last-child,
   .account-profile-heading > div > p:last-child,.account-panel-heading > p:last-child,
   .account-hint,.account-legal,.account-status,
-  .community-hero > p:last-child,.community-setup p,
+  .community-hero > p:last-child,.community-hero__copy > p:last-child,.community-setup p,
   .community-card__description,.community-empty
 ) { color: var(--muted) !important; }
 html[data-theme="light"] body :is(.account-panel,.community-toolbar,.community-setup,.community-publish-panel,.community-card) {
