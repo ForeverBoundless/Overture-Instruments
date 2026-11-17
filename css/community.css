@@ -153,7 +153,16 @@ html[data-theme="light"] .community-hero-art::before {
 html[data-theme="light"] .community-hero-art__orbit { border-color:rgba(116,59,184,.22); }
 html[data-theme="light"] .community-hero-art__orbit--two { border-color:rgba(116,59,184,.2); }
 
-@media (max-width:760px) {
+@media (max-width:900px) {
+  .community-hero {
+    grid-template-columns:minmax(0,1fr) minmax(210px,.65fr);
+    gap:20px;
+  }
+  .community-hero-art { width:100%; }
+  .community-hero-art__letter { font-size:clamp(160px,25vw,250px); }
+}
+
+@media (max-width:680px) {
   .community-hero {
     grid-template-columns:minmax(0,1fr);
     gap:4px;
