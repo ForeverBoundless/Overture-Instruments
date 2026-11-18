@@ -659,7 +659,7 @@ html[data-theme="light"] .library-boot {color:#26374a}
 html[data-theme="light"] .library-boot span {color:#62758a}
 
 /* Scalable instrument library. Each tile is rendered from launcher.js data. */
-#launcher-page { position:fixed; inset:0; z-index:200; overflow-y:auto; color:var(--launcher-ink); background:radial-gradient(circle at 18% 20%,rgba(89,123,203,.23),transparent 26%),radial-gradient(circle at 80% 85%,rgba(236,153,48,.16),transparent 25%),rgba(9,12,17,.94); backdrop-filter:blur(14px) saturate(1.25); transition:opacity .42s ease,transform .42s cubic-bezier(.2,.8,.2,1),visibility .42s; }
+#launcher-page { position:fixed; inset:0; z-index:200; overflow-y:auto; color:var(--launcher-ink); background:radial-gradient(circle at 18% 20%,rgba(255,159,10,.17),transparent 26%),radial-gradient(circle at 80% 85%,rgba(236,153,48,.16),transparent 25%),rgba(9,12,17,.94); backdrop-filter:blur(14px) saturate(1.25); transition:opacity .42s ease,transform .42s cubic-bezier(.2,.8,.2,1),visibility .42s; }
 .launcher-page--leaving{opacity:0;transform:scale(1.012);visibility:hidden}.launcher-header,.launcher-hero,.instrument-grid,.launcher-footer{position:relative;z-index:1;width:min(1120px,calc(100% - 48px));margin-inline:auto}.launcher-header{display:flex;align-items:center;justify-content:space-between;padding-top:30px}.launcher-status{display:flex;gap:8px;align-items:center;color:#bac0ce;font-size:12px;font-weight:600}.launcher-status span{width:7px;height:7px;border-radius:50%;background:#83e6a8;box-shadow:0 0 0 4px rgba(131,230,168,.12)}
 .launcher-hero {
   display: grid;
@@ -4491,12 +4491,12 @@ html[data-theme="light"] .instrument-tile--ob-xa .instrument-tile__hint { color:
   isolation: isolate;
   background-color: #090c11;
   background-image:
-    repeating-radial-gradient(ellipse 72% 64% at 0% 47%, transparent 0 34px, rgba(125,228,255,.105) 35px 36px, transparent 37px 70px),
-    repeating-radial-gradient(ellipse 70% 58% at 100% 70%, transparent 0 38px, rgba(130,230,168,.082) 39px 40px, transparent 41px 78px),
+    repeating-radial-gradient(ellipse 72% 64% at 0% 47%, transparent 0 34px, rgba(255,183,94,.105) 35px 36px, transparent 37px 70px),
+    repeating-radial-gradient(ellipse 70% 58% at 100% 70%, transparent 0 38px, rgba(255,159,10,.082) 39px 40px, transparent 41px 78px),
     linear-gradient(rgba(199,216,239,.04) 1px, transparent 1px),
     linear-gradient(90deg, rgba(199,216,239,.04) 1px, transparent 1px),
-    radial-gradient(ellipse at 16% 20%, rgba(125,228,255,.14), transparent 34%),
-    radial-gradient(ellipse at 84% 72%, rgba(130,230,168,.09), transparent 36%),
+    radial-gradient(ellipse at 16% 20%, rgba(255,183,94,.13), transparent 34%),
+    radial-gradient(ellipse at 84% 72%, rgba(255,159,10,.09), transparent 36%),
     radial-gradient(circle at 18% 20%, rgba(89,123,203,.23), transparent 26%),
     radial-gradient(circle at 80% 85%, rgba(236,153,48,.16), transparent 25%);
   background-size:
