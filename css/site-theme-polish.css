@@ -292,3 +292,32 @@ html[data-theme="light"] body main .feature-section--community .eyebrow-dot--cya
   background-color: var(--oi-community-accent-strong) !important;
   box-shadow: 0 0 12px var(--oi-community-accent-glow) !important;
 }
+
+
+/* ============================================================
+   SITEWIDE TYPOGRAPHY — Inter Variable
+   Shared theme pages use one sans-serif family for body copy,
+   headings, navigation and controls. DM Mono remains reserved
+   for code and compact technical readouts. Emulator pages do
+   not load this shared theme and retain their instrument styling.
+   ============================================================ */
+html {
+  font-synthesis: none;
+  font-kerning: normal;
+  text-rendering: optimizeLegibility;
+}
+body {
+  font-family: var(--font-body);
+  font-optical-sizing: auto;
+  font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+}
+body :is(h1,h2,h3,h4,h5,h6) {
+  font-family: var(--font-display);
+  font-kerning: normal;
+}
+body :is(button,input,select,textarea) {
+  font-family: var(--font-body);
+}
+body :is(code,pre,kbd,samp) {
+  font-family: var(--font-mono);
+}
