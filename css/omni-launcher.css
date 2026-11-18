@@ -1460,3 +1460,22 @@ html[data-theme="light"].omni-launcher-mode body .omni-shell .community-button--
     inset 0 1px rgba(255,255,255,.96),
     inset 0 -1px rgba(23,105,139,.06) !important;
 }
+
+
+/* Keep the launcher hero comfortably below the fixed-height site navigation.
+   Earlier Community-derived shell padding was too generous for this compact
+   single-purpose launcher. */
+html.omni-launcher-mode .omni-shell {
+  padding-top:clamp(88px,7.2vw,104px);
+}
+
+@media (max-width:760px) {
+  html.omni-launcher-mode .omni-shell {
+    padding-top:88px;
+  }
+}
+@media (max-width:420px) {
+  html.omni-launcher-mode .omni-shell {
+    padding-top:82px;
+  }
+}
