@@ -30,9 +30,17 @@ class Audio {
 function slider(parent, { label, min, max, value, step = 0.001, unit = '', log = false, format, onInput }) {
   const row = el('label', 'lab-control', parent);
   const top = el('div', 'lab-control-head', row); el('span', '', top, label); const out = el('output', '', top);
-  const input = el('input', '', row); input.type = 'range'; input.min = log ? Math.log(min) : min; input.max = log ? Math.log(max) : max; input.step = log ? 0.0005 : step; input.value = log ? Math.log(value) : value;
+  const input = el('input', 'lab-slider', row); input.type = 'range'; input.min = log ? Math.log(min) : min; input.max = log ? Math.log(max) : max; input.step = log ? 0.0005 : step; input.value = log ? Math.log(value) : value;
   const read = () => (log ? Math.exp(Number(input.value)) : Number(input.value));
-  const show = () => { out.textContent = (format ? format(read()) : `${read().toFixed(step >= 1 ? 0 : 2)} ${unit}`).trim(); };
+  const updateFill = () => {
+    const lo = Number(input.min), hi = Number(input.max), current = Number(input.value);
+    const ratio = hi > lo && Number.isFinite(current) ? clamp((current - lo) / (hi - lo), 0, 1) : 0;
+    input.style.setProperty('--lab-slider-fill', `${ratio * 100}%`);
+  };
+  const show = () => {
+    out.textContent = (format ? format(read()) : `${read().toFixed(step >= 1 ? 0 : 2)} ${unit}`).trim();
+    updateFill();
+  };
   input.addEventListener('input', () => { show(); onInput(read()); });
   show();
   return { get value() { return read(); }, set(v) { input.value = log ? Math.log(v) : v; show(); onInput(read()); }, input };

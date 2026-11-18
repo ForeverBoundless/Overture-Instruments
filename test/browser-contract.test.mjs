@@ -751,8 +751,8 @@ test('Granular lab initializes without AudioContext and its note keys start/stop
   assert.match(granular, /this\.keyInput\(this\.controls,m=>this\.noteOn\(m\),m=>this\.noteOff\(m\)\)/);
   assert.match(granular, /this\.noteRate=Math\.pow\(2,\(midi-45\)\/12\)/);
   assert.match(granular, /source\.playbackRate\.value=\(this\.p\.reverse\?-1:1\)\*rate/);
-  assert.match(page, /labs\.js\?v=20261112-granular-note-r2/);
-  assert.match(worker, /labs\.js\?v=20261112-granular-note-r2/);
+  assert.match(page, /labs\.js\?v=20261118-green-sliders-r1/);
+  assert.match(worker, /labs\.js\?v=20261118-green-sliders-r1/);
 });
 
 test('Community confirmation is required only when an audio file is attached', async () => {
@@ -984,4 +984,22 @@ test('OMNI patch rename uses a theme-aware modal and patch tile entrance plays o
   assert.match(page, /omni-launcher\\.css\\?v=20261118-rename-modal-blue-r2/);
   assert.match(page, /omni-launcher\\.js\\?v=20261118-rename-modal-r1/);
   assert.match(worker, /overture-shell-v119/);
+});
+
+
+test('Experiments sliders use the OMNI range design recoloured green', async () => {
+  const [source, styles, page, worker] = await Promise.all([
+    readFile(new URL('../js/experiments/labs.js', import.meta.url), 'utf8'),
+    readFile(new URL('../css/experiments.css', import.meta.url), 'utf8'),
+    readFile(new URL('../experiments/filter-lab.html', import.meta.url), 'utf8'),
+    readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
+  ]);
+  assert.match(source, /el\\('input', 'lab-slider', row\\)/);
+  assert.match(source, /--lab-slider-fill/);
+  assert.match(styles, /\\.lab-control input\\.lab-slider::-webkit-slider-runnable-track/);
+  assert.match(styles, /\\.lab-control input\\.lab-slider::-webkit-slider-thumb/);
+  assert.match(styles, /html\\[data-theme="light"\\] \\.lab-control input\\.lab-slider/);
+  assert.match(page, /labs\\.js/);
+  assert.match(worker, /experiments\\.css\\?v=20261118-green-sliders-r1/);
+  assert.match(worker, /overture-shell-v120/);
 });
