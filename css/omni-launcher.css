@@ -1526,6 +1526,14 @@ html.omni-launcher-mode .omni-wordmark__pixel-canvas {
   width:100%;
   height:100%;
   image-rendering:pixelated;
+  filter:
+    drop-shadow(0 0 4px rgba(87,190,255,.88))
+    drop-shadow(0 0 11px rgba(61,157,243,.52));
   pointer-events:none;
+}
+html[data-theme="light"].omni-launcher-mode .omni-wordmark__pixel-canvas {
+  filter:
+    drop-shadow(0 0 3px rgba(22,125,187,.55))
+    drop-shadow(0 0 9px rgba(22,125,187,.24));
 }
 
