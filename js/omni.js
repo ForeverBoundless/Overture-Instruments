@@ -63,6 +63,17 @@ class OmniApp {
     this.patch = defaultPatch();
     this.workspaceRestored = false;
     this.currentId = null;
+    try {
+      const launchRaw = sessionStorage.getItem('overture.omni.launch-patch');
+      if (launchRaw) {
+        sessionStorage.removeItem('overture.omni.launch-patch');
+        const launch = JSON.parse(launchRaw);
+        this.patch = validatePatch(launch.data);
+        this.currentId = launch.source === 'local' ? launch.id : null;
+        this.launchCloudId = launch.source === 'cloud' ? launch.id : null;
+        this.workspaceRestored = false;
+      }
+    } catch (error) { console.warn('Could not open the selected OMNI patch.', error); }
     this.view = { x: 20, y: 20, scale: 0.66 };
     let savedWorkspace = null;
     try {
