@@ -1,4 +1,4 @@
-const CACHE = 'overture-shell-v91';
+const CACHE = 'overture-shell-v92';
 const APP_SHELL = [
   '/account',
   '/login',
@@ -15,7 +15,7 @@ const APP_SHELL = [
   '/css/community.css?v=20261112-audio-moderation-r1',
   '/css/community.css?v=20261112-community-moderation-r1',
   '/css/community.css?v=20261116-community-purple',
-  '/css/community.css?v=20261116-community-violet-r1',
+  '/css/community.css?v=20261117-community-signal-r1',
   '/css/emulator-topbar.css?v=20261116-r3',
   '/css/community.css',
   '/js/community.js?v=20261103-auth-hidden',
@@ -67,10 +67,10 @@ const APP_SHELL = [
   '/css/roland-juno-106.css',
   '/css/roland-tr-808.css',
   '/css/site-footer.css',
-  '/css/site-theme-polish.css?v=20261103-accent-spacing',
-  '/css/site-theme-polish.css?v=20261116-community-purple',
-  '/css/site-theme.css',
-  '/css/site-theme.css?v=20261116-community-purple',
+  '/css/site-theme-polish.css?v=20261117-inter-type-r1',
+  '/css/site-theme-polish.css?v=20261117-inter-type-r1',
+  '/css/site-theme.css?v=20261117-inter-type-r1',
+  '/css/site-theme.css?v=20261117-inter-type-r1',
   '/css/sub37.css',
   '/css/yamaha-dx7.css',
   '/experiments',
