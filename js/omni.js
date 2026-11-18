@@ -5,15 +5,29 @@ const boot = window.__overtureOmniBoot;
 const bootStartedAt = performance.now();
 const dependencyGroups = [
   // Keep this order aligned with the first four module bindings below.
-  ['./omni/modules.js?v=20261117-omni-module-expansion-r1', './omni/moduleInfo.js?v=20261117-omni-module-expansion-r1', './omni/graph.js?v=20261117-omni-module-expansion-r1', './omni/templates.js?v=20261117-omni-module-expansion-r1'],
+  ['./omni/modules.js?v=20261117-omni-module-expansion-r2', './omni/moduleInfo.js?v=20261117-omni-module-expansion-r2', './omni/graph.js?v=20261117-omni-module-expansion-r2', './omni/templates.js?v=20261117-omni-module-expansion-r2'],
   ['./shared/presetStore.js', './shared/audioRecorder.js', './shared/midiRecorder.js'],
   ['../ui/Keyboard.js', '../ui/Wheel.js', './engine/MidiManager.js'],
   ['./shared/panel.js', './shared/midiMap.js']
 ];
 let completedGroups = 0;
 const loaded = [];
-for (const group of dependencyGroups) {
-  loaded.push(...await Promise.all(group.map((path) => import(path))));
+for (let groupIndex = 0; groupIndex < dependencyGroups.length; groupIndex += 1) {
+  const group = dependencyGroups[groupIndex];
+  for (const path of group) {
+    boot?.update?.(
+      4 + completedGroups * 11,
+      'Preparing the module library and audio engine…',
+      `Loading ${path.split('/').pop().split('?')[0]} (${groupIndex + 1}/${dependencyGroups.length})`
+    );
+    try {
+      loaded.push(await import(path));
+    } catch (error) {
+      console.error(`[OMNI] Failed to load dependency: ${path}`, error);
+      boot?.fail?.('OMNI could not load a required module', `${path.split('/').pop().split('?')[0]}: ${error?.message || String(error)}`);
+      throw error;
+    }
+  }
   completedGroups += 1;
   boot?.update?.(4 + completedGroups * 11, 'Loading the synthesis engine…', `Loaded dependency group ${completedGroups} of ${dependencyGroups.length}`);
   await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
