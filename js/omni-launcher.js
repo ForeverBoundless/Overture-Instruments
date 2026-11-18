@@ -385,7 +385,7 @@ function showTemplates() {
   const heading = document.createElement('h2');
   heading.id = 'omni-template-title';
   heading.textContent = 'Start from a template';
-  const close = makeButton('×', 'community-close', () => dialog.close(), 'Close templates');
+  const close = makeButton('×', 'community-button community-button--quiet omni-template-close', () => dialog.close(), 'Close templates');
   header.append(heading, close);
 
   const searchWrap = document.createElement('div');
