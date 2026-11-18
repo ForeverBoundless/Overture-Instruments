@@ -1580,3 +1580,10 @@ html[data-theme="light"].omni-launcher-mode .omni-launcher__template-panel{color
 @media(max-width:760px){html.omni-launcher-mode .site-header{padding:16px 22px}html.omni-launcher-mode .omni-launcher{padding:0 22px 28px}html.omni-launcher-mode .omni-launcher__intro{min-height:175px}html.omni-launcher-mode .omni-launcher__intro-mark{width:86px;height:86px;font-size:58px}html.omni-launcher-mode .omni-launcher__quick-actions{grid-template-columns:1fr;margin-bottom:36px}html.omni-launcher-mode .omni-launcher__tools{grid-template-columns:1fr 1fr}html.omni-launcher-mode .omni-launcher__search{grid-column:1/-1}html.omni-launcher-mode .omni-launcher__grid{grid-template-columns:1fr}html.omni-launcher-mode .omni-launcher__footer{flex-direction:column}}
 html.omni-editor-mode .site-header{display:none}
 html.omni-editor-mode .omni-launcher{display:none}
+
+html[data-theme="light"].omni-launcher-mode .omni-patch-tile__preview svg rect{fill:#edf2f6!important}
+html[data-theme="light"].omni-launcher-mode .omni-patch-tile__preview svg path{filter:saturate(.9)}
+html[data-theme="light"].omni-launcher-mode .omni-patch-tile__metrics{color:#536172}
+html[data-theme="light"].omni-launcher-mode .omni-patch-action{color:#34475b}
+html[data-theme="light"].omni-launcher-mode .omni-patch-action:hover{color:#075d7b}
+html[data-theme="light"].omni-launcher-mode .omni-launcher__status.is-error{color:#a83f35}
