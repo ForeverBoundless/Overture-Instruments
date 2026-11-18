@@ -1,4 +1,4 @@
-const CACHE = 'overture-shell-v94';
+const CACHE = 'overture-shell-v95';
 const APP_SHELL = [
   '/account',
   '/login',
@@ -168,11 +168,11 @@ const APP_SHELL = [
   '/js/omni.js',
   '/js/omni.js?v=20261105-module-info',
   '/js/omni.js?v=20261112-community-edit-r1',
-  '/js/omni.js?v=20261117-omni-module-expansion-r1',
-  '/js/omni/modules.js?v=20261117-omni-module-expansion-r1',
-  '/js/omni/moduleInfo.js?v=20261117-omni-module-expansion-r1',
-  '/js/omni/graph.js?v=20261117-omni-module-expansion-r1',
-  '/js/omni/templates.js?v=20261117-omni-module-expansion-r1',
+  '/js/omni.js?v=20261117-omni-module-expansion-r2',
+  '/js/omni/modules.js?v=20261117-omni-module-expansion-r2',
+  '/js/omni/moduleInfo.js?v=20261117-omni-module-expansion-r2',
+  '/js/omni/graph.js?v=20261117-omni-module-expansion-r2',
+  '/js/omni/templates.js?v=20261117-omni-module-expansion-r2',
   '/ui/Wheel.js',
   '/js/omni/graph.js',
   '/js/omni/graph.js?v=20261104-sem-mellotron',
