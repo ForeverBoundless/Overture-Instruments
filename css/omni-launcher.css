@@ -424,3 +424,478 @@ html[data-theme="light"].omni-launcher-mode .omni-template-dialog::backdrop {
 }
 html.omni-editor-mode .site-header,
 html.omni-editor-mode .omni-site-footer { display:none; }
+
+
+/* Shared Community page geometry and card rhythm, with OMNI blue as the only accent. */
+html.omni-launcher-mode .omni-shell {
+  width:min(var(--page-width),calc(100% - var(--gutter) - var(--gutter)));
+  margin:0 auto;
+  padding:clamp(126px,14vw,174px) 0 92px;
+}
+html.omni-launcher-mode .omni-shell::before {
+  position:absolute;
+  z-index:-1;
+  top:36px;
+  left:50%;
+  width:min(100vw,1440px);
+  height:500px;
+  content:"";
+  pointer-events:none;
+  transform:translateX(-50%);
+  background:
+    radial-gradient(ellipse at 50% 28%,rgba(28,121,218,.14),transparent 46%),
+    radial-gradient(ellipse at 20% 24%,rgba(24,93,176,.08),transparent 38%);
+  mask-image:linear-gradient(180deg,#000,transparent 96%);
+}
+html.omni-launcher-mode .omni-shell::after {
+  position:absolute;
+  z-index:-1;
+  top:34px;
+  right:0;
+  left:0;
+  height:480px;
+  content:"";
+  pointer-events:none;
+  opacity:.17;
+  background-image:
+    linear-gradient(rgba(125,190,245,.055) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(125,190,245,.055) 1px,transparent 1px);
+  background-size:66px 66px;
+  mask-image:radial-gradient(ellipse at 50% 35%,#000 0%,transparent 78%);
+}
+html.omni-launcher-mode .omni-shell .community-hero {
+  display:grid;
+  grid-template-columns:minmax(0,1.1fr) minmax(250px,.72fr);
+  align-items:center;
+  gap:clamp(28px,5vw,76px);
+  min-height:300px;
+  padding:0 0 42px;
+}
+html.omni-launcher-mode .omni-shell .community-hero__copy { min-width:0; }
+html.omni-launcher-mode .omni-shell .community-hero h1 {
+  margin:0;
+  color:var(--ink);
+  font:500 clamp(34px,5.35vw,66px)/1.04 var(--font-body);
+  letter-spacing:-.065em;
+}
+html.omni-launcher-mode .omni-shell .community-hero h1 em {
+  color:#70bdff;
+  font:400 1em var(--font-display);
+  font-style:normal;
+  text-shadow:0 0 22px rgba(61,157,243,.26);
+}
+html.omni-launcher-mode .omni-shell .community-hero__copy > p:last-child {
+  max-width:620px;
+  margin:19px 0 0;
+  color:var(--muted);
+  font-size:14px;
+  line-height:1.8;
+}
+html.omni-launcher-mode .omni-hero-art {
+  display:grid;
+  width:min(100%,390px);
+  aspect-ratio:1.85;
+  justify-self:end;
+  align-self:center;
+  place-items:center;
+  overflow:hidden;
+  border:1px solid rgba(91,171,246,.16);
+  border-radius:14px;
+  background:
+    radial-gradient(ellipse at 50% 50%,rgba(31,117,207,.12),transparent 70%),
+    repeating-linear-gradient(0deg,rgba(82,170,252,.035) 0 1px,transparent 1px 4px),
+    linear-gradient(145deg,rgba(9,26,47,.34),rgba(9,18,32,.10));
+}
+html.omni-launcher-mode .omni-hero-art svg {
+  display:block;
+  width:91%;
+  height:84%;
+  overflow:visible;
+  filter:drop-shadow(0 0 12px rgba(58,147,232,.14));
+}
+
+/* The toolbar uses the same label, control, border and panel rules as Community. */
+html.omni-launcher-mode .omni-shell .community-toolbar {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(145px,165px) minmax(145px,165px) auto;
+  align-items:end;
+  gap:13px;
+  padding:17px;
+}
+html.omni-launcher-mode .omni-shell .community-toolbar label {
+  display:grid;
+  min-width:0;
+  gap:8px;
+  color:var(--muted);
+  font:500 8px/1.5 var(--font-mono);
+  letter-spacing:.13em;
+}
+html.omni-launcher-mode .omni-shell .community-toolbar input,
+html.omni-launcher-mode .omni-shell .community-toolbar select {
+  display:block;
+  width:100%;
+  min-width:0;
+  min-height:43px;
+  padding:10px 12px;
+  border:1px solid var(--oi-control-border);
+  border-radius:var(--oi-control-radius);
+  color:var(--ink);
+  background:var(--oi-control-background);
+  font:400 12px/1.4 var(--font-body);
+  letter-spacing:0;
+}
+html.omni-launcher-mode .omni-shell .community-toolbar input:focus,
+html.omni-launcher-mode .omni-shell .community-toolbar select:focus {
+  border-color:rgba(92,177,251,.68);
+  box-shadow:0 0 0 3px rgba(75,154,224,.10);
+  outline:0;
+}
+html.omni-launcher-mode .omni-shell .community-search span { color:var(--muted); }
+html.omni-launcher-mode .omni-shell .community-toolbar select { cursor:pointer; }
+html.omni-launcher-mode .omni-shell .community-toolbar .community-button--primary {
+  min-width:128px;
+  min-height:42px;
+  padding-inline:20px;
+  border-color:rgba(94,178,255,.72);
+  color:#061a2c;
+  background:linear-gradient(180deg,#8bd1ff,#4aa5ef);
+  box-shadow:0 5px 16px rgba(31,121,208,.16),inset 0 1px rgba(255,255,255,.42);
+  font:650 9px/1.2 var(--font-body);
+  letter-spacing:.055em;
+}
+html.omni-launcher-mode .omni-shell .community-toolbar .community-button--primary:hover:not(:disabled) {
+  border-color:#a5ddff;
+  background:linear-gradient(180deg,#a1dcff,#66b6f6);
+}
+html.omni-launcher-mode .omni-account-row {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:18px;
+  min-height:60px;
+  margin:0;
+  padding:12px 0 17px;
+  border-bottom:1px solid rgba(224,233,246,.075);
+}
+html.omni-launcher-mode .omni-account-row #omni-launch-status {
+  min-width:0;
+  max-width:640px;
+  margin:0;
+  color:var(--muted);
+  font-size:10px;
+  line-height:1.65;
+}
+html.omni-launcher-mode .omni-account-row #omni-launch-status:empty { display:none; }
+html.omni-launcher-mode .omni-account-row .community-account__actions {
+  display:flex;
+  min-width:0;
+  flex-wrap:wrap;
+  align-items:center;
+  justify-content:flex-end;
+  gap:8px;
+}
+html.omni-launcher-mode .omni-account-row .community-button--quiet {
+  min-height:34px;
+  padding-inline:12px;
+  color:var(--muted);
+  background:transparent;
+  font:650 9px/1.2 var(--font-body);
+  letter-spacing:.055em;
+}
+html.omni-launcher-mode .omni-account-row .community-button--quiet:hover:not(:disabled) {
+  border-color:rgba(90,174,247,.42);
+  color:var(--ink);
+  background:rgba(59,141,215,.08);
+}
+html.omni-launcher-mode .omni-shell .community-results { padding-top:45px; }
+html.omni-launcher-mode .omni-shell .community-section-heading {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+  margin-bottom:20px;
+}
+html.omni-launcher-mode .omni-shell .community-section-heading h2 {
+  margin:0;
+  color:var(--ink);
+  font:400 clamp(24px,3vw,34px)/1.12 var(--font-display);
+  letter-spacing:-.045em;
+}
+html.omni-launcher-mode .omni-library-heading h2 span {
+  display:inline-flex;
+  min-width:26px;
+  height:26px;
+  align-items:center;
+  justify-content:center;
+  margin-left:8px;
+  border:1px solid var(--oi-panel-border);
+  border-radius:20px;
+  color:var(--muted);
+  background:var(--oi-panel-background-soft);
+  font:10px var(--font-mono);
+  vertical-align:middle;
+}
+html.omni-launcher-mode .omni-shell .community-grid {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  grid-auto-rows:1fr;
+  align-items:stretch;
+  gap:16px;
+}
+html.omni-launcher-mode .omni-shell .community-card {
+  display:flex;
+  width:100%;
+  min-width:0;
+  min-height:320px;
+  flex-direction:column;
+  padding:20px;
+  transition:border-color .2s ease,transform .2s ease,box-shadow .2s ease;
+}
+html.omni-launcher-mode .omni-shell .community-card:hover {
+  transform:translateY(-2px);
+  border-color:rgba(94,178,255,.30);
+  box-shadow:var(--oi-panel-shadow);
+}
+html.omni-launcher-mode .omni-shell .community-card__top {
+  display:flex;
+  min-width:0;
+  min-height:22px;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:13px;
+  color:#75bfff;
+  font:500 8px/1.45 var(--font-mono);
+  letter-spacing:.1em;
+  text-transform:uppercase;
+}
+html.omni-launcher-mode .omni-shell .community-card__top>span {
+  color:var(--faint);
+  font-size:8px;
+  letter-spacing:.025em;
+}
+html.omni-launcher-mode .omni-shell .community-card h3 {
+  margin:0 0 9px;
+  color:var(--ink);
+  font:400 21px/1.2 var(--font-display);
+  letter-spacing:-.035em;
+  overflow-wrap:anywhere;
+}
+html.omni-launcher-mode .omni-shell .community-card__description {
+  display:-webkit-box;
+  min-height:2.4em;
+  flex:1 1 auto;
+  overflow:hidden;
+  margin:0 0 12px;
+  color:var(--muted);
+  font-size:11px;
+  line-height:1.6;
+  overflow-wrap:anywhere;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+}
+html.omni-launcher-mode .omni-shell .community-card__meta {
+  display:flex;
+  min-width:0;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin:0 0 11px;
+  color:var(--faint);
+  font:8px/1.4 var(--font-mono);
+  letter-spacing:.06em;
+}
+html.omni-launcher-mode .omni-shell .community-card__actions {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 40px;
+  gap:8px;
+  margin-top:auto;
+  padding-top:12px;
+}
+html.omni-launcher-mode .omni-shell .community-card__actions .community-button {
+  width:100%;
+  min-width:0;
+  min-height:36px;
+  padding:7px 10px;
+  font:650 9px/1.3 var(--font-body);
+  letter-spacing:.05em;
+}
+html.omni-launcher-mode .omni-patch-card__menu-wrap {
+  position:relative;
+  display:flex;
+  min-width:0;
+}
+html.omni-launcher-mode .omni-patch-card__menu-wrap .omni-patch-more {
+  width:40px;
+  min-width:40px;
+  padding:0;
+  font:600 17px/1 var(--font-body);
+}
+html.omni-launcher-mode .omni-patch-menu {
+  position:absolute;
+  z-index:35;
+  right:0;
+  bottom:calc(100% + 7px);
+  display:grid;
+  min-width:166px;
+  padding:5px;
+  border:1px solid var(--oi-panel-border);
+  border-radius:10px;
+  background:var(--panel);
+  box-shadow:0 16px 42px rgba(0,0,0,.26);
+}
+html.omni-launcher-mode .omni-patch-menu[hidden] { display:none; }
+html.omni-launcher-mode .omni-patch-menu__item {
+  min-height:34px;
+  padding:0 10px;
+  border:0;
+  border-radius:6px;
+  background:transparent;
+  color:var(--ink);
+  font:500 11px var(--font-body);
+  text-align:left;
+  cursor:pointer;
+}
+html.omni-launcher-mode .omni-patch-menu__item:hover {
+  background:rgba(66,148,220,.12);
+  color:#78c1ff;
+}
+html.omni-launcher-mode .omni-patch-menu__item.is-danger { color:#df827a; }
+html.omni-launcher-mode .omni-patch-preview {
+  position:relative;
+  display:grid;
+  width:100%;
+  height:112px;
+  flex:0 0 auto;
+  place-items:center;
+  overflow:hidden;
+  margin:1px 0 13px;
+  padding:8px 10px;
+  border:1px solid rgba(93,171,245,.22);
+  border-radius:9px;
+  background:
+    radial-gradient(ellipse at 50% 55%,rgba(35,128,221,.22),transparent 72%),
+    repeating-linear-gradient(0deg,rgba(87,174,255,.06) 0 1px,transparent 1px 4px),
+    linear-gradient(135deg,#0a1a2d,#102944 56%,#09182a);
+  cursor:pointer;
+}
+html.omni-launcher-mode .omni-patch-preview::after {
+  position:absolute;
+  inset:0;
+  content:"";
+  pointer-events:none;
+  opacity:.18;
+  background-image:linear-gradient(rgba(114,184,245,.12) 1px,transparent 1px),linear-gradient(90deg,rgba(114,184,245,.12) 1px,transparent 1px);
+  background-size:28px 28px;
+}
+html.omni-launcher-mode .omni-patch-preview svg {
+  position:relative;
+  z-index:1;
+  display:block;
+  width:100%;
+  height:100%;
+  max-height:98px;
+}
+html.omni-launcher-mode .community-empty {
+  margin:0;
+  padding:36px 20px;
+  border:1px dashed var(--oi-control-border);
+  border-radius:var(--oi-panel-radius);
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.7;
+  text-align:center;
+}
+
+/* Keep patch controls, panels and preview contrast coherent in light mode. */
+html[data-theme="light"].omni-launcher-mode body.omni-page {
+  background:
+    radial-gradient(ellipse at 50% -12%,rgba(48,151,224,.13),transparent 46%),
+    var(--bg);
+}
+html[data-theme="light"].omni-launcher-mode .omni-shell {
+  --oi-primary-border:#3c8fca;
+  --oi-primary-ink:#08233a;
+  --oi-primary-background:linear-gradient(180deg,#c3eaff,#8bcdf4);
+  --oi-primary-hover-background:linear-gradient(180deg,#d7f2ff,#a4dcf8);
+  --oi-button-hover-background:rgba(35,125,191,.075);
+}
+html[data-theme="light"].omni-launcher-mode .omni-shell::before {
+  background:radial-gradient(ellipse at 50% 25%,rgba(42,145,221,.10),transparent 48%);
+}
+html[data-theme="light"].omni-launcher-mode .omni-shell .community-hero h1 em {
+  color:#1676ad;
+  text-shadow:0 0 16px rgba(34,132,199,.12);
+}
+html[data-theme="light"].omni-launcher-mode .omni-shell .community-card__top {
+  color:#176fae;
+}
+html[data-theme="light"].omni-launcher-mode .omni-shell .community-toolbar .community-button--primary {
+  border-color:#3c8fca;
+  color:#08233a;
+  background:linear-gradient(180deg,#c3eaff,#8bcdf4);
+  box-shadow:0 5px 14px rgba(30,115,176,.12),inset 0 1px rgba(255,255,255,.85);
+}
+html[data-theme="light"].omni-launcher-mode .omni-shell .community-toolbar input,
+html[data-theme="light"].omni-launcher-mode .omni-shell .community-toolbar select {
+  border-color:rgba(43,91,126,.25);
+  background:#f8fbfe;
+  color:#263e54;
+}
+html[data-theme="light"].omni-launcher-mode .omni-account-row {
+  border-bottom-color:rgba(43,59,78,.12);
+}
+html[data-theme="light"].omni-launcher-mode .omni-shell .community-card {
+  border-color:var(--oi-panel-border);
+  background:var(--oi-panel-background);
+}
+html[data-theme="light"].omni-launcher-mode .omni-patch-preview {
+  border-color:rgba(38,116,169,.22);
+  background:
+    radial-gradient(ellipse at 50% 55%,rgba(61,151,219,.17),transparent 72%),
+    repeating-linear-gradient(0deg,rgba(35,127,194,.065) 0 1px,transparent 1px 4px),
+    linear-gradient(135deg,#dcebf7,#e9f3fa 56%,#d8e8f5);
+}
+html[data-theme="light"].omni-launcher-mode .omni-patch-menu {
+  border-color:rgba(43,91,126,.20);
+  background:#fafdff;
+  box-shadow:0 16px 42px rgba(31,68,99,.18);
+}
+html[data-theme="light"].omni-launcher-mode .omni-patch-menu__item { color:#253d52; }
+html[data-theme="light"].omni-launcher-mode .omni-patch-menu__item:hover {
+  background:rgba(35,125,191,.08);
+  color:#176fae;
+}
+
+@media(max-width:1020px) {
+  html.omni-launcher-mode .omni-shell .community-hero { grid-template-columns:minmax(0,1fr) minmax(220px,.65fr); gap:25px; }
+  html.omni-launcher-mode .omni-shell .community-toolbar { grid-template-columns:minmax(0,1fr) minmax(140px,160px) minmax(140px,160px); }
+  html.omni-launcher-mode .omni-shell .community-toolbar .community-button--primary { grid-column:1/-1; justify-self:end; min-width:150px; }
+  html.omni-launcher-mode .omni-shell .community-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media(max-width:760px) {
+  html.omni-launcher-mode .omni-shell { width:calc(100% - 40px); padding-top:112px; padding-bottom:76px; }
+  html.omni-launcher-mode .omni-shell .community-hero { grid-template-columns:minmax(0,1fr); min-height:0; gap:5px; padding-bottom:30px; }
+  html.omni-launcher-mode .omni-hero-art { justify-self:center; width:min(100%,440px); aspect-ratio:2.35; margin:8px auto 0; }
+  html.omni-launcher-mode .omni-shell .community-toolbar { grid-template-columns:repeat(2,minmax(0,1fr)); gap:11px; padding:14px; }
+  html.omni-launcher-mode .omni-shell .community-toolbar .omni-search-label { grid-column:1/-1; }
+  html.omni-launcher-mode .omni-shell .community-toolbar .community-button--primary { grid-column:1/-1; justify-self:stretch; width:100%; }
+  html.omni-launcher-mode .omni-account-row { grid-template-columns:minmax(0,1fr); gap:10px; padding-block:14px; }
+  html.omni-launcher-mode .omni-account-row .community-account__actions { justify-content:flex-start; }
+  html.omni-launcher-mode .omni-shell .community-grid { gap:13px; }
+}
+@media(max-width:560px) {
+  html.omni-launcher-mode .omni-shell { width:calc(100% - 34px); padding-top:102px; }
+  html.omni-launcher-mode .omni-hero-art { aspect-ratio:2.1; }
+}
+@media(max-width:420px) {
+  html.omni-launcher-mode .omni-shell .community-toolbar { grid-template-columns:minmax(0,1fr); }
+  html.omni-launcher-mode .omni-shell .community-toolbar .omni-search-label,
+  html.omni-launcher-mode .omni-shell .community-toolbar .community-button--primary { grid-column:1; }
+  html.omni-launcher-mode .omni-shell .community-grid { grid-template-columns:minmax(0,1fr); }
+  html.omni-launcher-mode .omni-account-row .community-account__actions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); }
+  html.omni-launcher-mode .omni-account-row .community-account__actions .community-button { width:100%; }
+}
+html.omni-editor-mode .site-header,
+html.omni-editor-mode .omni-site-footer { display:none; }
+html.omni-editor-mode .omni-shell { display:none; }
