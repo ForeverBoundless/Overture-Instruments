@@ -5,7 +5,7 @@ const boot = window.__overtureOmniBoot;
 const bootStartedAt = performance.now();
 const dependencyGroups = [
   // Keep this order aligned with the first four module bindings below.
-  ['./omni/modules.js?v=20261117-omni-module-expansion-r2', './omni/moduleInfo.js?v=20261117-omni-module-expansion-r2', './omni/graph.js?v=20261117-omni-module-expansion-r2', './omni/templates.js?v=20261117-omni-module-expansion-r2'],
+  ['./omni/modules.js?v=20261117-omni-module-expansion-r3', './omni/moduleInfo.js?v=20261117-omni-module-expansion-r3', './omni/graph.js?v=20261117-omni-module-expansion-r3', './omni/templates.js?v=20261117-omni-module-expansion-r3'],
   ['./shared/presetStore.js', './shared/audioRecorder.js', './shared/midiRecorder.js'],
   ['../ui/Keyboard.js', '../ui/Wheel.js', './engine/MidiManager.js'],
   ['./shared/panel.js', './shared/midiMap.js']
