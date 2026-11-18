@@ -42,14 +42,14 @@ function stableStringify(value) {
   return JSON.stringify(value);
 }
 function patchSignature(patch) {
-  const modules = (patch.modules || []).map((module) => ({ type: module.type, params: module.params || {} }))
-    .sort((a, b) => stableStringify(a).localeCompare(stableStringify(b)));
-  const byId = new Map((patch.modules || []).map((module) => [module.id, module]));
-  const connections = (patch.connections || []).map((connection) => {
-    const from = byId.get(connection.from.module), to = byId.get(connection.to.module);
-    return (from?.type || 'unknown') + ':' + connection.from.port + '>' + (to?.type || 'unknown') + ':' + connection.to.port;
-  }).sort();
-  return stableStringify({ schema: patch.schema, modules, connections, global: patch.global || {} });
+  const modules = patch.modules || [];
+  const indexById = new Map(modules.map((module, index) => [module.id, index]));
+  const normalizedModules = modules.map((module) => ({ type: module.type, params: module.params || {} }));
+  const connections = (patch.connections || []).map((connection) => ({
+    from: [indexById.get(connection.from.module), connection.from.port],
+    to: [indexById.get(connection.to.module), connection.to.port],
+  })).sort((a, b) => stableStringify(a).localeCompare(stableStringify(b)));
+  return stableStringify({ schema: patch.schema, modules: normalizedModules, connections, global: patch.global || {} });
 }
 const allItems = () => {
   const sources = [
