@@ -957,3 +957,27 @@ test('Every non-Prophet emulator toolbar shows live MIDI status, Help and Commun
   assert.match(worker, /emulator-topbar\.css\?v=20261116-r3/);
   assert.match(worker, /overture-shell-v87/);
 });
+
+
+test('OMNI patch rename uses a theme-aware modal and patch tile entrance plays only once', async () => {
+  const [launcher, styles, page, worker] = await Promise.all([
+    readFile(new URL('../js/omni-launcher.js', import.meta.url), 'utf8'),
+    readFile(new URL('../css/omni-launcher.css', import.meta.url), 'utf8'),
+    readFile(new URL('../omni.html', import.meta.url), 'utf8'),
+    readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
+  ]);
+  assert.doesNotMatch(launcher, /window\\.prompt\\(['"]Patch name/);
+  assert.match(launcher, /className = 'omni-rename-dialog'/);
+  assert.match(launcher, /dialog\\.showModal\\(\\)/);
+  assert.match(launcher, /aria-labelledby', 'omni-rename-title'/);
+  assert.match(launcher, /Patch names must contain at least three characters/);
+  assert.match(styles, /\\.omni-rename-dialog::backdrop/);
+  assert.match(styles, /html\\[data-theme="light"\\]\\.omni-launcher-mode \\.omni-rename-dialog/);
+  assert.match(launcher, /patchTileIntroPlayed/);
+  assert.match(launcher, /makePatchTile\\(item, playIntro = false\\)/);
+  assert.match(styles, /\\.omni-patch-grid > \\.omni-patch-card\\.is-entering/);
+  assert.match(launcher, /visibilitychange/);
+  assert.match(page, /omni-launcher\\.css\\?v=20261118-rename-modal-r1/);
+  assert.match(page, /omni-launcher\\.js\\?v=20261118-rename-modal-r1/);
+  assert.match(worker, /overture-shell-v118/);
+});
