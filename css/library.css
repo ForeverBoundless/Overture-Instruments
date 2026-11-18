@@ -4529,12 +4529,16 @@ html[data-theme="light"] .instrument-tile--ob-xa .instrument-tile__hint { color:
 }
 
 #launcher-page .launcher-hero h1 em {
-  color: var(--amber-bright);
+  color: var(--oled-amber);
   font-family: var(--font-display);
   font-weight: 400;
   font-style: normal;
-  text-shadow: 0 0 22px rgba(255,159,10,.17);
-  animation: none;
+  text-shadow:
+    0 0 .05em var(--led-on-glow),
+    0 0 .16em var(--led-on-glow),
+    0 0 .4em rgba(255,138,0,.55),
+    0 0 .7em rgba(255,94,0,.3);
+  animation: instrument-flicker 4.6s ease-in-out infinite;
 }
 
 /* Keep the inline O at lowercase x-height and on the text baseline. */
