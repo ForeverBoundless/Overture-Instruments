@@ -876,6 +876,294 @@ export const MODULES = {
       return inst;
     },
   },
+  obxaVoice: {
+    name: 'OB-Xa Poly Voice', category: 'Instrument modules', color: '#ffb75e',
+    params: [
+      P('voices', 'Voice cards', 4, 8, 8, { step: 1 }),
+      P('wave1', 'VCO 1 waveform', 0, 2, 0, { options: ['sawtooth', 'square', 'triangle'] }),
+      P('wave2', 'VCO 2 waveform', 0, 2, 0, { options: ['sawtooth', 'square', 'triangle'] }),
+      P('octave2', 'VCO 2 octave', -2, 2, 0, { step: 1 }),
+      P('detune', 'VCO 2 detune (cents)', -50, 50, 7),
+      P('cutoff', 'Filter cutoff (Hz)', 40, 14000, 1800, { log: true }),
+      P('resonance', 'Filter resonance', 0.1, 8, 1.2),
+      P('envAmount', 'Filter envelope amount', -1, 1, 0.45),
+      P('attack', 'Attack (s)', 0.001, 4, 0.025, { log: true }),
+      P('decay', 'Decay (s)', 0.01, 4, 0.55, { log: true }),
+      P('sustain', 'Sustain', 0, 1, 0.72),
+      P('release', 'Release (s)', 0.01, 6, 0.6, { log: true }),
+      P('level', 'Level', 0, 1, 0.62),
+    ],
+    inputs: [N('note', 'Note')], outputs: [A('out', 'Audio')],
+    create(ctx) {
+      const inst = new Instance(this, ctx); const out = gain(inst);
+      const voices = Array.from({ length: 8 }, () => {
+        const a = inst.track(ctx.createOscillator()); const b = inst.track(ctx.createOscillator());
+        const mix = gain(inst, 0.5); const f1 = biq(inst, 'lowpass', 1800, 0.8); const f2 = biq(inst, 'lowpass', 1800, 0.8); const amp = gain(inst, 0);
+        a.connect(mix); b.connect(mix); mix.connect(f1); f1.connect(f2); f2.connect(amp); amp.connect(out); a.start(); b.start();
+        return { a, b, f1, f2, amp, note: null, channel: 1, startedAt: 0, active: false };
+      });
+      const pool = () => voices.slice(0, Math.max(4, Math.min(8, Math.round(inst.params.voices))));
+      const pitch = (voice, note, t) => {
+        const hz = midiHz(note); voice.a.frequency.setTargetAtTime(hz, t, 0.004);
+        voice.b.frequency.setTargetAtTime(hz * Math.pow(2, inst.params.octave2), t, 0.004);
+        voice.b.detune.setTargetAtTime(inst.params.detune, t, 0.004);
+      };
+      const shape = () => {
+        voices.forEach((voice) => { voice.a.type = ['sawtooth', 'square', 'triangle'][inst.params.wave1]; voice.b.type = ['sawtooth', 'square', 'triangle'][inst.params.wave2]; });
+      };
+      inst.outputs.out = out;
+      inst.inputs.note = noteIn((ev) => {
+        const t = eventTime(ctx, ev); const available = pool();
+        if (ev.on) {
+          const voice = available.find((v) => !v.active) || available.reduce((a, b) => a.startedAt <= b.startedAt ? a : b);
+          pitch(voice, ev.note, t); voice.note = ev.note; voice.channel = ev.channel || 1; voice.startedAt = t; voice.active = true;
+          const p = inst.params; const amp = voice.amp.gain; amp.cancelScheduledValues(t); amp.setValueAtTime(0.0001, t);
+          amp.linearRampToValueAtTime(Math.max(0.0001, ev.velocity * p.level), t + p.attack);
+          amp.setTargetAtTime(Math.max(0.0001, ev.velocity * p.level * p.sustain), t + p.attack, Math.max(0.01, p.decay / 3));
+          const peak = Math.max(40, Math.min(16000, p.cutoff * Math.pow(2, p.envAmount * 3)));
+          [voice.f1, voice.f2].forEach((filter) => { filter.frequency.cancelScheduledValues(t); filter.frequency.setValueAtTime(peak, t); filter.frequency.setTargetAtTime(p.cutoff, t + p.attack, Math.max(0.01, p.decay / 3)); filter.Q.setTargetAtTime(p.resonance, t, 0.01); });
+        } else {
+          const voice = available.find((v) => v.active && v.note === ev.note && v.channel === (ev.channel || 1));
+          if (voice) { voice.amp.gain.cancelScheduledValues(t); voice.amp.gain.setTargetAtTime(0.0001, t, Math.max(0.008, inst.params.release / 4)); voice.active = false; }
+        }
+      });
+      inst.allOff = () => voices.forEach((voice) => { voice.active = false; voice.amp.gain.setTargetAtTime(0.0001, now(ctx), 0.02); });
+      inst.apply = () => { shape(); out.gain.setTargetAtTime(inst.params.level, now(ctx), 0.01); voices.forEach((voice) => { voice.f1.Q.setTargetAtTime(inst.params.resonance, now(ctx), 0.01); voice.f2.Q.setTargetAtTime(inst.params.resonance, now(ctx), 0.01); if (voice.active) pitch(voice, voice.note, now(ctx)); }); };
+      return inst;
+    },
+  },
+  pro3Wavetable: {
+    name: 'Pro 3 Wavetable Oscillator', category: 'Instrument modules', color: '#ffb75e',
+    params: [
+      P('wave', 'Wavetable', 0, 3, 0, { options: ['Analog saw', 'Pulse', 'Triangle', 'Digital harmonics'] }),
+      P('morph', 'Spectral morph', 0, 1, 0.25),
+      P('pulseWidth', 'Pulse width', 0.08, 0.92, 0.35),
+      P('octave', 'Octave', -3, 3, 0, { step: 1 }),
+      P('tune', 'Fine tune (cents)', -100, 100, 0),
+      P('pitchDepth', 'Pitch CV depth (semitones)', 0, 48, 12),
+      P('attack', 'Gate attack (s)', 0.001, 1, 0.005, { log: true }),
+      P('release', 'Gate release (s)', 0.005, 3, 0.08, { log: true }),
+      P('level', 'Level', 0, 1, 0.7),
+    ],
+    inputs: [N('pitch', 'Pitch'), C('pitchMod', 'Pitch CV')], outputs: [A('out', 'Audio')],
+    create(ctx) {
+      const inst = new Instance(this, ctx); const osc = inst.track(ctx.createOscillator()); const mod = gain(inst); const amp = gain(inst, 0); const out = gain(inst);
+      osc.connect(amp); amp.connect(out); mod.connect(osc.detune); osc.start();
+      const buildWave = () => {
+        const real = new Float32Array(65); const imag = new Float32Array(65); const p = inst.params;
+        for (let h = 1; h < 65; h += 1) {
+          let coefficient = 0;
+          if (p.wave === 0) coefficient = 1 / h;
+          else if (p.wave === 1) coefficient = 2 * Math.sin(Math.PI * h * p.pulseWidth) / (Math.PI * h);
+          else if (p.wave === 2) coefficient = h % 2 ? (h % 4 === 1 ? 1 : -1) / (h * h) : 0;
+          else coefficient = h % 3 === 0 ? 1 / h : (h % 2 ? 0.42 : 0.12) / h;
+          imag[h] = coefficient * Math.pow(1 / h, p.morph * 0.85);
+        }
+        osc.setPeriodicWave(ctx.createPeriodicWave(real, imag));
+      };
+      inst.inputs.pitch = noteIn((ev) => {
+        const t = eventTime(ctx, ev);
+        if (ev.on) { osc.frequency.setTargetAtTime(midiHz(ev.note) * Math.pow(2, inst.params.octave), t, 0.003); amp.gain.cancelScheduledValues(t); amp.gain.setValueAtTime(0, t); amp.gain.linearRampToValueAtTime(inst.params.level * ev.velocity, t + inst.params.attack); }
+        else amp.gain.setTargetAtTime(0, t, Math.max(0.004, inst.params.release / 4));
+      });
+      inst.inputs.pitchMod = mod; inst.outputs.out = out;
+      inst.apply = () => { buildWave(); mod.gain.setTargetAtTime(inst.params.pitchDepth * 100, now(ctx), 0.01); out.gain.setTargetAtTime(inst.params.level, now(ctx), 0.01); };
+      inst.allOff = () => amp.gain.setTargetAtTime(0, now(ctx), 0.01);
+      return inst;
+    },
+  },
+  super8Voice: {
+    name: 'Super 8 Binaural Voice', category: 'Instrument modules', color: '#ffb75e',
+    params: [
+      P('wave', 'DDS waveform', 0, 3, 2, { options: ['sine', 'triangle', 'sawtooth', 'square'] }),
+      P('octave', 'Octave', -2, 2, 0, { step: 1 }),
+      P('detune', 'DDS spread (cents)', 0, 40, 8),
+      P('stereo', 'Stereo spread', 0, 1, 0.7),
+      P('attack', 'Attack (s)', 0.001, 3, 0.35, { log: true }),
+      P('release', 'Release (s)', 0.01, 5, 0.8, { log: true }),
+      P('level', 'Level', 0, 1, 0.58),
+    ],
+    inputs: [N('note', 'Note')], outputs: [A('out', 'Stereo audio')],
+    create(ctx) {
+      const inst = new Instance(this, ctx); const out = gain(inst);
+      const voices = Array.from({ length: 8 }, (_, index) => {
+        const a = inst.track(ctx.createOscillator()); const b = inst.track(ctx.createOscillator()); const mix = gain(inst, 0.5);
+        const amp = gain(inst, 0); const pan = inst.track(ctx.createStereoPanner());
+        a.connect(mix); b.connect(mix); mix.connect(amp); amp.connect(pan); pan.connect(out); a.start(); b.start();
+        pan.pan.value = (index % 2 ? 1 : -1) * (0.25 + (index / 7) * 0.75);
+        return { a, b, amp, pan, note: null, channel: 1, active: false, startedAt: 0 };
+      });
+      const update = () => voices.forEach((v, i) => {
+        v.a.type = ['sine', 'triangle', 'sawtooth', 'square'][inst.params.wave];
+        v.b.type = ['sine', 'triangle', 'sawtooth', 'square'][inst.params.wave];
+        v.pan.pan.setTargetAtTime((i % 2 ? 1 : -1) * inst.params.stereo, now(ctx), 0.02);
+      });
+      inst.inputs.note = noteIn((ev) => {
+        const t = eventTime(ctx, ev);
+        if (ev.on) {
+          const v = voices.find((item) => !item.active) || voices.reduce((a, b) => a.startedAt <= b.startedAt ? a : b);
+          const hz = midiHz(ev.note) * Math.pow(2, inst.params.octave);
+          v.a.frequency.setTargetAtTime(hz, t, 0.004); v.b.frequency.setTargetAtTime(hz, t, 0.004);
+          v.a.detune.setTargetAtTime(-inst.params.detune, t, 0.004); v.b.detune.setTargetAtTime(inst.params.detune, t, 0.004);
+          v.amp.gain.cancelScheduledValues(t); v.amp.gain.setValueAtTime(0, t); v.amp.gain.linearRampToValueAtTime(inst.params.level * ev.velocity, t + inst.params.attack);
+          v.note = ev.note; v.channel = ev.channel || 1; v.active = true; v.startedAt = t;
+        } else {
+          const v = voices.find((item) => item.active && item.note === ev.note && item.channel === (ev.channel || 1));
+          if (v) { v.amp.gain.cancelScheduledValues(t); v.amp.gain.setTargetAtTime(0, t, Math.max(0.01, inst.params.release / 4)); v.active = false; }
+        }
+      });
+      inst.outputs.out = out; inst.apply = update;
+      inst.allOff = () => voices.forEach((v) => { v.active = false; v.amp.gain.setTargetAtTime(0, now(ctx), 0.02); });
+      return inst;
+    },
+  },
+  nordOrgan: {
+    name: 'Nord Tonewheel Organ', category: 'Instrument modules', color: '#ffb75e',
+    params: [
+      P('drawbar1', '16 ft drawbar', 0, 1, 0.72), P('drawbar2', '5 1/3 ft drawbar', 0, 1, 0.38),
+      P('drawbar3', '8 ft drawbar', 0, 1, 0.82), P('drawbar4', '4 ft drawbar', 0, 1, 0.5),
+      P('drawbar5', '2 2/3 ft drawbar', 0, 1, 0.34), P('drawbar6', '2 ft drawbar', 0, 1, 0.26),
+      P('drawbar7', '1 3/5 ft drawbar', 0, 1, 0.2), P('drawbar8', '1 1/3 ft drawbar', 0, 1, 0.16),
+      P('drawbar9', '1 ft drawbar', 0, 1, 0.12), P('percussion', 'Percussion', 0, 1, 0, { options: ['off', 'on'] }),
+      P('percLevel', 'Percussion level', 0, 1, 0.3), P('vibrato', 'Vibrato depth', 0, 1, 0.12), P('release', 'Key release (s)', 0.01, 0.4, 0.07),
+      P('level', 'Level', 0, 1, 0.62),
+    ],
+    inputs: [N('note', 'Note')], outputs: [A('out', 'Audio')],
+    create(ctx) {
+      const inst = new Instance(this, ctx); const out = gain(inst);
+      const ratios = [0.5, 1.5, 1, 2, 3, 4, 5, 6, 8];
+      const voices = Array.from({ length: 8 }, () => {
+        const parts = ratios.map(() => { const osc = inst.track(ctx.createOscillator()); const g = gain(inst, 0); osc.type = 'sine'; osc.connect(g); osc.start(); return { osc, gain: g }; });
+        const amp = gain(inst, 0); const percussion = inst.track(ctx.createOscillator()); const percGain = gain(inst, 0);
+        percussion.type = 'sine'; percussion.connect(percGain); percGain.connect(amp); amp.connect(out); percussion.start();
+        return { parts, amp, percussion, percGain, note: null, channel: 1, active: false, startedAt: 0 };
+      });
+      const applyDrawbars = () => voices.forEach((voice) => voice.parts.forEach((part, i) => part.gain.gain.setTargetAtTime(inst.params[`drawbar${i + 1}`] * 0.11, now(ctx), 0.02)));
+      const ratiosForVoice = (voice, note, t) => voice.parts.forEach((part, i) => part.osc.frequency.setTargetAtTime(midiHz(note) * ratios[i], t, 0.004));
+      inst.inputs.note = noteIn((ev) => {
+        const t = eventTime(ctx, ev);
+        if (ev.on) {
+          const v = voices.find((item) => !item.active) || voices.reduce((a, b) => a.startedAt <= b.startedAt ? a : b);
+          ratiosForVoice(v, ev.note, t); v.note = ev.note; v.channel = ev.channel || 1; v.active = true; v.startedAt = t;
+          v.amp.gain.cancelScheduledValues(t); v.amp.gain.setValueAtTime(0, t); v.amp.gain.linearRampToValueAtTime(inst.params.level * ev.velocity, t + 0.004);
+          v.percussion.frequency.setTargetAtTime(midiHz(ev.note) * 4, t, 0.002);
+          v.percGain.gain.cancelScheduledValues(t); v.percGain.gain.setValueAtTime(inst.params.percussion ? inst.params.percLevel * ev.velocity : 0, t); v.percGain.gain.setTargetAtTime(0, t + 0.01, 0.08);
+        } else {
+          const v = voices.find((item) => item.active && item.note === ev.note && item.channel === (ev.channel || 1));
+          if (v) { v.amp.gain.setTargetAtTime(0, t, Math.max(0.005, inst.params.release / 4)); v.active = false; }
+        }
+      });
+      inst.outputs.out = out;
+      inst.apply = () => { applyDrawbars(); out.gain.setTargetAtTime(1, now(ctx), 0.01); };
+      inst.allOff = () => voices.forEach((v) => { v.active = false; v.amp.gain.setTargetAtTime(0, now(ctx), 0.01); });
+      return inst;
+    },
+  },
+  clavinet: {
+    name: 'Clavinet D6 Voice', category: 'Instrument modules', color: '#ffb75e',
+    params: [
+      P('tone', 'Tone rocker', 0, 3, 1, { options: ['Brilliant', 'Treble', 'Medium', 'Soft'] }),
+      P('pickup', 'Pickup setting', 0, 3, 3, { options: ['Lower', 'Upper', 'Both in phase', 'Both out of phase'] }),
+      P('brightness', 'String brightness (Hz)', 500, 12000, 5200, { log: true }),
+      P('decay', 'String sustain', 0.05, 0.94, 0.62),
+      P('mute', 'Felt mute', 0, 1, 0),
+      P('detune', 'String detune (cents)', -20, 20, 0),
+      P('level', 'Level', 0, 1, 0.62),
+    ],
+    inputs: [N('note', 'Note')], outputs: [A('out', 'Audio')],
+    create(ctx) {
+      const inst = new Instance(this, ctx); const out = gain(inst);
+      const voices = Array.from({ length: 8 }, () => {
+        const delay = inst.track(ctx.createDelay(0.05)); const tone = biq(inst, 'lowpass', 5200, 0.8); const feedback = gain(inst, 0.55); const amp = gain(inst, 0);
+        delay.connect(tone); tone.connect(feedback); feedback.connect(delay); tone.connect(amp); amp.connect(out);
+        return { delay, tone, feedback, amp, note: null, channel: 1, active: false, startedAt: 0 };
+      });
+      inst.inputs.note = noteIn((ev) => {
+        const t = eventTime(ctx, ev);
+        if (ev.on) {
+          const v = voices.find((item) => !item.active) || voices.reduce((a, b) => a.startedAt <= b.startedAt ? a : b);
+          const p = inst.params; const hz = midiHz(ev.note) * Math.pow(2, p.detune / 1200);
+          v.delay.delayTime.setTargetAtTime(Math.min(0.045, 1 / hz), t, 0.001);
+          v.tone.type = ['lowpass', 'highpass', 'bandpass', 'notch'][p.pickup];
+          v.tone.frequency.setTargetAtTime([Math.min(12000, p.brightness * 1.35), p.brightness, p.brightness * 0.8, p.brightness * 0.65][p.tone], t, 0.01);
+          v.feedback.gain.setTargetAtTime((0.2 + p.decay * 0.72) * (1 - p.mute * 0.92), t, 0.005);
+          v.amp.gain.cancelScheduledValues(t); v.amp.gain.setValueAtTime(0, t); v.amp.gain.linearRampToValueAtTime(p.level * ev.velocity, t + 0.002);
+          v.note = ev.note; v.channel = ev.channel || 1; v.active = true; v.startedAt = t;
+          const burst = ctx.createBufferSource(); burst.buffer = noiseBuf(ctx, 0.025); burst.connect(v.delay); burst.start(t);
+          burst.onended = () => { try { burst.disconnect(); } catch { /* already disconnected */ } };
+          inst.nodes.push(burst);
+        } else {
+          const v = voices.find((item) => item.active && item.note === ev.note && item.channel === (ev.channel || 1));
+          if (v) { v.amp.gain.setTargetAtTime(0, t, 0.012 + inst.params.mute * 0.02); v.active = false; }
+        }
+      });
+      inst.outputs.out = out;
+      inst.apply = () => { out.gain.setTargetAtTime(inst.params.level, now(ctx), 0.01); voices.forEach((v) => { v.tone.frequency.setTargetAtTime(inst.params.brightness, now(ctx), 0.01); }); };
+      inst.allOff = () => voices.forEach((v) => { v.active = false; v.amp.gain.setTargetAtTime(0, now(ctx), 0.01); });
+      return inst;
+    },
+  },
+  tr808Kick: {
+    name: 'TR-808 Bass Drum', category: 'Sources', color: '#ff9f0a',
+    params: [P('pitch', 'Fundamental (Hz)', 30, 90, 48, { log: true }), P('decay', 'Decay (s)', 0.08, 1.8, 0.62, { log: true }), P('click', 'Attack click', 0, 1, 0.25), P('level', 'Level', 0, 1, 0.72)],
+    inputs: [N('trigger', 'Trigger')], outputs: [A('out', 'Audio')],
+    create(ctx) {
+      const inst = new Instance(this, ctx); const out = gain(inst);
+      inst.inputs.trigger = noteIn((ev) => {
+        if (!ev.on) return;
+        const p = inst.params; const t = eventTime(ctx, ev);
+        const osc = inst.track(ctx.createOscillator()); const amp = gain(inst, 0); osc.type = 'sine'; osc.connect(amp); amp.connect(out);
+        osc.frequency.setValueAtTime(p.pitch * 2.4, t); osc.frequency.exponentialRampToValueAtTime(p.pitch, t + Math.min(0.16, p.decay * 0.45));
+        amp.gain.setValueAtTime(0.0001, t); amp.gain.linearRampToValueAtTime(p.level * ev.velocity, t + 0.003); amp.gain.exponentialRampToValueAtTime(0.0001, t + p.decay);
+        osc.start(t); osc.stop(t + p.decay + 0.03);
+        if (p.click > 0) {
+          const click = inst.track(ctx.createOscillator()); const cg = gain(inst, 0); click.type = 'triangle'; click.connect(cg); cg.connect(out);
+          click.frequency.setValueAtTime(1800, t); cg.gain.setValueAtTime(p.click * p.level * 0.35, t); cg.gain.exponentialRampToValueAtTime(0.0001, t + 0.012);
+          click.start(t); click.stop(t + 0.02);
+        }
+      });
+      inst.outputs.out = out; inst.apply = () => {};
+      return inst;
+    },
+  },
+  tr808Snare: {
+    name: 'TR-808 Snare Drum', category: 'Sources', color: '#ff9f0a',
+    params: [P('tone', 'Body tuning (Hz)', 120, 360, 190, { log: true }), P('snap', 'Snare noise', 0, 1, 0.75), P('decay', 'Decay (s)', 0.05, 1.2, 0.24, { log: true }), P('level', 'Level', 0, 1, 0.62)],
+    inputs: [N('trigger', 'Trigger')], outputs: [A('out', 'Audio')],
+    create(ctx) {
+      const inst = new Instance(this, ctx); const out = gain(inst);
+      inst.inputs.trigger = noteIn((ev) => {
+        if (!ev.on) return;
+        const p = inst.params; const t = eventTime(ctx, ev);
+        const src = inst.track(ctx.createBufferSource()); src.buffer = noiseBuf(ctx, 1); src.loop = true;
+        const hp = biq(inst, 'highpass', 900, 0.7); const noiseAmp = gain(inst, 0);
+        src.connect(hp); hp.connect(noiseAmp); noiseAmp.connect(out);
+        noiseAmp.gain.setValueAtTime(p.snap * p.level * ev.velocity, t); noiseAmp.gain.exponentialRampToValueAtTime(0.0001, t + p.decay);
+        src.start(t); src.stop(t + p.decay + 0.02);
+        const body = inst.track(ctx.createOscillator()); const bodyAmp = gain(inst, 0); body.type = 'triangle'; body.connect(bodyAmp); bodyAmp.connect(out);
+        body.frequency.setValueAtTime(p.tone * 1.4, t); body.frequency.exponentialRampToValueAtTime(p.tone, t + 0.025);
+        bodyAmp.gain.setValueAtTime(p.level * ev.velocity * 0.5, t); bodyAmp.gain.exponentialRampToValueAtTime(0.0001, t + p.decay * 0.65);
+        body.start(t); body.stop(t + p.decay + 0.03);
+      });
+      inst.outputs.out = out; inst.apply = () => {};
+      return inst;
+    },
+  },
+  stereoWidener: {
+    name: 'Stereo Widener', category: 'Processing', color: '#7de4ff',
+    params: [P('delay', 'Side delay (ms)', 4, 28, 13), P('width', 'Width', 0, 1, 0.65), P('wet', 'Delayed side', 0, 1, 0.32)],
+    inputs: [A('in', 'Audio')], outputs: [A('out', 'Stereo')],
+    create(ctx) {
+      const inst = new Instance(this, ctx); const input = gain(inst); const left = gain(inst, 1); const right = gain(inst, 0.75);
+      const delay = inst.track(ctx.createDelay(0.05)); const side = gain(inst, 0); const merger = inst.track(ctx.createChannelMerger(2)); const out = gain(inst);
+      input.connect(left); input.connect(right); input.connect(delay); delay.connect(side);
+      left.connect(merger, 0, 0); right.connect(merger, 0, 1); side.connect(merger, 0, 1); merger.connect(out);
+      inst.inputs.in = input; inst.outputs.out = out;
+      inst.apply = () => { const p = inst.params; const t = now(ctx); delay.delayTime.setTargetAtTime(p.delay / 1000, t, 0.01); right.gain.setTargetAtTime(1 - p.width * 0.35, t, 0.01); side.gain.setTargetAtTime(p.width * p.wet * 0.55, t, 0.01); };
+      return inst;
+    },
+  },
+
 };
 
 export function modulePorts(module, direction) {
