@@ -1226,3 +1226,123 @@ html[data-theme="light"].omni-launcher-mode .omni-wordmark__product {
     animation: none !important;
   }
 }
+
+
+/* ============================================================
+   OMNI LAUNCH SEQUENCE — staged entry, brand attribution
+   ============================================================ */
+html.omni-launcher-mode .omni-wordmark-hero {
+  flex-direction:column;
+}
+
+html.omni-launcher-mode .omni-wordmark__byline {
+  position:relative;
+  z-index:2;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:.34em;
+  margin:0;
+  color:rgba(220,235,245,.66);
+  font:500 clamp(10px,1.05vw,12px)/1.4 var(--font-body);
+  letter-spacing:.075em;
+  animation:omni-launcher-byline-enter .72s .48s cubic-bezier(.2,.8,.2,1) both;
+}
+
+html.omni-launcher-mode .omni-wordmark__byline strong {
+  color:var(--omni-hero-cyan);
+  font-weight:650;
+  letter-spacing:.045em;
+  text-shadow:0 0 14px var(--omni-hero-glow);
+}
+
+html[data-theme="light"].omni-launcher-mode .omni-wordmark__byline {
+  color:#647487;
+}
+
+html[data-theme="light"].omni-launcher-mode .omni-wordmark__byline strong {
+  color:#087f9f;
+  text-shadow:0 0 12px rgba(8,127,159,.14);
+}
+
+/* The launcher appears in layers instead of arriving as one static block. */
+html.omni-launcher-mode .omni-shell .omni-wordmark-hero {
+  animation:omni-launcher-surface-enter .9s cubic-bezier(.2,.8,.2,1) both;
+}
+
+html.omni-launcher-mode .omni-shell .community-toolbar {
+  animation:omni-launcher-surface-enter .76s .24s cubic-bezier(.2,.8,.2,1) both;
+}
+
+html.omni-launcher-mode .omni-shell .omni-account-row {
+  animation:omni-launcher-surface-enter .72s .38s cubic-bezier(.2,.8,.2,1) both;
+}
+
+html.omni-launcher-mode .omni-shell .community-results {
+  animation:omni-launcher-surface-enter .78s .5s cubic-bezier(.2,.8,.2,1) both;
+}
+
+html.omni-launcher-mode .omni-patch-grid > .omni-patch-card {
+  animation:omni-launcher-card-enter .58s cubic-bezier(.2,.8,.2,1) both;
+}
+html.omni-launcher-mode .omni-patch-grid > .omni-patch-card:nth-child(1) { animation-delay:.56s; }
+html.omni-launcher-mode .omni-patch-grid > .omni-patch-card:nth-child(2) { animation-delay:.63s; }
+html.omni-launcher-mode .omni-patch-grid > .omni-patch-card:nth-child(3) { animation-delay:.70s; }
+html.omni-launcher-mode .omni-patch-grid > .omni-patch-card:nth-child(4) { animation-delay:.77s; }
+html.omni-launcher-mode .omni-patch-grid > .omni-patch-card:nth-child(5) { animation-delay:.84s; }
+html.omni-launcher-mode .omni-patch-grid > .omni-patch-card:nth-child(6) { animation-delay:.91s; }
+
+@keyframes omni-launcher-surface-enter {
+  from {
+    opacity:0;
+    transform:translate3d(0,18px,0) scale(.992);
+    filter:blur(7px);
+  }
+  to {
+    opacity:1;
+    transform:translate3d(0,0,0) scale(1);
+    filter:blur(0);
+  }
+}
+
+@keyframes omni-launcher-byline-enter {
+  from {
+    opacity:0;
+    transform:translate3d(0,9px,0);
+    letter-spacing:.14em;
+    filter:blur(4px);
+  }
+  to {
+    opacity:1;
+    transform:translate3d(0,0,0);
+    letter-spacing:.075em;
+    filter:blur(0);
+  }
+}
+
+@keyframes omni-launcher-card-enter {
+  from {
+    opacity:0;
+    transform:translate3d(0,14px,0) scale(.985);
+    filter:blur(5px);
+  }
+  to {
+    opacity:1;
+    transform:translate3d(0,0,0) scale(1);
+    filter:blur(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.omni-launcher-mode .omni-wordmark__byline,
+  html.omni-launcher-mode .omni-shell .omni-wordmark-hero,
+  html.omni-launcher-mode .omni-shell .community-toolbar,
+  html.omni-launcher-mode .omni-shell .omni-account-row,
+  html.omni-launcher-mode .omni-shell .community-results,
+  html.omni-launcher-mode .omni-patch-grid > .omni-patch-card {
+    animation:none !important;
+    opacity:1 !important;
+    transform:none !important;
+    filter:none !important;
+  }
+}
