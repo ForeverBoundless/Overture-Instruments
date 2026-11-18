@@ -291,19 +291,17 @@ function paintWordmarkPixels(target, canvas, blockSize, textStyle) {
   context.textBaseline = 'alphabetic';
   if ('letterSpacing' in context) context.letterSpacing = textStyle.letterSpacing;
 
-  /* Match the browser's inline line-box baseline instead of using Canvas's
-     em-square middle baseline, which makes the rasterized letters sit high. */
+  /* Centre the visible glyph bounds inside the existing span box.
+     fontBoundingBox metrics include reserved font space and pushed the canvas
+     lettering lower than the browser-rendered wordmark. */
   const metrics = context.measureText(text);
-  const fontSize = Number.parseFloat(textStyle.fontSize);
-  const lineHeight = Number.parseFloat(textStyle.lineHeight);
-  const fontAscent = Number.isFinite(metrics.fontBoundingBoxAscent)
-    ? metrics.fontBoundingBoxAscent
-    : fontSize * 0.8;
-  const fontDescent = Number.isFinite(metrics.fontBoundingBoxDescent)
-    ? metrics.fontBoundingBoxDescent
-    : fontSize * 0.2;
-  const leading = Number.isFinite(lineHeight) ? (lineHeight - fontSize) / 2 : 0;
-  const baseline = leading + fontAscent;
+  const glyphAscent = Number.isFinite(metrics.actualBoundingBoxAscent)
+    ? metrics.actualBoundingBoxAscent
+    : Number.parseFloat(textStyle.fontSize) * 0.72;
+  const glyphDescent = Number.isFinite(metrics.actualBoundingBoxDescent)
+    ? metrics.actualBoundingBoxDescent
+    : Number.parseFloat(textStyle.fontSize) * 0.18;
+  const baseline = (bounds.height + glyphAscent - glyphDescent) / 2;
 
   context.scale(width / bounds.width, height / bounds.height);
   context.fillText(text, bounds.width / 2, baseline, bounds.width);
@@ -319,7 +317,6 @@ function runWordmarkPixelation(target) {
   const textStyle = {
     font: [style.fontStyle, style.fontVariant, style.fontWeight, style.fontSize, style.fontFamily].join(' '),
     fontSize: style.fontSize,
-    lineHeight: style.lineHeight,
     color: style.color,
     letterSpacing: style.letterSpacing,
   };
