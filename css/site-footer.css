@@ -1,5 +1,5 @@
 /* Shared site footer + contact modal (used by index, library, about) */
-.site-footer, .contact-modal { --amber: #ffb75e; --font-mono: 'DM Mono', 'Courier New', monospace; --font-display: 'Futura Book', 'Figtree', 'Inter Variable', sans-serif; --page-width: 1180px; --gutter: clamp(22px, 5.4vw, 82px); }
+.site-footer, .contact-modal { --amber: #ffb75e; --font-mono: 'DM Mono', 'Courier New', monospace; --font-display: 'Inter Variable', 'Inter', 'Segoe UI', sans-serif; --page-width: 1180px; --gutter: clamp(22px, 5.4vw, 82px); }
 .site-footer { position: relative; z-index: 1; padding: 31px var(--gutter) 19px; border-top: 1px solid rgba(255,255,255,.095); background: rgba(7,9,13,.62); }
 .footer-top, .footer-bottom { display: flex; align-items: center; justify-content: space-between; gap: 22px; width: min(var(--page-width), 100%); margin-inline: auto; }
 .footer-top { padding-bottom: 27px; }
