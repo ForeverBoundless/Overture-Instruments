@@ -272,10 +272,9 @@ function render() {
   root.innerHTML = [
     '<div class="community-shell omni-shell">',
     '  <section class="community-hero omni-wordmark-hero" aria-labelledby="omni-launcher-title">',
-    '    <h1 class="omni-wordmark" id="omni-launcher-title">',
+    '    <h1 class="omni-wordmark" id="omni-launcher-title" aria-label="OMNI">',
     '      <img class="omni-wordmark__logo" src="/ui/Logos/OvertureLogo.png" alt="">',
-    '      <span class="omni-wordmark__name">verture</span>',
-    '      <span class="omni-wordmark__product">OMNI</span>',
+    '      <span class="omni-wordmark__product">MNI</span>',
     '    </h1>',
     '  </section>',
     '  <section class="community-toolbar omni-toolbar" aria-label="Patch library controls">',
