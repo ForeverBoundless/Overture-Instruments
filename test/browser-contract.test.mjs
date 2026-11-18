@@ -972,12 +972,16 @@ test('OMNI patch rename uses a theme-aware modal and patch tile entrance plays o
   assert.match(launcher, /aria-labelledby', 'omni-rename-title'/);
   assert.match(launcher, /Patch names must contain at least three characters/);
   assert.match(styles, /\\.omni-rename-dialog::backdrop/);
+  assert.match(styles, /omni-rename-accent:#7de4ff/);
+  assert.match(styles, /html\\[data-theme="light"\\]\\.omni-launcher-mode \\.omni-rename-dialog[\\s\\S]*omni-rename-accent:#087f9f/);
+  assert.match(styles, /omni-rename-dialog \\.omni-rename-actions \\.community-button--primary:hover/);
+
   assert.match(styles, /html\\[data-theme="light"\\]\\.omni-launcher-mode \\.omni-rename-dialog/);
   assert.match(launcher, /patchTileIntroPlayed/);
   assert.match(launcher, /makePatchTile\\(item, playIntro = false\\)/);
   assert.match(styles, /\\.omni-patch-grid > \\.omni-patch-card\\.is-entering/);
   assert.match(launcher, /visibilitychange/);
-  assert.match(page, /omni-launcher\\.css\\?v=20261118-rename-modal-r1/);
+  assert.match(page, /omni-launcher\\.css\\?v=20261118-rename-modal-blue-r2/);
   assert.match(page, /omni-launcher\\.js\\?v=20261118-rename-modal-r1/);
-  assert.match(worker, /overture-shell-v118/);
+  assert.match(worker, /overture-shell-v119/);
 });

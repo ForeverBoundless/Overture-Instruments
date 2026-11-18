@@ -1656,3 +1656,87 @@ html[data-theme="light"].omni-launcher-mode .omni-rename-dialog::backdrop {
   html.omni-launcher-mode .omni-rename-actions { display:grid; grid-template-columns:1fr 1fr; }
   html.omni-launcher-mode .omni-rename-actions .community-button { width:100%; }
 }
+
+
+/* The rename dialog sits directly under body, outside .omni-shell, so it
+   needs its own OMNI accent overrides rather than inheriting Community violet
+   or the sitewide amber primary-button treatment. */
+html.omni-launcher-mode .omni-rename-dialog {
+  --omni-rename-accent:#7de4ff;
+  --omni-rename-accent-soft:rgba(125,228,255,.12);
+  --omni-rename-accent-border:rgba(125,228,255,.48);
+  --omni-rename-accent-glow:rgba(73,190,235,.24);
+  border-color:rgba(125,228,255,.25);
+}
+html.omni-launcher-mode .omni-rename-dialog .omni-rename-field input:focus {
+  border-color:var(--omni-rename-accent) !important;
+  box-shadow:0 0 0 3px var(--omni-rename-accent-soft),0 0 15px var(--omni-rename-accent-glow) !important;
+}
+html.omni-launcher-mode .omni-rename-dialog .omni-rename-close:hover:not(:disabled),
+html.omni-launcher-mode .omni-rename-dialog .omni-rename-close:focus-visible,
+html.omni-launcher-mode .omni-rename-dialog .omni-rename-actions .community-button--quiet:hover:not(:disabled),
+html.omni-launcher-mode .omni-rename-dialog .omni-rename-actions .community-button--quiet:focus-visible {
+  border-color:var(--omni-rename-accent-border) !important;
+  color:var(--omni-rename-accent) !important;
+  background:var(--omni-rename-accent-soft) !important;
+  box-shadow:0 0 0 3px var(--omni-rename-accent-soft),0 0 15px var(--omni-rename-accent-glow) !important;
+}
+html.omni-launcher-mode body .omni-rename-dialog .omni-rename-actions .community-button--primary {
+  border-color:#8de7ff !important;
+  color:#062033 !important;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.34),rgba(255,255,255,0) 46%),
+    linear-gradient(135deg,#a6edff 0%,#68cdef 52%,#3aa9df 100%) !important;
+  box-shadow:
+    0 6px 18px rgba(52,177,224,.23),
+    0 0 18px rgba(72,190,235,.12),
+    inset 0 1px rgba(255,255,255,.72),
+    inset 0 -1px rgba(10,91,139,.12) !important;
+}
+html.omni-launcher-mode body .omni-rename-dialog .omni-rename-actions .community-button--primary:hover:not(:disabled),
+html.omni-launcher-mode body .omni-rename-dialog .omni-rename-actions .community-button--primary:focus-visible {
+  border-color:#c6f5ff !important;
+  color:#041b2a !important;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.42),rgba(255,255,255,0) 48%),
+    linear-gradient(135deg,#c2f4ff 0%,#84dcf6 52%,#54bce8 100%) !important;
+  box-shadow:
+    0 8px 22px rgba(52,177,224,.29),
+    0 0 22px rgba(72,190,235,.18),
+    inset 0 1px rgba(255,255,255,.82),
+    inset 0 -1px rgba(10,91,139,.10) !important;
+  outline:2px solid #7de4ff !important;
+  outline-offset:3px !important;
+}
+html[data-theme="light"].omni-launcher-mode .omni-rename-dialog {
+  --omni-rename-accent:#087f9f;
+  --omni-rename-accent-soft:rgba(8,127,159,.09);
+  --omni-rename-accent-border:rgba(8,127,159,.36);
+  --omni-rename-accent-glow:rgba(8,127,159,.17);
+  border-color:rgba(8,127,159,.25);
+}
+html[data-theme="light"].omni-launcher-mode body .omni-rename-dialog .omni-rename-actions .community-button--primary {
+  border-color:#55b8d5 !important;
+  color:#073044 !important;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.64),rgba(255,255,255,0) 48%),
+    linear-gradient(135deg,#d7f7ff 0%,#a6e3f4 54%,#7bcde6 100%) !important;
+  box-shadow:
+    0 5px 15px rgba(35,132,171,.14),
+    inset 0 1px rgba(255,255,255,.92),
+    inset 0 -1px rgba(23,105,139,.08) !important;
+}
+html[data-theme="light"].omni-launcher-mode body .omni-rename-dialog .omni-rename-actions .community-button--primary:hover:not(:disabled),
+html[data-theme="light"].omni-launcher-mode body .omni-rename-dialog .omni-rename-actions .community-button--primary:focus-visible {
+  border-color:#329fc2 !important;
+  color:#05283a !important;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.72),rgba(255,255,255,0) 48%),
+    linear-gradient(135deg,#e5fbff 0%,#b9edfa 54%,#91dcef 100%) !important;
+  box-shadow:
+    0 7px 19px rgba(35,132,171,.19),
+    inset 0 1px rgba(255,255,255,.96),
+    inset 0 -1px rgba(23,105,139,.06) !important;
+  outline:2px solid #087f9f !important;
+  outline-offset:3px !important;
+}
