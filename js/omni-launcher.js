@@ -321,7 +321,7 @@ function runWordmarkPixelation(target) {
 
   target.classList.add('is-pixelating');
   /* Pixelate, hold briefly at the coarsest resolution, then resolve back. */
-  const pixelSteps = [1, 2, 4, 7, 11, 16, 16, 11, 7, 4, 2, 1];
+  const pixelSteps = [1, 1.5, 2, 2.8, 3.8, 5, 5, 3.8, 2.8, 2, 1.5, 1];
   const duration = 3000 + Math.random() * 2000;
 
   pixelSteps.slice(1).forEach((blockSize, index) => {
