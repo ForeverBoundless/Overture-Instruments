@@ -1,8 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { LiveGraph, connectionError, defaultPatch, validatePatch } from '../js/omni/graph.js?v=20261117-omni-module-expansion-r1';
-import { MODULES, modulePorts } from '../js/omni/modules.js?v=20261117-omni-module-expansion-r1';
-import { TEMPLATES } from '../js/omni/templates.js?v=20261117-omni-module-expansion-r1';
+import { LiveGraph, connectionError, defaultPatch, validatePatch } from '../js/omni/graph.js?v=20261117-omni-module-expansion-r3';
+import { MODULES, modulePorts } from '../js/omni/modules.js?v=20261117-omni-module-expansion-r3';
+import { TEMPLATES } from '../js/omni/templates.js?v=20261117-omni-module-expansion-r3';
 
 
 test('expanded instrument modules and starter templates are registered and valid', () => {
