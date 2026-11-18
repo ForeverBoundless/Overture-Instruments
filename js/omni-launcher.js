@@ -268,6 +268,80 @@ function renderStatus() {
   }
 }
 
+let wordmarkPixelationTimer = 0;
+
+function paintWordmarkPixels(target, canvas, blockSize) {
+  const bounds = target.getBoundingClientRect();
+  if (!bounds.width || !bounds.height) return false;
+
+  const width = Math.max(1, Math.ceil(bounds.width / blockSize));
+  const height = Math.max(1, Math.ceil(bounds.height / blockSize));
+  canvas.width = width;
+  canvas.height = height;
+
+  const context = canvas.getContext('2d');
+  if (!context) return false;
+
+  const style = window.getComputedStyle(target);
+  context.clearRect(0, 0, width, height);
+  context.imageSmoothingEnabled = false;
+  context.scale(width / bounds.width, height / bounds.height);
+  context.font = [style.fontStyle, style.fontVariant, style.fontWeight, style.fontSize, style.fontFamily].join(' ');
+  context.fillStyle = style.color;
+  context.textAlign = 'left';
+  context.textBaseline = 'middle';
+  if ('letterSpacing' in context) context.letterSpacing = style.letterSpacing;
+  context.fillText(target.textContent.trim(), 0, bounds.height / 2, bounds.width);
+  return true;
+}
+
+function runWordmarkPixelation(target) {
+  if (!target || !target.isConnected || document.hidden) return;
+
+  let canvas = target.querySelector('.omni-wordmark__pixel-canvas');
+  if (!canvas) {
+    canvas = document.createElement('canvas');
+    canvas.className = 'omni-wordmark__pixel-canvas';
+    canvas.setAttribute('aria-hidden', 'true');
+    target.append(canvas);
+  }
+
+  if (!paintWordmarkPixels(target, canvas, 2)) {
+    canvas.remove();
+    return;
+  }
+
+  target.classList.add('is-pixelating');
+  const pixelSteps = [2, 4, 7, 11, 7, 4, 2];
+  const stepDuration = 95;
+
+  pixelSteps.slice(1).forEach((blockSize, index) => {
+    window.setTimeout(() => {
+      if (target.isConnected) paintWordmarkPixels(target, canvas, blockSize);
+    }, (index + 1) * stepDuration);
+  });
+
+  window.setTimeout(() => {
+    if (!target.isConnected) return;
+    target.classList.remove('is-pixelating');
+    canvas.remove();
+  }, pixelSteps.length * stepDuration);
+}
+
+function scheduleWordmarkPixelation() {
+  window.clearTimeout(wordmarkPixelationTimer);
+  const target = document.querySelector('.omni-wordmark__product');
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!target || reducedMotion) return;
+
+  const delay = 10000 + Math.floor(Math.random() * 5001);
+  wordmarkPixelationTimer = window.setTimeout(() => {
+    const currentTarget = document.querySelector('.omni-wordmark__product');
+    if (!document.hidden) runWordmarkPixelation(currentTarget);
+    scheduleWordmarkPixelation();
+  }, delay);
+}
+
 function render() {
   root.innerHTML = [
     '<div class="community-shell omni-shell">',
@@ -323,8 +397,9 @@ function render() {
     '    <p class="community-empty omni-empty" id="omni-empty" hidden>No patches here yet. Create a new patch or start from a template.</p>',
     '  </section>',
     '</div>',
-  ].join(""); 
+  ].join("");
 
+  scheduleWordmarkPixelation();
   document.getElementById('omni-filter').value = state.filter;
   document.getElementById('omni-sort').value = state.sort;
   document.getElementById('omni-search').value = state.query;
