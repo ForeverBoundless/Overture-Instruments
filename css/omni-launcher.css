@@ -1189,8 +1189,8 @@ html[data-theme="light"].omni-launcher-mode .omni-wordmark__product {
 }
 
 @keyframes omni-launcher-logo-breathe {
-  0%, 100% { filter: brightness(1) drop-shadow(0 0 5px rgba(125,228,255,.48)) drop-shadow(0 0 17px rgba(65,190,255,.22)); }
-  50% { filter: brightness(1.12) drop-shadow(0 0 8px rgba(125,228,255,.72)) drop-shadow(0 0 24px rgba(65,190,255,.34)); }
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: .92; transform: scale(1.018); }
 }
 
 @media (max-width: 760px) {
