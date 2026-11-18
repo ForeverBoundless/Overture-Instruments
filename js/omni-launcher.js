@@ -285,12 +285,29 @@ function paintWordmarkPixels(target, canvas, blockSize, textStyle) {
   context.clearRect(0, 0, width, height);
   context.imageSmoothingEnabled = false;
   context.scale(width / bounds.width, height / bounds.height);
+  const text = target.textContent.trim();
   context.font = textStyle.font;
   context.fillStyle = textStyle.color;
-  context.textAlign = 'left';
-  context.textBaseline = 'middle';
+  context.textAlign = 'center';
+  context.textBaseline = 'alphabetic';
   if ('letterSpacing' in context) context.letterSpacing = textStyle.letterSpacing;
-  context.fillText(target.textContent.trim(), 0, bounds.height / 2, bounds.width);
+
+  /* Match the browser's inline line-box baseline instead of using Canvas's
+     em-square middle baseline, which makes the rasterized letters sit high. */
+  const metrics = context.measureText(text);
+  const fontSize = Number.parseFloat(textStyle.fontSize);
+  const lineHeight = Number.parseFloat(textStyle.lineHeight);
+  const fontAscent = Number.isFinite(metrics.fontBoundingBoxAscent)
+    ? metrics.fontBoundingBoxAscent
+    : fontSize * 0.8;
+  const fontDescent = Number.isFinite(metrics.fontBoundingBoxDescent)
+    ? metrics.fontBoundingBoxDescent
+    : fontSize * 0.2;
+  const leading = Number.isFinite(lineHeight) ? (lineHeight - fontSize) / 2 : 0;
+  const baseline = leading + fontAscent;
+
+  context.scale(width / bounds.width, height / bounds.height);
+  context.fillText(text, bounds.width / 2, baseline, bounds.width);
   return true;
 }
 
@@ -302,6 +319,8 @@ function runWordmarkPixelation(target) {
   const style = window.getComputedStyle(target);
   const textStyle = {
     font: [style.fontStyle, style.fontVariant, style.fontWeight, style.fontSize, style.fontFamily].join(' '),
+    fontSize: style.fontSize,
+    lineHeight: style.lineHeight,
     color: style.color,
     letterSpacing: style.letterSpacing,
   };
