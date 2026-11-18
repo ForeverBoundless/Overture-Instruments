@@ -1,8 +1,31 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { LiveGraph, connectionError, defaultPatch, validatePatch } from '../js/omni/graph.js?v=20261104-sem-mellotron';
-import { MODULES, modulePorts } from '../js/omni/modules.js?v=20261104-sem-mellotron';
-import { TEMPLATES } from '../js/omni/templates.js?v=20261104-sem-mellotron';
+import { LiveGraph, connectionError, defaultPatch, validatePatch } from '../js/omni/graph.js?v=20261117-omni-module-expansion-r1';
+import { MODULES, modulePorts } from '../js/omni/modules.js?v=20261117-omni-module-expansion-r1';
+import { TEMPLATES } from '../js/omni/templates.js?v=20261117-omni-module-expansion-r1';
+
+
+test('expanded instrument modules and starter templates are registered and valid', () => {
+  const addedTypes = ['obxaVoice', 'pro3Wavetable', 'super8Voice', 'nordOrgan', 'clavinet', 'tr808Kick', 'tr808Snare', 'stereoWidener'];
+  for (const type of addedTypes) {
+    assert.ok(MODULES[type], `missing module ${type}`);
+    assert.ok(MODULES[type].params.length >= 3, `${type} should expose useful controls`);
+    const params = Object.fromEntries(MODULES[type].params.map((parameter) => [parameter.key, parameter.default]));
+    assert.ok(modulePorts({ type, params }, 'outputs').length, `${type} should expose an output`);
+  }
+  const addedTemplates = [
+    'OB-Xa Velvet Brass', 'Pro 3 Wavetable Lab', 'Super 8 Binaural Pad',
+    'Nord Rotary Registration', 'Clavinet D6 Funk', 'TR-808 Studio Kit',
+    'OB-Xa Arpeggiated Lead', 'Pro 3 Hybrid Bass', 'Organ & Mellotron Layers',
+    'Super 8 Sequenced Atmosphere', 'Clavinet Stereo Comp',
+  ];
+  for (const name of addedTemplates) {
+    const template = TEMPLATES.find((item) => item.name === name);
+    assert.ok(template, `missing template ${name}`);
+    assert.doesNotThrow(() => validatePatch(template.patch), `${name} should have valid ports and connections`);
+  }
+  assert.ok(TEMPLATES.length >= 37, 'the starter library should contain the original templates plus at least eleven additions');
+});
 
 test('default OMNI patch validates and rejects audio feedback', () => {
   const patch = validatePatch(defaultPatch());
