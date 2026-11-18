@@ -100,7 +100,9 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
 .section-shell, .feature-shell { position: relative; z-index: 1; width: min(var(--page-width), calc(100% - (var(--gutter) * 2))); margin-inline: auto; }
 .section-index { display: flex; align-items: center; gap: 12px; color: #778293; font-family: var(--font-mono); font-size: 9px; letter-spacing: .14em; }
 .section-index > span:first-child { color: var(--amber); }
-.index-rule { display: inline-block; width: 37px; height: 1px; background: linear-gradient(90deg, var(--amber), rgba(255,183,94,0)); }
+.index-rule { display: inline-block; width: 37px; height: 1px; background: linear-gradient(90deg, var(--amber), transparent); }
+.feature-section--omni .index-rule { background: linear-gradient(90deg, var(--cyan), transparent); }
+.feature-section--experiments .index-rule { background: linear-gradient(90deg, var(--green), transparent); }
 .eyebrow { display: flex; align-items: center; gap: 10px; margin: 0 0 19px; color: #a8b2c3; font-family: var(--font-mono); font-size: 9px; letter-spacing: .13em; }
 .eyebrow-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--amber); box-shadow: 0 0 12px rgba(255,183,94,.65); }
 .eyebrow-dot--cyan { background: var(--cyan); box-shadow: 0 0 12px rgba(112,220,240,.6); }
