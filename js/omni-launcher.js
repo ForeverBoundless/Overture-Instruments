@@ -270,7 +270,7 @@ function renderStatus() {
 
 let wordmarkPixelationTimer = 0;
 
-function paintWordmarkPixels(target, canvas, blockSize) {
+function paintWordmarkPixels(target, canvas, blockSize, textStyle) {
   const bounds = target.getBoundingClientRect();
   if (!bounds.width || !bounds.height) return false;
 
@@ -282,21 +282,29 @@ function paintWordmarkPixels(target, canvas, blockSize) {
   const context = canvas.getContext('2d');
   if (!context) return false;
 
-  const style = window.getComputedStyle(target);
   context.clearRect(0, 0, width, height);
   context.imageSmoothingEnabled = false;
   context.scale(width / bounds.width, height / bounds.height);
-  context.font = [style.fontStyle, style.fontVariant, style.fontWeight, style.fontSize, style.fontFamily].join(' ');
-  context.fillStyle = style.color;
+  context.font = textStyle.font;
+  context.fillStyle = textStyle.color;
   context.textAlign = 'left';
   context.textBaseline = 'middle';
-  if ('letterSpacing' in context) context.letterSpacing = style.letterSpacing;
+  if ('letterSpacing' in context) context.letterSpacing = textStyle.letterSpacing;
   context.fillText(target.textContent.trim(), 0, bounds.height / 2, bounds.width);
   return true;
 }
 
 function runWordmarkPixelation(target) {
   if (!target || !target.isConnected || document.hidden) return;
+
+  /* Capture the real text styling before making the source lettering
+     transparent. Re-reading it during the effect would return transparent. */
+  const style = window.getComputedStyle(target);
+  const textStyle = {
+    font: [style.fontStyle, style.fontVariant, style.fontWeight, style.fontSize, style.fontFamily].join(' '),
+    color: style.color,
+    letterSpacing: style.letterSpacing,
+  };
 
   let canvas = target.querySelector('.omni-wordmark__pixel-canvas');
   if (!canvas) {
@@ -306,26 +314,30 @@ function runWordmarkPixelation(target) {
     target.append(canvas);
   }
 
-  if (!paintWordmarkPixels(target, canvas, 2)) {
+  if (!paintWordmarkPixels(target, canvas, 1, textStyle)) {
     canvas.remove();
     return;
   }
 
   target.classList.add('is-pixelating');
-  const pixelSteps = [2, 4, 7, 11, 7, 4, 2];
-  const stepDuration = 95;
+  /* Pixelate, hold briefly at the coarsest resolution, then resolve back. */
+  const pixelSteps = [1, 2, 4, 7, 11, 16, 16, 11, 7, 4, 2, 1];
+  const duration = 3000 + Math.random() * 2000;
 
   pixelSteps.slice(1).forEach((blockSize, index) => {
+    const stepTime = duration * (index + 1) / (pixelSteps.length - 1);
     window.setTimeout(() => {
-      if (target.isConnected) paintWordmarkPixels(target, canvas, blockSize);
-    }, (index + 1) * stepDuration);
+      if (target.isConnected && !document.hidden) {
+        paintWordmarkPixels(target, canvas, blockSize, textStyle);
+      }
+    }, stepTime);
   });
 
   window.setTimeout(() => {
     if (!target.isConnected) return;
     target.classList.remove('is-pixelating');
     canvas.remove();
-  }, pixelSteps.length * stepDuration);
+  }, duration + 40);
 }
 
 function scheduleWordmarkPixelation() {
