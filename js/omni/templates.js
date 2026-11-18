@@ -1,5 +1,5 @@
 /** omni/templates.js - starter patches. Compact DSL: modules [id,type,col,row,params?], wires 'a.port>b.port'. */
-import { MODULES, modulePorts, SIGNAL_COLORS } from './modules.js?v=20261117-omni-module-expansion-r3';
+import { MODULES, modulePorts, SIGNAL_COLORS } from './modules.js?v=20261118-organ-drawbar-r1';
 import { defaultParams, SCHEMA } from './graph.js?v=20261117-omni-module-expansion-r3';
 
 const CX = 260, CY = 210;
@@ -119,23 +119,88 @@ const DEFS = [
   T('Empty Canvas', 'Just an Audio Output - build from scratch.', [['out', 'output', 2, 0]], []),
 ];
 
-/** Expands a compact definition into a schema-1 patch. */
+/** Approximate the visible module footprint for template auto-layout. */
+function templateModuleWidth(type) {
+  return type === 'nordOrgan' ? 440 : 210;
+}
+function templateModuleHeight(module) {
+  const rows = Math.max(1, modulePorts(module, 'inputs').length, modulePorts(module, 'outputs').length);
+  // Header, port stack and summary, plus the organ's 180px drawbar bank.
+  return 78 + rows * 23 + (module.type === 'nordOrgan' ? 180 : 0);
+}
+
+/** Expands a compact definition into a schema-1 patch. Modules occupy variable-width columns
+ * and variable-height rows, so the larger nine-drawbar organ cannot collide with neighbours. */
 export function buildTemplate(def) {
-  const modules = def.mods.map(([id, type, c, r, params]) => ({ id, type, x: 40 + c * CX, y: 40 + r * CY, params: { ...defaultParams(type), ...(params || {}) } }));
+  const source = def.mods.map(([id, type, col, row, params]) => ({
+    id, type, col, row, params: { ...defaultParams(type), ...(params || {}) },
+  }));
+  const columns = [...new Set(source.map((module) => module.col))].sort((a, b) => a - b);
+  const rows = [...new Set(source.map((module) => module.row))].sort((a, b) => a - b);
+  const columnX = new Map();
+  const rowY = new Map();
+
+  let x = 40;
+  columns.forEach((col) => {
+    columnX.set(col, x);
+    const width = Math.max(...source.filter((module) => module.col === col).map((module) => templateModuleWidth(module.type)));
+    x += Math.max(CX, width + 50);
+  });
+
+  let y = 40;
+  rows.forEach((row) => {
+    rowY.set(row, y);
+    const height = Math.max(...source.filter((module) => module.row === row).map(templateModuleHeight));
+    y += Math.max(CY, height + 48);
+  });
+
+  const modules = source.map(({ id, type, col, row, params }) => ({
+    id, type, x: columnX.get(col), y: rowY.get(row), params,
+  }));
   const connections = def.wires.map((w, i) => { const [a, b] = w.split('>'); const [am, ap] = a.split('.'); const [bm, bp] = b.split('.'); return { id: `t${i}`, from: { module: am, port: ap }, to: { module: bm, port: bp } }; });
   return { schema: SCHEMA, name: def.name, modules, connections, global: { master: def.master } };
 }
 
 export const TEMPLATES = DEFS.map((d) => ({ name: d.name, desc: d.desc, patch: buildTemplate(d) }));
 
-/** Small dark-theme SVG preview of a patch (modules as colour blocks, wires as curves). */
+/** Compact patch preview with the wider organ footprint and a miniature nine-drawbar bank. */
 export function templatePreview(patch, W = 240, H = 120) {
-  const BW = 180, BH = (m) => 52 + Math.max(modulePorts(m, 'inputs').length, modulePorts(m, 'outputs').length) * 18;
-  const maxX = Math.max(...patch.modules.map((m) => m.x + BW)) + 40, maxY = Math.max(...patch.modules.map((m) => m.y + BH(m))) + 40;
+  const BW = (m) => m.type === 'nordOrgan' ? 440 : 210;
+  const portRows = (m) => Math.max(modulePorts(m, 'inputs').length, modulePorts(m, 'outputs').length);
+  const BH = (m) => 52 + portRows(m) * 18 + (m.type === 'nordOrgan' ? 52 : 0);
+  const maxX = Math.max(...patch.modules.map((m) => m.x + BW(m))) + 40;
+  const maxY = Math.max(...patch.modules.map((m) => m.y + BH(m))) + 40;
   const byId = Object.fromEntries(patch.modules.map((m) => [m.id, m]));
-  const port = (m, id, dir) => { const i = modulePorts(m, dir).findIndex((p) => p.id === id); return [m.x + (dir === 'inputs' ? 0 : BW), m.y + 40 + i * 18]; };
+  const port = (m, id, dir) => {
+    const index = modulePorts(m, dir).findIndex((p) => p.id === id);
+    return [m.x + (dir === 'inputs' ? 0 : BW(m)), m.y + 40 + index * 18];
+  };
   let s = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${maxX} ${maxY}" width="${W}" height="${H}" preserveAspectRatio="xMidYMid meet">`;
-  patch.connections.forEach((c) => { const a = byId[c.from.module], b = byId[c.to.module]; const [x1, y1] = port(a, c.from.port, 'outputs'); const [x2, y2] = port(b, c.to.port, 'inputs'); const t = modulePorts(a, 'outputs').find((p) => p.id === c.from.port).type; s += `<path class="omni-preview-wire" d="M${x1} ${y1} C ${x1 + 70} ${y1}, ${x2 - 70} ${y2}, ${x2} ${y2}" fill="none" stroke="${SIGNAL_COLORS[t]}" stroke-width="3.5" stroke-linecap="round" opacity=".78"/>`; });
-  patch.modules.forEach((m) => { const color = MODULES[m.type].color; s += `<g class="omni-preview-module"><rect x="${m.x}" y="${m.y}" width="${BW}" height="${BH(m)}" rx="9" fill="#121a24" stroke="${color}" stroke-width="2"/><rect x="${m.x + 2}" y="${m.y + 2}" width="${BW - 4}" height="5" rx="2.5" fill="${color}" opacity=".92"/><path d="M${m.x + 8} ${m.y + 17} H${m.x + BW - 8}" fill="none" stroke="#dfe7f1" stroke-width="1" opacity=".08"/></g>`; });
+  patch.connections.forEach((connection) => {
+    const from = byId[connection.from.module], to = byId[connection.to.module];
+    const [x1, y1] = port(from, connection.from.port, 'outputs');
+    const [x2, y2] = port(to, connection.to.port, 'inputs');
+    const signal = modulePorts(from, 'outputs').find((item) => item.id === connection.from.port)?.type;
+    if (!signal) return;
+    const bend = Math.max(24, Math.min(70, (x2 - x1) * 0.45));
+    s += `<path class="omni-preview-wire" d="M${x1} ${y1} C ${x1 + bend} ${y1}, ${x2 - bend} ${y2}, ${x2} ${y2}" fill="none" stroke="${SIGNAL_COLORS[signal]}" stroke-width="3.5" stroke-linecap="round" opacity=".78"/>`;
+  });
+  patch.modules.forEach((module) => {
+    const color = MODULES[module.type].color;
+    const width = BW(module), height = BH(module);
+    s += `<g class="omni-preview-module"><rect x="${module.x}" y="${module.y}" width="${width}" height="${height}" rx="9" fill="#121a24" stroke="${color}" stroke-width="2"/><rect x="${module.x + 2}" y="${module.y + 2}" width="${width - 4}" height="5" rx="2.5" fill="${color}" opacity=".92"/><path d="M${module.x + 8} ${module.y + 17} H${module.x + width - 8}" fill="none" stroke="#dfe7f1" stroke-width="1" opacity=".08"/></g>`;
+    if (module.type === 'nordOrgan') {
+      const barTop = module.y + 52 + portRows(module) * 18;
+      const railHeight = 34;
+      const spacing = (width - 40) / 8;
+      for (let index = 0; index < 9; index += 1) {
+        const value = Math.min(1, Math.max(0, Number(module.params?.[`drawbar${index + 1}`] ?? 0) || 0));
+        const railX = module.x + 20 + index * spacing;
+        const fillHeight = railHeight * value;
+        const thumbY = barTop + railHeight - fillHeight - 2;
+        s += `<rect x="${railX - 1.5}" y="${barTop}" width="3" height="${railHeight}" rx="1.5" fill="#263b4d"/><rect x="${railX - 1.5}" y="${barTop + railHeight - fillHeight}" width="3" height="${fillHeight}" rx="1.5" fill="#7de4ff"/><rect x="${railX - 4}" y="${thumbY}" width="8" height="4" rx="1.5" fill="#d9e8f2"/>`;
+      }
+    }
+  });
   return `${s}</svg>`;
 }

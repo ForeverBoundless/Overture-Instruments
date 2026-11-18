@@ -1038,3 +1038,28 @@ test('Experiments sliders use OMNI styling with green accents in both themes', a
   assert.ok(page.includes('/js/experiments/labs.js'));
   assert.ok(worker.includes('/css/experiments.css?v=20261118-green-sliders-r1'));
 });
+
+
+test('OMNI organ starter templates expand their layout and preview to fit the drawbar module', async () => {
+  const [templates, app, launcher, page, worker] = await Promise.all([
+    readFile(new URL('../js/omni/templates.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/omni.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/omni-launcher.js', import.meta.url), 'utf8'),
+    readFile(new URL('../omni.html', import.meta.url), 'utf8'),
+    readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
+  ]);
+  assert.match(templates, /templateModuleWidth\\(type\\)[\\s\\S]*?nordOrgan' \\? 440 : 210/);
+  assert.match(templates, /templateModuleHeight\\(module\\)[\\s\\S]*?nordOrgan' \\? 180 : 0/);
+  assert.match(templates, /columnX\.set\(col, x\)/);
+  assert.match(templates, /rowY\.set\(row, y\)/);
+  assert.match(templates, /const BW = \\(m\\) => m\\.type === 'nordOrgan' \\? 440 : 210/);
+  assert.match(templates, /miniature nine-drawbar bank/);
+  assert.match(templates, /drawbar\\$\\{index \\+ 1\\}/);
+  assert.match(templates, /T\\('Nord Rotary Registration'/);
+  assert.match(templates, /T\\('Organ & Mellotron Layers'/);
+  assert.match(app, /templates\\.js\\?v=20261118-template-organ-layout-r1/);
+  assert.match(launcher, /omni\\.js\\?v=20261118-template-organ-layout-r1/);
+  assert.match(page, /omni-launcher\\.js\\?v=20261118-template-organ-layout-r1/);
+  assert.match(worker, /overture-shell-v121/);
+  assert.match(worker, /templates\\.js\\?v=20261118-template-organ-layout-r1/);
+});

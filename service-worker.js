@@ -1,4 +1,4 @@
-const CACHE = 'overture-shell-v120';
+const CACHE = 'overture-shell-v121';
 const APP_SHELL = [
   '/account',
   '/login',
@@ -8,8 +8,8 @@ const APP_SHELL = [
   '/js/shared/account-shell.js?v=20261102-contributions-menu',
   '/community',
   '/omni',
-  '/js/omni-launcher.js?v=20261118-organ-drawbar-r1',
-  '/js/omni.js?v=20261118-organ-drawbar-r1',
+  '/js/omni-launcher.js?v=20261118-template-organ-layout-r1',
+  '/js/omni.js?v=20261118-template-organ-layout-r1',
   '/css/omni.css?v=20261118-organ-drawbar-r1',
   '/css/omni-launcher.css?v=20261118-rename-modal-blue-r2',
   '/css/site-footer.css?v=20261118-omni-shell-r3',
@@ -179,7 +179,7 @@ const APP_SHELL = [
   '/js/omni/modules.js?v=20261118-organ-drawbar-r1',
   '/js/omni/moduleInfo.js?v=20261117-omni-module-expansion-r3',
   '/js/omni/graph.js?v=20261117-omni-module-expansion-r3',
-  '/js/omni/templates.js?v=20261117-omni-module-expansion-r3',
+  '/js/omni/templates.js?v=20261118-template-organ-layout-r1',
   '/ui/Wheel.js',
   '/js/omni/graph.js',
   '/js/omni/graph.js?v=20261104-sem-mellotron',
