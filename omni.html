@@ -10,7 +10,7 @@
 <link rel="manifest" href="/manifest.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/keyboard.css"><link rel="stylesheet" href="/css/knobs.css"><link rel="stylesheet" href="/css/omni.css?v=20261118-launcher-r2">
+<link rel="stylesheet" href="/css/keyboard.css"><link rel="stylesheet" href="/css/knobs.css"><link rel="stylesheet" href="/css/omni.css?v=20261118-launcher-r3">
 <script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
 <script defer src="/_vercel/insights/script.js"></script>
 <link rel="stylesheet" href="/css/midi-map.css?v=20261116-community-purple">
@@ -19,7 +19,8 @@
 <link rel="stylesheet" href="/css/site-theme-polish.css?v=20261117-inter-type-r1">
 <link rel="stylesheet" href="/css/omni-info.css?v=20261114-info-type">
 <link rel="stylesheet" href="/css/brand.css?v=20261118-omni-shell-r2">
-<link rel="stylesheet" href="/css/site-footer.css?v=20261118-omni-shell-r2">
+<link rel="stylesheet" href="/css/site-footer.css?v=20261118-omni-shell-r3">
+<link rel="stylesheet" href="/css/omni-launcher.css?v=20261118-r3">
 <script src="/js/shared/site-theme.js" defer></script>
 <script src="/js/shared/site-nav.js" defer></script>
 <script src="/js/shared/supabase-config.js"></script>
@@ -78,7 +79,15 @@
     }
   };
 </script>
-<script type="module" src="/js/omni-launcher.js?v=20261118-launcher-r2"></script>
+<footer class="site-footer omni-site-footer">
+  <div class="footer-top">
+    <a class="footer-brand" href="/" aria-label="Overture Instruments home"><img src="/ui/Logos/OvertureLogo.png" alt="" width="34" height="34"><span>OVERTURE <b>INSTRUMENTS</b></span></a>
+    <button class="footer-contact" type="button" id="contact-open">Contact</button>
+    <a class="footer-github" href="https://github.com/ForeverBoundless/Overture-Instruments" target="_blank" rel="noopener noreferrer"><span>Explore the open-source codebase</span><b aria-hidden="true">↗</b></a>
+  </div>
+  <div class="footer-bottom"><span>© <span id="copyright-year">2026</span> Overture Instruments</span><span class="footer-disclaimer">Independent, unofficial project. All trademarks belong to their respective owners.</span><a href="#top" class="back-to-top">BACK TO TOP ↑</a></div>
+</footer>
+<script type="module" src="/js/omni-launcher.js?v=20261118-launcher-r3"></script>
 <script type="module" src="/js/shared/midiMap.js"></script>
 </body>
 </html>
