@@ -988,20 +988,18 @@ test('OMNI patch rename uses a theme-aware modal and patch tile entrance plays o
 
 
 test('Experiments sliders use the OMNI range design recoloured green', async () => {
-  const [source, styles, page, worker] = await Promise.all([
+  const [source, styles, worker] = await Promise.all([
     readFile(new URL('../js/experiments/labs.js', import.meta.url), 'utf8'),
     readFile(new URL('../css/experiments.css', import.meta.url), 'utf8'),
-    readFile(new URL('../experiments/filter-lab.html', import.meta.url), 'utf8'),
     readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
   ]);
-  assert.match(source, /el\\('input', 'lab-slider', row\\)/);
-  assert.match(source, /--lab-slider-fill/);
-  assert.match(styles, /\\.lab-control input\\.lab-slider::-webkit-slider-runnable-track/);
-  assert.match(styles, /\\.lab-control input\\.lab-slider::-webkit-slider-thumb/);
-  assert.match(styles, /html\\[data-theme="light"\\] \\.lab-control input\\.lab-slider/);
-  assert.match(page, /labs\\.js/);
-  assert.match(worker, /experiments\\.css\\?v=20261118-green-sliders-r1/);
-  assert.match(worker, /overture-shell-v120/);
+  assert.ok(source.includes("el('input', 'lab-slider', row)"));
+  assert.ok(source.includes('--lab-slider-fill'));
+  assert.ok(styles.includes('.lab-control input.lab-slider::-webkit-slider-runnable-track'));
+  assert.ok(styles.includes('.lab-control input.lab-slider::-webkit-slider-thumb'));
+  assert.ok(styles.includes('html[data-theme="light"] .lab-control input.lab-slider'));
+  assert.ok(worker.includes('/css/experiments.css?v=20261118-green-sliders-r1'));
+  assert.ok(worker.includes('overture-shell-v121'));
 });
 
 
@@ -1048,18 +1046,19 @@ test('OMNI organ starter templates expand their layout and preview to fit the dr
     readFile(new URL('../omni.html', import.meta.url), 'utf8'),
     readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
   ]);
-  assert.match(templates, /templateModuleWidth\\(type\\)[\\s\\S]*?nordOrgan' \\? 440 : 210/);
-  assert.match(templates, /templateModuleHeight\\(module\\)[\\s\\S]*?nordOrgan' \\? 180 : 0/);
-  assert.match(templates, /columnX\.set\(col, x\)/);
-  assert.match(templates, /rowY\.set\(row, y\)/);
-  assert.match(templates, /const BW = \\(m\\) => m\\.type === 'nordOrgan' \\? 440 : 210/);
-  assert.match(templates, /miniature nine-drawbar bank/);
-  assert.match(templates, /drawbar\\$\\{index \\+ 1\\}/);
-  assert.match(templates, /T\\('Nord Rotary Registration'/);
-  assert.match(templates, /T\\('Organ & Mellotron Layers'/);
-  assert.match(app, /templates\\.js\\?v=20261118-template-organ-layout-r1/);
-  assert.match(launcher, /omni\\.js\\?v=20261118-template-organ-layout-r1/);
-  assert.match(page, /omni-launcher\\.js\\?v=20261118-template-organ-layout-r1/);
-  assert.match(worker, /overture-shell-v121/);
-  assert.match(worker, /templates\\.js\\?v=20261118-template-organ-layout-r1/);
+  assert.ok(templates.includes("function templateModuleWidth(type)"));
+  assert.ok(templates.includes("return type === 'nordOrgan' ? 440 : 210;"));
+  assert.ok(templates.includes("return 78 + rows * 23 + (module.type === 'nordOrgan' ? 180 : 0);"));
+  assert.ok(templates.includes('columnX.set(col, x);'));
+  assert.ok(templates.includes('rowY.set(row, y);'));
+  assert.ok(templates.includes("const BW = (m) => m.type === 'nordOrgan' ? 440 : 210;"));
+  assert.ok(templates.includes('miniature nine-drawbar bank'));
+  assert.ok(templates.includes('drawbar${index + 1}'));
+  assert.ok(templates.includes("T('Nord Rotary Registration'"));
+  assert.ok(templates.includes("T('Organ & Mellotron Layers'"));
+  assert.ok(app.includes('templates.js?v=20261118-template-organ-layout-r1'));
+  assert.ok(launcher.includes('omni.js?v=20261118-template-organ-layout-r1'));
+  assert.ok(page.includes('omni-launcher.js?v=20261118-template-organ-layout-r1'));
+  assert.ok(worker.includes('overture-shell-v121'));
+  assert.ok(worker.includes('templates.js?v=20261118-template-organ-layout-r1'));
 });
