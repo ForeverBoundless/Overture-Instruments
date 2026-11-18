@@ -29,6 +29,34 @@ html.omni-launcher-mode #omni-root {
 
 /* The page shell, content width, hero spacing, field components, card
    surfaces and footer are inherited from Community's actual styles. */
+/* The launcher reuses Community controls, but keeps every interactive
+   highlight on OMNI's cyan-blue accent rather than Community violet. */
+html.omni-launcher-mode .omni-shell {
+  --oi-community-accent:#7de4ff;
+  --oi-community-accent-strong:#7de4ff;
+  --oi-community-accent-soft:rgba(125,228,255,.10);
+  --oi-community-accent-soft-strong:rgba(125,228,255,.16);
+  --oi-community-accent-border:rgba(125,228,255,.46);
+  --oi-community-accent-glow:rgba(73,190,235,.28);
+  --oi-community-button-background:linear-gradient(135deg,#c2f4ff,#84dcf6 52%,#54bce8);
+  --oi-community-button-hover-background:linear-gradient(135deg,#d9f8ff,#a8e9fb 52%,#70d2f2);
+  --oi-community-button-ink:#041b2a;
+  --oi-community-button-border:#7de4ff;
+}
+
+html[data-theme="light"].omni-launcher-mode .omni-shell {
+  --oi-community-accent:#1676ad;
+  --oi-community-accent-strong:#1676ad;
+  --oi-community-accent-soft:rgba(22,125,187,.07);
+  --oi-community-accent-soft-strong:rgba(22,125,187,.12);
+  --oi-community-accent-border:rgba(22,125,187,.36);
+  --oi-community-accent-glow:rgba(22,125,187,.19);
+  --oi-community-button-background:linear-gradient(135deg,#dff7ff,#a8e1f6 52%,#8bcdf0);
+  --oi-community-button-hover-background:linear-gradient(135deg,#effcff,#c8edfb 52%,#a6def5);
+  --oi-community-button-ink:#08233a;
+  --oi-community-button-border:#3c8fca;
+}
+
 html.omni-launcher-mode .omni-shell {
   --omni-accent:#69baff;
   --omni-accent-strong:#8bd0ff;
