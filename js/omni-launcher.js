@@ -276,6 +276,7 @@ function render() {
     '      <img class="omni-wordmark__logo" src="/ui/Logos/OvertureLogo.png" alt="">',
     '      <span class="omni-wordmark__product">MNI</span>',
     '    </h1>',
+    '    <p class="omni-wordmark__byline"><span>from</span> <strong>Overture Instruments</strong></p>',
     '  </section>',
     '  <section class="community-toolbar omni-toolbar" aria-label="Patch library controls">',
     '    <label class="community-search omni-search-label">',
