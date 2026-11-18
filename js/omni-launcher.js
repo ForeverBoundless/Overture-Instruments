@@ -399,7 +399,7 @@ function exportLibrary() {
   setStatus('Exported the patches currently shown in your library.');
 }
 
-async async function syncItem(item) {
+async function syncItem(item) {
   if (!state.supabase || !state.user) {
     setStatus('Sign in to your Overture account before syncing patches.', true);
     return;
