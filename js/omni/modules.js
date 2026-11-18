@@ -1090,7 +1090,7 @@ export const MODULES = {
           v.amp.gain.cancelScheduledValues(t); v.amp.gain.setValueAtTime(0, t); v.amp.gain.linearRampToValueAtTime(p.level * ev.velocity, t + 0.002);
           v.note = ev.note; v.channel = ev.channel || 1; v.active = true; v.startedAt = t;
           const burst = ctx.createBufferSource(); burst.buffer = noiseBuf(ctx, 0.025); burst.connect(v.delay); burst.start(t);
-          burst.onended = () => { try { burst.disconnect(); } catch { /* already disconnected */ } };
+          burst.onended = () => { try { burst.disconnect(); } catch { /* already disconnected */ } inst.nodes = inst.nodes.filter((node) => node !== burst); };
           inst.nodes.push(burst);
         } else {
           const v = voices.find((item) => item.active && item.note === ev.note && item.channel === (ev.channel || 1));
@@ -1115,10 +1115,12 @@ export const MODULES = {
         const osc = inst.track(ctx.createOscillator()); const amp = gain(inst, 0); osc.type = 'sine'; osc.connect(amp); amp.connect(out);
         osc.frequency.setValueAtTime(p.pitch * 2.4, t); osc.frequency.exponentialRampToValueAtTime(p.pitch, t + Math.min(0.16, p.decay * 0.45));
         amp.gain.setValueAtTime(0.0001, t); amp.gain.linearRampToValueAtTime(p.level * ev.velocity, t + 0.003); amp.gain.exponentialRampToValueAtTime(0.0001, t + p.decay);
+        osc.onended = () => { try { osc.disconnect(); amp.disconnect(); } catch { /* already disconnected */ } inst.nodes = inst.nodes.filter((node) => node !== osc && node !== amp); };
         osc.start(t); osc.stop(t + p.decay + 0.03);
         if (p.click > 0) {
           const click = inst.track(ctx.createOscillator()); const cg = gain(inst, 0); click.type = 'triangle'; click.connect(cg); cg.connect(out);
           click.frequency.setValueAtTime(1800, t); cg.gain.setValueAtTime(p.click * p.level * 0.35, t); cg.gain.exponentialRampToValueAtTime(0.0001, t + 0.012);
+          click.onended = () => { try { click.disconnect(); cg.disconnect(); } catch { /* already disconnected */ } inst.nodes = inst.nodes.filter((node) => node !== click && node !== cg); };
           click.start(t); click.stop(t + 0.02);
         }
       });
@@ -1139,10 +1141,12 @@ export const MODULES = {
         const hp = biq(inst, 'highpass', 900, 0.7); const noiseAmp = gain(inst, 0);
         src.connect(hp); hp.connect(noiseAmp); noiseAmp.connect(out);
         noiseAmp.gain.setValueAtTime(p.snap * p.level * ev.velocity, t); noiseAmp.gain.exponentialRampToValueAtTime(0.0001, t + p.decay);
+        src.onended = () => { try { src.disconnect(); hp.disconnect(); noiseAmp.disconnect(); } catch { /* already disconnected */ } inst.nodes = inst.nodes.filter((node) => node !== src && node !== hp && node !== noiseAmp); };
         src.start(t); src.stop(t + p.decay + 0.02);
         const body = inst.track(ctx.createOscillator()); const bodyAmp = gain(inst, 0); body.type = 'triangle'; body.connect(bodyAmp); bodyAmp.connect(out);
         body.frequency.setValueAtTime(p.tone * 1.4, t); body.frequency.exponentialRampToValueAtTime(p.tone, t + 0.025);
         bodyAmp.gain.setValueAtTime(p.level * ev.velocity * 0.5, t); bodyAmp.gain.exponentialRampToValueAtTime(0.0001, t + p.decay * 0.65);
+        body.onended = () => { try { body.disconnect(); bodyAmp.disconnect(); } catch { /* already disconnected */ } inst.nodes = inst.nodes.filter((node) => node !== body && node !== bodyAmp); };
         body.start(t); body.stop(t + p.decay + 0.03);
       });
       inst.outputs.out = out; inst.apply = () => {};
