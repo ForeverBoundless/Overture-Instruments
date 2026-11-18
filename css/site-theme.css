@@ -30,8 +30,8 @@
   --theme-muted: #a9b2c2;
   --theme-border: rgba(224,233,246,.13);
   --theme-sheen: rgba(255,255,255,.055);
-  --font-display: 'Futura Book', 'Figtree', 'Inter Variable', sans-serif;
-  --font-body: 'Inter Variable', 'Figtree', 'Segoe UI', sans-serif;
+  --font-display: 'Inter Variable', 'Inter', 'Segoe UI', sans-serif;
+  --font-body: 'Inter Variable', 'Inter', 'Segoe UI', sans-serif;
   --font-mono: 'DM Mono', 'Courier New', monospace;
   --page-width: 1180px;
   --gutter: clamp(22px, 5.4vw, 82px);
