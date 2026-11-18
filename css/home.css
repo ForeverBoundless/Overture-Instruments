@@ -98,7 +98,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-
 
 /* Shared section architecture */
 .section-shell, .feature-shell { position: relative; z-index: 1; width: min(var(--page-width), calc(100% - (var(--gutter) * 2))); margin-inline: auto; }
-.section-index { display: flex; align-items: center; gap: 12px; color: #778293; font-family: var(--font-mono); font-size: 9px; letter-spacing: .14em; }
+.section-index { display: flex; align-items: center; gap: 12px; margin: 0 0 22px; color: #778293; font-family: var(--font-mono); font-size: 9px; letter-spacing: .14em; }
 .section-index > span:first-child { color: var(--amber); }
 .index-rule { display: inline-block; width: 37px; height: 1px; background: linear-gradient(90deg, var(--amber), transparent); }
 .feature-section--omni .index-rule { background: linear-gradient(90deg, var(--cyan), transparent); }
