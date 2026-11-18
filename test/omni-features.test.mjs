@@ -21,16 +21,16 @@ test('OMNI chord interval sliders expose the complete ±32-semitone range', asyn
   assert.ok(source.includes("inp.setAttribute('aria-valuemax', String(p.max));"));
   assert.ok(source.includes("el('div', 'omni-param__bounds', row)"));
   assert.ok(css.includes('.omni-param__bounds'));
-  assert.ok(source.includes(`'./omni/modules.js?v=20261117-omni-module-expansion-r1'`));
-  assert.ok(source.includes(`'./omni/graph.js?v=20261117-omni-module-expansion-r1'`));
-  assert.ok((await readFile(new URL('../js/omni/graph.js', import.meta.url), 'utf8')).includes(`from './modules.js?v=20261117-omni-module-expansion-r1'`));
-  assert.ok(worker.includes(`/js/omni/graph.js?v=20261117-omni-module-expansion-r1`));
-  assert.ok(worker.includes(`/js/omni/modules.js?v=20261117-omni-module-expansion-r1`));
+  assert.ok(source.includes(`'./omni/modules.js?v=20261117-omni-module-expansion-r3'`));
+  assert.ok(source.includes(`'./omni/graph.js?v=20261117-omni-module-expansion-r3'`));
+  assert.ok((await readFile(new URL('../js/omni/graph.js', import.meta.url), 'utf8')).includes(`from './modules.js?v=20261117-omni-module-expansion-r3'`));
+  assert.ok(worker.includes(`/js/omni/graph.js?v=20261117-omni-module-expansion-r3`));
+  assert.ok(worker.includes(`/js/omni/modules.js?v=20261117-omni-module-expansion-r3`));
   assert.ok(page.includes('omni.css?v=20261114-macro-theme'));
-  assert.ok(page.includes('omni.js?v=20261117-omni-module-expansion-r1'));
+  assert.ok(page.includes('omni.js?v=20261117-omni-module-expansion-r3'));
   assert.match(worker, /overture-shell-v\d+/);
   assert.ok(worker.includes('/css/omni.css?v=20261114-macro-theme'));
-  assert.ok(worker.includes('/js/omni.js?v=20261117-omni-module-expansion-r1'));
+  assert.ok(worker.includes('/js/omni.js?v=20261117-omni-module-expansion-r3'));
 });
 
 test('OMNI exposes recording, searchable modules and editing shortcuts', async () => {
@@ -102,10 +102,10 @@ test('OMNI performance deck keeps octave controls in the keyboard header and giv
   assert.match(css, /\.omni-keys \.lp-keyboard[^}]*width:100%/);
   assert.match(css, /\.omni-keys \.lp-keyboard[^}]*min-width:520px/);
   assert.match(page, /omni\.css\?v=20261114-macro-theme/);
-  assert.match(page, /omni\.js\?v=20261117-omni-module-expansion-r1/);
+  assert.match(page, /omni\.js\?v=20261117-omni-module-expansion-r3/);
   assert.match(worker, /overture-shell-v\d+/);
   assert.match(worker, /omni\.css\?v=20261114-macro-theme/);
-  assert.ok(worker.includes('/js/omni.js?v=20261117-omni-module-expansion-r1'));
+  assert.ok(worker.includes('/js/omni.js?v=20261117-omni-module-expansion-r3'));
 });
 
 
@@ -120,7 +120,7 @@ test('OMNI keyboard spans four octaves and status text avoids the centered theme
   assert.match(source, /C2 – C6/);
   assert.match(css, /\.omni-commandbar > \.omni-status[\s\S]*text-align:right/);
   assert.match(source, /commandbar\.appendChild\(this\.status\)/);
-  assert.match(page, /omni\.js\?v=20261117-omni-module-expansion-r1/);
+  assert.match(page, /omni\.js\?v=20261117-omni-module-expansion-r3/);
   assert.match(worker, /overture-shell-v\d+/);
 });
 
@@ -195,7 +195,7 @@ test('OMNI performance pane can be shown/hidden from View and remembers its stat
   assert.match(source, /localStorage\.setItem\('overture\.omni\.performance-visible'/);
   assert.match(source, /this\.performanceToggleBtn\.setAttribute\('aria-pressed'/);
   assert.match(css, /#omni-root > \.omni-perf\[hidden\]\s*\{\s*display:none !important/);
-  assert.match(page, /omni\.js\?v=20261117-omni-module-expansion-r1/);
+  assert.match(page, /omni\.js\?v=20261117-omni-module-expansion-r3/);
   assert.match(worker, /overture-shell-v\d+/);
 });
 
@@ -254,15 +254,15 @@ test('OMNI exposes native SEM and Mellotron instrument modules and refreshes off
   assert.match(sem, /this\.scheduled\[0\]\.frame <= currentFrame \+ n/);
   assert.match(mellotron, /this\.scheduled\[0\]\.frame <= currentFrame \+ i/);
   assert.match(mellotron, /this\.p\.release/);
-  assert.match(app, /20261117-omni-module-expansion-r1/);
-  assert.match(graph, /20261117-omni-module-expansion-r1/);
+  assert.match(app, /20261117-omni-module-expansion-r3/);
+  assert.match(graph, /20261117-omni-module-expansion-r3/);
   assert.match(templates, /SEM Warm Ensemble/);
   assert.match(templates, /Mellotron Choir/);
-  assert.match(page, /omni\.js\?v=20261117-omni-module-expansion-r1/);
+  assert.match(page, /omni\.js\?v=20261117-omni-module-expansion-r3/);
   assert.match(worker, /overture-shell-v\d+/);
   assert.match(worker, /OberheimEightVoiceProcessor\.js/);
   assert.match(worker, /MellotronProcessor\.js/);
-  assert.ok(worker.includes('/js/omni.js?v=20261117-omni-module-expansion-r1'));
+  assert.ok(worker.includes('/js/omni.js?v=20261117-omni-module-expansion-r3'));
 });
 
 
@@ -292,10 +292,10 @@ test('every OMNI module has a complete technical reference and the inspector can
   assert.match(styles, /html\[data-theme="light"\] \.omni-info-dialog/);
   assert.match(styles, /\.omni-info-dialog\s*\{/);
   assert.match(page, /omni-info\.css\?v=20261114-info-type/);
-  assert.match(page, /omni\.js\?v=20261117-omni-module-expansion-r1/);
+  assert.match(page, /omni\.js\?v=20261117-omni-module-expansion-r3/);
   assert.match(worker, /overture-shell-v\d+/);
   assert.match(worker, /omni-info\.css\?v=20261114-info-type/);
-  assert.match(worker, /moduleInfo\.js\?v=20261117-omni-module-expansion-r1/);
+  assert.match(worker, /moduleInfo\.js\?v=20261117-omni-module-expansion-r3/);
   assert.match(contributorGuide, /every module must also have a complete entry in `js\/omni\/moduleInfo\.js`/);
 });
 
