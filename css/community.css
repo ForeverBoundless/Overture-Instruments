@@ -1120,3 +1120,69 @@ html[data-theme="light"] #community-root .community-hero h1 em {
   -webkit-text-fill-color: #6930aa !important;
   text-shadow: 0 0 9px rgba(116,59,184,.19), 0 0 20px rgba(116,59,184,.11) !important;
 }
+
+
+/* Community signal field — the Library's animated ring-and-grid treatment,
+   recoloured in violet and extended behind the complete page. */
+.community-shell::before {
+  top: 0;
+  right: auto;
+  bottom: 0;
+  left: 50%;
+  width: 100vw;
+  height: auto;
+  transform: translateX(-50%);
+  background:
+    repeating-radial-gradient(ellipse 72% 64% at 0% 47%, transparent 0 34px, rgba(196,147,255,.105) 35px 36px, transparent 37px 70px),
+    repeating-radial-gradient(ellipse 70% 58% at 100% 70%, transparent 0 38px, rgba(180,119,244,.09) 39px 40px, transparent 41px 78px),
+    radial-gradient(ellipse at 22% 30%, rgba(196,147,255,.14), transparent 36%),
+    radial-gradient(ellipse at 78% 24%, rgba(180,119,244,.09), transparent 38%),
+    radial-gradient(ellipse at 50% 76%, rgba(180,119,244,.055), transparent 46%);
+  background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
+  animation: community-signal-drift 34s linear infinite;
+}
+@keyframes community-signal-drift {
+  from { background-position: 0 0, 0 0, center, center, center; }
+  to { background-position: 0 32px, 0 -28px, center, center, center; }
+}
+html[data-theme="light"] .community-shell::before {
+  opacity: .78;
+  background:
+    repeating-radial-gradient(ellipse 72% 64% at 0% 47%, transparent 0 34px, rgba(116,59,184,.105) 35px 36px, transparent 37px 70px),
+    repeating-radial-gradient(ellipse 70% 58% at 100% 70%, transparent 0 38px, rgba(116,59,184,.08) 39px 40px, transparent 41px 78px),
+    radial-gradient(ellipse at 22% 30%, rgba(180,119,244,.11), transparent 36%),
+    radial-gradient(ellipse at 78% 24%, rgba(116,59,184,.075), transparent 38%),
+    radial-gradient(ellipse at 50% 76%, rgba(116,59,184,.045), transparent 46%);
+}
+@media (prefers-reduced-motion: reduce) {
+  .community-shell::before { animation: none !important; }
+}
+
+/* Reduce the hero mark's footprint so it no longer holds the following
+   controls below an oversized logo-and-letter composition. */
+.community-hero {
+  min-height: 285px;
+}
+.community-hero-art {
+  width: min(100%, 350px);
+  aspect-ratio: 1.35;
+}
+.community-hero-art__logo {
+  width: 34%;
+}
+.community-hero-art__letter {
+  font-size: clamp(150px, 19vw, 260px);
+}
+@media (max-width: 900px) {
+  .community-hero-art__letter { font-size: clamp(145px, 20vw, 230px); }
+}
+@media (max-width: 680px) {
+  .community-hero-art {
+    width: min(68vw, 290px);
+    aspect-ratio: 1.35;
+  }
+  .community-hero-art__logo { width: 34%; }
+  .community-hero-art__letter {
+    font-size: clamp(155px, 55vw, 210px);
+  }
+}
