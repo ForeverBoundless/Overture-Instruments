@@ -72,7 +72,7 @@ class OmniApp {
         const launch = JSON.parse(launchRaw);
         this.patch = validatePatch(launch.data);
         this.currentId = launch.source === 'local' ? launch.id : null;
-        this.launchCloudId = launch.source === 'cloud' ? launch.id : null;
+        this.launchCloudId = launch.source === 'account' ? launch.id : null;
         this.workspaceRestored = false;
       }
     } catch (error) { console.warn('Could not open the selected OMNI patch.', error); }
@@ -1002,7 +1002,30 @@ class OmniApp {
     this.updateVoiceModeButtons(); this.render(); this.scheduleRebuild(); this.refreshHistoryButtons(); this.persistWorkspace();
   }
   load(patch, id = null) { try { this.patch = validatePatch(patch); this.currentId = id; this.communitySource = null; this.afterLoad(); this.setInitialView(); this.pushHistory(); } catch (err) { this.msg(err.message, true); } }
-  save() { const existing = this.currentId ? this.store.get(this.currentId) : null; const name = prompt('Instrument name', existing?.name || this.patch.name); if (name === null) return; this.patch.name = name.slice(0, 60) || 'Untitled'; this.nameInput.value = this.patch.name; const it = this.store.save(this.patch.name, this.patch, existing?.id); this.currentId = it.id; this.refreshLoadList(); this.persistWorkspace(); this.msg(`Saved "${it.name}".`); }
+  async save() {
+    const existing = this.currentId ? this.store.get(this.currentId) : null;
+    const name = prompt('Instrument name', existing?.name || this.patch.name);
+    if (name === null) return;
+    this.patch.name = name.trim().slice(0, 60) || 'Untitled';
+    this.nameInput.value = this.patch.name;
+    try {
+      if (this.launchCloudId) {
+        const { configureSupabase } = await import('./shared/supabaseClient.js');
+        const client = await configureSupabase();
+        const { data: { session } } = await client.auth.getSession();
+        if (!session?.user) throw new Error('Sign in again to update this account patch.');
+        const { error } = await client.from('omni_user_patches')
+          .update({ title: this.patch.name.slice(0, 80), patch_data: validatePatch(this.patch) })
+          .eq('id', this.launchCloudId).eq('owner_id', session.user.id);
+        if (error) throw error;
+        this.refreshLoadList(); this.persistWorkspace(); this.msg(`Saved "${this.patch.name}" to your Overture account.`);
+        return;
+      }
+      const it = this.store.save(this.patch.name, this.patch, existing?.id);
+      this.currentId = it.id;
+      this.refreshLoadList(); this.persistWorkspace(); this.msg(`Saved "${it.name}" on this device.`);
+    } catch (error) { this.msg(error.message || 'Could not save this patch.', true); }
+  }
 
   addModule(type, x, y) {
     const def = MODULES[type];
