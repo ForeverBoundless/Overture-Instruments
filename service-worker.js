@@ -1,4 +1,4 @@
-const CACHE = 'overture-shell-v87';
+const CACHE = 'overture-shell-v88';
 const APP_SHELL = [
   '/account',
   '/login',
@@ -45,7 +45,7 @@ const APP_SHELL = [
   '/css/sequential-pro-3.css?v=20261112-layout-r3',
   '/css/udo-super-8.css?v=20261112-layout-r3',
   '/css/ob-xa.css?v=20261106-mays-mod-r1',
-  '/css/library.css?v=20261106-tile-minimal-r1',
+  '/css/library.css?v=20261117-signal-field-r1',
   '/css/knobs.css',
   '/css/korg-ms-20.css',
   '/css/mellotron-m400.css',
