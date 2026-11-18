@@ -4483,3 +4483,58 @@ html[data-theme="light"] .instrument-tile--ob-xa .instrument-tile__hint { color:
  .instrument-spec strong{font-size:9px}
  .instrument-tile__actions{padding-top:8px}
 }
+
+
+/* Library signal-field background: a quiet mix of the Experiments rings and OMNI grid. */
+#launcher-page::before,
+#launcher-page::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+#launcher-page::before {
+  opacity: .58;
+  background:
+    radial-gradient(ellipse at 16% 20%, rgba(125,228,255,.13), transparent 34%),
+    radial-gradient(ellipse at 84% 72%, rgba(130,230,168,.085), transparent 36%),
+    linear-gradient(rgba(199,216,239,.028) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(199,216,239,.028) 1px, transparent 1px);
+  background-size: auto, auto, 64px 64px, 64px 64px;
+  mask-image: radial-gradient(ellipse at 50% 34%, #000 0%, rgba(0,0,0,.8) 60%, transparent 100%);
+}
+
+#launcher-page::after {
+  opacity: .54;
+  background:
+    repeating-radial-gradient(ellipse at 0% 45%, transparent 0 22px, rgba(125,228,255,.075) 23px 24px, transparent 25px 48px),
+    repeating-radial-gradient(ellipse at 100% 66%, transparent 0 28px, rgba(130,230,168,.06) 29px 30px, transparent 31px 57px);
+  mask-image: linear-gradient(90deg, #000 0%, rgba(0,0,0,.72) 14%, transparent 47%, rgba(0,0,0,.5) 84%, #000 100%);
+  animation: launcher-signal-drift 30s linear infinite;
+}
+
+@keyframes launcher-signal-drift {
+  to { background-position: 0 40px, 0 -36px; }
+}
+
+html[data-theme="light"] #launcher-page::before {
+  opacity: .62;
+  background:
+    radial-gradient(ellipse at 16% 20%, rgba(8,127,159,.085), transparent 34%),
+    radial-gradient(ellipse at 84% 72%, rgba(22,119,71,.065), transparent 36%),
+    linear-gradient(rgba(64,94,125,.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(64,94,125,.045) 1px, transparent 1px);
+}
+
+html[data-theme="light"] #launcher-page::after {
+  opacity: .42;
+  background:
+    repeating-radial-gradient(ellipse at 0% 45%, transparent 0 22px, rgba(8,127,159,.06) 23px 24px, transparent 25px 48px),
+    repeating-radial-gradient(ellipse at 100% 66%, transparent 0 28px, rgba(22,119,71,.05) 29px 30px, transparent 31px 57px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #launcher-page::after { animation: none !important; }
+}
