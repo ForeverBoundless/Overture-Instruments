@@ -63,9 +63,11 @@ class OmniApp {
     this.patch = defaultPatch();
     this.workspaceRestored = false;
     this.currentId = null;
+    let launchOpened = false;
     try {
       const launchRaw = sessionStorage.getItem('overture.omni.launch-patch');
       if (launchRaw) {
+        launchOpened = true;
         sessionStorage.removeItem('overture.omni.launch-patch');
         const launch = JSON.parse(launchRaw);
         this.patch = validatePatch(launch.data);
@@ -80,7 +82,7 @@ class OmniApp {
       const raw = localStorage.getItem('overture.omni.workspace.v1');
       if (raw) {
         const candidate = JSON.parse(raw);
-        if (candidate?.version === 1 && candidate.patch) {
+        if (!launchOpened && candidate?.version === 1 && candidate.patch) {
           const patch = validatePatch(candidate.patch);
           savedWorkspace = candidate;
           this.patch = patch;
