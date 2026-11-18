@@ -1397,3 +1397,66 @@ html[data-theme="light"].omni-launcher-mode .omni-wordmark__byline strong {
   html.omni-launcher-mode .omni-wordmark-lockup { gap:2px; }
   html.omni-launcher-mode .omni-wordmark__byline { font-size:12px !important; }
 }
+
+
+/* OMNI owns a cyan primary action colour. The shared Community stylesheet
+   deliberately marks its violet primary fill !important, so this scoped,
+   later override preserves the same glossy gradient and inset highlight
+   without changing the Community page or other sections. */
+html.omni-launcher-mode body .omni-shell .community-button--primary {
+  border-color:#8de7ff !important;
+  color:#062033 !important;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.34),rgba(255,255,255,0) 46%),
+    linear-gradient(135deg,#a6edff 0%,#68cdef 52%,#3aa9df 100%) !important;
+  box-shadow:
+    0 6px 18px rgba(52,177,224,.23),
+    0 0 18px rgba(72,190,235,.12),
+    inset 0 1px rgba(255,255,255,.72),
+    inset 0 -1px rgba(10,91,139,.12) !important;
+  text-shadow:none !important;
+}
+
+html.omni-launcher-mode body .omni-shell .community-button--primary:hover:not(:disabled) {
+  border-color:#c6f5ff !important;
+  color:#041b2a !important;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.42),rgba(255,255,255,0) 48%),
+    linear-gradient(135deg,#c2f4ff 0%,#84dcf6 52%,#54bce8 100%) !important;
+  box-shadow:
+    0 8px 22px rgba(52,177,224,.29),
+    0 0 22px rgba(72,190,235,.18),
+    inset 0 1px rgba(255,255,255,.82),
+    inset 0 -1px rgba(10,91,139,.10) !important;
+}
+
+html.omni-launcher-mode body .omni-shell .community-button--primary:active:not(:disabled) {
+  box-shadow:
+    0 3px 10px rgba(52,177,224,.18),
+    inset 0 1px rgba(255,255,255,.55),
+    inset 0 2px 5px rgba(10,91,139,.13) !important;
+}
+
+html[data-theme="light"].omni-launcher-mode body .omni-shell .community-button--primary {
+  border-color:#55b8d5 !important;
+  color:#073044 !important;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.64),rgba(255,255,255,0) 48%),
+    linear-gradient(135deg,#d7f7ff 0%,#a6e3f4 54%,#7bcde6 100%) !important;
+  box-shadow:
+    0 5px 15px rgba(35,132,171,.14),
+    inset 0 1px rgba(255,255,255,.92),
+    inset 0 -1px rgba(23,105,139,.08) !important;
+}
+
+html[data-theme="light"].omni-launcher-mode body .omni-shell .community-button--primary:hover:not(:disabled) {
+  border-color:#329fc2 !important;
+  color:#05283a !important;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.72),rgba(255,255,255,0) 48%),
+    linear-gradient(135deg,#e5fbff 0%,#b9edfa 54%,#91dcef 100%) !important;
+  box-shadow:
+    0 7px 19px rgba(35,132,171,.19),
+    inset 0 1px rgba(255,255,255,.96),
+    inset 0 -1px rgba(23,105,139,.06) !important;
+}
