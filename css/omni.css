@@ -1493,3 +1493,8 @@ html[data-theme="light"] .omni-launcher__actions button,html[data-theme="light"]
 html[data-theme="light"] .omni-launcher__search,html[data-theme="light"] .omni-launcher__select{background:#ffffffb8;border-color:#9abbd8}
 html[data-theme="light"] .omni-launcher__search input,html[data-theme="light"] .omni-launcher__select select{color:#183653}
 @media(max-width:760px){.omni-launcher{padding:0 18px 22px}.omni-launcher__intro{min-height:180px}.omni-launcher__intro-mark{width:92px;height:92px;font-size:62px}.omni-launcher__actions{grid-template-columns:1fr;gap:8px;margin-bottom:36px}.omni-launcher__actions button{min-height:66px}.omni-launcher__tools{grid-template-columns:1fr 1fr}.omni-launcher__search{grid-column:1/-1}.omni-launcher__grid{grid-template-columns:1fr}.omni-launcher__top-actions>span{display:none}.omni-launcher__footer{flex-direction:column}}
+
+/* Launcher uses a scrollable document; the editor remains viewport-locked. */
+html.omni-launcher-mode,html.omni-launcher-mode body{height:auto;min-height:100%;overflow-x:hidden;overflow-y:auto}
+html.omni-launcher-mode #omni-root,html.omni-launcher-mode #omni-root[aria-busy="true"]{display:block;width:100%;height:auto;min-height:100vh;max-height:none;overflow:visible}
+html.omni-launcher-mode .omni-launcher{width:100%}
