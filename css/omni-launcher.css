@@ -967,7 +967,7 @@ html.omni-launcher-mode .omni-wordmark__product {
   margin-left:.24em;
   color:#70bdff;
   font-weight:600;
-  letter-spacing:-.055em;
+  letter-spacing:-.045em;
   text-shadow:0 0 20px rgba(61,157,243,.22);
 }
 html[data-theme="light"].omni-launcher-mode .omni-wordmark__logo {
@@ -1466,16 +1466,16 @@ html[data-theme="light"].omni-launcher-mode body .omni-shell .community-button--
    Earlier Community-derived shell padding was too generous for this compact
    single-purpose launcher. */
 html.omni-launcher-mode .omni-shell {
-  padding-top:clamp(88px,7.2vw,104px);
+  padding-top:clamp(74px,6vw,84px);
 }
 
 @media (max-width:760px) {
   html.omni-launcher-mode .omni-shell {
-    padding-top:88px;
+    padding-top:66px;
   }
 }
 @media (max-width:420px) {
   html.omni-launcher-mode .omni-shell {
-    padding-top:82px;
+    padding-top:62px;
   }
 }
