@@ -284,7 +284,6 @@ function paintWordmarkPixels(target, canvas, blockSize, textStyle) {
 
   context.clearRect(0, 0, width, height);
   context.imageSmoothingEnabled = false;
-  context.scale(width / bounds.width, height / bounds.height);
   const text = target.textContent.trim();
   context.font = textStyle.font;
   context.fillStyle = textStyle.color;
