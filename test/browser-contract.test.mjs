@@ -751,8 +751,8 @@ test('Granular lab initializes without AudioContext and its note keys start/stop
   assert.match(granular, /this\.keyInput\(this\.controls,m=>this\.noteOn\(m\),m=>this\.noteOff\(m\)\)/);
   assert.match(granular, /this\.noteRate=Math\.pow\(2,\(midi-45\)\/12\)/);
   assert.match(granular, /source\.playbackRate\.value=\(this\.p\.reverse\?-1:1\)\*rate/);
-  assert.match(page, /labs\.js\?v=20261112-granular-note-r2/);
-  assert.match(worker, /labs\.js\?v=20261112-granular-note-r2/);
+  assert.match(page, /labs\.js\?v=20261118-green-sliders-r1/);
+  assert.match(worker, /labs\.js\?v=20261118-green-sliders-r1/);
 });
 
 test('Community confirmation is required only when an audio file is attached', async () => {
@@ -956,4 +956,109 @@ test('Every non-Prophet emulator toolbar shows live MIDI status, Help and Commun
   assert.match(toolbar, /html\[data-theme="light"\] \.oi-emulator-help/);
   assert.match(worker, /emulator-topbar\.css\?v=20261116-r3/);
   assert.match(worker, /overture-shell-v87/);
+});
+
+
+test('OMNI patch rename uses a theme-aware modal and patch tile entrance plays only once', async () => {
+  const [launcher, styles, page, worker] = await Promise.all([
+    readFile(new URL('../js/omni-launcher.js', import.meta.url), 'utf8'),
+    readFile(new URL('../css/omni-launcher.css', import.meta.url), 'utf8'),
+    readFile(new URL('../omni.html', import.meta.url), 'utf8'),
+    readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
+  ]);
+  assert.doesNotMatch(launcher, /window\\.prompt\\(['"]Patch name/);
+  assert.match(launcher, /className = 'omni-rename-dialog'/);
+  assert.match(launcher, /dialog\\.showModal\\(\\)/);
+  assert.match(launcher, /aria-labelledby', 'omni-rename-title'/);
+  assert.match(launcher, /Patch names must contain at least three characters/);
+  assert.match(styles, /\\.omni-rename-dialog::backdrop/);
+  assert.match(styles, /omni-rename-accent:#7de4ff/);
+  assert.match(styles, /html\\[data-theme="light"\\]\\.omni-launcher-mode \\.omni-rename-dialog[\\s\\S]*omni-rename-accent:#087f9f/);
+  assert.match(styles, /omni-rename-dialog \\.omni-rename-actions \\.community-button--primary:hover/);
+
+  assert.match(styles, /html\\[data-theme="light"\\]\\.omni-launcher-mode \\.omni-rename-dialog/);
+  assert.match(launcher, /patchTileIntroPlayed/);
+  assert.match(launcher, /makePatchTile\\(item, playIntro = false\\)/);
+  assert.match(styles, /\\.omni-patch-grid > \\.omni-patch-card\\.is-entering/);
+  assert.match(launcher, /visibilitychange/);
+  assert.match(page, /omni-launcher\\.css\\?v=20261118-rename-modal-blue-r2/);
+  assert.match(page, /omni-launcher\\.js\\?v=20261118-rename-modal-r1/);
+  assert.match(worker, /overture-shell-v120/);
+});
+
+
+test('Experiments sliders use the OMNI range design recoloured green', async () => {
+  const [source, styles, worker] = await Promise.all([
+    readFile(new URL('../js/experiments/labs.js', import.meta.url), 'utf8'),
+    readFile(new URL('../css/experiments.css', import.meta.url), 'utf8'),
+    readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
+  ]);
+  assert.ok(source.includes("el('input', 'lab-slider', row)"));
+  assert.ok(source.includes('--lab-slider-fill'));
+  assert.ok(styles.includes('.lab-control input.lab-slider::-webkit-slider-runnable-track'));
+  assert.ok(styles.includes('.lab-control input.lab-slider::-webkit-slider-thumb'));
+  assert.ok(styles.includes('html[data-theme="light"] .lab-control input.lab-slider'));
+  assert.ok(worker.includes('/css/experiments.css?v=20261118-green-sliders-r1'));
+  assert.ok(worker.includes('overture-shell-v121'));
+});
+
+
+test('OMNI organ card exposes nine linked drawbars and a wider layout', async () => {
+  const [app, styles, page, worker] = await Promise.all([
+    readFile(new URL('../js/omni.js', import.meta.url), 'utf8'),
+    readFile(new URL('../css/omni.css', import.meta.url), 'utf8'),
+    readFile(new URL('../omni.html', import.meta.url), 'utf8'),
+    readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
+  ]);
+  assert.ok(app.includes('ORGAN_DRAWBARS = ['));
+  assert.ok(app.includes('omni-organ-drawbar__input'));
+  assert.ok(app.includes('input.addEventListener(\'input\', () => this.setParam(m.id, key, Number(input.value), false))'));
+  assert.ok(app.includes('input.dataset.paramKey = key'));
+  assert.ok(app.includes('this.inspBody?.querySelectorAll'));
+  assert.ok(styles.includes('.omni-module--organ {width:440px'));
+  assert.ok(styles.includes('grid-template-columns:repeat(9,minmax(0,1fr))'));
+  assert.ok(page.includes('omni.css?v=20261118-organ-drawbar-r1'));
+  assert.ok(worker.includes('omni.js?v=20261118-organ-drawbar-r1'));
+});
+
+test('Experiments sliders use OMNI styling with green accents in both themes', async () => {
+  const [source, styles, page, worker] = await Promise.all([
+    readFile(new URL('../js/experiments/labs.js', import.meta.url), 'utf8'),
+    readFile(new URL('../css/experiments.css', import.meta.url), 'utf8'),
+    readFile(new URL('../experiments/filter-lab.html', import.meta.url), 'utf8'),
+    readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
+  ]);
+  assert.ok(source.includes("el('input', 'lab-slider', row)"));
+  assert.ok(source.includes('--lab-slider-fill'));
+  assert.ok(styles.includes('.lab-control input.lab-slider::-webkit-slider-runnable-track'));
+  assert.ok(styles.includes('.lab-control input.lab-slider::-webkit-slider-thumb'));
+  assert.ok(styles.includes('html[data-theme="light"] .lab-control input.lab-slider'));
+  assert.ok(page.includes('/js/experiments/labs.js'));
+  assert.ok(worker.includes('/css/experiments.css?v=20261118-green-sliders-r1'));
+});
+
+
+test('OMNI organ starter templates expand their layout and preview to fit the drawbar module', async () => {
+  const [templates, app, launcher, page, worker] = await Promise.all([
+    readFile(new URL('../js/omni/templates.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/omni.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/omni-launcher.js', import.meta.url), 'utf8'),
+    readFile(new URL('../omni.html', import.meta.url), 'utf8'),
+    readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
+  ]);
+  assert.ok(templates.includes("function templateModuleWidth(type)"));
+  assert.ok(templates.includes("return type === 'nordOrgan' ? 440 : 210;"));
+  assert.ok(templates.includes("return 78 + rows * 23 + (module.type === 'nordOrgan' ? 180 : 0);"));
+  assert.ok(templates.includes('columnX.set(col, x);'));
+  assert.ok(templates.includes('rowY.set(row, y);'));
+  assert.ok(templates.includes("const BW = (m) => m.type === 'nordOrgan' ? 440 : 210;"));
+  assert.ok(templates.includes('miniature nine-drawbar bank'));
+  assert.ok(templates.includes('drawbar${index + 1}'));
+  assert.ok(templates.includes("T('Nord Rotary Registration'"));
+  assert.ok(templates.includes("T('Organ & Mellotron Layers'"));
+  assert.ok(app.includes('templates.js?v=20261118-template-organ-layout-r1'));
+  assert.ok(launcher.includes('omni.js?v=20261118-template-organ-layout-r1'));
+  assert.ok(page.includes('omni-launcher.js?v=20261118-template-organ-layout-r1'));
+  assert.ok(worker.includes('overture-shell-v121'));
+  assert.ok(worker.includes('templates.js?v=20261118-template-organ-layout-r1'));
 });
