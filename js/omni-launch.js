@@ -30,9 +30,9 @@
       const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
       // Make the current history entry the intended return destination before
-      // navigating away. Back from /omni therefore returns to /#omni.
+      // navigating away. Back from the editor therefore returns to the OMNI launcher.
       try {
-        window.history.replaceState(window.history.state, '', '/#omni');
+        window.history.replaceState(window.history.state, '', '/omni');
       } catch (_err) {
         // The animation still works if history replacement is restricted.
       }
