@@ -293,7 +293,7 @@ export const MODULE_INFO = {
     "circuit": "A note echo is a digital event scheduler. It stores the incoming note and schedules later note-on and note-off messages using a timer or clock. Each repeat can update velocity and pitch before it is sent; it does not create echoes by delaying an audio waveform.",
     "use": "Note echo creates repeated phrases that retrigger a synthesizer voice. Velocity decay makes later notes softer, while pitch-per-repeat can create rising or falling sequences.",
     "implementation": "OMNI schedules additional note events from each incoming note, using the selected delay, repeat count, velocity decay, and interval shift. Connect its note output to an oscillator or instrument voice."
-  }
+  },
   "obxaVoice": {
     "summary": "A polyphonic dual-oscillator synthesizer voice inspired by the Oberheim OB-Xa's two-VCO voice architecture.",
     "circuit": "Each OB-Xa voice card contains two voltage-controlled oscillators, a mixer, a resonant low-pass filter path, an envelope-controlled amplifier, and modulation circuitry. The historical instrument used selectable 2-pole and 4-pole filter responses and analogue voice-card variation.",
