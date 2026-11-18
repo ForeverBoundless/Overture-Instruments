@@ -328,10 +328,15 @@ html[data-theme="light"] .omni-patch-link { color: #075f83 !important; }
 html[data-theme="light"] #launcher-page {
   color: #333333 !important;
   background:
+    repeating-radial-gradient(ellipse 72% 64% at 0% 47%, transparent 0 34px, rgba(8,127,159,.09) 35px 36px, transparent 37px 70px),
+    repeating-radial-gradient(ellipse 70% 58% at 100% 70%, transparent 0 38px, rgba(22,119,71,.07) 39px 40px, transparent 41px 78px),
+    linear-gradient(rgba(64,94,125,.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(64,94,125,.055) 1px, transparent 1px),
+    radial-gradient(ellipse at 16% 20%, rgba(8,127,159,.085), transparent 34%),
+    radial-gradient(ellipse at 84% 72%, rgba(22,119,71,.065), transparent 36%),
     radial-gradient(circle at 14% 9%, rgba(125,228,255,.2), transparent 30%),
     radial-gradient(circle at 87% 78%, rgba(255,183,94,.12), transparent 29%),
     linear-gradient(145deg,#eef2f6,#e3e9f0 55%,#edf1f6) !important;
-  backdrop-filter: blur(14px) saturate(1.05);
 }
 html[data-theme="light"] :is(.launcher-ambient,.launcher-noise) { opacity: .035 !important; }
 html[data-theme="light"] .launcher-hero__description { color: #536172 !important; }
