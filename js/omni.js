@@ -5,7 +5,7 @@ const boot = window.__overtureOmniBoot;
 const bootStartedAt = performance.now();
 const dependencyGroups = [
   // Keep this order aligned with the first four module bindings below.
-  ['./omni/modules.js?v=20261117-omni-module-expansion-r3', './omni/moduleInfo.js?v=20261117-omni-module-expansion-r3', './omni/graph.js?v=20261117-omni-module-expansion-r3', './omni/templates.js?v=20261117-omni-module-expansion-r3'],
+  ['./omni/modules.js?v=20261118-organ-drawbar-r1', './omni/moduleInfo.js?v=20261117-omni-module-expansion-r3', './omni/graph.js?v=20261117-omni-module-expansion-r3', './omni/templates.js?v=20261117-omni-module-expansion-r3'],
   ['./shared/presetStore.js', './shared/audioRecorder.js', './shared/midiRecorder.js'],
   ['../ui/Keyboard.js', '../ui/Wheel.js', './engine/MidiManager.js'],
   ['./shared/panel.js', './shared/midiMap.js']
@@ -55,6 +55,17 @@ const updateRangeFill = (input) => {
   const ratio = Number.isFinite(value) && max > min ? Math.min(1, Math.max(0, (value - min) / (max - min))) : 0;
   input.style.setProperty('--omni-slider-fill', `${ratio * 100}%`);
 };
+const ORGAN_DRAWBARS = [
+  { key: 'drawbar1', label: '16′', name: '16 foot' },
+  { key: 'drawbar2', label: '5⅓′', name: '5 and one-third foot' },
+  { key: 'drawbar3', label: '8′', name: '8 foot' },
+  { key: 'drawbar4', label: '4′', name: '4 foot' },
+  { key: 'drawbar5', label: '2⅔′', name: '2 and two-thirds foot' },
+  { key: 'drawbar6', label: '2′', name: '2 foot' },
+  { key: 'drawbar7', label: '1⅗′', name: '1 and three-fifths foot' },
+  { key: 'drawbar8', label: '1⅓′', name: '1 and one-third foot' },
+  { key: 'drawbar9', label: '1′', name: '1 foot' },
+];
 const NS = 'http://www.w3.org/2000/svg';
 
 class OmniApp {
@@ -1137,6 +1148,27 @@ class OmniApp {
   setParam(id, key, value, commit) {
     const m = this.patch.modules.find((x) => x.id === id); if (!m) return;
     m.params[key] = value;
+
+    // The organ's on-card drawbars and inspector sliders share the same parameters.
+    this.cards?.querySelectorAll('.omni-organ-drawbar__input').forEach((input) => {
+      if (input.dataset.moduleId !== id || input.dataset.paramKey !== key) return;
+      input.value = String(value);
+      updateRangeFill(input);
+      const readout = input.parentElement?.querySelector('.omni-organ-drawbar__value');
+      if (readout) {
+        const position = Math.round(Number(value) * 8);
+        readout.textContent = String(position);
+        input.setAttribute('aria-valuetext', `${position} of 8`);
+      }
+    });
+    this.inspBody?.querySelectorAll('input.omni-slider[data-module-id][data-param-key]').forEach((input) => {
+      if (input.dataset.moduleId !== id || input.dataset.paramKey !== key) return;
+      input.value = input.dataset.log === 'true' ? Math.log(value) : String(value);
+      updateRangeFill(input);
+      const output = input.parentElement?.querySelector('output');
+      if (output) output.textContent = Number(value).toFixed(input.dataset.precision === '0' ? 0 : 2);
+    });
+
     if (this.live) { const ok = this.live.setParam(id, key, value); if (!ok) this.scheduleRebuild(); }
     const portCountChanged = (m.type === 'chord' && key === 'voices') || (m.type === 'mixer' && key === 'channels');
     if (commit && portCountChanged) this.syncModulePorts(id);
@@ -1167,6 +1199,19 @@ class OmniApp {
   _bindCanvas() {
     let drag = null;
     this.canvas.addEventListener('pointerdown', (e) => {
+      const organDrawbar = e.target.closest('.omni-organ-drawbar__input');
+      if (organDrawbar) {
+        const card = organDrawbar.closest('.omni-module');
+        const module = this.patch.modules.find((item) => item.id === card?.dataset.id);
+        if (module && (this.selected !== module.id || this.selectedModules.size !== 1)) {
+          this.selected = module.id;
+          this.selectedWire = null;
+          this.selectedModules = new Set([module.id]);
+          this.renderSelection();
+          this.renderInspector();
+        }
+        return;
+      }
       const port = e.target.closest('.omni-port'), card = e.target.closest('.omni-module'), wire = e.target.closest('.omni-wire');
       if (port) {
         e.preventDefault();
@@ -1304,6 +1349,32 @@ class OmniApp {
       const inCol = el('div', 'omni-port-col', ports); const outCol = el('div', 'omni-port-col omni-port-col--out', ports);
       modulePorts(m, 'inputs').forEach((p) => { const row = el('div', 'omni-port-row', inCol); const dot = el('button', `omni-port omni-port--${p.type}`, row); dot.type = 'button'; dot.dataset.dir = 'in'; dot.dataset.module = m.id; dot.dataset.port = p.id; dot.title = `${p.label} (${p.type} in)`; dot.setAttribute('aria-label', `${def.name} ${p.label} input`); el('span', '', row, p.label); });
       modulePorts(m, 'outputs').forEach((p) => { const row = el('div', 'omni-port-row', outCol); el('span', '', row, p.label); const dot = el('button', `omni-port omni-port--${p.type}`, row); dot.type = 'button'; dot.dataset.dir = 'out'; dot.dataset.module = m.id; dot.dataset.port = p.id; dot.title = `${p.label} (${p.type} out)`; dot.setAttribute('aria-label', `${def.name} ${p.label} output`); });
+
+      if (m.type === 'nordOrgan') {
+        card.classList.add('omni-module--organ');
+        const bank = el('section', 'omni-organ-drawbars', card);
+        bank.setAttribute('aria-label', 'Nine tonewheel organ drawbars');
+        el('div', 'omni-organ-drawbars__title', bank, 'TONEWHEEL DRAWBARS');
+        const row = el('div', 'omni-organ-drawbars__row', bank);
+        ORGAN_DRAWBARS.forEach(({ key, label, name }) => {
+          const control = el('label', 'omni-organ-drawbar', row);
+          el('span', 'omni-organ-drawbar__label', control, label);
+          const input = el('input', 'omni-organ-drawbar__input', control);
+          input.type = 'range';
+          input.min = '0'; input.max = '1'; input.step = '0.001';
+          input.value = String(m.params[key]);
+          input.dataset.moduleId = m.id;
+          input.dataset.paramKey = key;
+          input.title = `${name} drawbar`;
+          input.setAttribute('aria-label', `${name} drawbar`);
+          input.setAttribute('aria-valuetext', `${Math.round(Number(input.value) * 8)} of 8`);
+          updateRangeFill(input);
+          el('output', 'omni-organ-drawbar__value', control, String(Math.round(Number(input.value) * 8)));
+          input.addEventListener('input', () => this.setParam(m.id, key, Number(input.value), false));
+          input.addEventListener('change', () => this.setParam(m.id, key, Number(input.value), true));
+        });
+      }
+
       const sum = def.params.slice(0, 2).map((p) => `${p.label.split(' (')[0]} ${p.options ? p.options[Math.round(m.params[p.key])] : +Number(m.params[p.key]).toFixed(2)}`).join(' · ');
       el('div', 'omni-module-summary', card, sum);
     });
@@ -1390,6 +1461,10 @@ class OmniApp {
           inp.setAttribute('aria-valuemax', String(p.max));
         }
         inp.value = log ? Math.log(m.params[p.key]) : m.params[p.key];
+        inp.dataset.moduleId = m.id;
+        inp.dataset.paramKey = p.key;
+        inp.dataset.log = String(log);
+        inp.dataset.precision = String(p.step === 1 ? 0 : 2);
         updateRangeFill(inp);
         const out = el('output', '', row, (+m.params[p.key]).toFixed(p.step === 1 ? 0 : 2));
         if (chordInterval) {

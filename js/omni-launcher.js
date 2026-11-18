@@ -788,7 +788,7 @@ async function bootLauncher() {
 }
 
 if (isEditor) {
-  import('./omni.js?v=20261117-omni-module-expansion-r3');
+  import('./omni.js?v=20261118-organ-drawbar-r1');
 } else {
   void bootLauncher();
 }
