@@ -196,10 +196,10 @@ class Pro3App{
    s(g.body,'osc'+n+'Wave','Waveform',waves,{group:grp,wide:true});s(g.body,'osc'+n+'Octave','Octave',OCTAVES,{group:grp});
    return g;
   };
-  const o1=osc(1,'Oscillator 1','analogue VCO',['saw','triangle','pulse']);
+  const o1=osc(1,'Oscillator 1','analog VCO',['saw','triangle','pulse']);
   k(o1.body,'osc1Tune','Fine',{min:-7,max:7,step:.05,bipolar:true,group:'OSCILLATOR 1',fmt:v=>Number(v).toFixed(1)});k(o1.body,'osc1Shape','Shape / PW',{group:'OSCILLATOR 1'});
   k(o1.body,'osc1Slop','Slop',{size:40,group:'OSCILLATOR 1'});k(o1.body,'osc1Glide','Glide',{size:40,group:'OSCILLATOR 1'});
-  const o2=osc(2,'Oscillator 2','analogue VCO',['saw','triangle','pulse']);
+  const o2=osc(2,'Oscillator 2','analog VCO',['saw','triangle','pulse']);
   k(o2.body,'osc2Tune','Fine',{min:-7,max:7,step:.05,bipolar:true,group:'OSCILLATOR 2',fmt:v=>Number(v).toFixed(1)});k(o2.body,'osc2Shape','Shape / PW',{group:'OSCILLATOR 2'});
   k(o2.body,'osc2Slop','Slop',{size:40,group:'OSCILLATOR 2'});k(o2.body,'osc2Glide','Glide',{size:40,group:'OSCILLATOR 2'});b(o2.body,'osc2Sync','Sync',{group:'OSCILLATOR 2'});
   const o3=osc(3,'Oscillator 3','digital wavetable',['sine','triangle','saw','pulse','superSaw','wavetable']);

@@ -13,7 +13,7 @@ const names = [
   'No Resonance Required','REZZO BASS','DI^tOR~ED BRA/S','ELEKTPOHNKA Telekom Net','Raw Z','LOW BASS','Trajectory Achieved','OLD LEAD','Organ Time','Sweep It try the weel','Industrial Machine','RIGID BASS','Main Engines Full Burn','5TH BOUNCE','SYNTH DRUM1','RISING SYNC',
   'BUZZINESS AS UNUSUAL','BROKE BASS','Carnival Freak','LONELY QUEST','The Triax Paradox','SYNC/SNARE','sub BASS','SPARKLESLIDE','THE INTRO TO THAT ONE','LITTLE LYRIC','ORGAN GRINDER','FRETTED BASS','NOISE IMPACT','SOFT LEAD WHEEL BRIGHT','Alien Language','SAWTEETH DUO DANCER',
   'SMOOTH LEAD MODWHEELSYNC','5TH IN LINE','Percolated','EuroSynth-Tastic','Dr. Press Growl','Duo Distort Artifacts','Hard Sync Hijinxx','BASS MELT FACE','Raymond’s Caught','SYNTH GONG1','RUBBER BANG','RUN!','B MOVIE','Percussophonic Blip','Gyro House','Trill Pickles',
-  'Braid Walker','Acid Wiggler','Minor Bender','STG Liberatn Lead 2003','Dorian Electra','Distortech MW is Accent','Distortech 2 MW is Accent','Acid Tracks MW is Accent','Analogue Native Dance','Just Add Kick Drums','Rubber Glass','What Time Is','Funk Cowboys','Space Banjo MW is Rate','Mushrooms In A Corn Field','ACROSS THE SKY',
+  'Braid Walker','Acid Wiggler','Minor Bender','STG Liberatn Lead 2003','Dorian Electra','Distortech MW is Accent','Distortech 2 MW is Accent','Acid Tracks MW is Accent','Analog Native Dance','Just Add Kick Drums','Rubber Glass','What Time Is','Funk Cowboys','Space Banjo MW is Rate','Mushrooms In A Corn Field','ACROSS THE SKY',
   'Up in the Sky','Tastes Metallic','TRIPLET 5THS','Interstellar Express','Intercranial Voyager','Sweet Lead',
 ];
 

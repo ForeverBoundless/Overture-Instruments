@@ -1,6 +1,6 @@
 /* UDO Audio Super 8: Overture stereo AudioWorklet.
    Dual DDS voice model, seven-oscillator Super mode, stereo binaural voice paths,
-   two independently voiced layers, analogue-style filters, modulation,
+   two independently voiced layers, analog-style filters, modulation,
    independent layer sequencing/arp, and per-layer chorus/delay.
 
    Engineering notes
@@ -280,7 +280,7 @@ class Super8Processor extends AudioWorkletProcessor{
  stepEnv(gate,stage,level,time,dt,attack,attackHold,decayHold,decay,sustain,release){
   if(!gate&&stage!=='idle'&&stage!=='release')stage='release';
   if(stage==='attack'){
-   // Aim above 1 so the attack finishes in finite time with an analogue-style curve.
+   // Aim above 1 so the attack finishes in finite time with an analog-style curve.
    level+=(1.3-level)*(1-Math.exp(-dt/((.001+attack*attack*3)*1.6)));
    if(level>=1){level=1;stage=attackHold>0?'attackHold':decayHold>0?'decayHold':'decay';time=0;}
   }else if(stage==='attackHold'){time+=dt;if(time>=attackHold*2){stage=decayHold>0?'decayHold':'decay';time=0;}}
@@ -460,7 +460,7 @@ class Super8Processor extends AudioWorkletProcessor{
   const pitch1=(to1?benderSemis:0)+(tgt==='DDS 2'?0:lfo2Pitch)+(to1?lfo1Pitch:0);
   const pitch2=(to2?benderSemis:0)+(tgt==='DDS 1'?0:lfo2Pitch)+(to2?lfo1Pitch:0);
   const midiBend=this.bendForVoice(v,layer)*p.bendRange;
-  // slow analogue drift (cents)
+  // slow analog drift (cents)
   v.driftT-=dtc;if(v.driftT<=0){v.driftT=.4+Math.abs(rnd())*1.2;v.driftTarget=rnd()*2.6;}
   v.drift+=(v.driftTarget-v.drift)*(1-Math.exp(-dtc/.6));
   const common=v.pitch+midiBend+(gl.masterTune||0)+v.drift*.01;

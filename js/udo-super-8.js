@@ -192,7 +192,7 @@ class Super8App{
   const top=addRow(p,'s8-top');
   const brand=document.createElement('div');brand.className='s8-brand';top.appendChild(brand);
   const logo=document.createElement('img');logo.src='/ui/Logos/UDO_logo.png';logo.alt='UDO Audio';logo.draggable=false;brand.appendChild(logo);
-  const model=document.createElement('div');model.className='s8-model';model.innerHTML='<strong>SUPER 8</strong><span>16-voice binaural analogue-hybrid synthesizer</span>';brand.appendChild(model);
+  const model=document.createElement('div');model.className='s8-model';model.innerHTML='<strong>SUPER 8</strong><span>16-voice binaural analog-hybrid synthesizer</span>';brand.appendChild(model);
   this.hwDisplay=addDisplay(top,{brand:'PERFORMANCE / PROGRAM'});this.hwDisplay.set('P 001','OVERTURE PERFORMANCE');
   const master=addRow(top,'s8-master');
   k(master,'volume','Master',{global:true,size:50,group:'MASTER'});k(master,'distortion','Distortion',{global:true,size:42,group:'MASTER'});k(master,'masterTune','Master tune',{global:true,min:-1,max:1,step:.01,size:42,bipolar:true,group:'MASTER',fmt:v=>(v>0?'+':'')+Math.round(v*100)+'¢'});
@@ -229,7 +229,7 @@ class Super8App{
 
   // ---- filter, envelopes, effects ----
   const mid=addRow(p,'hp-main s8-mid');
-  const vcf=addPanel(mid,{title:'VCF',sub:'analogue HPF · four-pole LPF',className:'s8-vcf'});
+  const vcf=addPanel(mid,{title:'VCF',sub:'analog HPF · four-pole LPF',className:'s8-vcf'});
   const vf=addRow(vcf.body,'hp-row-tight');
   f(vf,'hpf','HPF',{group:'VCF',height:96});f(vf,'cutoff','LPF',{group:'VCF',height:96});f(vf,'resonance','Res',{group:'VCF',height:96});f(vf,'filterLfoAmount','LFO 1',{group:'VCF',height:96});f(vf,'filterOscAmount','DDS 2',{group:'VCF',height:96});
   const vs=addRow(vcf.body,'s8-selects');

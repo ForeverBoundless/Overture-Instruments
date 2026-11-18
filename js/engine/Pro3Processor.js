@@ -1,5 +1,5 @@
 /* Sequential Pro 3 - Overture AudioWorklet.
-   Two analogue-style VCOs, a band-limited wavetable oscillator, shared paraphonic
+   Two analog-style VCOs, a band-limited wavetable oscillator, shared paraphonic
    filter/envelopes, three zero-delay-feedback filter topologies, tuned feedback,
    modulation matrix, a stereo effects pair and sample-clocked sequencing.
    Modulation runs at control rate (16 samples); audio-rate code never allocates. */
