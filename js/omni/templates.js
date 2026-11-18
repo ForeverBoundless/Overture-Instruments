@@ -1,6 +1,6 @@
 /** omni/templates.js - starter patches. Compact DSL: modules [id,type,col,row,params?], wires 'a.port>b.port'. */
-import { MODULES, modulePorts, SIGNAL_COLORS } from './modules.js?v=20261117-omni-module-expansion-r1';
-import { defaultParams, SCHEMA } from './graph.js?v=20261117-omni-module-expansion-r1';
+import { MODULES, modulePorts, SIGNAL_COLORS } from './modules.js?v=20261117-omni-module-expansion-r3';
+import { defaultParams, SCHEMA } from './graph.js?v=20261117-omni-module-expansion-r3';
 
 const CX = 260, CY = 210;
 const T = (name, desc, mods, wires, master = 0.8) => ({ name, desc, mods, wires, master });
