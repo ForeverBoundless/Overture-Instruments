@@ -992,3 +992,237 @@ html[data-theme="light"].omni-launcher-mode .omni-wordmark__product {
   }
   html.omni-launcher-mode .omni-wordmark__product { margin-left:.18em; }
 }
+
+
+/* ============================================================
+   OMNI LAUNCHER — signal-field hero
+   The Overture mark is the O in OMNI. The launcher uses the
+   same cyan waveform/grid language as the OMNI homepage feature,
+   while all surfaces and type remain tied to the shared theme.
+   ============================================================ */
+html.omni-launcher-mode .omni-shell {
+  --omni-hero-cyan: #7de4ff;
+  --omni-hero-surface: linear-gradient(145deg, rgba(16,31,43,.94), rgba(8,16,24,.98));
+  --omni-hero-border: rgba(125,228,255,.22);
+  --omni-hero-grid: rgba(125,228,255,.075);
+  --omni-hero-scanline: rgba(125,228,255,.052);
+  --omni-hero-glow: rgba(53,177,226,.19);
+  --omni-hero-beam: rgba(125,228,255,.32);
+  --omni-hero-shadow: 0 24px 64px rgba(0,0,0,.20), inset 0 1px rgba(255,255,255,.055);
+}
+html[data-theme="light"].omni-launcher-mode .omni-shell {
+  --omni-hero-cyan: #087f9f;
+  --omni-hero-surface: linear-gradient(145deg, rgba(248,252,255,.98), rgba(226,237,245,.98));
+  --omni-hero-border: rgba(8,127,159,.25);
+  --omni-hero-grid: rgba(8,127,159,.105);
+  --omni-hero-scanline: rgba(8,127,159,.07);
+  --omni-hero-glow: rgba(8,127,159,.13);
+  --omni-hero-beam: rgba(8,127,159,.19);
+  --omni-hero-shadow: 0 22px 52px rgba(43,72,93,.10), inset 0 1px rgba(255,255,255,.9);
+}
+
+/* Bring the launcher content closer to the site header without crowding it. */
+html.omni-launcher-mode .omni-shell {
+  padding-top: clamp(104px, 9.3vw, 132px);
+}
+
+html.omni-launcher-mode .omni-shell .omni-wordmark-hero {
+  position: relative;
+  display: flex;
+  width: 100%;
+  min-height: 276px;
+  align-items: center;
+  justify-content: center;
+  isolation: isolate;
+  overflow: hidden;
+  margin: 0 0 30px;
+  padding: 30px 22px;
+  border: 1px solid var(--omni-hero-border);
+  border-radius: 18px;
+  background: var(--omni-hero-surface);
+  box-shadow: var(--omni-hero-shadow);
+  text-align: center;
+}
+
+/* Slow waveform drift, fine cyan scanlines and a restrained grid echo the
+   animated OMNI feature panel on the homepage. */
+html.omni-launcher-mode .omni-wordmark-hero::before {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  content: "";
+  pointer-events: none;
+  opacity: .78;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22960%22 height=%22280%22 viewBox=%220 0 960 280%22%3E%3Cg fill=%22none%22 stroke=%22%237de4ff%22 stroke-linecap=%22round%22%3E%3Cpath d=%22M0 64 C80 14 160 14 240 64 S400 114 480 64 S640 14 720 64 S880 114 960 64%22 stroke-opacity=%22.34%22 stroke-width=%221.5%22/%3E%3Cpath d=%22M0 144 C80 184 160 184 240 144 S400 104 480 144 S640 184 720 144 S880 104 960 144%22 stroke-opacity=%22.2%22 stroke-width=%221.2%22/%3E%3Cpath d=%22M0 226 C80 196 160 196 240 226 S400 256 480 226 S640 196 720 226 S880 256 960 226%22 stroke-opacity=%22.15%22 stroke-width=%221.1%22/%3E%3C/g%3E%3C/svg%3E"),
+    repeating-linear-gradient(0deg, var(--omni-hero-scanline) 0 1px, transparent 1px 5px),
+    linear-gradient(var(--omni-hero-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--omni-hero-grid) 1px, transparent 1px),
+    radial-gradient(ellipse at 50% 50%, var(--omni-hero-glow), transparent 63%);
+  background-repeat: repeat, repeat, repeat, repeat, no-repeat;
+  background-size: 960px 280px, auto, 44px 44px, 44px 44px, 100% 100%;
+  background-position: 0 0, 0 0, center center, center center, center center;
+  mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+  animation: omni-launcher-wave-drift 34s linear infinite;
+}
+
+/* A soft scanning beam passes through the field once per cycle. */
+html.omni-launcher-mode .omni-wordmark-hero::after {
+  position: absolute;
+  z-index: 1;
+  top: -28%;
+  bottom: -28%;
+  left: -46%;
+  width: 38%;
+  content: "";
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, var(--omni-hero-beam), transparent);
+  filter: blur(1px);
+  transform: skewX(-17deg);
+  animation: omni-launcher-scan-sweep 8.8s ease-in-out infinite;
+}
+
+html.omni-launcher-mode .omni-wordmark {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  width: auto;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: clamp(58px, 7.1vw, 88px);
+  font-weight: 600;
+  line-height: .98;
+  letter-spacing: -.078em;
+  white-space: nowrap;
+  text-shadow: 0 0 26px var(--omni-hero-glow);
+  animation:
+    omni-launcher-wordmark-enter .95s cubic-bezier(.2,.8,.2,1) both,
+    omni-launcher-wordmark-flicker 7.4s 1s ease-in-out infinite;
+}
+
+html.omni-launcher-mode .omni-wordmark__logo {
+  display: block;
+  width: .82em;
+  height: .82em;
+  flex: 0 0 auto;
+  margin: 0 .035em 0 0;
+  object-fit: contain;
+  filter:
+    brightness(0) saturate(100%)
+    invert(86%) sepia(18%) saturate(1722%)
+    hue-rotate(163deg) brightness(104%) contrast(103%)
+    drop-shadow(0 0 4px rgba(125,228,255,.82))
+    drop-shadow(0 0 12px rgba(65,190,255,.56))
+    drop-shadow(0 0 24px rgba(65,190,255,.28));
+  animation: omni-launcher-logo-breathe 5.6s ease-in-out infinite;
+}
+
+html.omni-launcher-mode .omni-wordmark__product {
+  margin: 0;
+  color: var(--omni-hero-cyan);
+  font-family: var(--font-display);
+  font-size: 1em;
+  font-weight: 600;
+  letter-spacing: -.078em;
+  text-shadow:
+    0 0 .045em currentColor,
+    0 0 .16em currentColor,
+    0 0 .38em var(--omni-hero-glow),
+    0 0 .72em var(--omni-hero-glow);
+}
+
+html[data-theme="light"].omni-launcher-mode .omni-wordmark {
+  color: #253746;
+  text-shadow: 0 0 22px rgba(8,127,159,.11);
+}
+
+html[data-theme="light"].omni-launcher-mode .omni-wordmark__logo {
+  filter:
+    brightness(0) saturate(100%)
+    invert(39%) sepia(71%) saturate(1010%)
+    hue-rotate(151deg) brightness(88%) contrast(91%)
+    drop-shadow(0 0 3px rgba(8,127,159,.28))
+    drop-shadow(0 0 10px rgba(8,127,159,.16));
+}
+
+html[data-theme="light"].omni-launcher-mode .omni-wordmark__product {
+  color: #087f9f;
+  text-shadow:
+    0 0 .04em currentColor,
+    0 0 .16em rgba(8,127,159,.35),
+    0 0 .4em rgba(8,127,159,.17);
+}
+
+@keyframes omni-launcher-wave-drift {
+  to {
+    background-position: -960px 0, 0 0, 22px 22px, 22px 22px, center center;
+  }
+}
+
+@keyframes omni-launcher-scan-sweep {
+  0%, 12% { left: -46%; opacity: 0; }
+  24% { opacity: .72; }
+  72% { opacity: .56; }
+  100% { left: 112%; opacity: 0; }
+}
+
+@keyframes omni-launcher-wordmark-enter {
+  from { opacity: 0; transform: translateY(12px) scale(.985); filter: blur(5px); }
+  to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+
+@keyframes omni-launcher-wordmark-flicker {
+  0%, 100% { opacity: 1; }
+  4% { opacity: .98; }
+  5% { opacity: .84; }
+  6% { opacity: 1; }
+  47% { opacity: 1; }
+  48% { opacity: .92; }
+  49% { opacity: 1; }
+  76% { opacity: 1; }
+  77% { opacity: .9; }
+  78% { opacity: 1; }
+}
+
+@keyframes omni-launcher-logo-breathe {
+  0%, 100% { filter: brightness(1) drop-shadow(0 0 5px rgba(125,228,255,.48)) drop-shadow(0 0 17px rgba(65,190,255,.22)); }
+  50% { filter: brightness(1.12) drop-shadow(0 0 8px rgba(125,228,255,.72)) drop-shadow(0 0 24px rgba(65,190,255,.34)); }
+}
+
+@media (max-width: 760px) {
+  html.omni-launcher-mode .omni-shell {
+    padding-top: 105px;
+  }
+  html.omni-launcher-mode .omni-shell .omni-wordmark-hero {
+    min-height: 224px;
+    margin-bottom: 24px;
+    padding: 24px 14px;
+    border-radius: 15px;
+  }
+  html.omni-launcher-mode .omni-wordmark {
+    font-size: clamp(48px, 11vw, 66px);
+  }
+}
+
+@media (max-width: 420px) {
+  html.omni-launcher-mode .omni-shell .omni-wordmark-hero {
+    min-height: 192px;
+    margin-bottom: 20px;
+  }
+  html.omni-launcher-mode .omni-wordmark {
+    font-size: clamp(42px, 11vw, 52px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.omni-launcher-mode .omni-wordmark-hero::before,
+  html.omni-launcher-mode .omni-wordmark-hero::after,
+  html.omni-launcher-mode .omni-wordmark,
+  html.omni-launcher-mode .omni-wordmark__logo {
+    animation: none !important;
+  }
+}
