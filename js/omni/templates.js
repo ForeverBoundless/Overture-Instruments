@@ -1,6 +1,6 @@
 /** omni/templates.js - starter patches. Compact DSL: modules [id,type,col,row,params?], wires 'a.port>b.port'. */
-import { MODULES, modulePorts, SIGNAL_COLORS } from './modules.js?v=20261104-sem-mellotron';
-import { defaultParams, SCHEMA } from './graph.js?v=20261104-sem-mellotron';
+import { MODULES, modulePorts, SIGNAL_COLORS } from './modules.js?v=20261117-omni-module-expansion-r1';
+import { defaultParams, SCHEMA } from './graph.js?v=20261117-omni-module-expansion-r1';
 
 const CX = 260, CY = 210;
 const T = (name, desc, mods, wires, master = 0.8) => ({ name, desc, mods, wires, master });
@@ -83,6 +83,39 @@ const DEFS = [
   T('Mellotron Choir', 'A finite-playback eight-voice choir tape with gentle stereo room and a long, natural release.',
     [['kb', 'keyboard', 0, 0], ['mtr', 'mellotron', 1, 0, { frame: 1, track: 0, tone: 0.58, release: 0.82, volume: 0.72 }], ['rev', 'reverb', 2, 0, { size: 4.2, damping: 0.72, mix: 0.34 }], ['out', 'output', 3, 0]],
     ['kb.note>mtr.note', 'mtr.out>rev.in', 'rev.out>out.in'], 0.72),
+  T('OB-Xa Velvet Brass', 'An eight-voice Oberheim-style stack with a resonant filter, stereo chorus and room.', 
+    [['kb', 'keyboard', 0, 0], ['ob', 'obxaVoice', 1, 0, { wave1: 0, wave2: 1, detune: 8, cutoff: 1600, resonance: 1.5, envAmount: 0.5, attack: 0.04, decay: 0.65, sustain: 0.76, release: 0.9 }], ['cho', 'junoChorus', 2, 0, { mode: 2 }], ['rev', 'reverb', 3, 0, { size: 3.2, mix: 0.28 }], ['out', 'output', 4, 0]],
+    ['kb.note>ob.note', 'ob.out>cho.in', 'cho.out>rev.in', 'rev.out>out.in'], 0.72),
+  T('Pro 3 Wavetable Lab', 'A clocked hybrid oscillator with pitch movement, filter-envelope sweeps and delay.', 
+    [['seq', 'sequencer', 0, 0, { running: 1, tempo: 112, root: 38, gate: 0.45, step1: 0, step2: 7, step3: 12, step4: 3, step5: 10, step6: 0, step7: 5, step8: 14 }], ['wt', 'pro3Wavetable', 1, 0, { wave: 3, morph: 0.45, octave: -1, pitchDepth: 7 }], ['env', 'envelope', 1, 1, env(0.004, 0.35, 0.15, 0.18)], ['lad', 'ladder', 2, 0, { cutoff: 780, resonance: 0.38, drive: 0.2, modDepth: 1800 }], ['vca', 'vca', 3, 0], ['dly', 'delay', 4, 0, { time: 0.27, feedback: 0.32, mix: 0.22 }], ['out', 'output', 5, 0]],
+    ['seq.note>wt.pitch', 'seq.note>env.gate', 'wt.out>lad.in', 'env.out>lad.cutoffMod', 'lad.out>vca.in', 'env.out>vca.gain', 'vca.out>dly.in', 'dly.out>out.in']),
+  T('Super 8 Binaural Pad', 'A paired-oscillator stereo voice with slow movement and a long, soft room tail.', 
+    [['kb', 'keyboard', 0, 0], ['s8', 'super8Voice', 1, 0, { wave: 2, detune: 11, stereo: 0.9, attack: 1.1, release: 1.8, level: 0.48 }], ['cho', 'junoChorus', 2, 0, { mode: 1 }], ['rev', 'reverb', 3, 0, { size: 4.8, damping: 0.6, mix: 0.34 }], ['out', 'output', 4, 0]],
+    ['kb.note>s8.note', 's8.out>cho.in', 'cho.out>rev.in', 'rev.out>out.in'], 0.68),
+  T('Nord Rotary Registration', 'A nine-drawbar organ registration through chorus, rotary-like modulation and reverb.', 
+    [['kb', 'keyboard', 0, 0], ['org', 'nordOrgan', 1, 0, { drawbar1: 0.7, drawbar2: 0.38, drawbar3: 0.85, drawbar4: 0.52, drawbar5: 0.3, drawbar6: 0.25, drawbar7: 0.2, drawbar8: 0.15, drawbar9: 0.1, percussion: 1, percLevel: 0.28 }], ['cho', 'junoChorus', 2, 0, { mode: 2 }], ['rev', 'reverb', 3, 0, { size: 2.7, mix: 0.2 }], ['out', 'output', 4, 0]],
+    ['kb.note>org.note', 'org.out>cho.in', 'cho.out>rev.in', 'rev.out>out.in']),
+  T('Clavinet D6 Funk', 'A plucked Clavinet-style voice with driven tone, phasing and a mono-to-stereo spread.', 
+    [['kb', 'keyboard', 0, 0], ['clav', 'clavinet', 1, 0, { tone: 0, pickup: 3, brightness: 6200, decay: 0.68, mute: 0.18 }], ['dst', 'distortion', 2, 0, { type: 3, drive: 2.5, tone: 6200, mix: 0.24, level: 0.72 }], ['phs', 'phaser', 3, 0, { rate: 0.55, depth: 0.6, mix: 0.38 }], ['wide', 'stereoWidener', 4, 0, { delay: 12, width: 0.72, wet: 0.38 }], ['out', 'output', 5, 0]],
+    ['kb.note>clav.note', 'clav.out>dst.in', 'dst.out>phs.in', 'phs.out>wide.in', 'wide.out>out.in'], 0.7),
+  T('TR-808 Studio Kit', 'A playable rhythm section with dedicated 808 kick and snare voices plus sequenced hats.', 
+    [['kickSeq', 'euclid', 0, 0, { running: 1, tempo: 116, steps: 16, hits: 4, rotate: 0, note: 36 }], ['snareSeq', 'euclid', 0, 1, { running: 1, tempo: 116, steps: 16, hits: 4, rotate: 4, note: 38 }], ['hatSeq', 'clock', 0, 2, { running: 1, tempo: 116, division: 2, note: 42, gate: 0.2 }], ['kick', 'tr808Kick', 1, 0, { pitch: 48, decay: 0.72, click: 0.2 }], ['snare', 'tr808Snare', 1, 1, { tone: 185, snap: 0.8, decay: 0.24 }], ['hat', 'drum', 1, 2, { type: 2, decay: 0.06, level: 0.42 }], ['mix', 'mixer', 2, 1, { channels: 3, level1: 0.8, level2: 0.68, level3: 0.45 }], ['cmp', 'compressor', 3, 1, { threshold: -16, ratio: 3.5, makeup: 1.2 }], ['out', 'output', 4, 1]],
+    ['kickSeq.note>kick.trigger', 'snareSeq.note>snare.trigger', 'hatSeq.note>hat.trigger', 'kick.out>mix.in1', 'snare.out>mix.in2', 'hat.out>mix.in3', 'mix.out>cmp.in', 'cmp.out>out.in'], 0.72),
+  T('OB-Xa Arpeggiated Lead', 'An OB-Xa-inspired voice driven by a held-note arpeggiator and dotted echo.', 
+    [['kb', 'keyboard', 0, 0], ['arp', 'arpeggiator', 1, 0, { mode: 2, tempo: 126, division: 2, octaves: 2, gate: 0.42 }], ['ob', 'obxaVoice', 2, 0, { voices: 6, wave1: 0, wave2: 1, detune: 5, cutoff: 2600, envAmount: 0.28, attack: 0.012, decay: 0.34, sustain: 0.56, release: 0.32 }], ['dly', 'delay', 3, 0, { time: 0.375, feedback: 0.38, mix: 0.28 }], ['out', 'output', 4, 0]],
+    ['kb.note>arp.in', 'arp.note>ob.note', 'ob.out>dly.in', 'dly.out>out.in']),
+  T('Pro 3 Hybrid Bass', 'A compact digital oscillator drives an MS-20-style filter with envelope and saturation.', 
+    [['kb', 'keyboard', 0, 0], ['wt', 'pro3Wavetable', 1, 0, { wave: 1, pulseWidth: 0.28, morph: 0.18, octave: -1, pitchDepth: 4, attack: 0.003, release: 0.07, level: 0.8 }], ['env', 'envelope', 1, 1, env(0.002, 0.24, 0.05, 0.12)], ['ms', 'ms20filter', 2, 0, { lpCutoff: 450, lpPeak: 4, hpCutoff: 55, modDepth: 2.3 }], ['dst', 'distortion', 3, 0, { type: 0, drive: 3.2, tone: 5200, mix: 0.35 }], ['out', 'output', 4, 0]],
+    ['kb.note>wt.pitch', 'kb.note>env.gate', 'wt.out>ms.in', 'env.out>ms.cutoffMod', 'ms.out>dst.in', 'dst.out>out.in']),
+  T('Organ & Mellotron Layers', 'Blend a drawbar registration with finite-playback tape strings and choir.', 
+    [['kb', 'keyboard', 0, 0], ['org', 'nordOrgan', 1, 0, { drawbar1: 0.28, drawbar2: 0.1, drawbar3: 0.86, drawbar4: 0.58, drawbar5: 0.32, drawbar6: 0.2, drawbar7: 0.12, drawbar8: 0.08, drawbar9: 0.05 }], ['mtr', 'mellotron', 1, 1, { frame: 1, track: 0, tone: 0.52, release: 0.9, volume: 0.7 }], ['mix', 'mixer', 2, 0, { channels: 2, level1: 0.65, level2: 0.8 }], ['cho', 'junoChorus', 3, 0, { mode: 1 }], ['rev', 'reverb', 4, 0, { size: 4.2, mix: 0.32 }], ['out', 'output', 5, 0]],
+    ['kb.note>org.note', 'kb.note>mtr.note', 'org.out>mix.in1', 'mtr.out>mix.in2', 'mix.out>cho.in', 'cho.out>rev.in', 'rev.out>out.in'], 0.68),
+  T('Super 8 Sequenced Atmosphere', 'A slow independent note sequence plays a wide hybrid voice into a long delay and reverb.', 
+    [['rnd', 'randomNotes', 0, 0, { running: 1, tempo: 72, scale: 4, root: 48, range: 3, density: 0.72, gate: 0.8 }], ['s8', 'super8Voice', 1, 0, { wave: 1, detune: 6, stereo: 0.92, attack: 0.6, release: 1.5, level: 0.52 }], ['dly', 'delay', 2, 0, { time: 0.5, feedback: 0.42, mix: 0.3 }], ['rev', 'reverb', 3, 0, { size: 5, damping: 0.7, mix: 0.4 }], ['out', 'output', 4, 0]],
+    ['rnd.note>s8.note', 's8.out>dly.in', 'dly.out>rev.in', 'rev.out>out.in'], 0.65),
+  T('Clavinet Stereo Comp', 'A dry rhythmic Clavinet voice becomes a wider, controlled stereo keyboard tone.', 
+    [['kb', 'keyboard', 0, 0], ['clav', 'clavinet', 1, 0, { tone: 1, pickup: 2, brightness: 3800, decay: 0.4, mute: 0.5 }], ['wide', 'stereoWidener', 2, 0, { delay: 8, width: 0.5, wet: 0.3 }], ['cmp', 'compressor', 3, 0, { threshold: -24, ratio: 3.2, makeup: 1.3 }], ['rev', 'reverb', 4, 0, { size: 1.8, damping: 0.8, mix: 0.12 }], ['out', 'output', 5, 0]],
+    ['kb.note>clav.note', 'clav.out>wide.in', 'wide.out>cmp.in', 'cmp.out>rev.in', 'rev.out>out.in']),
   T('Empty Canvas', 'Just an Audio Output - build from scratch.', [['out', 'output', 2, 0]], []),
 ];
 
