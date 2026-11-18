@@ -24,6 +24,7 @@ const state = {
   filter: 'all',
   sort: 'updated_at',
   setupError: '',
+  patchTileIntroPlayed: false,
 };
 
 const localItems = () => localStore.items.map((item) => ({
@@ -178,9 +179,16 @@ function makeButton(label, className, onClick, title = '') {
   return button;
 }
 
-function makePatchTile(item) {
+function makePatchTile(item, playIntro = false) {
   const card = document.createElement('article');
-  card.className = 'community-card omni-patch-card';
+  card.className = 'community-card omni-patch-card' + (playIntro ? ' is-entering' : '');
+  if (playIntro) {
+    card.addEventListener('animationend', (event) => {
+      if (event.target === card && event.animationName === 'omni-launcher-card-enter') {
+        card.classList.remove('is-entering');
+      }
+    });
+  }
 
   const top = document.createElement('div');
   top.className = 'community-card__top';
@@ -247,7 +255,9 @@ function renderGrid() {
   if (!grid || !empty || !count) return;
 
   const items = getVisibleItems();
-  grid.replaceChildren(...items.map(makePatchTile));
+  const playTileIntro = !state.patchTileIntroPlayed && items.length > 0 && !document.hidden;
+  grid.replaceChildren(...items.map((item) => makePatchTile(item, playTileIntro)));
+  if (items.length > 0) state.patchTileIntroPlayed = true;
   count.textContent = String(allItems().length);
   empty.hidden = items.length > 0;
   const emptyTitle = empty.querySelector('h3');
@@ -595,27 +605,130 @@ async function syncItem(item) {
 }
 
 async function renameItem(item) {
-  const nextName = window.prompt('Patch name', item.title);
-  if (nextName === null) return;
-  const title = nextName.trim().slice(0, 80);
-  if (title.length < 3) {
-    setStatus('Patch names must contain at least three characters.', true);
-    return;
-  }
-  try {
-    if (item.source === 'local') {
-      localStore.rename(item.id, title);
-    } else {
-      const table = item.source === 'community' ? 'community_patches' : 'omni_user_patches';
-      const { error } = await state.supabase.from(table).update({ title }).eq('id', item.id).eq('owner_id', state.user.id);
-      if (error) throw error;
+  const dialog = document.createElement('dialog');
+  dialog.className = 'omni-rename-dialog';
+  dialog.setAttribute('aria-labelledby', 'omni-rename-title');
+
+  const panel = document.createElement('form');
+  panel.className = 'omni-rename-panel';
+  panel.noValidate = true;
+
+  const header = document.createElement('header');
+  header.className = 'omni-rename-panel__head';
+  const heading = document.createElement('h2');
+  heading.id = 'omni-rename-title';
+  heading.textContent = 'Rename patch';
+  let saving = false;
+  const close = makeButton('×', 'community-button community-button--quiet omni-rename-close', () => {
+    if (!saving) dialog.close();
+  }, 'Close rename dialog');
+  header.append(heading, close);
+
+  const field = document.createElement('label');
+  field.className = 'omni-rename-field';
+  const fieldLabel = document.createElement('span');
+  fieldLabel.textContent = 'PATCH NAME';
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.name = 'patch-name';
+  input.value = item.title;
+  input.maxLength = 80;
+  input.minLength = 3;
+  input.required = true;
+  input.autocomplete = 'off';
+  input.setAttribute('aria-label', 'Patch name');
+  field.append(fieldLabel, input);
+
+  const feedback = document.createElement('p');
+  feedback.className = 'omni-rename-error';
+  feedback.setAttribute('role', 'alert');
+  feedback.setAttribute('aria-live', 'polite');
+
+  const actions = document.createElement('div');
+  actions.className = 'omni-rename-actions';
+  const cancel = makeButton('CANCEL', 'community-button community-button--quiet', () => {
+    if (!saving) dialog.close();
+  });
+  const save = document.createElement('button');
+  save.type = 'submit';
+  save.className = 'community-button community-button--primary';
+  save.textContent = 'SAVE NAME';
+  actions.append(cancel, save);
+  panel.append(header, field, feedback, actions);
+
+  const showError = (message) => {
+    feedback.textContent = message;
+    input.setAttribute('aria-invalid', 'true');
+    input.focus();
+  };
+
+  input.addEventListener('input', () => {
+    feedback.textContent = '';
+    input.removeAttribute('aria-invalid');
+  });
+
+  panel.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (saving) return;
+
+    const title = input.value.trim().slice(0, 80);
+    if (title.length < 3) {
+      showError('Patch names must contain at least three characters.');
+      return;
     }
-    await refreshAccountPatches();
-    renderGrid();
-    setStatus('Renamed "' + title + '".');
-  } catch (error) {
-    setStatus(error.message || 'Could not rename that patch.', true);
-  }
+    if (title === item.title) {
+      dialog.close();
+      return;
+    }
+
+    saving = true;
+    input.disabled = true;
+    close.disabled = true;
+    cancel.disabled = true;
+    save.disabled = true;
+    save.textContent = 'SAVING…';
+    feedback.textContent = '';
+
+    try {
+      if (item.source === 'local') {
+        localStore.rename(item.id, title);
+      } else {
+        if (!state.supabase || !state.user) {
+          throw new Error('Sign in to your Overture account before renaming this patch.');
+        }
+        const table = item.source === 'community' ? 'community_patches' : 'omni_user_patches';
+        const { error } = await state.supabase.from(table)
+          .update({ title }).eq('id', item.id).eq('owner_id', state.user.id);
+        if (error) throw error;
+      }
+      await refreshAccountPatches();
+      renderGrid();
+      dialog.close();
+      setStatus('Renamed "' + title + '".');
+    } catch (error) {
+      saving = false;
+      input.disabled = false;
+      close.disabled = false;
+      cancel.disabled = false;
+      save.disabled = false;
+      save.textContent = 'SAVE NAME';
+      showError(error.message || 'Could not rename that patch.');
+    }
+  });
+
+  dialog.append(panel);
+  dialog.addEventListener('click', (event) => {
+    if (event.target === dialog && !saving) dialog.close();
+  });
+  dialog.addEventListener('cancel', (event) => {
+    if (saving) event.preventDefault();
+  });
+  dialog.addEventListener('close', () => dialog.remove(), { once: true });
+
+  document.body.append(dialog);
+  dialog.showModal();
+  input.focus();
+  input.select();
 }
 
 async function deleteItem(item) {
@@ -679,6 +792,13 @@ if (isEditor) {
 } else {
   void bootLauncher();
 }
+
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) return;
+  document.querySelectorAll('.omni-patch-card.is-entering').forEach((card) => {
+    card.classList.remove('is-entering');
+  });
+});
 
 document.addEventListener('click', (event) => {
   if (!event.target.closest('.omni-patch-tile__controls')) {
