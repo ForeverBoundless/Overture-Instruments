@@ -36,11 +36,36 @@ const localItems = () => localStore.items.map((item) => ({
   source: 'local',
 }));
 
-const allItems = () => [
-  ...state.accountPatches.map((item) => ({ ...item, source: 'account' })),
-  ...state.communityPatches.map((item) => ({ ...item, source: 'community' })),
-  ...localItems(),
-];
+function stableStringify(value) {
+  if (Array.isArray(value)) return '[' + value.map(stableStringify).join(',') + ']';
+  if (value && typeof value === 'object') return '{' + Object.keys(value).sort().map((key) => JSON.stringify(key) + ':' + stableStringify(value[key])).join(',') + '}';
+  return JSON.stringify(value);
+}
+function patchSignature(patch) {
+  const modules = (patch.modules || []).map((module) => ({ type: module.type, params: module.params || {} }))
+    .sort((a, b) => stableStringify(a).localeCompare(stableStringify(b)));
+  const byId = new Map((patch.modules || []).map((module) => [module.id, module]));
+  const connections = (patch.connections || []).map((connection) => {
+    const from = byId.get(connection.from.module), to = byId.get(connection.to.module);
+    return (from?.type || 'unknown') + ':' + connection.from.port + '>' + (to?.type || 'unknown') + ':' + connection.to.port;
+  }).sort();
+  return stableStringify({ schema: patch.schema, modules, connections, global: patch.global || {} });
+}
+const allItems = () => {
+  const sources = [
+    ...state.accountPatches.map((item) => ({ ...item, source: 'account' })),
+    ...state.communityPatches.map((item) => ({ ...item, source: 'community' })),
+    ...localItems(),
+  ];
+  const unique = new Map();
+  sources.forEach((item) => {
+    const signature = patchSignature(item.patch_data);
+    const existing = unique.get(signature);
+    if (!existing) unique.set(signature, { ...item, locations: [item.source] });
+    else if (!existing.locations.includes(item.source)) existing.locations.push(item.source);
+  });
+  return [...unique.values()];
+};
 
 function setStatus(message, error = false) {
   const node = document.getElementById('omni-launch-status');
@@ -56,14 +81,17 @@ function dateLabel(value) {
     : new Intl.DateTimeFormat(undefined, { month: 'short', day: 'numeric', year: 'numeric' }).format(date);
 }
 
-function sourceLabel(source) {
-  return ({ account: 'ACCOUNT', local: 'THIS DEVICE', community: 'PUBLISHED' })[source] || 'PATCH';
+function sourceLabel(item) {
+  const sources = item.locations || [item.source];
+  if (sources.includes('account')) return sources.includes('community') ? 'ACCOUNT · PUBLISHED' : 'ACCOUNT';
+  if (sources.includes('community')) return 'PUBLISHED';
+  return 'THIS DEVICE';
 }
 
 function getVisibleItems() {
   const query = state.query.trim().toLowerCase();
   const items = allItems().filter((item) => {
-    if (state.filter !== 'all' && item.source !== state.filter) return false;
+    if (state.filter !== 'all' && !(item.locations || [item.source]).includes(state.filter)) return false;
     if (!query) return true;
     const moduleText = item.patch_data.modules.map((module) => module.type + ' ' + module.id).join(' ');
     const connectionText = item.patch_data.connections.map((connection) => connection.from.port + ' ' + connection.to.port).join(' ');
@@ -153,21 +181,12 @@ function makeButton(label, className, onClick, title = '') {
 function makePatchTile(item) {
   const tile = document.createElement('article');
   tile.className = 'omni-patch-tile';
-  tile.dataset.source = item.source;
-
-  const open = document.createElement('button');
-  open.type = 'button';
-  open.className = 'omni-patch-tile__open';
-  open.setAttribute('aria-label', 'Open ' + item.title);
-  open.addEventListener('click', () => openEditor(item.patch_data, item.id, item.source, item));
-
-  const preview = document.createElement('div');
+  const preview = document.createElement('button');
+  preview.type = 'button';
   preview.className = 'omni-patch-tile__preview';
-  preview.innerHTML = templatePreview(item.patch_data, 380, 150);
-  const metrics = document.createElement('span');
-  metrics.className = 'omni-patch-tile__metrics';
-  metrics.textContent = item.patch_data.modules.length + ' MODULES  ·  ' + item.patch_data.connections.length + ' CONNECTIONS';
-  preview.append(metrics);
+  preview.setAttribute('aria-label', 'Open ' + item.title);
+  preview.innerHTML = templatePreview(item.patch_data, 420, 160);
+  preview.addEventListener('click', () => openEditor(item.patch_data, item.id, item.source, item));
 
   const body = document.createElement('div');
   body.className = 'omni-patch-tile__body';
@@ -176,30 +195,33 @@ function makePatchTile(item) {
   const title = document.createElement('h3');
   title.textContent = item.title;
   const meta = document.createElement('p');
-  meta.textContent = dateLabel(item.updated_at || item.created_at) + '  ·  ' + sourceLabel(item.source);
+  meta.textContent = dateLabel(item.updated_at || item.created_at) + ' · ' + sourceLabel(item);
   details.append(title, meta);
-  const arrow = document.createElement('span');
-  arrow.className = 'omni-patch-tile__arrow';
-  arrow.textContent = '↗';
-  body.append(details, arrow);
-  open.append(preview, body);
-  tile.append(open);
 
-  const actions = document.createElement('div');
-  actions.className = 'omni-patch-tile__actions';
-  actions.append(makeButton('OPEN', 'omni-patch-action omni-patch-action--open', () => openEditor(item.patch_data, item.id, item.source, item)));
-  actions.append(makeButton(
-    item.source === 'local' ? 'SAVE TO ACCOUNT' : (item.source === 'account' ? 'SAVE' : 'EDIT'),
-    'omni-patch-action',
-    () => item.source === 'community' ? openEditor(item.patch_data, item.id, item.source, item) : syncItem(item),
-  ));
-  actions.append(makeButton('RENAME', 'omni-patch-action', () => renameItem(item)));
-  actions.append(makeButton('EXPORT', 'omni-patch-action', () => exportItem(item)));
-  actions.append(makeButton('DELETE', 'omni-patch-action omni-patch-action--quiet', () => deleteItem(item)));
-  tile.append(actions);
+  const controls = document.createElement('div');
+  controls.className = 'omni-patch-tile__controls';
+  const open = makeButton('Open', 'omni-patch-tile__open-action', () => openEditor(item.patch_data, item.id, item.source, item));
+  const more = makeButton('···', 'omni-patch-tile__more', null, 'More patch actions');
+  const menu = document.createElement('div');
+  menu.className = 'omni-patch-menu';
+  menu.hidden = true;
+  more.addEventListener('click', (event) => {
+    event.stopPropagation();
+    document.querySelectorAll('.omni-patch-menu').forEach((other) => { if (other !== menu) other.hidden = true; });
+    menu.hidden = !menu.hidden;
+  });
+  const menuAction = (label, action, danger = false) => {
+    menu.append(makeButton(label, 'omni-patch-menu__item' + (danger ? ' is-danger' : ''), () => { menu.hidden = true; action(); }));
+  };
+  menuAction(item.source === 'account' ? 'Save changes' : 'Save to account', () => syncItem(item));
+  menuAction('Rename', () => renameItem(item));
+  menuAction('Export JSON', () => exportItem(item));
+  menuAction('Delete', () => deleteItem(item), true);
+  controls.append(open, more, menu);
+  body.append(details, controls);
+  tile.append(preview, body);
   return tile;
 }
-
 function renderGrid() {
   const grid = document.getElementById('omni-patch-grid');
   const empty = document.getElementById('omni-empty');
@@ -231,61 +253,41 @@ function renderStatus() {
 function render() {
   root.innerHTML = [
     '<main class="omni-launcher">',
-    '  <section class="omni-launcher__intro" aria-labelledby="omni-launcher-title">',
-    '    <div class="omni-launcher__intro-copy">',
-    '      <p class="omni-launcher__eyebrow">OVERTURE / CREATIVE SYSTEMS / 01</p>',
-    '      <h1 id="omni-launcher-title">Overture <em>OMNI</em></h1>',
-    '      <p>Build an instrument from the ground up, or pick up where you left off.</p>',
-    '    </div>',
-    '    <div class="omni-launcher__intro-mark" aria-hidden="true"><span>O</span><i></i></div>',
-    '  </section>',
-    '  <section class="omni-launcher__quick-actions" aria-label="Create or import a patch">',
-    '    <button class="omni-launcher__create" id="omni-new" type="button"><span class="omni-launcher__action-symbol">＋</span><span><b>New patch</b><small>Start with an empty instrument</small></span></button>',
-    '    <button class="omni-launcher__quick-action" id="omni-templates" type="button"><span class="omni-launcher__action-symbol">▦</span><span><b>Start from template</b><small>Explore the starter library</small></span></button>',
-    '    <button class="omni-launcher__quick-action" id="omni-import" type="button"><span class="omni-launcher__action-symbol">↥</span><span><b>Import patch</b><small>Open a saved OMNI JSON file</small></span></button>',
-    '    <button class="omni-launcher__quick-action" id="omni-export-all" type="button"><span class="omni-launcher__action-symbol">↓</span><span><b>Export library</b><small>Back up your saved patches</small></span></button>',
+    '  <section class="omni-launcher__intro" aria-labelledby="omni-launcher-title"><div class="omni-launcher__intro-copy"><h1 id="omni-launcher-title">Overture <em>OMNI</em></h1><p>Your modular instruments, saved in one place.</p></div></section>',
+    '  <section class="omni-launcher__quick-actions" aria-label="Patch actions">',
+    '    <button class="omni-launcher__create" id="omni-new" type="button"><span>＋</span><b>New patch</b></button>',
+    '    <button class="omni-launcher__quick-action" id="omni-templates" type="button"><span>▦</span><b>Templates</b></button>',
+    '    <button class="omni-launcher__quick-action" id="omni-import" type="button"><span>↑</span><b>Import patch</b></button>',
     '  </section>',
     '  <section class="omni-launcher__library" aria-labelledby="omni-patches-title">',
-    '    <div class="omni-launcher__section-head"><div><p class="omni-launcher__eyebrow">YOUR WORKSPACE</p><h2 id="omni-patches-title">My patches <span id="omni-patch-count">0</span></h2></div><button id="omni-refresh" class="omni-launcher__refresh" type="button">↻ <span>Refresh</span></button></div>',
-    '    <div class="omni-launcher__tools">',
+    '    <div class="omni-launcher__section-head"><h2 id="omni-patches-title">My patches <span id="omni-patch-count">0</span></h2><button id="omni-export-all" class="omni-launcher__text-button" type="button">Export library</button></div>',
+    '    <div class="omni-launcher__toolbar">',
     '      <label class="omni-launcher__search"><span aria-hidden="true">⌕</span><input id="omni-search" type="search" placeholder="Search patches or modules…" autocomplete="off"></label>',
-    '      <label class="omni-launcher__select"><span>SHOW</span><select id="omni-filter"><option value="all">All patches</option><option value="account">Account</option><option value="local">This device</option><option value="community">Published</option></select></label>',
-    '      <label class="omni-launcher__select"><span>SORT BY</span><select id="omni-sort"><option value="updated_at">Recently updated</option><option value="created_at">Date created</option><option value="title">Name</option><option value="modules">Most modules</option><option value="connections">Most connections</option></select></label>',
+    '      <label class="omni-launcher__field"><span>Show</span><select id="omni-filter"><option value="all">All patches</option><option value="account">Account</option><option value="local">This device</option><option value="community">Published</option></select></label>',
+    '      <label class="omni-launcher__field"><span>Sort by</span><select id="omni-sort"><option value="updated_at">Recently updated</option><option value="created_at">Date created</option><option value="title">Name</option><option value="modules">Module count</option><option value="connections">Connection count</option></select></label>',
+    '      <button id="omni-refresh" class="omni-launcher__refresh" type="button" aria-label="Refresh patches">↻</button>',
     '    </div>',
     '    <p id="omni-launch-status" class="omni-launcher__status" role="status" aria-live="polite"></p>',
     '    <div class="omni-launcher__grid" id="omni-patch-grid"></div>',
-    '    <div class="omni-launcher__empty" id="omni-empty" hidden><span aria-hidden="true">⌁</span><h3>Your patch library is empty</h3><p>Start with a new patch, choose a template, or import a patch you already made.</p></div>',
+    '    <div class="omni-launcher__empty" id="omni-empty" hidden><h3>No patches here yet</h3><p>Create a patch or start with a template.</p></div>',
     '  </section>',
-    '  <footer class="omni-launcher__footer"><span>OVERTURE OMNI <i>·</i> MODULAR SOUND DESIGN</span><span>PRIVATE BY DEFAULT <i>·</i> PUBLISH WHEN YOU ARE READY</span></footer>',
     '</main>',
-  ].join('');
+  ].join("");
 
   document.getElementById('omni-filter').value = state.filter;
   document.getElementById('omni-sort').value = state.sort;
   document.getElementById('omni-search').value = state.query;
-
   document.getElementById('omni-new').addEventListener('click', () => openEditor());
   document.getElementById('omni-templates').addEventListener('click', showTemplates);
   document.getElementById('omni-import').addEventListener('click', importPatch);
   document.getElementById('omni-export-all').addEventListener('click', exportLibrary);
   document.getElementById('omni-refresh').addEventListener('click', refreshAndRender);
-  document.getElementById('omni-search').addEventListener('input', (event) => {
-    state.query = event.target.value;
-    renderGrid();
-  });
-  document.getElementById('omni-filter').addEventListener('change', (event) => {
-    state.filter = event.target.value;
-    renderGrid();
-  });
-  document.getElementById('omni-sort').addEventListener('change', (event) => {
-    state.sort = event.target.value;
-    renderGrid();
-  });
-
+  document.getElementById('omni-search').addEventListener('input', (event) => { state.query = event.target.value; renderGrid(); });
+  document.getElementById('omni-filter').addEventListener('change', (event) => { state.filter = event.target.value; renderGrid(); });
+  document.getElementById('omni-sort').addEventListener('change', (event) => { state.sort = event.target.value; renderGrid(); });
   renderGrid();
   renderStatus();
 }
-
 async function refreshAndRender() {
   const button = document.getElementById('omni-refresh');
   if (button) { button.disabled = true; button.textContent = 'Refreshing…'; }
@@ -312,13 +314,10 @@ function showTemplates() {
   const header = document.createElement('header');
   header.className = 'omni-launcher__dialog-head';
   const headingGroup = document.createElement('div');
-  const eyebrow = document.createElement('p');
-  eyebrow.className = 'omni-launcher__eyebrow';
-  eyebrow.textContent = 'STARTER PATCHES';
   const heading = document.createElement('h2');
   heading.id = 'omni-template-title';
-  heading.textContent = 'Choose a template';
-  headingGroup.append(eyebrow, heading);
+  heading.textContent = 'Templates';
+  headingGroup.append(heading);
   const close = makeButton('×', 'omni-launcher__dialog-close', () => overlay.remove(), 'Close templates');
   header.append(headingGroup, close);
 
@@ -368,9 +367,14 @@ function importPatch() {
   pickFile('.json,application/json', (raw) => {
     try {
       const imported = localStore.parseImport(raw);
-      const item = localStore.save(imported.name, imported.data);
+      imported.data.name = imported.name;
+      if (allItems().some((item) => patchSignature(item.patch_data) === patchSignature(imported.data))) {
+        setStatus('That patch is already in your library.');
+        return;
+      }
+      localStore.save(imported.name, imported.data);
       renderGrid();
-      setStatus('Imported "' + item.name + '" to this device. Open it from your patch library.');
+      setStatus('Patch imported to this device.');
     } catch (error) {
       setStatus(error.message || 'Could not import that patch.', true);
     }
@@ -395,12 +399,20 @@ function exportLibrary() {
   setStatus('Exported the patches currently shown in your library.');
 }
 
-async function syncItem(item) {
+async async function syncItem(item) {
   if (!state.supabase || !state.user) {
     setStatus('Sign in to your Overture account before syncing patches.', true);
     return;
   }
   try {
+    const signature = patchSignature(item.patch_data);
+    const alreadySaved = state.accountPatches.find((candidate) => patchSignature(candidate.patch_data) === signature);
+    if (item.source !== 'account' && alreadySaved) {
+      localStore.items.filter((local) => patchSignature(local.data) === signature).forEach((local) => localStore.remove(local.id));
+      renderGrid();
+      setStatus('This patch is already saved to your account. The duplicate has been combined.');
+      return;
+    }
     const payload = {
       owner_id: state.user.id,
       title: item.title.slice(0, 80),
@@ -416,7 +428,7 @@ async function syncItem(item) {
         .insert(payload).select('id').single();
     }
     if (result.error) throw result.error;
-    if (item.source === 'local') localStore.remove(item.id);
+    localStore.items.filter((local) => patchSignature(local.data) === signature).forEach((local) => localStore.remove(local.id));
     await refreshAccountPatches();
     renderGrid();
     setStatus(item.source === 'account' ? 'Account patch saved.' : 'Patch synced to your Overture account.');
@@ -510,3 +522,9 @@ if (isEditor) {
 } else {
   void bootLauncher();
 }
+
+document.addEventListener('click', (event) => {
+  if (!event.target.closest('.omni-patch-tile__controls')) {
+    document.querySelectorAll('.omni-patch-menu').forEach((menu) => { menu.hidden = true; });
+  }
+});
