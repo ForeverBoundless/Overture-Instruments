@@ -8,24 +8,29 @@
 <meta name="description" content="OMNI lets you assemble a synthesizer from functional modules, connect real audio and control signals, play it, and save or export the design.">
 <link rel="icon" href="/ui/Logos/OvertureLogo.png">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/keyboard.css"><link rel="stylesheet" href="/css/knobs.css"><link rel="stylesheet" href="/css/omni.css?v=20261118-launcher-r3">
-<script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
-<script defer src="/_vercel/insights/script.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/keyboard.css">
+<link rel="stylesheet" href="/css/knobs.css">
+<link rel="stylesheet" href="/css/omni.css?v=20261118-launcher-r4">
 <link rel="stylesheet" href="/css/midi-map.css?v=20261116-community-purple">
-
+<link rel="stylesheet" href="/css/brand.css">
+<link rel="stylesheet" href="/css/site-footer.css">
 <link rel="stylesheet" href="/css/site-theme.css?v=20261117-inter-type-r1">
 <link rel="stylesheet" href="/css/site-theme-polish.css?v=20261117-inter-type-r1">
 <link rel="stylesheet" href="/css/omni-info.css?v=20261114-info-type">
-<link rel="stylesheet" href="/css/brand.css?v=20261118-omni-shell-r2">
-<link rel="stylesheet" href="/css/site-footer.css?v=20261118-omni-shell-r3">
-<link rel="stylesheet" href="/css/omni-launcher-blue.css?v=20261118-blue-r1">
+<link rel="stylesheet" href="/css/omni-launcher.css?v=20261118-shared-r4">
+<script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
+<script defer src="/_vercel/insights/script.js"></script>
 <script src="/js/shared/site-theme.js" defer></script>
 <script src="/js/shared/site-nav.js" defer></script>
 <script src="/js/shared/supabase-config.js"></script>
 <script type="module" src="/js/shared/account-shell.js?v=20261102-contributions-menu"></script>
 <script src="/js/shared/pwa.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@5/dist/email.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js" defer></script>
+<script src="/js/shared/contact.js?v=20261029-modalfix" defer></script>
 </head>
 <body class="omni-page">
 <div class="site-noise" aria-hidden="true"></div>
@@ -35,12 +40,17 @@
     <span class="site-brand__wordmark">OVERTURE INSTRUMENTS</span>
   </a>
   <nav class="main-nav" id="main-nav" aria-label="Main navigation">
-    <a href="/about">About</a><a href="/library">Library</a><a href="/omni" aria-current="page">OMNI</a><a href="/community">Community</a><a href="/experiments">Experiments</a>
+    <a href="/about">About</a>
+    <a href="/library">Library</a>
+    <a href="/omni" aria-current="page">OMNI</a>
+    <a href="/community">Community</a>
+    <a href="/experiments">Experiments</a>
   </nav>
-  <a class="header-account" href="/account"><span class="header-account__label">LOG IN</span></a>
-  <button class="menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="main-nav"><span></span><span></span></button>
-</header>
-<main id="omni-root" aria-busy="true">
+  <a class="header-account" href="/account" aria-label="Log in to your Overture account"><span class="header-account__label">LOG IN</span></a>
+  <button class="menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="main-nav">
+    <span></span><span></span>
+  </button>
+</header><main id="omni-root" aria-busy="true">
   <section class="omni-boot" id="omni-boot" role="status" aria-live="polite">
     <img src="/ui/Logos/OvertureLogo.png" alt="" width="48" height="48">
     <strong>OMNI</strong>
@@ -80,14 +90,55 @@
   };
 </script>
 <footer class="site-footer omni-site-footer">
-  <div class="footer-top">
-    <a class="footer-brand" href="/" aria-label="Overture Instruments home"><img src="/ui/Logos/OvertureLogo.png" alt="" width="34" height="34"><span>OVERTURE <b>INSTRUMENTS</b></span></a>
-    <button class="footer-contact" type="button" id="contact-open">Contact</button>
-    <a class="footer-github" href="https://github.com/ForeverBoundless/Overture-Instruments" target="_blank" rel="noopener noreferrer"><span>Explore the open-source codebase</span><b aria-hidden="true">↗</b></a>
+    <div class="footer-top">
+      <a class="footer-brand" href="#top" aria-label="Back to top">
+        <img src="/ui/Logos/OvertureLogo.png" alt="" width="34" height="34">
+        <span>OVERTURE <b>INSTRUMENTS</b></span>
+      </a>
+      <button class="footer-contact" type="button" id="contact-open">Contact</button>
+      <a class="footer-github" href="https://github.com/ForeverBoundless/Overture-Instruments" target="_blank" rel="noopener noreferrer">
+        <span>Explore the open-source codebase</span><b aria-hidden="true">↗</b>
+      </a>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="copyright-year">2026</span> Overture Instruments</span>
+      <span class="footer-disclaimer">Independent, unofficial project. Not affiliated with, endorsed by, or sponsored by any manufacturer represented here. All trademarks and brand names belong to their respective owners.</span>
+      <a href="#top" class="back-to-top">BACK TO TOP ↑</a>
+    </div>
+  </footer>
+<div class="contact-modal" id="contact-modal" hidden>
+    <div class="contact-modal__backdrop" data-contact-close></div>
+    <form class="contact-modal__panel" id="contact-form" role="dialog" aria-modal="true" aria-labelledby="contact-title">
+      <div class="contact-modal__head">
+        <h2 id="contact-title">Get in touch</h2>
+        <button type="button" class="contact-modal__close" aria-label="Close" data-contact-close>×</button>
+      </div>
+      <input type="text" name="_honey" tabindex="-1" autocomplete="off" style="display:none">
+      <label class="contact-field"><span>Name <em>(optional)</em></span><input type="text" name="name" autocomplete="name"></label>
+      <label class="contact-field"><span>Subject</span><input type="text" name="subject" required></label>
+      <div class="contact-field">
+        <span>Message</span>
+        <div class="contact-toolbar" aria-label="Formatting">
+          <button type="button" data-command="bold" title="Bold"><b>B</b></button>
+          <button type="button" data-command="italic" title="Italic"><i>I</i></button>
+          <button type="button" data-command="code" title="Code">&lt;/&gt;</button>
+          <button type="button" data-command="heading" title="Heading">H</button>
+          <button type="button" data-command="bullets" title="Bullet list">•</button>
+          <button type="button" data-command="numbered" title="Numbered list">1.</button>
+          <button type="button" data-command="quote" title="Quote">"</button>
+          <button type="button" data-command="link" title="Link">🔗</button>
+        </div>
+        <div class="contact-editor__body" contenteditable="true" role="textbox" aria-label="Message" aria-multiline="true" data-placeholder="Write your message…"></div>
+        <textarea name="body" class="contact-editor__source" tabindex="-1" aria-hidden="true"></textarea>
+      </div>
+      <p class="contact-status" role="status" aria-live="polite"></p>
+      <div class="contact-modal__actions">
+        <button type="button" class="contact-cancel" data-contact-close>Cancel</button>
+        <button type="submit" class="button button--primary">Send email</button>
+      </div>
+    </form>
   </div>
-  <div class="footer-bottom"><span>© <span id="copyright-year">2026</span> Overture Instruments</span><span class="footer-disclaimer">Independent, unofficial project. All trademarks belong to their respective owners.</span><a href="#top" class="back-to-top">BACK TO TOP ↑</a></div>
-</footer>
-<script type="module" src="/js/omni-launcher.js?v=20261118-launcher-r3"></script>
+<script type="module" src="/js/omni-launcher.js?v=20261118-launcher-r4"></script>
 <script type="module" src="/js/shared/midiMap.js"></script>
 </body>
 </html>
