@@ -1,0 +1,631 @@
+/* OMNI patch launcher — Overture layout, OMNI blue identity.
+   Shared typography, spacing, site navigation and surfaces come from site-theme.css,
+   brand.css and site-footer.css. This sheet only defines the OMNI page accent. */
+
+html.omni-launcher-mode,
+html.omni-launcher-mode body {
+  min-height:100%;
+  height:auto;
+  overflow-x:clip;
+  overflow-y:auto;
+}
+html.omni-launcher-mode body.omni-page {
+  margin:0;
+  color:var(--ink);
+  background:
+    radial-gradient(ellipse at 50% 8%,rgba(29,112,204,.24),transparent 48%),
+    radial-gradient(ellipse at 12% 35%,rgba(22,92,171,.10),transparent 40%),
+    var(--bg);
+  font:14px/1.55 var(--font-body);
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+html.omni-launcher-mode #omni-root {
+  display:block;
+  width:100%;
+  min-height:0;
+  height:auto;
+  max-height:none;
+  overflow:visible;
+}
+html.omni-launcher-mode .omni-launcher {
+  --omni-blue:#4aa9ff;
+  --omni-blue-bright:#7bc8ff;
+  --omni-blue-deep:#176ec0;
+  --oi-primary-border:rgba(95,181,255,.78);
+  --oi-primary-ink:#06172a;
+  --oi-primary-background:linear-gradient(135deg,#8bd5ff,#4099ef 60%,#2678d3);
+  --oi-primary-hover-background:linear-gradient(135deg,#a3e0ff,#60adf4 60%,#3789e2);
+  --oi-button-hover-background:rgba(76,160,245,.11);
+  --oi-focus:#79c7ff;
+  position:relative;
+  isolation:isolate;
+  width:min(var(--page-width),calc(100% - var(--gutter) - var(--gutter)));
+  min-height:calc(100vh - 100px);
+  margin:0 auto;
+  padding:clamp(126px,14vw,174px) 0 90px;
+  overflow:visible;
+  color:var(--ink);
+  background:transparent;
+}
+html.omni-launcher-mode .omni-launcher::before {
+  position:fixed;
+  z-index:-2;
+  inset:0;
+  content:"";
+  pointer-events:none;
+  background:
+    radial-gradient(ellipse at 50% 13%,rgba(24,116,216,.23),transparent 53%),
+    radial-gradient(ellipse at 85% 58%,rgba(20,100,198,.085),transparent 43%),
+    repeating-linear-gradient(0deg,rgba(82,174,255,.052) 0 1px,transparent 1px 4px),
+    linear-gradient(110deg,rgba(7,25,48,.55),transparent 44%,rgba(6,31,60,.28));
+  mask-image:linear-gradient(180deg,#000 0%,#000 70%,transparent 100%);
+}
+html.omni-launcher-mode .omni-launcher::after {
+  position:fixed;
+  z-index:-1;
+  inset:0;
+  content:"";
+  pointer-events:none;
+  opacity:.19;
+  background-image:
+    linear-gradient(rgba(85,171,255,.10) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(85,171,255,.10) 1px,transparent 1px);
+  background-size:48px 48px;
+  mask-image:linear-gradient(180deg,#000,transparent 84%);
+}
+
+/* Hero follows the same width, top spacing and title scale as Community. */
+html.omni-launcher-mode .omni-launcher__intro {
+  display:flex;
+  min-height:260px;
+  align-items:center;
+  padding:0 0 38px;
+}
+html.omni-launcher-mode .omni-launcher__intro-copy { max-width:780px; }
+html.omni-launcher-mode .omni-launcher__intro h1 {
+  margin:0;
+  color:var(--ink);
+  font:400 clamp(36px,5.2vw,64px)/1.06 var(--font-display);
+  letter-spacing:-.055em;
+}
+html.omni-launcher-mode .omni-launcher__intro h1 em {
+  color:var(--omni-blue-bright);
+  font-style:normal;
+  text-shadow:0 0 28px rgba(55,151,255,.48),0 0 70px rgba(40,119,222,.24);
+}
+html.omni-launcher-mode .omni-launcher__intro-copy>p {
+  max-width:600px;
+  margin:18px 0 0;
+  color:var(--muted);
+  font-size:14px;
+  line-height:1.8;
+}
+
+/* Three clear primary actions, with one blue primary button. */
+html.omni-launcher-mode .omni-launcher__quick-actions {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:13px;
+  margin:0 0 48px;
+}
+html.omni-launcher-mode .omni-launcher__quick-actions button {
+  display:flex;
+  min-width:0;
+  min-height:68px;
+  align-items:center;
+  gap:13px;
+  padding:15px 18px;
+  border:1px solid var(--oi-panel-border);
+  border-radius:var(--oi-panel-radius);
+  background:var(--oi-panel-background);
+  box-shadow:var(--oi-panel-shadow);
+  color:var(--ink);
+  text-align:left;
+  cursor:pointer;
+  transition:transform .18s ease,border-color .18s ease,background .18s ease,box-shadow .18s ease;
+}
+html.omni-launcher-mode .omni-launcher__quick-actions button:hover {
+  transform:translateY(-2px);
+  border-color:rgba(93,180,255,.52);
+  background:var(--oi-panel-background-soft);
+  box-shadow:0 15px 40px rgba(15,94,173,.16),var(--oi-panel-shadow);
+}
+html.omni-launcher-mode .omni-launcher__quick-actions button>span {
+  flex:0 0 auto;
+  color:var(--omni-blue-bright);
+  font-size:22px;
+  line-height:1;
+}
+html.omni-launcher-mode .omni-launcher__quick-actions b {
+  color:var(--ink);
+  font:600 12px/1.3 var(--font-body);
+}
+html.omni-launcher-mode .omni-launcher__create {
+  border-color:rgba(94,181,255,.72)!important;
+  background:var(--oi-primary-background)!important;
+  box-shadow:0 8px 28px rgba(24,124,224,.22),inset 0 1px rgba(255,255,255,.34)!important;
+}
+html.omni-launcher-mode .omni-launcher__create b,
+html.omni-launcher-mode .omni-launcher__create>span { color:var(--oi-primary-ink)!important; }
+html.omni-launcher-mode .omni-launcher__create:hover { background:var(--oi-primary-hover-background)!important; }
+
+/* Search and sorting mirror the Community toolbar's compact control row. */
+html.omni-launcher-mode .omni-launcher__section-head {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:18px;
+  margin:0 0 19px;
+}
+html.omni-launcher-mode .omni-launcher__section-head h2 {
+  margin:0;
+  color:var(--ink);
+  font:400 clamp(24px,3vw,34px)/1.12 var(--font-display);
+  letter-spacing:-.045em;
+}
+html.omni-launcher-mode .omni-launcher__section-head h2 span {
+  display:inline-flex;
+  min-width:25px;
+  height:25px;
+  align-items:center;
+  justify-content:center;
+  margin-left:8px;
+  border:1px solid var(--oi-panel-border);
+  border-radius:20px;
+  color:var(--muted);
+  background:var(--oi-panel-background-soft);
+  font:10px var(--font-mono);
+  vertical-align:middle;
+}
+html.omni-launcher-mode .omni-launcher__toolbar {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(145px,165px) minmax(155px,180px) 40px;
+  align-items:end;
+  gap:13px;
+  padding:17px;
+  border:1px solid var(--oi-panel-border);
+  border-radius:var(--oi-panel-radius);
+  background:var(--oi-panel-background);
+  box-shadow:var(--oi-panel-shadow);
+}
+html.omni-launcher-mode .omni-launcher__search,
+html.omni-launcher-mode .omni-launcher__field {
+  display:grid;
+  min-width:0;
+  gap:7px;
+  color:var(--muted);
+  font:500 8px/1.5 var(--font-mono);
+  letter-spacing:.11em;
+}
+html.omni-launcher-mode .omni-launcher__search {
+  grid-template-columns:18px minmax(0,1fr);
+  align-items:center;
+  min-height:42px;
+  padding:0 12px;
+  border:1px solid var(--oi-control-border);
+  border-radius:var(--oi-control-radius);
+  background:var(--oi-control-background);
+  font-size:17px;
+  letter-spacing:0;
+}
+html.omni-launcher-mode .omni-launcher__search input {
+  width:100%;
+  min-width:0;
+  height:40px;
+  padding:0;
+  border:0;
+  outline:0;
+  background:transparent;
+  color:var(--ink);
+  font:12px var(--font-body);
+}
+html.omni-launcher-mode .omni-launcher__search input::placeholder { color:var(--faint); }
+html.omni-launcher-mode .omni-launcher__field select {
+  width:100%;
+  min-width:0;
+  height:42px;
+  padding:0 10px;
+  border:1px solid var(--oi-control-border);
+  border-radius:var(--oi-control-radius);
+  outline:0;
+  background:var(--oi-control-background);
+  color:var(--ink);
+  font:12px var(--font-body);
+  letter-spacing:0;
+  cursor:pointer;
+}
+html.omni-launcher-mode .omni-launcher__field select option { background:var(--panel); color:var(--ink); }
+html.omni-launcher-mode .omni-launcher__text-button,
+html.omni-launcher-mode .omni-launcher__refresh {
+  min-height:38px;
+  padding:0 12px;
+  border:1px solid var(--oi-control-border);
+  border-radius:var(--oi-button-radius);
+  background:var(--oi-button-background);
+  color:var(--omni-blue-bright);
+  font:600 10px var(--font-body);
+  cursor:pointer;
+  transition:background .18s,border-color .18s,color .18s;
+}
+html.omni-launcher-mode .omni-launcher__refresh { width:40px; padding:0; font-size:17px; }
+html.omni-launcher-mode .omni-launcher__text-button:hover,
+html.omni-launcher-mode .omni-launcher__refresh:hover {
+  border-color:rgba(93,180,255,.55);
+  background:rgba(60,140,220,.10);
+  color:var(--ink);
+}
+html.omni-launcher-mode .omni-launcher__status {
+  min-height:17px;
+  margin:12px 0;
+  color:var(--muted);
+  font:10px/1.5 var(--font-body);
+}
+html.omni-launcher-mode .omni-launcher__status:empty { display:none; }
+html.omni-launcher-mode .omni-launcher__status.is-error { color:#e68c81; }
+
+/* Patch cards use the same quiet surface and border system as Community cards. */
+html.omni-launcher-mode .omni-launcher__grid {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  align-items:stretch;
+  gap:16px;
+}
+html.omni-launcher-mode .omni-patch-tile {
+  display:flex;
+  min-width:0;
+  min-height:0;
+  flex-direction:column;
+  overflow:visible;
+  border:1px solid var(--oi-panel-border);
+  border-radius:var(--oi-panel-radius);
+  background:var(--oi-panel-background);
+  box-shadow:var(--oi-panel-shadow);
+  transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;
+}
+html.omni-launcher-mode .omni-patch-tile:hover {
+  transform:translateY(-2px);
+  border-color:rgba(93,180,255,.5);
+  box-shadow:0 17px 42px rgba(17,100,183,.14),var(--oi-panel-shadow);
+}
+html.omni-launcher-mode .omni-patch-tile__preview {
+  position:relative;
+  display:grid;
+  width:100%;
+  height:155px;
+  place-items:center;
+  overflow:hidden;
+  padding:13px;
+  border:0;
+  border-bottom:1px solid rgba(94,172,244,.20);
+  border-radius:var(--oi-panel-radius) var(--oi-panel-radius) 0 0;
+  background:
+    radial-gradient(ellipse at 50% 52%,rgba(22,126,225,.25),transparent 68%),
+    repeating-linear-gradient(0deg,rgba(87,177,255,.08) 0 1px,transparent 1px 4px),
+    linear-gradient(135deg,#0c1d32,#102945 54%,#0a192b);
+  cursor:pointer;
+}
+html.omni-launcher-mode .omni-patch-tile__preview::after {
+  position:absolute;
+  inset:0;
+  content:"";
+  pointer-events:none;
+  opacity:.35;
+  background-image:linear-gradient(rgba(100,180,255,.12) 1px,transparent 1px),linear-gradient(90deg,rgba(100,180,255,.12) 1px,transparent 1px);
+  background-size:28px 28px;
+}
+html.omni-launcher-mode .omni-patch-tile__preview svg {
+  position:relative;
+  z-index:1;
+  display:block;
+  width:100%;
+  height:100%;
+  max-height:126px;
+  filter:drop-shadow(0 0 9px rgba(63,158,255,.26));
+}
+html.omni-launcher-mode .omni-patch-tile__body {
+  display:flex;
+  min-width:0;
+  flex:1;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:15px 16px;
+}
+html.omni-launcher-mode .omni-patch-tile__details { min-width:0; }
+html.omni-launcher-mode .omni-patch-tile__details h3 {
+  margin:0;
+  color:var(--ink);
+  font:600 14px/1.35 var(--font-body);
+  overflow-wrap:anywhere;
+}
+html.omni-launcher-mode .omni-patch-tile__details p {
+  margin:5px 0 0;
+  color:var(--muted);
+  font:8px/1.5 var(--font-mono);
+  letter-spacing:.035em;
+}
+html.omni-launcher-mode .omni-patch-tile__controls {
+  position:relative;
+  display:flex;
+  flex:0 0 auto;
+  align-items:center;
+  gap:6px;
+}
+html.omni-launcher-mode .omni-patch-tile__open-action {
+  min-width:57px;
+  height:32px;
+  padding:0 12px;
+  border:1px solid rgba(93,180,255,.42);
+  border-radius:var(--oi-button-radius);
+  background:rgba(40,126,209,.12);
+  color:var(--omni-blue-bright);
+  font:600 10px var(--font-body);
+  cursor:pointer;
+}
+html.omni-launcher-mode .omni-patch-tile__open-action:hover {
+  border-color:rgba(93,180,255,.78);
+  background:rgba(40,126,209,.22);
+  color:var(--ink);
+}
+html.omni-launcher-mode .omni-patch-tile__more {
+  width:32px;
+  height:32px;
+  padding:0;
+  border:1px solid var(--oi-control-border);
+  border-radius:var(--oi-button-radius);
+  background:var(--oi-button-background);
+  color:var(--muted);
+  font:600 17px/1 var(--font-body);
+  cursor:pointer;
+}
+html.omni-launcher-mode .omni-patch-tile__more:hover {
+  border-color:rgba(93,180,255,.58);
+  color:var(--omni-blue-bright);
+}
+html.omni-launcher-mode .omni-patch-menu {
+  position:absolute;
+  z-index:30;
+  right:0;
+  bottom:calc(100% + 8px);
+  display:grid;
+  min-width:158px;
+  padding:5px;
+  border:1px solid var(--oi-panel-border);
+  border-radius:10px;
+  background:var(--panel);
+  box-shadow:0 16px 42px rgba(0,0,0,.28);
+}
+html.omni-launcher-mode .omni-patch-menu[hidden] { display:none; }
+html.omni-launcher-mode .omni-patch-menu__item {
+  min-height:34px;
+  padding:0 10px;
+  border:0;
+  border-radius:6px;
+  background:transparent;
+  color:var(--ink);
+  font:500 11px var(--font-body);
+  text-align:left;
+  cursor:pointer;
+}
+html.omni-launcher-mode .omni-patch-menu__item:hover { background:rgba(68,151,226,.13); }
+html.omni-launcher-mode .omni-patch-menu__item.is-danger { color:#e58a82; }
+
+html.omni-launcher-mode .omni-launcher__empty {
+  padding:46px 20px;
+  border:1px dashed var(--oi-panel-border);
+  border-radius:var(--oi-panel-radius);
+  background:var(--oi-panel-background-soft);
+  text-align:center;
+  color:var(--muted);
+}
+html.omni-launcher-mode .omni-launcher__empty h3 {
+  margin:0 0 7px;
+  color:var(--ink);
+  font:500 17px var(--font-display);
+}
+html.omni-launcher-mode .omni-launcher__empty p { margin:0; font-size:12px; }
+html.omni-launcher-mode .omni-launcher__loading {
+  display:grid;
+  min-height:58vh;
+  place-content:center;
+  justify-items:center;
+  gap:12px;
+  color:var(--omni-blue-bright);
+  font:10px var(--font-mono);
+  letter-spacing:.12em;
+}
+html.omni-launcher-mode .omni-launcher__loading img {
+  width:40px;
+  height:40px;
+  object-fit:contain;
+  filter:drop-shadow(0 0 15px rgba(71,161,255,.52));
+}
+
+/* Template picker */
+html.omni-launcher-mode .omni-launcher__overlay {
+  position:fixed;
+  inset:0;
+  z-index:100;
+  display:grid;
+  place-items:center;
+  padding:22px;
+  background:rgba(4,10,18,.74);
+  backdrop-filter:blur(13px);
+}
+html.omni-launcher-mode .omni-launcher__template-panel {
+  width:min(850px,100%);
+  max-height:84vh;
+  overflow:auto;
+  padding:24px;
+  border:1px solid rgba(93,180,255,.32);
+  border-radius:var(--oi-panel-radius);
+  background:var(--oi-panel-background);
+  box-shadow:0 28px 90px rgba(0,0,0,.34),0 0 48px rgba(40,130,226,.10);
+  color:var(--ink);
+}
+html.omni-launcher-mode .omni-launcher__dialog-head {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:17px;
+}
+html.omni-launcher-mode .omni-launcher__dialog-head h2 {
+  margin:0;
+  color:var(--ink);
+  font:400 26px var(--font-display);
+}
+html.omni-launcher-mode .omni-launcher__dialog-close {
+  width:34px;
+  height:34px;
+  border:1px solid var(--oi-control-border);
+  border-radius:8px;
+  background:var(--oi-button-background);
+  color:var(--ink);
+  font-size:20px;
+  cursor:pointer;
+}
+html.omni-launcher-mode .omni-launcher__template-search { margin-bottom:14px; }
+html.omni-launcher-mode .omni-launcher__template-grid {
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+}
+html.omni-launcher-mode .omni-launcher__template {
+  min-height:88px;
+  padding:14px;
+  border:1px solid var(--oi-panel-border);
+  border-radius:10px;
+  background:var(--oi-panel-background-soft);
+  color:var(--ink);
+  text-align:left;
+  cursor:pointer;
+  transition:border-color .18s,background .18s;
+}
+html.omni-launcher-mode .omni-launcher__template:hover {
+  border-color:rgba(93,180,255,.62);
+  background:rgba(36,111,184,.15);
+}
+html.omni-launcher-mode .omni-launcher__template b {
+  display:block;
+  margin-bottom:6px;
+  font:600 12px var(--font-body);
+}
+html.omni-launcher-mode .omni-launcher__template small {
+  display:block;
+  color:var(--muted);
+  font:11px/1.5 var(--font-body);
+}
+
+/* Keep the same Overture cool-grey light theme, with a clearly blue OMNI layer. */
+html[data-theme="light"].omni-launcher-mode body.omni-page {
+  background:
+    radial-gradient(ellipse at 50% 5%,rgba(47,150,235,.18),transparent 52%),
+    radial-gradient(ellipse at 90% 42%,rgba(35,132,220,.07),transparent 42%),
+    var(--bg);
+}
+html[data-theme="light"].omni-launcher-mode .omni-launcher {
+  --omni-blue:#176fae;
+  --omni-blue-bright:#167dbb;
+  --omni-blue-deep:#145f99;
+  --oi-primary-border:#4b9bd0;
+  --oi-primary-ink:#06213a;
+  --oi-primary-background:linear-gradient(135deg,#b8e5ff,#79c4f4 60%,#56a8e4);
+  --oi-primary-hover-background:linear-gradient(135deg,#d0efff,#91d0f7 60%,#69b8ee);
+  --oi-button-hover-background:rgba(29,126,193,.09);
+}
+html[data-theme="light"].omni-launcher-mode .omni-launcher::before {
+  background:
+    radial-gradient(ellipse at 50% 12%,rgba(44,151,234,.16),transparent 55%),
+    repeating-linear-gradient(0deg,rgba(25,119,186,.075) 0 1px,transparent 1px 4px);
+  mask-image:linear-gradient(180deg,#000 0%,#000 68%,transparent 100%);
+}
+html[data-theme="light"].omni-launcher-mode .omni-launcher::after {
+  opacity:.19;
+  background-image:
+    linear-gradient(rgba(36,115,173,.11) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(36,115,173,.11) 1px,transparent 1px);
+}
+html[data-theme="light"].omni-launcher-mode .omni-launcher__quick-actions button {
+  background:linear-gradient(145deg,rgba(252,254,255,.96),rgba(232,242,250,.96));
+}
+html[data-theme="light"].omni-launcher-mode .omni-launcher__create {
+  background:var(--oi-primary-background)!important;
+}
+html[data-theme="light"].omni-launcher-mode .omni-launcher__toolbar {
+  background:linear-gradient(145deg,rgba(250,253,255,.97),rgba(231,239,247,.97));
+}
+html[data-theme="light"].omni-launcher-mode .omni-launcher__search,
+html[data-theme="light"].omni-launcher-mode .omni-launcher__field select {
+  background:#f8fbfe;
+  border-color:rgba(43,91,126,.25);
+  color:#263e54;
+}
+html[data-theme="light"].omni-launcher-mode .omni-launcher__search input,
+html[data-theme="light"].omni-launcher-mode .omni-launcher__field select { color:#263e54; }
+html[data-theme="light"].omni-launcher-mode .omni-patch-tile {
+  background:linear-gradient(145deg,#fbfdff,#eaf1f7);
+}
+html[data-theme="light"].omni-launcher-mode .omni-patch-tile__preview {
+  background:
+    radial-gradient(ellipse at 50% 52%,rgba(52,151,224,.16),transparent 68%),
+    repeating-linear-gradient(0deg,rgba(35,127,194,.085) 0 1px,transparent 1px 4px),
+    linear-gradient(135deg,#dcebf7,#e9f3fa 54%,#d8e8f5);
+}
+html[data-theme="light"].omni-launcher-mode .omni-patch-tile__preview::after {
+  background-image:linear-gradient(rgba(48,116,163,.10) 1px,transparent 1px),linear-gradient(90deg,rgba(48,116,163,.10) 1px,transparent 1px);
+}
+html[data-theme="light"].omni-launcher-mode .omni-patch-tile__open-action {
+  border-color:rgba(35,117,177,.34);
+  background:rgba(38,133,195,.08);
+  color:#176fae;
+}
+html[data-theme="light"].omni-launcher-mode .omni-patch-tile__more,
+html[data-theme="light"].omni-launcher-mode .omni-launcher__text-button,
+html[data-theme="light"].omni-launcher-mode .omni-launcher__refresh {
+  background:rgba(38,133,195,.06);
+  color:#176fae;
+}
+html[data-theme="light"].omni-launcher-mode .omni-patch-menu {
+  border-color:rgba(43,91,126,.20);
+  background:#fafdff;
+  box-shadow:0 16px 42px rgba(31,68,99,.18);
+}
+html[data-theme="light"].omni-launcher-mode .omni-patch-menu__item { color:#253d52; }
+html[data-theme="light"].omni-launcher-mode .omni-patch-menu__item:hover { background:rgba(38,133,195,.09); }
+html[data-theme="light"].omni-launcher-mode .omni-launcher__template-panel {
+  background:linear-gradient(145deg,#fbfdff,#eaf2f8);
+  box-shadow:0 28px 90px rgba(31,68,99,.2);
+}
+html[data-theme="light"].omni-launcher-mode .omni-launcher__template {
+  background:linear-gradient(145deg,#fbfdff,#eaf2f8);
+}
+html[data-theme="light"].omni-launcher-mode .omni-launcher__template:hover { background:#e1f0fb; }
+
+@media(max-width:900px) {
+  html.omni-launcher-mode .omni-launcher__grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  html.omni-launcher-mode .omni-launcher__template-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  html.omni-launcher-mode .omni-launcher__toolbar { grid-template-columns:minmax(0,1fr) 150px 165px 40px; }
+}
+@media(max-width:680px) {
+  html.omni-launcher-mode .omni-launcher { width:calc(100% - 34px); padding-top:102px; padding-bottom:58px; }
+  html.omni-launcher-mode .omni-launcher__intro { min-height:190px; padding-bottom:28px; }
+  html.omni-launcher-mode .omni-launcher__quick-actions { grid-template-columns:1fr; gap:9px; margin-bottom:34px; }
+  html.omni-launcher-mode .omni-launcher__quick-actions button { min-height:58px; }
+  html.omni-launcher-mode .omni-launcher__toolbar { grid-template-columns:1fr 1fr; gap:10px; padding:12px; }
+  html.omni-launcher-mode .omni-launcher__search { grid-column:1/-1; }
+  html.omni-launcher-mode .omni-launcher__refresh { grid-column:1/-1; width:100%; }
+  html.omni-launcher-mode .omni-launcher__grid { grid-template-columns:1fr; }
+  html.omni-launcher-mode .omni-launcher__template-grid { grid-template-columns:1fr 1fr; }
+  html.omni-launcher-mode .omni-patch-tile__preview { height:138px; }
+}
+@media(max-width:420px) {
+  html.omni-launcher-mode .omni-launcher__toolbar { grid-template-columns:1fr; }
+  html.omni-launcher-mode .omni-launcher__search,
+  html.omni-launcher-mode .omni-launcher__refresh { grid-column:1; }
+  html.omni-launcher-mode .omni-launcher__template-grid { grid-template-columns:1fr; }
+}
+@media(prefers-reduced-motion:reduce) {
+  html.omni-launcher-mode .omni-launcher__quick-actions button,
+  html.omni-launcher-mode .omni-patch-tile { transition:none; }
+}
