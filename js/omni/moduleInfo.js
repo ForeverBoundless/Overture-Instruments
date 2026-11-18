@@ -294,6 +294,55 @@ export const MODULE_INFO = {
     "use": "Note echo creates repeated phrases that retrigger a synthesizer voice. Velocity decay makes later notes softer, while pitch-per-repeat can create rising or falling sequences.",
     "implementation": "OMNI schedules additional note events from each incoming note, using the selected delay, repeat count, velocity decay, and interval shift. Connect its note output to an oscillator or instrument voice."
   }
+  "obxaVoice": {
+    "summary": "A polyphonic dual-oscillator synthesizer voice inspired by the Oberheim OB-Xa's two-VCO voice architecture.",
+    "circuit": "Each OB-Xa voice card contains two voltage-controlled oscillators, a mixer, a resonant low-pass filter path, an envelope-controlled amplifier, and modulation circuitry. The historical instrument used selectable 2-pole and 4-pole filter responses and analogue voice-card variation.",
+    "use": "The two oscillators can be combined at different waveforms and tuning offsets for brass, strings, unison leads, and wide pads. The filter envelope shapes the start of each note, while the amplitude envelope controls its sustain and release.",
+    "implementation": "This OMNI module builds an eight-note Web Audio voice bank using native oscillators, cascaded biquad filters, and scheduled gain envelopes. It is an independent OB-Xa-inspired model; it does not reproduce the original CEM filter chips or every hardware voice-card feature."
+  },
+  "pro3Wavetable": {
+    "summary": "A band-limited wavetable-style oscillator inspired by the Sequential Pro 3's digital oscillator section.",
+    "circuit": "The Pro 3 combines analogue-style VCOs with a digital wavetable oscillator. A wavetable oscillator reads a periodic waveform table at a rate set by pitch; changing the table or its harmonic content changes the timbre without needing a conventional low-pass filter.",
+    "use": "Select a saw, pulse, triangle, or harmonic-rich digital spectrum, then move the spectral morph control to darken or brighten the waveform. Pitch CV can add modulation before the signal reaches downstream filters or amplifiers.",
+    "implementation": "OMNI creates custom PeriodicWave tables from Fourier coefficients and plays them with a native Web Audio oscillator. The waveform set and morph control are a compact procedural model, not a copy of the Pro 3's original wavetable bank or FPGA implementation."
+  },
+  "super8Voice": {
+    "summary": "A stereo polyphonic dual-oscillator voice inspired by the UDO Super 8's binaural hybrid voice architecture.",
+    "circuit": "The Super 8 is a digital/analogue hybrid instrument with digital oscillator generation and stereo voice paths. Its binaural operation uses paired left/right oscillator paths with related pitch and phase behaviour to create a wide stereo image.",
+    "use": "Detune adds motion between paired oscillators, while stereo spread places voices across the field. Slow attacks and releases make the module useful for layered pads, sustained chords, and evolving textures.",
+    "implementation": "OMNI uses paired native oscillators, per-voice gain envelopes, and StereoPannerNodes to create an eight-note stereo software voice. It models the broad binaural idea but does not reproduce the Super 8's FPGA, exact DDS tables, or original analogue signal path."
+  },
+  "nordOrgan": {
+    "summary": "A nine-partial tonewheel organ voice with drawbar controls inspired by the Nord C2D's B3 model.",
+    "circuit": "Tonewheel organs generate harmonics from rotating toothed wheels and electromagnetic pickups. The drawbars control the level of selected harmonic components; the familiar 16-foot through 1-foot registration combines subharmonic and upper-harmonic components rather than using a conventional subtractive filter.",
+    "use": "Move the nine drawbars to create clean fundamentals, hollow registrations, bright upper harmonics, and dense organ mixtures. The percussion control adds a short higher-harmonic attack to each played note.",
+    "implementation": "OMNI creates nine sine-wave partials per note and scales them with independent drawbar gains. A short oscillator transient approximates percussion. This is a procedural additive model, not a recording or circuit-level recreation of the Nord C2D tonewheel engine."
+  },
+  "clavinet": {
+    "summary": "A plucked-string keyboard voice inspired by the Hohner Clavinet D6's tangent-struck strings and magnetic pickups.",
+    "circuit": "On a Clavinet, a key moves a rubber-tipped tangent against a string, setting the string into vibration. Magnetic pickups sense the string at fixed positions, and pickup selection plus the tone rockers changes the resulting spectrum. A felt pad damps the string when the key is released.",
+    "use": "The pickup and tone settings shift the brightness and filtering of the string model, while sustain and felt mute change how long it rings. Use it for percussive keyboard parts, funk chords, and short rhythmic stabs.",
+    "implementation": "OMNI uses a short noise excitation, a feedback delay loop, and a selectable biquad filter to make a procedural plucked-string voice. It is not the dedicated Hohner D6 emulator's waveguide model and does not claim exact pickup or tangent behaviour."
+  },
+  "tr808Kick": {
+    "summary": "A dedicated synthetic bass-drum voice inspired by the Roland TR-808 kick circuit.",
+    "circuit": "The original TR-808 bass drum uses a resonant bridged-T oscillator circuit triggered by a short pulse. Its pitch envelope begins above the final fundamental and falls quickly, while the decay control determines how long the low-frequency tone remains audible.",
+    "use": "Tune the fundamental for deep sub kicks or shorter, higher percussion. Increase attack click for a sharper transient, then adjust decay to fit the groove.",
+    "implementation": "OMNI schedules a sine oscillator with a downward exponential pitch sweep and a short transient oscillator. It is a native Web Audio synthesis model, not a component-level bridged-T circuit simulation or a sample playback."
+  },
+  "tr808Snare": {
+    "summary": "A dedicated noise-and-tone snare voice inspired by the Roland TR-808 snare drum.",
+    "circuit": "The TR-808 snare combines filtered noise with two resonant tonal components. Noise supplies the snare-wire character, while the pitched body gives the drum its hollow, tuned centre. The balance and decay controls shape the attack and tail.",
+    "use": "Raise the noise component for a crisp, snappy sound or bring up the tonal body for a rounder, more electronic hit. Tune the body to sit with the bass drum and sequence.",
+    "implementation": "OMNI layers a filtered noise burst with a short triangle-wave body oscillator. It is a procedural Web Audio drum voice and is not a sample or a transistor-level reproduction of the TR-808 circuit."
+  },
+  "stereoWidener": {
+    "summary": "A mono-to-stereo effect that creates width with a short delayed side signal.",
+    "circuit": "Short inter-channel delays create differences in arrival time that the auditory system interprets as spatial width. The effect is related to the Haas effect; excessive delay or level can cause phase coloration and mono-compatibility problems.",
+    "use": "Use a small side delay and moderate width to spread a mono synthesizer signal across the stereo field. Check the result in mono, since the delayed side can partially cancel or colour the original signal.",
+    "implementation": "OMNI sends the input directly to the left channel and combines a quieter direct signal with a short delayed copy on the right. The controls adjust delay time and delayed-side level; this is a simple widening effect, not a room or binaural renderer."
+  },
+
 };
 
 export function assertModuleInfoCoverage(moduleCatalogue) {
