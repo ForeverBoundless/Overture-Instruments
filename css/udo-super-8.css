@@ -1117,3 +1117,169 @@
     border-left: 0;
   }
 }
+
+
+/* -------------------------------------------------------------------------
+   Super 8 modulation bank.
+   LFO 1 and LFO 2 belong side by side across the main fascia, not stacked
+   inside the narrow lower-left performance bay. The bender remains below.
+   ------------------------------------------------------------------------- */
+.s8-mod-row {
+  display: grid;
+  grid-template-columns: minmax(0, .92fr) minmax(0, 1.28fr);
+  align-items: stretch;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+}
+.s8-mod-row > .hp-group {
+  min-width: 0;
+  max-width: 100%;
+}
+.s8-mod-row .hp-group-body {
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+}
+.s8-mod-row .hp-select {
+  min-width: 0;
+  width: 100%;
+}
+.s8-mod-row .hp-knob {
+  justify-self: center;
+}
+.s8-mod-row .hp-button-label {
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+/* LFO 1: two selector spaces followed by three evenly spaced dials, with
+   the two mode switches directly underneath. */
+.s8-mod-row > .s8-lfo1 .hp-group-body {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  align-items: start;
+  justify-items: center;
+  gap: 8px 10px;
+  padding: 8px 5px 5px;
+}
+.s8-mod-row > .s8-lfo1 .hp-select-wide {
+  grid-column: span 2;
+  align-self: start;
+}
+.s8-mod-row > .s8-lfo1 .hp-knob {
+  width: 46px;
+  max-width: 100%;
+}
+.s8-mod-row > .s8-lfo1 .hp-knob-art {
+  width: 42px;
+  height: 42px;
+}
+.s8-mod-row > .s8-lfo1 .hp-btn {
+  justify-self: center;
+}
+
+/* LFO 2: selectors and rate/delay controls above a full-width six-fader
+   modulation row. Its wider bay accounts for the extra destinations. */
+.s8-mod-row > .s8-lfo2 .hp-group-body {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  align-items: start;
+  justify-items: center;
+  gap: 8px 8px;
+  padding: 8px 6px 5px;
+}
+.s8-mod-row > .s8-lfo2 .hp-select-wide {
+  grid-column: span 3;
+  width: 100%;
+}
+.s8-mod-row > .s8-lfo2 .hp-knob {
+  grid-column: span 3;
+  width: 46px;
+}
+.s8-mod-row > .s8-lfo2 .hp-knob-art {
+  width: 42px;
+  height: 42px;
+}
+.s8-mod-row > .s8-lfo2 .s8-faders {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  justify-items: center;
+  align-items: start;
+  gap: 5px;
+  width: 100%;
+  padding-top: 4px;
+  border-top: 1px solid rgba(75, 85, 89, .2);
+}
+.s8-mod-row > .s8-lfo2 .hp-fader {
+  width: 30px;
+  max-width: 100%;
+}
+.s8-mod-row > .s8-lfo2 .hp-fader-vertical .hp-fader-track {
+  height: 58px !important;
+  width: 11px;
+}
+.s8-mod-row > .s8-lfo2 .hp-fader-label {
+  min-height: 19px;
+  max-width: 100%;
+  font-size: 5.5px;
+  line-height: 1.08;
+  text-align: center;
+}
+
+/* The lower-left bay is now for the two-axis bender only. Keep it aligned
+   with the keyboard rail instead of using it as a second LFO column. */
+.s8-play-row {
+  align-items: stretch;
+}
+.s8-play-row > .s8-performance-bay {
+  flex: 0 0 clamp(175px, 16%, 230px);
+  align-content: center;
+  justify-content: center;
+}
+.s8-play-row > .s8-performance-bay > .s8-bender-block {
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  border-top: 0;
+}
+.s8-play-row > .s8-performance-bay .hp-super8-bender-pad {
+  width: 100%;
+  max-width: 190px;
+  height: 72px;
+  align-self: center;
+}
+.s8-play-row > .s8-performance-bay .hp-super8-bender-caption {
+  text-align: center;
+}
+
+/* Keep the modulation banks balanced at narrower widths. */
+@media (max-width: 1050px) {
+  .s8-mod-row {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.12fr);
+    gap: 6px;
+  }
+  .s8-mod-row > .s8-lfo1 .hp-group-body {
+    gap: 7px 5px;
+  }
+  .s8-mod-row > .s8-lfo2 .hp-group-body {
+    gap: 7px 5px;
+  }
+}
+@media (max-width: 760px) {
+  .s8-mod-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .s8-mod-row > .s8-lfo1 .hp-group-body {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+  .s8-play-row > .s8-performance-bay {
+    width: 100%;
+    flex: 0 0 auto;
+  }
+  .s8-play-row > .s8-performance-bay .hp-super8-bender-pad {
+    max-width: 260px;
+  }
+}
