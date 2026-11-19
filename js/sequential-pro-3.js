@@ -158,11 +158,20 @@ class Pro3App{
   const voice=addRow(top,'p3-voice');
   s(voice,'mode','Voice mode',['mono','paraphonic'],{group:'PERFORMANCE',wide:true});
   b(voice,'hold','Hold',{group:'PERFORMANCE',led:'amber'});
-  k(voice,'volume','Master',{size:46,group:'MASTER'});
   this.hwPower=addButton(voice,{label:'POWER',value:false,toggle:false,led:'green',group:'GLOBAL',onChange:async()=>{const ready=await this.activateAudio?.();this.hwPower?.setValue(!!ready,true);}});
 
-  // ---- compact upper strip: effects, sequencer and arpeggiator ----
+  // ---- compact upper strip: global modulation, effects, sequencer and arp ----
   const upper=document.createElement('div');upper.className='p3-upper';p.appendChild(upper);
+
+  const global=addPanel(upper,{title:'Modulation',sub:'global controls and routing',className:'p3-global'});
+  k(global.body,'volume','Master Volume',{size:43,group:'GLOBAL'});
+  k(global.body,'distortion','Distortion',{size:40,group:'GLOBAL'});
+  const matrixAccess=document.createElement('button');
+  matrixAccess.type='button';
+  matrixAccess.className='p3-matrix-trigger';
+  matrixAccess.textContent='MOD MATRIX';
+  matrixAccess.addEventListener('click',()=>{this.refreshMatrix();this.matrixDialog.showModal();});
+  global.body.appendChild(matrixAccess);
 
   const fx=addPanel(upper,{title:'Effects',sub:'stereo signal processors',className:'p3-fx'});
   [1,2].forEach(n=>{
@@ -259,7 +268,6 @@ class Pro3App{
   k(fl.body,'filterEnvAmount','Env amount',{size:42,group:'FILTER'});
   k(fl.body,'filterKeyTrack','Key track',{size:42,group:'FILTER'});
   k(fl.body,'filterState','LP · notch · HP',{size:42,group:'FILTER'});
-  k(fl.body,'distortion','Distortion',{size:42,group:'FILTER'});
 
   const env=addPanel(main,{title:'Envelopes',sub:'auxiliary · filter · amplifier · auxiliary 2',className:'p3-env'});
   [['aux1','AUX 1'],['filter','FILTER'],['amp','AMP'],['aux2','AUX 2']].forEach(([prefix,label])=>{
@@ -301,7 +309,6 @@ class Pro3App{
   action('Save program',()=>{const name=prompt('Name this Pro 3 program','My Pro 3 Program');if(name===null)return;try{const item=this.store.save(name,clone(this.patch));this.refreshHardwarePresetList('u:'+item.id);this.hwDisplay.set(item.name.toUpperCase(),'USER PROGRAM SAVED');}catch(e){alert(e.message);}});
   createCommunityShareButton(footer,{instrumentId:'sequential-pro-3',className:'hp-action',getData:()=>clean(clone(this.patch)),getAudioOutput: () => this.engine.output,
        getTitle:()=> 'Sequential Pro 3 program'});
-  const matrixButton=action('Mod matrix · 32 routes',()=>{this.refreshMatrix();this.matrixDialog.showModal();});
   const waveButton=document.createElement('label');waveButton.className='hp-action';waveButton.textContent='Load wavetable';
   const waveInput=document.createElement('input');waveInput.type='file';waveInput.accept='.wav,audio/wav';waveButton.appendChild(waveInput);footer.appendChild(waveButton);
   waveInput.addEventListener('change',async()=>{const file=waveInput.files?.[0];if(!file)return;try{if(!this.engine.ctx)throw new Error('Power on audio first.');const decoded=await this.engine.ctx.decodeAudioData(await file.arrayBuffer()),data=decoded.getChannelData(0);if(data.length<64||data.length>65536)throw new Error('Use a single-cycle WAV between 64 and 65,536 samples.');this.engine.post({t:'wavetable',data:Array.from(data)});this.hwDisplay.set('WAVETABLE LOADED','USER SINGLE CYCLE · BANK 32');}catch(e){this.hwDisplay.set('WAVETABLE FAILED',e.message);alert(e.message);}});
