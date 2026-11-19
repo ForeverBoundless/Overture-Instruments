@@ -1,3 +1,10 @@
+@font-face {
+  font-family: 'Inter Variable';
+  src: url('/ui/Inter-Variable.ttf') format('truetype');
+  font-weight: 100 900;
+  font-display: swap;
+}
+
 /* Shared Overture power-on component.
    All emulators use the same layout, type, spacing, surface and motion.
    Instrument identity is limited to one restrained accent colour. */
