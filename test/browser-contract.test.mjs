@@ -709,6 +709,10 @@ test('Sequential Pro 3 and UDO Super 8 are first-class library instruments', asy
   assert.ok(superApp.includes('s8-performance-bay'));
   assert.ok(superApp.includes('s8-mod-row'));
   assert.ok(superApp.includes('[l1,l2].forEach(section=>modRow.appendChild(section))'));
+  assert.ok(superApp.includes('s8-mod-brand'));
+  assert.ok(superApp.includes("modBrandLogo.src='/ui/Logos/UDO_logo.png'"));
+  assert.ok(superStyles.includes('grid-template-columns:\n    minmax(230px, .72fr)'));
+  assert.ok(superStyles.includes('.s8-mod-brand-copy strong'));
   assert.ok(superStyles.includes('.s8-mod-row > .s8-lfo1 .hp-group-body'));
   assert.ok(superStyles.includes('.s8-mod-row > .s8-lfo2 .s8-faders'));
   assert.ok(superStyles.includes('.s8-mod-row > .hp-group > .hp-group-body'));
