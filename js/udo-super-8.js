@@ -320,9 +320,9 @@ class Super8App{
   modBrandTop.appendChild(modBrandLogo);
   const modBrandRule=document.createElement('span');modBrandRule.className='s8-mod-brand-rule';modBrandTop.appendChild(modBrandRule);
   const modBrandCopy=document.createElement('div');modBrandCopy.className='s8-mod-brand-copy';
-  const modBrandName=document.createElement('strong');modBrandName.innerHTML='<span>U·D·O</span> SUPER 8';modBrandCopy.appendChild(modBrandName);
+  const modBrandName=document.createElement('strong');modBrandName.innerHTML='SUPER 8';modBrandCopy.appendChild(modBrandName);
   const modBrandType=document.createElement('span');modBrandType.textContent='16-VOICE BINAURAL ANALOG-HYBRID SYNTHESIZER';modBrandCopy.appendChild(modBrandType);
-  const modBrandBy=document.createElement('small');modBrandBy.textContent='UDO AUDIO  ·  FROM OVERTURE INSTRUMENTS';modBrandCopy.appendChild(modBrandBy);
+  const modBrandBy=document.createElement('small');modBrandBy.textContent='';modBrandCopy.appendChild(modBrandBy);
   modBrand.append(modBrandTop,modBrandCopy);
   const modBrandFoot=document.createElement('div');modBrandFoot.className='s8-mod-brand-foot';
   const modBrandLed=document.createElement('i');modBrandLed.setAttribute('aria-hidden','true');modBrandFoot.appendChild(modBrandLed);
