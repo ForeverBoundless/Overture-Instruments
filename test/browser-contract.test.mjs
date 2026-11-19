@@ -697,6 +697,11 @@ test('Sequential Pro 3 and UDO Super 8 are first-class library instruments', asy
   assert.match(superEngine, /superMode/);
   assert.match(superEngine, /modMatrix/);
   assert.match(superEngine, /delayFreeze/);
+  assert.ok(superApp.includes('s8-upper'));
+  assert.ok(superApp.includes('s8-console-row'));
+  assert.ok(superApp.includes('s8-performance-bay'));
+  assert.ok(styles.includes('.super8-tile-art'));
+  assert.ok(styles.includes('.hp-super8 .hp-keybed'));
   assert.ok(worker.includes('/html/sequential-pro-3'));
   assert.ok(worker.includes('/html/udo-super-8'));
   assert.ok(worker.includes('/js/engine/Pro3Processor.js'));
