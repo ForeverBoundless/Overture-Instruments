@@ -1,4 +1,4 @@
-const CACHE = 'overture-shell-v121';
+const CACHE = 'overture-shell-v122';
 const APP_SHELL = [
   '/account',
   '/login',
@@ -50,9 +50,14 @@ const APP_SHELL = [
   '/css/hohner-d6.css?v=20261106-audio-r1',
   '/css/hardware-panel.css',
   '/css/sequential-pro-3.css?v=20261112-layout-r3',
+  '/css/sequential-pro-3.css?v=20261119-pro3-reference-r1',
+  '/js/sequential-pro-3.js?v=20261119-pro3-layout-r1',
   '/css/udo-super-8.css?v=20261112-layout-r3',
   '/css/ob-xa.css?v=20261106-mays-mod-r1',
   '/css/library.css?v=20261117-amber-signal-r1',
+  '/css/library.css?v=20261119-pro3-tile-r1',
+  '/js/library.js?v=20261119-pro3-tile-r1',
+  '/js/launcher-components.js?v=20261119-pro3-tile-r1',
   '/css/knobs.css',
   '/css/korg-ms-20.css',
   '/css/mellotron-m400.css',
