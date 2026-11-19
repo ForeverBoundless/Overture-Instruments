@@ -1,4 +1,4 @@
-const CACHE = 'overture-shell-v127';
+const CACHE = 'overture-shell-v128';
 const APP_SHELL = [
   '/account',
   '/login',
@@ -52,7 +52,7 @@ const APP_SHELL = [
   '/css/sequential-pro-3.css?v=20261112-layout-r3',
   '/css/sequential-pro-3.css?v=20261119-pro3-final-r1',
   '/js/sequential-pro-3.js?v=20261119-pro3-final-r1',
-  '/css/udo-super-8.css?v=20261119-reference-r1',
+  '/css/udo-super-8.css?v=20261119-finish-r1',
   '/css/ob-xa.css?v=20261106-mays-mod-r1',
   '/css/library.css?v=20261117-amber-signal-r1',
   '/css/library.css?v=20261119-tile-consistency-r1',
@@ -195,7 +195,7 @@ const APP_SHELL = [
   '/js/omni/templates.js?v=20261104-sem-mellotron',
   '/js/prophet10.js',
   '/js/sequential-pro-3.js?v=20261112-audio-r3',
-  '/js/udo-super-8.js?v=20261119-reference-r1',
+  '/js/udo-super-8.js?v=20261119-finish-r1',
   '/js/roland-juno-106.js',
   '/js/roland-tr-808.js',
   '/js/oberheim-eight-voice.js',
