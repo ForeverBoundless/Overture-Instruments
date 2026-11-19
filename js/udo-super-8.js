@@ -293,7 +293,31 @@ class Super8App{
   const finishBender=e=>{if(e.pointerId!==benderPointer)return;benderPointer=null;this.patch.benderX=0;this.patch.benderY=0;renderBender();post();};pad.addEventListener('pointerup',finishBender);pad.addEventListener('pointercancel',finishBender);
   pad.addEventListener('keydown',e=>{const step=e.shiftKey?.2:.05;if(e.key==='ArrowLeft')this.patch.benderX-=step;else if(e.key==='ArrowRight')this.patch.benderX+=step;else if(e.key==='ArrowUp')this.patch.benderY+=step;else if(e.key==='ArrowDown')this.patch.benderY-=step;else return;this.patch.benderX=Math.max(-1,Math.min(1,this.patch.benderX));this.patch.benderY=Math.max(0,Math.min(1,this.patch.benderY));renderBender();post();e.preventDefault();});
   this.renderHardwareBender=renderBender;renderBender();
-  this.hwKeyboard=addKeyboard(playRow,{firstNote:36,count:61,keyColor:'amber',onNoteOn:(n,v)=>this.perf.noteOn(n,v,'ui'),onNoteOff:n=>this.perf.noteOff(n,'ui'),onAftertouch:(n,v)=>this.engine.post({t:'polyAt',note:n,value:v,channel:1})});
+  this.hwKeyboard=addKeyboard(playRow,{firstNote:36,count:61,keyColor:'silver',onNoteOn:(n,v)=>this.perf.noteOn(n,v,'ui'),onNoteOff:n=>this.perf.noteOff(n,'ui'),onAftertouch:(n,v)=>this.engine.post({t:'polyAt',note:n,value:v,channel:1})});
+
+  // Assemble the controls into the same physical zones as the Super 8 reference.
+  const vent=document.createElement('div');vent.className='s8-vent';vent.setAttribute('aria-hidden','true');
+  const upperRow=document.createElement('div');upperRow.className='hp-row s8-upper';
+  const vol=addPanel(upperRow,{title:'VOL',className:'s8-vol'});
+  [...master.children].forEach(control=>vol.body.appendChild(control));
+  [d1,dm,d2,mx,vcf,envp].forEach(section=>upperRow.appendChild(section));
+
+  const consoleRow=document.createElement('div');consoleRow.className='hp-row s8-console-row';
+  [part,fxp,seqp].forEach(section=>consoleRow.appendChild(section));
+  st.insertBefore(this.hwDisplay.el,st.firstChild);
+
+  const performanceBay=document.createElement('div');performanceBay.className='s8-performance-bay';
+  [l1,l2,left].forEach(section=>performanceBay.appendChild(section));
+  const keyArea=document.createElement('div');keyArea.className='s8-key-area';
+  const brandRail=document.createElement('div');brandRail.className='s8-brand-rail';
+  brandRail.appendChild(brand);
+  keyArea.append(brandRail,this.hwKeyboard.el);
+  playRow.replaceChildren(performanceBay,keyArea);
+  p.insertBefore(vent,p.firstChild);
+  p.insertBefore(upperRow,vent.nextSibling);
+  p.insertBefore(consoleRow,upperRow.nextSibling);
+  p.appendChild(playRow);
+  top.remove();osc.remove();mid.remove();mod.remove();
 
   // ---- memory and tools ----
   const footer=document.createElement('div');footer.className='hp-footer hp-super8-hardware-footer';p.appendChild(footer);
