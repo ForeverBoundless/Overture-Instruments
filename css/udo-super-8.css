@@ -26,10 +26,10 @@
 .s8-osc>.hp-group{grid-column:span 3}
 .s8-mid>.s8-vcf{grid-column:span 4}.s8-mid>.s8-env{grid-column:span 5}.s8-mid>.s8-fx{grid-column:span 3}
 .s8-mod>.s8-lfo1{grid-column:span 5}.s8-mod>.s8-lfo2{grid-column:span 7}
-.s8-env .hp-group-body{align-items:flex-start;flex-wrap:nowrap;gap:0 14px}
+.s8-env .hp-group-body{align-items:center;justify-content:center;flex-wrap:nowrap;gap:0 14px}
 .s8-env-col+.s8-env-col{padding-left:12px;border-left:1px solid var(--hp-line)}
 .s8-env-col .hp-row{flex-wrap:nowrap;gap:2px}.s8-env-col .hp-fader{width:30px}
-.s8-fx .hp-group-body,.s8-lfo2 .hp-group-body,.s8-lfo1 .hp-group-body{align-items:flex-start}
+.s8-fx .hp-group-body,.s8-lfo2 .hp-group-body,.s8-lfo1 .hp-group-body{align-items:center;justify-content:center}
 @media(max-width:1280px){
  .s8-osc>.hp-group{grid-column:span 6}
  .s8-mid>.hp-group{grid-column:span 12}
