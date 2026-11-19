@@ -232,3 +232,10 @@
   filter: saturate(.94) contrast(1.1);
   box-shadow: inset 2px 0 5px rgba(0,0,0,.24), inset 1px 0 3px rgba(255,205,156,.09);
 }
+
+
+/* Center control banks within each Sub 37 module; preserve the sequencer grid. */
+.s37-section-body { justify-content: center; }
+.s37-knob-row { width: 100%; justify-content: center; }
+.s37-button-grid { width: 100%; justify-content: center; }
+.s37-osc-controls { justify-content: center; }
