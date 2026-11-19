@@ -4600,3 +4600,75 @@ html[data-theme="light"] .instrument-tile--sequential-pro-3 .instrument-tile__ey
   vertical-align: -.02em;
   transform: translateX(.022em);
 }
+
+
+/* Pro 3 miniature control bank: raised silver knobs in graphite grey bays. */
+.pro3-tile-art {
+  position: absolute;
+  z-index: 2;
+  top: 83px;
+  left: 9px;
+  right: 9px;
+  bottom: 69px;
+  display: grid;
+  grid-template-columns: repeat(4,minmax(0,1fr));
+  grid-template-rows: repeat(3,minmax(0,1fr));
+  gap: 4px;
+  padding: 5px;
+  border: 1px solid rgba(225,228,230,.34);
+  border-radius: 4px;
+  background:
+    repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 1px,transparent 1px 4px),
+    linear-gradient(155deg,rgba(32,37,43,.96),rgba(63,68,74,.98));
+  box-shadow: inset 0 1px rgba(255,255,255,.12), inset 0 0 15px rgba(0,0,0,.55), 0 2px 5px rgba(0,0,0,.38);
+  pointer-events: none;
+}
+.pro3-tile-art span {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  border: 1px solid rgba(215,219,222,.2);
+  border-radius: 2px;
+  background: linear-gradient(145deg,rgba(134,138,143,.68),rgba(72,77,83,.78));
+  box-shadow: inset 0 1px rgba(255,255,255,.12);
+}
+.pro3-tile-art span::before {
+  content: '';
+  width: 13px;
+  height: 13px;
+  max-width: 82%;
+  max-height: 82%;
+  border: 1px solid #252a30;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 27%,#f0f1ef 0 9%,#bec2c4 23%,#777e84 63%,#343a40 82%,#171b20 100%);
+  box-shadow: 0 1px 2px #000b,inset 0 1px #fff8;
+}
+.pro3-tile-art span::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #f13732;
+  box-shadow: 0 0 4px rgba(255,45,39,.8);
+}
+.pro3-tile-art span:nth-child(3n)::after { opacity: .38; }
+.pro3-tile-art span i {
+  position: absolute;
+  z-index: 1;
+  top: calc(50% - 5px);
+  left: 50%;
+  width: 1.5px;
+  height: 4px;
+  border-radius: 1px;
+  background: #f6f6f3;
+  transform: translateX(-50%);
+  box-shadow: 0 0 2px rgba(255,255,255,.45);
+}
+@media (max-width: 560px) {
+  .pro3-tile-art { left: 7px; right: 7px; gap: 3px; padding: 4px; }
+  .pro3-tile-art span::before { width: 11px; height: 11px; }
+}
