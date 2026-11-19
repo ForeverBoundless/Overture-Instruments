@@ -1,4 +1,4 @@
-const CACHE = 'overture-shell-v132';
+const CACHE = 'overture-shell-v133';
 const APP_SHELL = [
   '/account',
   '/login',
@@ -64,6 +64,7 @@ const APP_SHELL = [
   '/css/mellotron-m400.css?v=20261104-centered-47key-r2',
   '/css/little-phatty.css?v=20261116-toolbar-offset-r1',
   '/css/midi-map.css?v=20261116-community-purple',
+  '/css/power-screens.css?v=20261119-emulator-power-r2',
   '/css/nord-c2d.css',
   '/css/oberheim-eight-voice.css',
   '/css/oberheim-eight-voice.css?v=20261104-ivory',
