@@ -140,7 +140,11 @@ class Pro3App{
   const hw=createHardwareSurface(root,{id:'sequential-pro-3',skin:'pro3',programLabel:'PRO 3 · INITIAL PROGRAM'});
   this.hw=hw;const p=hw.instrument;this.midi=hw.midi;
   const remember=(type,key,control)=>{this.hwControls[type].push({key,control});this.hwControls.all.push(control);return control;};
-  const k=(parent,key,label,o={})=>remember('knobs',key,addKnob(parent,{label,min:o.min??0,max:o.max??1,value:this.patch[key],step:o.step,size:o.size||48,small:o.small,bipolar:o.bipolar,accent:o.accent,midiId:'PRO3:'+key,group:o.group||'SYNTHESIS',formatValue:o.fmt||(o.max>10?(v=>Number(v).toFixed(1)):o.max>5?(v=>String(Math.round(v))):fmt2),onChange:v=>this.set(key,v)}));
+  const k=(parent,key,label,o={})=>{
+   const control=addKnob(parent,{label,min:o.min??0,max:o.max??1,value:this.patch[key],step:o.step,size:o.size||48,small:o.small,bipolar:o.bipolar,accent:o.accent,midiId:'PRO3:'+key,group:o.group||'SYNTHESIS',formatValue:o.fmt||(o.max>10?(v=>Number(v).toFixed(1)):o.max>5?(v=>String(Math.round(v))):fmt2),onChange:v=>this.set(key,v)});
+   control.el.dataset.key=key;
+   return remember('knobs',key,control);
+  };
   const f=(parent,key,label,o={})=>remember('faders',key,addFader(parent,{label,value:this.patch[key],height:o.height||84,midiId:'PRO3:'+key,group:o.group||'SYNTHESIS',onChange:v=>this.set(key,v)}));
   const b=(parent,key,label,o={})=>remember('buttons',key,addButton(parent,{label,value:!!this.patch[key],led:o.led||'red',midiId:'PRO3:'+key,group:o.group||'SYNTHESIS',onChange:v=>this.set(key,v)}));
   const s=(parent,key,label,options,o={})=>{const c=addSelect(parent,{label,options,value:this.patch[key],optionLabels:o.labels,wide:o.wide,midiId:'PRO3:'+key,group:o.group||'SYNTHESIS',onChange:v=>{this.set(key,v);if(o.after)o.after(v);}});c.holder.dataset.key=key;c.el._oiMidi.id='PRO3:'+key;return remember('selects',key,c);};
@@ -157,8 +161,21 @@ class Pro3App{
   k(voice,'volume','Master',{size:46,group:'MASTER'});
   this.hwPower=addButton(voice,{label:'POWER',value:false,toggle:false,led:'green',group:'GLOBAL',onChange:async()=>{const ready=await this.activateAudio?.();this.hwPower?.setValue(!!ready,true);}});
 
-  // ---- sequencer ----
-  const seq=addPanel(p,{title:'Sequencer',sub:'16 tracks · four 16-step phrases',className:'p3-seq'});
+  // ---- compact upper strip: effects, sequencer and arpeggiator ----
+  const upper=document.createElement('div');upper.className='p3-upper';p.appendChild(upper);
+
+  const fx=addPanel(upper,{title:'Effects',sub:'stereo signal processors',className:'p3-fx'});
+  [1,2].forEach(n=>{
+   const col=document.createElement('div');col.className='p3-fx-col';fx.body.appendChild(col);
+   s(col,'fx'+n+'Type','Effect '+n,FX_TYPES,{group:'EFFECTS',wide:true,labels:FX_LABELS});
+   const r=addRow(col,'p3-fx-knobs');
+   k(r,'fx'+n+'Mix','Mix',{size:37,group:'EFFECTS'});
+   k(r,'fx'+n+'Time','Time',{size:37,group:'EFFECTS'});
+   k(r,'fx'+n+'Feedback','Feedback',{max:.88,size:37,group:'EFFECTS'});
+   k(r,'fx'+n+'Tone','Tone',{size:37,group:'EFFECTS'});
+  });
+
+  const seq=addPanel(upper,{title:'Sequencer',sub:'16 tracks · four 16-step phrases',className:'p3-seq'});
   const seqTop=addRow(seq.body,'p3-seq-top');
   s(seqTop,'seqTrack','Track',Array.from({length:16},(_,i)=>i),{labels:Array.from({length:16},(_,i)=>i+1),group:'SEQUENCER',after:()=>this.renderSteps()});
   s(seqTop,'seqPhrase','Phrase',['A','B','C','D'],{group:'SEQUENCER',after:v=>{this.seqPage=['A','B','C','D'].indexOf(v);this.renderSteps();}});
@@ -166,79 +183,101 @@ class Pro3App{
   this.hwControls.all.push(this.hwDest);
   s(seqTop,'seqMode','Play mode',['forward','reverse','forwardReverse','random'],{group:'SEQUENCER',wide:true});
   s(seqTop,'seqLength','Length',Array.from({length:64},(_,i)=>i+1),{group:'SEQUENCER'});
-  k(seqTop,'bpm','Tempo',{min:30,max:260,step:1,size:42,group:'SEQUENCER',fmt:v=>String(Math.round(v))});
-  k(seqTop,'seqSwing','Swing',{size:42,group:'SEQUENCER'});
-  k(seqTop,'seqGate','Gate',{size:42,group:'SEQUENCER'});
+  k(seqTop,'bpm','Tempo',{min:30,max:260,step:1,size:38,group:'SEQUENCER',fmt:v=>String(Math.round(v))});
+  k(seqTop,'seqSwing','Swing',{size:38,group:'SEQUENCER'});
+  k(seqTop,'seqGate','Gate',{size:38,group:'SEQUENCER'});
   b(seqTop,'seqEnabled','Play',{group:'SEQUENCER',led:'green'});
-  b(seqTop,'seqRecord','Rec',{group:'SEQUENCER'});
+  b(seqTop,'seqRecord','Record',{group:'SEQUENCER'});
   const steps=document.createElement('div');steps.className='p3-steps';seq.body.appendChild(steps);this.hwSteps=[];
   for(let i=0;i<16;i++){const c=addButton(steps,{label:String(i+1),value:false,led:'red',midiId:'PRO3:SEQ:STEP:'+i,group:'SEQUENCER',onChange:()=>this.toggleStep(i)});this.hwSteps.push(c);this.hwControls.all.push(c);}
-  // keep transport buttons in sync with the engine
   const playBtn=this.hwControls.buttons.find(x=>x.key==='seqEnabled').control;
   playBtn.el.addEventListener('click',()=>this.engine.post({t:'transport',play:this.patch.seqEnabled}));
 
-  // ---- voice sections ----
+  const arp=addPanel(upper,{title:'Arpeggiator',sub:'performance',className:'p3-arp'});
+  b(arp.body,'arpEnabled','On',{group:'ARPEGGIATOR',led:'green'});
+  b(arp.body,'arpLatch','Latch',{group:'ARPEGGIATOR'});
+  s(arp.body,'arpMode','Mode',['up','down','upDown','random','assign'],{group:'ARPEGGIATOR',wide:true});
+  s(arp.body,'arpDivision','Clock',[1,2,4,8,16],{group:'ARPEGGIATOR'});
+  k(arp.body,'arpRange','Octaves',{min:1,max:4,step:1,size:38,group:'ARPEGGIATOR',fmt:v=>String(Math.round(v))});
+  k(arp.body,'arpSwing','Swing',{size:38,group:'ARPEGGIATOR'});
+
+  // ---- lower control surface: one continuous row of hardware sections ----
   const main=addRow(p,'hp-main p3-main');
-  const lfo=addPanel(main,{title:'LFO 1–3',sub:'clockable modulators',className:'p3-lfo'});
+  const lfo=addPanel(main,{title:'LFO',sub:'three modulators',className:'p3-lfo'});
   for(let i=1;i<=3;i++){
    const col=document.createElement('div');col.className='p3-col';lfo.body.appendChild(col);addLabel(col,'LFO '+i);
    const primary=addRow(col,'p3-lfo-row');
-   k(primary,'lfo'+i+'Rate','Rate',{size:40,group:'LFO '+i});
-   k(primary,'lfo'+i+'Amount','Amount',{size:40,group:'LFO '+i});
+   k(primary,'lfo'+i+'Rate','Rate',{size:37,group:'LFO '+i});
+   k(primary,'lfo'+i+'Amount','Amount',{size:37,group:'LFO '+i});
    s(primary,'lfo'+i+'Wave','Shape',['triangle','saw','reverseSaw','square','sampleHold'],{group:'LFO '+i,labels:['TRI','SAW','R.SAW','SQR','S&H']});
    const secondary=addRow(col,'p3-lfo-row');
-   k(secondary,'lfo'+i+'Phase','Phase',{size:36,group:'LFO '+i});
-   k(secondary,'lfo'+i+'Slew','Slew',{size:36,group:'LFO '+i});
+   k(secondary,'lfo'+i+'Phase','Phase',{size:34,group:'LFO '+i});
+   k(secondary,'lfo'+i+'Slew','Slew',{size:34,group:'LFO '+i});
    b(secondary,'lfo'+i+'Sync','Sync',{group:'LFO '+i});
   }
-  const osc=(n,title,sub,waves)=>{
-   const g=addPanel(main,{title,sub,className:'p3-osc'});const grp=title;
-   s(g.body,'osc'+n+'Wave','Waveform',waves,{group:grp,wide:true});s(g.body,'osc'+n+'Octave','Octave',OCTAVES,{group:grp});
-   return g;
+
+  const oscBank=addPanel(main,{title:'Oscillators',sub:'two analog VCOs · wavetable oscillator',className:'p3-osc-bank'});
+  const oscCols=addRow(oscBank.body,'p3-osc-cols');
+  const osc=(n,title,waves)=>{
+   const col=document.createElement('div');col.className='p3-osc-col';oscCols.appendChild(col);
+   addLabel(col,title,'p3-osc-label');
+   s(col,'osc'+n+'Wave','Wave',waves,{group:'OSCILLATOR '+n,wide:true});
+   s(col,'osc'+n+'Octave','Octave',OCTAVES,{group:'OSCILLATOR '+n});
+   const knobs=addRow(col,'p3-osc-knobs');
+   return {body:knobs};
   };
-  const o1=osc(1,'Oscillator 1','analog VCO',['saw','triangle','pulse']);
-  k(o1.body,'osc1Tune','Fine',{min:-7,max:7,step:.05,bipolar:true,group:'OSCILLATOR 1',fmt:v=>Number(v).toFixed(1)});k(o1.body,'osc1Shape','Shape / PW',{group:'OSCILLATOR 1'});
-  k(o1.body,'osc1Slop','Slop',{size:40,group:'OSCILLATOR 1'});k(o1.body,'osc1Glide','Glide',{size:40,group:'OSCILLATOR 1'});
-  const o2=osc(2,'Oscillator 2','analog VCO',['saw','triangle','pulse']);
-  k(o2.body,'osc2Tune','Fine',{min:-7,max:7,step:.05,bipolar:true,group:'OSCILLATOR 2',fmt:v=>Number(v).toFixed(1)});k(o2.body,'osc2Shape','Shape / PW',{group:'OSCILLATOR 2'});
-  k(o2.body,'osc2Slop','Slop',{size:40,group:'OSCILLATOR 2'});k(o2.body,'osc2Glide','Glide',{size:40,group:'OSCILLATOR 2'});b(o2.body,'osc2Sync','Sync',{group:'OSCILLATOR 2'});
-  const o3=osc(3,'Oscillator 3','digital wavetable',['sine','triangle','saw','pulse','superSaw','wavetable']);
-  k(o3.body,'osc3Shape','Wavetable',{step:1/31,group:'OSCILLATOR 3',fmt:v=>'Bank '+(Math.round(v*31)+1)});k(o3.body,'osc3ShapeMod','Morph',{group:'OSCILLATOR 3'});
-  k(o3.body,'osc3Tune','Fine',{min:-7,max:7,step:.05,bipolar:true,size:40,group:'OSCILLATOR 3',fmt:v=>Number(v).toFixed(1)});k(o3.body,'osc3Glide','Glide',{size:40,group:'OSCILLATOR 3'});
-  const mix=addPanel(main,{title:'Mixer',sub:'levels',className:'p3-mixer'});
-  f(mix.body,'osc1Level','Osc 1',{group:'MIXER',height:96});f(mix.body,'osc2Level','Osc 2',{group:'MIXER',height:96});f(mix.body,'osc3Level','Osc 3',{group:'MIXER',height:96});f(mix.body,'noiseLevel','Noise',{group:'MIXER',height:96});
-  const ext=f(mix.body,'externalLevel','Ext',{group:'MIXER',height:96});ext.el.style.opacity='.4';ext.el.style.pointerEvents='none';ext.el.title='External audio needs a hardware input and is not available in the browser';
-  const fl=addPanel(main,{title:'Filter',sub:'three designs',className:'p3-filter'});
+  const o1=osc(1,'OSC 1',['saw','triangle','pulse']);
+  k(o1.body,'osc1Tune','Fine',{min:-7,max:7,step:.05,bipolar:true,size:37,group:'OSCILLATOR 1',fmt:v=>Number(v).toFixed(1)});
+  k(o1.body,'osc1Shape','Shape / PW',{size:37,group:'OSCILLATOR 1'});
+  k(o1.body,'osc1Slop','Slop',{size:37,group:'OSCILLATOR 1'});
+  k(o1.body,'osc1Glide','Glide',{size:37,group:'OSCILLATOR 1'});
+  const o2=osc(2,'OSC 2',['saw','triangle','pulse']);
+  k(o2.body,'osc2Tune','Fine',{min:-7,max:7,step:.05,bipolar:true,size:37,group:'OSCILLATOR 2',fmt:v=>Number(v).toFixed(1)});
+  k(o2.body,'osc2Shape','Shape / PW',{size:37,group:'OSCILLATOR 2'});
+  k(o2.body,'osc2Slop','Slop',{size:37,group:'OSCILLATOR 2'});
+  k(o2.body,'osc2Glide','Glide',{size:37,group:'OSCILLATOR 2'});
+  b(o2.body,'osc2Sync','Sync',{group:'OSCILLATOR 2'});
+  const o3=osc(3,'OSC 3',['sine','triangle','saw','pulse','superSaw','wavetable']);
+  k(o3.body,'osc3Shape','Wavetable',{step:1/31,size:37,group:'OSCILLATOR 3',fmt:v=>'Bank '+(Math.round(v*31)+1)});
+  k(o3.body,'osc3ShapeMod','Morph',{size:37,group:'OSCILLATOR 3'});
+  k(o3.body,'osc3Tune','Fine',{min:-7,max:7,step:.05,bipolar:true,size:37,group:'OSCILLATOR 3',fmt:v=>Number(v).toFixed(1)});
+  k(o3.body,'osc3Glide','Glide',{size:37,group:'OSCILLATOR 3'});
+
+  const mix=addPanel(main,{title:'Mixer',sub:'oscillator levels',className:'p3-mixer'});
+  k(mix.body,'osc1Level','OSC 1',{size:35,group:'MIXER'});
+  k(mix.body,'osc2Level','OSC 2',{size:35,group:'MIXER'});
+  k(mix.body,'osc3Level','OSC 3',{size:35,group:'MIXER'});
+  k(mix.body,'externalLevel','EXT AUDIO',{size:35,group:'MIXER'});
+  k(mix.body,'noiseLevel','NOISE',{size:35,group:'MIXER'});
+
+  const fl=addPanel(main,{title:'Filter',sub:'three selectable filter designs',className:'p3-filter'});
   s(fl.body,'filterType','Model',['prophet6','ladder','stateVariable'],{group:'FILTER',wide:true,labels:['Prophet-6','Ladder','State variable']});
   b(fl.body,'filterBp','Band pass',{group:'FILTER'});
-  addRow(fl.body,'p3-break');
-  k(fl.body,'filterCutoff','Cutoff',{step:.005,size:56,group:'FILTER'});k(fl.body,'resonance','Resonance',{step:.005,size:56,group:'FILTER'});k(fl.body,'filterDrive','Drive',{group:'FILTER'});
-  k(fl.body,'filterEnvAmount','Env amount',{group:'FILTER'});k(fl.body,'filterKeyTrack','Key track',{group:'FILTER'});k(fl.body,'filterState','LP · notch · HP',{group:'FILTER'});k(fl.body,'distortion','Distortion',{group:'FILTER'});
+  k(fl.body,'filterCutoff','Cutoff',{step:.005,size:60,group:'FILTER',accent:true});
+  k(fl.body,'resonance','Resonance',{step:.005,size:42,group:'FILTER'});
+  k(fl.body,'filterDrive','Drive',{size:42,group:'FILTER'});
+  k(fl.body,'filterEnvAmount','Env amount',{size:42,group:'FILTER'});
+  k(fl.body,'filterKeyTrack','Key track',{size:42,group:'FILTER'});
+  k(fl.body,'filterState','LP · notch · HP',{size:42,group:'FILTER'});
+  k(fl.body,'distortion','Distortion',{size:42,group:'FILTER'});
+
+  const env=addPanel(main,{title:'Envelopes',sub:'auxiliary · filter · amplifier · auxiliary 2',className:'p3-env'});
+  [['aux1','AUX 1'],['filter','FILTER'],['amp','AMP'],['aux2','AUX 2']].forEach(([prefix,label])=>{
+   const row=addRow(env.body,'p3-env-col');
+   addLabel(row,label,'p3-env-row-label');
+   const controls=addRow(row,'p3-env-controls');
+   [['Delay','DLY'],['Attack','ATK'],['Decay','DEC'],['Sustain','SUS'],['Release','REL']].forEach(([suffix,short])=>k(controls,prefix+suffix,short,{size:34,group:label}));
+   b(controls,prefix+'Loop','Loop',{group:label});
+  });
+
   const fb=addPanel(main,{title:'Tuned feedback',sub:'resonant delay path',className:'p3-feedback'});
-  k(fb.body,'feedbackAmount','Amount',{min:-1,max:.96,step:.005,bipolar:true,size:56,group:'TUNED FEEDBACK'});k(fb.body,'feedbackTune','Tuning',{min:0,max:48,step:1,size:56,group:'TUNED FEEDBACK',fmt:v=>String(Math.round(v))+' st'});
+  k(fb.body,'feedbackAmount','Amount',{min:-1,max:.96,step:.005,bipolar:true,size:38,group:'TUNED FEEDBACK'});
+  k(fb.body,'feedbackTune','Tuning',{min:0,max:48,step:1,size:38,group:'TUNED FEEDBACK',fmt:v=>String(Math.round(v))+' st'});
   b(fb.body,'feedbackGrunge','Grunge',{group:'TUNED FEEDBACK'});
 
-  // ---- envelopes, effects, arp, morph ----
-  const lower=addRow(p,'hp-main p3-lower');
-  const env=addPanel(lower,{title:'Envelopes',sub:'delay · attack · decay · sustain · release',className:'p3-env'});
-  [['filter','Filter'],['amp','Amp'],['aux1','Aux 1'],['aux2','Aux 2']].forEach(([prefix,label])=>{
-   const col=document.createElement('div');col.className='p3-col p3-env-col';env.body.appendChild(col);addLabel(col,label);
-   const faders=addRow(col,'hp-row-tight');
-   [['Delay','Dly'],['Attack','Atk'],['Decay','Dec'],['Sustain','Sus'],['Release','Rel']].forEach(([suffix,short])=>f(faders,prefix+suffix,short,{group:label.toUpperCase(),height:72}));
-   b(col,prefix+'Loop','Loop',{group:label.toUpperCase()});
-  });
-  const fx=addPanel(lower,{title:'Effects',sub:'effect 1 → effect 2',className:'p3-fx'});
-  [1,2].forEach(n=>{
-   const col=document.createElement('div');col.className='p3-col';fx.body.appendChild(col);
-   s(col,'fx'+n+'Type','Effect '+n,FX_TYPES,{group:'EFFECTS',wide:true,labels:FX_LABELS});
-   const r=addRow(col,'hp-row-tight');
-   k(r,'fx'+n+'Mix','Mix',{size:40,group:'EFFECTS'});k(r,'fx'+n+'Time','Time',{size:40,group:'EFFECTS'});k(r,'fx'+n+'Feedback','Feedback',{max:.88,size:40,group:'EFFECTS'});k(r,'fx'+n+'Tone','Tone',{size:40,group:'EFFECTS'});
-  });
-  const arp=addPanel(lower,{title:'Arpeggiator',sub:'runs with the sequencer',className:'p3-arp'});
-  b(arp.body,'arpEnabled','Arp on',{group:'ARPEGGIATOR',led:'green'});b(arp.body,'arpLatch','Latch',{group:'ARPEGGIATOR'});
-  s(arp.body,'arpMode','Mode',['up','down','upDown','random','assign'],{group:'ARPEGGIATOR',wide:true});s(arp.body,'arpDivision','Clock',[1,2,4,8,16],{group:'ARPEGGIATOR'});
-  k(arp.body,'arpRange','Octaves',{min:1,max:4,step:1,size:42,group:'ARPEGGIATOR',fmt:v=>String(Math.round(v))});k(arp.body,'arpSwing','Swing',{size:42,group:'ARPEGGIATOR'});
-  const morph=addPanel(lower,{title:'Patch morph',sub:'blend two program states',className:'p3-morph'});
+  // Patch morph remains available as a compact utility module below the faceplate.
+  const utility=addRow(p,'p3-utility');
+  const morph=addPanel(utility,{title:'Patch morph',sub:'blend two program states',className:'p3-morph'});
   const mr=addRow(morph.body,'hp-row-tight');
   const setA=addButton(mr,{label:'Store A',toggle:false,led:'amber',group:'MORPH',onChange:()=>{this.morphA=clone(this.patch);this.display.set('MORPH A STORED','PATCH MORPH');}});
   const setB=addButton(mr,{label:'Store B',toggle:false,led:'amber',group:'MORPH',onChange:()=>{this.morphB=clone(this.patch);this.display.set('MORPH B STORED','PATCH MORPH');}});
