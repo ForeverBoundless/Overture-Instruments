@@ -4397,37 +4397,87 @@ html[data-theme="light"] .instrument-tile--ob-xa .instrument-tile__hint { color:
 }
 
 
-/* Sequential Pro 3 — charcoal control surface, walnut cheeks and warm LEDs. */
+/* Sequential Pro 3 — graphite case, silver hardware, lavender display and red LEDs. */
 .instrument-tile--sequential-pro-3 {
-  --tile-bar-glow: #ffab45;
-  background: linear-gradient(145deg, rgba(91,59,34,.34), rgba(18,21,25,.98));
+  --tile-bar-glow: #e94c42;
+  background: linear-gradient(145deg, rgba(92,96,102,.34), rgba(17,20,24,.99));
 }
 .instrument-tile--sequential-pro-3 .instrument-tile__visual {
-  background: linear-gradient(90deg,#66462f 0 7%,#20252a 7% 93%,#61432e 93% 100%);
-  box-shadow: inset 0 1px rgba(255,255,255,.14), inset 0 -14px 22px rgba(0,0,0,.35);
+  background:
+    linear-gradient(90deg, #34383d 0 6%, transparent 6% 94%, #34383d 94% 100%),
+    linear-gradient(165deg, #777b80 0%, #52575d 28%, #30353b 72%, #20252a 100%);
+  box-shadow: inset 0 1px rgba(255,255,255,.26), inset 0 -14px 22px rgba(0,0,0,.42);
 }
 .instrument-tile--sequential-pro-3 .instrument-tile__visual::before {
+  opacity: .94;
   background:
-    repeating-linear-gradient(0deg,transparent 0 9px,rgba(255,255,255,.035) 9px 10px),
-    linear-gradient(180deg,rgba(255,255,255,.07),transparent 38%,rgba(0,0,0,.2));
+    repeating-linear-gradient(0deg, transparent 0 5px, rgba(255,255,255,.045) 5px 6px),
+    linear-gradient(180deg, rgba(255,255,255,.16), transparent 35%, rgba(0,0,0,.22));
 }
 .instrument-tile--sequential-pro-3 .instrument-tile__visual::after {
-  left:17px;right:17px;top:83px;height:17px;
-  background:repeating-linear-gradient(90deg,transparent 0 8px,rgba(255,160,65,.7) 8px 10px,transparent 10px 13px);
-  border-top:1px solid rgba(255,180,91,.55);
-  border-bottom:1px solid rgba(255,180,91,.28);
-  opacity:.65;
+  left: 8px;
+  right: 8px;
+  top: 83px;
+  height: 56px;
+  border: 1px solid rgba(22,25,29,.72);
+  border-radius: 4px;
+  background:
+    radial-gradient(circle, #ff3831 0 1.5px, transparent 2.1px) 7px 8px / 15px 13px repeat,
+    linear-gradient(180deg, rgba(31,35,40,.8), rgba(62,67,73,.92));
+  box-shadow: inset 0 1px rgba(255,255,255,.11), 0 2px 4px rgba(0,0,0,.44);
 }
 .instrument-tile--sequential-pro-3 .instrument-tile__glow {
-  background:radial-gradient(ellipse at 52% 42%,rgba(255,153,53,.24),transparent 55%);
-  filter:blur(8px);opacity:.7;
+  background: radial-gradient(ellipse at 52% 30%, rgba(209,190,238,.26), transparent 55%);
+  filter: blur(8px);
+  opacity: .72;
 }
 .instrument-tile--sequential-pro-3 .instrument-tile__display {
-  border:3px solid #674a31;background:linear-gradient(180deg,#241709,#100b07);
+  left: 24px;
+  top: 29px;
+  width: 83px;
+  height: 32px;
+  padding: 5px 6px;
+  border: 3px solid #514b59;
+  border-radius: 3px;
+  background: linear-gradient(180deg, #8b78a4, #55466d 65%, #332b43);
+  box-shadow: inset 0 0 12px rgba(15,12,21,.9), 0 2px 4px rgba(0,0,0,.55);
 }
 .instrument-tile--sequential-pro-3 .instrument-tile__display span {
-  background:#ffad52;box-shadow:0 0 6px rgba(255,164,74,.78);
+  height: 2px;
+  margin: 3px 0;
+  background: #e3d7f2;
+  box-shadow: 0 0 5px rgba(226,211,246,.85);
 }
+.instrument-tile--sequential-pro-3 .instrument-tile__keys {
+  right: 7px;
+  bottom: 13px;
+  width: 139px;
+  height: 45px;
+  transform: none;
+  border: 2px solid #171a1e;
+  border-radius: 2px;
+  background: repeating-linear-gradient(
+    90deg,
+    #f1f0ec 0 9px,
+    #17191c 9px 12px,
+    #f9f8f4 12px 21px
+  );
+  box-shadow: 0 3px 6px rgba(0,0,0,.65), inset 0 1px rgba(255,255,255,.7);
+}
+.instrument-tile--sequential-pro-3 .instrument-tile__icon {
+  color: rgba(244,245,244,.83);
+  text-shadow: 0 1px 2px rgba(0,0,0,.55);
+}
+.instrument-tile--sequential-pro-3 .instrument-tile__eyebrow {
+  color: #d2d3d5;
+}
+html[data-theme="light"] .instrument-tile--sequential-pro-3 .instrument-tile__eyebrow {
+  color: #62666d !important;
+}
+.instrument-tile--sequential-pro-3 .instrument-spec .material-symbols-rounded {
+  color: #e65a51;
+}
+
 
 /* UDO Super 8 — folded pale metal, dark controls and a restrained vermilion rail. */
 .instrument-tile--udo-super-8 {
