@@ -25,6 +25,23 @@ window.va = window.va || function () { (window.vaq = window.vaq || []).push(argu
 </head>
 <body class="little-phatty-body">
 
+<div id="power-overlay" role="dialog" aria-modal="true" aria-labelledby="power-overlay-title">
+  <div id="power-overlay-inner">
+    <div class="power-orbit power-orbit-one" aria-hidden="true"></div>
+    <div class="power-orbit power-orbit-two" aria-hidden="true"></div>
+    <div class="power-launcher-mark" aria-hidden="true"><span class="material-symbols-rounded">power_settings_new</span></div>
+    <p class="power-eyebrow">OVERTURE INSTRUMENTS · MOOG</p>
+    <h1 id="power-overlay-title">LITTLE PHATTY</h1>
+    <p class="power-launcher-copy">Stage Edition · Monophonic Analog Synthesizer</p>
+    <button type="button" id="power-launcher-button" aria-label="Power on the Little Phatty">
+      <span class="material-symbols-rounded" aria-hidden="true">power_settings_new</span>
+      Click to power on
+    </button>
+    <p id="power-overlay-sub"><span class="power-dot" aria-hidden="true"></span> AUDIO ENGINE STANDBY</p>
+    <div class="power-launcher-footer"><span>37-KEY KEYBOARD</span><i></i><span>100 PRESETS</span><i></i><span>MOOG ANALOG SOUND</span></div>
+  </div>
+</div>
+
 <div id="app-root"></div>
 
 <script type="module" src="/js/engine/app.js"></script>
