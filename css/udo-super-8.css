@@ -1283,3 +1283,110 @@
     max-width: 260px;
   }
 }
+
+
+/* Compact the modulation controls so the two LFO bays use the same density
+   as the rest of the Super 8 faceplate. Keep their overall row proportions. */
+.s8-mod-row > .hp-group {
+  padding: 4px 5px 5px;
+}
+.s8-mod-row > .hp-group > .hp-group-head {
+  min-height: 15px;
+  margin: -4px -5px 3px;
+  padding: 2px 4px 2px;
+}
+.s8-mod-row > .hp-group > .hp-group-body {
+  gap: 4px 5px;
+  padding: 4px 4px 2px;
+}
+.s8-mod-row > .s8-lfo1 .hp-group-body,
+.s8-mod-row > .s8-lfo2 .hp-group-body {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 4px 5px;
+  padding: 4px 4px 2px;
+}
+.s8-mod-row > .s8-lfo1 .hp-group-body > .hp-select,
+.s8-mod-row > .s8-lfo2 .hp-group-body > .hp-select {
+  grid-column: span 3;
+  justify-self: center;
+  width: min(100%, 154px);
+  max-width: 154px;
+}
+.s8-mod-row > .s8-lfo1 .hp-group-body > .hp-knob,
+.s8-mod-row > .s8-lfo2 .hp-group-body > .hp-knob {
+  grid-column: span 3;
+  justify-self: center;
+  width: 36px;
+  --size: 36px;
+}
+.s8-mod-row > .s8-lfo1 .hp-knob-art,
+.s8-mod-row > .s8-lfo2 .hp-knob-art {
+  width: 36px;
+  height: 36px;
+}
+.s8-mod-row > .s8-lfo1 .hp-knob-value,
+.s8-mod-row > .s8-lfo2 .hp-knob-value {
+  min-height: 7px;
+  margin-top: 1px;
+  font-size: 5px;
+}
+.s8-mod-row > .s8-lfo1 .hp-knob > .hp-control-label,
+.s8-mod-row > .s8-lfo2 .hp-knob > .hp-control-label {
+  min-height: 10px;
+  margin-top: 1px;
+  padding-inline: 0;
+  font-size: 5.3px;
+  line-height: 1.05;
+}
+.s8-mod-row > .s8-lfo1 .hp-btn {
+  grid-column: span 3;
+  justify-self: center;
+  gap: 2px;
+}
+.s8-mod-row > .s8-lfo1 .hp-button {
+  width: 23px;
+  height: 18px;
+}
+.s8-mod-row > .s8-lfo1 .hp-button-label {
+  font-size: 5px;
+  line-height: 1;
+}
+.s8-mod-row > .s8-lfo2 .s8-faders {
+  grid-column: 1 / -1;
+  gap: 3px;
+  padding-top: 3px;
+  margin-top: 0;
+}
+.s8-mod-row > .s8-lfo2 .hp-fader {
+  width: 24px;
+  flex-basis: 24px;
+  gap: 2px;
+}
+.s8-mod-row > .s8-lfo2 .hp-fader-vertical .hp-fader-track {
+  height: 44px !important;
+  width: 10px;
+}
+.s8-mod-row > .s8-lfo2 .hp-fader-cap {
+  width: 17px;
+  height: 9px;
+}
+.s8-mod-row > .s8-lfo2 .hp-fader-label {
+  min-height: 14px;
+  font-size: 5px;
+  line-height: 1.02;
+}
+.s8-mod-row > .s8-lfo2 .hp-fader-value {
+  min-height: 6px;
+  font-size: 4.8px;
+}
+@media (max-width: 1050px) {
+  .s8-mod-row > .hp-group > .hp-group-body,
+  .s8-mod-row > .s8-lfo1 .hp-group-body,
+  .s8-mod-row > .s8-lfo2 .hp-group-body {
+    gap: 4px;
+    padding: 4px 3px 2px;
+  }
+  .s8-mod-row > .s8-lfo2 .s8-faders {
+    gap: 2px;
+  }
+}
