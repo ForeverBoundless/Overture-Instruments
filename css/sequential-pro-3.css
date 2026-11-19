@@ -629,3 +629,248 @@ body.pn-body.hp-pro3-body {
 @media (prefers-reduced-motion: reduce) {
   .hp-pro3 * { scroll-behavior: auto !important; }
 }
+
+
+/* -------------------------------------------------------------------------
+   Pro 3 finishing pass: retain the shared Overture toolbar above the chassis,
+   use one wide patch-morph control bay, and let compact controls wrap cleanly.
+   ------------------------------------------------------------------------- */
+
+/* The shared Overture toolbar is the single top bar; suppress the older
+   hardware-surface status strip inside the instrument. */
+.hp-pro3-stage > .hp-info {
+  display: none !important;
+}
+
+/* Patch morph is a full-width, centered utility bay rather than a small card
+   pushed to the right edge of the faceplate. */
+.p3-utility {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+}
+.p3-morph {
+  flex: 1 1 100%;
+  width: min(100%, 1280px);
+  max-width: 1280px;
+  min-width: 0;
+  margin-inline: auto;
+}
+.p3-morph .hp-group-body {
+  display: grid;
+  grid-template-columns: minmax(150px, 190px) minmax(0, 1fr);
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  width: 100%;
+  min-width: 0;
+  padding: 10px 12px 6px;
+}
+.p3-morph-actions {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+}
+.p3-morph-actions .hp-btn {
+  flex: 0 1 78px;
+  width: 78px;
+  min-width: 0;
+  max-width: 100%;
+}
+.p3-morph-actions .hp-button {
+  width: 42px;
+  height: 27px;
+}
+.p3-morph-actions .hp-button-label {
+  width: 100%;
+  max-width: 100%;
+  font-size: 6.5px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.p3-morph-slider {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  align-items: center;
+  gap: 15px;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  color: #f2f2f0;
+  font: 700 8px 'Saira', InterLocal, sans-serif;
+}
+.p3-morph-slider > .hp-control-label {
+  min-width: 0;
+  color: #f5f5f2;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: .07em;
+  text-align: left;
+  white-space: nowrap;
+}
+
+/* Overture's native range-slider treatment, recoloured Pro 3 red. */
+.p3-morph input.p3-overture-slider {
+  appearance: none;
+  -webkit-appearance: none;
+  display: block;
+  width: 100%;
+  min-width: 0;
+  height: 24px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  outline: 0;
+  background: transparent;
+  cursor: pointer;
+  accent-color: #ed3932;
+  touch-action: pan-y;
+}
+.p3-morph input.p3-overture-slider::-webkit-slider-runnable-track {
+  height: 6px;
+  border: 1px solid rgba(20,24,28,.72);
+  border-radius: 99px;
+  background:
+    linear-gradient(90deg, #ed3932 0 var(--p3-slider-fill,0%), #282d32 var(--p3-slider-fill,0%) 100%);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,.55), 0 1px rgba(255,255,255,.13);
+}
+.p3-morph input.p3-overture-slider::-moz-range-track {
+  height: 6px;
+  border: 1px solid rgba(20,24,28,.72);
+  border-radius: 99px;
+  background: #282d32;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,.55), 0 1px rgba(255,255,255,.13);
+}
+.p3-morph input.p3-overture-slider::-moz-range-progress {
+  height: 6px;
+  border-radius: 99px;
+  background: #ed3932;
+}
+.p3-morph input.p3-overture-slider::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 15px;
+  height: 15px;
+  margin-top: -5px;
+  border: 2px solid #171b20;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #fff, #d7d9d9 58%, #858b91);
+  box-shadow: 0 0 0 2px rgba(237,57,50,.26), 0 1px 4px rgba(0,0,0,.55);
+}
+.p3-morph input.p3-overture-slider::-moz-range-thumb {
+  width: 11px;
+  height: 11px;
+  border: 2px solid #171b20;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #fff, #d7d9d9 58%, #858b91);
+  box-shadow: 0 0 0 2px rgba(237,57,50,.26), 0 1px 4px rgba(0,0,0,.55);
+}
+.p3-morph input.p3-overture-slider:focus-visible {
+  outline: 2px solid #ff7770;
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+.p3-morph input.p3-overture-slider:hover::-webkit-slider-thumb {
+  box-shadow: 0 0 0 3px rgba(237,57,50,.32), 0 1px 5px rgba(0,0,0,.6);
+}
+
+/* Keep the existing faceplate grid. These local sizing rules stop labels,
+   buttons, knobs, selectors and faders from intruding into adjacent controls. */
+.hp-pro3 .hp-group,
+.hp-pro3 .hp-group-body,
+.hp-pro3 .hp-row,
+.hp-pro3 .hp-knob,
+.hp-pro3 .hp-fader,
+.hp-pro3 .hp-btn,
+.hp-pro3 .hp-select,
+.hp-pro3 .hp-slider {
+  box-sizing: border-box;
+  min-width: 0;
+}
+.hp-pro3 .hp-group-body > *,
+.hp-pro3 .hp-row > * {
+  min-width: 0;
+  max-width: 100%;
+}
+.hp-pro3 .hp-knob > .hp-control-label,
+.hp-pro3 .hp-fader-label,
+.hp-pro3 .hp-button-label,
+.hp-pro3 .hp-select > span {
+  max-width: 100%;
+  white-space: normal !important;
+  overflow-wrap: anywhere;
+  text-overflow: clip;
+}
+.hp-pro3 .hp-knob > .hp-control-label {
+  min-height: 14px;
+  line-height: 1.12;
+}
+.hp-pro3 .hp-button-label {
+  width: 100%;
+  transform: none !important;
+  line-height: 1.08;
+}
+.hp-pro3 .hp-select {
+  width: 100%;
+  max-width: 100%;
+}
+.hp-pro3 .hp-select > span {
+  min-height: 13px;
+  line-height: 1.12;
+  text-align: center;
+}
+.hp-pro3 .hp-select select {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+.hp-pro3 .hp-fader-track,
+.hp-pro3 .hp-knob-art,
+.hp-pro3 .hp-button {
+  flex-shrink: 0;
+}
+.p3-osc-col,
+.p3-lfo .p3-col,
+.p3-env-col,
+.p3-env-controls,
+.p3-steps,
+.p3-fx-col,
+.p3-arp .hp-group-body,
+.p3-feedback .hp-group-body {
+  min-width: 0;
+}
+.p3-env-controls .hp-knob {
+  width: 100%;
+  max-width: 36px;
+  min-width: 0;
+}
+.p3-env-controls .hp-button-label {
+  max-width: 100%;
+  white-space: normal !important;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 760px) {
+  .p3-morph .hp-group-body {
+    grid-template-columns: minmax(116px, 145px) minmax(0, 1fr);
+    gap: 10px;
+    padding-inline: 4px;
+  }
+  .p3-morph-actions { gap: 5px; }
+  .p3-morph-actions .hp-btn { flex-basis: 56px; width: 56px; }
+  .p3-morph-actions .hp-button { width: 34px; }
+  .p3-morph-slider { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .p3-morph-slider > .hp-control-label { font-size: 7px; }
+}
+@media (max-width: 420px) {
+  .p3-morph .hp-group-body { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  .p3-morph-actions { justify-content: flex-start; }
+  .p3-morph-slider { grid-template-columns: minmax(72px, max-content) minmax(0,1fr); gap: 8px; }
+}
