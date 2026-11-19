@@ -3,14 +3,14 @@
    Instrument identity is limited to one restrained accent colour. */
 
 :root {
-  --oi-power-ink: #f5f7fb;
-  --oi-power-muted: #a9b2c2;
-  --oi-power-bg: #0b0e13;
-  --oi-power-panel: #121821;
-  --oi-power-line: rgba(224,233,246,.16);
-  --oi-power-shadow: 0 28px 80px rgba(0,0,0,.42), inset 0 1px rgba(255,255,255,.055);
-  --oi-power-radius: 14px;
-  --oi-power-accent: #ffb75e;
+  --oi-power-ink: var(--ink, #f5f7fb);
+  --oi-power-muted: var(--muted, #a9b2c2);
+  --oi-power-bg: var(--bg, #0b0e13);
+  --oi-power-panel: var(--oi-panel-background, linear-gradient(145deg, rgba(18,24,33,.96), rgba(14,19,27,.98)));
+  --oi-power-line: var(--oi-panel-border, var(--line, rgba(224,233,246,.16)));
+  --oi-power-shadow: var(--oi-panel-shadow, 0 28px 80px rgba(0,0,0,.42), inset 0 1px rgba(255,255,255,.055));
+  --oi-power-radius: var(--oi-panel-radius, 14px);
+  --oi-power-accent: var(--amber, #ffb75e);
 }
 
 /* Keep every overlay on the same Overture backdrop. */
@@ -47,7 +47,7 @@
     radial-gradient(ellipse at 50% 54%, rgba(255,183,94,.055), transparent 58%),
     rgba(7,10,15,.88);
   color: var(--oi-power-ink);
-  font-family: 'Inter Variable', 'Inter', 'Segoe UI', sans-serif;
+  font-family: var(--font-body, 'Inter Variable'), 'Inter', 'Segoe UI', sans-serif;
   backdrop-filter: blur(14px) saturate(1.12);
   -webkit-backdrop-filter: blur(14px) saturate(1.12);
   cursor: pointer;
@@ -92,7 +92,7 @@
   border-radius: var(--oi-power-radius);
   background:
     radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--oi-power-accent) 8%, transparent), transparent 62%),
-    linear-gradient(145deg, rgba(22,30,42,.98), rgba(13,18,27,.99));
+    var(--oi-power-panel);
   box-shadow: var(--oi-power-shadow);
   color: var(--oi-power-ink);
   text-align: center;
@@ -186,7 +186,7 @@
   max-width: 100%;
   margin: 0;
   color: var(--oi-power-ink);
-  font: 750 23px/1.18 'Inter Variable', 'Inter', 'Segoe UI', sans-serif;
+  font: 750 23px/1.18 var(--font-display, 'Inter Variable'), 'Inter', 'Segoe UI', sans-serif;
   letter-spacing: .105em;
   text-transform: uppercase;
   overflow-wrap: anywhere;
@@ -200,7 +200,7 @@
   min-height: 18px;
   margin: 0;
   color: var(--oi-power-accent);
-  font: 500 10px/1.4 'DM Mono', 'Courier New', monospace;
+  font: 500 10px/1.4 var(--font-mono, 'DM Mono'), 'Courier New', monospace;
   letter-spacing: .13em;
   text-align: center;
   text-transform: uppercase;
@@ -251,19 +251,19 @@
 
 /* Instrument colour is deliberately limited to the accent rule and standby LED. */
 #power-overlay { --oi-power-accent: #ffb75e; }           /* Little Phatty */
-#mellotron-power { --oi-power-accent: #e8b26a; }        /* Mellotron */
+#mellotron-power { --oi-power-accent: #ffb75e; }        /* Mellotron */
 #sub37-power { --oi-power-accent: #7de4ff; }            /* Sub 37 */
-#obxa-power { --oi-power-accent: #8cccf0; }             /* OB-Xa */
-#nord-c2d-power { --oi-power-accent: #ff777b; }         /* Nord C2D */
-#prophet10-power { --oi-power-accent: #ff8a70; }        /* Prophet-10 */
-#hohner-power { --oi-power-accent: #e4bd86; }            /* Hohner D6 */
+#obxa-power { --oi-power-accent: #7de4ff; }             /* OB-Xa */
+#nord-c2d-power { --oi-power-accent: #ffb75e; }         /* Nord C2D */
+#prophet10-power { --oi-power-accent: #7de4ff; }        /* Prophet-10 */
+#hohner-power { --oi-power-accent: #ffb75e; }            /* Hohner D6 */
 #dx7-power { --oi-power-accent: #82e6a8; }               /* Yamaha DX7 */
-#ms20-power { --oi-power-accent: #d6bb78; }              /* Korg MS-20 */
-#super8-power { --oi-power-accent: #e56a50; }            /* UDO Super 8 */
+#ms20-power { --oi-power-accent: #ffb75e; }              /* Korg MS-20 */
+#super8-power { --oi-power-accent: #82e6a8; }            /* UDO Super 8 */
 #tr808-power { --oi-power-accent: #ff9f0a; }             /* Roland TR-808 */
 #juno-power { --oi-power-accent: #7de4ff; }              /* Roland JUNO-106 */
-#pro3-power { --oi-power-accent: #ef7770; }              /* Sequential Pro 3 */
-#oberheim-power { --oi-power-accent: #c58b62; }          /* Oberheim Eight Voice */
+#pro3-power { --oi-power-accent: #7de4ff; }              /* Sequential Pro 3 */
+#oberheim-power { --oi-power-accent: #82e6a8; }          /* Oberheim Eight Voice */
 
 @media (max-width: 520px) {
   :is(
@@ -359,7 +359,7 @@
   max-width: 100%;
   margin: 0;
   color: var(--oi-power-ink);
-  font: 750 23px/1.18 'Inter Variable', 'Inter', 'Segoe UI', sans-serif;
+  font: 750 23px/1.18 var(--font-display, 'Inter Variable'), 'Inter', 'Segoe UI', sans-serif;
   letter-spacing: .105em;
   text-transform: uppercase;
   overflow-wrap: anywhere;
@@ -388,7 +388,7 @@
   min-height: 18px;
   margin: 0;
   color: var(--oi-power-accent);
-  font: 500 10px/1.4 'DM Mono', 'Courier New', monospace;
+  font: 500 10px/1.4 var(--font-mono, 'DM Mono'), 'Courier New', monospace;
   letter-spacing: .13em;
   text-align: center;
   text-transform: uppercase;
