@@ -971,12 +971,12 @@ test('OMNI patch rename uses a theme-aware modal and patch tile entrance plays o
     readFile(new URL('../omni.html', import.meta.url), 'utf8'),
     readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
   ]);
-  assert.doesNotMatch(launcher, /window\\.prompt\\(['"]Patch name/);
+  assert.doesNotMatch(launcher, /window\.prompt\(['"]Patch name/);
   assert.match(launcher, /className = 'omni-rename-dialog'/);
-  assert.match(launcher, /dialog\\.showModal\\(\\)/);
+  assert.match(launcher, /dialog\.showModal\(\)/);
   assert.match(launcher, /aria-labelledby', 'omni-rename-title'/);
   assert.match(launcher, /Patch names must contain at least three characters/);
-  assert.match(styles, /\\.omni-rename-dialog::backdrop/);
+  assert.match(styles, /\.omni-rename-dialog::backdrop/);
   assert.match(styles, /omni-rename-accent:#7de4ff/);
   assert.match(styles, /html\\[data-theme="light"\\]\\.omni-launcher-mode \\.omni-rename-dialog[\\s\\S]*omni-rename-accent:#087f9f/);
   assert.match(styles, /omni-rename-dialog \\.omni-rename-actions \\.community-button--primary:hover/);
