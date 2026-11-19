@@ -312,6 +312,24 @@ class Super8App{
   const modRow=addRow(p,'s8-mod-row');
   [l1,l2].forEach(section=>modRow.appendChild(section));
 
+  // Right-hand fascia branding balances the compact LFO bank and mirrors
+  // the restrained UDO Audio / SUPER 8 wordmark on the real instrument.
+  const modBrand=document.createElement('div');modBrand.className='s8-mod-brand';
+  const modBrandTop=document.createElement('div');modBrandTop.className='s8-mod-brand-top';
+  const modBrandLogo=document.createElement('img');modBrandLogo.src='/ui/Logos/UDO_logo.png';modBrandLogo.alt='UDO Audio';modBrandLogo.draggable=false;
+  modBrandTop.appendChild(modBrandLogo);
+  const modBrandRule=document.createElement('span');modBrandRule.className='s8-mod-brand-rule';modBrandTop.appendChild(modBrandRule);
+  const modBrandCopy=document.createElement('div');modBrandCopy.className='s8-mod-brand-copy';
+  const modBrandName=document.createElement('strong');modBrandName.innerHTML='<span>U·D·O</span> SUPER 8';modBrandCopy.appendChild(modBrandName);
+  const modBrandType=document.createElement('span');modBrandType.textContent='16-VOICE BINAURAL ANALOG-HYBRID SYNTHESIZER';modBrandCopy.appendChild(modBrandType);
+  const modBrandBy=document.createElement('small');modBrandBy.textContent='UDO AUDIO  ·  FROM OVERTURE INSTRUMENTS';modBrandCopy.appendChild(modBrandBy);
+  modBrand.append(modBrandTop,modBrandCopy);
+  const modBrandFoot=document.createElement('div');modBrandFoot.className='s8-mod-brand-foot';
+  const modBrandLed=document.createElement('i');modBrandLed.setAttribute('aria-hidden','true');modBrandFoot.appendChild(modBrandLed);
+  const modBrandFootText=document.createElement('span');modBrandFootText.textContent='DUAL-LAYER PERFORMANCE INSTRUMENT';modBrandFoot.appendChild(modBrandFootText);
+  modBrand.appendChild(modBrandFoot);
+  modRow.appendChild(modBrand);
+
   const performanceBay=document.createElement('div');performanceBay.className='s8-performance-bay';
   performanceBay.appendChild(left);
   const keyArea=document.createElement('div');keyArea.className='s8-key-area';
