@@ -44,7 +44,7 @@
 .obxa-mod-route-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;min-width:0}
 .obxa-mod-route{display:flex;flex-direction:column;align-items:stretch;gap:7px;min-width:0;padding:8px 9px;border:1px solid #344e64;border-radius:3px;background:linear-gradient(145deg,#142230,#0d151e)}
 .obxa-mod-route__title{margin:0;color:#83a9c4;font:700 7px/1 'DM Mono',monospace;letter-spacing:.13em}
-.obxa-mod-switches{justify-content:flex-start;align-items:center;gap:6px}
+.obxa-mod-switches{justify-content:center;align-items:center;gap:6px}
 .obxa-mod-switches .pn-button{flex:0 1 auto}
 .obxa-mod-memory{display:flex;flex-wrap:wrap;align-items:center;gap:7px}
 .obxa-mod-help{margin:0;padding-top:7px;border-top:1px solid #ffffff12;font-size:8px;line-height:1.55;max-width:100%}
