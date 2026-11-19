@@ -21,14 +21,17 @@ window.va = window.va || function () { (window.vaq = window.vaq || []).push(argu
 <link rel="stylesheet" href="/css/midi-map.css?v=20261116-community-purple">
 <link rel="manifest" href="/manifest.webmanifest">
 <script src="/js/shared/pwa.js" defer></script>
-<link rel="stylesheet" href="/css/power-screens.css?v=20261119-emulator-power-r2">
+<link rel="stylesheet" href="/css/power-screens.css?v=20261119-emulator-power-r3">
 </head>
 <body class="little-phatty-body">
 
-<div id="power-overlay" role="dialog" aria-modal="true" aria-labelledby="power-overlay-title">
-  <div id="power-overlay-inner">
-    <div class="power-orbit power-orbit-one" aria-hidden="true"></div>
-    <div class="power-orbit power-orbit-two" aria-hidden="true"></div>
+<div id="power-overlay" class="oi-power-overlay" role="dialog" aria-modal="true" aria-labelledby="power-overlay-title">
+  <button type="button" id="power-launcher-button" class="oi-power-card" aria-label="Power on the Little Phatty">
+    <img src="/ui/Logos/OvertureLogo.png" alt="Overture" width="44" height="44">
+    <strong id="power-overlay-title">LITTLE PHATTY</strong>
+    <small id="power-overlay-sub">Click to power on</small>
+  </button>
+</div>
     <div class="power-launcher-mark" aria-hidden="true"><span class="material-symbols-rounded">power_settings_new</span></div>
     <p class="power-eyebrow">OVERTURE INSTRUMENTS · MOOG</p>
     <h1 id="power-overlay-title">LITTLE PHATTY</h1>
