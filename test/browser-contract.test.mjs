@@ -665,7 +665,7 @@ test('Hohner D6 and OB-Xa library cards use minimalist instrument-specific surfa
 
 
 test('Sequential Pro 3 and UDO Super 8 are first-class library instruments', async () => {
-  const [metadata, library, styles, proPage, proApp, proEngine, superPage, superApp, superEngine, superStyles, worker] = await Promise.all([
+  const [metadata, library, styles, proPage, proApp, proEngine, superPage, superApp, superEngine, superStyles, worker, proSkin] = await Promise.all([
     readFile(new URL('../js/data/instruments.js', import.meta.url), 'utf8'),
     readFile(new URL('../js/library.js', import.meta.url), 'utf8'),
     readFile(new URL('../css/library.css', import.meta.url), 'utf8'),
@@ -677,6 +677,7 @@ test('Sequential Pro 3 and UDO Super 8 are first-class library instruments', asy
     readFile(new URL('../js/engine/Super8Processor.js', import.meta.url), 'utf8'),
     readFile(new URL('../css/udo-super-8.css', import.meta.url), 'utf8'),
     readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
+    readFile(new URL('../css/sequential-pro-3.css', import.meta.url), 'utf8'),
   ]);
   for (const id of ['sequential-pro-3','udo-super-8']) assert.ok(metadata.includes("id: '" + id + "'"));
   assert.ok(metadata.includes("route: '/html/sequential-pro-3'"));
@@ -687,6 +688,11 @@ test('Sequential Pro 3 and UDO Super 8 are first-class library instruments', asy
   assert.ok(proPage.includes('sequential-pro-3.css'));
   assert.match(proApp, /MODULATION MATRIX/);
   assert.match(proApp, /seqTracks/);
+  assert.ok(proApp.includes('p3-overture-slider'));
+  assert.ok(proApp.includes('p3-morph-actions'));
+  assert.ok(proSkin.includes('.hp-pro3-stage > .hp-info'));
+  assert.ok(proSkin.includes('.p3-morph-slider'));
+  assert.ok(proSkin.includes('::-webkit-slider-runnable-track'));
   assert.ok(proEngine.includes('registerProcessor("pro3-processor",Pro3Processor)'));
   assert.match(proEngine, /paraphonic/);
   assert.ok(superPage.includes('udo-super-8.css'));
