@@ -195,7 +195,7 @@ class Super8App{
   const model=document.createElement('div');model.className='s8-model';model.innerHTML='<strong>SUPER 8</strong><span>16-voice binaural analog-hybrid synthesizer</span>';brand.appendChild(model);
   this.hwDisplay=addDisplay(top,{brand:'PERFORMANCE / PROGRAM'});this.hwDisplay.set('P 001','OVERTURE PERFORMANCE');
   const master=addRow(top,'s8-master');
-  k(master,'volume','Master',{global:true,size:50,group:'MASTER'});k(master,'distortion','Distortion',{global:true,size:42,group:'MASTER'});k(master,'masterTune','Master tune',{global:true,min:-1,max:1,step:.01,size:42,bipolar:true,group:'MASTER',fmt:v=>(v>0?'+':'')+Math.round(v*100)+'¢'});
+  k(master,'volume','Master',{global:true,size:38,group:'MASTER'});k(master,'distortion','Distortion',{global:true,size:36,group:'MASTER'});k(master,'masterTune','Master tune',{global:true,min:-1,max:1,step:.01,size:36,bipolar:true,group:'MASTER',fmt:v=>(v>0?'+':'')+Math.round(v*100)+'¢'});
   this.hwPower=addButton(master,{label:'POWER',value:false,toggle:false,led:'green',group:'GLOBAL',onChange:async()=>{const ready=await this.activateAudio?.();this.hwPower?.setValue(!!ready,true);}});
 
   // ---- parts, voice mode ----
@@ -215,13 +215,13 @@ class Super8App{
   const d1=addPanel(osc,{title:'DDS 1',sub:'oscillator · super wave',className:'s8-dds1'});
   s(d1.body,'dds1Wave','Waveform',WAVES1,{group:'DDS 1',wide:true});s(d1.body,'dds1Range','Range',[64,32,16,8,4,2],{group:'DDS 1'});
   s(d1.body,'altA','Wave A',Array.from({length:64},(_,i)=>i),{group:'DDS 1',labels:Array.from({length:64},(_,i)=>String(i+1).padStart(2,'0'))});s(d1.body,'altB','Wave B',Array.from({length:64},(_,i)=>i),{group:'DDS 1',labels:Array.from({length:64},(_,i)=>String(i+1).padStart(2,'0'))});
-  s(d1.body,'superMode','Super',['off','half','on'],{group:'DDS 1'});k(d1.body,'detune','Detune',{group:'DDS 1'});k(d1.body,'pwDrift','PW drift',{group:'DDS 1'});
+  s(d1.body,'superMode','Super',['off','half','on'],{group:'DDS 1'});const d1knobs=addRow(d1.body,'s8-mini-knobs');k(d1knobs,'detune','Detune',{size:34,group:'DDS 1'});k(d1knobs,'pwDrift','PW drift',{size:34,group:'DDS 1'});
   const d2=addPanel(osc,{title:'DDS 2',sub:'second oscillator · modes',className:'s8-dds2'});
   s(d2.body,'dds2Wave','Waveform',WAVES2,{group:'DDS 2',wide:true});s(d2.body,'dds2Range','Range',[32,16,8,4,2,'LFO'],{group:'DDS 2'});
   s(d2.body,'dds2Mode','Mode',['normal','sync','ring','sub'],{group:'DDS 2'});s(d2.body,'subMode','Sub wave',['sine','square'],{group:'DDS 2'});
-  k(d2.body,'dds2Tune','Fine tune',{min:-7,max:7,step:.01,bipolar:true,group:'DDS 2',fmt:v=>Number(v).toFixed(1)});k(d2.body,'crossMod','Cross mod',{group:'DDS 2'});k(d2.body,'dds2WaveMod','PWM',{group:'DDS 2'});
+  const d2knobs=addRow(d2.body,'s8-mini-knobs');k(d2knobs,'dds2Tune','Fine tune',{min:-7,max:7,step:.01,bipolar:true,size:34,group:'DDS 2',fmt:v=>Number(v).toFixed(1)});k(d2knobs,'crossMod','Cross mod',{size:34,group:'DDS 2'});k(d2knobs,'dds2WaveMod','PWM',{size:34,group:'DDS 2'});
   const dm=addPanel(osc,{title:'DDS modulator',sub:'LFO 1 · ENV 1 · wave morph',className:'s8-ddsmod'});
-  f(dm.body,'lfo1PitchAmount','LFO 1',{group:'DDS MODULATOR'});f(dm.body,'env1PitchAmount','ENV 1',{group:'DDS MODULATOR'});
+  const dmFaders=addRow(dm.body,'s8-faders');f(dmFaders,'lfo1PitchAmount','LFO 1',{group:'DDS MODULATOR',height:62});f(dmFaders,'env1PitchAmount','ENV 1',{group:'DDS MODULATOR',height:62});
   s(dm.body,'oscPitchDestination','Pitch dest',['DDS 1','1+2','DDS 2'],{group:'DDS MODULATOR'});s(dm.body,'waveModSource','Wave source',['Manual','LFO 1','ENV 1'],{group:'DDS MODULATOR'});
   k(dm.body,'waveMod','Wave / PWM',{group:'DDS MODULATOR'});
   const mx=addPanel(osc,{title:'Mixer',sub:'DDS 1 ↔ DDS 2 · layer pan',className:'s8-mixer'});
@@ -230,8 +230,8 @@ class Super8App{
   // ---- filter, envelopes, effects ----
   const mid=addRow(p,'hp-main s8-mid');
   const vcf=addPanel(mid,{title:'VCF',sub:'analog HPF · four-pole LPF',className:'s8-vcf'});
-  const vf=addRow(vcf.body,'hp-row-tight');
-  f(vf,'hpf','HPF',{group:'VCF',height:96});f(vf,'cutoff','LPF',{group:'VCF',height:96});f(vf,'resonance','Res',{group:'VCF',height:96});f(vf,'filterLfoAmount','LFO 1',{group:'VCF',height:96});f(vf,'filterOscAmount','DDS 2',{group:'VCF',height:96});
+  const vf=addRow(vcf.body,'s8-faders');
+  f(vf,'hpf','HPF',{group:'VCF',height:68});f(vf,'cutoff','LPF',{group:'VCF',height:68});f(vf,'resonance','Res',{group:'VCF',height:68});f(vf,'filterLfoAmount','LFO 1',{group:'VCF',height:68});f(vf,'filterOscAmount','DDS 2',{group:'VCF',height:68});
   const vs=addRow(vcf.body,'s8-selects');
   s(vs,'drive','Drive',['off','1','2'],{group:'VCF'});s(vs,'keyTrack','Key track',['off','half','on'],{group:'VCF'});s(vs,'filterMod','Env source',['env1','both','env2'],{group:'VCF'});s(vs,'velocity','Velocity (VCA)',['off','half','on'],{group:'VCA'});
   const envp=addPanel(mid,{title:'Envelopes',sub:'ENV 1 modulation · ENV 2 amplifier',className:'s8-env'});
@@ -243,7 +243,7 @@ class Super8App{
   const e2k=addRow(e2,'hp-row-tight');k(e2k,'env2DecayHold','D hold',{small:true,size:34,group:'ENVELOPE 2'});
   const fxp=addPanel(mid,{title:'Effects',sub:'chorus · stereo delay',className:'s8-fx'});
   s(fxp.body,'chorus','Chorus',['off','I','II','both'],{group:'EFFECTS'});k(fxp.body,'chorusMix','Chorus mix',{size:42,group:'EFFECTS'});
-  addRow(fxp.body,'p3-break');
+  addRow(fxp.body,'s8-fx-break');
   k(fxp.body,'delayTime','Delay time',{size:42,group:'EFFECTS'});k(fxp.body,'delayFeedback','Feedback',{size:42,group:'EFFECTS'});k(fxp.body,'delayMod','Modulation',{size:42,group:'EFFECTS'});k(fxp.body,'delayMix','Delay mix',{size:42,group:'EFFECTS'});
   b(fxp.body,'delaySync','Tempo sync',{group:'EFFECTS',led:'amber'});b(fxp.body,'delayFreeze','Freeze',{group:'EFFECTS',led:'amber'});
 
@@ -256,8 +256,8 @@ class Super8App{
   const l2=addPanel(mod,{title:'LFO 2 and bender',sub:'modulation · two-axis control',className:'s8-lfo2'});
   s(l2.body,'lfo2Wave','Waveform',LFO_SHAPES,{group:'LFO 2',wide:true});s(l2.body,'lfo2Mode','Trigger',['trig','atTrig','onAtBend'],{group:'LFO 2',labels:['Always','Pressure','On bend']});
   k(l2.body,'lfo2Rate','Rate',{group:'LFO 2'});k(l2.body,'lfo2Delay','Delay',{group:'LFO 2'});
-  addRow(l2.body,'p3-break');
-  [['lfo2RateAmount','Rate mod'],['lfo2Dds','To DDS'],['lfo2Vcf','To VCF'],['lfo2Vca','To VCA'],['benderDds','Bend pitch'],['benderVcf','Bend VCF']].forEach(([key,l])=>f(l2.body,key,l,{group:'LFO 2',height:56}));
+  const l2faders=addRow(l2.body,'s8-faders');
+  [['lfo2RateAmount','Rate mod'],['lfo2Dds','To DDS'],['lfo2Vcf','To VCF'],['lfo2Vca','To VCA'],['benderDds','Bend pitch'],['benderVcf','Bend VCF']].forEach(([key,l])=>f(l2faders,key,l,{group:'LFO 2',height:48}));
 
   // ---- sequencer and arpeggiator ----
   const seqp=addPanel(p,{title:'Sequencer and arpeggiator',sub:'64 steps per part · four pages of 16',className:'s8-seq'});
