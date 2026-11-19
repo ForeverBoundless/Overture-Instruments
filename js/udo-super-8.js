@@ -307,8 +307,13 @@ class Super8App{
   [part,fxp,seqp].forEach(section=>consoleRow.appendChild(section));
   st.insertBefore(this.hwDisplay.el,st.firstChild);
 
+  // The two LFOs get a dedicated full-width bank beneath the sequencer.
+  // They must not share the narrow performance-bay column with the bender.
+  const modRow=addRow(p,'s8-mod-row');
+  [l1,l2].forEach(section=>modRow.appendChild(section));
+
   const performanceBay=document.createElement('div');performanceBay.className='s8-performance-bay';
-  [l1,l2,left].forEach(section=>performanceBay.appendChild(section));
+  performanceBay.appendChild(left);
   const keyArea=document.createElement('div');keyArea.className='s8-key-area';
   const brandRail=document.createElement('div');brandRail.className='s8-brand-rail';
   brandRail.appendChild(brand);
@@ -317,6 +322,7 @@ class Super8App{
   p.insertBefore(vent,p.firstChild);
   p.insertBefore(upperRow,vent.nextSibling);
   p.insertBefore(consoleRow,upperRow.nextSibling);
+  p.appendChild(modRow);
   p.appendChild(playRow);
   top.remove();osc.remove();mid.remove();mod.remove();
 
