@@ -31,11 +31,11 @@ body.pn-body { background: radial-gradient(ellipse at 50% -10%, #2a2f38 0%, var(
 .pn-section { min-width: 0; padding: 8px 9px 9px; border: 1px solid var(--pn-border); border-radius: 5px; background: linear-gradient(160deg, color-mix(in srgb, var(--pn-section) 85%, #fff), var(--pn-section) 60%); box-shadow: inset 0 1px #ffffff12, inset 0 -1px #000; }
 .pn-section h2 { margin: 0 0 7px; padding-bottom: 4px; border-bottom: 1px solid #ffffff17; font-size: 9px; font-weight: 800; letter-spacing: .16em; }
 .pn-section h2 span { margin-left: 6px; color: var(--pn-muted); font-size: 7px; font-weight: 600; }
-.pn-body { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 8px; }
-.pn-knobs { display: flex; flex-wrap: wrap; gap: 6px; }
+.pn-body { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; }
+.pn-knobs { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px; }
 .pn-knob { --knob-size: 46px; min-width: 46px; }
 .pn-knob .lp-knob-label { color: #c9cbcf; font-size: 6.5px; letter-spacing: .04em; max-width: 64px; }
-.pn-buttons { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.pn-buttons { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; justify-content: center; }
 .pn-button { min-height: 22px; padding: 4px 8px; border: 1px solid #5a606a; border-radius: 3px; color: #d6d8dc; background: linear-gradient(#383c44, #1a1c21); box-shadow: inset 0 1px #ffffff18, 0 1px #000; font: 700 8px/1 'Inter Variable', sans-serif; letter-spacing: .07em; cursor: pointer; }
 .pn-button:hover { filter: brightness(1.2); }
 .pn-button:active { transform: translateY(1px); }
