@@ -15,9 +15,11 @@ function buildTile(instrument) {
   tile.tabIndex = 0;
   tile.setAttribute('role', 'button');
   tile.setAttribute('aria-label', `Select ${instrument.name}`);
-  const art = instrument.id === 'sequential-pro-3'
-    ? '<div class="pro3-tile-art" aria-hidden="true"><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span></div>'
-    : instrument.id === 'mellotron-m400'
+  const art = instrument.id === 'udo-super-8'
+    ? '<div class="super8-tile-art" aria-hidden="true"><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span></div>'
+    : instrument.id === 'sequential-pro-3'
+      ? '<div class="pro3-tile-art" aria-hidden="true"><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span></div>'
+      : instrument.id === 'mellotron-m400'
       ? '<div class="m400-tile-art" aria-hidden="true"><span class="m400-tile-reel m400-tile-reel--one"></span><span class="m400-tile-reel m400-tile-reel--two"></span><i></i></div>'
       : instrument.id === 'oberheim-eight-voice'
         ? '<div class="eight-voice-tile-art" aria-hidden="true"><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span><span><i></i></span></div>'
