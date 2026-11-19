@@ -226,7 +226,7 @@ class Super8App{
   s(dm.body,'oscPitchDestination','Pitch dest',['DDS 1','1+2','DDS 2'],{group:'DDS MODULATOR'});s(dm.body,'waveModSource','Wave source',['Manual','LFO 1','ENV 1'],{group:'DDS MODULATOR'});
   k(dm.body,'waveMod','Wave / PWM',{group:'DDS MODULATOR'});
   const mx=addPanel(osc,{title:'Mixer',sub:'DDS 1 ↔ DDS 2 · layer pan',className:'s8-mixer'});
-  k(mx.body,'mix','DDS 1 ↔ 2',{size:58,group:'MIXER'});k(mx.body,'pan','Layer pan',{size:46,bipolar:true,group:'MIXER'});
+  k(mx.body,'mix','DDS 1 ↔ 2',{size:42,group:'MIXER'});k(mx.body,'pan','Layer pan',{size:36,bipolar:true,group:'MIXER'});
 
   // ---- filter, envelopes, effects ----
   const mid=addRow(p,'hp-main s8-mid');
