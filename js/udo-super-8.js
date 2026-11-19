@@ -252,11 +252,11 @@ class Super8App{
   const mod=addRow(p,'hp-main s8-mod');
   const l1=addPanel(mod,{title:'LFO 1',sub:'rate · delay · L/R phase',className:'s8-lfo1'});
   s(l1.body,'lfo1Wave','Waveform',LFO_SHAPES,{group:'LFO 1',wide:true});s(l1.body,'lfo1Mode','Mode',['free','once','reset'],{group:'LFO 1'});
-  k(l1.body,'lfo1Rate','Rate',{group:'LFO 1'});k(l1.body,'lfo1Delay','Delay',{group:'LFO 1'});k(l1.body,'lrPhase','L/R phase',{group:'LFO 1'});
+  k(l1.body,'lfo1Rate','Rate',{size:36,group:'LFO 1'});k(l1.body,'lfo1Delay','Delay',{size:36,group:'LFO 1'});k(l1.body,'lrPhase','L/R phase',{size:36,group:'LFO 1'});
   b(l1.body,'lfo1HighFreq','High freq',{group:'LFO 1',led:'amber'});b(l1.body,'lfo1KeyTrack','Key track',{group:'LFO 1',led:'amber'});
   const l2=addPanel(mod,{title:'LFO 2 and bender',sub:'modulation · two-axis control',className:'s8-lfo2'});
   s(l2.body,'lfo2Wave','Waveform',LFO_SHAPES,{group:'LFO 2',wide:true});s(l2.body,'lfo2Mode','Trigger',['trig','atTrig','onAtBend'],{group:'LFO 2',labels:['Always','Pressure','On bend']});
-  k(l2.body,'lfo2Rate','Rate',{group:'LFO 2'});k(l2.body,'lfo2Delay','Delay',{group:'LFO 2'});
+  k(l2.body,'lfo2Rate','Rate',{size:36,group:'LFO 2'});k(l2.body,'lfo2Delay','Delay',{size:36,group:'LFO 2'});
   const l2faders=addRow(l2.body,'s8-faders');
   [['lfo2RateAmount','Rate mod'],['lfo2Dds','To DDS'],['lfo2Vcf','To VCF'],['lfo2Vca','To VCA'],['benderDds','Bend pitch'],['benderVcf','Bend VCF']].forEach(([key,l])=>f(l2faders,key,l,{group:'LFO 2',height:48}));
 
