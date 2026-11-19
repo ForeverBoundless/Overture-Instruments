@@ -701,7 +701,7 @@ test('Sequential Pro 3 and UDO Super 8 are first-class library instruments', asy
   assert.ok(superApp.includes('s8-upper'));
   assert.ok(superApp.includes('s8-console-row'));
   assert.ok(superApp.includes('s8-performance-bay'));
-  assert.ok(styles.includes('.super8-tile-art'));
+  assert.doesNotMatch(styles, /super8-tile-art|pro3-tile-art/);
   assert.ok(superStyles.includes('.hp-super8 .hp-keybed'));
   assert.ok(worker.includes('/html/sequential-pro-3'));
   assert.ok(worker.includes('/html/udo-super-8'));

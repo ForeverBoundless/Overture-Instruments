@@ -4,7 +4,7 @@
  * bespoke controls: a generic button/slider kit cannot reproduce the
  * physical Little Phatty panel's interaction and proportions.
  */
-import './library.js?v=20261119-super8-tile-r1';
+import './library.js?v=20261119-tile-consistency-r1';
 
 // Enhancement only: the catalog remains functional if the CDN is offline.
 // The custom element's text still presents a usable Launch control while

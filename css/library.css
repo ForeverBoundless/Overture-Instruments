@@ -4397,121 +4397,137 @@ html[data-theme="light"] .instrument-tile--ob-xa .instrument-tile__hint { color:
 }
 
 
-/* Sequential Pro 3 — graphite case, silver hardware, lavender display and red LEDs. */
+/* =====================================================================
+   SEQUENTIAL PRO 3
+   Same shared display + keybed geometry as every other tile; only the
+   material, pattern and colour change. Black steel chassis, a row of
+   orange-ringed knobs, a violet LCD and warm orange light.
+   ===================================================================== */
 .instrument-tile--sequential-pro-3 {
-  --tile-bar-glow: #e94c42;
-  background: linear-gradient(145deg, rgba(92,96,102,.34), rgba(17,20,24,.99));
+  --tile-bar-glow: #f27a2a;
+  background: linear-gradient(145deg, rgba(105,70,142,.30), rgba(17,18,22,.99));
 }
 .instrument-tile--sequential-pro-3 .instrument-tile__visual {
-  background:
-    linear-gradient(90deg, #34383d 0 6%, transparent 6% 94%, #34383d 94% 100%),
-    linear-gradient(165deg, #777b80 0%, #52575d 28%, #30353b 72%, #20252a 100%);
-  box-shadow: inset 0 1px rgba(255,255,255,.26), inset 0 -14px 22px rgba(0,0,0,.42);
+  background: linear-gradient(165deg, #34363b 0%, #1d1f23 38%, #131417 72%, #0b0c0e 100%);
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.16),
+    inset 0 -12px 23px rgba(0,0,0,.42);
 }
+/* Brushed black steel */
 .instrument-tile--sequential-pro-3 .instrument-tile__visual::before {
-  opacity: .94;
   background:
-    repeating-linear-gradient(0deg, transparent 0 5px, rgba(255,255,255,.045) 5px 6px),
-    linear-gradient(180deg, rgba(255,255,255,.16), transparent 35%, rgba(0,0,0,.22));
+    repeating-linear-gradient(0deg, transparent 0 3px, rgba(255,255,255,.035) 3px 4px),
+    linear-gradient(115deg, rgba(255,255,255,.1), transparent 42%, rgba(0,0,0,.28));
 }
+/* A row of orange-ringed knob caps beneath the display */
 .instrument-tile--sequential-pro-3 .instrument-tile__visual::after {
-  left: 8px;
-  right: 8px;
-  top: 83px;
-  height: 56px;
-  border: 1px solid rgba(22,25,29,.72);
-  border-radius: 4px;
+  left: 14px;
+  right: 14px;
+  top: 92px;
+  height: 11px;
   background:
-    radial-gradient(circle, #ff3831 0 1.5px, transparent 2.1px) 7px 8px / 15px 13px repeat,
-    linear-gradient(180deg, rgba(31,35,40,.8), rgba(62,67,73,.92));
-  box-shadow: inset 0 1px rgba(255,255,255,.11), 0 2px 4px rgba(0,0,0,.44);
+    radial-gradient(circle, #121317 0 2.4px, #f27a2a 2.9px 4.2px, #3b1d0c 4.7px 5.2px, transparent 5.6px)
+      0 0 / 18px 11px repeat-x;
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,.7));
+  opacity: .9;
 }
 .instrument-tile--sequential-pro-3 .instrument-tile__glow {
-  background: radial-gradient(ellipse at 52% 30%, rgba(209,190,238,.26), transparent 55%);
-  filter: blur(8px);
-  opacity: .72;
+  background:
+    radial-gradient(circle at 48% 30%, rgba(176,138,232,.3), transparent 30%),
+    radial-gradient(circle at 50% 52%, rgba(242,122,42,.18), transparent 54%);
+  filter: blur(6px);
 }
+/* Violet LCD */
 .instrument-tile--sequential-pro-3 .instrument-tile__display {
-  left: 24px;
-  top: 29px;
-  width: 83px;
-  height: 32px;
-  padding: 5px 6px;
-  border: 3px solid #514b59;
-  border-radius: 3px;
-  background: linear-gradient(180deg, #8b78a4, #55466d 65%, #332b43);
-  box-shadow: inset 0 0 12px rgba(15,12,21,.9), 0 2px 4px rgba(0,0,0,.55);
+  border: 3px solid #3d3945;
+  background: linear-gradient(180deg, #7d68a6, #4d3d72 62%, #2f2447);
+  box-shadow:
+    inset 0 0 13px rgba(14,9,26,.9),
+    inset 0 0 0 1px rgba(214,196,245,.14),
+    0 2px 5px rgba(0,0,0,.6);
 }
 .instrument-tile--sequential-pro-3 .instrument-tile__display span {
-  height: 2px;
-  margin: 3px 0;
-  background: #e3d7f2;
-  box-shadow: 0 0 5px rgba(226,211,246,.85);
+  background: #eadcff;
+  box-shadow: 0 0 7px rgba(226,208,255,.9), 0 0 13px rgba(150,112,214,.35);
 }
 .instrument-tile--sequential-pro-3 .instrument-tile__keys {
-  right: 7px;
-  bottom: 13px;
-  width: 139px;
-  height: 45px;
-  transform: none;
-  border: 2px solid #171a1e;
-  border-radius: 2px;
-  background: repeating-linear-gradient(
-    90deg,
-    #f1f0ec 0 9px,
-    #17191c 9px 12px,
-    #f9f8f4 12px 21px
-  );
-  box-shadow: 0 3px 6px rgba(0,0,0,.65), inset 0 1px rgba(255,255,255,.7);
+  border-color: #121316;
+  box-shadow:
+    0 7px 11px rgba(0,0,0,.6),
+    0 2px 0 rgba(255,255,255,.4) inset,
+    0 -2px 5px rgba(0,0,0,.25) inset;
 }
 .instrument-tile--sequential-pro-3 .instrument-tile__icon {
-  color: rgba(244,245,244,.83);
-  text-shadow: 0 1px 2px rgba(0,0,0,.55);
+  color: #f6a15f;
+  text-shadow: 0 0 11px rgba(242,122,42,.4);
 }
-.instrument-tile--sequential-pro-3 .instrument-tile__eyebrow {
-  color: #d2d3d5;
-}
-html[data-theme="light"] .instrument-tile--sequential-pro-3 .instrument-tile__eyebrow {
-  color: #62666d !important;
-}
-.instrument-tile--sequential-pro-3 .instrument-spec .material-symbols-rounded {
-  color: #e65a51;
-}
+.instrument-tile--sequential-pro-3 .instrument-spec .material-symbols-rounded { color: #f27a2a; }
 
 
-/* UDO Super 8 — folded pale metal, dark controls and a restrained vermilion rail. */
+/* =====================================================================
+   UDO SUPER 8
+   Same shared display + keybed geometry as every other tile; only the
+   material, pattern and colour change. Pale white chassis, a vermilion
+   rail, black fader slots and a dark red-lit display.
+   ===================================================================== */
 .instrument-tile--udo-super-8 {
-  --tile-bar-glow:#ed8764;
-  background:linear-gradient(145deg,rgba(155,169,177,.28),rgba(22,29,34,.98));
+  --tile-bar-glow: #ec5a3c;
+  background: linear-gradient(145deg, rgba(224,86,58,.28), rgba(24,26,29,.98));
 }
 .instrument-tile--udo-super-8 .instrument-tile__visual {
-  background:linear-gradient(150deg,#d5dadd 0%,#929da4 54%,#65717a 100%);
-  box-shadow:inset 0 1px rgba(255,255,255,.55),inset 0 -14px 22px rgba(20,28,34,.24);
+  background: linear-gradient(160deg, #fcfcf9 0%, #e5e8e5 50%, #c5cbc9 100%);
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.95),
+    inset 0 -12px 23px rgba(40,50,54,.24);
 }
+/* Satin white enamel with a faint vertical sheen */
 .instrument-tile--udo-super-8 .instrument-tile__visual::before {
   background:
-    repeating-linear-gradient(0deg,transparent 0 7px,rgba(39,49,56,.10) 7px 8px),
-    linear-gradient(110deg,rgba(255,255,255,.23),transparent 48%,rgba(16,26,32,.12));
+    repeating-linear-gradient(90deg, transparent 0 5px, rgba(40,50,54,.035) 5px 6px),
+    linear-gradient(115deg, rgba(255,255,255,.4), transparent 45%, rgba(30,40,44,.12));
 }
+/* Vermilion rail over a bank of black fader slots */
 .instrument-tile--udo-super-8 .instrument-tile__visual::after {
-  left:16px;right:16px;top:91px;height:3px;
-  background:linear-gradient(90deg,transparent,rgba(190,77,48,.92) 12%,rgba(190,77,48,.92) 88%,transparent);
-  box-shadow:0 0 7px rgba(190,77,48,.32);
+  left: 14px;
+  right: 14px;
+  top: 92px;
+  height: 34px;
+  border-top: 3px solid #e0533a;
+  background:
+    repeating-linear-gradient(90deg, #1b2125 0 5px, transparent 5px 11px) 2px 8px / 100% 22px no-repeat;
+  filter: drop-shadow(0 1px 1px rgba(0,0,0,.25));
 }
 .instrument-tile--udo-super-8 .instrument-tile__glow {
-  background:radial-gradient(ellipse at 50% 40%,rgba(237,135,100,.22),transparent 58%);
-  filter:blur(8px);opacity:.7;
+  background:
+    radial-gradient(circle at 48% 30%, rgba(236,90,60,.26), transparent 32%),
+    radial-gradient(circle at 50% 52%, rgba(255,160,120,.18), transparent 54%);
+  filter: blur(6px);
 }
 .instrument-tile--udo-super-8 .instrument-tile__display {
-  border:3px solid #4f5b62;background:linear-gradient(180deg,#192229,#10171c);
+  border: 3px solid #4a5156;
+  background: linear-gradient(180deg, #1a2025, #0b0f12);
+  box-shadow:
+    inset 0 0 14px #000,
+    inset 0 0 0 1px rgba(255,160,130,.12),
+    0 2px 5px rgba(0,0,0,.45);
 }
 .instrument-tile--udo-super-8 .instrument-tile__display span {
-  background:#ee9878;box-shadow:0 0 6px rgba(238,152,120,.75);
+  background: #ff7050;
+  box-shadow: 0 0 7px rgba(255,100,70,.95), 0 0 13px rgba(236,90,60,.3);
 }
-.instrument-tile--sequential-pro-3 .instrument-tile__content,
-.instrument-tile--udo-super-8 .instrument-tile__content { min-width:0; }
-.instrument-tile--sequential-pro-3 .instrument-specs,
-.instrument-tile--udo-super-8 .instrument-specs { flex-wrap:wrap; }
+.instrument-tile--udo-super-8 .instrument-tile__keys {
+  border-color: #23292d;
+  box-shadow:
+    0 7px 11px rgba(0,0,0,.5),
+    0 2px 0 rgba(255,255,255,.5) inset,
+    0 -2px 5px rgba(0,0,0,.2) inset;
+}
+.instrument-tile--udo-super-8 .instrument-tile__icon {
+  color: #59636a;
+  text-shadow: 0 1px 0 rgba(255,255,255,.6);
+}
+.instrument-tile--udo-super-8 .instrument-spec .material-symbols-rounded { color: #ec5a3c; }
+
 
 /* Give every library instrument the same footprint, including the four newest tiles. */
 .instrument-grid{grid-auto-rows:275px}
@@ -4599,210 +4615,4 @@ html[data-theme="light"] .instrument-tile--sequential-pro-3 .instrument-tile__ey
   object-fit: contain;
   vertical-align: -.02em;
   transform: translateX(.022em);
-}
-
-
-/* Pro 3 miniature control bank: raised silver knobs in graphite grey bays. */
-.pro3-tile-art {
-  position: absolute;
-  z-index: 2;
-  top: 83px;
-  left: 9px;
-  right: 9px;
-  bottom: 69px;
-  display: grid;
-  grid-template-columns: repeat(4,minmax(0,1fr));
-  grid-template-rows: repeat(3,minmax(0,1fr));
-  gap: 4px;
-  padding: 5px;
-  border: 1px solid rgba(225,228,230,.34);
-  border-radius: 4px;
-  background:
-    repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 1px,transparent 1px 4px),
-    linear-gradient(155deg,rgba(32,37,43,.96),rgba(63,68,74,.98));
-  box-shadow: inset 0 1px rgba(255,255,255,.12), inset 0 0 15px rgba(0,0,0,.55), 0 2px 5px rgba(0,0,0,.38);
-  pointer-events: none;
-}
-.pro3-tile-art span {
-  position: relative;
-  display: grid;
-  place-items: center;
-  min-width: 0;
-  border: 1px solid rgba(215,219,222,.2);
-  border-radius: 2px;
-  background: linear-gradient(145deg,rgba(134,138,143,.68),rgba(72,77,83,.78));
-  box-shadow: inset 0 1px rgba(255,255,255,.12);
-}
-.pro3-tile-art span::before {
-  content: '';
-  width: 13px;
-  height: 13px;
-  max-width: 82%;
-  max-height: 82%;
-  border: 1px solid #252a30;
-  border-radius: 50%;
-  background: radial-gradient(circle at 32% 27%,#f0f1ef 0 9%,#bec2c4 23%,#777e84 63%,#343a40 82%,#171b20 100%);
-  box-shadow: 0 1px 2px #000b,inset 0 1px #fff8;
-}
-.pro3-tile-art span::after {
-  content: '';
-  position: absolute;
-  top: 3px;
-  right: 3px;
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  background: #f13732;
-  box-shadow: 0 0 4px rgba(255,45,39,.8);
-}
-.pro3-tile-art span:nth-child(3n)::after { opacity: .38; }
-.pro3-tile-art span i {
-  position: absolute;
-  z-index: 1;
-  top: calc(50% - 5px);
-  left: 50%;
-  width: 1.5px;
-  height: 4px;
-  border-radius: 1px;
-  background: #f6f6f3;
-  transform: translateX(-50%);
-  box-shadow: 0 0 2px rgba(255,255,255,.45);
-}
-@media (max-width: 560px) {
-  .pro3-tile-art { left: 7px; right: 7px; gap: 3px; padding: 4px; }
-  .pro3-tile-art span::before { width: 11px; height: 11px; }
-}
-
-
-/* UDO Super 8 — pale metal case, red panel rails, grouped control bays and keybed. */
-.instrument-tile--udo-super-8 {
-  --tile-bar-glow: #df5038;
-  background: linear-gradient(145deg, rgba(218,224,223,.42), rgba(28,34,37,.98));
-}
-.instrument-tile--udo-super-8 .instrument-tile__visual {
-  background: linear-gradient(160deg, #fbfcfa 0%, #e4e8e6 48%, #c7cecd 100%);
-  box-shadow: inset 0 1px rgba(255,255,255,.95), inset 0 -14px 22px rgba(43,52,55,.2);
-}
-.instrument-tile--udo-super-8 .instrument-tile__visual::before {
-  background:
-    repeating-linear-gradient(90deg, #22282b 0 1.5px, transparent 1.5px 5px) 12px 12px / calc(100% - 24px) 8px no-repeat,
-    linear-gradient(180deg, rgba(255,255,255,.3), transparent 48%, rgba(31,39,42,.13));
-}
-.instrument-tile--udo-super-8 .instrument-tile__visual::after {
-  left: 8px;
-  right: 8px;
-  bottom: 74px;
-  height: 16px;
-  border: 1px solid rgba(39,45,48,.24);
-  background:
-    radial-gradient(circle, #e34e34 0 1.3px, transparent 1.8px) 3px 4px / 12px 7px repeat,
-    linear-gradient(180deg, #32393d, #111619);
-  box-shadow: inset 0 1px rgba(255,255,255,.16), 0 1px 3px rgba(0,0,0,.28);
-}
-.instrument-tile--udo-super-8 .instrument-tile__glow {
-  background: radial-gradient(ellipse at 52% 35%, rgba(227,79,55,.18), transparent 58%);
-  filter: blur(7px);
-  opacity: .7;
-}
-.instrument-tile--udo-super-8 .instrument-tile__display,
-.instrument-tile--udo-super-8 .instrument-tile__icon { display: none; }
-.instrument-tile--udo-super-8 .instrument-tile__keys {
-  right: 7px;
-  bottom: 15px;
-  width: calc(100% - 14px);
-  height: 48px;
-  transform: none;
-  border: 2px solid #30373a;
-  border-radius: 2px;
-  background: repeating-linear-gradient(
-    90deg,
-    #f9faf7 0 7px,
-    #161b1e 7px 9px,
-    #fff 9px 16px
-  );
-  box-shadow: 0 3px 5px rgba(0,0,0,.45), inset 0 1px #fff;
-}
-.instrument-tile--udo-super-8 .instrument-tile__eyebrow { color: #4c565a; }
-.instrument-tile--udo-super-8 .instrument-spec .material-symbols-rounded { color: #df5038; }
-html[data-theme="light"] .instrument-tile--udo-super-8 .instrument-tile__eyebrow { color: #4c565a !important; }
-
-.super8-tile-art {
-  position: absolute;
-  z-index: 2;
-  top: 32px;
-  left: 8px;
-  right: 8px;
-  bottom: 94px;
-  display: grid;
-  grid-template-columns: repeat(8,minmax(0,1fr));
-  grid-template-rows: repeat(2,minmax(0,1fr));
-  gap: 3px;
-  padding: 6px 4px 5px;
-  border: 1px solid #aab1b2;
-  border-radius: 2px;
-  background:
-    linear-gradient(180deg, #db4c34 0 4px, transparent 4px),
-    repeating-linear-gradient(0deg, rgba(29,37,40,.025) 0 1px, transparent 1px 4px),
-    linear-gradient(160deg, #f2f4f1, #d9dfdd);
-  box-shadow: inset 0 1px #fff, 0 2px 4px rgba(0,0,0,.25);
-  pointer-events: none;
-}
-.super8-tile-art span {
-  position: relative;
-  display: grid;
-  place-items: center;
-  min-width: 0;
-  border: 1px solid rgba(79,88,92,.24);
-  border-radius: 1px;
-  background: linear-gradient(145deg, #f8f9f6, #cbd1d0);
-  box-shadow: inset 0 1px rgba(255,255,255,.8);
-}
-.super8-tile-art span::before {
-  content: '';
-  width: 9px;
-  height: 9px;
-  max-width: 85%;
-  max-height: 85%;
-  border: 1px solid #555e62;
-  border-radius: 50%;
-  background: radial-gradient(circle at 32% 25%, #fff 0 8%, #d7dddc 30%, #7a8589 72%, #3e484c 100%);
-  box-shadow: 0 1px 2px rgba(0,0,0,.45), inset 0 1px #fff;
-}
-.super8-tile-art span::after {
-  content: '';
-  position: absolute;
-  top: 2px;
-  right: 2px;
-  width: 2.5px;
-  height: 2.5px;
-  border-radius: 50%;
-  background: #e84a31;
-  box-shadow: 0 0 3px rgba(232,74,49,.65);
-}
-.super8-tile-art span:nth-child(4n),
-.super8-tile-art span:nth-child(4n + 1) {
-  background: linear-gradient(145deg, #343c40, #111619);
-  border-color: #0a0e10;
-}
-.super8-tile-art span:nth-child(4n)::before,
-.super8-tile-art span:nth-child(4n + 1)::before {
-  width: 7px;
-  height: 14px;
-  border-radius: 1px;
-  background: linear-gradient(90deg, #70797d, #f1f3f0 45%, #7c868a);
-}
-.super8-tile-art span i {
-  position: absolute;
-  z-index: 1;
-  top: calc(50% - 4px);
-  left: 50%;
-  width: 1.5px;
-  height: 4px;
-  border-radius: 1px;
-  background: #343c40;
-  transform: translateX(-50%);
-}
-@media(max-width:560px) {
-  .super8-tile-art { left: 7px; right: 7px; gap: 2px; padding-inline: 3px; }
-  .super8-tile-art span::before { width: 7px; height: 7px; }
 }
