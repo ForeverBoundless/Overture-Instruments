@@ -609,3 +609,511 @@
 @media (prefers-reduced-motion: reduce) {
   .hp-super8 * { scroll-behavior: auto !important; }
 }
+
+
+/* -------------------------------------------------------------------------
+   Super 8 finishing pass: one Overture toolbar, properly grouped controls,
+   and local fit rules that keep labels and hardware clear of one another.
+   The upper bank, console strip, left performance bay and keybed stay put.
+   ------------------------------------------------------------------------- */
+
+/* The shared Overture toolbar above the instrument is the only status bar. */
+.hp-super8-stage > .hp-info {
+  display: none !important;
+}
+
+/* Keep every hardware control inside its own grid cell and allow long labels
+   to wrap below the control instead of spilling into adjacent controls. */
+.hp-super8,
+.hp-super8 * {
+  box-sizing: border-box;
+}
+.hp-super8 .hp-group,
+.hp-super8 .hp-group-body,
+.hp-super8 .hp-row,
+.hp-super8 .hp-knob,
+.hp-super8 .hp-fader,
+.hp-super8 .hp-btn,
+.hp-super8 .hp-select {
+  min-width: 0;
+  max-width: 100%;
+}
+.hp-super8 .hp-group-body > *,
+.hp-super8 .hp-row > * {
+  min-width: 0;
+  max-width: 100%;
+}
+.hp-super8 .hp-control-label,
+.hp-super8 .hp-knob > .hp-control-label,
+.hp-super8 .hp-fader-label,
+.hp-super8 .hp-button-label,
+.hp-super8 .hp-select > span {
+  max-width: 100%;
+  white-space: normal !important;
+  overflow-wrap: anywhere;
+  text-overflow: clip;
+  line-height: 1.12;
+}
+.hp-super8 .hp-control-label {
+  font-size: 5.8px;
+}
+.hp-super8 .hp-knob > .hp-control-label {
+  min-height: 14px;
+  margin-top: 2px;
+  padding-inline: 1px;
+  text-align: center;
+}
+.hp-super8 .hp-knob-value {
+  min-height: 8px;
+  font-size: 5.2px;
+}
+.hp-super8 .hp-button {
+  flex-shrink: 0;
+  width: 26px;
+  height: 21px;
+}
+.hp-super8 .hp-button-label {
+  position: static !important;
+  width: 100%;
+  max-width: 100%;
+  transform: none !important;
+  font-size: 5.5px;
+  text-align: center;
+}
+.hp-super8 .hp-select {
+  width: 100%;
+  max-width: 100%;
+}
+.hp-super8 .hp-select > span {
+  min-height: 13px;
+  font-size: 5.8px;
+  text-align: center;
+}
+.hp-super8 .hp-select select {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 20px;
+  font-size: 6px;
+}
+.hp-super8 .hp-fader {
+  max-width: 100%;
+  flex-shrink: 1;
+}
+.hp-super8 .hp-fader-track,
+.hp-super8 .hp-fader-cap,
+.hp-super8 .hp-knob-art {
+  flex-shrink: 0;
+}
+.hp-super8 .hp-fader-label {
+  min-height: 12px;
+  font-size: 5.5px;
+  text-align: center;
+}
+.hp-super8 .hp-button:focus-visible,
+.hp-super8 .hp-select select:focus-visible,
+.hp-super8 .hp-knob:focus-visible,
+.hp-super8 .hp-fader:focus-visible,
+.hp-super8 .hp-super8-bender-pad:focus-visible {
+  outline: 2px solid #df5139;
+  outline-offset: 2px;
+}
+
+/* Master controls: the three silver dials and power switch stay within VOL. */
+.s8-vol .hp-group-body {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  justify-items: center;
+  gap: 4px 3px;
+}
+.s8-vol .hp-knob {
+  width: 38px;
+  max-width: 100%;
+}
+.s8-vol .hp-button-label {
+  max-width: 100%;
+}
+
+/* DDS controls use two compact selector columns and a dedicated dial row. */
+.s8-dds1 .hp-group-body,
+.s8-dds2 .hp-group-body {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  justify-items: center;
+  gap: 5px 4px;
+}
+.s8-dds1 .hp-select-wide,
+.s8-dds2 .hp-select-wide {
+  grid-column: 1 / -1;
+  width: 100%;
+}
+.s8-dds1 .s8-mini-knobs,
+.s8-dds2 .s8-mini-knobs {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 5px 10px;
+  width: 100%;
+}
+.s8-dds1 .s8-mini-knobs .hp-knob,
+.s8-dds2 .s8-mini-knobs .hp-knob {
+  flex: 0 1 36px;
+  width: 36px;
+}
+
+/* DDS modulation faders now share a full-width row above the source selectors. */
+.s8-ddsmod .hp-group-body {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 5px 6px;
+}
+.s8-ddsmod .s8-faders {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  justify-items: center;
+  align-items: start;
+  gap: 5px;
+  width: 100%;
+}
+.s8-ddsmod .hp-fader {
+  flex: 0 1 28px;
+  width: 28px;
+}
+.s8-ddsmod .hp-fader-vertical .hp-fader-track {
+  height: 56px !important;
+}
+.s8-ddsmod .hp-select {
+  width: 100%;
+  min-width: 0;
+}
+.s8-ddsmod .hp-knob {
+  grid-column: 1 / -1;
+  justify-self: center;
+}
+
+/* Mixer dials remain side by side without their caps touching. */
+.s8-mixer .hp-group-body {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 5px 8px;
+}
+.s8-mixer .hp-knob {
+  flex: 0 1 42px;
+  width: 42px;
+}
+
+/* The five VCF faders are a measured row, with the selectors underneath. */
+.s8-vcf .hp-group-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  gap: 5px;
+}
+.s8-vcf .s8-faders {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  justify-items: center;
+  align-items: start;
+  gap: 3px;
+  width: 100%;
+}
+.s8-vcf .hp-fader {
+  flex: 0 1 26px;
+  width: 26px;
+  max-width: 100%;
+}
+.s8-vcf .hp-fader-vertical .hp-fader-track {
+  height: 62px !important;
+}
+.s8-vcf .s8-selects {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 4px;
+  width: 100%;
+}
+.s8-vcf .hp-select {
+  width: 100%;
+  min-width: 0;
+}
+
+/* Give ENV 1 and ENV 2 equal columns with consistent fader and dial spacing. */
+.s8-env .hp-group-body {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 6px;
+}
+.s8-env-col {
+  min-width: 0;
+  gap: 5px;
+  padding: 3px 4px;
+}
+.s8-env-col .hp-row-tight {
+  flex-wrap: nowrap;
+  justify-content: space-evenly;
+  gap: 2px;
+  width: 100%;
+}
+.s8-env .hp-fader {
+  flex: 0 1 23px;
+  width: 23px;
+}
+.s8-env .hp-fader-vertical .hp-fader-track {
+  height: 54px !important;
+}
+.s8-env .hp-fader-label {
+  min-height: 11px;
+  font-size: 5.5px;
+}
+.s8-env .hp-knob {
+  flex: 0 1 30px;
+  width: 30px;
+}
+.s8-env .hp-knob-art {
+  width: 30px;
+  height: 30px;
+}
+.s8-env .hp-button {
+  width: 22px;
+  height: 19px;
+}
+
+/* Parts controls are split into voice/layer selection and a centered
+   performance row, avoiding a last-column orphan dial. */
+.s8-part .hp-group-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  gap: 7px;
+}
+.s8-part .s8-part-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: start;
+  justify-items: center;
+  gap: 6px 4px;
+  width: 100%;
+}
+.s8-part .s8-part-row .hp-select {
+  width: 100%;
+  min-width: 0;
+}
+.s8-part .s8-part-performance {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  justify-content: space-evenly;
+  gap: 5px;
+  width: 100%;
+  padding-top: 5px;
+  border-top: 1px solid rgba(85, 94, 98, .22);
+}
+.s8-part .s8-part-performance .hp-knob {
+  flex: 0 1 38px;
+  width: 38px;
+}
+
+/* The effects divider spans both grid columns instead of occupying a normal
+   control cell. The sequencer header can wrap cleanly at compact widths. */
+.s8-fx .hp-group-body {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  justify-items: center;
+  align-items: start;
+  gap: 5px 7px;
+}
+.s8-fx .hp-select {
+  width: 100%;
+  min-width: 0;
+}
+.s8-fx .s8-mini-knobs {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: start;
+  justify-items: center;
+  gap: 4px;
+  width: 100%;
+}
+.s8-fx .s8-fx-break {
+  grid-column: 1 / -1;
+  height: 0;
+  min-height: 0;
+  width: 100%;
+  margin: 0;
+  border-top: 1px solid rgba(85, 94, 98, .24);
+}
+.s8-seq-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px 8px;
+  width: 100%;
+  min-width: 0;
+}
+.s8-seq-top > * {
+  min-width: 0;
+  max-width: 100%;
+}
+.s8-seq-top .hp-display {
+  flex: 1 1 112px;
+  min-width: 96px;
+  max-width: 160px;
+}
+.s8-seq-top .hp-select {
+  flex: 1 1 76px;
+  min-width: 64px;
+  max-width: 126px;
+}
+.s8-seq-top .hp-knob {
+  flex: 0 1 36px;
+  width: 36px;
+}
+.s8-seq-top .hp-btn {
+  flex: 0 1 34px;
+  min-width: 28px;
+}
+.s8-seq-top .s8-pages {
+  flex: 0 1 auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 3px;
+  min-width: 0;
+}
+.s8-seq-top .s8-pages .hp-btn {
+  flex: 0 1 32px;
+  min-width: 28px;
+}
+
+/* A real six-column fader row keeps the LFO 2 depth controls evenly spaced. */
+.s8-lfo2 .hp-group-body {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 5px 6px;
+}
+.s8-lfo1 .hp-select-wide,
+.s8-lfo2 .hp-select-wide {
+  grid-column: 1 / -1;
+}
+.s8-lfo2 .s8-faders {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  justify-items: center;
+  align-items: start;
+  gap: 3px;
+  width: 100%;
+}
+.s8-lfo2 .hp-fader {
+  flex: 0 1 26px;
+  width: 26px;
+  max-width: 100%;
+}
+.s8-lfo2 .hp-fader-vertical .hp-fader-track {
+  width: 10px;
+  height: 42px !important;
+}
+.s8-lfo2 .hp-fader-cap {
+  width: 17px;
+  height: 9px;
+}
+.s8-lfo2 .hp-fader-label {
+  min-height: 18px;
+  font-size: 5px;
+  line-height: 1.08;
+  overflow-wrap: anywhere;
+}
+
+/* Preserve the reference's left performance bay while keeping all three
+   control groups from pushing into the keyboard rail. */
+.s8-performance-bay {
+  flex: 0 0 clamp(222px, 17%, 270px);
+}
+.s8-performance-bay > .hp-group,
+.s8-performance-bay > .s8-bender-block {
+  min-width: 0;
+  max-width: 100%;
+}
+.s8-performance-bay > .hp-group .hp-group-body {
+  min-width: 0;
+}
+.s8-bender-block {
+  min-width: 0;
+}
+.s8-bender-block .hp-super8-bender-pad {
+  max-width: 100%;
+  height: 58px;
+}
+.s8-bender-block .hp-super8-bender-caption {
+  white-space: normal;
+  line-height: 1.2;
+}
+.s8-brand-rail,
+.s8-brand-rail .s8-brand,
+.s8-brand-rail .s8-model {
+  min-width: 0;
+  max-width: 100%;
+}
+.s8-brand-rail .s8-model span {
+  overflow-wrap: anywhere;
+}
+.s8-key-area,
+.hp-super8 .hp-keybed {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Compact widths: keep the envelope pair and performance controls readable
+   rather than squeezing their labels into adjacent modules. */
+@media (max-width: 1050px) {
+  .s8-upper > .s8-env { grid-column: span 3; }
+  .s8-console-row {
+    grid-template-columns: minmax(190px, 1.35fr) minmax(160px, 1.1fr) minmax(0, 3.7fr);
+  }
+  .s8-part .s8-part-row { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (max-width: 760px) {
+  .s8-upper > .s8-env { grid-column: 1 / -1; }
+  .s8-performance-bay {
+    flex: 0 0 auto;
+    width: 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .s8-performance-bay > .s8-lfo1,
+  .s8-performance-bay > .s8-lfo2,
+  .s8-performance-bay > .s8-bender-block {
+    min-width: 0;
+  }
+  .s8-performance-bay > .s8-lfo2 {
+    grid-column: 1 / -1;
+  }
+  .s8-lfo2 .s8-faders {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+  .s8-env .hp-group-body {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 420px) {
+  .s8-part .s8-part-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .s8-env .hp-group-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .s8-env-col + .s8-env-col {
+    padding-top: 5px;
+    border-top: 1px solid rgba(70,77,80,.26);
+    border-left: 0;
+  }
+}
