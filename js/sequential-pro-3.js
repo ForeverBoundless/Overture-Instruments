@@ -157,7 +157,6 @@ class Pro3App{
   this.hwDisplay=addDisplay(top,{brand:'PROGRAM / PARAMETER DISPLAY'});this.display=this.hwDisplay;this.display.flash=m=>this.hwDisplay.set(String(m).toUpperCase(),'PRO 3');this.hwDisplay.set('001 · PROLOGUE BASS','OVERTURE PROGRAM');
   const voice=addRow(top,'p3-voice');
   s(voice,'mode','Voice mode',['mono','paraphonic'],{group:'PERFORMANCE',wide:true});
-  b(voice,'hold','Hold',{group:'PERFORMANCE',led:'amber'});
   this.hwPower=addButton(voice,{label:'POWER',value:false,toggle:false,led:'green',group:'GLOBAL',onChange:async()=>{const ready=await this.activateAudio?.();this.hwPower?.setValue(!!ready,true);}});
 
   // ---- compact upper strip: global modulation, effects, sequencer and arp ----
@@ -166,6 +165,8 @@ class Pro3App{
   const global=addPanel(upper,{title:'Modulation',sub:'global controls and routing',className:'p3-global'});
   k(global.body,'volume','Master Volume',{size:43,group:'GLOBAL'});
   k(global.body,'distortion','Distortion',{size:40,group:'GLOBAL'});
+  k(global.body,'glide','Glide Rate',{size:40,group:'GLOBAL'});
+  b(global.body,'hold','Hold',{group:'GLOBAL',led:'amber'});
   const matrixAccess=document.createElement('button');
   matrixAccess.type='button';
   matrixAccess.className='p3-matrix-trigger';
