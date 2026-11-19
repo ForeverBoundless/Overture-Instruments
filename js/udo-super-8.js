@@ -190,9 +190,6 @@ class Super8App{
 
   // ---- top strip ----
   const top=addRow(p,'s8-top');
-  const brand=document.createElement('div');brand.className='s8-brand';top.appendChild(brand);
-  const logo=document.createElement('img');logo.src='/ui/Logos/UDO_logo.png';logo.alt='UDO Audio';logo.draggable=false;brand.appendChild(logo);
-  const model=document.createElement('div');model.className='s8-model';model.innerHTML='<strong>SUPER 8</strong><span>16-voice binaural analog-hybrid synthesizer</span>';brand.appendChild(model);
   this.hwDisplay=addDisplay(top,{brand:'PERFORMANCE / PROGRAM'});this.hwDisplay.set('P 001','OVERTURE PERFORMANCE');
   const master=addRow(top,'s8-master');
   k(master,'volume','Master',{global:true,size:38,group:'MASTER'});k(master,'distortion','Distortion',{global:true,size:36,group:'MASTER'});k(master,'masterTune','Master tune',{global:true,min:-1,max:1,step:.01,size:36,bipolar:true,group:'MASTER',fmt:v=>(v>0?'+':'')+Math.round(v*100)+'¢'});
@@ -333,9 +330,7 @@ class Super8App{
   const performanceBay=document.createElement('div');performanceBay.className='s8-performance-bay';
   performanceBay.appendChild(left);
   const keyArea=document.createElement('div');keyArea.className='s8-key-area';
-  const brandRail=document.createElement('div');brandRail.className='s8-brand-rail';
-  brandRail.appendChild(brand);
-  keyArea.append(brandRail,this.hwKeyboard.el);
+  keyArea.appendChild(this.hwKeyboard.el);
   playRow.replaceChildren(performanceBay,keyArea);
   p.insertBefore(vent,p.firstChild);
   p.insertBefore(upperRow,vent.nextSibling);
