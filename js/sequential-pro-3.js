@@ -284,14 +284,29 @@ class Pro3App{
   k(fb.body,'feedbackTune','Tuning',{min:0,max:48,step:1,size:38,group:'TUNED FEEDBACK',fmt:v=>String(Math.round(v))+' st'});
   b(fb.body,'feedbackGrunge','Grunge',{group:'TUNED FEEDBACK'});
 
-  // Patch morph remains available as a compact utility module below the faceplate.
+  // Full-width, centered morph bay: program capture switches sit before the blend control.
   const utility=addRow(p,'p3-utility');
   const morph=addPanel(utility,{title:'Patch morph',sub:'blend two program states',className:'p3-morph'});
-  const mr=addRow(morph.body,'hp-row-tight');
+  const mr=addRow(morph.body,'hp-row-tight p3-morph-actions');
   const setA=addButton(mr,{label:'Store A',toggle:false,led:'amber',group:'MORPH',onChange:()=>{this.morphA=clone(this.patch);this.display.set('MORPH A STORED','PATCH MORPH');}});
   const setB=addButton(mr,{label:'Store B',toggle:false,led:'amber',group:'MORPH',onChange:()=>{this.morphB=clone(this.patch);this.display.set('MORPH B STORED','PATCH MORPH');}});
   this.hwControls.all.push(setA,setB);
-  this.hwMorph=addSlider(morph.body,{label:'Morph A → B',value:0,midiId:'PRO3:morph',group:'MORPH',onChange:v=>this.applyMorph(v)});this.hwControls.all.push(this.hwMorph);
+  let morphInput=null;
+  const updateMorphFill=value=>{
+   if(!morphInput)return;
+   const amount=Math.max(0,Math.min(1,Number(value)||0));
+   morphInput.style.setProperty('--p3-slider-fill',(amount*100)+'%');
+  };
+  this.hwMorph=addSlider(morph.body,{label:'Morph A → B',value:0,midiId:'PRO3:morph',group:'MORPH',onChange:v=>{updateMorphFill(v);this.applyMorph(v);}});
+  morphInput=this.hwMorph.el;
+  morphInput.classList.add('p3-overture-slider');
+  this.hwMorph.holder.classList.add('p3-morph-slider');
+  updateMorphFill(morphInput.value);
+  const setMorphValue=this.hwMorph.setValue;
+  this.hwMorph.setValue=value=>{setMorphValue(value);updateMorphFill(value);};
+  const setMorphMidiValue=morphInput._oiMidi.set;
+  morphInput._oiMidi.set=value=>{setMorphMidiValue(value);updateMorphFill(value);};
+  this.hwControls.all.push(this.hwMorph);
 
   // ---- performance and keybed ----
   const play=addRow(p,'hp-play');
