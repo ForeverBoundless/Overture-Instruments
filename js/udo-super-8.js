@@ -208,7 +208,8 @@ class Super8App{
   b(pr,'binaural','Binaural',{global:true,group:'GLOBAL',led:'amber'});b(pr,'mpe','MPE',{global:true,group:'GLOBAL',led:'amber'});b(pr,'hold','Hold',{group:'PERFORMANCE',led:'amber'});
   s(pr,'splitPoint','Split point',Array.from({length:49},(_,i)=>48+i),{global:true,group:'GLOBAL',labels:Array.from({length:49},(_,i)=>NOTE_NAMES[(48+i)%12]+(Math.floor((48+i)/12)-1))});
   s(pr,'voiceMode','Voice assign',['solo','legato','poly1','poly2'],{group:'PERFORMANCE'});s(pr,'unison','Unison',['off','half','all','octave','fifth'],{group:'PERFORMANCE'});
-  k(pr,'portamento','Portamento',{size:40,group:'PERFORMANCE'});k(pr,'transpose','Transpose',{min:-24,max:24,step:1,size:40,bipolar:true,group:'PERFORMANCE',fmt:v=>(v>0?'+':'')+Math.round(v)});k(pr,'bendRange','Bend range',{min:1,max:12,step:1,size:40,group:'PERFORMANCE',fmt:v=>String(Math.round(v))});
+  const partPerformance=addRow(part.body,'s8-part-performance');
+  k(partPerformance,'portamento','Portamento',{size:34,group:'PERFORMANCE'});k(partPerformance,'transpose','Transpose',{min:-24,max:24,step:1,size:34,bipolar:true,group:'PERFORMANCE',fmt:v=>(v>0?'+':'')+Math.round(v)});k(partPerformance,'bendRange','Bend range',{min:1,max:12,step:1,size:34,group:'PERFORMANCE',fmt:v=>String(Math.round(v))});
 
   // ---- oscillators ----
   const osc=addRow(p,'hp-main s8-osc');
