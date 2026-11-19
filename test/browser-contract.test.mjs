@@ -711,6 +711,11 @@ test('Sequential Pro 3 and UDO Super 8 are first-class library instruments', asy
   assert.ok(superApp.includes('[l1,l2].forEach(section=>modRow.appendChild(section))'));
   assert.ok(superStyles.includes('.s8-mod-row > .s8-lfo1 .hp-group-body'));
   assert.ok(superStyles.includes('.s8-mod-row > .s8-lfo2 .s8-faders'));
+  assert.ok(superStyles.includes('.s8-mod-row > .hp-group > .hp-group-body'));
+  assert.ok(superStyles.includes('grid-template-columns: repeat(6, minmax(0, 1fr))'));
+  assert.ok(superStyles.includes('height: 44px !important'));
+  assert.ok(superApp.includes("k(l1.body,'lfo1Rate','Rate',{size:36"));
+  assert.ok(superApp.includes("k(l2.body,'lfo2Rate','Rate',{size:36"));
   assert.doesNotMatch(styles, /super8-tile-art|pro3-tile-art/);
   assert.ok(superStyles.includes('.hp-super8 .hp-keybed'));
   assert.ok(superStyles.includes('.hp-super8-stage > .hp-info'));
