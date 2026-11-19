@@ -1390,3 +1390,195 @@
     gap: 2px;
   }
 }
+
+
+/* Compact left modulation bank with a dedicated UDO identity plate on right.
+   This fills the unused faceplate area without stretching the LFO controls. */
+.s8-mod-row {
+  display: grid;
+  grid-template-columns:
+    minmax(230px, .72fr)
+    minmax(310px, .96fr)
+    minmax(250px, 1.28fr);
+  align-items: stretch;
+  gap: 7px;
+  width: 100%;
+  min-width: 0;
+}
+.s8-mod-row > .s8-lfo1,
+.s8-mod-row > .s8-lfo2 {
+  align-self: stretch;
+  min-width: 0;
+}
+.s8-mod-row > .s8-lfo1 .hp-group-body,
+.s8-mod-row > .s8-lfo2 .hp-group-body {
+  gap: 3px 4px;
+  padding: 3px 3px 2px;
+}
+.s8-mod-row > .s8-lfo1 .hp-group-head,
+.s8-mod-row > .s8-lfo2 .hp-group-head {
+  margin-bottom: 2px;
+}
+.s8-mod-row > .s8-lfo1 .hp-group-body > .hp-select,
+.s8-mod-row > .s8-lfo2 .hp-group-body > .hp-select {
+  width: min(100%, 132px);
+  max-width: 132px;
+}
+.s8-mod-row > .s8-lfo1 .hp-knob,
+.s8-mod-row > .s8-lfo2 .hp-knob {
+  width: 34px;
+  --size: 34px;
+}
+.s8-mod-row > .s8-lfo1 .hp-knob-art,
+.s8-mod-row > .s8-lfo2 .hp-knob-art {
+  width: 34px;
+  height: 34px;
+}
+.s8-mod-row > .s8-lfo2 .s8-faders {
+  gap: 2px;
+  padding-top: 2px;
+}
+.s8-mod-row > .s8-lfo2 .hp-fader-vertical .hp-fader-track {
+  height: 40px !important;
+}
+.s8-mod-row > .s8-lfo2 .hp-fader-label {
+  min-height: 12px;
+  font-size: 4.8px;
+}
+
+/* The unused right-hand fascia becomes a branded panel, not another control
+   module. Keep it quiet and precise so the red LFO headers remain the accent. */
+.s8-mod-brand {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  gap: 16px;
+  min-width: 0;
+  min-height: 100%;
+  padding: clamp(14px, 2.3vw, 30px);
+  overflow: hidden;
+  border: 1px solid #b5bcbe;
+  border-radius: 2px;
+  background:
+    repeating-linear-gradient(0deg, rgba(31,39,42,.018) 0 1px, transparent 1px 4px),
+    linear-gradient(145deg, #f9faf8 0%, #eef1ef 48%, #e0e5e3 100%);
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.94),
+    inset 0 -1px rgba(91,101,105,.11),
+    0 1px 3px rgba(24,32,35,.12);
+}
+.s8-mod-brand::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 5px;
+  height: 100%;
+  background: linear-gradient(180deg, #ed684b, #d84730 72%, #a93225);
+  opacity: .9;
+}
+.s8-mod-brand-top {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 16px;
+  min-width: 0;
+}
+.s8-mod-brand-top img {
+  display: block;
+  flex: 0 1 auto;
+  width: auto;
+  height: clamp(32px, 3.1vw, 48px);
+  max-width: 34%;
+  object-fit: contain;
+  object-position: left center;
+  filter: contrast(1.04);
+}
+.s8-mod-brand-rule {
+  display: block;
+  flex: 0 0 1px;
+  height: 42px;
+  background: linear-gradient(transparent, #aeb6b8 20% 80%, transparent);
+}
+.s8-mod-brand-copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 0;
+}
+.s8-mod-brand-copy strong {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  color: #252c30;
+  font: 900 clamp(25px, 2.6vw, 39px)/.96 'Saira', InterLocal, sans-serif;
+  letter-spacing: .075em;
+  white-space: nowrap;
+}
+.s8-mod-brand-copy strong span {
+  font-weight: 600;
+  letter-spacing: .16em;
+}
+.s8-mod-brand-copy > span {
+  color: #5c666b;
+  font: 600 clamp(6px, .58vw, 8px)/1.35 'DM Mono', monospace;
+  letter-spacing: .12em;
+  overflow-wrap: anywhere;
+}
+.s8-mod-brand-copy small {
+  color: #8a9295;
+  font: 500 6px/1.3 'DM Mono', monospace;
+  letter-spacing: .1em;
+}
+.s8-mod-brand-foot {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  margin-top: auto;
+  padding-top: 9px;
+  border-top: 1px solid rgba(104,115,119,.24);
+}
+.s8-mod-brand-foot i {
+  display: block;
+  flex: 0 0 6px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #d94a34;
+  box-shadow: 0 0 6px rgba(217,74,52,.4);
+}
+.s8-mod-brand-foot span {
+  color: #858e91;
+  font: 600 5.5px/1.3 'DM Mono', monospace;
+  letter-spacing: .14em;
+}
+@media (max-width: 1050px) {
+  .s8-mod-row {
+    grid-template-columns:
+      minmax(210px, .72fr)
+      minmax(270px, .96fr)
+      minmax(220px, 1.1fr);
+    gap: 6px;
+  }
+  .s8-mod-brand {
+    padding: 12px;
+    gap: 12px;
+  }
+  .s8-mod-brand-top { gap: 10px; }
+  .s8-mod-brand-copy strong { font-size: clamp(22px, 2.5vw, 30px); }
+}
+@media (max-width: 760px) {
+  .s8-mod-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .s8-mod-brand {
+    min-height: 145px;
+    padding: 15px 18px;
+  }
+  .s8-mod-brand-copy strong { font-size: 29px; }
+}
