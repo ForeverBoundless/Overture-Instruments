@@ -30,7 +30,6 @@
   #pro3-power,
   #oberheim-power
 ).oi-power-overlay {
-  --oi-power-accent: #ffb75e;
   position: fixed;
   inset: 0;
   z-index: 99999;
