@@ -568,6 +568,11 @@ class App {
         document.removeEventListener('launcher:launch', unlock);
         document.removeEventListener('pointerdown', this._standaloneUnlock);
         document.removeEventListener('keydown', this._standaloneUnlock);
+        const powerOverlay = document.getElementById('power-overlay');
+        if (powerOverlay) {
+          powerOverlay.classList.add('power-overlay-hidden');
+          setTimeout(() => powerOverlay.remove(), 520);
+        }
         this.oled.showParameter('AUDIO', 'READY', 1200);
         const launcher = document.getElementById('launcher-page');
         if (launcher) {
@@ -581,18 +586,34 @@ class App {
     document.addEventListener('launcher:launch', unlock, { once: true });
     if (document.getElementById('launcher-page')) {
       return;
-    } else {
-      // The standalone Little Phatty route has no launcher event. Start on
-      // the first real user gesture so Web Audio autoplay policy is honored.
-      this._standaloneUnlock = (event) => {
-        if (event.type === 'keydown' && this._isTypingTarget(event.target)) return;
-        document.removeEventListener('pointerdown', this._standaloneUnlock);
-        document.removeEventListener('keydown', this._standaloneUnlock);
-        unlock();
-      };
-      document.addEventListener('pointerdown', this._standaloneUnlock);
-      document.addEventListener('keydown', this._standaloneUnlock);
     }
+    const powerOverlay = document.getElementById('power-overlay');
+    if (powerOverlay) {
+      const launchButton = document.getElementById('power-launcher-button');
+      const status = document.getElementById('power-overlay-sub');
+      const launch = () => {
+        if (launchButton) launchButton.disabled = true;
+        if (status) status.textContent = 'STARTING AUDIO ENGINE…';
+        unlock().catch((error) => {
+          this._unlockPromise = null;
+          if (launchButton) launchButton.disabled = false;
+          if (status) status.textContent = 'AUDIO START FAILED · ' + String(error?.message || error || 'Unknown audio error');
+        });
+      };
+      // The whole faceplate is clickable; the button also provides a clear
+      // keyboard-accessible launch target.
+      powerOverlay.addEventListener('click', launch);
+      return;
+    }
+    // Fallback for legacy standalone routes without a dedicated power screen.
+    this._standaloneUnlock = (event) => {
+      if (event.type === 'keydown' && this._isTypingTarget(event.target)) return;
+      document.removeEventListener('pointerdown', this._standaloneUnlock);
+      document.removeEventListener('keydown', this._standaloneUnlock);
+      unlock().catch((error) => { console.error('Little Phatty audio failed to start.', error); });
+    };
+    document.addEventListener('pointerdown', this._standaloneUnlock);
+    document.addEventListener('keydown', this._standaloneUnlock);
   }
 
 
