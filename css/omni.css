@@ -3726,3 +3726,23 @@ html[data-theme="light"] #omni-root .omni-commandbar > .omni-midi-map-button:hov
 html[data-theme="light"] #omni-root .ofp-menu-action--danger {
   color:#ad4942;
 }
+
+
+/* Light-surface contrast and faceplate-colour-safe empty states. */
+#omni-root .ofp-empty-state p {
+  color:var(--ofp-text);
+  opacity:.72;
+}
+#omni-root .ofp-empty-state__action {
+  border-color:color-mix(in srgb,var(--ofp-text) 38%,transparent);
+  color:var(--ofp-text);
+  background:color-mix(in srgb,var(--ofp-text) 8%,transparent);
+}
+#omni-root .ofp-empty-state__action:hover {
+  border-color:color-mix(in srgb,var(--ofp-text) 58%,transparent);
+  background:color-mix(in srgb,var(--ofp-text) 14%,transparent);
+}
+html[data-theme="light"] #omni-root .ofp-inspector-action--danger,
+html[data-theme="light"] #omni-root dialog.ofp-check-dialog .ofp-check-item--error>span {
+  color:#ad4942;
+}
