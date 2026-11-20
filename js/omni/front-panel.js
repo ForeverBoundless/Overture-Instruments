@@ -164,9 +164,6 @@ export class FrontPanelEditor {
     const moreMenu = make('details', 'ofp-toolbar-menu', actions);
     make('summary', 'ofp-toolbar-menu__trigger', moreMenu, 'More');
     const morePanel = make('div', 'ofp-toolbar-menu__panel', moreMenu);
-    this.fitButton = make('button', 'ofp-menu-action', morePanel, 'Fit panel');
-    this.fitButton.type = 'button';
-    this.fitButton.addEventListener('click', () => { this.fitToViewport(); moreMenu.open = false; this.commit(); });
     this.resetButton = make('button', 'ofp-menu-action', morePanel, 'Clear panel…');
     this.resetButton.type = 'button';
     this.resetButton.addEventListener('click', () => {
