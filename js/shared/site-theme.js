@@ -97,7 +97,13 @@
       return;
     }
     const account = appBar?.querySelector('.omni-account');
-    if (account) parent.insertBefore(toggle, account);
+    // account-shell.js wraps the account anchor after this script creates it.
+    // Insert before the direct-child wrapper rather than trying to insert before
+    // a nested anchor (which throws NotFoundError and used to hide the theme toggle).
+    const accountSlot = account
+      ? (account.parentElement === parent ? account : account.closest('.header-account-wrap'))
+      : null;
+    if (accountSlot?.parentElement === parent) parent.insertBefore(toggle, accountSlot);
     else if (toggle.parentElement !== parent) parent.appendChild(toggle);
     toggle.classList.toggle('site-theme-toggle--omni', Boolean(appBar));
     toggle.classList.remove('site-theme-toggle--floating');
