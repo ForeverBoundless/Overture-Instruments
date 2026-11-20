@@ -1788,3 +1788,6 @@ html[data-theme="light"] #omni-root .ofp-component[data-finish="ivory"]{color:#2
 
 #omni-root .ofp-component[hidden]{display:none!important}
 #omni-root .ofp-component::after{border-color:rgba(125,228,255,.14)}
+
+#omni-root>.omni-front-panel{grid-row:2 / 4}
+.ofp-workspace{position:relative;overflow:hidden}
