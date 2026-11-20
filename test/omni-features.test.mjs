@@ -497,12 +497,16 @@ test('OMNI front-panel validation remains backwards-compatible and sanitizes imp
 });
 
 test('OMNI front-panel studio parses and keeps its canvas-first editing layout', async () => {
-  const [editor, css] = await Promise.all([
+  const [editor, app, css] = await Promise.all([
     readFile(new URL('../js/omni/front-panel.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/omni.js', import.meta.url), 'utf8'),
     readFile(new URL('../css/omni.css', import.meta.url), 'utf8'),
   ]);
   const editorPath = fileURLToPath(new URL('../js/omni/front-panel.js', import.meta.url));
+  const appPath = fileURLToPath(new URL('../js/omni.js', import.meta.url));
   execFileSync(process.execPath, ['--check', editorPath], { stdio: 'pipe' });
+  execFileSync(process.execPath, ['--check', appPath], { stdio: 'pipe' });
+  assert.match(app, /this\.appHeader\?\.classList\.toggle\('is-front-view'/);
 
   assert.match(editor, /this\.addRailButton = railButton/);
   assert.match(editor, /this\.layersRailButton = railButton/);
