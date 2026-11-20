@@ -213,7 +213,7 @@ else grid.insertAdjacentElement('afterend', comingSoon);
 
 const count = page.querySelector('.launcher-footer span');
 if (count) {
-  const amount = String(INSTRUMENTS.length).padStart(2, '0');
+  const amount = String(INSTRUMENTS.length);
   count.textContent = `${amount} AVAILABLE INSTRUMENT${INSTRUMENTS.length === 1 ? '' : 'S'}`;
 }
 
