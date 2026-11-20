@@ -880,7 +880,7 @@ class OmniApp {
       this.live?.teardown(); this.live = null;
       const oldContext = this.ctx; this.ctx = null; this.master = null;
       await oldContext.close();
-      this.powerBtn.textContent = 'POWER ON'; this.powerBtn.classList.remove('lit'); this.msg('Audio off.'); return;
+      this.powerBtn.textContent = 'POWER ON'; this.powerBtn.classList.remove('lit'); this.frontPanelEditor?.refreshValues(); this.msg('Audio off.'); return;
     }
     try {
       const AC = window.AudioContext || window.webkitAudioContext; this.ctx = new AC({ latencyHint: 'interactive' }); await this.ctx.resume();
@@ -889,7 +889,7 @@ class OmniApp {
       await this.live.build(this.patch);
       this.live.setPitchBend(this.pitchBend * 2);
       this.live.setModWheel(this.modWheelValue);
-      this.powerBtn.textContent = 'POWER OFF'; this.powerBtn.classList.add('lit'); this.msg('Audio running - play the keyboard or your MIDI controller.');
+      this.powerBtn.textContent = 'POWER OFF'; this.powerBtn.classList.add('lit'); this.frontPanelEditor?.refreshValues(); this.msg('Audio running - play the keyboard or your MIDI controller.');
     } catch (err) { this.msg(`Audio could not start: ${err.message}`, true); }
   }
   scheduleRebuild() {
@@ -1201,6 +1201,7 @@ class OmniApp {
     if (commit && portCountChanged) this.syncModulePorts(id);
     if (commit) this.pushHistory();
     else this.persistWorkspace();
+    this.frontPanelEditor?.refreshValues();
   }
 
   // ------------------------------------------------------------------ canvas
@@ -1359,6 +1360,7 @@ class OmniApp {
   render() {
     this.renderCards();
     this.frontPanelEditor?.refreshValues();
+    this.frontPanelEditor?.refreshModuleReferences();
     // Apply layout zoom before measuring ports. Otherwise initial SVG paths
     // are calculated at 1× while the module layer is subsequently scaled.
     this.applyView();
