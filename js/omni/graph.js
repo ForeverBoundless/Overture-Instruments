@@ -86,6 +86,15 @@ export function validatePatch(raw) {
     const height = Math.min(900, Math.max(360, Number(panel.height) || 520));
     const allowed = new Set(['knob','dial','slider','dropdown','button','switch','encoder','drawbars','keyboard','pitchwheel','modwheel','module','screen','oled','led','meter','pad','label','section']);
     const color = (value, fallback) => /^#[0-9a-f]{6}$/i.test(String(value || '')) ? value : fallback;
+    const componentIds = new Set();
+    const guideIds = new Set();
+    const uniqueId = (raw, used, prefix) => {
+      const base = String(raw || uid(prefix)).replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 48) || uid(prefix);
+      let candidate = base, suffix = 1;
+      while (used.has(candidate)) candidate = base.slice(0, 44) + '-' + suffix++;
+      used.add(candidate);
+      return candidate;
+    };
     const components = Array.isArray(panel.components) ? panel.components.slice(0, 100).filter((item) => item && allowed.has(item.type)).map((item) => {
       const module = byId[String(item.bind?.moduleId || '')];
       const parameter = module && MODULES[module.type].params.find((entry) => entry.key === item.bind?.paramKey);
@@ -93,7 +102,7 @@ export function validatePatch(raw) {
       const w = Math.min(760, Math.max(48, Number(item.w) || 120));
       const h = Math.min(440, Math.max(36, Number(item.h) || 80));
       const component = {
-        id: String(item.id || uid('fp')).slice(0, 60),
+        id: uniqueId(item.id, componentIds, 'fp'),
         type: item.type,
         label: String(item.label || item.type).slice(0, 40),
         x: Math.min(width - Math.min(width, w), Math.max(0, Number(item.x) || 0)),
@@ -118,7 +127,7 @@ export function validatePatch(raw) {
       return component;
     }) : [];
     const guides = Array.isArray(panel.guides) ? panel.guides.slice(0, 80).filter((guide) => guide && ['x','y'].includes(guide.axis)).map((guide) => ({
-      id: String(guide.id || uid('guide')).slice(0, 60),
+      id: uniqueId(guide.id, guideIds, 'guide'),
       axis: guide.axis,
       position: Math.min(guide.axis === 'x' ? width : height, Math.max(0, Number(guide.position) || 0)),
       color: color(guide.color, '#7de4ff'),
