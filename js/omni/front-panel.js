@@ -44,6 +44,7 @@ export class FrontPanelEditor {
   constructor(app, root) {
     this.app = app;
     this.selectedId = null;
+    this.selectedIds = new Set();
     this.dragState = null;
     this.state = app.patch.frontPanel ? clone(app.patch.frontPanel) : this.defaultLayout();
     app.patch.frontPanel = this.state;
@@ -602,6 +603,7 @@ export class FrontPanelEditor {
     const meterFill = node.querySelector('.ofp-meter__fill'); if (meterFill) meterFill.style.width = (ratio * 100) + '%';
     const ring = node.querySelector('.ofp-knob__ring');
     if (ring) ring.style.setProperty('--ofp-angle', String(-135 + ratio * 270) + 'deg');
+    const toggle = node.querySelector('.ofp-switch'); if (toggle) { toggle.classList.toggle('is-on', value > (range.min + range.max) / 2); const label = toggle.querySelector('.ofp-switch__label'); if (label) label.textContent = value > (range.min + range.max) / 2 ? 'ON' : 'OFF'; }
   }
 
   render() {
@@ -809,26 +811,48 @@ export class FrontPanelEditor {
 
   bindComponentDrag(node, component) {
     node.addEventListener('pointerdown', (event) => {
-      if (event.target.closest('input,select,button,textarea,a') || event.target.closest('.ofp-component__resize')) return;
+      if (event.target.closest('input,select,button,textarea,a') || event.target.closest('.ofp-component__resize')) {
+        this.select(component.id, event.shiftKey || event.ctrlKey || event.metaKey);
+        return;
+      }
+      if (component.locked) { this.select(component.id, event.shiftKey || event.ctrlKey || event.metaKey); return; }
       event.preventDefault();
-      this.select(component.id);
+      this.select(component.id, event.shiftKey || event.ctrlKey || event.metaKey);
       const scale = this.currentScale || 1;
-      const startX = event.clientX;
-      const startY = event.clientY;
-      const originX = component.x;
-      const originY = component.y;
-      try { node.setPointerCapture(event.pointerId); } catch { /* optional */ }
+      const startX = event.clientX, startY = event.clientY;
+      const moving = this.selectedIds?.has(component.id)
+        ? [...this.selectedIds].map((selectedId) => this.getComponent(selectedId)).filter((item) => item && !item.locked)
+        : [component];
+      const origins = moving.map((item) => ({ item, x: item.x, y: item.y }));
+      const originX = component.x, originY = component.y;
+      try { node.setPointerCapture(event.pointerId); } catch { /* optional pointer capture */ }
       const move = (moveEvent) => {
-        component.x = clamp(originX + (moveEvent.clientX - startX) / scale, 0, this.state.width - 36);
-        component.y = clamp(originY + (moveEvent.clientY - startY) / scale, 0, this.state.height - 36);
-        node.style.left = component.x + 'px';
-        node.style.top = component.y + 'px';
+        let nextX = clamp(originX + (moveEvent.clientX - startX) / scale, 0, this.state.width - component.w);
+        let nextY = clamp(originY + (moveEvent.clientY - startY) / scale, 0, this.state.height - component.h);
+        if (moving.length === 1) {
+          const snapped = this.snapPosition(component, nextX, nextY);
+          nextX = snapped.x; nextY = snapped.y;
+          this.renderSmartGuides(snapped.alignX, snapped.alignY);
+        } else {
+          const grid = Math.max(1, Number(this.state.gridSize) || 28);
+          if (this.state.snap) { nextX = Math.round(nextX / grid) * grid; nextY = Math.round(nextY / grid) * grid; }
+        }
+        const dx = nextX - originX, dy = nextY - originY;
+        origins.forEach(({ item, x, y }) => {
+          item.x = clamp(x + dx, 0, this.state.width - item.w);
+          item.y = clamp(y + dy, 0, this.state.height - item.h);
+          const element = this.faceplate.querySelector('[data-component-id="' + item.id + '"]');
+          if (element) { element.style.left = item.x + 'px'; element.style.top = item.y + 'px'; }
+        });
+        this.renderRulers();
       };
       const finish = () => {
         node.removeEventListener('pointermove', move);
         node.removeEventListener('pointerup', finish);
         node.removeEventListener('pointercancel', finish);
+        this.clearSmartGuides();
         this.commit();
+        this.renderLayers();
         this.renderInspector();
       };
       node.addEventListener('pointermove', move);
@@ -998,7 +1022,7 @@ export class FrontPanelEditor {
         this.render();
         this.commit();
       });
-    } else if (['knob', 'dial', 'slider', 'dropdown', 'drawbars'].includes(component.type)) {
+    } else if (['knob', 'dial', 'encoder', 'slider', 'dropdown', 'switch', 'meter', 'drawbars'].includes(component.type)) {
       const bindings = [['', 'Not connected']];
       this.app.patch.modules.forEach((module) => {
         const definition = MODULES[module.type];
@@ -1133,7 +1157,7 @@ export class FrontPanelEditor {
 
   refreshValues() {
     this.state.components.forEach((component) => {
-      if (['knob','dial','encoder','slider','pitchwheel','modwheel','meter'].includes(component.type)) {
+      if (['knob','dial','encoder','slider','pitchwheel','modwheel','meter','switch'].includes(component.type)) {
         const node = this.faceplate.querySelector('[data-component-id="' + component.id + '"]');
         const input = node?.querySelector('input[type="range"]');
         if (!input) return;
