@@ -836,12 +836,12 @@ export class FrontPanelEditor {
     return component.value ?? 0.5;
   }
 
-    getValue(component, key = null) {
+  getValue(component, key = null) {
     const value = this.getRawValue(component, key);
     return Number(value ?? 0.5);
   }
 
-    rangeRatio(range, value) {
+  rangeRatio(range, value) {
     const number = Number(value);
     if (range.log && range.min > 0 && range.max > range.min) {
       return clamp((Math.log(Math.max(range.min, number)) - Math.log(range.min)) / (Math.log(range.max) - Math.log(range.min)), 0, 1);
@@ -1185,7 +1185,7 @@ export class FrontPanelEditor {
     make('span', 'ofp-keyboard__screw', frontLip);
   }
 
-    bindKey(key, note) {
+  bindKey(key, note) {
     let active = false;
     const down = (event) => {
       if (active) return;
@@ -1514,7 +1514,7 @@ export class FrontPanelEditor {
     });
   }
 
-    renderComponentAppearance(component) {
+  renderComponentAppearance(component) {
     this.renderMaterialPresets(this.inspectorBody, component);
     this.selectField('Material', component.finish || this.state.finish, FINISHES, (value) => {
       component.finish = value;
@@ -1649,7 +1649,7 @@ export class FrontPanelEditor {
     }
 
     if (component.type === 'button') {
-      this.selectField('Button action', component.action || (component.bind?.paramKey ? 'toggle' : 'none'), [
+      this.selectField('Button action', component.bind?.paramKey ? 'toggle' : (component.action || 'none'), [
         ['none', 'No action'],
         ['panic', 'All notes off'],
         ['toggle', 'Toggle bound parameter'],
@@ -1680,8 +1680,11 @@ export class FrontPanelEditor {
       this.field('Text / display content', textarea);
     }
     const bound = this.getParameter(component);
+    const drawbarModule = component.type === 'drawbars' ? this.getModule(component.bind?.moduleId) : null;
     const bindingState = bound
       ? 'LIVE · ' + bound.definition.name + ' / ' + bound.parameter.label
+      : drawbarModule
+        ? 'LIVE · ' + (MODULES[drawbarModule.type]?.name || drawbarModule.type) + ' / NINE DRAWBARS'
       : component.bind?.moduleId
         ? 'Module or parameter is missing.'
         : canBind
@@ -2128,17 +2131,26 @@ export class FrontPanelEditor {
     this.previewDialog = dialog;
     const header = make('header', 'ofp-preview-dialog__header', dialog);
     const title = make('div', '', header);
-    make('span', 'ofp-panel-heading__eyebrow', title, 'LIVE DESIGN PREVIEW');
+    make('span', 'ofp-panel-heading__eyebrow', title, 'FRONT-PANEL PREVIEW');
     make('strong', '', title, this.app.patch.name || 'Untitled instrument');
     const close = make('button', 'ofp-action', header, 'CLOSE');
     close.type = 'button';
     close.addEventListener('click', () => dialog.close());
     const viewport = make('div', 'ofp-preview-dialog__stage', dialog);
-    const image = make('img', 'ofp-preview-dialog__image', viewport);
-    const url = URL.createObjectURL(new Blob([this.exportSVGMarkup()], { type: 'image/svg+xml;charset=utf-8' }));
-    image.src = url;
-    image.alt = 'Static visual preview of the current instrument front panel';
-    dialog.addEventListener('close', () => { URL.revokeObjectURL(url); dialog.remove(); this.previewDialog = null; }, { once: true });
+    const markup = this.exportSVGMarkup();
+    const parsed = new DOMParser().parseFromString(markup, 'image/svg+xml');
+    if (parsed.querySelector('parsererror') || parsed.documentElement.localName !== 'svg') {
+      dialog.remove();
+      this.previewDialog = null;
+      this.app.msg('The faceplate preview could not be rendered. Check the current design and try again.', true);
+      return;
+    }
+    const svg = document.importNode(parsed.documentElement, true);
+    svg.setAttribute('class', 'ofp-preview-dialog__artwork');
+    svg.setAttribute('role', 'img');
+    svg.setAttribute('aria-label', 'Front-panel artwork preview');
+    viewport.appendChild(svg);
+    dialog.addEventListener('close', () => { dialog.remove(); this.previewDialog = null; }, { once: true });
     dialog.addEventListener('click', (event) => { if (event.target === dialog) dialog.close(); });
     dialog.showModal();
   }
@@ -2150,7 +2162,8 @@ export class FrontPanelEditor {
       if (item.x < 0 || item.y < 0 || item.x + item.w > this.state.width || item.y + item.h > this.state.height) findings.push({ level: 'error', message: (item.label || item.type) + ' extends beyond the faceplate.' });
       if (item.w < 58 || item.h < 42) findings.push({ level: 'warning', message: (item.label || item.type) + ' is very small and may be difficult to use.' });
       if (!String(item.label || '').trim()) findings.push({ level: 'warning', message: item.type + ' has no visible label.' });
-      if (['knob','dial','encoder','slider','dropdown','switch','meter','drawbars'].includes(item.type) && !item.bind?.moduleId) findings.push({ level: 'warning', message: (item.label || item.type) + ' is not connected to an engine parameter.' });
+      if (['knob','dial','encoder','slider','dropdown','switch','meter','drawbars'].includes(item.type) && (!item.bind?.moduleId || (item.type !== 'drawbars' && !item.bind?.paramKey))) findings.push({ level: 'warning', message: (item.label || item.type) + ' is not connected to an engine parameter.' });
+      if (item.type === 'button' && item.action === 'toggle' && (!item.bind?.moduleId || !item.bind?.paramKey)) findings.push({ level: 'warning', message: (item.label || item.type) + ' is set to toggle a parameter but has no valid module binding.' });
     });
     for (let i=0;i<components.length;i++) for(let j=i+1;j<components.length;j++) {
       const a=components[i],b=components[j];
