@@ -136,6 +136,7 @@ export function validatePatch(raw) {
       accent: color(panel.accent, '#ffb75e'),
       textColor: color(panel.textColor, '#edf3fa'),
       unit: ['px','mm','in'].includes(panel.unit) ? panel.unit : 'mm',
+      zoom: Math.min(3, Math.max(.25, Number(panel.zoom) || 1)),
       safeMargin: Math.min(120, Math.max(0, Number(panel.safeMargin) || 24)),
       gridSize: Math.min(120, Math.max(4, Number(panel.gridSize) || 28)),
       showRulers: panel.showRulers !== false,
