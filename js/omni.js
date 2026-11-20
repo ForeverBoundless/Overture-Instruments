@@ -248,6 +248,10 @@ class OmniApp {
       patchToSVG(this.patch),
       'image/svg+xml',
     ), 'Export the current patch as an SVG schematic');
+    const panelFileImport = action(fileMenu, 'Import front-panel design…', () => this.frontPanelEditor?.importJSON(), 'Import a validated front-panel JSON file');
+    panelFileImport.classList.add('omni-front-only-command');
+    const panelFileExport = action(fileMenu, 'Export front-panel design JSON', () => this.frontPanelEditor?.exportJSON(), 'Save the editable front-panel layout');
+    panelFileExport.classList.add('omni-front-only-command');
 
     const editMenu = group('Edit');
     this.undoBtn = action(editMenu, 'Undo', () => this.undo(), 'Undo · Ctrl/⌘ Z');
@@ -258,6 +262,12 @@ class OmniApp {
     action(editMenu, 'Paste selection', () => this.pasteSelection(), 'Paste · Ctrl/⌘ V');
     action(editMenu, 'Duplicate selection', () => this.duplicateSelection(), 'Duplicate · Ctrl/⌘ D');
     action(editMenu, 'Delete selection', () => this.deleteSelection(), 'Delete or Backspace', 'omni-menu__item--danger');
+    const duplicatePanel = action(editMenu, 'Duplicate selected control', () => this.frontPanelEditor?.duplicateSelected(), 'Duplicate selected front-panel controls · Ctrl/⌘ D');
+    duplicatePanel.classList.add('omni-front-only-command');
+    const deletePanel = action(editMenu, 'Delete selected control', () => this.frontPanelEditor?.removeSelected(), 'Delete selected front-panel controls');
+    deletePanel.classList.add('omni-front-only-command','omni-menu__item--danger');
+    const selectAllPanel = action(editMenu, 'Select all front-panel controls', () => this.frontPanelEditor?.selectAllComponents(), 'Select every visible front-panel control');
+    selectAllPanel.classList.add('omni-front-only-command');
 
     const viewMenu = group('View');
     action(viewMenu, 'Zoom in', () => this.zoom(1.25), 'Zoom in');
@@ -266,6 +276,21 @@ class OmniApp {
     this.snapBtn = action(viewMenu, 'Snap to grid: ON', () => this.toggleSnap(), 'Toggle module snapping');
     this.performanceToggleBtn = action(viewMenu, this.performanceVisible ? 'Hide Performance Pane' : 'Show Performance Pane', () => this.togglePerformancePane(), 'Show or hide the keyboard, pitch wheel, mod wheel and performance controls');
     this.performanceToggleBtn.setAttribute('aria-pressed', String(this.performanceVisible));
+    const panelViewItems = [
+      ['Fit faceplate to workspace', () => this.frontPanelEditor?.fitToViewport()],
+      ['Zoom in on faceplate', () => this.frontPanelEditor?.zoomBy(1.2)],
+      ['Zoom out on faceplate', () => this.frontPanelEditor?.zoomBy(0.8)],
+      ['Toggle rulers', () => this.frontPanelEditor?.toggleViewSetting('showRulers')],
+      ['Toggle grid', () => this.frontPanelEditor?.toggleViewSetting('showGrid')],
+      ['Toggle guides', () => this.frontPanelEditor?.toggleViewSetting('showGuides')],
+      ['Toggle safe area', () => this.frontPanelEditor?.toggleViewSetting('showSafeMargin')],
+      ['Toggle snapping', () => this.frontPanelEditor?.toggleViewSetting('snap')],
+      ['Preview front panel', () => this.frontPanelEditor?.openPreview()],
+    ];
+    panelViewItems.forEach(([label, fn]) => {
+      const item = action(viewMenu, label, fn, label);
+      item.classList.add('omni-front-only-command');
+    });
 
     const audioMenu = group('Audio');
     this.audioRecordBtn = action(audioMenu, 'Record audio…', () => this.toggleAudioRecording(), 'Record the live OMNI output');
@@ -282,10 +307,53 @@ class OmniApp {
     const helpMenu = group('Help');
     action(helpMenu, 'OMNI guide…', () => this.guide(), 'Open the OMNI guide');
     action(helpMenu, 'Keyboard shortcuts', () => this.showShortcuts(), 'View performance and editing shortcuts');
+    const panelGuide = action(helpMenu, 'Front-panel studio guide…', () => this.frontPanelEditor?.openGuide(), 'Learn the layout, styling, preview and export workflow');
+    panelGuide.classList.add('omni-front-only-command');
+    const designCheck = action(helpMenu, 'Run front-panel design check', () => this.frontPanelEditor?.runDesignCheck(), 'Check spacing, bounds, labels and parameter bindings');
+    designCheck.classList.add('omni-front-only-command');
     const midiMapButton = tb('MIDI MAP', () => document.querySelector('.oi-midi-tab')?.click(), 'Open MIDI assignments', commandbar);
     midiMapButton.classList.add('omni-midi-map-button');
     midiMapButton.setAttribute('aria-label', 'Open MIDI assignments');
+    const frontOnlyGroup = (label) => {
+      const menu = group(label);
+      menu.details.classList.add('omni-menu--front-only');
+      return menu;
+    };
+    const frontAction = (menu, label, fn, title = label) => action(menu, label, fn, title);
+    const insertMenu = frontOnlyGroup('Insert');
+    [
+      ['Knob','knob'],['Dial','dial'],['Rotary encoder','encoder'],['Fader','slider'],['Dropdown','dropdown'],
+      ['Push button','button'],['Toggle switch','switch'],['Nine drawbars','drawbars'],['Keyboard','keyboard'],
+      ['Pitch wheel','pitchwheel'],['Mod wheel','modwheel'],['Performance pad','pad'],['Module bay','module'],
+      ['LCD display','screen'],['OLED display','oled'],['LED indicator','led'],['Level meter','meter'],
+      ['Text label','label'],['Section divider','section']
+    ].forEach(([label,type]) => frontAction(insertMenu,label,()=>this.frontPanelEditor?.addComponent(type),'Add '+label.toLowerCase()));
+    const arrangeMenu = frontOnlyGroup('Arrange');
+    [
+      ['Align left','left'],['Align horizontal centre','centerX'],['Align right','right'],
+      ['Align top','top'],['Align vertical centre','centerY'],['Align bottom','bottom'],
+      ['Distribute horizontally','distributeX'],['Distribute vertically','distributeY'],
+      ['Match width','sameWidth'],['Match height','sameHeight'],
+      ['Centre on faceplate horizontally','panelCenterX'],['Centre on faceplate vertically','panelCenterY']
+    ].forEach(([label,mode])=>frontAction(arrangeMenu,label,()=>this.frontPanelEditor?.alignSelection(mode),label));
+    frontAction(arrangeMenu,'Bring forward',()=>this.frontPanelEditor?.stepSelectedLayer(1));
+    frontAction(arrangeMenu,'Send backward',()=>this.frontPanelEditor?.stepSelectedLayer(-1));
+    frontAction(arrangeMenu,'Duplicate controls',()=>this.frontPanelEditor?.duplicateSelected());
+    frontAction(arrangeMenu,'Remove controls',()=>this.frontPanelEditor?.removeSelected());
+    const inspectMenu = frontOnlyGroup('Inspect');
+    frontAction(inspectMenu,'Panel properties',()=>{this.frontPanelEditor?.select(null);});
+    frontAction(inspectMenu,'Selected control properties',()=>this.frontPanelEditor?.focusInspector());
+    frontAction(inspectMenu,'Run design check',()=>this.frontPanelEditor?.runDesignCheck());
+    frontAction(inspectMenu,'Open visual preview',()=>this.frontPanelEditor?.openPreview());
+    const exportMenu = frontOnlyGroup('Export');
+    frontAction(exportMenu,'Export vector artwork · SVG',()=>this.frontPanelEditor?.exportSVG());
+    frontAction(exportMenu,'Export raster · PNG',()=>this.frontPanelEditor?.exportPNG(2));
+    frontAction(exportMenu,'Export raster · JPEG',()=>this.frontPanelEditor?.exportJPEG(1));
+    frontAction(exportMenu,'Export editable layout · JSON',()=>this.frontPanelEditor?.exportJSON());
+    frontAction(exportMenu,'Print sheet / Save as PDF',()=>this.frontPanelEditor?.printPDF());
+    this.frontPanelCommandMenus = [insertMenu.details,arrangeMenu.details,inspectMenu.details,exportMenu.details];
 
+    this.commandbar = commandbar;
     this.menuDetails = [...commandbar.querySelectorAll('.omni-menu')];
     this.status.classList.add('omni-status--command');
     commandbar.appendChild(this.status);
@@ -569,6 +637,8 @@ class OmniApp {
     this.performancePane.hidden = view === 'front' || !this.performanceVisible;
     this.engineViewButton.setAttribute('aria-pressed', String(view === 'engine'));
     this.frontViewButton.setAttribute('aria-pressed', String(view === 'front'));
+    this.commandbar?.querySelectorAll('.omni-front-only-command').forEach((item) => { item.hidden = view !== 'front'; });
+    this.commandbar?.querySelectorAll('.omni-menu--front-only').forEach((item) => { item.hidden = view !== 'front'; });
     this.persistWorkspace();
     if (view === 'engine') requestAnimationFrame(() => { this.applyView(); this.renderWires(); });
     else requestAnimationFrame(() => this.frontPanelEditor.scaleFaceplate());
