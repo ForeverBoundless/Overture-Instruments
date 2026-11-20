@@ -380,7 +380,7 @@ export class FrontPanelEditor {
   bindViewportNavigation() {
     const viewport = this.viewport;
     if (!viewport) return;
-    const isEditable = (target) => target?.closest?.('input,textarea,select,[contenteditable="true"]');
+    const isEditable = (target) => target?.closest?.('input,textarea,select,button,a,[role="button"],[contenteditable="true"]');
     document.addEventListener('keydown', (event) => {
       if (this.el.hidden || event.code !== 'Space' || isEditable(event.target) || event.repeat) return;
       this.spacePressed = true;
