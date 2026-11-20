@@ -9,7 +9,7 @@ const APP_SHELL = [
   '/community',
   '/omni',
   '/omni/documentation',
-  '/js/omni-launcher.js?v=20261119-front-panel-r17',
+  '/js/omni-launcher.js?v=20261119-front-panel-r18',
   '/js/omni.js?v=20261119-front-panel-r17',
   '/css/omni.css?v=20261119-front-panel-r16',
   '/css/omni-documentation.css?v=20261119-omni-docs-r1',
