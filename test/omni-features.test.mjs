@@ -26,10 +26,10 @@ test('OMNI chord interval sliders expose the complete ±32-semitone range', asyn
   assert.ok((await readFile(new URL('../js/omni/graph.js', import.meta.url), 'utf8')).includes(`from './modules.js?v=20261118-organ-drawbar-r1'`));
   assert.ok(worker.includes(`/js/omni/graph.js?v=20261119-front-panel-r2`));
   assert.ok(worker.includes(`/js/omni/modules.js?v=20261118-organ-drawbar-r1`));
-  assert.ok(page.includes('omni.css?v=20261119-front-panel-r16'));
+  assert.ok(page.includes('omni.css?v=20261119-front-panel-r17'));
   assert.ok(page.includes('omni-launcher.js?v=20261119-front-panel-r18'));
   assert.match(worker, /overture-shell-v\d+/);
-  assert.ok(worker.includes('/css/omni.css?v=20261119-front-panel-r16'));
+  assert.ok(worker.includes('/css/omni.css?v=20261119-front-panel-r17'));
   assert.ok(worker.includes('/js/omni-launcher.js?v=20261119-front-panel-r18'));
 });
 
@@ -101,10 +101,10 @@ test('OMNI performance deck keeps octave controls in the keyboard header and giv
   assert.match(css, /grid-template-columns:88px minmax\(0,1fr\)/);
   assert.match(css, /\.omni-keys \.lp-keyboard[^}]*width:100%/);
   assert.match(css, /\.omni-keys \.lp-keyboard[^}]*min-width:520px/);
-  assert.match(page, /omni\.css\?v=20261119-front-panel-r16/);
+  assert.match(page, /omni\.css\?v=20261119-front-panel-r17/);
   assert.match(page, /omni-launcher\.js\?v=20261119-front-panel-r18/);
   assert.match(worker, /overture-shell-v\d+/);
-  assert.match(worker, /omni\.css\?v=20261119-front-panel-r16/);
+  assert.match(worker, /omni\.css\?v=20261119-front-panel-r17/);
   assert.ok(worker.includes('/js/omni-launcher.js?v=20261119-front-panel-r18'));
 });
 
@@ -148,7 +148,7 @@ test('OMNI launcher links to a complete, theme-aware documentation page', async 
   assert.match(css, /var\(--bg\)/);
   assert.ok(worker.includes("'/omni/documentation'"));
   assert.ok(worker.includes("'/css/omni-documentation.css?v=20261119-omni-docs-r1'"));
-  assert.match(worker, /overture-shell-v152/);
+  assert.match(worker, /overture-shell-v153/);
   assert.match(routes, /"cleanUrls": true/);
 });
 
@@ -212,7 +212,7 @@ test('OMNI wordmark explicitly uses Inter Variable', async () => {
   const page = await readFile(new URL('../omni.html', import.meta.url), 'utf8');
   const worker = await readFile(new URL('../service-worker.js', import.meta.url), 'utf8');
   assert.match(css, /\.omni-logo-wording strong\s*\{[^}]*font-family:\s*'Inter Variable'/s);
-  assert.match(page, /omni\.css\?v=20261119-front-panel-r16/);
+  assert.match(page, /omni\.css\?v=20261119-front-panel-r17/);
   assert.match(worker, /overture-shell-v\d+/);
 });
 
@@ -511,9 +511,9 @@ test('OMNI front-panel workspaces and precision design tools are integrated', as
   assert.match(css, /\.ofp-measurements/);
   assert.match(css, /\.ofp-layers-panel/);
   assert.match(css, /html\[data-theme="light"\].*ofp-library/);
-  assert.match(page, /omni\.css\?v=20261119-front-panel-r16/);
+  assert.match(page, /omni\.css\?v=20261119-front-panel-r17/);
   assert.match(launcher, /omni\.js\?v=20261119-front-panel-r17/);
-  assert.match(worker, /overture-shell-v152/);
+  assert.match(worker, /overture-shell-v153/);
   assert.match(worker, /front-panel\.js\?v=20261119-front-panel-r15/);
   assert.match(worker, /graph\.js\?v=20261119-front-panel-r2/);
   assert.match(readme, /Front-end View/);
