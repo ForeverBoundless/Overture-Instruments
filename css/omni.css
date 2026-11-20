@@ -1818,3 +1818,285 @@ html[data-theme="light"] #omni-root .ofp-stage-foot { border-color:rgba(43,59,78
 
 .ofp-measurement-readout{grid-column:1/-1;color:var(--cyan);font:8px/1.6 var(--font-mono);font-variant-numeric:tabular-nums}
 html[data-theme="light"] #omni-root .ofp-measurement-readout{color:#087f9f}
+
+
+/* =========================================================
+   OMNI FRONT-PANEL STUDIO — cohesive command and hardware UI
+   ========================================================= */
+
+/* Keep the editor switch truly centred and group theme + account at the right. */
+#omni-root .omni-topbar {
+  display:grid;
+  grid-template-columns:auto minmax(170px,min(25vw,320px)) minmax(12px,1fr) auto minmax(12px,1fr) auto auto;
+  align-items:center;
+  column-gap:clamp(10px,1.5vw,22px);
+}
+#omni-root .omni-logo {grid-column:1}
+#omni-root .omni-project {grid-column:2;width:100%;min-width:0}
+#omni-root .omni-view-switch {grid-column:4;justify-self:center;margin:0}
+#omni-root .omni-status {grid-column:5;justify-self:end;margin:0;max-width:min(18vw,240px)}
+#omni-root .omni-topbar .site-theme-toggle--omni {
+  position:relative;top:auto;left:auto;z-index:1;grid-column:6;justify-self:center;
+  width:38px;height:34px;min-width:38px;transform:none;margin:0;border-radius:9px;
+}
+#omni-root .omni-topbar .site-theme-toggle--omni:active {transform:scale(.96)}
+#omni-root .omni-account {grid-column:7;justify-self:end;margin:0;white-space:nowrap}
+#omni-root .omni-front-only-command[hidden],
+#omni-root .omni-menu--front-only[hidden] {display:none!important}
+#omni-root .omni-front-only-command {border-top:1px solid var(--omni-border)}
+#omni-root .omni-menu--front-only .omni-menu__panel {width:270px}
+#omni-root .omni-commandbar {position:relative;z-index:20}
+#omni-root .omni-menu[open] {z-index:40}
+
+/* The design studio follows the same restrained, layered surface language as
+   the sound-engine workspace instead of creating a second visual system. */
+#omni-root>.omni-front-panel {min-height:0;isolation:isolate}
+#omni-root .ofp-toolbar {
+  min-height:54px;padding:8px clamp(13px,1.5vw,22px);
+  background:linear-gradient(180deg,var(--omni-panel),var(--omni-panel-soft));
+}
+#omni-root .ofp-toolbar__identity {gap:2px}
+#omni-root .ofp-toolbar__title {font-size:16px;letter-spacing:-.03em}
+#omni-root .ofp-toolbar__actions {align-items:center;gap:6px}
+#omni-root .ofp-action {min-height:31px;padding-inline:11px;font-family:var(--font-body);font-size:9px;letter-spacing:.07em}
+#omni-root .ofp-action--primary {font-weight:750}
+#omni-root .ofp-workspace {grid-template-columns:minmax(190px,218px) minmax(0,1fr) minmax(270px,304px);gap:0}
+#omni-root .ofp-library,#omni-root .ofp-inspector {
+  padding:14px 12px;background:linear-gradient(180deg,var(--omni-panel),var(--omni-panel-soft));
+  scrollbar-width:thin;scrollbar-color:rgba(125,228,255,.2) transparent;
+}
+#omni-root .ofp-library {display:flex;flex-direction:column;gap:6px}
+#omni-root .ofp-library .ofp-panel-heading {margin-bottom:4px}
+#omni-root .ofp-help {margin:0 0 6px;max-width:38ch;font-size:10px;line-height:1.55}
+#omni-root .ofp-library-search {
+  width:100%;min-height:34px;padding:0 10px;border:1px solid var(--omni-border-strong);border-radius:7px;
+  color:var(--omni-text);background:var(--omni-panel-soft);font:11px var(--font-body);
+}
+#omni-root .ofp-library-search:focus {outline:2px solid rgba(125,228,255,.4);outline-offset:1px}
+#omni-root .ofp-library-group {display:grid;gap:7px;margin-top:7px;padding-top:7px;border-top:1px solid var(--omni-border)}
+#omni-root .ofp-library-group__heading {
+  display:flex;align-items:center;gap:8px;min-height:22px;color:var(--omni-muted);
+  font:600 9px var(--font-mono);letter-spacing:.12em;cursor:pointer;list-style:none;
+}
+#omni-root .ofp-library-group__heading::-webkit-details-marker {display:none}
+#omni-root .ofp-library-group__heading::after {
+  width:6px;height:6px;margin-left:auto;border-right:1px solid currentColor;border-bottom:1px solid currentColor;
+  content:'';transform:rotate(45deg) translateY(-2px);transition:transform .16s ease;
+}
+#omni-root .ofp-library-group[open]>.ofp-library-group__heading::after {transform:rotate(225deg) translate(-1px,-1px)}
+#omni-root .ofp-library-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+#omni-root .ofp-library-item {
+  display:grid;grid-template-rows:56px auto;gap:4px;min-width:0;min-height:0;padding:5px;
+  border:1px solid var(--omni-border);border-radius:7px;background:linear-gradient(150deg,rgba(255,255,255,.035),rgba(0,0,0,.1)),var(--omni-panel-soft);
+  color:var(--omni-text);text-align:center;cursor:grab;transition:border-color .16s ease,background .16s ease,transform .16s ease;
+}
+#omni-root .ofp-library-item:hover {transform:translateY(-1px);border-color:rgba(125,228,255,.48);background:rgba(125,228,255,.055)}
+#omni-root .ofp-library-item:active {cursor:grabbing}
+#omni-root .ofp-library-preview {width:100%;height:54px;overflow:visible}
+#omni-root .ofp-library-item__label {display:block;min-width:0;overflow:hidden;color:var(--omni-muted);font:9px/1.25 var(--font-body);text-overflow:ellipsis;white-space:nowrap}
+#omni-root .ofp-library-item[hidden],#omni-root .ofp-library-group[hidden] {display:none!important}
+
+/* Canvas controls are arranged in compact, discoverable drop-down groups. */
+#omni-root .ofp-stage-panel {padding:10px 12px;background:radial-gradient(ellipse at 50% 44%,rgba(125,228,255,.045),transparent 64%)}
+#omni-root .ofp-stage-head {min-height:35px}
+#omni-root .ofp-design-tools {display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:7px 0;border-bottom:1px solid var(--omni-border)}
+#omni-root .ofp-tool-group {position:relative;display:block;flex:0 0 auto}
+#omni-root .ofp-tool-group__trigger {
+  display:flex;align-items:center;gap:9px;min-height:31px;padding:0 10px;border:1px solid var(--omni-border);
+  border-radius:6px;color:var(--omni-muted);background:var(--omni-panel-soft);
+  font:650 9px var(--font-mono);letter-spacing:.08em;cursor:pointer;list-style:none;
+}
+#omni-root .ofp-tool-group__trigger::-webkit-details-marker {display:none}
+#omni-root .ofp-tool-group__trigger::after {width:6px;height:6px;border-right:1px solid currentColor;border-bottom:1px solid currentColor;content:'';transform:rotate(45deg) translateY(-2px)}
+#omni-root .ofp-tool-group[open]>.ofp-tool-group__trigger {border-color:rgba(125,228,255,.42);color:var(--omni-text);background:rgba(125,228,255,.07)}
+#omni-root .ofp-tool-group__panel {
+  position:absolute;z-index:34;top:calc(100% + 6px);left:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:5px;width:max-content;min-width:210px;max-width:min(360px,80vw);max-height:55vh;overflow:auto;
+  padding:9px;border:1px solid var(--omni-border-strong);border-radius:9px;
+  background:linear-gradient(150deg,#1a2330,#101720 72%);box-shadow:0 18px 48px rgba(0,0,0,.4);backdrop-filter:blur(16px);
+}
+#omni-root .ofp-tool-toggle,#omni-root .ofp-tool-select {
+  min-height:30px;padding:0 9px;border:1px solid var(--omni-border);border-radius:5px;
+  color:var(--omni-muted);background:rgba(255,255,255,.025);font:500 9px var(--font-body);letter-spacing:0;cursor:pointer;
+}
+#omni-root .ofp-tool-toggle:hover,#omni-root .ofp-tool-select:hover {border-color:rgba(125,228,255,.5);color:var(--omni-text);background:rgba(125,228,255,.06)}
+#omni-root .ofp-tool-toggle[aria-pressed="true"] {border-color:rgba(125,228,255,.5);color:#10202b;background:linear-gradient(135deg,#a8edff,#63cde7)}
+#omni-root .ofp-tool-select {grid-column:1/-1;color:var(--omni-text);background:#17222e}
+#omni-root .ofp-align-tools {display:none!important}
+#omni-root .ofp-viewport {background-color:rgba(5,9,14,.24);background-image:radial-gradient(ellipse at 50% 50%,rgba(125,228,255,.045),transparent 62%)}
+#omni-root .ofp-stage-foot {min-height:25px;font-size:8px;letter-spacing:.04em}
+#omni-root .ofp-stage-foot span:last-child {color:var(--cyan)}
+
+/* Instrument hardware: mounted controls, not generic cards containing emoji. */
+#omni-root .ofp-component {
+  border-color:transparent;background:transparent;box-shadow:none!important;overflow:visible;
+  padding:var(--ofp-padding,7px);isolation:isolate;
+}
+#omni-root .ofp-component::after {display:none}
+#omni-root .ofp-component.is-selected {outline:1px solid rgba(125,228,255,.65);outline-offset:3px;border-radius:5px}
+#omni-root .ofp-component__title {
+  position:relative;z-index:1;width:100%;color:var(--ofp-control-text);font:650 var(--ofp-font-size,8px)/1.2 var(--font-mono);
+  letter-spacing:.13em;text-shadow:0 1px 2px rgba(0,0,0,.55);cursor:move;
+}
+#omni-root .ofp-component--knob .ofp-knob,
+#omni-root .ofp-component--dial .ofp-knob,
+#omni-root .ofp-component--encoder .ofp-knob {width:min(94px,82%);max-width:100%;margin:2px auto}
+#omni-root .ofp-knob {position:relative;display:grid;place-items:center;flex:0 0 auto;width:84px;aspect-ratio:1;overflow:visible;filter:drop-shadow(0 6px 6px rgba(0,0,0,.22))}
+#omni-root .ofp-knob__scale {position:absolute;inset:0;border-radius:50%;pointer-events:none}
+#omni-root .ofp-knob__tick {position:absolute;top:50%;left:calc(50% - 1px);width:2px;height:5px;border-radius:1px;background:rgba(211,223,233,.58);transform-origin:1px 42px}
+#omni-root .ofp-knob__tick.is-major {height:8px;background:var(--ofp-control-text);box-shadow:0 0 3px rgba(0,0,0,.5)}
+#omni-root .ofp-knob__ring {
+  position:absolute;inset:5px;border-radius:50%;
+  background:conic-gradient(from 225deg,var(--ofp-control-accent) 0deg,var(--ofp-control-accent) calc(var(--ofp-value,.5)*270deg),rgba(112,128,142,.42) calc(var(--ofp-value,.5)*270deg),rgba(112,128,142,.42) 270deg,transparent 270deg);
+  mask:radial-gradient(circle,transparent 67%,#000 69% 100%);transform:rotate(-135deg);
+}
+#omni-root .ofp-knob__bezel {
+  position:absolute;inset:13px;border:1px solid rgba(211,223,233,.46);border-radius:50%;
+  background:linear-gradient(145deg,rgba(255,255,255,.2),rgba(7,12,18,.42) 36%,rgba(255,255,255,.08));
+  box-shadow:0 3px 6px rgba(0,0,0,.46),inset 0 1px 2px rgba(255,255,255,.22),inset 0 -2px 4px rgba(0,0,0,.5);
+  pointer-events:none;
+}
+#omni-root .ofp-knob__cap {
+  position:relative;z-index:1;width:59%;aspect-ratio:1;border:1px solid rgba(228,237,243,.44);border-radius:50%;
+  background:radial-gradient(circle at 35% 25%,rgba(255,255,255,.42),transparent 18%),linear-gradient(145deg,#697782 0%,#3d4a55 27%,#202a34 62%,#0b1118 100%);
+  box-shadow:0 4px 8px rgba(0,0,0,.54),inset 0 1px 2px rgba(255,255,255,.3),inset 0 -3px 5px rgba(0,0,0,.55);
+}
+#omni-root .ofp-knob__indicator {position:absolute;top:7%;left:calc(50% - 1.5px);width:3px;height:26%;border-radius:2px;background:var(--ofp-control-accent);box-shadow:0 0 4px var(--ofp-control-accent)}
+#omni-root .ofp-component__value {min-height:13px;color:var(--ofp-control-accent);font:650 9px var(--font-mono);font-variant-numeric:tabular-nums;text-shadow:0 1px 2px rgba(0,0,0,.5)}
+#omni-root .ofp-component--slider .ofp-slider {width:100%;flex:1;min-height:54px}
+#omni-root .ofp-slider__input {
+  width:82%;height:28px;margin:0;appearance:none;-webkit-appearance:none;background:transparent;cursor:ns-resize;
+}
+#omni-root .ofp-slider__input::-webkit-slider-runnable-track {height:7px;border:1px solid #090e13;border-radius:99px;background:linear-gradient(180deg,#090f15,#3b4650 40%,#101820);box-shadow:inset 0 2px 3px rgba(0,0,0,.7)}
+#omni-root .ofp-slider__input::-webkit-slider-thumb {
+  width:22px;height:18px;margin-top:-6px;appearance:none;-webkit-appearance:none;border:1px solid #d2dce2;border-radius:4px;
+  background:linear-gradient(180deg,#f5f7f8,#aab6bf 48%,#687782);box-shadow:0 2px 4px rgba(0,0,0,.5),inset 0 1px #fff;
+}
+#omni-root .ofp-slider__input::-moz-range-track {height:7px;border:1px solid #090e13;border-radius:99px;background:linear-gradient(180deg,#090f15,#3b4650 40%,#101820)}
+#omni-root .ofp-slider__input::-moz-range-thumb {width:20px;height:16px;border:1px solid #d2dce2;border-radius:4px;background:linear-gradient(180deg,#f5f7f8,#aab6bf 48%,#687782)}
+#omni-root .ofp-component--slider[data-orientation="vertical"] .ofp-slider {height:100%;width:100%}
+#omni-root .ofp-component--slider[data-orientation="vertical"] .ofp-slider__input {width:28px;height:82%;writing-mode:vertical-lr;direction:rtl}
+#omni-root .ofp-dropdown {
+  width:100%;min-height:32px;padding:0 28px 0 9px;border:1px solid var(--ofp-control-border);border-radius:5px;
+  color:var(--ofp-control-text);background:linear-gradient(180deg,#293744,#111a23);font:10px var(--font-body);
+}
+#omni-root .ofp-hardware-button {
+  min-height:32px;padding:4px 12px;border:1px solid var(--ofp-control-accent);border-radius:4px;
+  color:var(--ofp-control-text);background:linear-gradient(180deg,rgba(255,255,255,.17),rgba(0,0,0,.32)),var(--ofp-control-surface);
+  box-shadow:0 3px 0 rgba(0,0,0,.48),inset 0 1px rgba(255,255,255,.24);font:650 9px var(--font-mono);
+}
+#omni-root .ofp-switch__track {width:58px;height:28px;border-color:#687786;background:linear-gradient(180deg,#070c11,#202a33);box-shadow:inset 0 3px 5px rgba(0,0,0,.8),0 1px rgba(255,255,255,.12)}
+#omni-root .ofp-switch__track::after {top:3px;left:3px;width:20px;height:20px;background:linear-gradient(180deg,#edf2f4,#85939f);box-shadow:0 2px 4px rgba(0,0,0,.7)}
+#omni-root .ofp-switch.is-on .ofp-switch__track {border-color:var(--ofp-control-accent);background:linear-gradient(180deg,#0c252b,#194450)}
+#omni-root .ofp-switch.is-on .ofp-switch__track::after {transform:translateX(29px)}
+#omni-root .ofp-keyboard {
+  position:relative;width:100%;height:76%;min-height:68px;border:1px solid #05080b;border-radius:4px;
+  background:linear-gradient(180deg,#05090d,#141c23);box-shadow:0 4px 9px rgba(0,0,0,.48),inset 0 1px rgba(255,255,255,.14);
+}
+#omni-root .ofp-key--white {border-color:#84909a;border-bottom-color:#59636c;border-radius:0 0 2px 2px;background:linear-gradient(90deg,#cbd3d9,#f8fafb 22%,#fff 56%,#d9e0e5);box-shadow:inset 0 -3px 3px rgba(0,0,0,.12)}
+#omni-root .ofp-key--black {border-color:#020406;border-radius:0 0 3px 3px;background:linear-gradient(90deg,#05080b,#3b4650 45%,#111820);box-shadow:0 3px 4px rgba(0,0,0,.65),inset 0 1px rgba(255,255,255,.2)}
+#omni-root .ofp-key.is-active {background:linear-gradient(180deg,#a8eeff,var(--ofp-control-accent));filter:none}
+#omni-root .ofp-wheel {width:62%;border:1px solid #66747f;border-radius:5px;background:linear-gradient(90deg,#080d12,#66737e 48%,#111820);box-shadow:0 4px 8px rgba(0,0,0,.38),inset 0 1px rgba(255,255,255,.14)}
+#omni-root .ofp-wheel__track {width:11px;border:1px solid #05080b;background:linear-gradient(90deg,#242e37,#a9b4bd 50%,#1b252e);box-shadow:inset 0 1px 3px rgba(0,0,0,.7)}
+#omni-root .ofp-wheel__cap {width:76%;height:17%;left:12%;border:1px solid #e1e7eb;border-radius:4px;background:linear-gradient(180deg,#f4f6f7,#9caab5 45%,#566570);box-shadow:0 3px 5px rgba(0,0,0,.55),inset 0 1px #fff}
+#omni-root .ofp-drawbars {height:82%;gap:5px;padding:4px 3px;border:1px solid rgba(255,255,255,.15);border-radius:5px;background:linear-gradient(150deg,#1d2934,#0a1118);box-shadow:inset 0 2px 8px rgba(0,0,0,.55)}
+#omni-root .ofp-drawbar {font-size:7px}
+#omni-root .ofp-drawbar__input {width:100%;accent-color:var(--ofp-control-accent)}
+#omni-root .ofp-display {border-radius:4px;background:radial-gradient(ellipse at 50% 20%,rgba(125,228,255,.12),transparent 70%),#050d12;box-shadow:inset 0 0 16px rgba(0,0,0,.8),0 2px 6px rgba(0,0,0,.28)}
+#omni-root .ofp-component--module {border:1px solid rgba(255,255,255,.18);border-radius:5px;background:linear-gradient(150deg,rgba(255,255,255,.08),transparent 48%),var(--ofp-control-surface);box-shadow:inset 0 1px rgba(255,255,255,.13)!important}
+#omni-root .ofp-pad {border-radius:6px;background:linear-gradient(145deg,rgba(255,255,255,.18),rgba(0,0,0,.42)),var(--ofp-control-surface)}
+#omni-root .ofp-component__resize {z-index:5;width:15px;height:15px}
+
+/* Properly grouped property inspector and compact tabs. */
+#omni-root .ofp-inspector {display:flex;flex-direction:column;gap:10px}
+#omni-root .ofp-inspector .ofp-panel-heading {margin:0;padding-bottom:8px;border-bottom:1px solid var(--omni-border)}
+#omni-root .ofp-inspector-tabs {display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding:3px;border:1px solid var(--omni-border);border-radius:7px;background:rgba(0,0,0,.13)}
+#omni-root .ofp-inspector-tab {min-height:30px;padding:0 4px;border:1px solid transparent;border-radius:5px;color:var(--omni-muted);background:transparent;font:550 10px var(--font-body);cursor:pointer}
+#omni-root .ofp-inspector-tab[aria-selected="true"] {border-color:rgba(125,228,255,.24);color:var(--omni-text);background:rgba(125,228,255,.1);box-shadow:inset 0 1px rgba(255,255,255,.04)}
+#omni-root .ofp-inspector__body {gap:12px;padding:1px 1px 18px}
+#omni-root .ofp-field {gap:5px;color:var(--omni-muted);font:500 9px var(--font-body);letter-spacing:.015em}
+#omni-root .ofp-input,#omni-root .ofp-select,#omni-root .ofp-textarea {min-height:33px;border-radius:6px;font:11px var(--font-body)}
+#omni-root .ofp-color {height:35px;min-width:0;padding:3px;border-radius:6px;background:var(--omni-panel-soft);cursor:pointer}
+#omni-root .ofp-color-grid {gap:8px}
+#omni-root .ofp-inspector-actions {display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:4px}
+#omni-root .ofp-inspector-action {min-height:32px;padding-inline:8px;border-radius:6px;font:600 9px var(--font-body)}
+#omni-root .ofp-binding-status {margin:0;padding:9px;border:1px solid var(--omni-border);border-radius:6px;color:var(--cyan);background:rgba(125,228,255,.035);font:9px var(--font-mono)}
+#omni-root .ofp-layers-panel {margin-top:auto;padding-top:14px}
+#omni-root .ofp-layer-row {min-height:29px}
+
+/* Preview / inspection dialogs and print-ready export. */
+#omni-root dialog.ofp-preview-dialog,
+#omni-root dialog.ofp-check-dialog,
+#omni-root dialog.ofp-guide-dialog {
+  width:min(980px,calc(100vw - 32px));max-width:none;max-height:calc(100dvh - 36px);overflow:auto;
+  padding:0;border:1px solid var(--omni-border-strong);border-radius:13px;
+  color:var(--omni-text);background:linear-gradient(150deg,#18222e,#0d131b 75%);
+  box-shadow:0 28px 90px rgba(0,0,0,.6);
+}
+#omni-root dialog.ofp-check-dialog,#omni-root dialog.ofp-guide-dialog {width:min(650px,calc(100vw - 30px))}
+#omni-root dialog::backdrop {background:rgba(3,7,11,.75);backdrop-filter:blur(8px)}
+#omni-root .ofp-preview-dialog__header,
+#omni-root .ofp-check-dialog__header {display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 16px;border-bottom:1px solid var(--omni-border)}
+#omni-root .ofp-preview-dialog__header strong,
+#omni-root .ofp-check-dialog__header strong {display:block;margin-top:3px;font:600 15px var(--font-body)}
+#omni-root .ofp-preview-dialog__stage {display:grid;place-items:center;min-height:300px;max-height:calc(100dvh - 130px);padding:24px;overflow:auto;background:radial-gradient(ellipse at center,rgba(125,228,255,.06),transparent 66%),#090e14}
+#omni-root .ofp-preview-dialog__image {display:block;width:min(100%,1200px);height:auto;max-height:72vh;object-fit:contain;filter:drop-shadow(0 16px 30px rgba(0,0,0,.5))}
+#omni-root .ofp-check-summary {display:flex;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--omni-border);color:var(--omni-muted);font:10px var(--font-mono)}
+#omni-root .ofp-check-summary strong {color:var(--omni-text)}
+#omni-root .ofp-check-list,#omni-root .ofp-guide-content {display:grid;gap:8px;padding:14px 16px 18px}
+#omni-root .ofp-check-item {display:grid;grid-template-columns:72px 1fr;gap:10px;align-items:start;padding:9px 10px;border:1px solid var(--omni-border);border-radius:7px;background:rgba(255,255,255,.025)}
+#omni-root .ofp-check-item>span {color:var(--amber);font:700 8px var(--font-mono);letter-spacing:.1em}
+#omni-root .ofp-check-item--error>span {color:#ff8c82}
+#omni-root .ofp-check-item p,#omni-root .ofp-check-empty {margin:0;color:var(--omni-muted);font:11px/1.55 var(--font-body)}
+#omni-root .ofp-guide-content__section {padding:10px 11px;border:1px solid var(--omni-border);border-radius:7px;background:rgba(255,255,255,.025)}
+#omni-root .ofp-guide-content__section h3 {margin:0 0 5px;color:var(--omni-text);font:600 12px var(--font-body)}
+#omni-root .ofp-guide-content__section p {margin:0;color:var(--omni-muted);font:11px/1.6 var(--font-body)}
+
+html[data-theme="light"] #omni-root .ofp-library,
+html[data-theme="light"] #omni-root .ofp-inspector {background:linear-gradient(180deg,#f2f6fa,#e9eff4)}
+html[data-theme="light"] #omni-root .ofp-library-search,
+html[data-theme="light"] #omni-root .ofp-tool-group__trigger,
+html[data-theme="light"] #omni-root .ofp-inspector-tabs {color:#34495d;border-color:rgba(43,59,78,.18);background:rgba(255,255,255,.65)}
+html[data-theme="light"] #omni-root .ofp-tool-group__panel {border-color:rgba(43,59,78,.18);background:linear-gradient(150deg,#f9fbfd,#e8eef4);box-shadow:0 18px 40px rgba(45,60,81,.18)}
+html[data-theme="light"] #omni-root .ofp-tool-toggle,
+html[data-theme="light"] #omni-root .ofp-tool-select {color:#40566a;border-color:rgba(43,59,78,.16);background:rgba(255,255,255,.78)}
+html[data-theme="light"] #omni-root .ofp-library-item {border-color:rgba(43,59,78,.13);background:linear-gradient(150deg,#fff,#e9eff4)}
+html[data-theme="light"] #omni-root .ofp-library-item__label {color:#4d6175}
+html[data-theme="light"] #omni-root .ofp-inspector-tab {color:#52677b}
+html[data-theme="light"] #omni-root .ofp-inspector-tab[aria-selected="true"] {color:#15566d;background:rgba(8,127,159,.09)}
+html[data-theme="light"] #omni-root dialog.ofp-preview-dialog,
+html[data-theme="light"] #omni-root dialog.ofp-check-dialog,
+html[data-theme="light"] #omni-root dialog.ofp-guide-dialog {color:#293d51;background:linear-gradient(150deg,#f8fafc,#e8eef4)}
+html[data-theme="light"] #omni-root .ofp-check-item,
+html[data-theme="light"] #omni-root .ofp-guide-content__section {background:rgba(255,255,255,.6)}
+html[data-theme="light"] #omni-root .ofp-guide-content__section h3 {color:#26394c}
+
+@media(max-width:1120px) {
+  #omni-root .omni-topbar {column-gap:10px;grid-template-columns:auto minmax(130px,22vw) minmax(8px,1fr) auto minmax(8px,1fr) auto auto}
+  #omni-root .ofp-workspace {grid-template-columns:180px minmax(0,1fr) 260px}
+}
+@media(max-width:900px) {
+  #omni-root .omni-topbar {display:flex;flex-wrap:wrap;gap:10px}
+  #omni-root .omni-view-switch {margin-left:auto}
+  #omni-root .omni-status {display:none}
+  #omni-root .omni-topbar .site-theme-toggle--omni {margin-left:auto}
+  #omni-root .ofp-workspace {grid-template-columns:160px minmax(0,1fr)}
+  #omni-root .ofp-inspector {position:absolute;right:8px;top:120px;bottom:8px;z-index:15;width:260px;border:1px solid var(--omni-border);border-radius:9px;box-shadow:var(--omni-shadow)}
+}
+@media(max-width:620px) {
+  #omni-root .omni-topbar {display:flex;flex-wrap:wrap;gap:8px;padding:8px 10px}
+  #omni-root .omni-project {min-width:0;flex:1 1 130px;width:auto}
+  #omni-root .omni-view-switch {order:4;flex:1 0 100%;justify-content:center;margin:0}
+  #omni-root .omni-topbar .site-theme-toggle--omni {margin-left:auto}
+  #omni-root .ofp-toolbar {align-items:flex-start;flex-direction:row;flex-wrap:wrap}
+  #omni-root .ofp-workspace {grid-template-columns:120px minmax(0,1fr)}
+  #omni-root .ofp-library {padding:9px 6px}
+  #omni-root .ofp-library-grid {grid-template-columns:1fr}
+  #omni-root .ofp-library-item {grid-template-rows:44px auto}
+  #omni-root .ofp-library-preview {height:42px}
+  #omni-root .ofp-inspector {top:110px;right:5px;bottom:5px;width:min(230px,65vw)}
+  #omni-root .ofp-stage-panel {padding:7px}
+  #omni-root .ofp-tool-group__trigger {min-height:28px;padding-inline:7px;font-size:8px}
+  #omni-root .ofp-tool-group__panel {grid-template-columns:1fr 1fr;min-width:190px}
+  #omni-root .ofp-stage-foot {flex-wrap:wrap}
+}
