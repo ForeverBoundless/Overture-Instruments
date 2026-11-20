@@ -65,7 +65,7 @@ export class FrontPanelEditor {
     const component = (type, label, x, y, w, h, extra = {}) => ({
       id: id(), type, label, x, y, w, h, value: 0.5,
       accent: '#ffb75e', surface: '#26313d', textColor: '#edf3fa',
-      finish: 'matte', margin: 8, hidden: false, locked: false, ...extra,
+      finish: 'matte', margin: 8, padding: 7, gap: 5, radius: 7, fontSize: 8, borderWidth: 1, shadow: 'soft', orientation: 'horizontal', hidden: false, locked: false, ...extra,
     });
     const filter = find('filter') || find('ladder');
     const osc = find('oscillator');
@@ -689,6 +689,12 @@ export class FrontPanelEditor {
     node.style.setProperty('--ofp-control-surface', safeColor(component.surface, '#26313d'));
     node.style.setProperty('--ofp-control-text', safeColor(component.textColor, this.state.textColor));
     node.style.setProperty('--ofp-control-border', safeColor(component.borderColor, component.accent || this.state.accent));
+    node.style.setProperty('--ofp-padding', clamp(component.padding ?? 7, 0, 48) + 'px');
+    node.style.setProperty('--ofp-gap', clamp(component.gap ?? 5, 0, 32) + 'px');
+    node.style.setProperty('--ofp-radius', clamp(component.radius ?? 7, 0, 32) + 'px');
+    node.style.setProperty('--ofp-font-size', clamp(component.fontSize ?? 8, 6, 28) + 'px');
+    node.style.setProperty('--ofp-border-width', clamp(component.borderWidth ?? 1, 0, 6) + 'px');
+    node.dataset.shadow = ['none','soft','hard'].includes(component.shadow) ? component.shadow : 'soft';
     node.dataset.finish = component.finish || 'matte';
     node.classList.toggle('is-selected', this.selectedIds?.has(component.id) || component.id === this.selectedId);
     node.classList.toggle('is-locked', Boolean(component.locked));
@@ -828,7 +834,8 @@ export class FrontPanelEditor {
     const board = make('div', 'ofp-keyboard', node);
     const whiteSemitones = [0, 2, 4, 5, 7, 9, 11];
     const start = Number(component.startNote) || 48;
-    const whiteCount = 14;
+    const octaves = clamp(Math.round(component.octaves ?? 2), 1, 5);
+    const whiteCount = 7 * octaves;
     const whiteWidth = 100 / whiteCount;
     for (let index = 0; index < whiteCount; index += 1) {
       const octave = Math.floor(index / 7);
@@ -842,7 +849,7 @@ export class FrontPanelEditor {
     }
     const blackOffsets = [0.70, 1.72, 3.70, 4.72, 5.72];
     const blackSemitones = [1, 3, 6, 8, 10];
-    for (let octave = 0; octave < 2; octave += 1) {
+    for (let octave = 0; octave < octaves; octave += 1) {
       blackSemitones.forEach((semitone, index) => {
         const note = start + octave * 12 + semitone;
         const key = make('button', 'ofp-key ofp-key--black', board);
@@ -1002,7 +1009,7 @@ export class FrontPanelEditor {
     if (type === 'button') component.action = 'none';
     if (type === 'pad') component.note = 60;
     if (type === 'label' || type === 'section') component.text = label.toUpperCase();
-    if (type === 'keyboard') component.startNote = 48;
+    if (type === 'keyboard') { component.startNote = 48; component.octaves = 2; }
     if (type === 'screen' || type === 'oled') component.text = 'YOUR TEXT\nDISPLAY CONTENT';
     this.state.components.push(component);
     this.selectedId = component.id;
@@ -1163,10 +1170,22 @@ export class FrontPanelEditor {
     this.selectField('Visibility', component.hidden ? 'hidden' : 'visible', [['visible','Visible'],['hidden','Hidden']], (value) => { component.hidden = value === 'hidden'; this.render(); this.commit(); });
     this.selectField('Layer lock', component.locked ? 'locked' : 'unlocked', [['unlocked','Unlocked'],['locked','Locked']], (value) => { component.locked = value === 'locked'; this.render(); this.commit(); });
     this.inputField('Clearance / margin (' + this.state.unit + ')', this.unitValue(component.margin ?? 8), 'number', (value) => this.updateComponentProperty(component, 'margin', clamp(this.unitPixels(value), 0, 180)));
+    const surfaceMetrics = make('div', 'ofp-field-grid', this.inspectorBody);
+    this.inputField('Inner padding (px)', component.padding ?? 7, 'number', (value) => this.updateComponentProperty(component, 'padding', clamp(value, 0, 48)), surfaceMetrics);
+    this.inputField('Control gap (px)', component.gap ?? 5, 'number', (value) => this.updateComponentProperty(component, 'gap', clamp(value, 0, 32)), surfaceMetrics);
+    const visualMetrics = make('div', 'ofp-field-grid', this.inspectorBody);
+    this.inputField('Corner radius (px)', component.radius ?? 7, 'number', (value) => this.updateComponentProperty(component, 'radius', clamp(value, 0, 32)), visualMetrics);
+    this.inputField('Legend size (px)', component.fontSize ?? 8, 'number', (value) => this.updateComponentProperty(component, 'fontSize', clamp(value, 6, 28)), visualMetrics);
+    this.inputField('Border width (px)', component.borderWidth ?? 1, 'number', (value) => this.updateComponentProperty(component, 'borderWidth', clamp(value, 0, 6)), visualMetrics);
+    this.selectField('Shadow', component.shadow || 'soft', [['none','None'],['soft','Soft'],['hard','Hard']], (value) => this.updateComponentProperty(component, 'shadow', value));
     this.colorField('Legend colour', component.textColor || this.state.textColor, (value, commit) => { component.textColor = value; this.faceplate.querySelector('[data-component-id="' + component.id + '"]')?.style.setProperty('--ofp-control-text', value); if (commit) this.commit(); });
     this.colorField('Border colour', component.borderColor || component.accent || this.state.accent, (value, commit) => { component.borderColor = value; this.faceplate.querySelector('[data-component-id="' + component.id + '"]')?.style.setProperty('--ofp-control-border', value); if (commit) this.commit(); });
     if (component.type === 'pad') this.inputField('MIDI note', component.note ?? 60, 'number', (value) => { component.note = clamp(value, 0, 127); this.render(); this.commit(); });
-    if (component.type === 'keyboard') this.inputField('Starting MIDI note', component.startNote ?? 48, 'number', (value) => { component.startNote = clamp(value, 0, 96); this.render(); this.commit(); });
+    if (component.type === 'keyboard') {
+      this.inputField('Starting MIDI note', component.startNote ?? 48, 'number', (value) => { component.startNote = clamp(value, 0, 96); this.render(); this.commit(); });
+      this.inputField('Octave count', component.octaves ?? 2, 'number', (value) => { component.octaves = clamp(Math.round(value), 1, 5); this.render(); this.commit(); });
+    }
+    if (component.type === 'slider') this.selectField('Orientation', component.orientation || 'horizontal', [['horizontal','Horizontal'],['vertical','Vertical']], (value) => { component.orientation = value; this.render(); this.commit(); });
     if (component.type !== 'keyboard' && component.type !== 'pitchwheel' && component.type !== 'modwheel') {
       const duplicate = make('button', 'ofp-inspector-action', this.inspectorBody, 'DUPLICATE CONTROL');
       duplicate.type = 'button';
@@ -1397,7 +1416,7 @@ export class FrontPanelEditor {
         shape += rect(x+7,top-4,w-14,keyHeight+8,'#090d11','#080b0e',3);
         for(let index=0;index<whiteCount;index++) shape += rect(x+7+index*whiteW,top,whiteW-1,keyHeight,'#e9edf0','#8996a2',2);
         const blackOffsets=[.70,1.72,3.70,4.72,5.72], blackW=whiteW*.52;
-        for(let octave=0;octave<2;octave++) blackOffsets.forEach((offset)=>{shape+=rect(x+7+(octave*7+offset)*whiteW-blackW/2,top,blackW,keyHeight*.61,'#131a21','#05080b',2);});
+        for(let octave=0;octave<octaves;octave++) blackOffsets.forEach((offset)=>{shape+=rect(x+7+(octave*7+offset)*whiteW-blackW/2,top,blackW,keyHeight*.61,'#131a21','#05080b',2);});
       } else if (component.type === 'pitchwheel' || component.type === 'modwheel') {
         const ratio=valueRatio(component);
         shape += rect(cx-8,y+28,16,Math.max(15,h-48),'#0b1118','#6c7882',5);
