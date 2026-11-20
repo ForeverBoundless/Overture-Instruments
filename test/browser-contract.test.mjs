@@ -1013,7 +1013,7 @@ test('OMNI patch rename uses a theme-aware modal and patch tile entrance plays o
   assert.match(styles, /\.omni-patch-grid > \.omni-patch-card\.is-entering/);
   assert.match(launcher, /visibilitychange/);
   assert.match(page, /omni-launcher\.css\?v=20261118-rename-modal-blue-r2/);
-  assert.match(page, /omni-launcher\.js\?v=20261119-front-panel-r16/);
+  assert.match(page, /omni-launcher\.js\?v=20261119-front-panel-r18/);
   assert.match(worker, /overture-shell-v\d+/);
 });
 
