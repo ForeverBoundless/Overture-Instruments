@@ -258,7 +258,7 @@ test('Community library has an optional Supabase setup and owner-scoped schema m
   ]);
   assert.ok(page.includes('supabase-config.js'));
   assert.match(config, /anonKey/);
-  assert.equal(config.split('\\n').some((line) => line.trim().startsWith('service_role:')), false);
+  assert.equal(config.split('\n').some((line) => line.trim().startsWith('service_role:')), false);
   assert.match(client, /createClient/);
   assert.match(migration, /enable row level security/i);
   assert.match(migration, /get_community_patch_by_id/);
@@ -1004,16 +1004,16 @@ test('OMNI patch rename uses a theme-aware modal and patch tile entrance plays o
   assert.match(launcher, /Patch names must contain at least three characters/);
   assert.match(styles, /\.omni-rename-dialog::backdrop/);
   assert.match(styles, /omni-rename-accent:#7de4ff/);
-  assert.match(styles, /html\\[data-theme="light"\\]\\.omni-launcher-mode \\.omni-rename-dialog[\\s\\S]*omni-rename-accent:#087f9f/);
-  assert.match(styles, /omni-rename-dialog \\.omni-rename-actions \\.community-button--primary:hover/);
+  assert.match(styles, /html\[data-theme="light"\]\.omni-launcher-mode \.omni-rename-dialog[\s\S]*omni-rename-accent:#087f9f/);
+  assert.match(styles, /omni-rename-dialog \.omni-rename-actions \.community-button--primary:hover/);
 
-  assert.match(styles, /html\\[data-theme="light"\\]\\.omni-launcher-mode \\.omni-rename-dialog/);
+  assert.match(styles, /html\[data-theme="light"\]\.omni-launcher-mode \.omni-rename-dialog/);
   assert.match(launcher, /patchTileIntroPlayed/);
-  assert.match(launcher, /makePatchTile\\(item, playIntro = false\\)/);
-  assert.match(styles, /\\.omni-patch-grid > \\.omni-patch-card\\.is-entering/);
+  assert.match(launcher, /makePatchTile\(item, playIntro = false\)/);
+  assert.match(styles, /\.omni-patch-grid > \.omni-patch-card\.is-entering/);
   assert.match(launcher, /visibilitychange/);
-  assert.match(page, /omni-launcher\\.css\\?v=20261118-rename-modal-blue-r2/);
-  assert.match(page, /omni-launcher\\.js\\?v=20261119-front-panel-r2/);
+  assert.match(page, /omni-launcher\.css\?v=20261118-rename-modal-blue-r2/);
+  assert.match(page, /omni-launcher\.js\?v=20261119-front-panel-r2/);
   assert.match(worker, /overture-shell-v\d+/);
 });
 
