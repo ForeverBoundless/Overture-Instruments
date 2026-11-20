@@ -335,6 +335,7 @@ test('OMNI theme control is stable and front-panel code stays outside the engine
   assert.ok(theme.includes('toggle.nextSibling !== accountSlot'));
   assert.ok(theme.includes('parent.insertBefore(toggle, accountSlot);'));
   assert.ok(editor.includes("if (this.app.workspaceView !== 'front' && !this.previewFaceplate) return;"));
+  assert.ok(editor.includes("refreshModuleReferences() {\n    if (this.app.workspaceView !== 'front' && !this.previewFaceplate) return;"));
   assert.ok(css.includes('html[data-theme="light"] #omni-root .omni-view-switch'));
   assert.ok(css.includes('html[data-theme="light"] #omni-root dialog.ofp-preview-dialog'));
   assert.ok(css.includes('html[data-theme="light"] #omni-root .ofp-preview-dialog__stage'));
