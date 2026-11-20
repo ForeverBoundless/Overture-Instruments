@@ -56,11 +56,7 @@ export class FrontPanelEditor {
     this.selectedIds = new Set();
     this.dragState = null;
     const savedPanel = app.patch.frontPanel;
-    const legacyStarterLabels = ['INSTRUMENT','CUTOFF','RESONANCE','ATTACK','WAVEFORM','ALL NOTES OFF','OSCILLATOR','KEYBOARD  /  2 OCTAVES','PITCH','MOD','STATUS DISPLAY','AUDIO'];
-    const legacyStarterLayout = savedPanel?.components?.length === 12 &&
-      savedPanel.width === 1240 && savedPanel.height === 520 &&
-      legacyStarterLabels.every((label) => savedPanel.components.some((item) => String(item.label || '').toUpperCase() === label));
-    this.state = savedPanel && !legacyStarterLayout ? clone(savedPanel) : this.defaultLayout();
+    this.state = savedPanel && !this.isLegacyStarterLayout(savedPanel) ? clone(savedPanel) : this.defaultLayout();
     app.patch.frontPanel = this.state;
     this.build(root);
     this.render();
@@ -96,6 +92,54 @@ export class FrontPanelEditor {
       textColor: '#e7edf2',
       components: [],
     };
+  }
+
+    isLegacyStarterLayout(panel) {
+    if (!panel || panel.width !== 1240 || panel.height !== 520 || panel.finish !== 'brushed') return false;
+    if (panel.unit !== 'mm' || panel.zoom !== 1 || panel.safeMargin !== 24 || panel.gridSize !== 28) return false;
+    if (!panel.showRulers || !panel.showGrid || !panel.showGuides || !panel.showSmartGuides || !panel.showSafeMargin || !panel.snap) return false;
+    if (panel.panelColor !== '#252d35' || panel.panelBorderColor !== '#667583' || panel.panelBorderWidth !== 1 || panel.panelRadius !== 14) return false;
+    if (panel.accent !== '#ffb75e' || panel.textColor !== '#edf3fa' || !Array.isArray(panel.components) || panel.components.length !== 12) return false;
+    if (!Array.isArray(panel.guides) || panel.guides.length !== 2 || panel.measurements?.length) return false;
+    const expectedGuides = [{ axis: 'x', position: 620, color: '#7de4ff' }, { axis: 'y', position: 205, color: '#ffb75e' }];
+    if (!expectedGuides.every((guide, index) => {
+      const actual = panel.guides[index];
+      return actual && actual.axis === guide.axis && actual.position === guide.position && actual.color === guide.color;
+    })) return false;
+
+    const find = (type) => this.app.patch.modules.find((module) => module.type === type);
+    const filter = find('filter') || find('ladder');
+    const oscillator = find('oscillator');
+    const envelope = find('envelope');
+    const base = {
+      value: 0.5, accent: '#ffb75e', surface: '#26313d', textColor: '#edf3fa',
+      finish: 'matte', margin: 8, padding: 7, gap: 5, radius: 7, fontSize: 8,
+      borderWidth: 1, shadow: 'soft', orientation: 'horizontal', hidden: false, locked: false,
+    };
+    const expected = [
+      { type: 'screen', label: 'INSTRUMENT', x: 26, y: 22, w: 238, h: 76, text: 'OVERTURE  /  OMNI\nUSER-DESIGNED INSTRUMENT', surface: '#111b25', accent: '#7de4ff' },
+      { type: 'knob', label: 'CUTOFF', x: 296, y: 23, w: 112, h: 132, bind: filter ? { moduleId: filter.id, paramKey: 'cutoff' } : null },
+      { type: 'dial', label: 'RESONANCE', x: 422, y: 23, w: 112, h: 132, bind: filter ? { moduleId: filter.id, paramKey: 'resonance' } : null },
+      { type: 'slider', label: 'ATTACK', x: 554, y: 30, w: 74, h: 148, bind: envelope ? { moduleId: envelope.id, paramKey: 'attack' } : null },
+      { type: 'dropdown', label: 'WAVEFORM', x: 650, y: 38, w: 174, h: 54, bind: oscillator ? { moduleId: oscillator.id, paramKey: 'wave' } : null },
+      { type: 'button', label: 'ALL NOTES OFF', x: 856, y: 38, w: 142, h: 54, action: 'panic', accent: '#82e6a8' },
+      { type: 'module', label: 'OSCILLATOR', x: 1018, y: 24, w: 194, h: 88, bind: oscillator ? { moduleId: oscillator.id } : null },
+      { type: 'keyboard', label: 'KEYBOARD  /  2 OCTAVES', x: 26, y: 228, w: 720, h: 168, startNote: 48 },
+      { type: 'pitchwheel', label: 'PITCH', x: 772, y: 220, w: 94, h: 176 },
+      { type: 'modwheel', label: 'MOD', x: 882, y: 220, w: 94, h: 176 },
+      { type: 'oled', label: 'STATUS DISPLAY', x: 1000, y: 220, w: 212, h: 106, text: 'READY\nPATCH DESIGNER', surface: '#071218', accent: '#7de4ff' },
+      { type: 'led', label: 'AUDIO', x: 1030, y: 352, w: 154, h: 42, accent: '#82e6a8' },
+    ];
+    const fields = ['type','label','x','y','w','h','value','accent','surface','textColor','finish','margin','padding','gap','radius','fontSize','borderWidth','shadow','orientation','hidden','locked','bind','action','text','startNote','octaves'];
+    return expected.every((defaults, index) => {
+      const actual = panel.components[index];
+      const signature = { ...base, ...defaults };
+      return fields.every((field) => {
+        const left = Object.prototype.hasOwnProperty.call(signature, field) ? signature[field] : undefined;
+        const right = Object.prototype.hasOwnProperty.call(actual, field) ? actual[field] : undefined;
+        return JSON.stringify(left) === JSON.stringify(right);
+      });
+    });
   }
 
     build(root) {
@@ -1891,7 +1935,7 @@ export class FrontPanelEditor {
   }
 
   setPatch(patch = this.app.patch) {
-    this.state = patch.frontPanel ? clone(patch.frontPanel) : this.defaultLayout();
+    this.state = patch.frontPanel && !this.isLegacyStarterLayout(patch.frontPanel) ? clone(patch.frontPanel) : this.defaultLayout();
     patch.frontPanel = this.state;
     this.selectedId = null;
     this.selectedIds?.clear();
