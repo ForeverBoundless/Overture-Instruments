@@ -825,7 +825,8 @@ export class FrontPanelEditor {
       }
       if (component.locked) { this.select(component.id, event.shiftKey || event.ctrlKey || event.metaKey); return; }
       event.preventDefault();
-      this.select(component.id, event.shiftKey || event.ctrlKey || event.metaKey);
+      const multi = event.shiftKey || event.ctrlKey || event.metaKey;
+      if (multi || !this.selectedIds?.has(component.id)) this.select(component.id, multi);
       const scale = this.currentScale || 1;
       const startX = event.clientX, startY = event.clientY;
       const moving = this.selectedIds?.has(component.id)
@@ -1166,7 +1167,11 @@ export class FrontPanelEditor {
 
   refreshValues() {
     this.state.components.forEach((component) => {
-      if (['knob','dial','encoder','slider','pitchwheel','modwheel','meter','switch'].includes(component.type)) {
+      if (component.type === 'switch' || component.type === 'meter') {
+        this.updateComponentVisual(component, null, this.getValue(component));
+        return;
+      }
+      if (['knob','dial','encoder','slider','pitchwheel','modwheel'].includes(component.type)) {
         const node = this.faceplate.querySelector('[data-component-id="' + component.id + '"]');
         const input = node?.querySelector('input[type="range"]');
         if (!input) return;
