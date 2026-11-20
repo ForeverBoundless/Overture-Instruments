@@ -340,6 +340,8 @@ test('OMNI front-panel workspaces and precision design tools are integrated', as
   assert.match(source, /workspaceView: this\.workspaceView/);
   assert.match(source, /this\.frontPanelEditor\?\.setPatch/);
   assert.match(editor, /buildDesignTools/);
+  assert.match(editor, /text\/omni-front-component/);
+  assert.match(editor, /addComponent\(type, x = null, y = null\)/);
   assert.match(editor, /buildLayerPanel/);
   assert.match(editor, /renderRulers/);
   assert.match(editor, /beginMeasurement/);
