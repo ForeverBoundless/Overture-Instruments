@@ -788,7 +788,7 @@ async function bootLauncher() {
 }
 
 if (isEditor) {
-  import('./omni.js?v=20261118-template-organ-layout-r1');
+  import('./omni.js?v=20261119-front-panel-r2');
 } else {
   void bootLauncher();
 }
