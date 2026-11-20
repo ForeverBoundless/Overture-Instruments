@@ -301,7 +301,7 @@ test('OMNI exposes native SEM and Mellotron instrument modules and refreshes off
 
 
 test('every OMNI module has a complete technical reference and the inspector can open it', async () => {
-  const [catalogue, references, app, page, styles, worker, contributorGuide] = await Promise.all([
+  const [catalogue, references, app, page, styles, worker, contributorGuide, readme, userGuide] = await Promise.all([
     import('../js/omni/modules.js'),
     import('../js/omni/moduleInfo.js'),
     readFile(new URL('../js/omni.js', import.meta.url), 'utf8'),
@@ -309,6 +309,8 @@ test('every OMNI module has a complete technical reference and the inspector can
     readFile(new URL('../css/omni-info.css', import.meta.url), 'utf8'),
     readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
     readFile(new URL('../CONTRIBUTING.md', import.meta.url), 'utf8'),
+    readFile(new URL('../README.md', import.meta.url), 'utf8'),
+    readFile(new URL('../omni/documentation.html', import.meta.url), 'utf8'),
   ]);
   assert.equal(references.assertModuleInfoCoverage(catalogue.MODULES), true);
   assert.deepEqual(Object.keys(references.MODULE_INFO).sort(), Object.keys(catalogue.MODULES).sort());
@@ -331,8 +333,21 @@ test('every OMNI module has a complete technical reference and the inspector can
   assert.match(worker, /omni-info\.css\?v=20261114-info-type/);
   assert.match(worker, /moduleInfo\.js\?v=20261117-omni-module-expansion-r3/);
   assert.match(contributorGuide, /every module must also have a complete entry in `js\/omni\/moduleInfo\.js`/);
+  assert.match(contributorGuide, /Every new or changed user-facing OMNI feature must include a documentation update in the same pull request/);
+  assert.match(contributorGuide, /omni\\/documentation\\.html/);
+  assert.ok(readme.includes(`**${Object.keys(catalogue.MODULES).length} module types**`));
+  assert.ok(userGuide.includes(`${Object.keys(catalogue.MODULES).length} module types`));
+  assert.ok(readme.includes('https://overture-instruments.vercel.app/omni/documentation'));
 });
 
+
+
+test('OMNI workspace tabs use the site-wide Inter typeface', async () => {
+  const css = await readFile(new URL('../css/omni.css', import.meta.url), 'utf8');
+  const rule = css.match(/\.omni-view-switch__button\\s*\\{[^}]*\\}/)?.[0] || '';
+  assert.ok(rule.includes("font:600 9px/1 'Inter Variable','Inter','Segoe UI',sans-serif"));
+  assert.doesNotMatch(rule, /var\\(--font-mono\\)/);
+});
 
 test('OMNI dependency import order matches the destructured module bindings', async () => {
   const source = await readFile(new URL('../js/omni.js', import.meta.url), 'utf8');
