@@ -327,6 +327,11 @@ export class FrontPanelEditor {
     this.bindEditorShortcuts();
 
     this.inspector = make('aside', 'ofp-inspector', this.workspace);
+    document.addEventListener('pointerdown', (event) => {
+      this.el.querySelectorAll('.ofp-toolbar-menu[open],.ofp-tool-group[open]').forEach((menu) => {
+        if (!menu.contains(event.target)) menu.open = false;
+      });
+    }, true);
     this.renderInspector();
   }
   buildDesignTools() {
