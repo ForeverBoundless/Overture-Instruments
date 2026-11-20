@@ -1757,7 +1757,7 @@ html[data-theme="light"] #omni-root .omni-organ-drawbar__value {color:#087f9f}
 .ofp-textarea{resize:vertical}.ofp-color{width:100%;height:31px;border:1px solid var(--omni-border-strong);border-radius:5px;background:transparent}
 .ofp-field-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .ofp-inspector-action{width:100%}.ofp-inspector-action--danger{color:#ff9b92;border-color:rgba(255,100,90,.3)}
-.ofp-layer-panel{display:grid;gap:6px;margin-top:20px;padding-top:13px;border-top:1px solid var(--omni-border)}
+.ofp-layers-panel{display:grid;gap:6px;margin-top:20px;padding-top:13px;border-top:1px solid var(--omni-border)}
 .ofp-layers-list{display:grid;gap:3px}
 .ofp-layer-row{display:flex;align-items:center;gap:2px;min-width:0;padding:3px;border:1px solid transparent;border-radius:5px;background:rgba(255,255,255,.018)}
 .ofp-layer-row.is-selected{border-color:rgba(125,228,255,.42);background:rgba(125,228,255,.07)}
@@ -1785,3 +1785,6 @@ html[data-theme="light"] #omni-root .ofp-component[data-finish="ivory"]{color:#2
 @media(max-width:1250px){.ofp-workspace{grid-template-columns:184px minmax(0,1fr) 244px}.ofp-library,.ofp-inspector{padding:12px 9px}.ofp-tool-toggle{font-size:7px;padding-inline:5px}}
 @media(max-width:900px){.ofp-workspace{grid-template-columns:152px minmax(0,1fr)}.ofp-inspector{position:absolute;right:9px;top:150px;bottom:45px;z-index:8;width:240px;border:1px solid var(--omni-border);border-radius:9px;box-shadow:var(--omni-shadow)}}
 @media(max-width:600px){.omni-topbar{flex-wrap:wrap}.omni-view-switch{order:5;width:100%}.omni-view-switch__button{flex:1}.ofp-toolbar{align-items:flex-start;flex-direction:column}.ofp-workspace{grid-template-columns:118px minmax(0,1fr)}.ofp-library{padding:9px 6px}.ofp-library-item{font-size:8px;padding:5px}.ofp-library-item__glyph{width:14px}.ofp-inspector{top:188px;right:6px;width:min(205px,60vw)}.ofp-stage-panel{padding:7px}.ofp-stage-foot{flex-wrap:wrap;font-size:6px}.ofp-align-tools{display:none}.ofp-design-tools{flex-wrap:nowrap;overflow:auto;max-width:100%}.ofp-tool-toggle{flex:0 0 auto}}
+
+#omni-root .ofp-component[hidden]{display:none!important}
+#omni-root .ofp-component::after{border-color:rgba(125,228,255,.14)}
