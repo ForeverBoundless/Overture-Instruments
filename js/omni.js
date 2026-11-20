@@ -288,8 +288,12 @@ class OmniApp {
       ['Toggle rulers', () => this.frontPanelEditor?.toggleViewSetting('showRulers')],
       ['Toggle grid', () => this.frontPanelEditor?.toggleViewSetting('showGrid')],
       ['Toggle guides', () => this.frontPanelEditor?.toggleViewSetting('showGuides')],
+      ['Toggle smart guides', () => this.frontPanelEditor?.toggleViewSetting('showSmartGuides')],
       ['Toggle safe area', () => this.frontPanelEditor?.toggleViewSetting('showSafeMargin')],
       ['Toggle snapping', () => this.frontPanelEditor?.toggleViewSetting('snap')],
+      ['Measure distance', () => this.frontPanelEditor?.toggleMeasureTool()],
+      ['Add vertical guide', () => this.frontPanelEditor?.startGuide('x')],
+      ['Add horizontal guide', () => this.frontPanelEditor?.startGuide('y')],
       ['Preview front panel', () => this.frontPanelEditor?.openPreview()],
     ];
     panelViewItems.forEach(([label, fn]) => {
