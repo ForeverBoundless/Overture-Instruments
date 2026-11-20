@@ -2362,3 +2362,40 @@ html[data-theme="light"] #omni-root .ofp-keyboard__front-lip {background:linear-
 #omni-root dialog.ofp-guide-dialog {z-index:1000}
 #omni-root .ofp-preview-dialog__stage {background:radial-gradient(ellipse at center,rgba(125,228,255,.06),transparent 66%),#090e14}
 html[data-theme="light"] #omni-root .ofp-preview-dialog__stage {background:radial-gradient(ellipse at center,rgba(8,127,159,.06),transparent 66%),#edf2f6}
+
+
+/* Material palette controls */
+#omni-root .ofp-material-presets {display:grid;gap:7px;margin:0 0 2px}
+#omni-root .ofp-material-presets__grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+#omni-root .ofp-material-preset {
+  display:grid;gap:6px;min-width:0;padding:7px;border:1px solid var(--omni-border);border-radius:7px;
+  color:var(--omni-muted);background:linear-gradient(145deg,rgba(255,255,255,.04),rgba(0,0,0,.08)),var(--omni-panel-soft);
+  text-align:left;cursor:pointer;transition:border-color .16s ease,transform .16s ease;
+}
+#omni-root .ofp-material-preset:hover {transform:translateY(-1px);border-color:rgba(125,228,255,.45)}
+#omni-root .ofp-material-preset__chips {display:flex;gap:3px;height:17px;overflow:hidden;border:1px solid rgba(255,255,255,.12);border-radius:4px}
+#omni-root .ofp-material-preset__chips>span {flex:1;min-width:0;border-right:1px solid rgba(0,0,0,.18)}
+#omni-root .ofp-material-preset__label {overflow:hidden;font:8px/1.2 var(--font-body);text-overflow:ellipsis;white-space:nowrap}
+html[data-theme="light"] #omni-root .ofp-material-preset {color:#506479;border-color:rgba(43,59,78,.13);background:linear-gradient(145deg,#fff,#e9eff4)}
+html[data-theme="light"] #omni-root .ofp-material-preset:hover {border-color:rgba(8,127,159,.42)}
+
+/* Canvas empty state and hardware binding are understated and functional. */
+#omni-root .ofp-empty-state__action:focus-visible,
+#omni-root .ofp-material-preset:focus-visible {outline:2px solid var(--cyan);outline-offset:2px}
+#omni-root .ofp-component--button .ofp-hardware-button.is-bound {border-color:var(--ofp-control-accent);box-shadow:0 0 0 1px color-mix(in srgb,var(--ofp-control-accent) 28%,transparent),0 3px 0 rgba(0,0,0,.48),inset 0 1px rgba(255,255,255,.24)}
+#omni-root .ofp-component--button .ofp-hardware-button:active {transform:translateY(2px)}
+html[data-theme="light"] #omni-root .ofp-component__title {text-shadow:none}
+
+/* A front panel should feel like a faceplate, not a generic card grid. */
+#omni-root .ofp-faceplate {
+  box-shadow:0 24px 50px rgba(0,0,0,.4),inset 0 1px rgba(255,255,255,.18),inset 0 -1px rgba(0,0,0,.45);
+}
+#omni-root .ofp-faceplate[data-finish="anodized"] {border-color:#56616a}
+#omni-root .ofp-faceplate[data-finish="brushed"] {border-color:#a3adb3}
+#omni-root .ofp-faceplate[data-finish="walnut"] {border-color:#69452f}
+#omni-root .ofp-faceplate[data-finish="ivory"] {border-color:#b9b09c}
+#omni-root .ofp-component__value {font-variant-numeric:tabular-nums}
+#omni-root .ofp-component--encoder .ofp-component__value {color:#7de4ff}
+
+/* Status stays at the far right in both engine and front-end workspace modes. */
+#omni-root .omni-status--command {text-align:right!important;justify-content:flex-end!important}
