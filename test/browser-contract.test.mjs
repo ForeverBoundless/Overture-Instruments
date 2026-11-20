@@ -1091,5 +1091,5 @@ test('OMNI organ starter templates expand their layout and preview to fit the dr
   assert.ok(launcher.includes('omni.js?v=20261119-front-panel-r2'));
   assert.ok(page.includes('omni-launcher.js?v=20261119-front-panel-r2'));
   assert.match(worker, /overture-shell-v\\d+/);
-  assert.ok(worker.includes('templates.js?v=20261118-template-organ-layout-r1'));
+  assert.ok(worker.includes('templates.js?v=20261119-front-panel-r2'));
 });
