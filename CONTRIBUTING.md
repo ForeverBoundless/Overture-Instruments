@@ -18,6 +18,19 @@ The automated suite cannot verify physical MIDI devices, microphone permissions,
 
 ## Working on OMNI
 
+### Documentation is part of every OMNI change
+
+**Every new or changed user-facing OMNI feature must include a documentation update in the same pull request.** Do not leave documentation as a later task. This applies to new modules, controls, parameters, routing behaviour, editor tools, performance/MIDI behaviour, recording, macros, patch storage, import/export formats, shortcuts, workflows, limitations and meaningful interface changes.
+
+The public, section-by-section guide is maintained in `omni/documentation.html`, with its page styles in `css/omni-documentation.css`. Update the relevant section when behaviour changes, add a section and matching navigation link when a new topic needs one, and keep examples and button/menu names aligned with the current interface. Describe what the shipped code does today; do not present planned or partially implemented work as available.
+
+Also update the supporting documentation when relevant:
+- Add or revise the module's four-field technical reference in `js/omni/moduleInfo.js` whenever a module is added, renamed or its behaviour changes.
+- Update `docs/FRONT-PANEL-STUDIO.md` when the front-panel editor's workflow, controls, data format, preview, validation or export behaviour changes.
+- Update the OMNI section and documentation links in `README.md` when the catalogue, scope or major capabilities change.
+
+Documentation changes belong in the same commit series as the implementation and its regression tests. Review the rendered page in both light and dark themes when its layout or styling changes.
+
 Module definitions live in `js/omni/modules.js`; every module must also have a complete entry in `js/omni/moduleInfo.js` containing four substantive fields: `summary`, `circuit`, `use`, and `implementation`. The inspector's information dialog presents these references to users, so they are product documentation as well as source data. Explain real hardware accurately, distinguish historical circuit designs where relevant, and label digital models and approximations as such. Do not describe a Web Audio or worklet implementation as though it were a physical circuit.
 
 `omni.js` validates the reference catalogue against the module registry at startup, and the module-reference test checks that every registered module has all four fields. Add or revise the reference in the same change whenever you add or rename a module. Instrument-derived modules should reuse the relevant Overture engine or worklet where appropriate and state clearly what is reused and what is modelled.
