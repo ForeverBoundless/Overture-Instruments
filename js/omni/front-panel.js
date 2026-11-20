@@ -1005,7 +1005,7 @@ export class FrontPanelEditor {
       y: clamp(24 + (count % 4) * 30, 0, this.state.height - size[1]),
       w: size[0], h: size[1], value: 0.5,
       accent: this.state.accent, surface: '#26313d', textColor: this.state.textColor,
-      finish: this.state.finish, margin: 8, hidden: false, locked: false,
+      finish: this.state.finish, margin: 8, padding: 7, gap: 5, radius: 7, fontSize: 8, borderWidth: 1, shadow: 'soft', orientation: 'horizontal', hidden: false, locked: false,
     };
     if (type === 'button') component.action = 'none';
     if (type === 'pad') component.note = 60;
