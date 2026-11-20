@@ -251,8 +251,8 @@ export class FrontPanelEditor {
     this.verticalRuler = make('div', 'ofp-ruler ofp-ruler--vertical', this.viewportRow);
     this.viewportRow.appendChild(this.viewport);
     this.stageFoot = make('div', 'ofp-stage-foot', this.stagePanel);
-    make('span', '', this.stageFoot, 'DRAG TO POSITION');
-    make('span', '', this.stageFoot, 'SELECT A CONTROL TO EDIT');
+    make('span', '', this.stageFoot, 'DRAG CONTROLS TO POSITION');
+    make('span', '', this.stageFoot, 'SPACE+DRAG / MIDDLE-DRAG TO PAN');
     make('span', '', this.stageFoot, 'PATCH-BINDABLE CONTROLS UPDATE THE ENGINE');
     this.bindViewportNavigation();
     this.buildDesignTools();
@@ -287,6 +287,11 @@ export class FrontPanelEditor {
     toggle(view, 'Grid', 'showGrid', 'Show or hide the layout grid');
     toggle(view, 'Safe area', 'showSafeMargin', 'Show or hide the safe margin');
     toggle(view, 'Snap', 'snap', 'Snap components to grid and alignment targets');
+    this.panModeButton = button(view, 'Pan tool', 'Drag the workspace without selecting or moving controls', () => {
+      this.panMode = !this.panMode;
+      this.panModeButton.setAttribute('aria-pressed', String(this.panMode));
+      this.viewport.classList.toggle('is-pan-tool', this.panMode);
+    }, this.panMode);
     button(view, '−', 'Zoom out', () => this.zoomBy(.8));
     button(view, '+', 'Zoom in', () => this.zoomBy(1.25));
     button(view, 'Fit', 'Fit the faceplate in the workspace', () => this.fitToViewport());
@@ -385,7 +390,7 @@ export class FrontPanelEditor {
     viewport.addEventListener('pointerdown', (event) => {
       if (event.button !== 0 && event.button !== 1) return;
       const overComponent = event.target.closest?.('.ofp-component');
-      if (overComponent && !this.spacePressed && event.button !== 1) return;
+      if (overComponent && !this.spacePressed && !this.panMode && event.button !== 1) return;
       if (this.tool === 'measure' || this.pendingGuideAxis) return;
       if (event.target.closest?.('button,input,select,textarea')) return;
       event.preventDefault();
@@ -394,7 +399,7 @@ export class FrontPanelEditor {
       const startY = event.clientY;
       const scrollLeft = viewport.scrollLeft;
       const scrollTop = viewport.scrollTop;
-      const pan = { pointerId: event.pointerId, startX, startY, scrollLeft, scrollTop, target, moved: false, clickToClear: !overComponent && event.button === 0 };
+      const pan = { pointerId: event.pointerId, startX, startY, scrollLeft, scrollTop, target, moved: false, clickToClear: !overComponent && event.button === 0 && !this.panMode };
       this.panState = pan;
       viewport.classList.add('is-panning');
       try { viewport.setPointerCapture(event.pointerId); } catch { /* optional pointer capture */ }
@@ -1265,7 +1270,7 @@ export class FrontPanelEditor {
 
   bindComponentDrag(node, component) {
     node.addEventListener('pointerdown', (event) => {
-      if (this.testMode || this.panState || this.spacePressed || event.button === 1) return;
+      if (this.testMode || this.panState || this.spacePressed || this.panMode || event.button === 1) return;
       if (event.target.closest('input,select,button,textarea,a') || event.target.closest('.ofp-component__resize')) {
         this.select(component.id, event.shiftKey || event.ctrlKey || event.metaKey);
         return;
