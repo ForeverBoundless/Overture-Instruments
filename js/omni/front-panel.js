@@ -296,21 +296,23 @@ export class FrontPanelEditor {
   zoomBy(factor, clientX = null, clientY = null) {
     const viewport = this.viewport;
     if (!viewport) return;
-    const rect = viewport.getBoundingClientRect();
-    const anchorX = Number.isFinite(clientX) ? clientX : rect.left + rect.width / 2;
-    const anchorY = Number.isFinite(clientY) ? clientY : rect.top + rect.height / 2;
-    const before = this.currentScale || 1;
-    const panelX = (viewport.scrollLeft + anchorX - rect.left) / before;
-    const panelY = (viewport.scrollTop + anchorY - rect.top) / before;
+    const viewportRect = viewport.getBoundingClientRect();
+    const faceplateRect = this.faceplate.getBoundingClientRect();
+    const anchorX = Number.isFinite(clientX) ? clientX : viewportRect.left + viewportRect.width / 2;
+    const anchorY = Number.isFinite(clientY) ? clientY : viewportRect.top + viewportRect.height / 2;
+    const pointX = (anchorX - faceplateRect.left) / (this.currentScale || 1);
+    const pointY = (anchorY - faceplateRect.top) / (this.currentScale || 1);
     this.state.zoom = clamp((this.state.zoom || 1) * factor, .25, 4);
     this.scaleFaceplate();
-    const after = this.currentScale || 1;
-    viewport.scrollLeft = Math.max(0, panelX * after - (anchorX - rect.left));
-    viewport.scrollTop = Math.max(0, panelY * after - (anchorY - rect.top));
+    const nextRect = this.faceplate.getBoundingClientRect();
+    const nextX = nextRect.left + pointX * this.currentScale;
+    const nextY = nextRect.top + pointY * this.currentScale;
+    viewport.scrollLeft += nextX - anchorX;
+    viewport.scrollTop += nextY - anchorY;
     this.commit();
   }
 
-  bindViewportNavigation() {
+    bindViewportNavigation() {
     const viewport = this.viewport;
     if (!viewport) return;
     const isEditable = (target) => target?.closest?.('input,textarea,select,[contenteditable="true"]');
@@ -340,6 +342,7 @@ export class FrontPanelEditor {
       if (event.button !== 0 && event.button !== 1) return;
       const overComponent = event.target.closest?.('.ofp-component');
       if (overComponent && !this.spacePressed && event.button !== 1) return;
+      if (this.tool === 'measure' || this.pendingGuideAxis) return;
       if (event.target.closest?.('button,input,select,textarea')) return;
       event.preventDefault();
       const target = event.target;
@@ -1147,8 +1150,8 @@ export class FrontPanelEditor {
     make('span', 'ofp-keyboard__model', rearRail, 'PERFORMANCE KEYBED');
     const keywell = make('div', 'ofp-keyboard__keywell', board);
     const keys = make('div', 'ofp-keyboard__keys', keywell);
-    const start = Math.round(Number(component.startNote ?? 48) / 12) * 12;
     const octaves = clamp(Math.round(component.octaves ?? 2), 1, 5);
+    const start = clamp(Math.round(Number(component.startNote ?? 48) / 12) * 12, 0, 127 - 12 * octaves);
     const whiteSemitones = [0, 2, 4, 5, 7, 9, 11];
     const whiteCount = 7 * octaves;
     const whiteWidth = 100 / whiteCount;
@@ -1218,7 +1221,7 @@ export class FrontPanelEditor {
 
   bindComponentDrag(node, component) {
     node.addEventListener('pointerdown', (event) => {
-      if (this.testMode) return;
+      if (this.testMode || this.panState || this.spacePressed || event.button === 1) return;
       if (event.target.closest('input,select,button,textarea,a') || event.target.closest('.ofp-component__resize')) {
         this.select(component.id, event.shiftKey || event.ctrlKey || event.metaKey);
         return;
@@ -1457,8 +1460,8 @@ export class FrontPanelEditor {
     this.inputField('Height (' + this.state.unit + ')', this.unitValue(component.h), 'number', (value) => this.updateComponentProperty(component, 'h', clamp(this.unitPixels(value), 42, Math.min(440, this.state.height - component.y))), dimensions);
     this.inputField('Clearance / margin (' + this.state.unit + ')', this.unitValue(component.margin ?? 8), 'number', (value) => this.updateComponentProperty(component, 'margin', clamp(this.unitPixels(value), 0, 180)));
     if (component.type === 'keyboard') {
-      this.inputField('Starting C MIDI note', component.startNote ?? 48, 'number', (value) => { component.startNote = clamp(Math.round(value / 12) * 12, 0, 108); this.render(); this.commit(); });
-      this.inputField('Octaves', component.octaves ?? 2, 'number', (value) => { component.octaves = clamp(Math.round(value), 1, 5); this.render(); this.commit(); });
+      this.inputField('Starting C MIDI note', component.startNote ?? 48, 'number', (value) => { component.startNote = clamp(Math.round(value / 12) * 12, 0, 127 - 12 * (component.octaves ?? 2)); this.render(); this.commit(); });
+      this.inputField('Octaves', component.octaves ?? 2, 'number', (value) => { component.octaves = clamp(Math.round(value), 1, 5); component.startNote = clamp(Math.round((component.startNote ?? 48) / 12) * 12, 0, 127 - 12 * component.octaves); this.render(); this.commit(); });
     }
     if (component.type === 'slider') this.selectField('Orientation', component.orientation || 'horizontal', [['horizontal','Horizontal'],['vertical','Vertical']], (value) => { component.orientation = value; this.render(); this.commit(); });
     this.selectField('Visibility', component.hidden ? 'hidden' : 'visible', [['visible','Visible'],['hidden','Hidden']], (value) => { component.hidden = value === 'hidden'; this.render(); this.commit(); });
