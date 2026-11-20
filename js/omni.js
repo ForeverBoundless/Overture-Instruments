@@ -156,6 +156,7 @@ class OmniApp {
   _build() {
     const root = document.getElementById('omni-root');
     const bar = el('header', 'omni-app-header', root);
+    this.appHeader = bar;
     const topbar = el('div', 'omni-topbar', bar);
     const brand = el('div', 'omni-logo', topbar);
     brand.innerHTML = '<a class="omni-logo-mark" href="/omni" title="Back to Overture OMNI"><img src="/ui/Logos/OvertureLogo.png" alt="Overture"></a><span class="omni-logo-wording"><strong>OMNI</strong></span>';
@@ -638,6 +639,7 @@ class OmniApp {
   setWorkspaceView(view, announce = true) {
     if (!['engine','front'].includes(view)) return;
     this.workspaceView = view;
+    this.appHeader?.classList.toggle('is-front-view', view === 'front');
     this.main.hidden = view === 'front';
     this.frontPanelEditor.el.hidden = view !== 'front';
     this.performancePane.hidden = view === 'front' || !this.performanceVisible;
