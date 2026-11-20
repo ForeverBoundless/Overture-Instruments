@@ -495,3 +495,22 @@ test('OMNI front-panel validation remains backwards-compatible and sanitizes imp
   assert.equal(zeroValues.frontPanel.components[0].startNote, 0);
   assert.equal(zeroValues.frontPanel.components[1].note, 0);
 });
+
+test('OMNI front-panel studio parses and keeps its canvas-first editing layout', async () => {
+  const [editor, css] = await Promise.all([
+    readFile(new URL('../js/omni/front-panel.js', import.meta.url), 'utf8'),
+    readFile(new URL('../css/omni.css', import.meta.url), 'utf8'),
+  ]);
+  const editorPath = fileURLToPath(new URL('../js/omni/front-panel.js', import.meta.url));
+  execFileSync(process.execPath, ['--check', editorPath], { stdio: 'pipe' });
+
+  assert.match(editor, /this\.addRailButton = railButton/);
+  assert.match(editor, /this\.layersRailButton = railButton/);
+  assert.match(editor, /this\.panelSettingsButton = railButton/);
+  assert.match(editor, /this\.inspector\.hidden = !this\.inspectorOpen/);
+  assert.match(editor, /showRulers: false/);
+  assert.match(editor, /showGrid: false/);
+  assert.match(css, /grid-template-columns:52px 0 minmax\(0,1fr\) 0/);
+  assert.match(css, /\.ofp-workspace\.is-library-open \{grid-template-columns:52px 226px/);
+  assert.match(css, /\.ofp-workspace\.is-inspector-open \{grid-template-columns:52px 0 minmax\(0,1fr\) 286px/);
+});
