@@ -311,9 +311,9 @@ class OmniApp {
     panelGuide.classList.add('omni-front-only-command');
     const designCheck = action(helpMenu, 'Run front-panel design check', () => this.frontPanelEditor?.runDesignCheck(), 'Check spacing, bounds, labels and parameter bindings');
     designCheck.classList.add('omni-front-only-command');
-    const midiMapButton = tb('MIDI MAP', () => document.querySelector('.oi-midi-tab')?.click(), 'Open MIDI assignments', commandbar);
-    midiMapButton.classList.add('omni-midi-map-button');
-    midiMapButton.setAttribute('aria-label', 'Open MIDI assignments');
+    this.midiMapButton = tb('MIDI MAP', () => document.querySelector('.oi-midi-tab')?.click(), 'Open MIDI assignments', commandbar);
+    this.midiMapButton.classList.add('omni-midi-map-button');
+    this.midiMapButton.setAttribute('aria-label', 'Open MIDI assignments');
     const frontOnlyGroup = (label) => {
       const menu = group(label);
       menu.details.classList.add('omni-menu--front-only');
@@ -357,6 +357,7 @@ class OmniApp {
     frontAction(exportMenu,'Export editable layout · JSON',()=>this.frontPanelEditor?.exportJSON());
     frontAction(exportMenu,'Print sheet / Save as PDF',()=>this.frontPanelEditor?.printPDF());
     this.frontPanelCommandMenus = [insertMenu.details,arrangeMenu.details,inspectMenu.details,exportMenu.details];
+    this.frontPanelCommandMenus.forEach((menu) => commandbar.insertBefore(menu, audioMenu.details));
 
     this.commandbar = commandbar;
     this.menuDetails = [...commandbar.querySelectorAll('.omni-menu')];
@@ -644,6 +645,7 @@ class OmniApp {
     this.frontViewButton.setAttribute('aria-pressed', String(view === 'front'));
     this.commandbar?.querySelectorAll('.omni-front-only-command').forEach((item) => { item.hidden = view !== 'front'; });
     this.commandbar?.querySelectorAll('.omni-menu--front-only').forEach((item) => { item.hidden = view !== 'front'; });
+    if (this.midiMapButton) this.midiMapButton.hidden = view === 'front';
     this.persistWorkspace();
     if (view === 'engine') requestAnimationFrame(() => { this.applyView(); this.renderWires(); });
     else requestAnimationFrame(() => this.frontPanelEditor.scaleFaceplate());
