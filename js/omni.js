@@ -269,6 +269,10 @@ class OmniApp {
     deletePanel.classList.add('omni-front-only-command','omni-menu__item--danger');
     const selectAllPanel = action(editMenu, 'Select all front-panel controls', () => this.frontPanelEditor?.selectAllComponents(), 'Select every visible front-panel control');
     selectAllPanel.classList.add('omni-front-only-command');
+    const clearPanel = action(editMenu, 'Clear front-panel layout…', () => {
+      if (confirm('Clear the faceplate and start with an empty layout?')) this.frontPanelEditor?.clearLayout();
+    }, 'Remove all controls from the faceplate', 'omni-menu__item--danger');
+    clearPanel.classList.add('omni-front-only-command');
 
     const viewMenu = group('View');
     action(viewMenu, 'Zoom in', () => this.zoom(1.25), 'Zoom in');
