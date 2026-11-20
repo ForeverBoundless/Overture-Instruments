@@ -379,10 +379,10 @@ test('OMNI front-panel workspaces and precision design tools are integrated', as
   assert.match(editor, /isLegacyStarterLayout/);
   assert.match(source, /this\.midiMapButton\.hidden = view === 'front'/);
   assert.match(source, /frontPanelCommandMenus\.forEach/);
-  assert.match(source, /\\['Calibrated dial','dial'\\]/);
+  assert.match(source, /\['Calibrated dial','dial'\]/);
   assert.match(theme, /accountSlot/);
-  assert.match(css, /\\.ofp-dial__face/);
-  assert.match(css, /\\.ofp-stage-zoom-button/);
+  assert.match(css, /\.ofp-dial__face/);
+  assert.match(css, /\.ofp-stage-zoom-button/);
   assert.match(css, /text-align:right!important/);
   assert.match(editor, /\['dial', 'Dial', 'CONTROLS'\]/);
   assert.match(editor, /ofp-dial__needle/);
