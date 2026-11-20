@@ -140,9 +140,14 @@ export class FrontPanelEditor {
       }
       const button = make('button', 'ofp-library-item', groups[category]);
       button.type = 'button';
+      button.draggable = true;
       make('span', 'ofp-library-item__glyph', button, this.glyph(type));
       make('span', '', button, label);
       button.addEventListener('click', () => this.addComponent(type));
+      button.addEventListener('dragstart', (event) => {
+        event.dataTransfer.setData('text/omni-front-component', type);
+        event.dataTransfer.effectAllowed = 'copy';
+      });
     });
 
     this.stagePanel = make('section', 'ofp-stage-panel', this.workspace);
@@ -159,6 +164,20 @@ export class FrontPanelEditor {
       if (this.pendingGuideAxis) { this.placeGuide(event); return; }
       if (event.target === this.faceplate || event.target === this.stage) this.select(null);
     }, true);
+    this.faceplate.addEventListener('dragover', (event) => {
+      if (event.dataTransfer?.types?.includes('text/omni-front-component')) {
+        event.preventDefault();
+        event.dataTransfer.dropEffect = 'copy';
+      }
+    });
+    this.faceplate.addEventListener('drop', (event) => {
+      const type = event.dataTransfer?.getData('text/omni-front-component');
+      if (!type) return;
+      event.preventDefault();
+      event.stopPropagation();
+      const point = this.toPanelPoint(event);
+      this.addComponent(type, point.x, point.y);
+    });
     this.horizontalRuler = make('div', 'ofp-ruler ofp-ruler--horizontal', this.stagePanel);
     this.viewportRow = make('div', 'ofp-viewport-row', this.stagePanel);
     this.verticalRuler = make('div', 'ofp-ruler ofp-ruler--vertical', this.viewportRow);
@@ -1006,7 +1025,7 @@ export class FrontPanelEditor {
     this.renderInspector();
   }
 
-  addComponent(type) {
+  addComponent(type, x = null, y = null) {
     const label = TYPES.find((item) => item[0] === type)?.[1] || type;
     const size = ({
       knob: [112, 132], dial: [112, 132], encoder: [112, 132], slider: [74, 148], dropdown: [170, 54],
@@ -1018,8 +1037,8 @@ export class FrontPanelEditor {
     const count = this.state.components.length;
     const component = {
       id: id(), type, label: type === 'button' ? 'BUTTON' : label.toUpperCase(),
-      x: clamp(24 + (count % 4) * 34, 0, this.state.width - size[0]),
-      y: clamp(24 + (count % 4) * 30, 0, this.state.height - size[1]),
+      x: clamp(Number.isFinite(Number(x)) ? Number(x) - size[0] / 2 : 24 + (count % 4) * 34, 0, this.state.width - size[0]),
+      y: clamp(Number.isFinite(Number(y)) ? Number(y) - size[1] / 2 : 24 + (count % 4) * 30, 0, this.state.height - size[1]),
       w: size[0], h: size[1], value: 0.5,
       accent: this.state.accent, surface: '#26313d', textColor: this.state.textColor,
       finish: this.state.finish, margin: 8, padding: 7, gap: 5, radius: 7, fontSize: 8, borderWidth: 1, shadow: 'soft', orientation: 'horizontal', hidden: false, locked: false,
