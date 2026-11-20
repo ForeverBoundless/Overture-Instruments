@@ -103,8 +103,15 @@
     const accountSlot = account
       ? (account.parentElement === parent ? account : account.closest('.header-account-wrap'))
       : null;
-    if (accountSlot?.parentElement === parent) parent.insertBefore(toggle, accountSlot);
-    else if (toggle.parentElement !== parent) parent.appendChild(toggle);
+    if (accountSlot?.parentElement === parent) {
+      // Do not move an already-correct toggle. The observer below watches
+      // subtree mutations, so needless insertions would schedule itself again.
+      if (toggle.parentElement !== parent || toggle.nextSibling !== accountSlot) {
+        parent.insertBefore(toggle, accountSlot);
+      }
+    } else if (toggle.parentElement !== parent || toggle.nextSibling !== null) {
+      parent.appendChild(toggle);
+    }
     toggle.classList.toggle('site-theme-toggle--omni', Boolean(appBar));
     toggle.classList.remove('site-theme-toggle--floating');
   };
