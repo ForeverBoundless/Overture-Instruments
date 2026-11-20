@@ -5,7 +5,7 @@
 - `js/engine/`: reusable synthesis primitives and instrument-specific engines/worklets.
 - `js/shared/`: theme, MIDI mapping, panel controls, browser storage, PWA registration, audio capture, and MIDI take/export utilities.
 - `js/data/`: factory/original Overture sound data and canonical public instrument metadata.
-- `js/omni/`: OMNI's module catalogue, patch schema, templates, validation, and live graph.
+- `js/omni/`: OMNI's module catalogue, patch schema, templates, validation, live graph, and front-panel editor.
 
 ## OMNI lifecycle
 
@@ -50,3 +50,8 @@ Unlisted records are excluded from ordinary anonymous table reads. Direct-link a
 ## New hybrid instruments
 
 The Sequential Pro 3 and UDO Super 8 each use a dedicated AudioWorklet processor under `js/engine/`. Their panels reuse `WorkletEngine`, the shared keyboard/MIDI plumbing, `PresetStore`, and the MIDI-map registration system. The Pro 3 stores one patch with its sequencer tracks and 32 modulation routes; the Super 8 stores an overall performance with two separately editable layer patches and independent step data. Initial sound examples are authored by Overture and are labelled accordingly rather than being represented as authentic hardware factory banks. Browser-only versions do not claim to provide physical CV, external audio, or separate hardware output connectors.
+
+
+## OMNI front-panel studio
+
+`js/omni/front-panel.js` provides a front-end design workspace alongside the existing engine graph. Its components use module IDs and parameter keys for optional bindings; they do not own or mutate the audio graph structure. The patch's optional `frontPanel` member contains a validated layout, styling, material, guides, and measurement annotations. Legacy patches without this member continue to validate and receive an editable starter panel when opened. Local workspace snapshots, patch JSON, account patches, and Community patches carry the panel data through the existing patch validator. Design rulers, grids, guides, smart alignment and measurements are non-printing overlays; SVG faceplate export is a static graphic rather than a live instrument.
