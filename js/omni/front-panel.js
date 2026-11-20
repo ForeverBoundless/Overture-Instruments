@@ -126,6 +126,10 @@ export class FrontPanelEditor {
     this.previewButton = make('button', 'ofp-action', actions, 'PREVIEW');
     this.previewButton.type = 'button';
     this.previewButton.addEventListener('click', () => this.openPreview());
+    this.testModeButton = make('button', 'ofp-action', actions, 'TEST PANEL');
+    this.testModeButton.type = 'button';
+    this.testModeButton.setAttribute('aria-pressed', 'false');
+    this.testModeButton.addEventListener('click', () => this.toggleTestMode());
     this.checkButton = make('button', 'ofp-action', actions, 'DESIGN CHECK');
     this.checkButton.type = 'button';
     this.checkButton.addEventListener('click', () => this.runDesignCheck());
@@ -319,6 +323,54 @@ export class FrontPanelEditor {
   focusInspector() {
     this.inspector?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     this.inspector?.querySelector('input,select,textarea,button')?.focus({ preventScroll: true });
+  }
+
+  toggleTestMode() {
+    this.testMode = !this.testMode;
+    this.faceplate?.classList.toggle('is-test-mode', this.testMode);
+    this.testModeButton?.setAttribute('aria-pressed', String(this.testMode));
+    this.testModeButton.textContent = this.testMode ? 'EXIT TEST' : 'TEST PANEL';
+    if (this.testMode) this.select(null);
+    this.app.msg(this.testMode
+      ? 'Live test mode: play the keyboard and operate bound controls. Editing is paused.'
+      : 'Front-panel editing mode restored.');
+  }
+
+  showPerformanceReport() {
+    const visible = this.state.components.filter((item) => !item.hidden);
+    const counts = visible.reduce((result, item) => {
+      result[item.type] = (result[item.type] || 0) + 1;
+      return result;
+    }, {});
+    const svgBytes = new Blob([this.exportSVGMarkup()]).size;
+    const dialog = make('dialog', 'ofp-check-dialog', document.body);
+    const header = make('header', 'ofp-check-dialog__header', dialog);
+    const head = make('div', '', header);
+    make('span', 'ofp-panel-heading__eyebrow', head, 'EDITOR PERFORMANCE');
+    make('strong', '', head, 'Design complexity');
+    const close = make('button', 'ofp-action', header, 'CLOSE');
+    close.type = 'button';
+    close.addEventListener('click', () => dialog.close());
+    const summary = make('div', 'ofp-check-summary', dialog);
+    make('strong', '', summary, visible.length + ' visible components');
+    make('span', '', summary, (this.lastRenderMs ?? 0).toFixed(2) + ' ms last DOM build');
+    const list = make('div', 'ofp-check-list', dialog);
+    [
+      ['Total layers', String(this.state.components.length)],
+      ['Visible layers', String(visible.length)],
+      ['Hidden layers', String(this.state.components.length - visible.length)],
+      ['SVG source size', (svgBytes / 1024).toFixed(1) + ' KB'],
+      ['Panel dimensions', this.state.width + ' × ' + this.state.height + ' px'],
+      ['Render timing', 'Last synchronous DOM construction only; excludes browser paint and audio processing.']
+    ].forEach(([label, value]) => {
+      const row = make('div', 'ofp-check-item', list);
+      make('span', '', row, label.toUpperCase());
+      make('p', '', row, value);
+    });
+    const breakdown = make('p', 'ofp-check-empty', list, Object.entries(counts).map(([type,count]) => type + ': ' + count).join(' · ') || 'No visible components.');
+    dialog.addEventListener('close', () => dialog.remove(), { once: true });
+    dialog.addEventListener('click', (event) => { if (event.target === dialog) dialog.close(); });
+    dialog.showModal();
   }
 
   renderPalettePreview(type, parent) {
@@ -793,6 +845,7 @@ export class FrontPanelEditor {
   }
 
   render() {
+    const renderStartedAt = performance.now();
     this.faceplate.replaceChildren();
     this.faceplate.style.width = this.state.width + 'px';
     this.faceplate.style.height = this.state.height + 'px';
@@ -809,6 +862,8 @@ export class FrontPanelEditor {
     this.renderRulers();
     this.renderLayers();
     this.renderInspector();
+    this.faceplate.classList.toggle('is-test-mode', Boolean(this.testMode));
+    this.lastRenderMs = Math.max(0, performance.now() - renderStartedAt);
     requestAnimationFrame(() => this.scaleFaceplate());
   }
 
@@ -1040,6 +1095,7 @@ export class FrontPanelEditor {
 
   bindComponentDrag(node, component) {
     node.addEventListener('pointerdown', (event) => {
+      if (this.testMode) return;
       if (event.target.closest('input,select,button,textarea,a') || event.target.closest('.ofp-component__resize')) {
         this.select(component.id, event.shiftKey || event.ctrlKey || event.metaKey);
         return;
@@ -1651,7 +1707,8 @@ export class FrontPanelEditor {
         shape += '<circle cx="'+(cx-16+ratio*32)+'" cy="'+cy+'" r="9" fill="#d5dde2" stroke="#778894"/>';
         shape += text(cx,y+h-8,ratio>.5?'ON':'OFF',legend,8,'middle');
       } else if (component.type === 'keyboard') {
-        const top=y+27, keyHeight=Math.max(12,h-34), whiteCount=14, whiteW=w/whiteCount;
+        const top=y+27, keyHeight=Math.max(12,h-34), octaves=clamp(Math.round(component.octaves ?? 2),1,5);
+        const whiteCount=7*octaves, whiteW=(w-14)/whiteCount;
         shape += rect(x+7,top-4,w-14,keyHeight+8,'#090d11','#080b0e',3);
         for(let index=0;index<whiteCount;index++) shape += rect(x+7+index*whiteW,top,whiteW-1,keyHeight,'#e9edf0','#8996a2',2);
         const blackOffsets=[.70,1.72,3.70,4.72,5.72], blackW=whiteW*.52;
