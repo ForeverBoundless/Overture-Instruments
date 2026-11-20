@@ -2120,6 +2120,9 @@ export class FrontPanelEditor {
   }
 
   refreshValues() {
+    // The sound-engine workspace should not do editor DOM work for every
+    // parameter and MIDI event. Keep live sync active only when its UI is visible.
+    if (this.app.workspaceView !== 'front' && !this.previewFaceplate) return;
     this.state.components.forEach((component) => {
       const nodes = this.componentNodes(component);
       if (!nodes.length) return;
@@ -2151,6 +2154,7 @@ export class FrontPanelEditor {
   }
 
   refreshModuleReferences() {
+    if (this.app.workspaceView !== 'front' && !this.previewFaceplate) return;
     this.state.components.forEach((component) => {
       if (component.type !== 'module') return;
       const module = component.bind?.moduleId ? this.getModule(component.bind.moduleId) : null;
