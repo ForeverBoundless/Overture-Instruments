@@ -382,7 +382,7 @@ test('visible site numbering uses plain numbers without zero-padding', async () 
     if (files[index].endsWith('.html')) {
       assert.doesNotMatch(
         source,
-        /<(?:i|span|b|strong)\\b[^>]*>\\s*0+[1-9]\\d*\\s*<\\/(?:i|span|b|strong)>/i,
+        new RegExp('<(?:i|span|b|strong)[^>]*> *0+[1-9][0-9]* *</(?:i|span|b|strong)>', 'i'),
         `zero-padded number label found in ${files[index]}`,
       );
     }
