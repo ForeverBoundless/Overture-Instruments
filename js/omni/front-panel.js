@@ -343,7 +343,7 @@ export class FrontPanelEditor {
       return result;
     }, {});
     const svgBytes = new Blob([this.exportSVGMarkup()]).size;
-    const dialog = make('dialog', 'ofp-check-dialog', document.body);
+    const dialog = make('dialog', 'ofp-check-dialog', this.el);
     const header = make('header', 'ofp-check-dialog__header', dialog);
     const head = make('div', '', header);
     make('span', 'ofp-panel-heading__eyebrow', head, 'EDITOR PERFORMANCE');
@@ -1856,7 +1856,7 @@ export class FrontPanelEditor {
 
   openPreview() {
     this.previewDialog?.remove();
-    const dialog = make('dialog', 'ofp-preview-dialog', document.body);
+    const dialog = make('dialog', 'ofp-preview-dialog', this.el);
     this.previewDialog = dialog;
     const header = make('header', 'ofp-preview-dialog__header', dialog);
     const title = make('div', '', header);
