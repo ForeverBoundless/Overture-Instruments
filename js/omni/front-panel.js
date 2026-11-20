@@ -1271,27 +1271,120 @@ export class FrontPanelEditor {
   }
 
   exportSVG() {
-    const esc = (value) => String(value || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;');
-    const width = this.state.width;
-    const height = this.state.height;
+    const esc = (value) => String(value ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;');
+    const width = this.state.width, height = this.state.height;
     const background = safeColor(this.state.panelColor, '#252d35');
-    const accent = safeColor(this.state.accent, '#ffb75e');
-    const textColor = safeColor(this.state.textColor, '#edf3fa');
-    const body = this.state.components.map((component) => {
-      const x = component.x, y = component.y, w = component.w, h = component.h;
-      const color = safeColor(component.accent, accent);
-      const fill = safeColor(component.surface, '#26313d');
-      let shape = '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="8" fill="' + fill + '" stroke="' + color + '" stroke-opacity=".42"/>';
-      if (component.type === 'knob' || component.type === 'dial') shape += '<circle cx="' + (x + w / 2) + '" cy="' + (y + h / 2) + '" r="' + Math.min(w, h) * .28 + '" fill="#101820" stroke="' + color + '"/>';
-      if (component.type === 'keyboard') {
-        const count = 14;
-        for (let index = 0; index < count; index += 1) shape += '<rect x="' + (x + index * w / count) + '" y="' + (y + 26) + '" width="' + (w / count - 1) + '" height="' + (h - 32) + '" rx="2" fill="#e9edf0" stroke="#8996a2"/>';
+    const globalAccent = safeColor(this.state.accent, '#ffb75e');
+    const globalText = safeColor(this.state.textColor, '#edf3fa');
+    const rect = (x,y,w,h,fill,stroke='none',radius=4,extra='') =>
+      '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="' + radius + '" fill="' + fill + '" stroke="' + stroke + '" ' + extra + '/>';
+    const text = (x,y,value,color,size=10,anchor='start',extra='') =>
+      '<text x="' + x + '" y="' + y + '" fill="' + color + '" font-family="Arial,sans-serif" font-size="' + size + '" text-anchor="' + anchor + '" ' + extra + '>' + esc(value) + '</text>';
+    const valueRatio = (component,key=null) => {
+      const range=this.getRange(component,key), value=this.getValue(component,key);
+      return range.max>range.min ? clamp((value-range.min)/(range.max-range.min),0,1) : 0;
+    };
+    const defs = [
+      '<pattern id="ofp-brushed" width="4" height="4" patternUnits="userSpaceOnUse"><path d="M0 1H4 M0 3H4" stroke="#ffffff" stroke-opacity=".12" stroke-width=".5"/></pattern>',
+      '<pattern id="ofp-walnut" width="22" height="9" patternUnits="userSpaceOnUse"><path d="M0 2 C6 0 12 4 22 2 M0 7 C7 5 15 9 22 7" fill="none" stroke="#6e452d" stroke-opacity=".65" stroke-width=".8"/></pattern>',
+      '<linearGradient id="ofp-anodized" x2="0" y2="1"><stop offset="0" stop-color="#ffffff" stop-opacity=".14"/><stop offset=".48" stop-color="#6bc8df" stop-opacity=".06"/><stop offset="1" stop-color="#000000" stop-opacity=".2"/></linearGradient>',
+      '<linearGradient id="ofp-ivory" x2="0" y2="1"><stop offset="0" stop-color="#ffffff" stop-opacity=".35"/><stop offset="1" stop-color="#b3b9bc" stop-opacity=".12"/></linearGradient>',
+    ].join('');
+    const materialOverlay = (x,y,w,h,finish) => {
+      if (finish === 'brushed') return rect(x,y,w,h,'url(#ofp-brushed)','none',7,'opacity=".75"');
+      if (finish === 'walnut') return rect(x,y,w,h,'url(#ofp-walnut)','none',7,'opacity=".8"');
+      if (finish === 'anodized') return rect(x,y,w,h,'url(#ofp-anodized)','none',7);
+      if (finish === 'ivory') return rect(x,y,w,h,'url(#ofp-ivory)','none',7);
+      return '';
+    };
+    const componentMarkup = this.state.components.filter((item) => !item.hidden).map((component) => {
+      const x=component.x, y=component.y, w=component.w, h=component.h;
+      const accent=safeColor(component.accent,globalAccent);
+      const surface=safeColor(component.surface,'#26313d');
+      const legend=safeColor(component.textColor,globalText);
+      const border=safeColor(component.borderColor,accent);
+      const finish=FINISHES.some(([key])=>key===component.finish)?component.finish:'matte';
+      const label=esc(component.label || component.type.toUpperCase());
+      let shape='';
+      if (!['label','section'].includes(component.type)) {
+        shape += rect(x,y,w,h,surface,border,7,'stroke-opacity=".55"');
+        shape += materialOverlay(x,y,w,h,finish);
       }
-      if (component.type === 'oled' || component.type === 'screen') shape += '<text x="' + (x + 14) + '" y="' + (y + h / 2 + 5) + '" fill="' + color + '" font-family="monospace" font-size="12">' + esc(component.text || '') + '</text>';
-      shape += '<text x="' + (x + 10) + '" y="' + (y + 16) + '" fill="' + textColor + '" font-family="sans-serif" font-size="10" letter-spacing="1">' + esc(component.label) + '</text>';
-      return shape;
+      const cx=x+w/2, cy=y+h/2;
+      if (['knob','dial','encoder'].includes(component.type)) {
+        const r=Math.min(w,h)*.25, ratio=valueRatio(component), angle=(-135+ratio*270)*Math.PI/180;
+        shape += '<circle cx="'+cx+'" cy="'+(y+h*.56)+'" r="'+(r*1.25)+'" fill="#111820" stroke="'+accent+'" stroke-width="2"/>';
+        shape += '<circle cx="'+cx+'" cy="'+(y+h*.56)+'" r="'+r+'" fill="#56616b" stroke="#aeb9c2" stroke-opacity=".55"/>';
+        shape += '<path d="M '+cx+' '+(y+h*.56-r*.65)+' L '+(cx+Math.sin(angle)*r*.75)+' '+(y+h*.56-Math.cos(angle)*r*.75)+'" stroke="'+accent+'" stroke-width="3" stroke-linecap="round"/>';
+        shape += '<path d="M '+(cx-r*1.5)+' '+(y+h*.56+r*1.55)+' A '+(r*1.5)+' '+(r*1.5)+' 0 1 1 '+(cx+r*1.5)+' '+(y+h*.56+r*1.55)+'" fill="none" stroke="'+accent+'" stroke-opacity=".65"/>';
+      } else if (component.type === 'slider') {
+        const ratio=valueRatio(component), trackX=cx-3, trackY=y+28, trackH=Math.max(12,h-52);
+        shape += rect(trackX,trackY,6,trackH,'#111820','#73808b',3);
+        shape += rect(cx-10,trackY+trackH*(1-ratio)-5,20,10,'#cbd4da','#64727d',3);
+      } else if (component.type === 'dropdown') {
+        shape += rect(x+12,y+26,w-24,Math.max(18,h-36),'#17222c',border,4);
+        shape += '<path d="M '+(x+w-30)+' '+(y+h/2-2)+' l 6 6 l 6 -6" fill="none" stroke="'+accent+'" stroke-width="1.5"/>';
+      } else if (component.type === 'button') {
+        shape += rect(x+14,y+25,w-28,Math.max(18,h-36),'#3d4a55',accent,5,'stroke-width="1.4"');
+        shape += rect(x+18,y+28,w-36,Math.max(12,h-43),'#596672','none',4,'opacity=".45"');
+      } else if (component.type === 'switch') {
+        const ratio=valueRatio(component);
+        shape += rect(cx-28,cy-12,56,24,ratio>.5?'#234b4c':'#111820',accent,12);
+        shape += '<circle cx="'+(cx-16+ratio*32)+'" cy="'+cy+'" r="9" fill="#d5dde2" stroke="#778894"/>';
+        shape += text(cx,y+h-8,ratio>.5?'ON':'OFF',legend,8,'middle');
+      } else if (component.type === 'keyboard') {
+        const top=y+27, keyHeight=Math.max(12,h-34), whiteCount=14, whiteW=w/whiteCount;
+        shape += rect(x+7,top-4,w-14,keyHeight+8,'#090d11','#080b0e',3);
+        for(let index=0;index<whiteCount;index++) shape += rect(x+7+index*whiteW,top,whiteW-1,keyHeight,'#e9edf0','#8996a2',2);
+        const blackOffsets=[.70,1.72,3.70,4.72,5.72], blackW=whiteW*.52;
+        for(let octave=0;octave<2;octave++) blackOffsets.forEach((offset)=>{shape+=rect(x+7+(octave*7+offset)*whiteW-blackW/2,top,blackW,keyHeight*.61,'#131a21','#05080b',2);});
+      } else if (component.type === 'pitchwheel' || component.type === 'modwheel') {
+        const ratio=valueRatio(component);
+        shape += rect(cx-8,y+28,16,Math.max(15,h-48),'#0b1118','#6c7882',5);
+        shape += rect(cx-20,y+30+(h-52)*(1-ratio)-6,40,12,'#cbd5dc',accent,3);
+      } else if (component.type === 'drawbars') {
+        const barTop=y+31, barH=Math.max(18,h-44), gap=3, slotW=(w-24-gap*8)/9;
+        for(let index=1;index<=9;index++){
+          const bx=x+12+(index-1)*(slotW+gap), ratio=this.getRange(component,'drawbar'+index);
+          const actual=valueRatio(component,'drawbar'+index);
+          shape += rect(bx+slotW*.38,barTop,Math.max(3,slotW*.24),barH,'#10171e','#65727d',2);
+          shape += rect(bx+1,barTop+barH*(1-actual)-4,slotW-2,8,'#ccd6dc',accent,2);
+        }
+      } else if (component.type === 'module') {
+        const module=component.bind?.moduleId?this.getModule(component.bind.moduleId):null;
+        shape += text(cx,y+45,module?MODULES[module.type]?.name||module.type:'UNASSIGNED MODULE',legend,12,'middle','font-weight="bold"');
+        shape += text(cx,y+62,module?module.id:'MODULE BAY',accent,8,'middle');
+      } else if (component.type === 'screen' || component.type === 'oled') {
+        shape += rect(x+8,y+25,w-16,h-33,'#061118',accent,3,'stroke-width="1.2"');
+        String(component.text||'').split(/\r?\n/).slice(0,4).forEach((line,index)=>{
+          shape += text(x+16,y+43+index*14,line,accent,index===0?12:9,'start','font-family="monospace"');
+        });
+      } else if (component.type === 'led') {
+        shape += '<circle cx="'+cx+'" cy="'+(y+h*.6)+'" r="7" fill="'+(this.app.ctx?accent:'#202b35')+'" stroke="'+accent+'"/>';
+        shape += text(cx+18,y+h*.64,component.label||'LED',legend,8,'start');
+      } else if (component.type === 'meter') {
+        const ratio=valueRatio(component);
+        shape += rect(x+12,cy-6,w-24,12,'#101820','#667580',3);
+        shape += rect(x+14,cy-4,(w-28)*ratio,8,accent,'none',2);
+      } else if (component.type === 'pad') {
+        shape += rect(x+12,y+27,w-24,h-38,'#36424c',accent,7,'stroke-width="1.4"');
+      } else if (component.type === 'section') {
+        shape += '<path d="M '+(x+6)+' '+cy+' H '+(x+w-6)+'" stroke="'+accent+'" stroke-width="1.5"/>';
+      } else if (component.type === 'label') {
+        shape += text(cx,cy+4,component.text||component.label,legend,12,'middle');
+      }
+      if (component.type !== 'label' && component.type !== 'section') {
+        shape += text(cx,y+16,label,legend,8,'middle','letter-spacing="1"');
+      } else if (component.type === 'section') {
+        shape += '<rect x="'+(x+w*.2)+'" y="'+(cy-9)+'" width="'+(w*.6)+'" height="18" fill="'+background+'"/>';
+        shape += text(cx,cy+3,component.text||component.label,legend,8,'middle','letter-spacing="1"');
+      }
+      return '<g data-component="'+esc(component.id)+'">'+shape+'</g>';
     }).join('');
-    const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' + width + '" height="' + height + '" viewBox="0 0 ' + width + ' ' + height + '"><rect width="100%" height="100%" rx="16" fill="' + background + '"/>' + body + '</svg>';
+    const panelFinish=materialOverlay(0,0,width,height,this.state.finish||'matte');
+    const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="'+width+'" height="'+height+'" viewBox="0 0 '+width+' '+height+'"><defs>'+defs+'</defs>'
+      + rect(0,0,width,height,background,'#ffffff',16)
+      + panelFinish + componentMarkup + '</svg>';
     const blob = new Blob([svg], { type: 'image/svg+xml' });
     const url = URL.createObjectURL(blob);
     const link = make('a', '', document.body);
@@ -1301,4 +1394,5 @@ export class FrontPanelEditor {
     link.remove();
     window.setTimeout(() => URL.revokeObjectURL(url), 30000);
   }
+
 }
