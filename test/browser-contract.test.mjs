@@ -1048,7 +1048,7 @@ test('OMNI organ card exposes nine linked drawbars and a wider layout', async ()
   assert.ok(app.includes('this.inspBody?.querySelectorAll'));
   assert.ok(styles.includes('.omni-module--organ {width:440px'));
   assert.ok(styles.includes('grid-template-columns:repeat(9,minmax(0,1fr))'));
-  assert.ok(page.includes('omni.css?v=20261119-front-panel-r16'));
+  assert.ok(page.includes('omni.css?v=20261119-front-panel-r17'));
   assert.ok(worker.includes('omni.js?v=20261119-front-panel-r17'));
 });
 
