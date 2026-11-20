@@ -321,6 +321,29 @@ test('Community share action uses the violet accent in dark and light themes', a
 });
 
 
+test('OMNI theme control is idempotent and front-panel code stays outside the engine-only path', async () => {
+  const [theme, source, editor, css] = await Promise.all([
+    readFile(new URL('../js/shared/site-theme.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/omni.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/omni/front-panel.js', import.meta.url), 'utf8'),
+    readFile(new URL('../css/omni.css', import.meta.url), 'utf8'),
+  ]);
+  const initialDependencies = source.slice(0, source.indexOf('const ['));
+  assert.doesNotMatch(initialDependencies, /front-panel\\.js/);
+  assert.match(source, /ensureFrontPanelEditor\\(\\)[\\s\\S]*?import\\('\\.\\/omni\\/front-panel\\.js\\?v=20261119-front-panel-r15'\\)/);
+  assert.match(theme, /toggle\\.addEventListener\\('click', \\(\\) => setTheme\\(getTheme\\(\\) === 'light' \\? 'dark' : 'light', true\\)\\)/);
+  assert.match(theme, /if \\(accountSlot\\?\\.parentElement === parent\\) \\{[\\s\\S]*toggle\\.parentElement !== parent \\|\\| toggle\\.nextSibling !== accountSlot[\\s\\S]*parent\\.insertBefore\\(toggle, accountSlot\\)/);
+  assert.match(editor, /refreshValues\\(\\) \\{[\\s\\S]*?this\\.app\\.workspaceView !== 'front' && !this\\.previewFaceplate\\) return;/);
+  assert.match(editor, /refreshModuleReferences\\(\\) \\{\\s*if \\(this\\.app\\.workspaceView !== 'front' && !this\\.previewFaceplate\\) return;/);
+  assert.match(css, /html\\[data-theme="light"\\] #omni-root \\.omni-view-switch/);
+  assert.match(css, /html\\[data-theme="light"\\] #omni-root dialog\\.ofp-preview-dialog/);
+  assert.match(css, /html\\[data-theme="light"\\] #omni-root \\.ofp-preview-dialog__stage/);
+  assert.match(css, /html\\[data-theme="light"\\] #omni-root \\.ofp-inspector-action--danger,[\\s\\S]*?color:#ad4942/);
+  assert.match(css, /#omni-root \\.ofp-empty-state p \\{[\\s\\S]*?color:var\\(--ofp-text\\)/);
+  assert.match(css, /#omni-root \\.ofp-empty-state__action \\{[\\s\\S]*?color:var\\(--ofp-text\\)/);
+});
+
+
 test('OMNI front-panel preview runs real controls without editor handles', async () => {
   const [editor, css] = await Promise.all([
     readFile(new URL('../js/omni/front-panel.js', import.meta.url), 'utf8'),
