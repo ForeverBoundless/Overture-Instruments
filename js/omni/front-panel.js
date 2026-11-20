@@ -77,8 +77,8 @@ export class FrontPanelEditor {
       zoom: 1,
       safeMargin: 28,
       gridSize: 24,
-      showRulers: true,
-      showGrid: true,
+      showRulers: false,
+      showGrid: false,
       showGuides: false,
       showSmartGuides: true,
       showSafeMargin: false,
@@ -144,6 +144,170 @@ export class FrontPanelEditor {
   }
 
     build(root) {
+    this.el = make('section', 'omni-front-panel', root);
+    this.el.hidden = true;
+
+    const toolbar = make('div', 'ofp-toolbar', this.el);
+    const identity = make('div', 'ofp-toolbar__identity', toolbar);
+    make('span', 'ofp-kicker', identity, 'OMNI');
+    make('strong', 'ofp-toolbar__title', identity, 'Front panel');
+
+    const actions = make('div', 'ofp-toolbar__actions', toolbar);
+    this.previewButton = make('button', 'ofp-action ofp-action--primary', actions, 'Preview');
+    this.previewButton.type = 'button';
+    this.previewButton.addEventListener('click', () => this.openPreview());
+    this.testModeButton = make('button', 'ofp-action', actions, 'Test');
+    this.testModeButton.type = 'button';
+    this.testModeButton.setAttribute('aria-pressed', 'false');
+    this.testModeButton.addEventListener('click', () => this.toggleTestMode());
+
+    const moreMenu = make('details', 'ofp-toolbar-menu', actions);
+    make('summary', 'ofp-toolbar-menu__trigger', moreMenu, 'More');
+    const morePanel = make('div', 'ofp-toolbar-menu__panel', moreMenu);
+    this.fitButton = make('button', 'ofp-menu-action', morePanel, 'Fit panel');
+    this.fitButton.type = 'button';
+    this.fitButton.addEventListener('click', () => { this.fitToViewport(); moreMenu.open = false; this.commit(); });
+    this.resetButton = make('button', 'ofp-menu-action', morePanel, 'Clear panel…');
+    this.resetButton.type = 'button';
+    this.resetButton.addEventListener('click', () => {
+      moreMenu.open = false;
+      if (!window.confirm('Clear the faceplate and start with an empty layout?')) return;
+      this.state = this.defaultLayout();
+      this.selectedId = null;
+      this.selectedIds?.clear();
+      this.inspectorOpen = false;
+      this.workspace?.classList.remove('is-inspector-open');
+      this.render();
+      this.commit();
+    });
+    this.checkButton = make('button', 'ofp-menu-action', morePanel, 'Design check');
+    this.checkButton.type = 'button';
+    this.checkButton.addEventListener('click', () => { moreMenu.open = false; this.runDesignCheck(); });
+
+    this.workspace = make('div', 'ofp-workspace', this.el);
+    this.libraryOpen = false;
+    this.inspectorOpen = false;
+    this.libraryMode = 'add';
+
+    this.rail = make('nav', 'ofp-rail', this.workspace);
+    this.rail.setAttribute('aria-label', 'Editor panels');
+    const railButton = (icon, label, title) => {
+      const button = make('button', 'ofp-rail-button', this.rail);
+      button.type = 'button';
+      button.title = title;
+      button.setAttribute('aria-label', title);
+      button.setAttribute('aria-pressed', 'false');
+      make('span', 'ofp-rail-icon', button, icon);
+      make('span', 'ofp-rail-label', button, label);
+      return button;
+    };
+    this.addRailButton = railButton('+', 'Add', 'Add a control');
+    this.addRailButton.addEventListener('click', () => this.toggleLibrary('add'));
+    this.layersRailButton = railButton('▤', 'Layers', 'Show faceplate layers');
+    this.layersRailButton.addEventListener('click', () => this.toggleLibrary('layers'));
+    this.panelSettingsButton = railButton('◫', 'Panel', 'Edit faceplate settings');
+    this.panelSettingsButton.addEventListener('click', () => this.togglePanelInspector());
+
+    this.library = make('aside', 'ofp-library', this.workspace);
+    this.cataloguePane = make('div', 'ofp-library-pane', this.library);
+    const libHead = make('div', 'ofp-panel-heading', this.cataloguePane);
+    make('span', 'ofp-panel-heading__eyebrow', libHead, 'INSERT');
+    make('strong', '', libHead, 'Components');
+    make('p', 'ofp-help', this.cataloguePane, 'Add a control, then place it on the faceplate.');
+    this.componentSearch = make('input', 'ofp-library-search', this.cataloguePane);
+    this.componentSearch.type = 'search';
+    this.componentSearch.placeholder = 'Search components';
+    this.componentSearch.setAttribute('aria-label', 'Search front-panel components');
+    this.componentSearch.addEventListener('input', () => {
+      const query = this.componentSearch.value.trim().toLowerCase();
+      this.library.querySelectorAll('.ofp-library-item').forEach((button) => {
+        button.hidden = Boolean(query) && !button.dataset.searchText.includes(query);
+      });
+      this.library.querySelectorAll('.ofp-library-group').forEach((group) => {
+        group.hidden = Boolean(query) && !group.querySelector('.ofp-library-item:not([hidden])');
+        if (query && !group.hidden) group.open = true;
+      });
+    });
+    const groups = {};
+    TYPES.forEach(([type, label, category]) => {
+      if (!groups[category]) {
+        const section = make('details', 'ofp-library-group', this.cataloguePane);
+        section.open = category === 'CONTROLS';
+        make('summary', 'ofp-library-group__heading', section, category.charAt(0) + category.slice(1).toLowerCase());
+        groups[category] = make('div', 'ofp-library-grid', section);
+      }
+      const button = make('button', 'ofp-library-item', groups[category]);
+      button.type = 'button';
+      button.draggable = true;
+      button.dataset.searchText = (label + ' ' + type + ' ' + category).toLowerCase();
+      this.renderPalettePreview(type, button);
+      make('span', 'ofp-library-item__label', button, label);
+      button.addEventListener('click', () => this.addComponent(type));
+      button.addEventListener('dragstart', (event) => {
+        event.dataTransfer.setData('text/omni-front-component', type);
+        event.dataTransfer.effectAllowed = 'copy';
+      });
+    });
+
+    this.stagePanel = make('section', 'ofp-stage-panel', this.workspace);
+    const stageHead = make('div', 'ofp-stage-head', this.stagePanel);
+    const stageName = make('div', 'ofp-stage-head__identity', stageHead);
+    make('strong', '', stageName, 'Instrument faceplate');
+    const stageTools = make('div', 'ofp-stage-head__tools', stageHead);
+    this.stageDimensions = make('span', 'ofp-stage-dimensions', stageTools);
+    this.zoomOutButton = make('button', 'ofp-stage-zoom-button', stageTools, '−');
+    this.zoomOutButton.type = 'button';
+    this.zoomOutButton.setAttribute('aria-label', 'Zoom out');
+    this.zoomOutButton.addEventListener('click', () => this.zoomBy(.8));
+    this.zoomReadout = make('output', 'ofp-stage-zoom', stageTools, '100%');
+    this.zoomInButton = make('button', 'ofp-stage-zoom-button', stageTools, '+');
+    this.zoomInButton.type = 'button';
+    this.zoomInButton.setAttribute('aria-label', 'Zoom in');
+    this.zoomInButton.addEventListener('click', () => this.zoomBy(1.25));
+    this.zoomFitButton = make('button', 'ofp-stage-zoom-fit', stageTools, 'Fit');
+    this.zoomFitButton.type = 'button';
+    this.zoomFitButton.addEventListener('click', () => this.fitToViewport());
+
+    this.viewport = make('div', 'ofp-viewport', this.stagePanel);
+    this.stage = make('div', 'ofp-stage', this.viewport);
+    this.faceplate = make('div', 'ofp-faceplate', this.stage);
+    this.faceplate.addEventListener('pointerdown', (event) => {
+      if (this.tool === 'measure') { this.beginMeasurement(event); return; }
+      if (this.pendingGuideAxis) { this.placeGuide(event); return; }
+      if (event.target === this.faceplate || event.target === this.stage) {
+        if (this.panState) return;
+        this.select(null);
+      }
+    }, true);
+    this.faceplate.addEventListener('dragover', (event) => {
+      if (event.dataTransfer?.types?.includes('text/omni-front-component')) {
+        event.preventDefault();
+        event.dataTransfer.dropEffect = 'copy';
+      }
+    });
+    this.faceplate.addEventListener('drop', (event) => {
+      const type = event.dataTransfer?.getData('text/omni-front-component');
+      if (!type) return;
+      event.preventDefault();
+      event.stopPropagation();
+      const point = this.toPanelPoint(event);
+      this.addComponent(type, point.x, point.y);
+    });
+
+    this.horizontalRuler = make('div', 'ofp-ruler ofp-ruler--horizontal', this.stagePanel);
+    this.viewportRow = make('div', 'ofp-viewport-row', this.stagePanel);
+    this.verticalRuler = make('div', 'ofp-ruler ofp-ruler--vertical', this.viewportRow);
+    this.viewportRow.appendChild(this.viewport);
+    this.stageFoot = make('div', 'ofp-stage-foot', this.stagePanel);
+    make('span', '', this.stageFoot, 'Drag to move · Shift-click to select multiple · Space-drag to pan');
+    this.bindViewportNavigation();
+    this.buildDesignTools();
+    this.buildLayerPanel();
+    this.bindEditorShortcuts();
+
+    this.inspector = make('aside', 'ofp-inspector', this.workspace);
+    this.renderInspector();
+  }
     this.el = make('section', 'omni-front-panel', root);
     this.el.hidden = true;
     const toolbar = make('div', 'ofp-toolbar', this.el);
@@ -280,6 +444,78 @@ export class FrontPanelEditor {
 
   buildDesignTools() {
     const toolbar = make('div', 'ofp-design-tools', this.stagePanel);
+    const button = (parent, label, title, callback, pressed = null) => {
+      const control = make('button', 'ofp-tool-toggle', parent, label);
+      control.type = 'button';
+      control.title = title;
+      control.setAttribute('aria-label', title);
+      if (pressed !== null) control.setAttribute('aria-pressed', String(Boolean(pressed)));
+      control.addEventListener('click', callback);
+      return control;
+    };
+    const group = (label) => {
+      const details = make('details', 'ofp-tool-group', toolbar);
+      make('summary', 'ofp-tool-group__trigger', details, label);
+      return make('div', 'ofp-tool-group__panel', details);
+    };
+    const toggle = (parent, label, key, title) =>
+      button(parent, label, title, () => this.toggleViewSetting(key), this.state[key]);
+
+    this.selectToolButton = button(toolbar, 'Select', 'Select and move controls', () => {
+      this.tool = 'select';
+      this.panMode = false;
+      this.viewport.classList.remove('is-pan-tool', 'is-measuring', 'is-placing-guide');
+      this.selectToolButton.setAttribute('aria-pressed', 'true');
+      this.panModeButton.setAttribute('aria-pressed', 'false');
+    }, true);
+    this.panModeButton = button(toolbar, 'Hand', 'Pan the canvas without selecting controls', () => {
+      this.panMode = !this.panMode;
+      this.panModeButton.setAttribute('aria-pressed', String(this.panMode));
+      this.selectToolButton.setAttribute('aria-pressed', String(!this.panMode));
+      this.viewport.classList.toggle('is-pan-tool', this.panMode);
+    }, this.panMode);
+    this.snapButton = button(toolbar, 'Snap', 'Snap controls to the layout grid', () => this.toggleViewSetting('snap'), this.state.snap);
+
+    const view = group('View');
+    toggle(view, 'Rulers', 'showRulers', 'Show or hide measurement rulers');
+    toggle(view, 'Grid', 'showGrid', 'Show or hide the layout grid');
+    toggle(view, 'Safe area', 'showSafeMargin', 'Show or hide the safe margin');
+    toggle(view, 'Guides', 'showGuides', 'Show or hide alignment guides');
+    toggle(view, 'Smart guides', 'showSmartGuides', 'Show or hide smart alignment feedback');
+    button(view, 'Measure distance', 'Measure a distance on the faceplate', () => {
+      this.tool = this.tool === 'measure' ? 'select' : 'measure';
+      this.measureButton?.setAttribute('aria-pressed', String(this.tool === 'measure'));
+      this.viewport.classList.toggle('is-measuring', this.tool === 'measure');
+      if (this.tool === 'measure') {
+        this.panMode = false;
+        this.panModeButton.setAttribute('aria-pressed', 'false');
+        this.selectToolButton.setAttribute('aria-pressed', 'false');
+      }
+    });
+    this.measureButton = view.querySelector('button:last-of-type');
+    button(view, 'Add vertical guide', 'Place a vertical alignment guide', () => this.startGuide('x'));
+    button(view, 'Add horizontal guide', 'Place a horizontal alignment guide', () => this.startGuide('y'));
+    button(view, 'Clear measurements', 'Remove all saved measurements', () => { this.state.measurements = []; this.render(); this.commit(); });
+    const unit = make('select', 'ofp-tool-select', view);
+    [['px','Pixels'],['mm','Millimetres'],['in','Inches']].forEach(([value,label]) => {
+      const option = make('option', '', unit, label); option.value = value;
+    });
+    unit.value = this.state.unit || 'mm';
+    unit.setAttribute('aria-label', 'Ruler measurement units');
+    unit.addEventListener('change', () => { this.state.unit = unit.value; this.renderRulers(); this.renderInspector(); this.commit(); });
+
+    const arrange = group('Arrange');
+    [
+      ['Align left','left'],['Centre horizontally','centerX'],['Align right','right'],
+      ['Align top','top'],['Centre vertically','centerY'],['Align bottom','bottom'],
+      ['Distribute horizontally','distributeX'],['Distribute vertically','distributeY'],
+      ['Match width','sameWidth'],['Match height','sameHeight'],
+      ['Align to panel left','panelLeft'],['Align to panel right','panelRight'],
+      ['Align to panel top','panelTop'],['Align to panel bottom','panelBottom'],
+      ['Centre on panel horizontally','panelCenterX'],['Centre on panel vertically','panelCenterY']
+    ].forEach(([label, mode]) => button(arrange, label, label, () => this.alignSelection(mode)));
+  }
+    const toolbar = make('div', 'ofp-design-tools', this.stagePanel);
     const group = (label) => {
       const details = make('details', 'ofp-tool-group', toolbar);
       make('summary', 'ofp-tool-group__trigger', details, label);
@@ -341,6 +577,38 @@ export class FrontPanelEditor {
       ['Panel centre X','panelCenterX'],['Panel centre Y','panelCenterY']
     ].forEach(([label, mode]) => button(arrange, label, 'Align selected controls: ' + label, () => this.alignSelection(mode)));
     this.stagePanel.insertBefore(toolbar, this.horizontalRuler);
+  }
+
+  toggleLibrary(mode = 'add') {
+    const alreadyOpen = this.workspace.classList.contains('is-library-open');
+    const sameMode = this.libraryMode === mode;
+    const open = !(alreadyOpen && sameMode);
+    this.libraryMode = mode;
+    this.workspace.classList.toggle('is-library-open', open);
+    this.cataloguePane.hidden = !open || mode !== 'add';
+    this.layersPanel.hidden = !open || mode !== 'layers';
+    this.addRailButton.setAttribute('aria-pressed', String(open && mode === 'add'));
+    this.layersRailButton.setAttribute('aria-pressed', String(open && mode === 'layers'));
+    if (open && mode === 'add') this.componentSearch?.focus();
+  }
+
+  togglePanelInspector() {
+    const alreadyOpen = this.workspace.classList.contains('is-inspector-open');
+    const isPanel = !this.selectedId;
+    if (alreadyOpen && isPanel) {
+      this.inspectorOpen = false;
+      this.workspace.classList.remove('is-inspector-open');
+      this.panelSettingsButton.setAttribute('aria-pressed', 'false');
+      return;
+    }
+    this.selectedId = null;
+    this.selectedIds?.clear();
+    this.inspectorOpen = true;
+    this.workspace.classList.add('is-inspector-open');
+    this.panelSettingsButton.setAttribute('aria-pressed', 'true');
+    this.faceplate.querySelectorAll('.ofp-component').forEach((node) => node.classList.remove('is-selected'));
+    this.renderInspector();
+    this.renderLayers();
   }
 
   startGuide(axis) {
@@ -594,6 +862,14 @@ export class FrontPanelEditor {
   }
 
     buildLayerPanel() {
+    this.layersPanel = make('section', 'ofp-layers-panel', this.library);
+    this.layersPanel.hidden = true;
+    const head = make('div', 'ofp-panel-heading', this.layersPanel);
+    make('span', 'ofp-panel-heading__eyebrow', head, 'DOCUMENT');
+    make('strong', '', head, 'Layers');
+    this.layersList = make('div', 'ofp-layers-list', this.layersPanel);
+    this.renderLayers();
+  }
     this.layersPanel = make('section', 'ofp-layers-panel', this.library);
     const head = make('div', 'ofp-panel-heading', this.layersPanel);
     make('span', 'ofp-panel-heading__eyebrow', head, 'LAYERS');
@@ -1443,6 +1719,30 @@ export class FrontPanelEditor {
 
   select(componentId, multi = false) {
     this.selectedIds ||= new Set();
+    if (componentId === null) {
+      this.selectedId = null;
+      this.selectedIds.clear();
+      this.inspectorOpen = false;
+    } else if (multi) {
+      if (this.selectedIds.has(componentId)) this.selectedIds.delete(componentId);
+      else this.selectedIds.add(componentId);
+      this.selectedId = this.selectedIds.has(componentId) ? componentId : [...this.selectedIds].at(-1) || null;
+      this.inspectorOpen = Boolean(this.selectedId);
+    } else {
+      this.selectedId = componentId;
+      this.selectedIds = new Set([componentId]);
+      this.inspectorOpen = true;
+      const component = this.getComponent(componentId);
+      const bindable = ['knob','dial','encoder','slider','dropdown','button','switch','drawbars','meter'];
+      if (component && bindable.includes(component.type) && !component.bind?.moduleId) this.inspectorTab = 'behavior';
+    }
+    this.workspace.classList.toggle('is-inspector-open', this.inspectorOpen);
+    this.panelSettingsButton?.setAttribute('aria-pressed', 'false');
+    this.faceplate.querySelectorAll('.ofp-component').forEach((node) => node.classList.toggle('is-selected', this.selectedIds.has(node.dataset.componentId)));
+    this.renderLayers();
+    this.renderInspector();
+  }
+    this.selectedIds ||= new Set();
     if (componentId === null) { this.selectedId = null; this.selectedIds.clear(); }
     else if (multi) {
       if (this.selectedIds.has(componentId)) this.selectedIds.delete(componentId); else this.selectedIds.add(componentId);
@@ -1485,6 +1785,10 @@ export class FrontPanelEditor {
     this.state.components.push(component);
     this.selectedId = component.id;
     this.selectedIds = new Set([component.id]);
+    this.inspectorOpen = true;
+    this.workspace.classList.remove('is-library-open');
+    this.addRailButton?.setAttribute('aria-pressed', 'false');
+    this.layersRailButton?.setAttribute('aria-pressed', 'false');
     this.render();
     this.commit();
   }
@@ -1556,6 +1860,47 @@ export class FrontPanelEditor {
   renderInspector() {
     if (!this.inspector) return;
     this.inspector.replaceChildren();
+    this.inspector.hidden = !this.inspectorOpen;
+    this.workspace.classList.toggle('is-inspector-open', this.inspectorOpen);
+    this.panelSettingsButton?.setAttribute('aria-pressed', String(this.inspectorOpen && !this.selectedId));
+    if (!this.inspectorOpen) return;
+
+    const component = this.getComponent(this.selectedId);
+    const header = make('div', 'ofp-panel-heading ofp-inspector__heading', this.inspector);
+    const identity = make('div', '', header);
+    make('span', 'ofp-panel-heading__eyebrow', identity, component ? 'SELECTION' : 'DOCUMENT');
+    make('strong', '', identity, component ? (component.label || 'Selected control') : 'Faceplate');
+    const close = make('button', 'ofp-inspector-close', header, '×');
+    close.type = 'button';
+    close.setAttribute('aria-label', 'Close properties');
+    close.addEventListener('click', () => {
+      this.inspectorOpen = false;
+      this.workspace.classList.remove('is-inspector-open');
+      this.panelSettingsButton?.setAttribute('aria-pressed', 'false');
+    });
+
+    if (!component) {
+      this.inspectorBody = make('div', 'ofp-inspector__body', this.inspector);
+      this.renderPanelSettings();
+      return;
+    }
+    const tabs = make('div', 'ofp-inspector-tabs', this.inspector);
+    const tabNames = [['layout','Layout'],['appearance','Style'],['behavior','Behaviour']];
+    this.inspectorTab ||= 'layout';
+    tabNames.forEach(([key,label]) => {
+      const button = make('button', 'ofp-inspector-tab', tabs, label);
+      button.type = 'button';
+      button.setAttribute('role','tab');
+      button.setAttribute('aria-selected',String(this.inspectorTab===key));
+      button.addEventListener('click',()=>{this.inspectorTab=key;this.renderInspector();});
+    });
+    this.inspectorBody = make('div', 'ofp-inspector__body', this.inspector);
+    if (this.inspectorTab === 'layout') this.renderComponentLayout(component);
+    else if (this.inspectorTab === 'appearance') this.renderComponentAppearance(component);
+    else this.renderComponentBehavior(component);
+  }
+    if (!this.inspector) return;
+    this.inspector.replaceChildren();
     const header = make('div', 'ofp-panel-heading', this.inspector);
     make('span', 'ofp-panel-heading__eyebrow', header, 'PROPERTIES');
     const component = this.getComponent(this.selectedId);
@@ -1582,6 +1927,40 @@ export class FrontPanelEditor {
   }
 
   renderComponentLayout(component) {
+    this.inputField('Label', component.label, 'text', (value) => {
+      component.label = value.slice(0, 40);
+      this.render();
+      this.commit();
+    });
+    const position = make('div', 'ofp-field-grid', this.inspectorBody);
+    this.inputField('X (' + this.state.unit + ')', this.unitValue(component.x), 'number', (value) => this.updateComponentProperty(component, 'x', clamp(this.unitPixels(value), 0, this.state.width - component.w)), position);
+    this.inputField('Y (' + this.state.unit + ')', this.unitValue(component.y), 'number', (value) => this.updateComponentProperty(component, 'y', clamp(this.unitPixels(value), 0, this.state.height - component.h)), position);
+    const dimensions = make('div', 'ofp-field-grid', this.inspectorBody);
+    this.inputField('Width (' + this.state.unit + ')', this.unitValue(component.w), 'number', (value) => this.updateComponentProperty(component, 'w', clamp(this.unitPixels(value), 48, Math.min(760, this.state.width - component.x))), dimensions);
+    this.inputField('Height (' + this.state.unit + ')', this.unitValue(component.h), 'number', (value) => this.updateComponentProperty(component, 'h', clamp(this.unitPixels(value), 42, Math.min(440, this.state.height - component.y))), dimensions);
+
+    const advanced = make('details', 'ofp-advanced', this.inspectorBody);
+    make('summary', 'ofp-advanced__summary', advanced, 'Advanced layout');
+    const body = make('div', 'ofp-advanced__body', advanced);
+    this.inputField('Clearance (' + this.state.unit + ')', this.unitValue(component.margin ?? 8), 'number', (value) => this.updateComponentProperty(component, 'margin', clamp(this.unitPixels(value), 0, 180)), body);
+    if (component.type === 'keyboard') {
+      this.inputField('Starting C MIDI note', component.startNote ?? 48, 'number', (value) => { component.startNote = clamp(Math.round(value / 12) * 12, 0, 127 - 12 * (component.octaves ?? 2)); this.render(); this.commit(); }, body);
+      this.inputField('Octaves', component.octaves ?? 2, 'number', (value) => { component.octaves = clamp(Math.round(value), 1, 5); component.startNote = clamp(Math.round((component.startNote ?? 48) / 12) * 12, 0, 127 - 12 * component.octaves); this.render(); this.commit(); }, body);
+    }
+    if (component.type === 'slider') this.selectField('Orientation', component.orientation || 'horizontal', [['horizontal','Horizontal'],['vertical','Vertical']], (value) => { component.orientation = value; this.render(); this.commit(); }, body);
+    this.selectField('Visibility', component.hidden ? 'hidden' : 'visible', [['visible','Visible'],['hidden','Hidden']], (value) => { component.hidden = value === 'hidden'; this.render(); this.commit(); }, body);
+    this.selectField('Layer lock', component.locked ? 'locked' : 'unlocked', [['unlocked','Unlocked'],['locked','Locked']], (value) => { component.locked = value === 'locked'; this.render(); this.commit(); }, body);
+
+    const actions = make('div', 'ofp-inspector-actions', this.inspectorBody);
+    if (component.type !== 'keyboard' && component.type !== 'pitchwheel' && component.type !== 'modwheel') {
+      const duplicate = make('button', 'ofp-inspector-action', actions, 'Duplicate');
+      duplicate.type = 'button';
+      duplicate.addEventListener('click', () => this.duplicateSelected());
+    }
+    const remove = make('button', 'ofp-inspector-action ofp-inspector-action--danger', actions, 'Delete');
+    remove.type = 'button';
+    remove.addEventListener('click', () => this.removeSelected());
+  }
     this.inputField('Control label', component.label, 'text', (value) => {
       component.label = value.slice(0, 40);
       this.render();
@@ -1653,6 +2032,49 @@ export class FrontPanelEditor {
   }
 
   renderComponentAppearance(component) {
+    const presets = make('details', 'ofp-advanced', this.inspectorBody);
+    make('summary', 'ofp-advanced__summary', presets, 'Material presets');
+    const presetBody = make('div', 'ofp-advanced__body', presets);
+    this.renderMaterialPresets(presetBody, component);
+    this.selectField('Finish', component.finish || this.state.finish, FINISHES, (value) => {
+      component.finish = value;
+      this.render();
+      this.commit();
+    });
+    this.colorField('Accent', component.accent || this.state.accent, (value, commit) => {
+      component.accent = value;
+      this.faceplate.querySelector('[data-component-id="' + component.id + '"]')?.style.setProperty('--ofp-control-accent', value);
+      if (commit) this.commit();
+    }, this.inspectorBody);
+
+    const advanced = make('details', 'ofp-advanced', this.inspectorBody);
+    make('summary', 'ofp-advanced__summary', advanced, 'Advanced appearance');
+    const body = make('div', 'ofp-advanced__body', advanced);
+    const colors = make('div', 'ofp-field-grid ofp-color-grid', body);
+    this.colorField('Surface', component.surface || '#26313d', (value, commit) => {
+      component.surface = value;
+      this.faceplate.querySelector('[data-component-id="' + component.id + '"]')?.style.setProperty('--ofp-control-surface', value);
+      if (commit) this.commit();
+    }, colors);
+    this.colorField('Legend', component.textColor || this.state.textColor, (value, commit) => {
+      component.textColor = value;
+      this.faceplate.querySelector('[data-component-id="' + component.id + '"]')?.style.setProperty('--ofp-control-text', value);
+      if (commit) this.commit();
+    }, colors);
+    this.colorField('Border', component.borderColor || component.accent || this.state.accent, (value, commit) => {
+      component.borderColor = value;
+      this.faceplate.querySelector('[data-component-id="' + component.id + '"]')?.style.setProperty('--ofp-control-border', value);
+      if (commit) this.commit();
+    }, body);
+    const metrics = make('div', 'ofp-field-grid', body);
+    this.inputField('Inner padding', component.padding ?? 7, 'number', (value) => this.updateComponentProperty(component, 'padding', clamp(value, 0, 48)), metrics);
+    this.inputField('Control spacing', component.gap ?? 5, 'number', (value) => this.updateComponentProperty(component, 'gap', clamp(value, 0, 32)), metrics);
+    const typeMetrics = make('div', 'ofp-field-grid', body);
+    this.inputField('Corner radius', component.radius ?? 7, 'number', (value) => this.updateComponentProperty(component, 'radius', clamp(value, 0, 32)), typeMetrics);
+    this.inputField('Legend size', component.fontSize ?? 8, 'number', (value) => this.updateComponentProperty(component, 'fontSize', clamp(value, 6, 28)), typeMetrics);
+    this.inputField('Border width', component.borderWidth ?? 1, 'number', (value) => this.updateComponentProperty(component, 'borderWidth', clamp(value, 0, 6)), body);
+    this.selectField('Depth', component.shadow || 'soft', [['none','Flat'],['soft','Soft shadow'],['hard','Raised hardware']], (value) => this.updateComponentProperty(component, 'shadow', value), body);
+  }
     this.renderMaterialPresets(this.inspectorBody, component);
     this.selectField('Material', component.finish || this.state.finish, FINISHES, (value) => {
       component.finish = value;
@@ -1834,6 +2256,116 @@ export class FrontPanelEditor {
   }
 
   renderPanelSettings() {
+    this.inputField('Width (' + this.state.unit + ')', this.unitValue(this.state.width), 'number', (value) => {
+      this.state.width = clamp(this.unitPixels(value), 800, 1800);
+      this.state.components.forEach((item) => { item.w = Math.min(item.w, this.state.width); item.x = clamp(item.x, 0, this.state.width - item.w); });
+      this.render();
+      this.commit();
+    });
+    this.inputField('Height (' + this.state.unit + ')', this.unitValue(this.state.height), 'number', (value) => {
+      this.state.height = clamp(this.unitPixels(value), 360, 900);
+      this.state.components.forEach((item) => { item.h = Math.min(item.h, this.state.height); item.y = clamp(item.y, 0, this.state.height - item.h); });
+      this.render();
+      this.commit();
+    });
+    this.selectField('Finish', this.state.finish, FINISHES, (value) => {
+      this.state.finish = value;
+      this.state.components.forEach((item) => { if (!item.finish) item.finish = value; });
+      this.render();
+      this.commit();
+    });
+    this.colorField('Panel colour', this.state.panelColor, (value, commit) => {
+      this.state.panelColor = value;
+      this.faceplate.style.setProperty('--ofp-panel-color', value);
+      if (commit) this.commit();
+    });
+    this.colorField('Accent colour', this.state.accent, (value, commit) => {
+      this.state.accent = value;
+      this.faceplate.style.setProperty('--ofp-accent', value);
+      if (commit) this.commit();
+    });
+
+    const presets = make('details', 'ofp-advanced', this.inspectorBody);
+    make('summary', 'ofp-advanced__summary', presets, 'Material presets');
+    const presetBody = make('div', 'ofp-advanced__body', presets);
+    this.renderMaterialPresets(presetBody);
+
+    const advanced = make('details', 'ofp-advanced', this.inspectorBody);
+    make('summary', 'ofp-advanced__summary', advanced, 'Advanced settings');
+    const body = make('div', 'ofp-advanced__body', advanced);
+    this.selectField('Units', this.state.unit || 'mm', [['px','Pixels'],['mm','Millimetres'],['in','Inches']], (value) => { this.state.unit = value; this.render(); this.commit(); }, body);
+    this.inputField('Safe margin (' + this.state.unit + ')', this.unitValue(this.state.safeMargin ?? 24), 'number', (value) => { this.state.safeMargin = clamp(this.unitPixels(value), 0, 450); this.render(); this.commit(); }, body);
+    this.inputField('Grid spacing (' + this.state.unit + ')', this.unitValue(this.state.gridSize ?? 28), 'number', (value) => { this.state.gridSize = clamp(this.unitPixels(value), 4, 450); this.render(); this.commit(); }, body);
+
+    const frame = make('div', 'ofp-panel-heading ofp-panel-heading--subsection', body);
+    make('strong', '', frame, 'Frame');
+    this.colorField('Frame colour', this.state.panelBorderColor || '#667583', (value, commit) => {
+      this.state.panelBorderColor = value;
+      this.faceplate.style.borderColor = value;
+      if (commit) this.commit();
+    }, body);
+    const frameMetrics = make('div', 'ofp-field-grid', body);
+    this.inputField('Frame width (px)', this.state.panelBorderWidth ?? 1, 'number', (value) => {
+      this.state.panelBorderWidth = clamp(value, 0, 8);
+      this.faceplate.style.borderWidth = this.state.panelBorderWidth + 'px';
+      this.commit();
+    }, frameMetrics);
+    this.inputField('Corner radius (px)', this.state.panelRadius ?? 14, 'number', (value) => {
+      this.state.panelRadius = clamp(value, 0, 40);
+      this.faceplate.style.borderRadius = this.state.panelRadius + 'px';
+      this.commit();
+    }, frameMetrics);
+    this.colorField('Legend colour', this.state.textColor, (value, commit) => {
+      this.state.textColor = value;
+      this.faceplate.style.setProperty('--ofp-text', value);
+      if (commit) this.commit();
+    }, body);
+
+    const guidesHead = make('div', 'ofp-panel-heading ofp-panel-heading--subsection', body);
+    make('strong', '', guidesHead, 'Guides and measurements');
+    (this.state.guides || []).forEach((guide, index) => {
+      const row = make('div', 'ofp-guide-setting', body);
+      make('span', 'ofp-guide-setting__name', row, (guide.axis === 'x' ? 'VERTICAL' : 'HORIZONTAL') + ' GUIDE');
+      this.inputField('Position (' + this.state.unit + ')', this.unitValue(guide.position), 'number', (value) => {
+        guide.position = clamp(this.unitPixels(value), 0, guide.axis === 'x' ? this.state.width : this.state.height);
+        this.render(); this.commit();
+      }, row);
+      this.colorField('Colour', guide.color || '#7de4ff', (value, commit) => {
+        guide.color = value;
+        this.faceplate.querySelectorAll('.ofp-guide-line')[index]?.style.setProperty('--ofp-guide-color', value);
+        if (commit) this.commit();
+      }, row);
+      const removeGuide = make('button', 'ofp-inspector-action ofp-inspector-action--danger', row, 'Remove guide');
+      removeGuide.type = 'button';
+      removeGuide.addEventListener('click', () => { this.state.guides.splice(index, 1); this.render(); this.commit(); });
+    });
+    (this.state.measurements || []).forEach((measurement, index) => {
+      const row = make('div', 'ofp-guide-setting', body);
+      const dx = Math.abs(measurement.x2 - measurement.x1);
+      const dy = Math.abs(measurement.y2 - measurement.y1);
+      const distance = Math.hypot(dx, dy);
+      make('span', 'ofp-guide-setting__name', row, 'MEASUREMENT ' + (index + 1));
+      make('span', 'ofp-measurement-readout', row, 'DIST ' + this.unitText(distance) + ' · X ' + this.unitText(dx) + ' · Y ' + this.unitText(dy));
+      const removeMeasurement = make('button', 'ofp-inspector-action ofp-inspector-action--danger', row, 'Remove measurement');
+      removeMeasurement.type = 'button';
+      removeMeasurement.addEventListener('click', () => { this.state.measurements.splice(index, 1); this.render(); this.commit(); });
+    });
+    const guideActions = make('div', 'ofp-field-grid', body);
+    [['x','Add vertical'],['y','Add horizontal']].forEach(([axis,label]) => {
+      const button = make('button', 'ofp-inspector-action', guideActions, label);
+      button.type = 'button';
+      button.addEventListener('click', () => {
+        this.pendingGuideAxis = axis;
+        this.tool = 'guide';
+        this.viewport.classList.add('is-placing-guide');
+        this.app.msg('Click the faceplate to position the guide.');
+      });
+    });
+    const clearGuides = make('button', 'ofp-inspector-action ofp-inspector-action--danger', body, 'Clear guides and measurements');
+    clearGuides.type = 'button';
+    clearGuides.addEventListener('click', () => { this.state.guides = []; this.state.measurements = []; this.render(); this.commit(); });
+    make('p', 'ofp-field-note', body, 'These settings are saved with the instrument patch.');
+  }
     this.renderMaterialPresets(this.inspectorBody);
     this.inputField('Panel width (' + this.state.unit + ')', this.unitValue(this.state.width), 'number', (value) => {
       this.state.width = clamp(this.unitPixels(value), 800, 1800);
