@@ -82,7 +82,7 @@ export class FrontPanelEditor {
       showGuides: false,
       showSmartGuides: true,
       showSafeMargin: false,
-      snap: true,
+      snap: false,
       guides: [],
       measurements: [],
       panelColor: '#252b32',
