@@ -233,7 +233,7 @@ class Sub37 {
   _buildPerformanceRow() {
     const row = document.createElement('div'); row.className = 's37-row s37-performance';
     const program = this._section('PROGRAMMING');
-    const bank = this._selector('BANK / PRESET', SUB37_PRESETS.map((preset) => ({ value: preset.id, label: `${preset.bank}.${String(preset.slot).padStart(2, '0')}  ${preset.name}` })), 0, (value) => this._applyPreset(Number(value)));
+    const bank = this._selector('BANK / PRESET', SUB37_PRESETS.map((preset) => ({ value: preset.id, label: `${preset.bank}.${String(preset.slot)}  ${preset.name}` })), 0, (value) => this._applyPreset(Number(value)));
     this.presetSelect = bank; program.body.appendChild(bank);
     const presetNode = bank.querySelector('select');
     presetNode.dataset.overturePresetSelector = 'true';
@@ -356,7 +356,7 @@ class Sub37 {
     controls.append(this.buttons.seqPlay, this.buttons.seqRecord, this._button('REST', () => this._setSeqFlag('rest')), this._button('TIE', () => this._setSeqFlag('tie')), this._button('CLEAR', () => this._clearSequence()));
     this.seqPage = this._selector('PAGE', ['1', '2', '3', '4'], '1', (page) => { this.seq.page = Number(page) - 1; this._renderSequence(); }); controls.appendChild(this.seqPage);
     this.stepGrid = document.createElement('div'); this.stepGrid.className = 's37-step-grid';
-    Array.from({ length: 16 }, (_, localIndex) => { const button = this._button(String(localIndex + 1).padStart(2, '0'), () => { this.seq.selected = this.seq.page * 16 + localIndex; this._renderSequence(); }, false, 's37-step'); this.stepGrid.appendChild(button); });
+    Array.from({ length: 16 }, (_, localIndex) => { const button = this._button(String(localIndex + 1), () => { this.seq.selected = this.seq.page * 16 + localIndex; this._renderSequence(); }, false, 's37-step'); this.stepGrid.appendChild(button); });
     section.append(head, controls, this.stepGrid); this._renderSequence(); return section;
   }
 
@@ -434,7 +434,7 @@ class Sub37 {
     }
     this._refreshClock();
     this.displayTop.textContent = preset.bank !== undefined && preset.slot !== undefined
-      ? `${preset.bank}.${String(preset.slot).padStart(2, '0')} ${preset.name || 'COMMUNITY'}`.slice(0, 22)
+      ? `${preset.bank}.${String(preset.slot)} ${preset.name || 'COMMUNITY'}`.slice(0, 22)
       : String(preset.name || 'COMMUNITY PRESET').slice(0, 22);
     this.displayBottom.textContent = preset.initialized ? 'INIT PRESET' : 'PRESET ACTIVE';
   }
