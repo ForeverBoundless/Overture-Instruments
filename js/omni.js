@@ -8,7 +8,8 @@ const dependencyGroups = [
   ['./omni/modules.js?v=20261118-organ-drawbar-r1', './omni/moduleInfo.js?v=20261117-omni-module-expansion-r3', './omni/graph.js?v=20261117-omni-module-expansion-r3', './omni/templates.js?v=20261118-template-organ-layout-r1'],
   ['./shared/presetStore.js', './shared/audioRecorder.js', './shared/midiRecorder.js'],
   ['../ui/Keyboard.js', '../ui/Wheel.js', './engine/MidiManager.js'],
-  ['./shared/panel.js', './shared/midiMap.js']
+  ['./shared/panel.js', './shared/midiMap.js'],
+  ['./omni/front-panel.js?v=20261119-front-panel-r2']
 ];
 let completedGroups = 0;
 const loaded = [];
@@ -44,7 +45,8 @@ const [
   { PitchWheel, ModWheel },
   { MidiManager, midiNoteName },
   { noteToMidi, KEY_TO_SEMI },
-  { registerMidiTarget, registerMidiTargetProvider }
+  { registerMidiTarget, registerMidiTargetProvider },
+  { FrontPanelEditor }
 ] = loaded;
 assertModuleInfoCoverage(MODULES);
 
@@ -127,6 +129,7 @@ class OmniApp {
     catch { this.performanceVisible = true; }
     if (savedWorkspace && typeof savedWorkspace.performanceVisible === 'boolean' && !this.communitySource) this.performanceVisible = savedWorkspace.performanceVisible;
     const keyboardModule = this.patch.modules.find((module) => module.type === 'keyboard');
+    this.workspaceView = savedWorkspace?.workspaceView === 'front' ? 'front' : 'engine';
     this.voiceMode = keyboardModule ? (Number(keyboardModule.params?.mode) === 1 ? 'mono' : 'poly') : (savedWorkspace?.voiceMode === 'mono' ? 'mono' : 'poly');
     this.octaveShift = Number.isFinite(Number(savedWorkspace?.octaveShift)) ? Math.min(3, Math.max(-3, Number(savedWorkspace.octaveShift))) : 0;
     this.keyboardPointerNotes = new Map();
@@ -159,6 +162,13 @@ class OmniApp {
     const project = el('label', 'omni-project', topbar);
     el('span', 'omni-project-label', project, 'INSTRUMENT');
     this.nameInput = el('input', 'omni-name', project); this.nameInput.value = this.patch.name; this.nameInput.placeholder = 'Untitled instrument'; this.nameInput.setAttribute('aria-label', 'Instrument name'); this.nameInput.addEventListener('change', () => { this.patch.name = this.nameInput.value.slice(0, 60) || 'Untitled'; this.nameInput.value = this.patch.name; this.pushHistory(); });
+    this.viewSwitch = el('div', 'omni-view-switch', topbar);
+    this.viewSwitch.setAttribute('role', 'group'); this.viewSwitch.setAttribute('aria-label', 'Instrument design workspace');
+    this.engineViewButton = el('button', 'omni-view-switch__button', this.viewSwitch, 'ENGINE VIEW');
+    this.frontViewButton = el('button', 'omni-view-switch__button', this.viewSwitch, 'FRONT-END VIEW');
+    [this.engineViewButton, this.frontViewButton].forEach((button) => { button.type = 'button'; });
+    this.engineViewButton.addEventListener('click', () => this.setWorkspaceView('engine'));
+    this.frontViewButton.addEventListener('click', () => this.setWorkspaceView('front'));
     this.status = el('div', 'omni-status', topbar, 'Ready. Power on the audio to hear the instrument.');
     const account = el('a', 'header-account omni-account', topbar);
     account.href = '/account'; account.setAttribute('aria-label', 'Log in to your Overture account');
@@ -545,6 +555,22 @@ class OmniApp {
       });
       return out;
     });
+    this.frontPanelEditor = new FrontPanelEditor(this, root);
+    this.setWorkspaceView(this.workspaceView || 'engine', false);
+  }
+
+  setWorkspaceView(view, announce = true) {
+    if (!['engine','front'].includes(view)) return;
+    this.workspaceView = view;
+    this.main.hidden = view === 'front';
+    this.frontPanelEditor.el.hidden = view !== 'front';
+    this.performancePane.hidden = view === 'front' || !this.performanceVisible;
+    this.engineViewButton.setAttribute('aria-pressed', String(view === 'engine'));
+    this.frontViewButton.setAttribute('aria-pressed', String(view === 'front'));
+    this.persistWorkspace();
+    if (view === 'engine') requestAnimationFrame(() => { this.applyView(); this.renderWires(); });
+    else requestAnimationFrame(() => this.frontPanelEditor.scaleFaceplate());
+    if (announce) this.msg(view === 'front' ? 'Front-end design workspace.' : 'Sound engine workspace.');
   }
 
   msg(text, error = false) { this.status.textContent = text; this.status.classList.toggle('is-error', error); }
@@ -586,14 +612,14 @@ class OmniApp {
     try {
       localStorage.setItem('overture.omni.workspace.v1', JSON.stringify({
         version: 1, patch: this.patch, view: this.view, currentId: this.currentId || null,
-        performanceVisible: this.performanceVisible, octaveShift: this.octaveShift, voiceMode: this.voiceMode,
+        performanceVisible: this.performanceVisible, octaveShift: this.octaveShift, voiceMode: this.voiceMode, workspaceView: this.workspaceView || 'engine',
       }));
     } catch (error) { console.warn('Could not save the local OMNI workspace.', error); }
   }
 
   togglePerformancePane() {
     this.performanceVisible = !this.performanceVisible;
-    this.performancePane.hidden = !this.performanceVisible;
+    this.performancePane.hidden = !this.performanceVisible || this.workspaceView === 'front';
     this.performanceToggleBtn.textContent = this.performanceVisible ? 'Hide Performance Pane' : 'Show Performance Pane';
     this.performanceToggleBtn.setAttribute('aria-pressed', String(this.performanceVisible));
     try { localStorage.setItem('overture.omni.performance-visible', String(this.performanceVisible)); }
@@ -1007,6 +1033,7 @@ class OmniApp {
   redo() { if (!this.future.length) return; const s = this.future.pop(); this.history.push(s); this.patch = JSON.parse(s); this.afterLoad(); }
   afterLoad() {
     this.selected = null; this.selectedModules.clear(); this.selectedWire = null;
+    this.frontPanelEditor?.setPatch(this.patch);
     this.nameInput.value = this.patch.name; this.masterInput.value = this.patch.global.master;
     const keyboardModule = this.patch.modules.find((module) => module.type === 'keyboard');
     this.voiceMode = keyboardModule ? (Number(keyboardModule.params?.mode) === 1 ? 'mono' : 'poly') : (this.voiceMode || 'poly');
@@ -1331,6 +1358,7 @@ class OmniApp {
   // ------------------------------------------------------------------ rendering
   render() {
     this.renderCards();
+    this.frontPanelEditor?.refreshValues();
     // Apply layout zoom before measuring ports. Otherwise initial SVG paths
     // are calculated at 1× while the module layer is subsequently scaled.
     this.applyView();
