@@ -2067,12 +2067,12 @@ html[data-theme="light"] #omni-root .ofp-library-item {border-color:rgba(43,59,7
 html[data-theme="light"] #omni-root .ofp-library-item__label {color:#4d6175}
 html[data-theme="light"] #omni-root .ofp-inspector-tab {color:#52677b}
 html[data-theme="light"] #omni-root .ofp-inspector-tab[aria-selected="true"] {color:#15566d;background:rgba(8,127,159,.09)}
-#omni-root dialog.ofp-preview-dialog,
-#omni-root dialog.ofp-check-dialog,
-#omni-root dialog.ofp-guide-dialog {color:#293d51;background:linear-gradient(150deg,#f8fafc,#e8eef4)}
-#omni-root dialog.ofp-check-dialog .ofp-check-item,
-#omni-root dialog.ofp-guide-dialog .ofp-guide-content__section {background:rgba(255,255,255,.6)}
-#omni-root dialog.ofp-guide-dialog .ofp-guide-content__section h3 {color:#26394c}
+html[data-theme="light"] #omni-root dialog.ofp-preview-dialog,
+html[data-theme="light"] #omni-root dialog.ofp-check-dialog,
+html[data-theme="light"] #omni-root dialog.ofp-guide-dialog {color:#293d51;background:linear-gradient(150deg,#f8fafc,#e8eef4)}
+html[data-theme="light"] #omni-root dialog.ofp-check-dialog .ofp-check-item,
+html[data-theme="light"] #omni-root dialog.ofp-guide-dialog .ofp-guide-content__section {background:rgba(255,255,255,.6)}
+html[data-theme="light"] #omni-root dialog.ofp-guide-dialog .ofp-guide-content__section h3 {color:#26394c}
 
 @media(max-width:1120px) {
   #omni-root .omni-topbar {column-gap:10px;grid-template-columns:auto minmax(130px,22vw) minmax(8px,1fr) auto minmax(8px,1fr) auto auto}
