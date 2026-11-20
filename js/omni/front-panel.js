@@ -232,7 +232,7 @@ export class FrontPanelEditor {
     this.stagePanel.insertBefore(tools, this.horizontalRuler);
     const align = make('div', 'ofp-align-tools', this.stagePanel);
     make('span', 'ofp-align-tools__label', align, 'ALIGN');
-    [['left','LEFT'],['centerX','CENTRE X'],['right','RIGHT'],['top','TOP'],['centerY','CENTRE Y'],['bottom','BOTTOM'],['distributeX','SPACE X']].forEach(([mode,label]) => {
+    [['left','LEFT'],['centerX','CENTRE X'],['right','RIGHT'],['top','TOP'],['centerY','CENTRE Y'],['bottom','BOTTOM'],['distributeX','SPACE X'],['distributeY','SPACE Y'],['sameWidth','SAME WIDTH'],['sameHeight','SAME HEIGHT']].forEach(([mode,label]) => {
       const button = make('button', 'ofp-tool-toggle ofp-tool-toggle--compact', align, label);
       button.type = 'button'; button.title = 'Align selected controls: ' + label.toLowerCase();
       button.addEventListener('click', () => this.alignSelection(mode));
@@ -305,6 +305,15 @@ export class FrontPanelEditor {
       let cursor = left;
       ordered.forEach((item)=>{item.x=cursor;cursor+=item.w+gap;});
     }
+    if (mode === 'distributeY' && items.length > 2) {
+      const ordered = [...items].sort((a,b) => a.y-b.y);
+      const occupied = ordered.reduce((sum,item)=>sum+item.h,0);
+      const gap = (bottom-top-occupied)/(ordered.length-1);
+      let cursor = top;
+      ordered.forEach((item)=>{item.y=cursor;cursor+=item.h+gap;});
+    }
+    if (mode === 'sameWidth') { const width = Math.min(...items.map((item)=>this.state.width-item.x)); items.forEach((item)=>{item.w=clamp(width,48,760);}); }
+    if (mode === 'sameHeight') { const height = Math.min(...items.map((item)=>this.state.height-item.y)); items.forEach((item)=>{item.h=clamp(height,36,440);}); }
     this.render();
     this.commit();
   }
@@ -318,16 +327,20 @@ export class FrontPanelEditor {
       if (command && event.key.toLowerCase() === 'd') { event.preventDefault(); event.stopPropagation(); this.duplicateSelected(); }
       else if (command && event.key.toLowerCase() === 'z') { event.preventDefault(); event.stopPropagation(); event.shiftKey ? this.app.redo() : this.app.undo(); }
       else if (event.key === 'Delete' || event.key === 'Backspace') { event.preventDefault(); event.stopPropagation(); this.removeSelected(); }
-      else if (event.key.startsWith('Arrow') && this.selectedId) {
-        const item = this.getComponent(this.selectedId); if (!item || item.locked) return;
-        const step = event.shiftKey ? 10 : 1;
-        if (event.key === 'ArrowLeft') item.x = Math.max(0, item.x-step);
-        if (event.key === 'ArrowRight') item.x = Math.min(this.state.width-item.w, item.x+step);
-        if (event.key === 'ArrowUp') item.y = Math.max(0, item.y-step);
-        if (event.key === 'ArrowDown') item.y = Math.min(this.state.height-item.h, item.y+step);
-        const node = this.faceplate.querySelector('[data-component-id="' + item.id + '"]');
-        if (node) { node.style.left=item.x+'px'; node.style.top=item.y+'px'; }
-        this.commit(); this.renderRulers(); event.preventDefault(); event.stopPropagation();
+      else if (event.key.startsWith('Arrow') && (this.selectedIds?.size || this.selectedId)) {
+        const ids=this.selectedIds?.size?this.selectedIds:new Set([this.selectedId]);
+        const selected=this.state.components.filter((item)=>ids.has(item.id)&&!item.locked);
+        if(!selected.length)return;
+        const step=event.shiftKey?10:1;
+        const dx=event.key==='ArrowLeft'?-step:event.key==='ArrowRight'?step:0;
+        const dy=event.key==='ArrowUp'?-step:event.key==='ArrowDown'?step:0;
+        selected.forEach((item)=>{
+          item.x=clamp(item.x+dx,0,this.state.width-item.w);
+          item.y=clamp(item.y+dy,0,this.state.height-item.h);
+          const node=this.faceplate.querySelector('[data-component-id="'+item.id+'"]');
+          if(node){node.style.left=item.x+'px';node.style.top=item.y+'px';}
+        });
+        this.commit();this.renderRulers();event.preventDefault();event.stopPropagation();
       }
     });
   }
@@ -446,30 +459,33 @@ export class FrontPanelEditor {
   clearSmartGuides() { this.smartGuideLayer?.replaceChildren(); }
 
   snapPosition(component,x,y) {
-    if (this.state.snap) {
-      const size=Math.max(1,Number(this.state.gridSize)||28);
-      x=Math.round(x/size)*size;y=Math.round(y/size)*size;
-    }
+    const grid = Math.max(1,Number(this.state.gridSize)||28);
+    if (this.state.snap) { x=Math.round(x/grid)*grid; y=Math.round(y/grid)*grid; }
     const limit=9/(this.currentScale||1);
-    let alignX=null,alignY=null,bestX=limit,bestY=limit;
+    let alignX=null,alignY=null,bestX=limit,bestY=limit,deltaX=0,deltaY=0;
     const xs=[x,x+component.w/2,x+component.w],ys=[y,y+component.h/2,y+component.h];
     const candidates=this.state.components.filter((item)=>item.id!==component.id&&!item.hidden);
     candidates.forEach((item)=>{
       const targetsX=[item.x,item.x+item.w/2,item.x+item.w];
       const targetsY=[item.y,item.y+item.h/2,item.y+item.h];
-      xs.forEach((pos,index)=>targetsX.forEach((target)=>{
-        const d=Math.abs(pos-target);if(d<bestX){bestX=d;alignX=target;x+=target-pos;}
+      xs.forEach((pos)=>targetsX.forEach((target)=>{
+        const offset=target-pos,d=Math.abs(offset);
+        if(d<bestX){bestX=d;alignX=target;deltaX=offset;}
       }));
-      ys.forEach((pos,index)=>targetsY.forEach((target)=>{
-        const d=Math.abs(pos-target);if(d<bestY){bestY=d;alignY=target;y+=target-pos;}
+      ys.forEach((pos)=>targetsY.forEach((target)=>{
+        const offset=target-pos,d=Math.abs(offset);
+        if(d<bestY){bestY=d;alignY=target;deltaY=offset;}
       }));
     });
-    (this.state.guides||[]).forEach((guide)=>{
+    if(this.state.showGuides) (this.state.guides||[]).forEach((guide)=>{
       const current=guide.axis==='x'?x+component.w/2:y+component.h/2;
       const d=Math.abs(current-guide.position);
-      if(d<limit){if(guide.axis==='x'){x+=guide.position-current;alignX=guide.position;}else{y+=guide.position-current;alignY=guide.position;}}
+      if(d<limit){
+        if(guide.axis==='x'&&d<bestX){bestX=d;deltaX=guide.position-current;alignX=guide.position;}
+        if(guide.axis==='y'&&d<bestY){bestY=d;deltaY=guide.position-current;alignY=guide.position;}
+      }
     });
-    return {x:clamp(x,0,this.state.width-component.w),y:clamp(y,0,this.state.height-component.h),alignX,alignY};
+    return {x:clamp(x+deltaX,0,this.state.width-component.w),y:clamp(y+deltaY,0,this.state.height-component.h),alignX,alignY};
   }
 
   beginMeasurement(event) {
@@ -662,6 +678,9 @@ export class FrontPanelEditor {
   renderComponent(component) {
     const node = make('div', 'ofp-component ofp-component--' + component.type, this.faceplate);
     node.dataset.componentId = component.id;
+    node.tabIndex = 0;
+    node.setAttribute('role', 'group');
+    node.setAttribute('aria-label', (component.label || component.type) + (component.locked ? ', locked' : ''));
     node.style.left = component.x + 'px';
     node.style.top = component.y + 'px';
     node.style.width = component.w + 'px';
@@ -871,8 +890,9 @@ export class FrontPanelEditor {
         this.select(component.id, event.shiftKey || event.ctrlKey || event.metaKey);
         return;
       }
-      if (component.locked) { this.select(component.id, event.shiftKey || event.ctrlKey || event.metaKey); return; }
+      if (component.locked) { this.select(component.id, event.shiftKey || event.ctrlKey || event.metaKey); node.focus({preventScroll:true}); return; }
       event.preventDefault();
+      node.focus({preventScroll:true});
       const multi = event.shiftKey || event.ctrlKey || event.metaKey;
       if (multi || !this.selectedIds?.has(component.id)) this.select(component.id, multi);
       const scale = this.currentScale || 1;
