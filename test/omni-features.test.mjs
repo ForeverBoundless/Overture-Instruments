@@ -508,6 +508,9 @@ test('OMNI front-panel studio parses and keeps its canvas-first editing layout',
   assert.match(editor, /this\.layersRailButton = railButton/);
   assert.match(editor, /this\.panelSettingsButton = railButton/);
   assert.match(editor, /this\.inspector\.hidden = !this\.inspectorOpen/);
+  assert.match(editor, /exportAction\('SVG artwork'/);
+  assert.match(editor, /moreAction\('Save instrument/);
+  assert.match(css, /\.omni-app-header\.is-front-view \.omni-commandbar > \.omni-menu/);
   assert.match(editor, /showRulers: false/);
   assert.match(editor, /showGrid: false/);
   assert.match(editor, /snap: false/);
