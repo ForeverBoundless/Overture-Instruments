@@ -81,7 +81,7 @@
     let touchStartX = null;
     let touchStartY = null;
 
-    if (totalReadout) totalReadout.textContent = String(slides.length).padStart(2, '0');
+    if (totalReadout) totalReadout.textContent = String(slides.length);
 
     const showSlide = (requestedIndex) => {
       currentIndex = (requestedIndex + slides.length) % slides.length;
@@ -99,7 +99,7 @@
         }
       });
 
-      if (currentReadout) currentReadout.textContent = String(currentIndex + 1).padStart(2, '0');
+      if (currentReadout) currentReadout.textContent = String(currentIndex + 1);
     };
 
     previous?.addEventListener('click', () => showSlide(currentIndex - 1));
