@@ -236,7 +236,9 @@ The repository includes a `vercel.json` configuration with `cleanUrls` enabled. 
 │   └── documentation.html     # Section-by-section OMNI user guide
 ├── experiments.html           # Experiments index
 ├── community.html              # Community patch library
-├── login.html                  # Sign-in, account creation and password recovery\n├── account.html                # Account and profile settings\n├── contributions.html          # Contributor profiles and published items
+├── login.html                  # Sign-in, account creation and password recovery
+├── account.html                # Account and profile settings
+├── contributions.html          # Contributor profiles and published items
 ├── html/                      # Individual instrument page documents
 ├── experiments/               # Individual experiment route documents
 ├── css/                       # Site, library, instrument, OMNI and lab styles (including omni-documentation.css)
@@ -248,7 +250,9 @@ The repository includes a `vercel.json` configuration with `cleanUrls` enabled. 
 │   ├── experiments/           # Shared implementation for the eight sound labs
 │   └── *.js                   # Page-level instrument and site controllers
 ├── ui/                        # Reusable controls, fonts, logos and images
-├── supabase/                  # Community/account setup guide and SQL migrations\n├── test/                      # Unit, browser-contract and OMNI feature tests\n├── docs/                      # Architecture and design notes
+├── supabase/                  # Community/account setup guide and SQL migrations
+├── test/                      # Unit, browser-contract and OMNI feature tests
+├── docs/                      # Architecture and design notes
 ├── LICENSE                    # MIT license with third-party-materials scope notes
 ├── README.md
 └── vercel.json                # Clean URL configuration
