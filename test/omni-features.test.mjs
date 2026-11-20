@@ -375,27 +375,37 @@ test('OMNI front-panel validation remains backwards-compatible and sanitizes imp
   const oldPatch = graph.validatePatch(patch);
   assert.equal(oldPatch.frontPanel, undefined);
   const filter = patch.modules.find((item) => item.type === 'filter');
+  const organ = { id: 'organ1', type: 'nordOrgan', x: 30, y: 30, params: graph.defaultParams('nordOrgan') };
+  patch.modules.push(organ);
   patch.frontPanel = {
     width: 1240, height: 520, finish: 'walnut', unit: 'mm', zoom: 1.5,
-    panelColor: '#252d35', safeMargin: 24, gridSize: 28,
+    panelColor: '#252d35', safeMargin: 400, gridSize: 28,
     guides: [{ id: 'g1', axis: 'x', position: 600, color: '#7de4ff' }],
     measurements: [{ x1: 10, y1: 10, x2: 100, y2: 100 }],
     components: [
       { id: 'knob1', type: 'knob', label: 'CUTOFF', x: 12, y: 12, w: 100, h: 120, bind: { moduleId: filter.id, paramKey: 'cutoff' }, finish: 'brushed' },
       { id: 'bad1', type: 'script', x: 0, y: 0 },
       { id: 'orphan1', type: 'slider', x: 0, y: 0, bind: { moduleId: 'missing', paramKey: 'cutoff' } },
+      { id: 'drawbars1', type: 'drawbars', x: 20, y: 200, bind: { moduleId: organ.id }, margin: 150 },
+      { id: 'bad id', type: 'label', x: 10, y: 10, text: 'SAFE TEXT' },
+      { id: 'bad id', type: 'label', x: 30, y: 30, text: 'SECOND LABEL' },
     ],
   };
   const validated = graph.validatePatch(patch);
-  assert.equal(validated.frontPanel.components.length, 2);
+  assert.equal(validated.frontPanel.components.length, 5);
   assert.equal(validated.frontPanel.components[0].bind.moduleId, filter.id);
   assert.equal(validated.frontPanel.components[0].bind.paramKey, 'cutoff');
   assert.equal(validated.frontPanel.components[1].bind, undefined);
+  assert.equal(validated.frontPanel.components[2].bind.moduleId, organ.id);
+  assert.ok(validated.frontPanel.components[2].margin <= 180);
+  assert.notEqual(validated.frontPanel.components[3].id, validated.frontPanel.components[4].id);
+  assert.match(validated.frontPanel.components[3].id, /^[a-zA-Z0-9_-]+$/);
   assert.equal(validated.frontPanel.finish, 'walnut');
   assert.equal(validated.frontPanel.unit, 'mm');
   assert.equal(validated.frontPanel.zoom, 1.5);
   assert.equal(validated.frontPanel.guides[0].axis, 'x');
   assert.equal(validated.frontPanel.measurements.length, 1);
+  assert.equal(validated.frontPanel.safeMargin, 400);
   const unsafe = graph.validatePatch({ ...patch, frontPanel: { ...patch.frontPanel, panelColor: 'url(javascript:alert(1))', zoom: 99, components: patch.frontPanel.components } });
   assert.equal(unsafe.frontPanel.panelColor, '#252d35');
   assert.equal(unsafe.frontPanel.zoom, 3);
