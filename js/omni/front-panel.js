@@ -801,25 +801,33 @@ export class FrontPanelEditor {
     if (!Array.isArray(raw)) return [];
     return raw.map((item, index) => {
       if (item && typeof item === 'object') {
-        return { value: Number.isFinite(Number(item.value)) ? Number(item.value) : index, label: String(item.label ?? item.name ?? item.value ?? index) };
+        return {
+          value: Object.prototype.hasOwnProperty.call(item, 'value') ? item.value : index,
+          label: String(item.label ?? item.name ?? item.value ?? index),
+        };
       }
       return { value: index, label: String(item) };
     });
   }
 
-  getValue(component, key = null) {
+  getRawValue(component, key = null) {
     if (component.type === 'drawbars' && key) {
       const bound = this.getParameter(component, key);
-      return bound ? Number(bound.module.params[key]) : Number(component.value || 0);
+      return bound ? bound.module.params[key] : (component.value ?? 0);
     }
     const bound = this.getParameter(component);
-    if (bound) return Number(bound.module.params[bound.parameter.key]);
+    if (bound) return bound.module.params[bound.parameter.key];
     if (component.type === 'pitchwheel') return Number(this.app.pitchBend || 0);
     if (component.type === 'modwheel') return Number(this.app.modWheelValue || 0);
-    return Number(component.value ?? 0.5);
+    return component.value ?? 0.5;
   }
 
-  rangeRatio(range, value) {
+    getValue(component, key = null) {
+    const value = this.getRawValue(component, key);
+    return Number(value ?? 0.5);
+  }
+
+    rangeRatio(range, value) {
     const number = Number(value);
     if (range.log && range.min > 0 && range.max > range.min) {
       return clamp((Math.log(Math.max(range.min, number)) - Math.log(range.min)) / (Math.log(range.max) - Math.log(range.min)), 0, 1);
@@ -997,19 +1005,25 @@ export class FrontPanelEditor {
       const select = make('select', 'ofp-dropdown', node);
       const bound = this.getParameter(component);
       const options = this.getOptions(bound);
-      if (options.length) options.forEach((item) => {
-        const option = make('option', '', select, item.label);
-        option.value = String(item.value);
-      });
-      else {
-        ['Option 1', 'Option 2', 'Option 3', 'Option 4'].forEach((label, index) => {
-          const option = make('option', '', select, label);
+      if (options.length) {
+        options.forEach((item, index) => {
+          const option = make('option', '', select, item.label);
           option.value = String(index);
         });
+        const rawValue = this.getRawValue(component);
+        const selectedIndex = options.findIndex((item) => String(item.value) === String(rawValue));
+        select.selectedIndex = selectedIndex >= 0 ? selectedIndex : 0;
+      } else {
+        const option = make('option', '', select, 'Connect a parameter in Behaviour');
+        option.value = '';
+        option.disabled = true;
       }
-      select.value = String(this.getValue(component));
       select.addEventListener('change', () => {
-        this.changeParameter(component, null, Number(select.value), true);
+        const selected = options[select.selectedIndex];
+        if (selected) {
+          this.changeParameter(component, null, selected.value, true);
+          this.refreshValues();
+        }
       });
     } else if (component.type === 'switch') {
       const button = make('button', 'ofp-switch' + (this.getValue(component) > .5 ? ' is-on' : ''), node);
@@ -1025,8 +1039,17 @@ export class FrontPanelEditor {
     } else if (component.type === 'button') {
       const button = make('button', 'ofp-hardware-button', node, component.label || 'BUTTON');
       button.type = 'button';
+      const bound = this.getParameter(component);
+      button.classList.toggle('is-bound', Boolean(bound));
       button.addEventListener('click', () => {
-        if (component.action === 'panic') this.app.allOff();
+        const current = this.getParameter(component);
+        if (current && component.action === 'toggle') {
+          const min = Number(current.parameter.min);
+          const max = Number(current.parameter.max);
+          const midpoint = (min + max) / 2;
+          this.changeParameter(component, null, this.getValue(component) > midpoint ? min : max, true);
+          this.refreshValues();
+        } else if (component.action === 'panic') this.app.allOff();
       });
     } else if (component.type === 'keyboard') {
       this.renderKeyboard(component, node);
@@ -1668,7 +1691,12 @@ export class FrontPanelEditor {
       } else if (component.type === 'dropdown') {
         const node = this.faceplate.querySelector('[data-component-id="' + component.id + '"]');
         const select = node?.querySelector('select');
-        if (select) select.value = String(this.getValue(component));
+        if (select) {
+          const options = this.getOptions(this.getParameter(component));
+          const rawValue = this.getRawValue(component);
+          const index = options.findIndex((item) => String(item.value) === String(rawValue));
+          if (index >= 0) select.selectedIndex = index;
+        }
       } else if (component.type === 'led') {
         const node = this.faceplate.querySelector('[data-component-id="' + component.id + '"]');
         node?.querySelector('.ofp-led')?.classList.toggle('is-on', Boolean(this.app.ctx));
