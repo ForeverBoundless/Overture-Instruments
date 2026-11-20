@@ -3746,3 +3746,13 @@ html[data-theme="light"] #omni-root .ofp-inspector-action--danger,
 html[data-theme="light"] #omni-root dialog.ofp-check-dialog .ofp-check-item--error>span {
   color:#ad4942;
 }
+
+/* Small labels on the metallic keybed need contrast against its light finish. */
+html[data-theme="light"] #omni-root .ofp-keyboard__octave-mark {
+  color:#435664;
+}
+
+/* Encoder readouts follow each control's own accent on every panel finish. */
+#omni-root .ofp-component--encoder .ofp-component__value {
+  color:var(--ofp-control-accent);
+}
