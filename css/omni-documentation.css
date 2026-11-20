@@ -429,3 +429,37 @@ html[data-theme="light"] .omni-doc-faq details {
   html { scroll-behavior: auto; }
   .omni-docs-nav__links a { transition: none; }
 }
+
+/* Keep the shared site chrome on the same blue accent as OMNI documentation. */
+.omni-docs-page .site-header .header-account:hover,
+.omni-docs-page .site-header .header-account:focus-visible {
+  border-color: var(--cyan) !important;
+  color: var(--cyan) !important;
+  background: rgba(125,228,255,.075) !important;
+}
+html[data-theme="light"] .omni-docs-page .site-header .header-account:hover,
+html[data-theme="light"] .omni-docs-page .site-header .header-account:focus-visible {
+  background: rgba(8,127,159,.065) !important;
+}
+.omni-docs-page .site-footer,
+.omni-docs-page .contact-modal {
+  --amber: var(--cyan);
+}
+.omni-docs-page .site-footer .footer-contact:hover {
+  border-color: var(--cyan);
+  background: rgba(125,228,255,.075);
+}
+.omni-docs-page .contact-modal .button--primary {
+  color: #082230;
+  background: linear-gradient(135deg, #d9f7ff, #83dcf7);
+  box-shadow: 0 7px 28px rgba(49,174,216,.16), inset 0 1px rgba(255,255,255,.6);
+}
+.omni-docs-page .contact-modal .button--primary:hover {
+  box-shadow: 0 10px 35px rgba(49,174,216,.24), inset 0 1px rgba(255,255,255,.6);
+}
+.omni-docs-page .contact-field .contact-editor__body:focus,
+.omni-docs-page .contact-field input:focus,
+.omni-docs-page .contact-field textarea:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 3px rgba(125,228,255,.14);
+}
