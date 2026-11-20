@@ -110,7 +110,7 @@ test('OMNI performance deck keeps octave controls in the keyboard header and giv
 
 
 test('OMNI keyboard spans five octaves and status text avoids the centered theme toggle', async () => {
-  const [source, css, page, worker] = await Promise.all([
+  const [source, css, page, worker, keyboard] = await Promise.all([
     readFile(new URL('../js/omni.js', import.meta.url), 'utf8'),
     readFile(new URL('../css/omni.css', import.meta.url), 'utf8'),
     readFile(new URL('../omni.html', import.meta.url), 'utf8'),
