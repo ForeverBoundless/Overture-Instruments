@@ -1932,7 +1932,9 @@ html[data-theme="light"] #omni-root .ofp-measurement-readout{color:#087f9f}
   border-color:transparent;background:transparent;box-shadow:none!important;overflow:visible;
   padding:var(--ofp-padding,7px);isolation:isolate;
 }
-#omni-root .ofp-component::after {display:none}
+#omni-root .ofp-component::after {display:block;inset:calc(-1 * var(--ofp-clearance,0px));border-color:transparent}
+#omni-root .ofp-component.is-selected::after {border-color:rgba(125,228,255,.34)}
+#omni-root .ofp-component.is-locked::after {border-color:rgba(255,183,94,.22)}
 #omni-root .ofp-component.is-selected {outline:1px solid rgba(125,228,255,.65);outline-offset:3px;border-radius:5px}
 #omni-root .ofp-component__title {
   position:relative;z-index:1;width:100%;color:var(--ofp-control-text);font:650 var(--ofp-font-size,8px)/1.2 var(--font-mono);
@@ -2108,3 +2110,51 @@ html[data-theme="light"] body>dialog.ofp-guide-dialog .ofp-guide-content__sectio
 #omni-root .ofp-faceplate.is-test-mode .ofp-component.is-selected {outline:none}
 #omni-root .ofp-action[aria-pressed="true"] {border-color:rgba(130,230,168,.56);color:#152a21;background:linear-gradient(135deg,#c3f2d4,#82e6a8)}
 #omni-root .ofp-action[aria-pressed="true"]:hover {background:linear-gradient(135deg,#d5f7e1,#a2ecc0)}
+
+/* Let inspector colour and finish settings change the hardware itself. */
+#omni-root .ofp-knob__cap {
+  background:radial-gradient(circle at 35% 25%,rgba(255,255,255,.35),transparent 20%),linear-gradient(145deg,rgba(255,255,255,.16),rgba(0,0,0,.45)),var(--ofp-control-surface,#26313d);
+}
+#omni-root .ofp-knob__bezel {border-color:var(--ofp-control-border,#8998a5)}
+#omni-root .ofp-switch__track {
+  border-color:var(--ofp-control-border,#687786);
+  background:linear-gradient(180deg,rgba(0,0,0,.42),rgba(255,255,255,.08)),var(--ofp-control-surface,#26313d);
+}
+#omni-root .ofp-dropdown {
+  border-color:var(--ofp-control-border);
+  background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(0,0,0,.42)),var(--ofp-control-surface,#26313d);
+}
+#omni-root .ofp-slider__input::-webkit-slider-thumb {
+  border-color:var(--ofp-control-border,#d2dce2);
+  background:linear-gradient(180deg,rgba(255,255,255,.72),rgba(0,0,0,.2)),var(--ofp-control-surface,#aab6bf);
+}
+#omni-root .ofp-slider__input::-moz-range-thumb {
+  border-color:var(--ofp-control-border,#d2dce2);
+  background:linear-gradient(180deg,rgba(255,255,255,.72),rgba(0,0,0,.2)),var(--ofp-control-surface,#aab6bf);
+}
+#omni-root .ofp-component--keyboard .ofp-keyboard {background:linear-gradient(180deg,rgba(255,255,255,.12),rgba(0,0,0,.48)),var(--ofp-control-surface,#141c23)}
+#omni-root .ofp-component--drawbars .ofp-drawbars {background:linear-gradient(150deg,rgba(255,255,255,.12),rgba(0,0,0,.45)),var(--ofp-control-surface,#0a1118)}
+#omni-root .ofp-component--module {border:1px solid var(--ofp-control-border);border-radius:var(--ofp-radius,7px);background:linear-gradient(150deg,rgba(255,255,255,.12),rgba(0,0,0,.38)),var(--ofp-control-surface);box-shadow:0 4px 12px rgba(0,0,0,.24),inset 0 1px rgba(255,255,255,.18)!important}
+#omni-root .ofp-component[data-finish="brushed"] .ofp-knob__cap,
+#omni-root .ofp-component[data-finish="brushed"] .ofp-switch__track,
+#omni-root .ofp-component[data-finish="brushed"] .ofp-hardware-button {
+  background:repeating-linear-gradient(0deg,rgba(255,255,255,.12) 0 1px,transparent 1px 3px),linear-gradient(145deg,#d9e0e4,#798791 48%,#303d47);
+}
+#omni-root .ofp-component[data-finish="anodized"] .ofp-knob__cap,
+#omni-root .ofp-component[data-finish="anodized"] .ofp-hardware-button {
+  background:linear-gradient(145deg,rgba(125,228,255,.3),rgba(0,0,0,.4)),var(--ofp-control-surface);
+}
+#omni-root .ofp-component[data-finish="walnut"] .ofp-knob__cap,
+#omni-root .ofp-component[data-finish="walnut"] .ofp-hardware-button {
+  background:repeating-linear-gradient(0deg,rgba(98,55,28,.32) 0 2px,transparent 2px 6px),linear-gradient(145deg,#bc8b63,#5f3827 70%);
+  border-color:#84563a;
+}
+#omni-root .ofp-component[data-finish="ivory"] .ofp-knob__cap,
+#omni-root .ofp-component[data-finish="ivory"] .ofp-hardware-button {
+  background:linear-gradient(145deg,#fff9e9,#c9c2ac 65%,#968f7c);
+  border-color:#a79f8c;
+}
+#omni-root .ofp-component[data-finish="walnut"] .ofp-switch__track,
+#omni-root .ofp-component[data-finish="ivory"] .ofp-switch__track {
+  background:linear-gradient(180deg,rgba(0,0,0,.32),rgba(255,255,255,.12)),var(--ofp-control-surface);
+}
