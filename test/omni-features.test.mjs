@@ -102,7 +102,7 @@ test('OMNI performance deck keeps octave controls in the keyboard header and giv
   assert.match(css, /\.omni-keys \.lp-keyboard[^}]*width:100%/);
   assert.match(css, /\.omni-keys \.lp-keyboard[^}]*min-width:520px/);
   assert.match(page, /omni\.css\?v=20261119-front-panel-r16/);
-  assert.match(page, /omni-launcher\.js\?v=20261119-front-panel-r17/);
+  assert.match(page, /omni-launcher\.js\?v=20261119-front-panel-r18/);
   assert.match(worker, /overture-shell-v\d+/);
   assert.match(worker, /omni\.css\?v=20261119-front-panel-r16/);
   assert.ok(worker.includes('/js/omni-launcher.js?v=20261119-front-panel-r18'));
@@ -122,7 +122,7 @@ test('OMNI keyboard spans five octaves and status text avoids the centered theme
   assert.match(keyboard, /const whiteKeyWidthPct = 100 \/ whiteKeys\.length;/);
   assert.match(css, /\.omni-commandbar > \.omni-status[\s\S]*text-align:right/);
   assert.match(source, /commandbar\.appendChild\(this\.status\)/);
-  assert.match(page, /omni-launcher\.js\?v=20261119-front-panel-r17/);
+  assert.match(page, /omni-launcher\.js\?v=20261119-front-panel-r18/);
   assert.match(worker, /overture-shell-v\d+/);
 });
 
@@ -229,7 +229,7 @@ test('OMNI performance pane can be shown/hidden from View and remembers its stat
   assert.match(source, /localStorage\.setItem\('overture\.omni\.performance-visible'/);
   assert.match(source, /this\.performanceToggleBtn\.setAttribute\('aria-pressed'/);
   assert.match(css, /#omni-root > \.omni-perf\[hidden\]\s*\{\s*display:none !important/);
-  assert.match(page, /omni-launcher\.js\?v=20261119-front-panel-r17/);
+  assert.match(page, /omni-launcher\.js\?v=20261119-front-panel-r18/);
   assert.match(worker, /overture-shell-v\d+/);
 });
 
@@ -292,7 +292,7 @@ test('OMNI exposes native SEM and Mellotron instrument modules and refreshes off
   assert.match(graph, /20261118-organ-drawbar-r1/);
   assert.match(templates, /SEM Warm Ensemble/);
   assert.match(templates, /Mellotron Choir/);
-  assert.match(page, /omni-launcher\.js\?v=20261119-front-panel-r17/);
+  assert.match(page, /omni-launcher\.js\?v=20261119-front-panel-r18/);
   assert.match(worker, /overture-shell-v\d+/);
   assert.match(worker, /OberheimEightVoiceProcessor\.js/);
   assert.match(worker, /MellotronProcessor\.js/);
@@ -326,7 +326,7 @@ test('every OMNI module has a complete technical reference and the inspector can
   assert.match(styles, /html\[data-theme="light"\] \.omni-info-dialog/);
   assert.match(styles, /\.omni-info-dialog\s*\{/);
   assert.match(page, /omni-info\.css\?v=20261114-info-type/);
-  assert.match(page, /omni-launcher\.js\?v=20261119-front-panel-r17/);
+  assert.match(page, /omni-launcher\.js\?v=20261119-front-panel-r18/);
   assert.match(worker, /overture-shell-v\d+/);
   assert.match(worker, /omni-info\.css\?v=20261114-info-type/);
   assert.match(worker, /moduleInfo\.js\?v=20261117-omni-module-expansion-r3/);
