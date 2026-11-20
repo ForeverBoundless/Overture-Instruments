@@ -1721,7 +1721,7 @@ html[data-theme="light"] #omni-root .omni-organ-drawbar__value {color:#087f9f}
 .ofp-key.is-active{background:var(--ofp-control-accent);filter:brightness(1.12)}
 .ofp-wheel{position:relative;display:flex;align-items:center;justify-content:center;flex:1;width:55%;border:1px solid rgba(255,255,255,.16);border-radius:5px;background:linear-gradient(90deg,#0b1118,#47525d,#0b1118)}
 .ofp-wheel__track{width:9px;height:80%;border-radius:8px;background:linear-gradient(180deg,#111,#b6c2cb,#111);box-shadow:0 0 0 1px #05090d}
-.ofp-wheel__cap{position:absolute;width:65%;height:15%;border:1px solid #aab5bd;border-radius:4px;background:linear-gradient(180deg,#f0f3f5,#71808c);pointer-events:none}
+.ofp-wheel__cap{position:absolute;left:17.5%;top:var(--ofp-wheel-position,50%);transform:translateY(-50%);width:65%;height:15%;border:1px solid #aab5bd;border-radius:4px;background:linear-gradient(180deg,#f0f3f5,#71808c);pointer-events:none}
 .ofp-wheel__input{position:absolute;inset:0;width:100%;height:100%;opacity:0;writing-mode:vertical-lr;direction:rtl;cursor:ns-resize}
 .ofp-module__name{font:600 12px var(--font-body);text-align:center}.ofp-module__id,.ofp-module__ports{color:var(--ofp-control-accent);font:8px var(--font-mono);text-align:center}
 .ofp-display{display:grid;align-content:center;gap:5px;width:100%;height:100%;padding:8px;border:1px solid var(--ofp-control-accent);border-radius:3px;background:linear-gradient(135deg,rgba(125,228,255,.06),transparent),#071218;box-shadow:inset 0 0 14px rgba(0,0,0,.65);color:var(--ofp-control-accent);font:9px/1.35 var(--font-mono);white-space:pre-wrap}
