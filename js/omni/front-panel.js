@@ -881,7 +881,9 @@ export class FrontPanelEditor {
   }
 
   bindResize(handle, node, component) {
+    handle.disabled = Boolean(component.locked);
     handle.addEventListener('pointerdown', (event) => {
+      if (component.locked) return;
       event.preventDefault();
       event.stopPropagation();
       const scale = this.currentScale || 1;
@@ -952,8 +954,9 @@ export class FrontPanelEditor {
   }
 
   removeSelected() {
-    if (!this.selectedId) return;
-    this.state.components = this.state.components.filter((item) => item.id !== this.selectedId);
+    const ids = this.selectedIds?.size ? new Set(this.selectedIds) : new Set(this.selectedId ? [this.selectedId] : []);
+    if (!ids.size) return;
+    this.state.components = this.state.components.filter((item) => !ids.has(item.id));
     this.selectedId = null;
     this.selectedIds?.clear();
     this.render();
@@ -961,15 +964,20 @@ export class FrontPanelEditor {
   }
 
   duplicateSelected() {
-    const component = this.getComponent(this.selectedId);
-    if (!component) return;
-    const copy = clone(component);
-    copy.id = id(); copy.locked = false; copy.hidden = false;
-    copy.x = clamp(copy.x + 26, 0, this.state.width - copy.w);
-    copy.y = clamp(copy.y + 26, 0, this.state.height - copy.h);
-    this.state.components.push(copy);
-    this.selectedId = copy.id;
-    this.selectedIds = new Set([copy.id]);
+    const selected = this.selectedIds?.size
+      ? this.state.components.filter((item) => this.selectedIds.has(item.id))
+      : [this.getComponent(this.selectedId)].filter(Boolean);
+    const copies = selected.filter((item) => !item.locked).map((component) => {
+      const copy = clone(component);
+      copy.id = id(); copy.locked = false; copy.hidden = false;
+      copy.x = clamp(copy.x + 26, 0, this.state.width - copy.w);
+      copy.y = clamp(copy.y + 26, 0, this.state.height - copy.h);
+      return copy;
+    });
+    if (!copies.length) return;
+    this.state.components.push(...copies);
+    this.selectedIds = new Set(copies.map((item) => item.id));
+    this.selectedId = copies.length === 1 ? copies[0].id : null;
     this.render();
     this.commit();
   }
@@ -1099,7 +1107,6 @@ export class FrontPanelEditor {
     this.colorField('Legend colour', component.textColor || this.state.textColor, (value, commit) => { component.textColor = value; this.faceplate.querySelector('[data-component-id="' + component.id + '"]')?.style.setProperty('--ofp-control-text', value); if (commit) this.commit(); });
     this.colorField('Border colour', component.borderColor || component.accent || this.state.accent, (value, commit) => { component.borderColor = value; this.faceplate.querySelector('[data-component-id="' + component.id + '"]')?.style.setProperty('--ofp-control-border', value); if (commit) this.commit(); });
     if (component.type === 'pad') this.inputField('MIDI note', component.note ?? 60, 'number', (value) => { component.note = clamp(value, 0, 127); this.render(); this.commit(); });
-    if (component.type === 'label' || component.type === 'section') this.inputField('Text', component.text || '', 'text', (value) => { component.text = value.slice(0, 80); this.render(); this.commit(); });
     if (component.type !== 'keyboard' && component.type !== 'pitchwheel' && component.type !== 'modwheel') {
       const duplicate = make('button', 'ofp-inspector-action', this.inspectorBody, 'DUPLICATE CONTROL');
       duplicate.type = 'button';
@@ -1113,13 +1120,13 @@ export class FrontPanelEditor {
   renderPanelSettings() {
     this.inputField('Panel width (' + this.state.unit + ')', this.unitValue(this.state.width), 'number', (value) => {
       this.state.width = clamp(this.unitPixels(value), 800, 1800);
-      this.state.components.forEach((item) => { item.x = clamp(item.x, 0, this.state.width - 36); });
+      this.state.components.forEach((item) => { item.w = Math.min(item.w, this.state.width); item.x = clamp(item.x, 0, this.state.width - item.w); });
       this.render();
       this.commit();
     });
     this.inputField('Panel height (' + this.state.unit + ')', this.unitValue(this.state.height), 'number', (value) => {
       this.state.height = clamp(this.unitPixels(value), 360, 900);
-      this.state.components.forEach((item) => { item.y = clamp(item.y, 0, this.state.height - 36); });
+      this.state.components.forEach((item) => { item.h = Math.min(item.h, this.state.height); item.y = clamp(item.y, 0, this.state.height - item.h); });
       this.render();
       this.commit();
     });
@@ -1200,6 +1207,7 @@ export class FrontPanelEditor {
     this.state = patch.frontPanel ? clone(patch.frontPanel) : this.defaultLayout();
     patch.frontPanel = this.state;
     this.selectedId = null;
+    this.selectedIds?.clear();
     this.render();
   }
 
