@@ -696,6 +696,7 @@ export class FrontPanelEditor {
     node.style.setProperty('--ofp-border-width', clamp(component.borderWidth ?? 1, 0, 6) + 'px');
     node.dataset.shadow = ['none','soft','hard'].includes(component.shadow) ? component.shadow : 'soft';
     node.dataset.finish = component.finish || 'matte';
+    node.dataset.orientation = component.orientation || 'horizontal';
     node.classList.toggle('is-selected', this.selectedIds?.has(component.id) || component.id === this.selectedId);
     node.classList.toggle('is-locked', Boolean(component.locked));
     node.hidden = Boolean(component.hidden);
@@ -1397,9 +1398,16 @@ export class FrontPanelEditor {
         shape += '<path d="M '+cx+' '+(y+h*.56-r*.65)+' L '+(cx+Math.sin(angle)*r*.75)+' '+(y+h*.56-Math.cos(angle)*r*.75)+'" stroke="'+accent+'" stroke-width="3" stroke-linecap="round"/>';
         shape += '<path d="M '+(cx-r*1.5)+' '+(y+h*.56+r*1.55)+' A '+(r*1.5)+' '+(r*1.5)+' 0 1 1 '+(cx+r*1.5)+' '+(y+h*.56+r*1.55)+'" fill="none" stroke="'+accent+'" stroke-opacity=".65"/>';
       } else if (component.type === 'slider') {
-        const ratio=valueRatio(component), trackX=cx-3, trackY=y+28, trackH=Math.max(12,h-52);
-        shape += rect(trackX,trackY,6,trackH,'#111820','#73808b',3);
-        shape += rect(cx-10,trackY+trackH*(1-ratio)-5,20,10,'#cbd4da','#64727d',3);
+        const ratio=valueRatio(component);
+        if (component.orientation === 'horizontal') {
+          const trackX=x+18, trackW=Math.max(12,w-36), trackY=cy-3;
+          shape += rect(trackX,trackY,trackW,6,'#111820','#73808b',3);
+          shape += rect(trackX+trackW*ratio-5,cy-10,10,20,'#cbd4da','#64727d',3);
+        } else {
+          const trackX=cx-3,trackY=y+28,trackH=Math.max(12,h-52);
+          shape += rect(trackX,trackY,6,trackH,'#111820','#73808b',3);
+          shape += rect(cx-10,trackY+trackH*(1-ratio)-5,20,10,'#cbd4da','#64727d',3);
+        }
       } else if (component.type === 'dropdown') {
         shape += rect(x+12,y+26,w-24,Math.max(18,h-36),'#17222c',border,4);
         shape += '<path d="M '+(x+w-30)+' '+(y+h/2-2)+' l 6 6 l 6 -6" fill="none" stroke="'+accent+'" stroke-width="1.5"/>';
