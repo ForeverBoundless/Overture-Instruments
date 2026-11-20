@@ -1892,7 +1892,7 @@ export class FrontPanelEditor {
     }
     const errors=findings.filter((item)=>item.level==='error').length;
     const warnings=findings.filter((item)=>item.level==='warning').length;
-    const dialog=make('dialog','ofp-check-dialog',document.body);
+    const dialog=make('dialog','ofp-check-dialog',this.el);
     const header=make('header','ofp-check-dialog__header',dialog);
     const head=make('div','',header);
     make('span','ofp-panel-heading__eyebrow',head,'FRONT-PANEL VALIDATION');
@@ -1915,7 +1915,7 @@ export class FrontPanelEditor {
   }
 
   openGuide() {
-    const dialog=make('dialog','ofp-guide-dialog',document.body);
+    const dialog=make('dialog','ofp-guide-dialog',this.el);
     const header=make('header','ofp-check-dialog__header',dialog);
     const title=make('div','',header);
     make('span','ofp-panel-heading__eyebrow',title,'OMNI FRONT-PANEL STUDIO');
