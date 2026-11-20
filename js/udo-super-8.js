@@ -121,13 +121,13 @@ class Super8App{
   p.seqSlot=index;
   p.seqBanks[index]={seqSteps:p.seqSteps.slice(),seqChords:p.seqChords.map(chord=>Array.isArray(chord)?chord.slice():null),seqSlides:p.seqSlides.slice(),seqAccents:p.seqAccents.slice(),seqGates:p.seqGates.slice(),seqLength:p.seqLength,seqSwing:p.seqSwing,seqBpm:p.seqBpm};
   this.engine.post({t:'param',layer:this.active,key:'seqBanks',value:p.seqBanks});
-  this.display.flash('SEQUENCE '+String(index+1).padStart(2,'0')+' STORED');
+  this.display.flash('SEQUENCE '+String(index+1)+' STORED');
  }
  loadSequence(slot=this.p().seqSlot){
   const p=this.p(),index=Math.max(0,Math.min(15,Math.round(Number(slot)||0))),bank=p.seqBanks[index];
   if(!bank){this.display.flash('SEQUENCE SLOT EMPTY');return;}
   ['seqSteps','seqChords','seqSlides','seqAccents','seqGates','seqLength','seqSwing','seqBpm'].forEach(key=>{p[key]=clone(bank[key]);this.engine.post({t:'param',layer:this.active,key,value:p[key]});});
-  p.seqSlot=index;this.renderSeq();this.syncHardware();this.display.flash('SEQUENCE '+String(index+1).padStart(2,'0')+' LOADED');
+  p.seqSlot=index;this.renderSeq();this.syncHardware();this.display.flash('SEQUENCE '+String(index+1)+' LOADED');
  }
  recordSequenceNoteOn(note,velocity){
   const p=this.p();if(!p.seqRecord)return;
@@ -142,7 +142,7 @@ class Super8App{
   p.seqChords[step]=chord;p.seqSteps[step]=chord[0];p.seqSlides[step]=false;p.seqAccents[step]=false;
   p.seqRecordStep=(step+1)%Math.max(1,Math.min(64,p.seqLength||16));
   this.seqPage=Math.floor(step/16);this.postSequence();this.renderSeq();this.syncHardware();
-  this.display.flash('RECORDED STEP '+String(step+1).padStart(2,'0'));
+  this.display.flash('RECORDED STEP '+String(step+1));
  }
  toggleSeqStep(i){
   const p=this.p(),step=this.seqPage*16+i,mode=p.seqMode,v=p.seqSteps[step];
@@ -212,7 +212,7 @@ class Super8App{
   const osc=addRow(p,'hp-main s8-osc');
   const d1=addPanel(osc,{title:'DDS 1',sub:'oscillator · super wave',className:'s8-dds1'});
   s(d1.body,'dds1Wave','Waveform',WAVES1,{group:'DDS 1',wide:true});s(d1.body,'dds1Range','Range',[64,32,16,8,4,2],{group:'DDS 1'});
-  s(d1.body,'altA','Wave A',Array.from({length:64},(_,i)=>i),{group:'DDS 1',labels:Array.from({length:64},(_,i)=>String(i+1).padStart(2,'0'))});s(d1.body,'altB','Wave B',Array.from({length:64},(_,i)=>i),{group:'DDS 1',labels:Array.from({length:64},(_,i)=>String(i+1).padStart(2,'0'))});
+  s(d1.body,'altA','Wave A',Array.from({length:64},(_,i)=>i),{group:'DDS 1',labels:Array.from({length:64},(_,i)=>String(i+1))});s(d1.body,'altB','Wave B',Array.from({length:64},(_,i)=>i),{group:'DDS 1',labels:Array.from({length:64},(_,i)=>String(i+1))});
   s(d1.body,'superMode','Super',['off','half','on'],{group:'DDS 1'});const d1knobs=addRow(d1.body,'s8-mini-knobs');k(d1knobs,'detune','Detune',{size:34,group:'DDS 1'});k(d1knobs,'pwDrift','PW drift',{size:34,group:'DDS 1'});
   const d2=addPanel(osc,{title:'DDS 2',sub:'second oscillator · modes',className:'s8-dds2'});
   s(d2.body,'dds2Wave','Waveform',WAVES2,{group:'DDS 2',wide:true});s(d2.body,'dds2Range','Range',[32,16,8,4,2,'LFO'],{group:'DDS 2'});
@@ -271,7 +271,7 @@ class Super8App{
   k(st,'arpRange','Octaves',{min:1,max:4,step:1,size:42,group:'ARPEGGIATOR',fmt:v=>String(Math.round(v))});k(st,'arpSwing','Arp swing',{size:42,group:'ARPEGGIATOR'});
   const steps=document.createElement('div');steps.className='s8-steps';seqp.body.appendChild(steps);this.hwSeqButtons=[];
   for(let i=0;i<16;i++){const c=addButton(steps,{label:String(i+1),value:false,led:'red',group:'SEQUENCER',midiId:'SUPER8:SEQ:STEP:'+i,onChange:()=>this.toggleSeqStep(i)});this.hwSeqButtons.push(c);this.hwControls.all.push(c);}
-  const seqMemory=addRow(seqp.body,'s8-seq-memory');s(seqMemory,'seqSlot','Memory slot',Array.from({length:16},(_,i)=>i),{group:'SEQUENCER',labels:Array.from({length:16},(_,i)=>String(i+1).padStart(2,'0'))});
+  const seqMemory=addRow(seqp.body,'s8-seq-memory');s(seqMemory,'seqSlot','Memory slot',Array.from({length:16},(_,i)=>i),{group:'SEQUENCER',labels:Array.from({length:16},(_,i)=>String(i+1))});
   const storeSeq=addButton(seqMemory,{label:'Store sequence',toggle:false,led:'amber',group:'SEQUENCER',onChange:()=>this.storeSequence()});const loadSeq=addButton(seqMemory,{label:'Load sequence',toggle:false,led:'green',group:'SEQUENCER',onChange:()=>this.loadSequence()});this.hwControls.all.push(storeSeq,loadSeq);
   b(seqMemory,'seqRecord','Record notes',{group:'SEQUENCER',led:'red'});
 
@@ -354,7 +354,7 @@ class Super8App{
   const waveLabel=document.createElement('label');waveLabel.className='hp-action hp-super8-wave-import';waveLabel.textContent='Load waves';
   const waveInput=document.createElement('input');waveInput.type='file';waveInput.multiple=true;waveInput.accept='.wav,audio/wav';waveLabel.appendChild(waveInput);footer.appendChild(waveLabel);
   waveInput.addEventListener('change',async()=>{try{if(!this.engine.ctx)throw new Error('Power on audio first.');const waves=[];for(const file of [...(waveInput.files||[])].slice(0,64)){const decoded=await this.engine.ctx.decodeAudioData(await file.arrayBuffer());const data=decoded.getChannelData(0);if(data.length<64||data.length>65536)throw new Error(file.name+' is not a supported single-cycle file.');const size=2048,down=Array.from({length:size},(_,i)=>{const pos=i*data.length/size,index=Math.floor(pos),frac=pos-index;return data[index]*(1-frac)+data[(index+1)%data.length]*frac;});waves.push(down);}if(waves.length){const p=this.p();p.userWaves=Array.from({length:64},(_,i)=>waves[i]??p.userWaves?.[i]??null);this.postPatch();this.display.flash(waves.length+' WAVES IMPORTED · SAVED WITH LAYER');}}catch(error){this.display.flash('Wave import failed');alert(error.message);}});
-  this.refreshHardwarePresetList=(selected='f:0')=>{this.hwPresets.replaceChildren();FACTORY.forEach((item,i)=>{const o=document.createElement('option');o.value='f:'+i;o.textContent=String(i+1).padStart(2,'0')+' · '+item.name;this.hwPresets.appendChild(o);});this.store.items.forEach(item=>{const o=document.createElement('option');o.value='u:'+item.id;o.textContent='User · '+item.name;this.hwPresets.appendChild(o);});this.hwPresets.value=selected;};this.hwPresets.dataset.overturePresetSelector='true';
+  this.refreshHardwarePresetList=(selected='f:0')=>{this.hwPresets.replaceChildren();FACTORY.forEach((item,i)=>{const o=document.createElement('option');o.value='f:'+i;o.textContent=String(i+1)+' · '+item.name;this.hwPresets.appendChild(o);});this.store.items.forEach(item=>{const o=document.createElement('option');o.value='u:'+item.id;o.textContent='User · '+item.name;this.hwPresets.appendChild(o);});this.hwPresets.value=selected;};this.hwPresets.dataset.overturePresetSelector='true';
    this.hwPresets.getCommunityPresetSelection=()=>{
     const value=this.hwPresets.value;
     if(value.startsWith('f:')){const index=Number(value.slice(2)),item=FACTORY[index];return item?{kind:'factory',index,value,name:item.name}:null;}

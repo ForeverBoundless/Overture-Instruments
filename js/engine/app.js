@@ -173,7 +173,7 @@ class App {
     PRESETS.forEach((p) => {
       const opt = document.createElement('option');
       opt.value = p.id;
-      opt.textContent = `${String(p.id).padStart(2, '0')}  ${p.name}`;
+      opt.textContent = `${String(p.id)}  ${p.name}`;
       select.appendChild(opt);
     });
     select.addEventListener('change', () => this._loadFactoryPreset(parseInt(select.value, 10)));

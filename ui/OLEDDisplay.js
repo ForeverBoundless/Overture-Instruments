@@ -28,7 +28,7 @@ export class OLEDDisplay {
   }
 
   showPreset(number, name) {
-    this._presetText = `${String(number).padStart(2, '0')}  ${name}`;
+    this._presetText = `${String(number)}  ${name}`;
     this._line1.textContent = this._presetText;
     this._renderLine2Status();
   }

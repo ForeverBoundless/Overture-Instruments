@@ -421,6 +421,7 @@ function render() {
     '    <div id="omni-launch-status" role="status" aria-live="polite"></div>',
     '    <div class="community-account__actions">',
     '      <button class="community-button community-button--quiet" id="omni-templates" type="button">TEMPLATES</button>',
+    '      <a class="community-button community-button--quiet" id="omni-documentation" href="/omni/documentation">DOCUMENTATION</a>',
     '      <button class="community-button community-button--quiet" id="omni-import" type="button">IMPORT</button>',
     '      <button class="community-button community-button--quiet" id="omni-export-all" type="button">EXPORT LIBRARY</button>',
     '      <button class="community-button community-button--quiet" id="omni-refresh" type="button" aria-label="Refresh patches">↻</button>',
@@ -788,7 +789,7 @@ async function bootLauncher() {
 }
 
 if (isEditor) {
-  import('./omni.js?v=20261118-template-organ-layout-r1');
+  import('./omni.js?v=20261119-front-panel-r17');
 } else {
   void bootLauncher();
 }

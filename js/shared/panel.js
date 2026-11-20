@@ -222,7 +222,7 @@ export function presetBar(parent, opts) {
   const body = el('div', 'pn-body', parent);
   let current = { kind: 'factory', index: 0 };
   const options = () => [
-    ...factory.map((p, i) => ({ value: `f:${i}`, label: `${String(i + 1).padStart(2, '0')}  ${p.name}` })),
+    ...factory.map((p, i) => ({ value: `f:${i}`, label: `${String(i + 1)}  ${p.name}` })),
     ...store.items.map((it) => ({ value: `u:${it.id}`, label: `U  ${it.name}` })),
   ];
   const sel = select(body, 'PRESET', options(), 'f:0', (v) => load(v));

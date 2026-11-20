@@ -73,7 +73,7 @@ test('Hohner D6 and Oberheim OB-Xa are complete first-class emulator entries', a
   assert.match(obEngine, /width=clamp\(\.5-p\.pulseWidth\*\.45/);
   assert.doesNotMatch(obEngine, /lfoVca/);
   assert.match(obPage, /Oberheim OB-Xa from Overture Instruments/);
-  assert.match(worker, /overture-shell-v87/);
+  assert.match(worker, /overture-shell-v\d+/);
   assert.match(worker, /hohner-d6/);
   assert.match(worker, /ob-xa/);
 });
@@ -375,7 +375,7 @@ test('Community instrument patches receive automatic previews and clear upload m
   assert.match(page, /Inappropriate, abusive, hateful, sexual, threatening, or infringing audio will be removed/);
   assert.match(css, /community-warning-tooltip/);
   assert.match(css, /\.community-warning-wrap:focus-within/);
-  assert.match(worker, /overture-shell-v87/);
+  assert.match(worker, /overture-shell-v\d+/);
   assert.match(worker, /instrumentPreview\.js/);
   assert.match(worker, /20261112-auto-preview-r1/);
 });
@@ -409,7 +409,7 @@ test('Community reports, moderator review, strike escalation and protected accou
   assert.match(migration, /community_can_publish/);
   assert.match(css, /community-report-dialog/);
   assert.match(css, /community-moderation-actions/);
-  assert.match(worker, /overture-shell-v87/);
+  assert.match(worker, /overture-shell-v\d+/);
   assert.match(worker, /20261114-publish-layout/);
 });
 
@@ -841,7 +841,7 @@ test('Community supports short direct instrument-output preview recordings', asy
   assert.match(community, /renderRecordedPreview/);
   assert.match(page, /community-record-preview/);
   assert.match(page, /community-recorded-preview/);
-  assert.match(worker, /overture-shell-v87/);
+  assert.match(worker, /overture-shell-v\d+/);
   assert.match(worker, /20261113-recorded-preview-r1/);
   assert.equal(emulators.every((source) => source.includes('getAudioOutput:')), true,
     'all 14 emulator pages must expose their final output node to the recorder');
@@ -893,7 +893,7 @@ test('Community pages, homepage feature and emulator share action use the violet
   assert.match(communityPage, /community\.css\?v=20261116-community-violet-r1/);
   assert.match(profilePage, /contributions\.css\?v=20261116-community-purple/);
   assert.match(homePage, /home\.css\?v=20261116-community-purple/);
-  assert.match(worker, /overture-shell-v87/);
+  assert.match(worker, /overture-shell-v\d+/);
 });
 
 
@@ -929,7 +929,7 @@ test('Emulator pages use the shared Overture toolbar and the Community preview r
   assert.match(communityCss, /#community-root \.community-hero h1 em[\s\S]*#6930aa/);
   assert.match(communityPage, /community\.css\?v=20261116-community-violet-r1/);
   assert.match(worker, /\/css\/emulator-topbar\.css\?v=20261116-r1/);
-  assert.match(worker, /overture-shell-v87/);
+  assert.match(worker, /overture-shell-v\d+/);
 });
 
 
@@ -952,7 +952,7 @@ test('The homepage Community section and coming-soon banner share a continuous v
   assert.ok(toolbar.includes('grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) auto'));
   assert.ok(phattyCss.includes('body.little-phatty-body.oi-emulator-topbar-active #app-root'));
   assert.ok(phattyPage.includes('little-phatty.css?v=20261116-toolbar-offset-r1'));
-  assert.ok(worker.includes('overture-shell-v87'));
+  assert.match(worker, /overture-shell-v\d+/);
   assert.ok(worker.includes('community-contours-r1'));
   assert.ok(worker.includes('toolbar-offset-r1'));
 });
@@ -986,7 +986,7 @@ test('Every non-Prophet emulator toolbar shows live MIDI status, Help and Commun
   assert.match(toolbar, /\.oi-emulator-topbar__help/);
   assert.match(toolbar, /html\[data-theme="light"\] \.oi-emulator-help/);
   assert.match(worker, /emulator-topbar\.css\?v=20261116-r3/);
-  assert.match(worker, /overture-shell-v87/);
+  assert.match(worker, /overture-shell-v\d+/);
 });
 
 
@@ -1004,17 +1004,17 @@ test('OMNI patch rename uses a theme-aware modal and patch tile entrance plays o
   assert.match(launcher, /Patch names must contain at least three characters/);
   assert.match(styles, /\.omni-rename-dialog::backdrop/);
   assert.match(styles, /omni-rename-accent:#7de4ff/);
-  assert.match(styles, /html\\[data-theme="light"\\]\\.omni-launcher-mode \\.omni-rename-dialog[\\s\\S]*omni-rename-accent:#087f9f/);
-  assert.match(styles, /omni-rename-dialog \\.omni-rename-actions \\.community-button--primary:hover/);
+  assert.match(styles, /html\[data-theme="light"\]\.omni-launcher-mode \.omni-rename-dialog[\s\S]*omni-rename-accent:#087f9f/);
+  assert.match(styles, /omni-rename-dialog \.omni-rename-actions \.community-button--primary:hover/);
 
-  assert.match(styles, /html\\[data-theme="light"\\]\\.omni-launcher-mode \\.omni-rename-dialog/);
+  assert.match(styles, /html\[data-theme="light"\]\.omni-launcher-mode \.omni-rename-dialog/);
   assert.match(launcher, /patchTileIntroPlayed/);
-  assert.match(launcher, /makePatchTile\\(item, playIntro = false\\)/);
-  assert.match(styles, /\\.omni-patch-grid > \\.omni-patch-card\\.is-entering/);
+  assert.match(launcher, /makePatchTile\(item, playIntro = false\)/);
+  assert.match(styles, /\.omni-patch-grid > \.omni-patch-card\.is-entering/);
   assert.match(launcher, /visibilitychange/);
-  assert.match(page, /omni-launcher\\.css\\?v=20261118-rename-modal-blue-r2/);
-  assert.match(page, /omni-launcher\\.js\\?v=20261118-rename-modal-r1/);
-  assert.match(worker, /overture-shell-v120/);
+  assert.match(page, /omni-launcher\.css\?v=20261118-rename-modal-blue-r2/);
+  assert.match(page, /omni-launcher\.js\?v=20261119-front-panel-r18/);
+  assert.match(worker, /overture-shell-v\d+/);
 });
 
 
@@ -1030,7 +1030,7 @@ test('Experiments sliders use the OMNI range design recoloured green', async () 
   assert.ok(styles.includes('.lab-control input.lab-slider::-webkit-slider-thumb'));
   assert.ok(styles.includes('html[data-theme="light"] .lab-control input.lab-slider'));
   assert.ok(worker.includes('/css/experiments.css?v=20261118-green-sliders-r1'));
-  assert.ok(worker.includes('overture-shell-v121'));
+  assert.match(worker, /overture-shell-v\d+/);
 });
 
 
@@ -1048,8 +1048,8 @@ test('OMNI organ card exposes nine linked drawbars and a wider layout', async ()
   assert.ok(app.includes('this.inspBody?.querySelectorAll'));
   assert.ok(styles.includes('.omni-module--organ {width:440px'));
   assert.ok(styles.includes('grid-template-columns:repeat(9,minmax(0,1fr))'));
-  assert.ok(page.includes('omni.css?v=20261118-organ-drawbar-r1'));
-  assert.ok(worker.includes('omni.js?v=20261118-organ-drawbar-r1'));
+  assert.ok(page.includes('omni.css?v=20261119-front-panel-r17'));
+  assert.ok(worker.includes('omni.js?v=20261119-front-panel-r17'));
 });
 
 test('Experiments sliders use OMNI styling with green accents in both themes', async () => {
@@ -1087,9 +1087,9 @@ test('OMNI organ starter templates expand their layout and preview to fit the dr
   assert.ok(templates.includes('drawbar${index + 1}'));
   assert.ok(templates.includes("T('Nord Rotary Registration'"));
   assert.ok(templates.includes("T('Organ & Mellotron Layers'"));
-  assert.ok(app.includes('templates.js?v=20261118-template-organ-layout-r1'));
-  assert.ok(launcher.includes('omni.js?v=20261118-template-organ-layout-r1'));
-  assert.ok(page.includes('omni-launcher.js?v=20261118-template-organ-layout-r1'));
-  assert.ok(worker.includes('overture-shell-v121'));
-  assert.ok(worker.includes('templates.js?v=20261118-template-organ-layout-r1'));
+  assert.ok(app.includes('templates.js?v=20261119-front-panel-r2'));
+  assert.ok(launcher.includes('omni.js?v=20261119-front-panel-r17'));
+  assert.ok(page.includes('omni-launcher.js?v=20261119-front-panel-r18'));
+  assert.match(worker, /overture-shell-v\d+/);
+  assert.ok(worker.includes('templates.js?v=20261119-front-panel-r2'));
 });

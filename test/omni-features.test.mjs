@@ -21,16 +21,16 @@ test('OMNI chord interval sliders expose the complete ±32-semitone range', asyn
   assert.ok(source.includes("inp.setAttribute('aria-valuemax', String(p.max));"));
   assert.ok(source.includes("el('div', 'omni-param__bounds', row)"));
   assert.ok(css.includes('.omni-param__bounds'));
-  assert.ok(source.includes(`'./omni/modules.js?v=20261117-omni-module-expansion-r3'`));
-  assert.ok(source.includes(`'./omni/graph.js?v=20261117-omni-module-expansion-r3'`));
-  assert.ok((await readFile(new URL('../js/omni/graph.js', import.meta.url), 'utf8')).includes(`from './modules.js?v=20261117-omni-module-expansion-r3'`));
-  assert.ok(worker.includes(`/js/omni/graph.js?v=20261117-omni-module-expansion-r3`));
-  assert.ok(worker.includes(`/js/omni/modules.js?v=20261117-omni-module-expansion-r3`));
-  assert.ok(page.includes('omni.css?v=20261114-macro-theme'));
-  assert.ok(page.includes('omni.js?v=20261117-omni-module-expansion-r3'));
+  assert.ok(source.includes(`'./omni/modules.js?v=20261118-organ-drawbar-r1'`));
+  assert.ok(source.includes(`'./omni/graph.js?v=20261119-front-panel-r2'`));
+  assert.ok((await readFile(new URL('../js/omni/graph.js', import.meta.url), 'utf8')).includes(`from './modules.js?v=20261118-organ-drawbar-r1'`));
+  assert.ok(worker.includes(`/js/omni/graph.js?v=20261119-front-panel-r2`));
+  assert.ok(worker.includes(`/js/omni/modules.js?v=20261118-organ-drawbar-r1`));
+  assert.ok(page.includes('omni.css?v=20261119-front-panel-r17'));
+  assert.ok(page.includes('omni-launcher.js?v=20261119-front-panel-r18'));
   assert.match(worker, /overture-shell-v\d+/);
-  assert.ok(worker.includes('/css/omni.css?v=20261114-macro-theme'));
-  assert.ok(worker.includes('/js/omni.js?v=20261117-omni-module-expansion-r3'));
+  assert.ok(worker.includes('/css/omni.css?v=20261119-front-panel-r17'));
+  assert.ok(worker.includes('/js/omni-launcher.js?v=20261119-front-panel-r18'));
 });
 
 test('OMNI exposes recording, searchable modules and editing shortcuts', async () => {
@@ -50,7 +50,7 @@ test('OMNI styles include recording, selection and library search states', async
 });
 
 test('OMNI and recording modules pass the Node JavaScript syntax parser', () => {
-  for (const file of ['../js/omni.js', '../js/shared/audioRecorder.js', '../js/shared/midiRecorder.js', '../js/community.js', '../js/shared/communityPreset.js', '../js/shared/supabaseClient.js']) {
+  for (const file of ['../js/omni.js', '../js/omni/front-panel.js', '../js/shared/audioRecorder.js', '../js/shared/midiRecorder.js', '../js/community.js', '../js/shared/communityPreset.js', '../js/shared/supabaseClient.js']) {
     const path = fileURLToPath(new URL(file, import.meta.url));
     execFileSync(process.execPath, ['--check', path], { stdio: 'pipe' });
   }
@@ -101,27 +101,86 @@ test('OMNI performance deck keeps octave controls in the keyboard header and giv
   assert.match(css, /grid-template-columns:88px minmax\(0,1fr\)/);
   assert.match(css, /\.omni-keys \.lp-keyboard[^}]*width:100%/);
   assert.match(css, /\.omni-keys \.lp-keyboard[^}]*min-width:520px/);
-  assert.match(page, /omni\.css\?v=20261114-macro-theme/);
-  assert.match(page, /omni\.js\?v=20261117-omni-module-expansion-r3/);
+  assert.match(page, /omni\.css\?v=20261119-front-panel-r17/);
+  assert.match(page, /omni-launcher\.js\?v=20261119-front-panel-r18/);
   assert.match(worker, /overture-shell-v\d+/);
-  assert.match(worker, /omni\.css\?v=20261114-macro-theme/);
-  assert.ok(worker.includes('/js/omni.js?v=20261117-omni-module-expansion-r3'));
+  assert.match(worker, /omni\.css\?v=20261119-front-panel-r17/);
+  assert.ok(worker.includes('/js/omni-launcher.js?v=20261119-front-panel-r18'));
 });
 
 
-test('OMNI keyboard spans four octaves and status text avoids the centered theme toggle', async () => {
-  const [source, css, page, worker] = await Promise.all([
+test('OMNI keyboard spans five octaves and status text avoids the centered theme toggle', async () => {
+  const [source, css, page, worker, keyboard] = await Promise.all([
     readFile(new URL('../js/omni.js', import.meta.url), 'utf8'),
     readFile(new URL('../css/omni.css', import.meta.url), 'utf8'),
     readFile(new URL('../omni.html', import.meta.url), 'utf8'),
     readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
+    readFile(new URL('../ui/Keyboard.js', import.meta.url), 'utf8'),
   ]);
-  assert.match(source, /octaves:\s*4/);
-  assert.match(source, /C2 – C6/);
+  assert.match(source, /octaves:\s*5/);
+  assert.match(source, /C2 – C7/);
+  assert.match(keyboard, /const whiteKeyWidthPct = 100 \/ whiteKeys\.length;/);
   assert.match(css, /\.omni-commandbar > \.omni-status[\s\S]*text-align:right/);
   assert.match(source, /commandbar\.appendChild\(this\.status\)/);
-  assert.match(page, /omni\.js\?v=20261117-omni-module-expansion-r3/);
+  assert.match(page, /omni-launcher\.js\?v=20261119-front-panel-r18/);
   assert.match(worker, /overture-shell-v\d+/);
+});
+
+
+
+test('OMNI launcher links to a complete, theme-aware documentation page', async () => {
+  const [launcher, page, css, worker, routes] = await Promise.all([
+    readFile(new URL('../js/omni-launcher.js', import.meta.url), 'utf8'),
+    readFile(new URL('../omni/documentation.html', import.meta.url), 'utf8'),
+    readFile(new URL('../css/omni-documentation.css', import.meta.url), 'utf8'),
+    readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
+    readFile(new URL('../vercel.json', import.meta.url), 'utf8'),
+  ]);
+  assert.ok(launcher.includes('class="community-button community-button--quiet" id="omni-documentation" href="/omni/documentation">DOCUMENTATION</a>'));
+  assert.match(page, /class="omni-docs-intro"/);
+  assert.doesNotMatch(page, /omni-docs-hero|omni-doc-section__number/);
+  assert.match(page, /<h2 id="overview-title">1\. What is OMNI\?<\/h2>/);
+  assert.match(page, /<h2 id="quick-start-title">2\. Quick start<\/h2>/);
+  assert.equal((page.match(/<h2 id="[^"]+">\d+\./g) || []).length, 12);
+  assert.match(css, /\.omni-docs-layout\s*\{[^}]*display:\s*grid/s);
+  assert.match(css, /grid-template-columns:\s*minmax\(0,\s*1fr\)/);
+  assert.match(css, /\.omni-docs-content\s*\{[^}]*display:\s*block/s);
+  assert.match(css, /\.omni-doc-steps li::before\s*\{[^}]*grid-column:\s*1;[^}]*grid-row:\s*1\s*\/\s*span 2;/s);
+  assert.match(css, /\.omni-doc-steps li strong\s*\{[^}]*grid-column:\s*2;[^}]*grid-row:\s*1;/s);
+  assert.match(css, /\.omni-doc-steps li span\s*\{[^}]*grid-column:\s*2;[^}]*grid-row:\s*2;/s);
+  assert.match(css, /omni-docs-page \.site-footer[\s\S]*?--amber:\s*var\(--cyan\)/);
+  assert.match(css, /--oi-community-button-background:\s*linear-gradient/);
+  assert.match(css, /omni-docs-page \.contact-modal \.button--primary/);
+  assert.match(css, /omni-docs-page \.site-header \.header-account:hover/);
+  assert.match(css, /body\.omni-docs-page\s*\{[^}]*--amber:\s*var\(--cyan\)/s);
+  assert.match(css, /body\.omni-docs-page\s*\{[^}]*--amber-bright:\s*var\(--cyan\)/s);
+  assert.match(css, /body\.omni-docs-page\s*\{[^}]*--green:\s*var\(--cyan\)/s);
+  assert.match(css, /--omni-signal-audio:\s*#ffb75e/i);
+  assert.match(css, /--omni-signal-note:\s*#82e6a8/i);
+  assert.match(css, /--omni-signal-audio:\s*#ad5f00/i);
+  assert.match(css, /--omni-signal-note:\s*#167747/i);
+  assert.match(css, /\.omni-doc-signal--audio\s*\{\s*color:\s*var\(--omni-signal-audio\)/);
+  assert.match(css, /\.omni-doc-signal--cv\s*\{\s*color:\s*var\(--cyan\)/);
+  assert.match(css, /\.omni-doc-signal--note\s*\{\s*color:\s*var\(--omni-signal-note\)/);
+  for (const section of ['overview','quick-start','engine-view','modules','connections','performance-midi','recording-macros','patches','front-panel','preview-export','shortcuts','troubleshooting']) {
+    assert.ok(page.includes('id="' + section + '"'), 'missing documentation section: ' + section);
+    assert.ok(page.includes('href="#' + section + '"'), 'missing section navigation link: ' + section);
+  }
+  assert.ok(page.includes('/js/shared/site-theme.js'));
+  assert.ok(page.includes('/js/shared/site-nav.js'));
+  assert.ok(page.includes('/css/omni-documentation.css?v=20261120-omni-docs-r6'));
+  assert.match(css, /html\[data-theme="light"\]/);
+  assert.match(css, /var\(--bg\)/);
+  assert.ok(worker.includes("'/omni/documentation'"));
+  assert.ok(worker.includes("'/css/omni-documentation.css?v=20261120-omni-docs-r6'"));
+  assert.match(worker, /overture-shell-v158/);
+  assert.match(routes, /"cleanUrls": true/);
+});
+
+test('OMNI always opens in Engine View, regardless of the saved workspace view', async () => {
+  const source = await readFile(new URL('../js/omni.js', import.meta.url), 'utf8');
+  assert.match(source, /this\.workspaceView = 'engine';/);
+  assert.doesNotMatch(source, /this\.workspaceView = savedWorkspace\?\.workspaceView/);
 });
 
 test('community publish login link honours Supabase hidden state in every responsive layout', async () => {
@@ -131,8 +190,8 @@ test('community publish login link honours Supabase hidden state in every respon
     readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
   ]);
   assert.match(css, /#community-account-link\[hidden\][\s\S]*display:none !important/);
-  assert.match(page, /community\.css\?v=20261114-publish-layout/);
-  assert.match(worker, /community\.css\?v=20261114-publish-layout/);
+  assert.match(page, /community\.css\?v=20261117-community-signal-r1/);
+  assert.match(worker, /community\.css\?v=20261117-community-signal-r1/);
 });
 
 test('light-mode accent effects retain the original luminous brand colours', async () => {
@@ -160,7 +219,7 @@ test('OMNI wordmark is black in light mode and hero accent tracking inherits the
   ]);
   assert.match(theme, /html\[data-theme="light"\] \.omni-logo-wording strong[\s\S]*color:#111820 !important/);
   assert.match(theme, /letter-spacing: inherit !important/);
-  assert.match(page, /site-theme-polish\.css\?v=20261103-accent-spacing/);
+  assert.match(page, /site-theme-polish\.css\?v=20261117-inter-type-r1/);
   assert.match(worker, /overture-shell-v\d+/);
 });
 
@@ -178,7 +237,7 @@ test('OMNI wordmark explicitly uses Inter Variable', async () => {
   const page = await readFile(new URL('../omni.html', import.meta.url), 'utf8');
   const worker = await readFile(new URL('../service-worker.js', import.meta.url), 'utf8');
   assert.match(css, /\.omni-logo-wording strong\s*\{[^}]*font-family:\s*'Inter Variable'/s);
-  assert.match(page, /omni\.css\?v=20261114-macro-theme/);
+  assert.match(page, /omni\.css\?v=20261119-front-panel-r17/);
   assert.match(worker, /overture-shell-v\d+/);
 });
 
@@ -195,7 +254,7 @@ test('OMNI performance pane can be shown/hidden from View and remembers its stat
   assert.match(source, /localStorage\.setItem\('overture\.omni\.performance-visible'/);
   assert.match(source, /this\.performanceToggleBtn\.setAttribute\('aria-pressed'/);
   assert.match(css, /#omni-root > \.omni-perf\[hidden\]\s*\{\s*display:none !important/);
-  assert.match(page, /omni\.js\?v=20261117-omni-module-expansion-r3/);
+  assert.match(page, /omni-launcher\.js\?v=20261119-front-panel-r18/);
   assert.match(worker, /overture-shell-v\d+/);
 });
 
@@ -255,19 +314,19 @@ test('OMNI exposes native SEM and Mellotron instrument modules and refreshes off
   assert.match(mellotron, /this\.scheduled\[0\]\.frame <= currentFrame \+ i/);
   assert.match(mellotron, /this\.p\.release/);
   assert.match(app, /20261117-omni-module-expansion-r3/);
-  assert.match(graph, /20261117-omni-module-expansion-r3/);
+  assert.match(graph, /20261118-organ-drawbar-r1/);
   assert.match(templates, /SEM Warm Ensemble/);
   assert.match(templates, /Mellotron Choir/);
-  assert.match(page, /omni\.js\?v=20261117-omni-module-expansion-r3/);
+  assert.match(page, /omni-launcher\.js\?v=20261119-front-panel-r18/);
   assert.match(worker, /overture-shell-v\d+/);
   assert.match(worker, /OberheimEightVoiceProcessor\.js/);
   assert.match(worker, /MellotronProcessor\.js/);
-  assert.ok(worker.includes('/js/omni.js?v=20261117-omni-module-expansion-r3'));
+  assert.ok(worker.includes('/js/omni-launcher.js?v=20261119-front-panel-r18'));
 });
 
 
 test('every OMNI module has a complete technical reference and the inspector can open it', async () => {
-  const [catalogue, references, app, page, styles, worker, contributorGuide] = await Promise.all([
+  const [catalogue, references, app, page, styles, worker, contributorGuide, readme, userGuide] = await Promise.all([
     import('../js/omni/modules.js'),
     import('../js/omni/moduleInfo.js'),
     readFile(new URL('../js/omni.js', import.meta.url), 'utf8'),
@@ -275,6 +334,8 @@ test('every OMNI module has a complete technical reference and the inspector can
     readFile(new URL('../css/omni-info.css', import.meta.url), 'utf8'),
     readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
     readFile(new URL('../CONTRIBUTING.md', import.meta.url), 'utf8'),
+    readFile(new URL('../README.md', import.meta.url), 'utf8'),
+    readFile(new URL('../omni/documentation.html', import.meta.url), 'utf8'),
   ]);
   assert.equal(references.assertModuleInfoCoverage(catalogue.MODULES), true);
   assert.deepEqual(Object.keys(references.MODULE_INFO).sort(), Object.keys(catalogue.MODULES).sort());
@@ -292,13 +353,61 @@ test('every OMNI module has a complete technical reference and the inspector can
   assert.match(styles, /html\[data-theme="light"\] \.omni-info-dialog/);
   assert.match(styles, /\.omni-info-dialog\s*\{/);
   assert.match(page, /omni-info\.css\?v=20261114-info-type/);
-  assert.match(page, /omni\.js\?v=20261117-omni-module-expansion-r3/);
+  assert.match(page, /omni-launcher\.js\?v=20261119-front-panel-r18/);
   assert.match(worker, /overture-shell-v\d+/);
   assert.match(worker, /omni-info\.css\?v=20261114-info-type/);
   assert.match(worker, /moduleInfo\.js\?v=20261117-omni-module-expansion-r3/);
   assert.match(contributorGuide, /every module must also have a complete entry in `js\/omni\/moduleInfo\.js`/);
+  assert.match(contributorGuide, /Every new or changed user-facing OMNI feature must include a documentation update in the same pull request/);
+  assert.ok(contributorGuide.includes('omni/documentation.html'));
+  assert.ok(readme.includes(`**${Object.keys(catalogue.MODULES).length} module types**`));
+  assert.ok(userGuide.includes(`${Object.keys(catalogue.MODULES).length} module types`));
+  assert.ok(readme.includes('https://overture-instruments.vercel.app/omni/documentation'));
 });
 
+
+
+
+test('visible site numbering uses plain numbers without zero-padding', async () => {
+  const files = [
+    '../index.html',
+    '../experiments.html',
+    '../experiments/oscillator-lab.html',
+    '../omni/documentation.html',
+    '../css/omni-documentation.css',
+    '../js/about.js',
+    '../js/library.js',
+    '../js/experiments/labs.js',
+    '../js/engine/app.js',
+    '../js/hohner-d6.js',
+    '../js/mellotron-m400.js',
+    '../js/nord-c2d.js',
+    '../js/sub37.js',
+    '../js/sequential-pro-3.js',
+    '../js/udo-super-8.js',
+    '../js/shared/panel.js',
+    '../ui/OLEDDisplay.js',
+  ];
+  const sources = await Promise.all(files.map((file) => readFile(new URL(file, import.meta.url), 'utf8')));
+  const zeroPadding = /\.padStart\s*\(\s*\d+\s*,\s*(['"])0\1\s*\)|decimal-leading-zero|\bEXPERIMENT\s+0{1,2}[1-9]\d*\b|\bINSTRUMENT\s+0{1,2}[1-9]\d*\b/i;
+  for (const [index, source] of sources.entries()) {
+    assert.doesNotMatch(source, zeroPadding, `zero-padded visible numbering found in ${files[index]}`);
+    if (files[index].endsWith('.html')) {
+      assert.doesNotMatch(
+        source,
+        new RegExp('<(?:i|span|b|strong)[^>]*> *0+[1-9][0-9]* *</(?:i|span|b|strong)>', 'i'),
+        `zero-padded number label found in ${files[index]}`,
+      );
+    }
+  }
+});
+
+test('OMNI workspace tabs use the site-wide Inter typeface', async () => {
+  const css = await readFile(new URL('../css/omni.css', import.meta.url), 'utf8');
+  const rule = css.split('\n').find((line) => line.includes('.omni-view-switch__button{')) || '';
+  assert.ok(rule.includes("font:600 9px/1 'Inter Variable','Inter','Segoe UI',sans-serif"));
+  assert.ok(!rule.includes('var(--font-mono)'));
+});
 
 test('OMNI dependency import order matches the destructured module bindings', async () => {
   const source = await readFile(new URL('../js/omni.js', import.meta.url), 'utf8');
@@ -318,4 +427,275 @@ test('Community share action uses the violet accent in dark and light themes', a
   assert.match(css, /button\.oi-community-share[\s\S]*#e6d2ff/);
   assert.match(css, /html\[data-theme="light"\] button\.oi-community-share[\s\S]*#eee2ff/);
   assert.match(css, /html\[data-theme="light"\] button\.oi-community-share:hover:not\(:disabled\)[\s\S]*#dfc9fb/);
+});
+
+
+test('OMNI theme control is stable and front-panel code stays outside the engine-only path', async () => {
+  const [theme, source, editor, css] = await Promise.all([
+    readFile(new URL('../js/shared/site-theme.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/omni.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/omni/front-panel.js', import.meta.url), 'utf8'),
+    readFile(new URL('../css/omni.css', import.meta.url), 'utf8'),
+  ]);
+  const initialDependencies = source.slice(0, source.indexOf('const ['));
+  assert.equal(initialDependencies.includes('front-panel.js'), false);
+  assert.ok(source.includes("import('./omni/front-panel.js?v=20261119-front-panel-r15')"));
+  assert.ok(theme.includes("toggle.addEventListener('click', () => setTheme(getTheme() === 'light' ? 'dark' : 'light', true));"));
+  assert.ok(theme.includes('toggle.nextSibling !== accountSlot'));
+  assert.ok(theme.includes('parent.insertBefore(toggle, accountSlot);'));
+  assert.ok(theme.includes("toggle.classList.toggle('site-theme-toggle--omni', Boolean(appBar));"));
+  assert.ok(editor.includes("if (this.app.workspaceView !== 'front' && !this.previewFaceplate) return;"));
+  assert.ok(editor.includes("refreshModuleReferences() {\n    if (this.app.workspaceView !== 'front' && !this.previewFaceplate) return;"));
+  assert.ok(css.includes('#omni-root .omni-topbar .site-theme-toggle--omni'));
+  assert.ok(css.includes('html[data-theme="light"] #omni-root .omni-view-switch'));
+  assert.ok(css.includes('html[data-theme="light"] #omni-root dialog.ofp-preview-dialog'));
+  assert.ok(css.includes('html[data-theme="light"] #omni-root .ofp-preview-dialog__stage'));
+  assert.ok(css.includes('html[data-theme="light"] #omni-root .ofp-inspector-action--danger'));
+  assert.ok(css.includes('html[data-theme="light"] #omni-root .ofp-keyboard__octave-mark'));
+  assert.ok(css.includes('color:var(--ofp-control-accent)'));
+  assert.ok(css.includes('color:#ad4942'));
+  assert.ok(css.includes('#omni-root .ofp-empty-state p'));
+  assert.ok(css.includes('color:var(--ofp-text)'));
+  assert.ok(css.includes('#omni-root .ofp-empty-state__action'));
+});
+
+
+test('OMNI front-panel preview runs real controls without editor handles', async () => {
+  const [editor, css] = await Promise.all([
+    readFile(new URL('../js/omni/front-panel.js', import.meta.url), 'utf8'),
+    readFile(new URL('../css/omni.css', import.meta.url), 'utf8'),
+  ]);
+  assert.match(editor, /this\.state\.components\.forEach\(\(component\) => this\.renderComponent\(component, faceplate, true\)\)/);
+  assert.match(editor, /if \(!preview\) \{[\s\S]*this\.bindComponentDrag\(node, component\)[\s\S]*this\.bindResize\(resize, node, component\)/);
+  assert.match(editor, /\[this\.faceplate, this\.previewFaceplate\]/);
+  assert.match(editor, /refreshValues\(\)[\s\S]*const nodes = this\.componentNodes\(component\)/);
+  assert.match(editor, /this\.app\.noteOn\(note/);
+  assert.match(editor, /this\.app\.setParam\(bound\.module\.id/);
+  assert.match(editor, /new ResizeObserver\(\(\) => this\.scalePreviewFaceplate\(\)\)/);
+  assert.match(css, /\.ofp-preview-faceplate \.ofp-component__resize \{display:none!important\}/);
+  assert.match(css, /\.ofp-preview-dialog__state-dot/);
+  assert.match(css, /width:min\(1680px,calc\(100vw - 24px\)\)/);
+  assert.match(css, /height:min\(1040px,calc\(100dvh - 24px\)\)/);
+  assert.match(editor, /Math\.min\(1\.35, availableWidth \/ this\.state\.width, availableHeight \/ this\.state\.height\)/);
+});
+
+test('OMNI front-panel workspaces and precision design tools are integrated', async () => {
+  const [source, editor, graph, css, page, launcher, worker, readme, architecture, theme] = await Promise.all([
+    readFile(new URL('../js/omni.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/omni/front-panel.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/omni/graph.js', import.meta.url), 'utf8'),
+    readFile(new URL('../css/omni.css', import.meta.url), 'utf8'),
+    readFile(new URL('../omni.html', import.meta.url), 'utf8'),
+    readFile(new URL('../js/omni-launcher.js', import.meta.url), 'utf8'),
+    readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
+    readFile(new URL('../README.md', import.meta.url), 'utf8'),
+    readFile(new URL('../docs/ARCHITECTURE.md', import.meta.url), 'utf8'),
+    readFile(new URL('../js/shared/site-theme.js', import.meta.url), 'utf8'),
+  ]);
+  assert.match(source, /FrontPanelEditor/);
+  assert.match(source, /ENGINE VIEW/);
+  assert.match(source, /FRONT-END VIEW/);
+  assert.match(source, /setWorkspaceView\(view/);
+  assert.match(source, /workspaceView: this\.workspaceView/);
+  assert.match(source, /this\.frontPanelEditor\?\.setPatch/);
+  assert.match(editor, /buildDesignTools/);
+  assert.match(editor, /text\/omni-front-component/);
+  assert.match(editor, /addComponent\(type, x = null, y = null\)/);
+  assert.match(editor, /buildLayerPanel/);
+  assert.match(editor, /renderRulers/);
+  assert.match(editor, /beginMeasurement/);
+  assert.match(editor, /renderSmartGuides/);
+  assert.match(editor, /alignSelection/);
+  assert.match(editor, /unitPixels/);
+  assert.match(editor, /safeMargin/);
+  assert.match(editor, /colorField\('Panel colour'/);
+  assert.match(editor, /selectField\('Material'/);
+  assert.match(editor, /exportSVG/);
+  assert.match(editor, /exportPNG/);
+  assert.match(editor, /exportJPEG/);
+  assert.match(editor, /exportJSON/);
+  assert.match(editor, /printPDF/);
+  assert.match(editor, /openPreview/);
+  assert.match(editor, /runDesignCheck/);
+  assert.match(editor, /toggleTestMode/);
+  assert.match(editor, /showPerformanceReport/);
+  assert.match(editor, /renderComponentLayout/);
+  assert.match(editor, /renderComponentAppearance/);
+  assert.match(editor, /renderComponentBehavior/);
+  assert.match(editor, /bindViewportNavigation/);
+  assert.match(editor, /Pan tool/);
+  assert.match(editor, /this\.panMode/);
+  assert.match(editor, /getRawValue/);
+  assert.match(editor, /parametersFor/);
+  assert.match(editor, /Choose an OMNI module/);
+  assert.match(editor, /Choose an OMNI module, then choose one of its parameters/);
+  assert.match(editor, /ofp-empty-state/);
+  assert.match(editor, /components: \[\]/);
+  assert.match(editor, /ofp-keyboard__rear-rail/);
+  assert.match(editor, /ofp-preview-faceplate/);
+  assert.match(editor, /MATERIAL_PRESETS/);
+  assert.match(editor, /isLegacyStarterLayout/);
+  assert.match(source, /this\.midiMapButton\.hidden = view === 'front'/);
+  assert.match(source, /frontPanelCommandMenus\.forEach/);
+  assert.match(source, /\['Calibrated dial','dial'\]/);
+  assert.match(theme, /accountSlot/);
+  assert.match(css, /\.ofp-dial__face/);
+  assert.match(css, /\.ofp-stage-zoom-button/);
+  assert.match(css, /text-align:right!important/);
+  assert.match(editor, /\['dial', 'Dial', 'CONTROLS'\]/);
+  assert.match(editor, /ofp-dial__needle/);
+  assert.match(editor, /ofp-dial__input/);
+  assert.match(editor, /ofp-binding-intro/);
+  assert.match(editor, /renderPreviewFaceplate\(\)/);
+  assert.match(editor, /renderComponent\(component, parent = this\.faceplate, preview = false\)/);
+  assert.match(editor, /componentNodes\(component\)/);
+  assert.match(editor, /this\.previewFaceplate/);
+  assert.match(css, /\.ofp-preview-faceplate/);
+  assert.match(css, /\.ofp-preview-dialog__frame/);
+  assert.match(editor, /zoomBy\(factor, clientX = null, clientY = null\)/);
+  assert.match(editor, /this\.zoomReadout\.textContent/);
+  assert.ok(editor.includes('button,a,[role="button"]'));
+  assert.match(source, /frontOnlyGroup\('Insert'\)/);
+  assert.match(source, /frontOnlyGroup\('Arrange'\)/);
+  assert.match(source, /frontOnlyGroup\('Inspect'\)/);
+  assert.match(source, /frontOnlyGroup\('Export'\)/);
+  assert.match(source, /Export raster · PNG · 3×/);
+  assert.match(source, /Test live front-panel controls/);
+  assert.match(editor, /setParam\(/);
+  assert.match(graph, /frontPanel/);
+  assert.match(graph, /measurements/);
+  assert.match(graph, /guides/);
+  assert.match(graph, /zoom: Math\.min\(3/);
+  assert.match(css, /\.ofp-faceplate/);
+  assert.match(css, /\.ofp-ruler/);
+  assert.match(css, /\.ofp-measurements/);
+  assert.match(css, /\.ofp-layers-panel/);
+  assert.match(css, /html\[data-theme="light"\].*ofp-library/);
+  assert.match(page, /omni\.css\?v=20261119-front-panel-r17/);
+  assert.match(launcher, /omni\.js\?v=20261119-front-panel-r17/);
+  assert.match(worker, /overture-shell-v158/);
+  assert.match(worker, /front-panel\.js\?v=20261119-front-panel-r15/);
+  assert.match(worker, /graph\.js\?v=20261119-front-panel-r2/);
+  assert.match(readme, /Front-end View/);
+  assert.match(architecture, /OMNI front-panel studio/);
+  assert.match(readme, /Front-Panel Studio guide/);
+  assert.match(architecture, /Test mode temporarily disables layout editing/);
+});
+
+test('OMNI front-panel validation remains backwards-compatible and sanitizes imported layouts', async () => {
+  const graph = await import('../js/omni/graph.js');
+  const patch = graph.defaultPatch();
+  const oldPatch = graph.validatePatch(patch);
+  assert.equal(oldPatch.frontPanel, undefined);
+  const filter = patch.modules.find((item) => item.type === 'filter');
+  const organ = { id: 'organ1', type: 'nordOrgan', x: 30, y: 30, params: graph.defaultParams('nordOrgan') };
+  patch.modules.push(organ);
+  patch.frontPanel = {
+    width: 1240, height: 520, finish: 'walnut', unit: 'mm', zoom: 1.5,
+    panelColor: '#252d35', panelBorderColor: '#ff9f0a', panelBorderWidth: 4, panelRadius: 20, safeMargin: 400, gridSize: 28,
+    guides: [{ id: 'g1', axis: 'x', position: 600, color: '#7de4ff' }],
+    measurements: [{ x1: 10, y1: 10, x2: 100, y2: 100 }],
+    components: [
+      { id: 'knob1', type: 'knob', label: 'CUTOFF', x: 12, y: 12, w: 100, h: 120, bind: { moduleId: filter.id, paramKey: 'cutoff' }, finish: 'brushed' },
+      { id: 'bad1', type: 'script', x: 0, y: 0 },
+      { id: 'orphan1', type: 'slider', x: 0, y: 0, bind: { moduleId: 'missing', paramKey: 'cutoff' } },
+      { id: 'drawbars1', type: 'drawbars', x: 20, y: 200, bind: { moduleId: organ.id }, margin: 150 },
+      { id: 'bad id', type: 'label', x: 10, y: 10, text: 'SAFE TEXT' },
+      { id: 'bad id', type: 'label', x: 30, y: 30, text: 'SECOND LABEL' },
+      { id: 'keys1', type: 'keyboard', x: 40, y: 320, w: 560, h: 140, startNote: 48, octaves: 4 },
+      { id: 'slider1', type: 'slider', x: 650, y: 40, w: 64, h: 140, orientation: 'vertical', padding: 12, gap: 8, radius: 14, fontSize: 12, borderWidth: 4, shadow: 'hard' },
+    ],
+  };
+  const validated = graph.validatePatch(patch);
+  assert.equal(validated.frontPanel.components.length, 7);
+  assert.equal(validated.frontPanel.components[0].bind.moduleId, filter.id);
+  assert.equal(validated.frontPanel.components[0].bind.paramKey, 'cutoff');
+  assert.equal(validated.frontPanel.components[0].padding, 7);
+  assert.equal(validated.frontPanel.components[0].radius, 7);
+  assert.equal(validated.frontPanel.components[0].shadow, 'soft');
+  assert.equal(validated.frontPanel.components[1].bind, undefined);
+  assert.equal(validated.frontPanel.components[2].bind.moduleId, organ.id);
+  assert.ok(validated.frontPanel.components[2].margin <= 180);
+  assert.equal(validated.frontPanel.components[5].octaves, 4);
+  assert.equal(validated.frontPanel.components[6].orientation, 'vertical');
+  assert.equal(validated.frontPanel.components[6].padding, 12);
+  assert.equal(validated.frontPanel.components[6].gap, 8);
+  assert.equal(validated.frontPanel.components[6].radius, 14);
+  assert.equal(validated.frontPanel.components[6].fontSize, 12);
+  assert.equal(validated.frontPanel.components[6].borderWidth, 4);
+  assert.equal(validated.frontPanel.components[6].shadow, 'hard');
+  assert.notEqual(validated.frontPanel.components[3].id, validated.frontPanel.components[4].id);
+  assert.match(validated.frontPanel.components[3].id, /^[a-zA-Z0-9_-]+$/);
+  assert.equal(validated.frontPanel.panelBorderColor, '#ff9f0a');
+  assert.equal(validated.frontPanel.panelBorderWidth, 4);
+  assert.equal(validated.frontPanel.panelRadius, 20);
+  assert.equal(validated.frontPanel.finish, 'walnut');
+  assert.equal(validated.frontPanel.unit, 'mm');
+  assert.equal(validated.frontPanel.zoom, 1.5);
+  assert.equal(validated.frontPanel.guides[0].axis, 'x');
+  assert.equal(validated.frontPanel.measurements.length, 1);
+  assert.equal(validated.frontPanel.safeMargin, 400);
+  const unsafe = graph.validatePatch({ ...patch, frontPanel: { ...patch.frontPanel, panelColor: 'url(javascript:alert(1))', zoom: 99, components: patch.frontPanel.components } });
+  assert.equal(unsafe.frontPanel.panelColor, '#252d35');
+  assert.equal(unsafe.frontPanel.zoom, 3);
+  assert.equal(unsafe.frontPanel.panelBorderColor, '#ff9f0a');
+  const zeroValues = graph.validatePatch({
+    ...patch,
+    frontPanel: {
+      ...patch.frontPanel,
+      safeMargin: 0,
+      gridSize: 450,
+      zoom: 0,
+      components: [
+        { id: 'low-key', type: 'keyboard', x: 0, y: 0, w: 500, h: 120, startNote: 0, octaves: 1 },
+        { id: 'low-pad', type: 'pad', x: 520, y: 0, w: 90, h: 90, note: 0 },
+      ],
+    },
+  });
+  assert.equal(zeroValues.frontPanel.safeMargin, 0);
+  assert.equal(zeroValues.frontPanel.gridSize, 450);
+  assert.equal(zeroValues.frontPanel.zoom, .25);
+  assert.equal(zeroValues.frontPanel.components[0].startNote, 0);
+  assert.equal(zeroValues.frontPanel.components[1].note, 0);
+});
+
+test('OMNI front-panel studio parses and keeps its canvas-first editing layout', async () => {
+  const [editor, app, css] = await Promise.all([
+    readFile(new URL('../js/omni/front-panel.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/omni.js', import.meta.url), 'utf8'),
+    readFile(new URL('../css/omni.css', import.meta.url), 'utf8'),
+  ]);
+  const editorPath = fileURLToPath(new URL('../js/omni/front-panel.js', import.meta.url));
+  const appPath = fileURLToPath(new URL('../js/omni.js', import.meta.url));
+  execFileSync(process.execPath, ['--check', editorPath], { stdio: 'pipe' });
+  execFileSync(process.execPath, ['--check', appPath], { stdio: 'pipe' });
+  assert.match(app, /this\.appHeader\?\.classList\.toggle\('is-front-view'/);
+
+  assert.match(editor, /this\.addRailButton = railButton/);
+  assert.match(editor, /this\.layersRailButton = railButton/);
+  assert.match(editor, /this\.panelSettingsButton = railButton/);
+  assert.match(editor, /this\.inspector\.hidden = !this\.inspectorOpen/);
+  assert.doesNotMatch(editor, /exportAction\(/);
+  assert.doesNotMatch(editor, /moreAction\(/);
+  assert.match(editor, /toggleMeasureTool\(\)/);
+  assert.match(app, /Export vector artwork · SVG/);
+  assert.match(app, /Save patch…/);
+  assert.match(app, /Front-panel studio guide…/);
+  assert.match(app, /Performance report/);
+  assert.match(app, /Add vertical guide/);
+  assert.match(app, /Toggle smart guides/);
+  assert.match(css, /\.omni-app-header\.is-front-view \.omni-commandbar > \.omni-menu/);
+  assert.match(css, /flex-flow:row nowrap/);
+  assert.match(css, /justify-content:flex-end!important/);
+  assert.match(css, /\.omni-commandbar \.omni-menu__trigger/);
+  assert.match(css, /\.omni-commandbar > \.omni-midi-map-button/);
+  assert.match(app, /Clear front-panel layout/);
+  assert.match(editor, /clearLayout\(\)/);
+  assert.doesNotMatch(css, /\.omni-app-header\.is-front-view \.omni-commandbar > \.omni-menu,\s*#omni-root \.omni-app-header\.is-front-view \.omni-commandbar > \.omni-midi-map-button\s*\{\s*display:none/);
+  assert.match(editor, /showRulers: false/);
+  assert.match(editor, /showGrid: false/);
+  assert.match(editor, /snap: false/);
+  assert.match(css, /grid-template-columns:52px 0 minmax\(0,1fr\) 0/);
+  assert.match(css, /\.ofp-workspace\.is-library-open \{grid-template-columns:52px 226px/);
+  assert.match(css, /\.ofp-workspace\.is-inspector-open \{grid-template-columns:52px 0 minmax\(0,1fr\) 286px/);
 });

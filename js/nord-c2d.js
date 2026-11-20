@@ -363,7 +363,7 @@ const banks = section.querySelector('.nord-manual-banks');
   _changeProgram(direction) {
     clearCommunitySource();
     this.engine.program.index = clamp(this.engine.program.index + (direction === 'next' ? 1 : -1), 1, 126);
-    const value = String(this.engine.program.index).padStart(3, '0');
+    const value = String(this.engine.program.index);
     document.querySelector('.nord-program-number').textContent = value;
     document.querySelector('.nord-program-readout').textContent = value;
     document.querySelector('.nord-program-name').textContent = this.engine.program.index <= 104 ? 'FACTORY ORGAN PROGRAM' : 'EMPTY PROGRAM';
@@ -372,7 +372,7 @@ const banks = section.querySelector('.nord-manual-banks');
   _selectMidiProgram(program) {
     clearCommunitySource();
     this.engine.program.index = clamp(Number(program) + 1, 1, 126);
-    const value = String(this.engine.program.index).padStart(3, '0');
+    const value = String(this.engine.program.index);
     document.querySelector('.nord-program-number').textContent = value;
     document.querySelector('.nord-program-readout').textContent = value;
     document.querySelector('.nord-program-name').textContent = this.engine.program.index <= 104 ? 'FACTORY ORGAN PROGRAM' : 'EMPTY PROGRAM';
@@ -492,8 +492,8 @@ const banks = section.querySelector('.nord-manual-banks');
     shell.querySelector('[data-action="rotary"]').classList.toggle('active', engine.rotaryEnabled);
     shell.querySelector('[data-action="reverb"]').classList.toggle('active', engine.reverb > .2);
     shell.querySelector('[data-action="split"]').classList.toggle('active', engine.greatSplit);
-    shell.querySelector('.nord-program-number').textContent = String(engine.program.index).padStart(3, '0');
-    shell.querySelector('.nord-program-readout').textContent = String(engine.program.index).padStart(3, '0');
+    shell.querySelector('.nord-program-number').textContent = String(engine.program.index);
+    shell.querySelector('.nord-program-readout').textContent = String(engine.program.index);
     shell.querySelector('.nord-program-name').textContent = String(title).slice(0, 40).toUpperCase();
     patch.manuals.forEach((manual, index) => {
       const section = shell.querySelector(`.nord-manual--${index ? 'upper' : 'lower'}`);

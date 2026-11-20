@@ -1641,3 +1641,2118 @@ html[data-theme="light"] #omni-root .omni-organ-drawbar__input::-moz-range-progr
 html[data-theme="light"] #omni-root .omni-organ-drawbar__input:focus-visible {outline-color:#087f9f}
 html[data-theme="light"] #omni-root .omni-organ-drawbar__value {color:#087f9f}
 @media(max-width:600px){#omni-root .omni-module--organ{width:420px}}
+
+
+/* ============================================================
+   OMNI Front-end Studio — precision tools and hardware surfaces
+   ============================================================ */
+.omni-view-switch{display:flex;align-items:center;gap:3px;flex:0 0 auto;padding:3px;border:1px solid var(--omni-border-strong);border-radius:9px;background:rgba(0,0,0,.16)}
+.omni-view-switch__button{min-height:31px;padding:0 12px;border:0;border-radius:6px;color:var(--omni-muted);background:transparent;font:600 9px/1 'Inter Variable','Inter','Segoe UI',sans-serif;letter-spacing:.07em;cursor:pointer;white-space:nowrap}
+.omni-view-switch__button[aria-pressed="true"]{color:#15202a;background:linear-gradient(135deg,#9ceaff,#5bc9e7);box-shadow:0 2px 12px rgba(75,193,224,.18)}
+#omni-root>.omni-main[hidden],#omni-root>.omni-perf[hidden],#omni-root>.omni-front-panel[hidden]{display:none!important}
+#omni-root>.omni-front-panel{min-height:0;overflow:hidden;background:var(--bg);color:var(--omni-text);display:flex;flex-direction:column}
+.ofp-toolbar{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 18px;border-bottom:1px solid var(--omni-border);background:var(--omni-panel)}
+.ofp-toolbar__identity{display:grid;gap:4px}.ofp-kicker,.ofp-panel-heading__eyebrow{color:var(--omni-muted);font:9px/1.3 var(--font-mono);letter-spacing:.14em}
+.ofp-toolbar__title{font:600 17px/1.2 'Inter Variable',var(--font-body);letter-spacing:-.025em}
+.ofp-toolbar__actions{display:flex;gap:7px;flex-wrap:wrap}
+.ofp-action,.ofp-inspector-action{min-height:32px;padding:0 11px;border:1px solid var(--omni-border-strong);border-radius:7px;color:var(--omni-text);background:var(--omni-panel-soft);font:600 9px/1 var(--font-mono);letter-spacing:.06em;cursor:pointer}
+.ofp-action:hover,.ofp-inspector-action:hover{border-color:var(--cyan);background:rgba(125,228,255,.07)}
+.ofp-action--primary{color:#13202a;border-color:transparent;background:linear-gradient(135deg,#9ceaff,#5bc9e7)}
+.ofp-workspace{display:grid;grid-template-columns:214px minmax(0,1fr) 276px;min-height:0;flex:1}
+.ofp-library,.ofp-inspector{min-width:0;overflow:auto;padding:16px 13px;border-right:1px solid var(--omni-border);background:var(--omni-panel)}
+.ofp-inspector{border-right:0;border-left:1px solid var(--omni-border)}
+.ofp-panel-heading{display:grid;gap:5px;margin-bottom:12px}.ofp-panel-heading strong{font:600 13px/1.3 'Inter Variable',var(--font-body)}
+.ofp-help,.ofp-field-note{color:var(--omni-muted);font-size:10px;line-height:1.6}
+.ofp-library-group{display:grid;gap:5px;margin-top:16px}.ofp-library-group h3{margin:0 0 3px;color:var(--omni-subtle);font:9px var(--font-mono);letter-spacing:.12em}
+.ofp-library-item{display:flex;align-items:center;gap:9px;min-height:34px;padding:6px 8px;border:1px solid var(--omni-border);border-radius:6px;color:var(--omni-text);background:var(--omni-panel-soft);font:500 10px var(--font-body);text-align:left;cursor:pointer}
+.ofp-library-item:hover{border-color:rgba(125,228,255,.5);background:rgba(125,228,255,.06)}
+.ofp-library-item__glyph{width:20px;color:var(--cyan);font-size:15px;text-align:center}
+.ofp-stage-panel{display:flex;min-width:0;min-height:0;flex-direction:column;padding:11px;background:radial-gradient(ellipse at 50% 42%,rgba(125,228,255,.055),transparent 62%)}
+.ofp-stage-head,.ofp-stage-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--omni-muted);font:8px var(--font-mono);letter-spacing:.09em}
+.ofp-stage-head strong{display:block;margin-top:3px;color:var(--omni-text);font:600 12px var(--font-body);letter-spacing:0}
+.ofp-stage-dimensions{font-variant-numeric:tabular-nums}
+.ofp-design-tools,.ofp-align-tools{display:flex;align-items:center;gap:5px;min-width:0;flex-wrap:wrap;padding:7px 0}
+.ofp-design-tools{border-bottom:1px solid var(--omni-border)}
+.ofp-align-tools{padding:5px 0;border-bottom:1px solid var(--omni-border)}
+.ofp-tool-toggle,.ofp-tool-select{min-height:26px;padding:0 7px;border:1px solid var(--omni-border-strong);border-radius:5px;color:var(--omni-muted);background:var(--omni-panel-soft);font:600 8px var(--font-mono);letter-spacing:.04em;cursor:pointer}
+.ofp-tool-toggle:hover,.ofp-tool-select:hover{color:var(--omni-text);border-color:var(--cyan)}
+.ofp-tool-toggle[aria-pressed="true"]{color:#14212a;border-color:rgba(125,228,255,.5);background:rgba(125,228,255,.88)}
+.ofp-tool-toggle--compact{min-height:23px;padding:0 6px;font-size:7px}
+.ofp-align-tools__label{margin-right:4px;color:var(--omni-subtle);font:8px var(--font-mono);letter-spacing:.1em}
+.ofp-viewport-row{display:flex;align-items:stretch;justify-content:center;min-height:0;flex:1;overflow:hidden}
+.ofp-ruler{position:relative;flex:none;overflow:hidden;color:var(--omni-muted);background:rgba(125,228,255,.035);font:7px var(--font-mono);font-variant-numeric:tabular-nums}
+.ofp-ruler--horizontal{height:20px;margin-left:24px;border-bottom:1px solid var(--omni-border)}
+.ofp-ruler--vertical{width:24px;border-right:1px solid var(--omni-border)}
+.ofp-ruler[hidden]{display:none!important}
+.ofp-ruler__tick{position:absolute;white-space:nowrap;opacity:.8}
+.ofp-ruler--horizontal .ofp-ruler__tick{top:4px;transform:translateX(-50%)}
+.ofp-ruler--vertical .ofp-ruler__tick{left:2px;transform:translateY(-50%) rotate(-90deg);transform-origin:left center}
+.ofp-viewport{display:flex;align-items:center;justify-content:center;min-height:0;min-width:0;flex:1;overflow:auto;padding:12px;background:radial-gradient(ellipse at 50% 42%,rgba(125,228,255,.04),transparent 62%)}
+.ofp-viewport.is-measuring{cursor:crosshair}.ofp-viewport.is-placing-guide{cursor:crosshair}
+.ofp-stage{position:relative;flex:none}
+.ofp-faceplate{position:absolute;left:0;top:0;transform-origin:top left;border:1px solid rgba(255,255,255,.2);border-radius:13px;background-color:var(--ofp-panel-color,#252d35);background-image:linear-gradient(135deg,rgba(255,255,255,.09),transparent 32%),linear-gradient(0deg,rgba(0,0,0,.14),transparent 22%);box-shadow:0 22px 55px rgba(0,0,0,.42),inset 0 1px rgba(255,255,255,.18);color:var(--ofp-text);overflow:hidden;isolation:isolate}
+.ofp-faceplate[data-finish="brushed"]{background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.025) 0 1px,transparent 1px 3px),linear-gradient(135deg,rgba(255,255,255,.1),transparent 35%)}
+.ofp-faceplate[data-finish="anodized"]{background-image:linear-gradient(135deg,rgba(125,228,255,.12),transparent 48%),linear-gradient(0deg,rgba(0,0,0,.18),transparent)}
+.ofp-faceplate[data-finish="walnut"]{background-image:repeating-linear-gradient(0deg,rgba(116,68,36,.23) 0 2px,transparent 2px 7px),linear-gradient(135deg,rgba(255,210,155,.1),transparent 40%)}
+.ofp-faceplate[data-finish="ivory"]{background-image:linear-gradient(135deg,rgba(255,255,255,.38),transparent 45%),linear-gradient(0deg,rgba(92,77,52,.06),transparent)}
+.ofp-component{position:absolute;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:var(--ofp-gap,5px);padding:var(--ofp-padding,7px);border:var(--ofp-border-width,1px) solid var(--ofp-control-border,rgba(255,255,255,.12));border-radius:var(--ofp-radius,7px);background:linear-gradient(145deg,rgba(255,255,255,.07),transparent 55%),var(--ofp-control-surface);color:var(--ofp-control-text);box-shadow:0 4px 12px rgba(0,0,0,.2),inset 0 1px rgba(255,255,255,.08);user-select:none}
+.ofp-component[data-shadow="none"]{box-shadow:none!important}
+.ofp-component[data-shadow="hard"]{box-shadow:0 8px 0 rgba(0,0,0,.44),0 14px 18px rgba(0,0,0,.28),inset 0 1px rgba(255,255,255,.14)}
+.ofp-component::after{position:absolute;inset:calc(-1 * var(--ofp-clearance,0px));border:1px dashed rgba(125,228,255,.0);border-radius:10px;content:'';pointer-events:none}
+.ofp-component.is-selected{outline:2px solid var(--ofp-control-accent);outline-offset:3px;z-index:3}
+.ofp-component.is-locked{cursor:not-allowed}.ofp-component.is-locked .ofp-component__title{cursor:not-allowed}
+.ofp-component__title{width:100%;overflow:hidden;color:var(--ofp-control-text);font:600 var(--ofp-font-size,8px)/1.25 var(--font-mono);letter-spacing:.1em;text-align:center;text-overflow:ellipsis;white-space:nowrap;cursor:move}
+.ofp-knob{position:relative;display:grid;place-items:center;width:min(72px,65%);aspect-ratio:1}
+.ofp-knob__ring{position:absolute;inset:2px;border-radius:50%;background:conic-gradient(from 225deg,var(--ofp-control-accent) 0deg,var(--ofp-control-accent) calc((var(--ofp-value,.5))*270deg),rgba(255,255,255,.12) calc((var(--ofp-value,.5))*270deg),rgba(255,255,255,.12) 270deg,transparent 270deg);mask:radial-gradient(circle,transparent 59%,#000 62%);transform:rotate(-135deg)}
+.ofp-knob__cap{width:62%;aspect-ratio:1;border-radius:50%;background:linear-gradient(145deg,#65717c,#202a33 62%,#111820);border:1px solid rgba(255,255,255,.3);box-shadow:0 4px 8px rgba(0,0,0,.45),inset 0 1px rgba(255,255,255,.3)}
+.ofp-knob__input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:ns-resize}
+.ofp-slider{display:flex;align-items:center;justify-content:center;flex:1;min-height:0}
+.ofp-slider__input{width:80%;accent-color:var(--ofp-control-accent)}
+.ofp-component--slider[data-orientation="vertical"] .ofp-slider{height:82%;min-height:0}
+.ofp-component--slider[data-orientation="vertical"] .ofp-slider__input{width:auto;height:100%;writing-mode:vertical-lr;direction:rtl}
+.ofp-dropdown{width:90%;min-height:28px;padding:4px;border:1px solid rgba(255,255,255,.2);border-radius:4px;color:var(--ofp-control-text);background:#18232e;font:9px var(--font-mono)}
+.ofp-hardware-button{min-height:25px;padding:5px 12px;border:1px solid var(--ofp-control-accent);border-radius:5px;color:var(--ofp-control-text);background:linear-gradient(180deg,rgba(255,255,255,.16),rgba(0,0,0,.16));box-shadow:0 3px 0 rgba(0,0,0,.3);font:600 8px var(--font-mono);cursor:pointer}
+.ofp-hardware-button:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.3)}
+.ofp-switch{position:relative;display:grid;justify-items:center;gap:6px;border:0;background:none;color:var(--ofp-control-text);cursor:pointer}
+.ofp-switch__track{position:relative;width:54px;height:24px;border:1px solid rgba(255,255,255,.24);border-radius:99px;background:#111a22;box-shadow:inset 0 2px 5px rgba(0,0,0,.55)}
+.ofp-switch__track::after{position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;content:'';background:linear-gradient(180deg,#f4f6f8,#8a98a4);box-shadow:0 1px 4px rgba(0,0,0,.6);transition:transform .14s ease}
+.ofp-switch.is-on .ofp-switch__track{border-color:var(--ofp-control-accent);background:rgba(125,228,255,.15)}
+.ofp-switch.is-on .ofp-switch__track::after{transform:translateX(29px);background:linear-gradient(180deg,#fff,var(--ofp-control-accent))}
+.ofp-switch__label{font:8px var(--font-mono)}
+.ofp-keyboard{position:relative;display:flex;width:100%;height:75%;min-height:45px;overflow:hidden;border:1px solid #111;border-radius:3px;background:#111}
+.ofp-key{position:absolute;top:0;height:100%;padding:0;border:1px solid #89939c;border-radius:0 0 3px 3px;background:linear-gradient(90deg,#d9e0e5,#fff 38%,#e3e8ec);cursor:pointer;touch-action:none}
+.ofp-key--black{z-index:2;height:62%;border-color:#05080b;border-radius:0 0 3px 3px;background:linear-gradient(90deg,#080d12,#37434e 48%,#10171e)}
+.ofp-key.is-active{background:var(--ofp-control-accent);filter:brightness(1.12)}
+.ofp-wheel{position:relative;display:flex;align-items:center;justify-content:center;flex:1;width:55%;border:1px solid rgba(255,255,255,.16);border-radius:5px;background:linear-gradient(90deg,#0b1118,#47525d,#0b1118)}
+.ofp-wheel__track{width:9px;height:80%;border-radius:8px;background:linear-gradient(180deg,#111,#b6c2cb,#111);box-shadow:0 0 0 1px #05090d}
+.ofp-wheel__cap{position:absolute;left:17.5%;top:var(--ofp-wheel-position,50%);transform:translateY(-50%);width:65%;height:15%;border:1px solid #aab5bd;border-radius:4px;background:linear-gradient(180deg,#f0f3f5,#71808c);pointer-events:none}
+.ofp-wheel__input{position:absolute;inset:0;width:100%;height:100%;opacity:0;writing-mode:vertical-lr;direction:rtl;cursor:ns-resize}
+.ofp-module__name{font:600 var(--ofp-font-size,12px) var(--font-body);text-align:center}.ofp-module__id,.ofp-module__ports{color:var(--ofp-control-accent);font:8px var(--font-mono);text-align:center}
+.ofp-display{display:grid;align-content:center;gap:5px;width:100%;height:100%;padding:8px;border:1px solid var(--ofp-control-accent);border-radius:3px;background:linear-gradient(135deg,rgba(125,228,255,.06),transparent),#071218;box-shadow:inset 0 0 14px rgba(0,0,0,.65);color:var(--ofp-control-accent);font:9px/1.35 var(--font-mono);white-space:pre-wrap}
+.ofp-display__line.is-primary{font-size:11px}.ofp-led{width:13px;height:13px;border-radius:50%;background:var(--ofp-control-accent);box-shadow:0 0 12px var(--ofp-control-accent)}.ofp-led__label{font:8px var(--font-mono)}
+.ofp-meter{width:76%;height:12px;overflow:hidden;border:1px solid rgba(255,255,255,.16);border-radius:3px;background:#0c141b;box-shadow:inset 0 2px 4px rgba(0,0,0,.55)}
+.ofp-meter__fill{display:block;height:100%;background:linear-gradient(90deg,#82e6a8,#ffb75e,#f87171);box-shadow:0 0 8px rgba(130,230,168,.35)}
+.ofp-pad{width:76%;height:70%;border:1px solid var(--ofp-control-accent);border-radius:8px;color:var(--ofp-control-text);background:linear-gradient(145deg,rgba(255,255,255,.17),rgba(0,0,0,.4));box-shadow:0 5px 0 rgba(0,0,0,.42),inset 0 1px rgba(255,255,255,.25);font:700 9px var(--font-mono);cursor:pointer}
+.ofp-pad.is-active{transform:translateY(3px);background:var(--ofp-control-accent);color:#111820;box-shadow:0 1px 0 rgba(0,0,0,.4)}
+.ofp-free-label{color:var(--ofp-control-text);font:600 var(--ofp-font-size,11px) var(--font-body);text-align:center}
+.ofp-section__line{width:100%;height:1px;background:var(--ofp-control-accent);box-shadow:0 0 8px var(--ofp-control-accent)}
+.ofp-section__text{color:var(--ofp-control-text);font:var(--ofp-font-size,8px) var(--font-mono);letter-spacing:.12em;text-align:center}
+.ofp-drawbars{display:flex;align-items:stretch;justify-content:space-around;gap:3px;width:100%;height:75%}
+.ofp-drawbar{display:flex;align-items:center;flex:1;flex-direction:column;gap:3px;color:var(--ofp-control-text);font:7px var(--font-mono)}
+.ofp-drawbar__input{height:100%;min-height:35px;width:100%;writing-mode:vertical-lr;direction:rtl;accent-color:var(--ofp-control-accent)}
+.ofp-component__value{color:var(--ofp-control-accent);font:9px var(--font-mono);font-variant-numeric:tabular-nums}
+.ofp-component__resize{position:absolute;right:1px;bottom:1px;width:12px;height:12px;padding:0;border:0;border-radius:2px;background:linear-gradient(135deg,transparent 45%,var(--ofp-control-accent) 47% 57%,transparent 59% 68%,var(--ofp-control-accent) 70% 80%,transparent 82%);cursor:nwse-resize;opacity:.75}
+.ofp-component__resize:hover{opacity:1}
+.ofp-overlays{position:absolute;inset:0;z-index:5;pointer-events:none}
+.ofp-grid-overlay{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.065) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.065) 1px,transparent 1px);pointer-events:none}
+.ofp-safe-margin{position:absolute;border:1px dashed rgba(255,183,94,.55);box-shadow:inset 0 0 0 1px rgba(255,183,94,.08);pointer-events:none}
+.ofp-guide-line{position:absolute;z-index:2;pointer-events:auto;touch-action:none}
+.ofp-guide-line::after{position:absolute;content:'';background:var(--ofp-guide-color);box-shadow:0 0 7px var(--ofp-guide-color);opacity:.72}
+.ofp-guide-line--x{top:0;bottom:0;width:10px;transform:translateX(-5px);cursor:ew-resize}
+.ofp-guide-line--x::after{left:5px;top:0;bottom:0;width:1px}
+.ofp-guide-line--y{left:0;right:0;height:10px;transform:translateY(-5px);cursor:ns-resize}
+.ofp-guide-line--y::after{top:5px;left:0;right:0;height:1px}
+.ofp-smart-guide{position:absolute;background:#7de4ff;box-shadow:0 0 8px rgba(125,228,255,.7);pointer-events:none}
+.ofp-smart-guide--vertical{top:0;bottom:0;width:1px}.ofp-smart-guide--horizontal{left:0;right:0;height:1px}
+.ofp-measurements{position:absolute;inset:0;z-index:4;overflow:visible;pointer-events:none}
+.ofp-inspector__body{display:grid;gap:11px}
+.ofp-field{display:grid;gap:5px;min-width:0;color:var(--omni-muted);font:9px var(--font-mono);letter-spacing:.04em}
+.ofp-input,.ofp-select,.ofp-textarea{width:100%;min-width:0;min-height:31px;padding:6px 8px;border:1px solid var(--omni-border-strong);border-radius:5px;color:var(--omni-text);background:var(--omni-panel-soft);font:10px var(--font-body)}
+.ofp-textarea{resize:vertical}.ofp-color{width:100%;height:31px;border:1px solid var(--omni-border-strong);border-radius:5px;background:transparent}
+.ofp-field-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.ofp-inspector-action{width:100%}.ofp-inspector-action--danger{color:#ff9b92;border-color:rgba(255,100,90,.3)}
+.ofp-layers-panel{display:grid;gap:6px;margin-top:20px;padding-top:13px;border-top:1px solid var(--omni-border)}
+.ofp-layers-list{display:grid;gap:3px}
+.ofp-layer-row{display:flex;align-items:center;gap:2px;min-width:0;padding:3px;border:1px solid transparent;border-radius:5px;background:rgba(255,255,255,.018)}
+.ofp-layer-row.is-selected{border-color:rgba(125,228,255,.42);background:rgba(125,228,255,.07)}
+.ofp-layer-name{flex:1;min-width:0;overflow:hidden;padding:4px 3px;border:0;color:var(--omni-text);background:none;font:9px var(--font-body);text-align:left;text-overflow:ellipsis;white-space:nowrap;cursor:pointer}
+.ofp-layer-icon{width:19px;height:23px;padding:0;border:0;border-radius:3px;color:var(--omni-muted);background:transparent;font:10px var(--font-mono);cursor:pointer}
+.ofp-layer-icon:hover{color:var(--cyan);background:rgba(125,228,255,.08)}
+.ofp-stage-foot{padding-top:9px;border-top:1px solid var(--omni-border);font-size:7px}
+.ofp-stage-foot span{white-space:nowrap}
+html[data-theme="light"] #omni-root .ofp-library,html[data-theme="light"] #omni-root .ofp-inspector,html[data-theme="light"] #omni-root .ofp-toolbar{background:linear-gradient(180deg,#f5f8fb,#eaf0f5);color:#26384a}
+html[data-theme="light"] #omni-root .ofp-action,html[data-theme="light"] #omni-root .ofp-inspector-action{color:#26384a;border-color:rgba(43,59,78,.2);background:rgba(255,255,255,.72)}
+html[data-theme="light"] #omni-root .ofp-library-item,html[data-theme="light"] #omni-root .ofp-input,html[data-theme="light"] #omni-root .ofp-select,html[data-theme="light"] #omni-root .ofp-textarea{color:#26384a;border-color:rgba(43,59,78,.18);background:rgba(255,255,255,.72)}
+html[data-theme="light"] #omni-root .ofp-toolbar__title,html[data-theme="light"] #omni-root .ofp-panel-heading strong{color:#26384a}
+html[data-theme="light"] #omni-root .ofp-design-tools,html[data-theme="light"] #omni-root .ofp-align-tools{border-color:rgba(43,59,78,.14)}
+html[data-theme="light"] #omni-root .ofp-tool-toggle,html[data-theme="light"] #omni-root .ofp-tool-select{color:#485c70;border-color:rgba(43,59,78,.18);background:rgba(255,255,255,.72)}
+html[data-theme="light"] #omni-root .ofp-tool-toggle[aria-pressed="true"]{color:#fff;background:#087f9f}
+html[data-theme="light"] #omni-root .ofp-ruler{color:#536c80;background:rgba(8,127,159,.055)}
+html[data-theme="light"] #omni-root .ofp-layer-row{background:rgba(40,60,80,.025)}
+html[data-theme="light"] #omni-root .ofp-layer-name{color:#34485c}
+html[data-theme="light"] #omni-root .ofp-component[data-finish="ivory"]{color:#283644;border-color:rgba(43,59,78,.25)}
+.ofp-component[data-finish="brushed"]{background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.035) 0 1px,transparent 1px 3px),linear-gradient(145deg,rgba(255,255,255,.16),transparent 55%);box-shadow:0 4px 12px rgba(0,0,0,.25),inset 0 1px rgba(255,255,255,.38)}
+.ofp-component[data-finish="anodized"]{background-image:linear-gradient(145deg,rgba(125,228,255,.18),transparent 58%),linear-gradient(180deg,rgba(255,255,255,.1),rgba(0,0,0,.2))}
+.ofp-component[data-finish="walnut"]{background-image:repeating-linear-gradient(0deg,rgba(130,78,45,.24) 0 2px,transparent 2px 7px),linear-gradient(145deg,rgba(255,213,169,.1),rgba(0,0,0,.2))}
+.ofp-component[data-finish="ivory"]{background-image:linear-gradient(145deg,rgba(255,255,255,.35),rgba(210,216,218,.05));box-shadow:0 4px 12px rgba(0,0,0,.17),inset 0 1px rgba(255,255,255,.5)}
+
+@media(max-width:1250px){.ofp-workspace{grid-template-columns:184px minmax(0,1fr) 244px}.ofp-library,.ofp-inspector{padding:12px 9px}.ofp-tool-toggle{font-size:7px;padding-inline:5px}}
+@media(max-width:900px){.ofp-workspace{grid-template-columns:152px minmax(0,1fr)}.ofp-inspector{position:absolute;right:9px;top:150px;bottom:45px;z-index:8;width:240px;border:1px solid var(--omni-border);border-radius:9px;box-shadow:var(--omni-shadow)}}
+@media(max-width:600px){.omni-topbar{flex-wrap:wrap}.omni-view-switch{order:5;width:100%}.omni-view-switch__button{flex:1}.ofp-toolbar{align-items:flex-start;flex-direction:column}.ofp-workspace{grid-template-columns:118px minmax(0,1fr)}.ofp-library{padding:9px 6px}.ofp-library-item{font-size:8px;padding:5px}.ofp-library-item__glyph{width:14px}.ofp-inspector{top:188px;right:6px;width:min(205px,60vw)}.ofp-stage-panel{padding:7px}.ofp-stage-foot{flex-wrap:wrap;font-size:6px}.ofp-align-tools{display:none}.ofp-design-tools{flex-wrap:nowrap;overflow:auto;max-width:100%}.ofp-tool-toggle{flex:0 0 auto}}
+
+#omni-root .ofp-component[hidden]{display:none!important}
+#omni-root .ofp-component::after{border-color:rgba(125,228,255,.14)}
+
+#omni-root>.omni-front-panel{grid-row:2 / 4}
+.ofp-workspace{position:relative;overflow:hidden}
+
+.ofp-guide-setting{display:grid;grid-template-columns:1fr auto;gap:7px;align-items:center;padding:8px;border:1px solid var(--omni-border);border-radius:6px;background:var(--omni-panel-soft)}
+.ofp-guide-setting__name{grid-column:1/-1;color:var(--omni-muted);font:8px var(--font-mono);letter-spacing:.1em}
+.ofp-guide-setting .ofp-field{min-width:0}
+.ofp-guide-setting .ofp-color{width:42px}
+html[data-theme="light"] #omni-root .ofp-guide-setting{border-color:rgba(43,59,78,.15);background:rgba(255,255,255,.5)}
+
+html[data-theme="light"] #omni-root .ofp-help,
+html[data-theme="light"] #omni-root .ofp-field,
+html[data-theme="light"] #omni-root .ofp-panel-heading__eyebrow,
+html[data-theme="light"] #omni-root .ofp-stage-head,
+html[data-theme="light"] #omni-root .ofp-stage-foot,
+html[data-theme="light"] #omni-root .ofp-stage-dimensions,
+html[data-theme="light"] #omni-root .ofp-layer-icon,
+html[data-theme="light"] #omni-root .ofp-guide-setting__name { color:#60758a; }
+html[data-theme="light"] #omni-root .ofp-guide-setting .ofp-field { color:#60758a; }
+html[data-theme="light"] #omni-root .ofp-layer-row.is-selected { border-color:rgba(8,127,159,.36);background:rgba(8,127,159,.055); }
+html[data-theme="light"] #omni-root .ofp-layer-icon:hover { color:#087f9f;background:rgba(8,127,159,.08); }
+html[data-theme="light"] #omni-root .ofp-stage-foot { border-color:rgba(43,59,78,.14); }
+
+
+.ofp-measurement-readout{grid-column:1/-1;color:var(--cyan);font:8px/1.6 var(--font-mono);font-variant-numeric:tabular-nums}
+html[data-theme="light"] #omni-root .ofp-measurement-readout{color:#087f9f}
+
+
+/* =========================================================
+   OMNI FRONT-PANEL STUDIO — cohesive command and hardware UI
+   ========================================================= */
+
+/* Keep the editor switch truly centred and group theme + account at the right. */
+#omni-root .omni-topbar {
+  display:grid;
+  grid-template-columns:auto minmax(170px,min(25vw,320px)) minmax(12px,1fr) auto minmax(12px,1fr) auto auto;
+  align-items:center;
+  column-gap:clamp(10px,1.5vw,22px);
+}
+#omni-root .omni-logo {grid-column:1}
+#omni-root .omni-project {grid-column:2;width:100%;min-width:0}
+#omni-root .omni-view-switch {grid-column:4;justify-self:center;margin:0}
+#omni-root .omni-status {grid-column:5;justify-self:end;margin:0;max-width:min(18vw,240px)}
+#omni-root .omni-topbar .site-theme-toggle--omni {
+  position:relative!important;top:auto!important;left:auto!important;z-index:1;grid-column:6;justify-self:center;
+  width:38px;height:34px;min-width:38px;transform:none!important;margin:0;border-radius:9px;
+}
+#omni-root .omni-topbar .site-theme-toggle--omni:active {transform:scale(.96)!important}
+#omni-root .omni-account {grid-column:7;justify-self:end;margin:0;white-space:nowrap}
+#omni-root .omni-front-only-command[hidden],
+#omni-root .omni-menu--front-only[hidden] {display:none!important}
+#omni-root .omni-front-only-command {border-top:1px solid var(--omni-border)}
+#omni-root .omni-menu--front-only .omni-menu__panel {width:270px}
+#omni-root .omni-commandbar {position:relative;z-index:20}
+#omni-root .omni-menu[open] {z-index:40}
+
+/* The design studio follows the same restrained, layered surface language as
+   the sound-engine workspace instead of creating a second visual system. */
+#omni-root>.omni-front-panel {min-height:0;isolation:isolate}
+#omni-root .ofp-toolbar {
+  min-height:54px;padding:8px clamp(13px,1.5vw,22px);
+  background:linear-gradient(180deg,var(--omni-panel),var(--omni-panel-soft));
+}
+#omni-root .ofp-toolbar__identity {gap:2px}
+#omni-root .ofp-toolbar__title {font-size:16px;letter-spacing:-.03em}
+#omni-root .ofp-toolbar__actions {align-items:center;gap:6px}
+#omni-root .ofp-action {min-height:31px;padding-inline:11px;font-family:var(--font-body);font-size:9px;letter-spacing:.07em}
+#omni-root .ofp-action--primary {font-weight:750}
+#omni-root .ofp-workspace {grid-template-columns:minmax(190px,218px) minmax(0,1fr) minmax(270px,304px);gap:0}
+#omni-root .ofp-library,#omni-root .ofp-inspector {
+  padding:14px 12px;background:linear-gradient(180deg,var(--omni-panel),var(--omni-panel-soft));
+  scrollbar-width:thin;scrollbar-color:rgba(125,228,255,.2) transparent;
+}
+#omni-root .ofp-library {display:flex;flex-direction:column;gap:6px}
+#omni-root .ofp-library .ofp-panel-heading {margin-bottom:4px}
+#omni-root .ofp-help {margin:0 0 6px;max-width:38ch;font-size:10px;line-height:1.55}
+#omni-root .ofp-library-search {
+  width:100%;min-height:34px;padding:0 10px;border:1px solid var(--omni-border-strong);border-radius:7px;
+  color:var(--omni-text);background:var(--omni-panel-soft);font:11px var(--font-body);
+}
+#omni-root .ofp-library-search:focus {outline:2px solid rgba(125,228,255,.4);outline-offset:1px}
+#omni-root .ofp-library-group {display:grid;gap:7px;margin-top:7px;padding-top:7px;border-top:1px solid var(--omni-border)}
+#omni-root .ofp-library-group__heading {
+  display:flex;align-items:center;gap:8px;min-height:22px;color:var(--omni-muted);
+  font:600 9px var(--font-mono);letter-spacing:.12em;cursor:pointer;list-style:none;
+}
+#omni-root .ofp-library-group__heading::-webkit-details-marker {display:none}
+#omni-root .ofp-library-group__heading::after {
+  width:6px;height:6px;margin-left:auto;border-right:1px solid currentColor;border-bottom:1px solid currentColor;
+  content:'';transform:rotate(45deg) translateY(-2px);transition:transform .16s ease;
+}
+#omni-root .ofp-library-group[open]>.ofp-library-group__heading::after {transform:rotate(225deg) translate(-1px,-1px)}
+#omni-root .ofp-library-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+#omni-root .ofp-library-item {
+  display:grid;grid-template-rows:56px auto;gap:4px;min-width:0;min-height:0;padding:5px;
+  border:1px solid var(--omni-border);border-radius:7px;background:linear-gradient(150deg,rgba(255,255,255,.035),rgba(0,0,0,.1)),var(--omni-panel-soft);
+  color:var(--omni-text);text-align:center;cursor:grab;transition:border-color .16s ease,background .16s ease,transform .16s ease;
+}
+#omni-root .ofp-library-item:hover {transform:translateY(-1px);border-color:rgba(125,228,255,.48);background:rgba(125,228,255,.055)}
+#omni-root .ofp-library-item:active {cursor:grabbing}
+#omni-root .ofp-library-preview {width:100%;height:54px;overflow:visible}
+#omni-root .ofp-library-item__label {display:block;min-width:0;overflow:hidden;color:var(--omni-muted);font:9px/1.25 var(--font-body);text-overflow:ellipsis;white-space:nowrap}
+#omni-root .ofp-library-item[hidden],#omni-root .ofp-library-group[hidden] {display:none!important}
+
+/* Canvas controls are arranged in compact, discoverable drop-down groups. */
+#omni-root .ofp-stage-panel {padding:10px 12px;background:radial-gradient(ellipse at 50% 44%,rgba(125,228,255,.045),transparent 64%)}
+#omni-root .ofp-stage-head {min-height:35px}
+#omni-root .ofp-design-tools {display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:7px 0;border-bottom:1px solid var(--omni-border)}
+#omni-root .ofp-tool-group {position:relative;display:block;flex:0 0 auto}
+#omni-root .ofp-tool-group__trigger {
+  display:flex;align-items:center;gap:9px;min-height:31px;padding:0 10px;border:1px solid var(--omni-border);
+  border-radius:6px;color:var(--omni-muted);background:var(--omni-panel-soft);
+  font:650 9px var(--font-mono);letter-spacing:.08em;cursor:pointer;list-style:none;
+}
+#omni-root .ofp-tool-group__trigger::-webkit-details-marker {display:none}
+#omni-root .ofp-tool-group__trigger::after {width:6px;height:6px;border-right:1px solid currentColor;border-bottom:1px solid currentColor;content:'';transform:rotate(45deg) translateY(-2px)}
+#omni-root .ofp-tool-group[open]>.ofp-tool-group__trigger {border-color:rgba(125,228,255,.42);color:var(--omni-text);background:rgba(125,228,255,.07)}
+#omni-root .ofp-tool-group__panel {
+  position:absolute;z-index:34;top:calc(100% + 6px);left:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:5px;width:max-content;min-width:210px;max-width:min(360px,80vw);max-height:55vh;overflow:auto;
+  padding:9px;border:1px solid var(--omni-border-strong);border-radius:9px;
+  background:linear-gradient(150deg,#1a2330,#101720 72%);box-shadow:0 18px 48px rgba(0,0,0,.4);backdrop-filter:blur(16px);
+}
+#omni-root .ofp-tool-toggle,#omni-root .ofp-tool-select {
+  min-height:30px;padding:0 9px;border:1px solid var(--omni-border);border-radius:5px;
+  color:var(--omni-muted);background:rgba(255,255,255,.025);font:500 9px var(--font-body);letter-spacing:0;cursor:pointer;
+}
+#omni-root .ofp-tool-toggle:hover,#omni-root .ofp-tool-select:hover {border-color:rgba(125,228,255,.5);color:var(--omni-text);background:rgba(125,228,255,.06)}
+#omni-root .ofp-tool-toggle[aria-pressed="true"] {border-color:rgba(125,228,255,.5);color:#10202b;background:linear-gradient(135deg,#a8edff,#63cde7)}
+#omni-root .ofp-tool-select {grid-column:1/-1;color:var(--omni-text);background:#17222e}
+#omni-root .ofp-align-tools {display:none!important}
+#omni-root .ofp-viewport {background-color:rgba(5,9,14,.24);background-image:radial-gradient(ellipse at 50% 50%,rgba(125,228,255,.045),transparent 62%)}
+#omni-root .ofp-stage-foot {min-height:25px;font-size:8px;letter-spacing:.04em}
+#omni-root .ofp-stage-foot span:last-child {color:var(--cyan)}
+
+/* Instrument hardware: mounted controls, not generic cards containing emoji. */
+#omni-root .ofp-component {
+  border-color:transparent;background:transparent;box-shadow:none!important;overflow:visible;
+  padding:var(--ofp-padding,7px);isolation:isolate;
+}
+#omni-root .ofp-component::after {display:block;inset:calc(-1 * var(--ofp-clearance,0px));border-color:transparent}
+#omni-root .ofp-component.is-selected::after {border-color:rgba(125,228,255,.34)}
+#omni-root .ofp-component.is-locked::after {border-color:rgba(255,183,94,.22)}
+#omni-root .ofp-component.is-selected {outline:1px solid rgba(125,228,255,.65);outline-offset:3px;border-radius:5px}
+#omni-root .ofp-component__title {
+  position:relative;z-index:1;width:100%;color:var(--ofp-control-text);font:650 var(--ofp-font-size,8px)/1.2 var(--font-mono);
+  letter-spacing:.13em;text-shadow:0 1px 2px rgba(0,0,0,.55);cursor:move;
+}
+#omni-root .ofp-component--knob .ofp-knob,
+#omni-root .ofp-component--dial .ofp-knob,
+#omni-root .ofp-component--encoder .ofp-knob {width:min(94px,82%);max-width:100%;margin:2px auto}
+#omni-root .ofp-knob {position:relative;display:grid;place-items:center;flex:0 0 auto;width:84px;aspect-ratio:1;overflow:visible;filter:drop-shadow(0 6px 6px rgba(0,0,0,.22))}
+#omni-root .ofp-knob__scale {position:absolute;inset:0;border-radius:50%;pointer-events:none}
+#omni-root .ofp-knob__tick {position:absolute;top:50%;left:calc(50% - 1px);width:2px;height:5px;border-radius:1px;background:rgba(211,223,233,.58);transform-origin:1px 42px}
+#omni-root .ofp-knob__tick.is-major {height:8px;background:var(--ofp-control-text);box-shadow:0 0 3px rgba(0,0,0,.5)}
+#omni-root .ofp-knob__ring {
+  position:absolute;inset:5px;border-radius:50%;
+  background:conic-gradient(from 225deg,var(--ofp-control-accent) 0deg,var(--ofp-control-accent) calc(var(--ofp-value,.5)*270deg),rgba(112,128,142,.42) calc(var(--ofp-value,.5)*270deg),rgba(112,128,142,.42) 270deg,transparent 270deg);
+  mask:radial-gradient(circle,transparent 67%,#000 69% 100%);transform:rotate(-135deg);
+}
+#omni-root .ofp-knob__bezel {
+  position:absolute;inset:13px;border:1px solid rgba(211,223,233,.46);border-radius:50%;
+  background:linear-gradient(145deg,rgba(255,255,255,.2),rgba(7,12,18,.42) 36%,rgba(255,255,255,.08));
+  box-shadow:0 3px 6px rgba(0,0,0,.46),inset 0 1px 2px rgba(255,255,255,.22),inset 0 -2px 4px rgba(0,0,0,.5);
+  pointer-events:none;
+}
+#omni-root .ofp-knob__cap {
+  position:relative;z-index:1;width:59%;aspect-ratio:1;border:1px solid rgba(228,237,243,.44);border-radius:50%;
+  background:radial-gradient(circle at 35% 25%,rgba(255,255,255,.42),transparent 18%),linear-gradient(145deg,#697782 0%,#3d4a55 27%,#202a34 62%,#0b1118 100%);
+  box-shadow:0 4px 8px rgba(0,0,0,.54),inset 0 1px 2px rgba(255,255,255,.3),inset 0 -3px 5px rgba(0,0,0,.55);
+}
+#omni-root .ofp-knob__indicator {position:absolute;top:7%;left:calc(50% - 1.5px);width:3px;height:26%;border-radius:2px;background:var(--ofp-control-accent);box-shadow:0 0 4px var(--ofp-control-accent)}
+#omni-root .ofp-component__value {min-height:13px;color:var(--ofp-control-accent);font:650 9px var(--font-mono);font-variant-numeric:tabular-nums;text-shadow:0 1px 2px rgba(0,0,0,.5)}
+#omni-root .ofp-component--slider .ofp-slider {width:100%;flex:1;min-height:54px}
+#omni-root .ofp-slider__input {
+  width:82%;height:28px;margin:0;appearance:none;-webkit-appearance:none;background:transparent;cursor:ns-resize;
+}
+#omni-root .ofp-slider__input::-webkit-slider-runnable-track {height:7px;border:1px solid #090e13;border-radius:99px;background:linear-gradient(180deg,#090f15,#3b4650 40%,#101820);box-shadow:inset 0 2px 3px rgba(0,0,0,.7)}
+#omni-root .ofp-slider__input::-webkit-slider-thumb {
+  width:22px;height:18px;margin-top:-6px;appearance:none;-webkit-appearance:none;border:1px solid #d2dce2;border-radius:4px;
+  background:linear-gradient(180deg,#f5f7f8,#aab6bf 48%,#687782);box-shadow:0 2px 4px rgba(0,0,0,.5),inset 0 1px #fff;
+}
+#omni-root .ofp-slider__input::-moz-range-track {height:7px;border:1px solid #090e13;border-radius:99px;background:linear-gradient(180deg,#090f15,#3b4650 40%,#101820)}
+#omni-root .ofp-slider__input::-moz-range-thumb {width:20px;height:16px;border:1px solid #d2dce2;border-radius:4px;background:linear-gradient(180deg,#f5f7f8,#aab6bf 48%,#687782)}
+#omni-root .ofp-component--slider[data-orientation="vertical"] .ofp-slider {height:100%;width:100%}
+#omni-root .ofp-component--slider[data-orientation="vertical"] .ofp-slider__input {width:28px;height:82%;writing-mode:vertical-lr;direction:rtl}
+#omni-root .ofp-dropdown {
+  width:100%;min-height:32px;padding:0 28px 0 9px;border:1px solid var(--ofp-control-border);border-radius:5px;
+  color:var(--ofp-control-text);background:linear-gradient(180deg,#293744,#111a23);font:10px var(--font-body);
+}
+#omni-root .ofp-hardware-button {
+  min-height:32px;padding:4px 12px;border:1px solid var(--ofp-control-accent);border-radius:4px;
+  color:var(--ofp-control-text);background:linear-gradient(180deg,rgba(255,255,255,.17),rgba(0,0,0,.32)),var(--ofp-control-surface);
+  box-shadow:0 3px 0 rgba(0,0,0,.48),inset 0 1px rgba(255,255,255,.24);font:650 9px var(--font-mono);
+}
+#omni-root .ofp-switch__track {width:58px;height:28px;border-color:#687786;background:linear-gradient(180deg,#070c11,#202a33);box-shadow:inset 0 3px 5px rgba(0,0,0,.8),0 1px rgba(255,255,255,.12)}
+#omni-root .ofp-switch__track::after {top:3px;left:3px;width:20px;height:20px;background:linear-gradient(180deg,#edf2f4,#85939f);box-shadow:0 2px 4px rgba(0,0,0,.7)}
+#omni-root .ofp-switch.is-on .ofp-switch__track {border-color:var(--ofp-control-accent);background:linear-gradient(180deg,#0c252b,#194450)}
+#omni-root .ofp-switch.is-on .ofp-switch__track::after {transform:translateX(29px)}
+#omni-root .ofp-keyboard {
+  position:relative;width:100%;height:76%;min-height:68px;border:1px solid #05080b;border-radius:4px;
+  background:linear-gradient(180deg,#05090d,#141c23);box-shadow:0 4px 9px rgba(0,0,0,.48),inset 0 1px rgba(255,255,255,.14);
+}
+#omni-root .ofp-key--white {border-color:#84909a;border-bottom-color:#59636c;border-radius:0 0 2px 2px;background:linear-gradient(90deg,#cbd3d9,#f8fafb 22%,#fff 56%,#d9e0e5);box-shadow:inset 0 -3px 3px rgba(0,0,0,.12)}
+#omni-root .ofp-key--black {border-color:#020406;border-radius:0 0 3px 3px;background:linear-gradient(90deg,#05080b,#3b4650 45%,#111820);box-shadow:0 3px 4px rgba(0,0,0,.65),inset 0 1px rgba(255,255,255,.2)}
+#omni-root .ofp-key.is-active {background:linear-gradient(180deg,#a8eeff,var(--ofp-control-accent));filter:none}
+#omni-root .ofp-wheel {width:62%;border:1px solid #66747f;border-radius:5px;background:linear-gradient(90deg,#080d12,#66737e 48%,#111820);box-shadow:0 4px 8px rgba(0,0,0,.38),inset 0 1px rgba(255,255,255,.14)}
+#omni-root .ofp-wheel__track {width:11px;border:1px solid #05080b;background:linear-gradient(90deg,#242e37,#a9b4bd 50%,#1b252e);box-shadow:inset 0 1px 3px rgba(0,0,0,.7)}
+#omni-root .ofp-wheel__cap {width:76%;height:17%;left:12%;border:1px solid #e1e7eb;border-radius:4px;background:linear-gradient(180deg,#f4f6f7,#9caab5 45%,#566570);box-shadow:0 3px 5px rgba(0,0,0,.55),inset 0 1px #fff}
+#omni-root .ofp-drawbars {height:82%;gap:5px;padding:4px 3px;border:1px solid rgba(255,255,255,.15);border-radius:5px;background:linear-gradient(150deg,#1d2934,#0a1118);box-shadow:inset 0 2px 8px rgba(0,0,0,.55)}
+#omni-root .ofp-drawbar {font-size:7px}
+#omni-root .ofp-drawbar__input {width:100%;accent-color:var(--ofp-control-accent)}
+#omni-root .ofp-display {border-radius:4px;background:radial-gradient(ellipse at 50% 20%,rgba(125,228,255,.12),transparent 70%),#050d12;box-shadow:inset 0 0 16px rgba(0,0,0,.8),0 2px 6px rgba(0,0,0,.28)}
+#omni-root .ofp-component--module {border:1px solid rgba(255,255,255,.18);border-radius:5px;background:linear-gradient(150deg,rgba(255,255,255,.08),transparent 48%),var(--ofp-control-surface);box-shadow:inset 0 1px rgba(255,255,255,.13)!important}
+#omni-root .ofp-pad {border-radius:6px;background:linear-gradient(145deg,rgba(255,255,255,.18),rgba(0,0,0,.42)),var(--ofp-control-surface)}
+#omni-root .ofp-component__resize {z-index:5;width:15px;height:15px}
+
+/* Properly grouped property inspector and compact tabs. */
+#omni-root .ofp-inspector {display:flex;flex-direction:column;gap:10px}
+#omni-root .ofp-inspector .ofp-panel-heading {margin:0;padding-bottom:8px;border-bottom:1px solid var(--omni-border)}
+#omni-root .ofp-inspector-tabs {display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding:3px;border:1px solid var(--omni-border);border-radius:7px;background:rgba(0,0,0,.13)}
+#omni-root .ofp-inspector-tab {min-height:30px;padding:0 4px;border:1px solid transparent;border-radius:5px;color:var(--omni-muted);background:transparent;font:550 10px var(--font-body);cursor:pointer}
+#omni-root .ofp-inspector-tab[aria-selected="true"] {border-color:rgba(125,228,255,.24);color:var(--omni-text);background:rgba(125,228,255,.1);box-shadow:inset 0 1px rgba(255,255,255,.04)}
+#omni-root .ofp-inspector__body {gap:12px;padding:1px 1px 18px}
+#omni-root .ofp-field {gap:5px;color:var(--omni-muted);font:500 9px var(--font-body);letter-spacing:.015em}
+#omni-root .ofp-input,#omni-root .ofp-select,#omni-root .ofp-textarea {min-height:33px;border-radius:6px;font:11px var(--font-body)}
+#omni-root .ofp-color {height:35px;min-width:0;padding:3px;border-radius:6px;background:var(--omni-panel-soft);cursor:pointer}
+#omni-root .ofp-color-grid {gap:8px}
+#omni-root .ofp-inspector-actions {display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:4px}
+#omni-root .ofp-inspector-action {min-height:32px;padding-inline:8px;border-radius:6px;font:600 9px var(--font-body)}
+#omni-root .ofp-binding-status {margin:0;padding:9px;border:1px solid var(--omni-border);border-radius:6px;color:var(--cyan);background:rgba(125,228,255,.035);font:9px var(--font-mono)}
+#omni-root .ofp-layers-panel {margin-top:auto;padding-top:14px}
+#omni-root .ofp-layer-row {min-height:29px}
+
+/* Preview / inspection dialogs and print-ready export. */
+#omni-root dialog.ofp-preview-dialog,
+#omni-root dialog.ofp-check-dialog,
+#omni-root dialog.ofp-guide-dialog {
+  width:min(980px,calc(100vw - 32px));max-width:none;max-height:calc(100dvh - 36px);overflow:auto;
+  padding:0;border:1px solid var(--omni-border-strong);border-radius:13px;
+  color:var(--omni-text);background:linear-gradient(150deg,#18222e,#0d131b 75%);
+  box-shadow:0 28px 90px rgba(0,0,0,.6);
+}
+#omni-root dialog.ofp-check-dialog,#omni-root dialog.ofp-guide-dialog {width:min(650px,calc(100vw - 30px))}
+#omni-root dialog.ofp-preview-dialog::backdrop,#omni-root dialog.ofp-check-dialog::backdrop,#omni-root dialog.ofp-guide-dialog::backdrop {background:rgba(3,7,11,.75);backdrop-filter:blur(8px)}
+#omni-root dialog.ofp-preview-dialog .ofp-preview-dialog__header,
+#omni-root dialog.ofp-check-dialog .ofp-check-dialog__header,#omni-root dialog.ofp-guide-dialog .ofp-check-dialog__header {display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 16px;border-bottom:1px solid var(--omni-border)}
+#omni-root dialog.ofp-preview-dialog .ofp-preview-dialog__header strong,
+#omni-root dialog.ofp-check-dialog .ofp-check-dialog__header strong,
+#omni-root dialog.ofp-guide-dialog .ofp-check-dialog__header strong {display:block;margin-top:3px;font:600 15px var(--font-body)}
+#omni-root dialog.ofp-preview-dialog .ofp-preview-dialog__stage {display:grid;place-items:center;min-height:300px;max-height:calc(100dvh - 130px);padding:24px;overflow:auto;background:radial-gradient(ellipse at center,rgba(125,228,255,.06),transparent 66%),#090e14}
+#omni-root dialog.ofp-preview-dialog .ofp-preview-dialog__image {display:block;width:min(100%,1200px);height:auto;max-height:72vh;object-fit:contain;filter:drop-shadow(0 16px 30px rgba(0,0,0,.5))}
+#omni-root dialog.ofp-check-dialog .ofp-check-summary {display:flex;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--omni-border);color:var(--omni-muted);font:10px var(--font-mono)}
+#omni-root dialog.ofp-check-dialog .ofp-check-summary strong {color:var(--omni-text)}
+#omni-root dialog.ofp-check-dialog .ofp-check-list,#omni-root dialog.ofp-guide-dialog .ofp-guide-content {display:grid;gap:8px;padding:14px 16px 18px}
+#omni-root dialog.ofp-check-dialog .ofp-check-item {display:grid;grid-template-columns:72px 1fr;gap:10px;align-items:start;padding:9px 10px;border:1px solid var(--omni-border);border-radius:7px;background:rgba(255,255,255,.025)}
+#omni-root dialog.ofp-check-dialog .ofp-check-item>span {color:var(--amber);font:700 8px var(--font-mono);letter-spacing:.1em}
+#omni-root dialog.ofp-check-dialog .ofp-check-item--error>span {color:#ff8c82}
+#omni-root dialog.ofp-check-dialog .ofp-check-item p,#omni-root dialog.ofp-check-dialog .ofp-check-empty {margin:0;color:var(--omni-muted);font:11px/1.55 var(--font-body)}
+#omni-root dialog.ofp-guide-dialog .ofp-guide-content__section {padding:10px 11px;border:1px solid var(--omni-border);border-radius:7px;background:rgba(255,255,255,.025)}
+#omni-root dialog.ofp-guide-dialog .ofp-guide-content__section h3 {margin:0 0 5px;color:var(--omni-text);font:600 12px var(--font-body)}
+#omni-root dialog.ofp-guide-dialog .ofp-guide-content__section p {margin:0;color:var(--omni-muted);font:11px/1.6 var(--font-body)}
+
+html[data-theme="light"] #omni-root .ofp-library,
+html[data-theme="light"] #omni-root .ofp-inspector {background:linear-gradient(180deg,#f2f6fa,#e9eff4)}
+html[data-theme="light"] #omni-root .ofp-library-search,
+html[data-theme="light"] #omni-root .ofp-tool-group__trigger,
+html[data-theme="light"] #omni-root .ofp-inspector-tabs {color:#34495d;border-color:rgba(43,59,78,.18);background:rgba(255,255,255,.65)}
+html[data-theme="light"] #omni-root .ofp-tool-group__panel {border-color:rgba(43,59,78,.18);background:linear-gradient(150deg,#f9fbfd,#e8eef4);box-shadow:0 18px 40px rgba(45,60,81,.18)}
+html[data-theme="light"] #omni-root .ofp-tool-toggle,
+html[data-theme="light"] #omni-root .ofp-tool-select {color:#40566a;border-color:rgba(43,59,78,.16);background:rgba(255,255,255,.78)}
+html[data-theme="light"] #omni-root .ofp-library-item {border-color:rgba(43,59,78,.13);background:linear-gradient(150deg,#fff,#e9eff4)}
+html[data-theme="light"] #omni-root .ofp-library-item__label {color:#4d6175}
+html[data-theme="light"] #omni-root .ofp-inspector-tab {color:#52677b}
+html[data-theme="light"] #omni-root .ofp-inspector-tab[aria-selected="true"] {color:#15566d;background:rgba(8,127,159,.09)}
+html[data-theme="light"] #omni-root dialog.ofp-preview-dialog,
+html[data-theme="light"] #omni-root dialog.ofp-check-dialog,
+html[data-theme="light"] #omni-root dialog.ofp-guide-dialog {color:#293d51;background:linear-gradient(150deg,#f8fafc,#e8eef4)}
+html[data-theme="light"] #omni-root dialog.ofp-check-dialog .ofp-check-item,
+html[data-theme="light"] #omni-root dialog.ofp-guide-dialog .ofp-guide-content__section {background:rgba(255,255,255,.6)}
+html[data-theme="light"] #omni-root dialog.ofp-guide-dialog .ofp-guide-content__section h3 {color:#26394c}
+
+@media(max-width:1120px) {
+  #omni-root .omni-topbar {column-gap:10px;grid-template-columns:auto minmax(130px,22vw) minmax(8px,1fr) auto minmax(8px,1fr) auto auto}
+  #omni-root .ofp-workspace {grid-template-columns:180px minmax(0,1fr) 260px}
+}
+@media(max-width:900px) {
+  #omni-root .omni-topbar {display:flex;flex-wrap:wrap;gap:10px}
+  #omni-root .omni-view-switch {margin-left:auto}
+  #omni-root .omni-status {display:none}
+  #omni-root .omni-topbar .site-theme-toggle--omni {margin-left:auto}
+  #omni-root .ofp-workspace {grid-template-columns:160px minmax(0,1fr)}
+  #omni-root .ofp-inspector {position:absolute;right:8px;top:120px;bottom:8px;z-index:15;width:260px;border:1px solid var(--omni-border);border-radius:9px;box-shadow:var(--omni-shadow)}
+}
+@media(max-width:620px) {
+  #omni-root .omni-topbar {display:flex;flex-wrap:wrap;gap:8px;padding:8px 10px}
+  #omni-root .omni-project {min-width:0;flex:1 1 130px;width:auto}
+  #omni-root .omni-view-switch {order:4;flex:1 0 100%;justify-content:center;margin:0}
+  #omni-root .omni-topbar .site-theme-toggle--omni {margin-left:auto}
+  #omni-root .ofp-toolbar {align-items:flex-start;flex-direction:row;flex-wrap:wrap}
+  #omni-root .ofp-workspace {grid-template-columns:120px minmax(0,1fr)}
+  #omni-root .ofp-library {padding:9px 6px}
+  #omni-root .ofp-library-grid {grid-template-columns:1fr}
+  #omni-root .ofp-library-item {grid-template-rows:44px auto}
+  #omni-root .ofp-library-preview {height:42px}
+  #omni-root .ofp-inspector {top:110px;right:5px;bottom:5px;width:min(230px,65vw)}
+  #omni-root .ofp-stage-panel {padding:7px}
+  #omni-root .ofp-tool-group__trigger {min-height:28px;padding-inline:7px;font-size:8px}
+  #omni-root .ofp-tool-group__panel {grid-template-columns:1fr 1fr;min-width:190px}
+  #omni-root .ofp-stage-foot {flex-wrap:wrap}
+}
+
+#omni-root .ofp-faceplate.is-test-mode .ofp-component {cursor:default}
+#omni-root .ofp-faceplate.is-test-mode .ofp-component__title {cursor:default}
+#omni-root .ofp-faceplate.is-test-mode .ofp-component__resize {display:none!important}
+#omni-root .ofp-faceplate.is-test-mode .ofp-component.is-selected {outline:none}
+#omni-root .ofp-action[aria-pressed="true"] {border-color:rgba(130,230,168,.56);color:#152a21;background:linear-gradient(135deg,#c3f2d4,#82e6a8)}
+#omni-root .ofp-action[aria-pressed="true"]:hover {background:linear-gradient(135deg,#d5f7e1,#a2ecc0)}
+
+/* Let inspector colour and finish settings change the hardware itself. */
+#omni-root .ofp-knob__cap {
+  background:radial-gradient(circle at 35% 25%,rgba(255,255,255,.35),transparent 20%),linear-gradient(145deg,rgba(255,255,255,.16),rgba(0,0,0,.45)),var(--ofp-control-surface,#26313d);
+}
+#omni-root .ofp-knob__bezel {border-color:var(--ofp-control-border,#8998a5)}
+#omni-root .ofp-switch__track {
+  border-color:var(--ofp-control-border,#687786);
+  background:linear-gradient(180deg,rgba(0,0,0,.42),rgba(255,255,255,.08)),var(--ofp-control-surface,#26313d);
+}
+#omni-root .ofp-dropdown {
+  border-color:var(--ofp-control-border);
+  background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(0,0,0,.42)),var(--ofp-control-surface,#26313d);
+}
+#omni-root .ofp-slider__input::-webkit-slider-thumb {
+  border-color:var(--ofp-control-border,#d2dce2);
+  background:linear-gradient(180deg,rgba(255,255,255,.72),rgba(0,0,0,.2)),var(--ofp-control-surface,#aab6bf);
+}
+#omni-root .ofp-slider__input::-moz-range-thumb {
+  border-color:var(--ofp-control-border,#d2dce2);
+  background:linear-gradient(180deg,rgba(255,255,255,.72),rgba(0,0,0,.2)),var(--ofp-control-surface,#aab6bf);
+}
+#omni-root .ofp-component--keyboard .ofp-keyboard {background:linear-gradient(180deg,rgba(255,255,255,.12),rgba(0,0,0,.48)),var(--ofp-control-surface,#141c23)}
+#omni-root .ofp-component--drawbars .ofp-drawbars {background:linear-gradient(150deg,rgba(255,255,255,.12),rgba(0,0,0,.45)),var(--ofp-control-surface,#0a1118)}
+#omni-root .ofp-component--module {border:1px solid var(--ofp-control-border);border-radius:var(--ofp-radius,7px);background:linear-gradient(150deg,rgba(255,255,255,.12),rgba(0,0,0,.38)),var(--ofp-control-surface);box-shadow:0 4px 12px rgba(0,0,0,.24),inset 0 1px rgba(255,255,255,.18)!important}
+#omni-root .ofp-component[data-finish="brushed"] .ofp-knob__cap,
+#omni-root .ofp-component[data-finish="brushed"] .ofp-switch__track,
+#omni-root .ofp-component[data-finish="brushed"] .ofp-hardware-button {
+  background:repeating-linear-gradient(0deg,rgba(255,255,255,.12) 0 1px,transparent 1px 3px),linear-gradient(145deg,#d9e0e4,#798791 48%,#303d47);
+}
+#omni-root .ofp-component[data-finish="anodized"] .ofp-knob__cap,
+#omni-root .ofp-component[data-finish="anodized"] .ofp-hardware-button {
+  background:linear-gradient(145deg,rgba(125,228,255,.3),rgba(0,0,0,.4)),var(--ofp-control-surface);
+}
+#omni-root .ofp-component[data-finish="walnut"] .ofp-knob__cap,
+#omni-root .ofp-component[data-finish="walnut"] .ofp-hardware-button {
+  background:repeating-linear-gradient(0deg,rgba(98,55,28,.32) 0 2px,transparent 2px 6px),linear-gradient(145deg,#bc8b63,#5f3827 70%);
+  border-color:#84563a;
+}
+#omni-root .ofp-component[data-finish="ivory"] .ofp-knob__cap,
+#omni-root .ofp-component[data-finish="ivory"] .ofp-hardware-button {
+  background:linear-gradient(145deg,#fff9e9,#c9c2ac 65%,#968f7c);
+  border-color:#a79f8c;
+}
+#omni-root .ofp-component[data-finish="walnut"] .ofp-switch__track,
+#omni-root .ofp-component[data-finish="ivory"] .ofp-switch__track {
+  background:linear-gradient(180deg,rgba(0,0,0,.32),rgba(255,255,255,.12)),var(--ofp-control-surface);
+}
+
+
+/* =========================================================
+   Front-end workspace correction pass — navigation, canvas,
+   engine binding clarity and physical instrument surfaces.
+   ========================================================= */
+
+/* Three stable zones: project identity / centred workspace switch / account. */
+#omni-root .omni-topbar {
+  display:flex!important;position:relative;align-items:center;justify-content:flex-start;
+  gap:16px;min-height:62px;padding:9px 18px;overflow:visible;
+}
+#omni-root .omni-logo {flex:0 0 auto;grid-column:auto}
+#omni-root .omni-project {flex:0 1 290px;width:min(290px,25vw);min-width:145px;grid-column:auto}
+#omni-root .omni-view-switch {
+  position:absolute;top:50%;left:50%;z-index:2;grid-column:auto;
+  transform:translate(-50%,-50%)!important;margin:0!important;
+}
+#omni-root .omni-topbar .site-theme-toggle--omni {
+  position:relative!important;top:auto!important;right:auto!important;bottom:auto!important;left:auto!important;
+  display:inline-grid;place-items:center;flex:0 0 38px;width:38px;height:36px;min-width:38px;
+  margin:0 0 0 auto!important;padding:0;transform:none!important;border-radius:9px;z-index:3;
+}
+#omni-root .omni-topbar .site-theme-toggle--omni:active {transform:scale(.95)!important}
+#omni-root .omni-account {position:relative;flex:0 0 auto;grid-column:auto;margin:0;white-space:nowrap;z-index:3}
+#omni-root .omni-status--command {
+  display:flex;flex:1 1 180px;align-items:center;justify-content:flex-end;min-width:120px;max-width:none;
+  margin:0 0 0 auto!important;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  color:var(--omni-muted);font:9px/1.35 var(--font-body);letter-spacing:.01em;
+}
+#omni-root .omni-status--command::before {flex:0 0 5px;margin:0 0 1px 9px;order:2}
+#omni-root .omni-front-only-command[hidden],
+#omni-root .omni-menu--front-only[hidden],
+#omni-root .omni-midi-map-button[hidden] {display:none!important}
+#omni-root .omni-menu--front-only {order:-1}
+#omni-root .omni-menu--front-only .omni-menu__trigger {color:var(--cyan);border-color:rgba(125,228,255,.18)}
+#omni-root .omni-menu--front-only[open] .omni-menu__trigger {border-color:rgba(125,228,255,.45);background:rgba(125,228,255,.07)}
+#omni-root .omni-commandbar {display:flex;align-items:center;gap:8px}
+#omni-root .omni-midi-map-button {flex:0 0 auto}
+@media(max-width:1120px) {
+  #omni-root .omni-topbar {gap:11px;padding-inline:13px}
+  #omni-root .omni-project {width:210px;flex-basis:210px}
+  #omni-root .omni-view-switch__button {padding-inline:9px;font-size:8px}
+}
+@media(max-width:900px) {
+  #omni-root .omni-topbar {display:flex!important;flex-wrap:wrap;gap:9px}
+  #omni-root .omni-view-switch {position:static;transform:none!important;margin:0 0 0 auto!important}
+  #omni-root .omni-topbar .site-theme-toggle--omni {margin-left:0!important}
+  #omni-root .omni-status--command {flex-basis:100%;margin-left:auto!important}
+}
+@media(max-width:620px) {
+  #omni-root .omni-topbar {gap:7px;padding:8px 10px}
+  #omni-root .omni-logo-wording {display:none}
+  #omni-root .omni-project {flex:1 1 110px;width:auto;min-width:0;padding-left:9px}
+  #omni-root .omni-topbar .site-theme-toggle--omni {margin-left:auto!important}
+  #omni-root .omni-account {flex:0 0 auto}
+  #omni-root .omni-view-switch {order:5;flex:1 0 100%;justify-content:center;margin:0!important}
+}
+
+/* Clear, direct engine-binding form. */
+#omni-root .ofp-binding-status {
+  display:flex;align-items:center;gap:8px;min-height:34px;margin:3px 0 0;padding:8px 10px;
+  border:1px solid var(--omni-border);border-radius:6px;color:var(--omni-muted);
+  background:rgba(255,255,255,.025);font:8px/1.45 var(--font-mono);letter-spacing:.015em;
+}
+#omni-root .ofp-binding-status.is-connected {border-color:rgba(130,230,168,.28);color:#9ee2b3;background:rgba(130,230,168,.06)}
+#omni-root .ofp-binding-range {display:grid;grid-template-columns:1fr auto;gap:5px 9px;padding:8px 10px;border:1px solid var(--omni-border);border-radius:6px;background:rgba(0,0,0,.1)}
+#omni-root .ofp-binding-range span:first-child {color:var(--omni-muted);font:8px var(--font-mono);letter-spacing:.1em}
+#omni-root .ofp-binding-range strong {color:var(--cyan);font:600 9px var(--font-mono);font-variant-numeric:tabular-nums}
+#omni-root .ofp-binding-range span:last-child {grid-column:1/-1;color:var(--omni-subtle);font:8px var(--font-body)}
+#omni-root .ofp-inspector__body .ofp-field select {min-height:36px}
+#omni-root .ofp-field-note {margin:0;padding:8px 9px;border-left:2px solid rgba(125,228,255,.35);background:rgba(125,228,255,.035);font-size:9px;line-height:1.55}
+html[data-theme="light"] #omni-root .ofp-binding-status {color:#5e6f80;background:rgba(255,255,255,.65)}
+html[data-theme="light"] #omni-root .ofp-binding-status.is-connected {color:#267a4c;border-color:rgba(39,137,82,.24);background:rgba(39,137,82,.06)}
+html[data-theme="light"] #omni-root .ofp-binding-range {border-color:rgba(43,59,78,.15);background:rgba(255,255,255,.65)}
+html[data-theme="light"] #omni-root .ofp-binding-range strong {color:#087f9f}
+
+/* The canvas is an actual scroll/pan surface. Center only while the artwork fits. */
+#omni-root .ofp-viewport {
+  display:block;min-width:0;min-height:0;flex:1;overflow:auto;
+  padding:12px;background-color:rgba(5,9,14,.24);
+  cursor:grab;overscroll-behavior:contain;scrollbar-width:thin;
+  scrollbar-color:rgba(125,228,255,.24) transparent;touch-action:pan-x pan-y;
+}
+#omni-root .ofp-viewport.is-pan-ready {cursor:grab}
+#omni-root .ofp-viewport.is-panning {cursor:grabbing;user-select:none}
+#omni-root .ofp-viewport.is-measuring {cursor:crosshair}
+#omni-root .ofp-viewport.is-placing-guide {cursor:crosshair}
+#omni-root .ofp-stage {position:relative;flex:none;transform-origin:top left}
+#omni-root .ofp-faceplate {transform-origin:top left;isolation:isolate}
+#omni-root .ofp-empty-state {
+  position:absolute;inset:0;z-index:1;display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:10px;padding:32px;color:var(--ofp-text);text-align:center;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 48%,rgba(125,228,255,.075),transparent 54%);
+}
+#omni-root .ofp-empty-state__eyebrow {color:var(--ofp-accent);font:8px var(--font-mono);letter-spacing:.2em}
+#omni-root .ofp-empty-state strong {max-width:460px;font:500 clamp(18px,2vw,26px)/1.2 var(--font-body);letter-spacing:-.035em}
+#omni-root .ofp-empty-state p {max-width:420px;margin:0;color:var(--omni-muted);font:11px/1.65 var(--font-body)}
+#omni-root .ofp-empty-state__action {
+  min-height:32px;margin-top:4px;padding:0 12px;border:1px solid rgba(125,228,255,.32);border-radius:6px;
+  color:var(--ofp-accent);background:rgba(125,228,255,.045);font:600 8px var(--font-mono);letter-spacing:.1em;
+  pointer-events:auto;cursor:pointer;
+}
+#omni-root .ofp-empty-state__action:hover {border-color:var(--ofp-accent);background:rgba(125,228,255,.1)}
+html[data-theme="light"] #omni-root .ofp-empty-state {background:radial-gradient(ellipse at 50% 48%,rgba(8,127,159,.06),transparent 58%)}
+html[data-theme="light"] #omni-root .ofp-empty-state p {color:#62768a}
+
+/* Proper piano-key proportions, a metal rear rail and a front key lip. */
+#omni-root .ofp-component--keyboard {padding:8px 9px 7px;gap:6px}
+#omni-root .ofp-component--keyboard .ofp-component__title {flex:0 0 auto;padding:0 3px;text-align:left;letter-spacing:.15em}
+#omni-root .ofp-keyboard {
+  position:relative;display:flex;flex:1 1 auto;flex-direction:column;justify-content:stretch;gap:0;
+  width:100%;height:calc(100% - 20px);min-height:72px;padding:0 9px 7px;overflow:hidden;
+  border:1px solid #070b0f;border-radius:5px;
+  background:linear-gradient(180deg,#38434c 0,#151d25 22%,#090e14 100%);
+  box-shadow:0 5px 11px rgba(0,0,0,.48),inset 0 1px rgba(255,255,255,.25),inset 0 -2px 5px rgba(0,0,0,.6);
+}
+#omni-root .ofp-keyboard__rear-rail {
+  position:relative;display:flex;align-items:center;justify-content:space-between;flex:0 0 17px;
+  padding:0 7px;border:1px solid rgba(255,255,255,.13);border-bottom-color:#05090d;border-radius:2px 2px 0 0;
+  color:#b8c3cc;background:linear-gradient(180deg,#79858e 0,#47545e 35%,#222c35 100%);
+  box-shadow:inset 0 1px rgba(255,255,255,.34),0 2px 3px rgba(0,0,0,.35);
+}
+#omni-root .ofp-keyboard__brand {font:700 7px var(--font-body);letter-spacing:.18em}
+#omni-root .ofp-keyboard__model {color:#d3dbe0;font:6px var(--font-mono);letter-spacing:.12em}
+#omni-root .ofp-keyboard__keywell {position:relative;flex:1;min-height:0;padding:3px 3px 0;background:linear-gradient(180deg,#0c1117,#222b33 75%,#080d12)}
+#omni-root .ofp-keyboard__keys {position:absolute;inset:3px 3px 0}
+#omni-root .ofp-key {
+  position:absolute;top:0;display:block;min-width:0;margin:0;padding:0;appearance:none;-webkit-appearance:none;
+  border:0;border-radius:0;cursor:pointer;touch-action:none;user-select:none;
+}
+#omni-root .ofp-key--white {
+  z-index:1;height:100%;border:1px solid #79858e;border-top-color:#c8d0d5;border-bottom:4px solid #5d6972;
+  border-radius:0 0 3px 3px;
+  background:linear-gradient(90deg,#c9d0d5 0,#f5f7f8 14%,#fff 54%,#dfe5e9 100%);
+  box-shadow:inset 0 1px rgba(255,255,255,.95),inset -1px 0 rgba(60,76,88,.18),0 2px 2px rgba(0,0,0,.36);
+}
+#omni-root .ofp-key--black {
+  z-index:2;height:62%;border:1px solid #030608;border-top-color:#68737b;border-bottom:3px solid #05080b;
+  border-radius:0 0 3px 3px;
+  background:linear-gradient(90deg,#05080b 0,#242e36 34%,#111820 72%,#030507 100%);
+  box-shadow:0 3px 4px rgba(0,0,0,.72),inset 0 1px rgba(255,255,255,.24),inset 0 -2px rgba(0,0,0,.5);
+}
+#omni-root .ofp-key--white:active,#omni-root .ofp-key--white.is-active {height:calc(100% - 1px);border-bottom-width:2px;background:linear-gradient(180deg,#b4dce8,#effaff 34%,#c8e5ee)}
+#omni-root .ofp-key--black:active,#omni-root .ofp-key--black.is-active {height:60%;background:linear-gradient(90deg,#0b242c,#47717f 55%,#10232b)}
+#omni-root .ofp-keyboard__octave-mark {position:absolute;bottom:5px;left:3px;color:#7a8790;font:6px var(--font-mono);pointer-events:none}
+#omni-root .ofp-keyboard__front-lip {
+  display:flex;align-items:center;justify-content:space-between;flex:0 0 7px;
+  padding:0 9px;border:1px solid #05090d;border-top:1px solid #65717a;border-radius:0 0 3px 3px;
+  background:linear-gradient(180deg,#69757e,#252f38 45%,#0c1116);box-shadow:0 2px 3px rgba(0,0,0,.55);
+}
+#omni-root .ofp-keyboard__screw {width:3px;height:3px;border:1px solid #bac3c9;border-radius:50%;background:radial-gradient(circle at 35% 35%,#e8edf0,#596771);box-shadow:0 0 1px #05080c}
+html[data-theme="light"] #omni-root .ofp-keyboard {border-color:#8996a0;background:linear-gradient(180deg,#c4ccd2,#66747f 25%,#283641)}
+html[data-theme="light"] #omni-root .ofp-keyboard__rear-rail {color:#344553;background:linear-gradient(180deg,#eff3f5,#aab5bd 44%,#687681)}
+html[data-theme="light"] #omni-root .ofp-keyboard__model {color:#3d4e5c}
+html[data-theme="light"] #omni-root .ofp-keyboard__keywell {background:linear-gradient(180deg,#46535e,#a5b0b8 75%,#25333e)}
+html[data-theme="light"] #omni-root .ofp-keyboard__front-lip {background:linear-gradient(180deg,#b8c2c9,#65747f 45%,#34434d)}
+
+/* Distinct rotary encoder instead of a duplicate "dial" control. */
+#omni-root .ofp-component--encoder .ofp-knob__cap {
+  width:54%;background:radial-gradient(circle at 35% 25%,rgba(255,255,255,.3),transparent 20%),linear-gradient(145deg,#88939b,#3b4751 46%,#121a21);
+}
+#omni-root .ofp-component--encoder .ofp-knob__bezel {inset:10px;border:2px solid rgba(125,228,255,.38)}
+#omni-root .ofp-component--encoder .ofp-knob__indicator {height:20%;background:#7de4ff}
+#omni-root .ofp-component--encoder .ofp-knob__ring {
+  mask:radial-gradient(circle,transparent 72%,#000 74% 100%);
+  background:repeating-conic-gradient(from 225deg,var(--ofp-control-accent) 0deg 7deg,transparent 7deg 12deg);
+}
+
+/* Material response is intentionally subtle and object-specific, not a tinted card. */
+#omni-root .ofp-faceplate[data-finish="matte"] {
+  background-image:radial-gradient(ellipse at 18% 8%,rgba(255,255,255,.055),transparent 48%),linear-gradient(145deg,rgba(255,255,255,.035),transparent 38%),repeating-linear-gradient(0deg,rgba(255,255,255,.009) 0 1px,transparent 1px 3px);
+}
+#omni-root .ofp-faceplate[data-finish="brushed"] {
+  background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.075) 0 1px,rgba(15,22,28,.035) 1px 2px,transparent 2px 4px),linear-gradient(120deg,rgba(255,255,255,.26),transparent 30%,rgba(0,0,0,.12) 72%),linear-gradient(180deg,rgba(255,255,255,.07),rgba(0,0,0,.1));
+}
+#omni-root .ofp-faceplate[data-finish="anodized"] {
+  background-image:linear-gradient(115deg,rgba(255,255,255,.07),transparent 28%,rgba(0,0,0,.22) 78%),repeating-linear-gradient(90deg,rgba(255,255,255,.012) 0 1px,transparent 1px 3px),radial-gradient(ellipse at 50% 0,rgba(125,228,255,.045),transparent 65%);
+}
+#omni-root .ofp-faceplate[data-finish="walnut"] {
+  background-image:repeating-linear-gradient(4deg,rgba(31,15,7,.18) 0 2px,rgba(218,166,117,.06) 2px 3px,transparent 3px 8px),repeating-linear-gradient(92deg,rgba(255,224,190,.025) 0 1px,transparent 1px 13px),linear-gradient(135deg,rgba(246,197,151,.13),rgba(25,13,8,.2));
+}
+#omni-root .ofp-faceplate[data-finish="ivory"] {
+  background-image:linear-gradient(135deg,rgba(255,255,255,.55),transparent 32%,rgba(94,81,61,.08)),repeating-linear-gradient(0deg,rgba(100,87,66,.022) 0 1px,transparent 1px 4px);
+}
+#omni-root .ofp-component[data-finish="brushed"] {background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.07) 0 1px,transparent 1px 3px),linear-gradient(145deg,rgba(255,255,255,.17),rgba(0,0,0,.14))}
+#omni-root .ofp-component[data-finish="anodized"] {background-image:linear-gradient(145deg,rgba(255,255,255,.09),transparent 36%,rgba(0,0,0,.24))}
+#omni-root .ofp-component[data-finish="walnut"] {background-image:repeating-linear-gradient(2deg,rgba(33,16,7,.2) 0 2px,rgba(218,166,117,.08) 2px 3px,transparent 3px 7px),linear-gradient(145deg,rgba(255,219,182,.12),rgba(0,0,0,.16))}
+#omni-root .ofp-component[data-finish="ivory"] {background-image:linear-gradient(140deg,rgba(255,255,255,.48),rgba(139,126,99,.08)),repeating-linear-gradient(0deg,rgba(80,71,58,.018) 0 1px,transparent 1px 4px)}
+#omni-root .ofp-component[data-finish="brushed"] .ofp-knob__cap {background:repeating-linear-gradient(0deg,rgba(255,255,255,.12) 0 1px,transparent 1px 3px),linear-gradient(145deg,#d9e0e4,#7c8992 52%,#394650)}
+#omni-root .ofp-component[data-finish="anodized"] .ofp-knob__cap {background:linear-gradient(145deg,#47525b,#161e25 54%,#070c11)}
+#omni-root .ofp-component[data-finish="walnut"] .ofp-knob__cap {background:repeating-linear-gradient(2deg,rgba(35,17,8,.3) 0 2px,transparent 2px 6px),linear-gradient(145deg,#b27c50,#593622)}
+#omni-root .ofp-component[data-finish="ivory"] .ofp-knob__cap {background:linear-gradient(145deg,#fff8e8,#c9c0ad 62%,#918975)}
+#omni-root .ofp-component[data-finish="walnut"] .ofp-hardware-button {background:repeating-linear-gradient(2deg,rgba(33,16,7,.25) 0 2px,transparent 2px 6px),linear-gradient(145deg,#ab764a,#53331f)}
+#omni-root .ofp-component[data-finish="ivory"] .ofp-hardware-button {color:#333c42;background:linear-gradient(145deg,#fff8e8,#c9c0ad 62%,#918975);border-color:#8f8878}
+#omni-root .ofp-component[data-finish="brushed"] .ofp-hardware-button {color:#26323a;background:linear-gradient(180deg,#f1f4f5,#a0adb5 52%,#687680);border-color:#d5dce0}
+#omni-root .ofp-component[data-finish="anodized"] .ofp-hardware-button {background:linear-gradient(180deg,#3b4751,#141c23 54%,#070c11);border-color:#65737e}
+
+/* Dialogs and preview remain in the editor theme and above the workspace. */
+#omni-root dialog.ofp-preview-dialog,
+#omni-root dialog.ofp-check-dialog,
+#omni-root dialog.ofp-guide-dialog {z-index:1000}
+#omni-root .ofp-preview-dialog__stage {background:radial-gradient(ellipse at center,rgba(125,228,255,.06),transparent 66%),#090e14}
+html[data-theme="light"] #omni-root .ofp-preview-dialog__stage {background:radial-gradient(ellipse at center,rgba(8,127,159,.06),transparent 66%),#edf2f6}
+
+
+/* Material palette controls */
+#omni-root .ofp-material-presets {display:grid;gap:7px;margin:0 0 2px}
+#omni-root .ofp-material-presets__grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+#omni-root .ofp-material-preset {
+  display:grid;gap:6px;min-width:0;padding:7px;border:1px solid var(--omni-border);border-radius:7px;
+  color:var(--omni-muted);background:linear-gradient(145deg,rgba(255,255,255,.04),rgba(0,0,0,.08)),var(--omni-panel-soft);
+  text-align:left;cursor:pointer;transition:border-color .16s ease,transform .16s ease;
+}
+#omni-root .ofp-material-preset:hover {transform:translateY(-1px);border-color:rgba(125,228,255,.45)}
+#omni-root .ofp-material-preset__chips {display:flex;gap:3px;height:17px;overflow:hidden;border:1px solid rgba(255,255,255,.12);border-radius:4px}
+#omni-root .ofp-material-preset__chips>span {flex:1;min-width:0;border-right:1px solid rgba(0,0,0,.18)}
+#omni-root .ofp-material-preset__label {overflow:hidden;font:8px/1.2 var(--font-body);text-overflow:ellipsis;white-space:nowrap}
+html[data-theme="light"] #omni-root .ofp-material-preset {color:#506479;border-color:rgba(43,59,78,.13);background:linear-gradient(145deg,#fff,#e9eff4)}
+html[data-theme="light"] #omni-root .ofp-material-preset:hover {border-color:rgba(8,127,159,.42)}
+
+/* Canvas empty state and hardware binding are understated and functional. */
+#omni-root .ofp-empty-state__action:focus-visible,
+#omni-root .ofp-material-preset:focus-visible {outline:2px solid var(--cyan);outline-offset:2px}
+#omni-root .ofp-component--button .ofp-hardware-button.is-bound {border-color:var(--ofp-control-accent);box-shadow:0 0 0 1px color-mix(in srgb,var(--ofp-control-accent) 28%,transparent),0 3px 0 rgba(0,0,0,.48),inset 0 1px rgba(255,255,255,.24)}
+#omni-root .ofp-component--button .ofp-hardware-button:active {transform:translateY(2px)}
+html[data-theme="light"] #omni-root .ofp-component__title {text-shadow:none}
+
+/* A front panel should feel like a faceplate, not a generic card grid. */
+#omni-root .ofp-faceplate {
+  box-shadow:0 24px 50px rgba(0,0,0,.4),inset 0 1px rgba(255,255,255,.18),inset 0 -1px rgba(0,0,0,.45);
+}
+#omni-root .ofp-faceplate[data-finish="anodized"] {border-color:#56616a}
+#omni-root .ofp-faceplate[data-finish="brushed"] {border-color:#a3adb3}
+#omni-root .ofp-faceplate[data-finish="walnut"] {border-color:#69452f}
+#omni-root .ofp-faceplate[data-finish="ivory"] {border-color:#b9b09c}
+#omni-root .ofp-component__value {font-variant-numeric:tabular-nums}
+#omni-root .ofp-component--encoder .ofp-component__value {color:#7de4ff}
+
+/* Status stays at the far right in both engine and front-end workspace modes. */
+#omni-root .omni-status--command {text-align:right!important;justify-content:flex-end!important}
+
+/* The preview uses the same real controls as the editor, with all editing chrome removed. */
+#omni-root dialog.ofp-preview-dialog {
+  width:min(1680px,calc(100vw - 24px));
+  height:min(1040px,calc(100dvh - 24px));
+  max-width:calc(100vw - 24px);
+  max-height:calc(100dvh - 24px);
+}
+#omni-root dialog.ofp-preview-dialog[open] {
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+#omni-root dialog.ofp-preview-dialog .ofp-preview-dialog__header {
+  flex:0 0 auto;
+  min-height:62px;
+}
+#omni-root .ofp-preview-dialog__title {min-width:0}
+#omni-root .ofp-preview-dialog__title strong {
+  overflow:hidden;
+  max-width:min(52vw,620px);
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+#omni-root .ofp-preview-dialog__state {
+  display:flex;
+  align-items:center;
+  gap:7px;
+  margin-left:auto;
+  color:#a9e8c0;
+  font:600 8px var(--font-mono);
+  letter-spacing:.1em;
+  white-space:nowrap;
+}
+#omni-root .ofp-preview-dialog__state-dot {
+  width:6px;height:6px;flex:none;border-radius:50%;
+  background:#82e6a8;box-shadow:0 0 9px rgba(130,230,168,.6);
+}
+#omni-root dialog.ofp-preview-dialog .ofp-preview-dialog__stage {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex:1 1 auto;
+  width:100%;
+  min-width:0;
+  min-height:0;
+  max-height:none;
+  padding:28px;
+  overflow:auto;
+}
+#omni-root .ofp-preview-dialog__frame {
+  position:relative;
+  flex:0 0 auto;
+  min-width:0;
+}
+#omni-root .ofp-preview-faceplate {
+  position:absolute;
+  left:0;
+  top:0;
+  transform-origin:top left;
+  overflow:hidden;
+  pointer-events:auto;
+}
+#omni-root .ofp-preview-faceplate .ofp-component {cursor:default}
+#omni-root .ofp-preview-faceplate .ofp-component__title {cursor:default}
+#omni-root .ofp-preview-faceplate .ofp-component::after,
+#omni-root .ofp-preview-faceplate .ofp-component__resize {display:none!important}
+#omni-root dialog.ofp-preview-dialog .ofp-preview-dialog__footer {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  flex:0 0 auto;
+  min-height:37px;
+  padding:7px 16px;
+  border-top:1px solid var(--omni-border);
+  color:var(--omni-muted);
+  font:9px var(--font-body);
+}
+html[data-theme="light"] #omni-root .ofp-preview-dialog__state {color:#24774e}
+html[data-theme="light"] #omni-root .ofp-preview-dialog__state-dot {background:#29975f;box-shadow:0 0 8px rgba(41,151,95,.35)}
+html[data-theme="light"] #omni-root dialog.ofp-preview-dialog .ofp-preview-dialog__footer {
+  border-color:rgba(43,59,78,.14);
+  color:#5b6e80;
+}
+@media(max-width:620px) {
+  #omni-root dialog.ofp-preview-dialog {
+    width:calc(100vw - 16px);
+    height:calc(100dvh - 16px);
+    max-width:calc(100vw - 16px);
+    max-height:calc(100dvh - 16px);
+  }
+  #omni-root dialog.ofp-preview-dialog .ofp-preview-dialog__header {flex-wrap:wrap;gap:9px;padding:11px}
+  #omni-root .ofp-preview-dialog__state {margin-left:0}
+  #omni-root dialog.ofp-preview-dialog .ofp-preview-dialog__stage {min-height:0;max-height:none;padding:12px}
+  #omni-root dialog.ofp-preview-dialog .ofp-preview-dialog__footer {align-items:flex-start;flex-direction:column;gap:4px;padding:8px 11px}
+}
+
+#omni-root .ofp-viewport.is-pan-tool {cursor:grab}
+#omni-root .ofp-viewport.is-pan-tool .ofp-component {cursor:grab}
+#omni-root .ofp-viewport.is-pan-tool .ofp-component__title {cursor:grab}
+#omni-root .ofp-viewport.is-panning {cursor:grabbing}
+#omni-root .ofp-tool-toggle[aria-pressed="true"] {border-color:rgba(125,228,255,.5);color:#10202b;background:linear-gradient(135deg,#a8edff,#63cde7)}
+html[data-theme="light"] #omni-root .ofp-tool-toggle[aria-pressed="true"] {color:#fff;background:#087f9f}
+
+
+/* OMNI front-panel refinement: give each rotary control a distinct identity. */
+#omni-root .ofp-component--dial .ofp-knob {width:min(94px,82%);filter:drop-shadow(0 5px 6px rgba(0,0,0,.2))}
+#omni-root .ofp-component--dial .ofp-knob__scale {inset:0}
+#omni-root .ofp-component--dial .ofp-knob__tick {height:5px;width:2px;transform-origin:1px 42px}
+#omni-root .ofp-component--dial .ofp-knob__tick.is-major {height:8px}
+#omni-root .ofp-component--dial .ofp-knob__ring {
+  inset:8px;
+  background:conic-gradient(from 225deg,var(--ofp-control-accent) 0deg,var(--ofp-control-accent) calc(var(--ofp-value,.5)*270deg),rgba(120,137,151,.35) calc(var(--ofp-value,.5)*270deg),rgba(120,137,151,.35) 270deg,transparent 270deg);
+  mask:radial-gradient(circle,transparent 77%,#000 79% 100%);
+}
+#omni-root .ofp-component--dial .ofp-knob__bezel {inset:19px;border-width:1px;background:radial-gradient(circle at 35% 25%,rgba(255,255,255,.17),transparent 35%),linear-gradient(145deg,#34424d,#111820)}
+#omni-root .ofp-component--dial .ofp-knob__cap {width:42%;border-color:rgba(255,255,255,.24);background:radial-gradient(circle at 35% 25%,#566570,#202b35 62%,#0b1118)}
+#omni-root .ofp-dial__needle {
+  position:absolute;z-index:2;top:5px;left:calc(50% - 1px);width:2px;height:23px;border-radius:2px;
+  background:var(--ofp-control-accent);box-shadow:0 0 5px color-mix(in srgb,var(--ofp-control-accent) 65%,transparent);
+  transform-origin:1px 42px;pointer-events:none;
+}
+#omni-root .ofp-dial__number {
+  position:absolute;top:50%;left:50%;width:12px;margin-left:-6px;margin-top:-4px;
+  color:var(--ofp-control-text);font:6px/1 var(--font-mono);text-align:center;opacity:.72;pointer-events:none;
+}
+#omni-root .ofp-component--dial .ofp-knob__indicator {display:none}
+#omni-root .ofp-component--knob .ofp-knob__indicator {transform-origin:50% 100%}
+#omni-root .ofp-component--dial .ofp-knob__input {z-index:4}
+#omni-root .ofp-binding-intro {margin:0 0 2px}
+html[data-theme="light"] #omni-root .ofp-component--dial .ofp-knob__bezel {background:linear-gradient(145deg,#dce5eb,#8494a1 58%,#5c6b77)}
+html[data-theme="light"] #omni-root .ofp-component--dial .ofp-knob__cap {background:linear-gradient(145deg,#f2f5f7,#aab7c0 62%,#73828d)}
+
+/* Cleaner keyboard: remove redundant trim and let the keys carry the design. */
+#omni-root .ofp-keyboard {padding:0 7px 5px;border-radius:4px}
+#omni-root .ofp-keyboard__rear-rail {flex-basis:13px;padding-inline:6px}
+#omni-root .ofp-keyboard__brand {font-size:6px;letter-spacing:.2em}
+#omni-root .ofp-keyboard__model {font-size:5px;letter-spacing:.1em}
+#omni-root .ofp-keyboard__keywell {padding:2px 2px 0}
+#omni-root .ofp-keyboard__keys {inset:2px 2px 0}
+#omni-root .ofp-keyboard__front-lip {flex-basis:5px;padding:0 5px;border-radius:0 0 2px 2px}
+#omni-root .ofp-keyboard__octave-mark {bottom:4px;font-size:5px}
+#omni-root .ofp-key--white {border-bottom-width:3px}
+#omni-root .ofp-key--black {height:59%;border-bottom-width:2px}
+#omni-root .ofp-key--black:active,#omni-root .ofp-key--black.is-active {height:57%}
+
+/* Keep the workspace switch optically centred and consistently legible. */
+#omni-root .omni-view-switch {
+  top:50%!important;left:50%!important;transform:translate(-50%,-50%)!important;
+  min-height:37px;align-items:center;padding:3px;
+  border-color:var(--omni-border-strong);background:var(--omni-panel-soft);
+  box-shadow:inset 0 1px rgba(255,255,255,.035);
+}
+#omni-root .omni-view-switch__button {display:inline-flex;align-items:center;justify-content:center;min-height:29px;line-height:1}
+#omni-root .omni-view-switch__button[aria-pressed="false"] {color:var(--omni-muted)}
+#omni-root .omni-view-switch__button[aria-pressed="true"] {color:#15202a}
+html[data-theme="light"] #omni-root .omni-view-switch {
+  border-color:rgba(43,59,78,.18);background:linear-gradient(180deg,#f6f9fb,#e6edf3);
+  box-shadow:inset 0 1px #fff,0 2px 8px rgba(35,55,75,.06);
+}
+html[data-theme="light"] #omni-root .omni-view-switch__button {color:#526579}
+html[data-theme="light"] #omni-root .omni-view-switch__button[aria-pressed="true"] {
+  color:#102a38;background:linear-gradient(135deg,#b7effb,#70cfe5);box-shadow:0 1px 5px rgba(23,119,148,.18);
+}
+#omni-root .omni-commandbar .omni-menu--front-only {order:0}
+#omni-root .omni-commandbar .omni-menu--front-only:first-of-type {margin-left:0}
+@media(max-width:900px) {
+  #omni-root .omni-view-switch {position:static!important;transform:none!important;margin:0 0 0 auto!important}
+}
+@media(max-width:620px) {
+  #omni-root .omni-view-switch {position:static!important;transform:none!important;margin:0!important}
+}
+
+
+/* =========================================================
+   OMNI Front-panel Studio — hardware, canvas and workspace
+   ========================================================= */
+
+/* Keep the editor switch centred independently of the project name and
+   the account cluster. The theme control is a real top-bar sibling. */
+#omni-root .omni-view-switch {
+  width:max-content;
+  max-width:calc(100% - 16px);
+  min-height:37px;
+  align-items:center;
+  justify-content:center;
+  padding:3px;
+  border:1px solid var(--omni-border-strong);
+  border-radius:9px;
+  background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(0,0,0,.2)),var(--omni-panel);
+  box-shadow:0 3px 12px rgba(0,0,0,.16),inset 0 1px rgba(255,255,255,.07);
+}
+#omni-root .omni-view-switch__button {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:29px;
+  padding-inline:13px;
+  line-height:1;
+  font-size:9px;
+}
+#omni-root .omni-topbar .header-account-wrap {
+  display:flex;
+  flex:0 0 auto;
+  align-items:center;
+  gap:0;
+  margin:0!important;
+  max-width:220px;
+}
+#omni-root .omni-topbar .site-theme-toggle--omni {
+  flex:0 0 38px;
+  margin:0 9px 0 auto!important;
+}
+#omni-root .omni-account {flex:0 0 auto;white-space:nowrap}
+#omni-root .omni-commandbar .omni-menu--front-only {order:0!important}
+#omni-root .omni-commandbar .omni-front-only-command[hidden],
+#omni-root .omni-commandbar .omni-menu--front-only[hidden],
+#omni-root .omni-commandbar .omni-midi-map-button[hidden] {display:none!important}
+#omni-root .omni-commandbar > .omni-status,
+#omni-root .omni-commandbar > .omni-status--command {
+  display:flex!important;
+  flex:1 1 240px;
+  align-items:center;
+  justify-content:flex-end!important;
+  min-width:0;
+  max-width:none;
+  margin:0 0 0 auto!important;
+  padding:2px 3px 2px 12px;
+  text-align:right!important;
+  text-align-last:right;
+  white-space:normal;
+  overflow-wrap:anywhere;
+}
+#omni-root .omni-commandbar > .omni-status::before {flex:0 0 5px}
+@media(max-width:1050px) {
+  #omni-root .omni-commandbar > .omni-status,
+  #omni-root .omni-commandbar > .omni-status--command {
+    flex:1 1 100%;
+    min-width:0;
+    margin-left:0!important;
+    padding:5px 4px 2px;
+    text-align:right!important;
+    justify-content:flex-end!important;
+  }
+}
+html[data-theme="light"] #omni-root .omni-view-switch {
+  border-color:rgba(43,59,78,.2);
+  background:linear-gradient(180deg,#f8fafc,#e7edf2);
+  box-shadow:inset 0 1px #fff,0 3px 12px rgba(38,58,78,.1);
+}
+html[data-theme="light"] #omni-root .omni-view-switch__button {color:#51657a}
+html[data-theme="light"] #omni-root .omni-view-switch__button[aria-pressed="true"] {
+  color:#12313e;
+  background:linear-gradient(135deg,#b8effb,#78d1e6);
+  box-shadow:0 1px 5px rgba(23,119,148,.2),inset 0 1px rgba(255,255,255,.7);
+}
+html[data-theme="light"] #omni-root .omni-view-switch__button[aria-pressed="false"]:hover {color:#163c4d;background:rgba(8,127,159,.07)}
+html[data-theme="light"] #omni-root .omni-topbar .site-theme-toggle--omni {
+  color:#52677b;
+  border-color:rgba(43,59,78,.18);
+  background:linear-gradient(180deg,#fff,#e8eef3);
+}
+@media(max-width:900px) {
+  #omni-root .omni-view-switch {position:static!important;transform:none!important;margin:0 0 0 auto!important}
+  #omni-root .omni-topbar .site-theme-toggle--omni {margin-left:0!important}
+  #omni-root .omni-topbar .header-account-wrap {margin-left:0!important}
+}
+@media(max-width:620px) {
+  #omni-root .omni-view-switch {order:5;flex:1 0 100%;max-width:none;margin:0!important}
+  #omni-root .omni-topbar .site-theme-toggle--omni {margin-left:auto!important}
+}
+
+/* The canvas header keeps zoom available without opening a disclosure menu. */
+#omni-root .ofp-stage-head {min-height:42px;flex:0 0 auto}
+#omni-root .ofp-stage-head__identity {display:grid;gap:3px;min-width:0}
+#omni-root .ofp-stage-head__identity strong {display:block;color:var(--omni-text);font:600 12px var(--font-body);letter-spacing:0}
+#omni-root .ofp-stage-head__tools {display:flex;align-items:center;justify-content:flex-end;gap:5px;min-width:0}
+#omni-root .ofp-stage-dimensions {padding-right:7px;border-right:1px solid var(--omni-border);font-variant-numeric:tabular-nums}
+#omni-root .ofp-stage-zoom {min-width:36px;color:var(--omni-muted);font:8px var(--font-mono);font-variant-numeric:tabular-nums;text-align:center}
+#omni-root .ofp-stage-zoom-button,#omni-root .ofp-stage-zoom-fit {
+  display:inline-grid;place-items:center;min-width:27px;height:27px;padding:0 7px;
+  border:1px solid var(--omni-border-strong);border-radius:5px;color:var(--omni-muted);
+  background:var(--omni-panel-soft);font:600 11px var(--font-body);cursor:pointer;
+}
+#omni-root .ofp-stage-zoom-fit {min-width:36px;font:700 8px var(--font-mono);letter-spacing:.05em}
+#omni-root .ofp-stage-zoom-button:hover,#omni-root .ofp-stage-zoom-fit:hover {color:var(--omni-text);border-color:var(--cyan);background:rgba(125,228,255,.07)}
+#omni-root .ofp-stage-zoom-button:disabled {opacity:.35;cursor:not-allowed}
+#omni-root .ofp-viewport {touch-action:none;overscroll-behavior:contain}
+#omni-root .ofp-viewport.is-panning,
+#omni-root .ofp-viewport.is-pan-ready {cursor:grabbing!important}
+#omni-root .ofp-viewport.is-panning * {user-select:none!important}
+html[data-theme="light"] #omni-root .ofp-stage-zoom-button,
+html[data-theme="light"] #omni-root .ofp-stage-zoom-fit {color:#40566a;border-color:rgba(43,59,78,.18);background:linear-gradient(180deg,#fff,#eaf0f4)}
+html[data-theme="light"] #omni-root .ofp-stage-zoom {color:#607489}
+@media(max-width:620px) {
+  #omni-root .ofp-stage-head {align-items:flex-start;flex-wrap:wrap}
+  #omni-root .ofp-stage-head__tools {width:100%;justify-content:flex-end}
+}
+
+/* A calibrated dial is a different instrument part from a gripped rotary knob. */
+#omni-root .ofp-component--dial {gap:4px}
+#omni-root .ofp-component--dial .ofp-dial {
+  position:relative;
+  display:grid;
+  place-items:center;
+  flex:0 0 auto;
+  width:min(112px,84%);
+  aspect-ratio:1;
+  overflow:visible;
+  filter:drop-shadow(0 6px 6px rgba(0,0,0,.22));
+}
+#omni-root .ofp-dial__face {
+  position:absolute;
+  inset:19%;
+  border:1px solid var(--ofp-control-border,#778894);
+  border-radius:50%;
+  background:
+    radial-gradient(circle at 35% 24%,rgba(255,255,255,.25),transparent 32%),
+    linear-gradient(145deg,#364550 0%,#1b2730 58%,#0c1218 100%);
+  box-shadow:0 4px 9px rgba(0,0,0,.46),inset 0 1px rgba(255,255,255,.18),inset 0 -3px 5px rgba(0,0,0,.52);
+  pointer-events:none;
+}
+#omni-root .ofp-dial__scale {position:absolute;inset:0;border-radius:50%;pointer-events:none}
+#omni-root .ofp-dial__tick {
+  position:absolute;
+  top:50%;
+  left:calc(50% - 1px);
+  width:2px;
+  height:5px;
+  margin-top:-2px;
+  border-radius:1px;
+  background:rgba(212,224,232,.62);
+  transform-origin:50% 50%;
+}
+#omni-root .ofp-dial__tick.is-major {height:8px;margin-top:-4px;background:var(--ofp-control-text);box-shadow:0 0 3px rgba(0,0,0,.5)}
+#omni-root .ofp-dial__number {
+  position:absolute;
+  top:50%;
+  left:50%;
+  width:22px;
+  margin:-4px 0 0 -11px;
+  color:var(--ofp-control-text);
+  font:600 6px/1 var(--font-mono);
+  font-variant-numeric:tabular-nums;
+  text-align:center;
+  text-shadow:0 1px 2px rgba(0,0,0,.65);
+  opacity:.88;
+  pointer-events:none;
+}
+#omni-root .ofp-dial__needle {
+  position:absolute;
+  z-index:2;
+  top:20%;
+  left:calc(50% - 1.25px);
+  width:2.5px;
+  height:30%;
+  border-radius:3px;
+  background:linear-gradient(90deg,#fff,var(--ofp-control-accent) 48%,#64727b);
+  box-shadow:0 0 5px color-mix(in srgb,var(--ofp-control-accent) 66%,transparent),0 1px 2px rgba(0,0,0,.55);
+  transform-origin:50% 100%;
+  pointer-events:none;
+}
+#omni-root .ofp-dial__hub {
+  position:absolute;
+  z-index:3;
+  top:calc(50% - 5px);
+  left:calc(50% - 5px);
+  width:10px;
+  height:10px;
+  border:1px solid rgba(255,255,255,.42);
+  border-radius:50%;
+  background:radial-gradient(circle at 35% 25%,#dce5e9,#65737c 62%,#1b252d);
+  box-shadow:0 1px 4px rgba(0,0,0,.65);
+  pointer-events:none;
+}
+#omni-root .ofp-dial__input {
+  position:absolute;
+  z-index:4;
+  inset:0;
+  width:100%;
+  height:100%;
+  margin:0;
+  opacity:0;
+  cursor:ew-resize;
+  touch-action:none;
+}
+#omni-root .ofp-component--knob .ofp-knob {width:min(94px,82%);filter:drop-shadow(0 6px 6px rgba(0,0,0,.2))}
+#omni-root .ofp-knob__cap {position:relative;overflow:visible}
+#omni-root .ofp-knob__indicator {
+  top:4%;
+  height:39%;
+  transform-origin:50% 125%;
+  border-radius:3px;
+  background:linear-gradient(90deg,#eaf9ff,var(--ofp-control-accent));
+}
+#omni-root .ofp-component--encoder .ofp-knob__ring {
+  inset:4px;
+  mask:radial-gradient(circle,transparent 73%,#000 75% 100%);
+  background:repeating-conic-gradient(from 225deg,var(--ofp-control-accent) 0deg 5deg,rgba(120,137,151,.35) 5deg 10deg);
+}
+#omni-root .ofp-encoder__tooth {
+  position:absolute;
+  top:50%;
+  left:calc(50% - 1px);
+  width:2px;
+  height:6px;
+  margin-top:-44px;
+  border-radius:1px;
+  background:linear-gradient(180deg,#aeb8c0,#35414b);
+  transform-origin:1px 44px;
+  pointer-events:none;
+}
+#omni-root .ofp-component--encoder .ofp-knob__cap {
+  width:54%;
+  background:radial-gradient(circle at 35% 25%,#aeb9c0,#53616a 38%,#202a32 74%,#0a1016);
+}
+html[data-theme="light"] #omni-root .ofp-dial__face {background:radial-gradient(circle at 35% 24%,#fff,transparent 34%),linear-gradient(145deg,#e0e7eb,#9aa8b1 58%,#677682);border-color:#82929d}
+html[data-theme="light"] #omni-root .ofp-dial__number {color:#233b4b;text-shadow:none}
+html[data-theme="light"] #omni-root .ofp-dial__tick {background:#465c6d}
+html[data-theme="light"] #omni-root .ofp-dial__hub {background:radial-gradient(circle at 35% 25%,#fff,#9caab3 64%,#5c6c78)}
+html[data-theme="light"] #omni-root .ofp-component--encoder .ofp-knob__cap {background:radial-gradient(circle at 35% 25%,#fff,#a4b1b9 45%,#64737d 80%)}
+
+/* A restrained, realistic keybed with a satin top rail and sculpted keys. */
+#omni-root .ofp-component--keyboard {padding:8px 10px 9px;gap:5px}
+#omni-root .ofp-component--keyboard .ofp-component__title {flex:0 0 auto;padding-left:3px;text-align:left}
+#omni-root .ofp-keyboard {
+  display:flex;
+  flex:1 1 auto;
+  flex-direction:column;
+  width:100%;
+  height:calc(100% - 19px);
+  min-height:74px;
+  padding:0 7px 5px;
+  overflow:hidden;
+  border:1px solid #070b0e;
+  border-radius:5px;
+  background:linear-gradient(180deg,#495660 0,#222c34 18%,#090e13 100%);
+  box-shadow:0 6px 13px rgba(0,0,0,.42),inset 0 1px rgba(255,255,255,.25),inset 0 -3px 6px rgba(0,0,0,.65);
+}
+#omni-root .ofp-keyboard__rear-rail {
+  flex:0 0 15px;
+  padding:0 7px;
+  border:1px solid rgba(255,255,255,.16);
+  border-bottom-color:#080d11;
+  border-radius:3px 3px 0 0;
+  color:#d2dbe0;
+  background:
+    linear-gradient(90deg,rgba(255,255,255,.1),transparent 18%,rgba(0,0,0,.12) 82%,rgba(255,255,255,.08)),
+    linear-gradient(180deg,#8d989f,#55636d 48%,#2b3740);
+  box-shadow:inset 0 1px rgba(255,255,255,.38),0 2px 3px rgba(0,0,0,.35);
+}
+#omni-root .ofp-keyboard__brand {font:750 6px var(--font-body);letter-spacing:.19em;text-shadow:0 1px 1px rgba(0,0,0,.3)}
+#omni-root .ofp-keyboard__model {color:#d9e0e4;font:6px var(--font-mono);letter-spacing:.08em}
+#omni-root .ofp-keyboard__keywell {
+  position:relative;
+  flex:1;
+  min-height:0;
+  padding:3px 3px 0;
+  background:linear-gradient(180deg,#10171d,#28343d 75%,#090e13);
+}
+#omni-root .ofp-keyboard__keys {position:absolute;inset:3px 3px 0}
+#omni-root .ofp-key {
+  position:absolute;
+  top:0;
+  display:block;
+  min-width:0;
+  margin:0;
+  padding:0;
+  appearance:none;
+  border:0;
+  border-radius:0;
+  cursor:pointer;
+  touch-action:none;
+  user-select:none;
+}
+#omni-root .ofp-key--white {
+  z-index:1;
+  height:100%;
+  border:1px solid #8a969d;
+  border-top-color:#e9eef0;
+  border-bottom:4px solid #64717a;
+  border-radius:0 0 3px 3px;
+  background:
+    linear-gradient(90deg,rgba(104,119,128,.12),transparent 17%,rgba(255,255,255,.62) 54%,rgba(119,134,144,.14)),
+    linear-gradient(180deg,#fffef9 0%,#f4f1e9 72%,#d7d8d3 100%);
+  box-shadow:inset 0 1px #fff,inset 1px 0 rgba(255,255,255,.75),inset -1px 0 rgba(60,76,88,.16),0 2px 2px rgba(0,0,0,.36);
+}
+#omni-root .ofp-key--black {
+  z-index:2;
+  height:61%;
+  border:1px solid #030609;
+  border-top-color:#66737c;
+  border-bottom:3px solid #05080b;
+  border-radius:0 0 3px 3px;
+  background:
+    linear-gradient(90deg,#05080b 0,#202b34 24%,#3c4851 48%,#151e26 78%,#030507 100%);
+  box-shadow:0 3px 4px rgba(0,0,0,.74),inset 0 1px rgba(255,255,255,.25),inset 0 -2px rgba(0,0,0,.55);
+}
+#omni-root .ofp-key--white:active,#omni-root .ofp-key--white.is-active {height:calc(100% - 1px);border-bottom-width:2px;background:linear-gradient(180deg,#c8e8f0,#f8ffff 38%,#d8e8ed)}
+#omni-root .ofp-key--black:active,#omni-root .ofp-key--black.is-active {height:59%;background:linear-gradient(90deg,#0c1b21,#416473 52%,#10232b)}
+#omni-root .ofp-key:focus-visible {outline:2px solid var(--ofp-control-accent);outline-offset:-3px;z-index:4}
+#omni-root .ofp-keyboard__octave-mark {bottom:5px;left:4px;color:#78868e;font:6px var(--font-mono);pointer-events:none}
+#omni-root .ofp-keyboard__front-lip {
+  display:block;
+  flex:0 0 6px;
+  border:1px solid #070b0e;
+  border-top:1px solid #7b878f;
+  border-radius:0 0 3px 3px;
+  background:linear-gradient(180deg,#78848d,#313c45 52%,#0d1319);
+  box-shadow:0 2px 3px rgba(0,0,0,.55),inset 0 1px rgba(255,255,255,.18);
+}
+html[data-theme="light"] #omni-root .ofp-keyboard {border-color:#84929b;background:linear-gradient(180deg,#e4e9ec,#84939e 25%,#384751)}
+html[data-theme="light"] #omni-root .ofp-keyboard__rear-rail {color:#304453;background:linear-gradient(180deg,#f7f9fa,#bec8ce 45%,#84939d)}
+html[data-theme="light"] #omni-root .ofp-keyboard__model {color:#3d5362}
+html[data-theme="light"] #omni-root .ofp-keyboard__keywell {background:linear-gradient(180deg,#5c6b75,#aebac1 75%,#45545e)}
+html[data-theme="light"] #omni-root .ofp-key--white {border-color:#87949c;border-top-color:#fff;border-bottom-color:#798890;background:linear-gradient(90deg,#d7dde0,#fff 25%,#f8f7f0 68%,#d0d8dc)}
+html[data-theme="light"] #omni-root .ofp-key--black {border-top-color:#9aa6ad;background:linear-gradient(90deg,#17212a,#52616a 45%,#222e37)}
+html[data-theme="light"] #omni-root .ofp-keyboard__front-lip {background:linear-gradient(180deg,#d2dce1,#788993 52%,#3d4c56)}
+
+/* Material surfaces share one physical language across panels and controls. */
+#omni-root .ofp-faceplate[data-finish="matte"] {
+  background-image:
+    radial-gradient(ellipse at 18% 5%,rgba(255,255,255,.07),transparent 42%),
+    repeating-linear-gradient(0deg,rgba(255,255,255,.012) 0 1px,transparent 1px 3px),
+    repeating-linear-gradient(90deg,rgba(0,0,0,.012) 0 1px,transparent 1px 4px);
+}
+#omni-root .ofp-faceplate[data-finish="anodized"] {
+  background-image:
+    linear-gradient(118deg,rgba(255,255,255,.105),transparent 27%,rgba(0,0,0,.2) 74%),
+    repeating-linear-gradient(90deg,rgba(202,227,238,.018) 0 1px,rgba(0,0,0,.018) 1px 3px),
+    radial-gradient(ellipse at 52% 0,rgba(125,228,255,.065),transparent 65%);
+}
+#omni-root .ofp-faceplate[data-finish="brushed"] {
+  background-image:
+    repeating-linear-gradient(0deg,rgba(255,255,255,.12) 0 1px,rgba(22,35,44,.045) 1px 2px,transparent 2px 4px),
+    linear-gradient(110deg,rgba(255,255,255,.35),transparent 28%,rgba(0,0,0,.13) 76%),
+    linear-gradient(180deg,rgba(255,255,255,.08),rgba(0,0,0,.1));
+}
+#omni-root .ofp-faceplate[data-finish="walnut"] {
+  background-image:
+    repeating-linear-gradient(3deg,rgba(32,17,10,.23) 0 2px,rgba(224,172,118,.09) 2px 3px,transparent 3px 9px),
+    repeating-linear-gradient(91deg,rgba(255,229,199,.025) 0 1px,transparent 1px 15px),
+    linear-gradient(135deg,rgba(248,201,155,.15),rgba(22,11,6,.22));
+}
+#omni-root .ofp-faceplate[data-finish="ivory"] {
+  background-image:
+    linear-gradient(135deg,rgba(255,255,255,.58),transparent 32%,rgba(99,87,67,.1)),
+    repeating-linear-gradient(0deg,rgba(103,91,71,.026) 0 1px,transparent 1px 5px);
+}
+#omni-root .ofp-component[data-finish="matte"] {
+  background-image:radial-gradient(ellipse at 25% 10%,rgba(255,255,255,.075),transparent 54%),repeating-linear-gradient(0deg,rgba(255,255,255,.018) 0 1px,transparent 1px 3px);
+}
+#omni-root .ofp-component[data-finish="anodized"] {
+  background-image:linear-gradient(145deg,rgba(255,255,255,.105),transparent 35%,rgba(0,0,0,.27)),repeating-linear-gradient(90deg,rgba(200,225,235,.02) 0 1px,transparent 1px 3px);
+}
+#omni-root .ofp-component[data-finish="brushed"] {
+  background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.14) 0 1px,rgba(0,0,0,.035) 1px 2px,transparent 2px 4px),linear-gradient(145deg,rgba(255,255,255,.24),rgba(0,0,0,.12));
+}
+#omni-root .ofp-component[data-finish="walnut"] {
+  background-image:repeating-linear-gradient(3deg,rgba(36,18,9,.22) 0 2px,rgba(224,174,123,.08) 2px 3px,transparent 3px 8px),linear-gradient(145deg,rgba(255,226,195,.12),rgba(0,0,0,.2));
+}
+#omni-root .ofp-component[data-finish="ivory"] {
+  background-image:linear-gradient(140deg,rgba(255,255,255,.55),rgba(255,255,255,.05) 45%,rgba(105,92,69,.12)),repeating-linear-gradient(0deg,rgba(83,74,59,.025) 0 1px,transparent 1px 5px);
+}
+#omni-root .ofp-component[data-finish="brushed"] .ofp-knob__cap,
+#omni-root .ofp-component[data-finish="brushed"] .ofp-switch__track {background:repeating-linear-gradient(0deg,rgba(255,255,255,.13) 0 1px,transparent 1px 3px),linear-gradient(145deg,#dfe5e8,#818f97 50%,#36434b)}
+#omni-root .ofp-component[data-finish="anodized"] .ofp-knob__cap {background:linear-gradient(145deg,#56636d,#202b34 52%,#080d12)}
+#omni-root .ofp-component[data-finish="walnut"] .ofp-knob__cap {background:repeating-linear-gradient(3deg,rgba(36,18,9,.25) 0 2px,transparent 2px 6px),linear-gradient(145deg,#bd8c61,#633e2b 72%)}
+#omni-root .ofp-component[data-finish="ivory"] .ofp-knob__cap {background:radial-gradient(circle at 34% 22%,#fffdf2,transparent 28%),linear-gradient(145deg,#eee8d9,#b9b09d 66%,#85806f)}
+#omni-root .ofp-component[data-finish="matte"] .ofp-knob__cap {background:radial-gradient(circle at 34% 23%,rgba(255,255,255,.24),transparent 21%),linear-gradient(145deg,#697781,#28343d 62%,#10171d)}
+#omni-root .ofp-component[data-finish="walnut"] .ofp-hardware-button {background:repeating-linear-gradient(3deg,rgba(35,17,8,.25) 0 2px,transparent 2px 6px),linear-gradient(145deg,#ac7951,#573623)}
+#omni-root .ofp-component[data-finish="ivory"] .ofp-hardware-button {color:#343b3e;background:linear-gradient(145deg,#fffdf1,#d6cfbc 62%,#a49d8b);border-color:#a49b87}
+#omni-root .ofp-component[data-finish="brushed"] .ofp-hardware-button {color:#202d35;background:linear-gradient(180deg,#f1f4f5,#a0adb5 52%,#687680);border-color:#c5d0d5}
+#omni-root .ofp-component[data-finish="anodized"] .ofp-hardware-button {background:linear-gradient(180deg,#46545f,#18232b 54%,#070c11);border-color:#657681}
+html[data-theme="light"] #omni-root .ofp-component[data-finish="matte"] {background-color:var(--ofp-control-surface)}
+html[data-theme="light"] #omni-root .ofp-component[data-finish="ivory"] .ofp-component__title {color:#343b40;text-shadow:none}
+html[data-theme="light"] #omni-root .ofp-component[data-finish="brushed"] .ofp-knob__cap {border-color:#63737d}
+html[data-theme="light"] #omni-root .ofp-component[data-finish="anodized"] .ofp-component__title {color:var(--ofp-control-text)}
+
+/* The component library and properties column stay aligned as the viewport shrinks. */
+#omni-root .ofp-library {min-height:0}
+#omni-root .ofp-inspector {min-height:0}
+#omni-root .ofp-stage-panel {min-width:0}
+#omni-root .ofp-library-search {width:100%;min-height:34px;padding:7px 9px;border:1px solid var(--omni-border-strong);border-radius:6px;color:var(--omni-text);background:var(--omni-panel-soft);font:10px var(--font-body)}
+#omni-root .ofp-library-group {display:grid;gap:7px}
+#omni-root .ofp-library-group__heading {display:flex;align-items:center;justify-content:space-between;min-height:28px;padding:0 2px;color:var(--omni-muted);font:700 8px var(--font-mono);letter-spacing:.13em;cursor:pointer}
+#omni-root .ofp-library-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+#omni-root .ofp-library-item {display:grid;grid-template-rows:48px auto;justify-items:center;gap:4px;min-width:0;min-height:76px;padding:6px;border:1px solid var(--omni-border);border-radius:7px;background:linear-gradient(150deg,rgba(255,255,255,.04),rgba(0,0,0,.08)),var(--omni-panel-soft)}
+#omni-root .ofp-library-preview {display:block;width:100%;height:46px}
+#omni-root .ofp-library-item__label {display:block;max-width:100%;overflow:hidden;color:var(--omni-text);font:500 9px/1.15 var(--font-body);text-align:center;text-overflow:ellipsis;white-space:nowrap}
+#omni-root .ofp-library-item:hover {border-color:rgba(125,228,255,.42);background:linear-gradient(150deg,rgba(125,228,255,.08),rgba(0,0,0,.08)),var(--omni-panel-soft)}
+#omni-root .ofp-component__resize {touch-action:none}
+#omni-root .ofp-component__title {cursor:grab}
+#omni-root .ofp-component.is-locked .ofp-component__resize {display:none}
+#omni-root .ofp-action:focus-visible,
+#omni-root .ofp-stage-zoom-button:focus-visible,
+#omni-root .ofp-stage-zoom-fit:focus-visible,
+#omni-root .ofp-tool-toggle:focus-visible,
+#omni-root .ofp-inspector-tab:focus-visible {outline:2px solid var(--cyan);outline-offset:2px}
+
+html[data-theme="light"] #omni-root .ofp-faceplate[data-finish="matte"] {background-color:var(--ofp-panel-color)}
+html[data-theme="light"] #omni-root .ofp-faceplate[data-finish="brushed"] {background-color:var(--ofp-panel-color)}
+html[data-theme="light"] #omni-root .ofp-faceplate[data-finish="anodized"] {background-color:var(--ofp-panel-color)}
+html[data-theme="light"] #omni-root .ofp-faceplate[data-finish="walnut"] {background-color:var(--ofp-panel-color)}
+html[data-theme="light"] #omni-root .ofp-faceplate[data-finish="ivory"] {background-color:var(--ofp-panel-color)}
+html[data-theme="light"] #omni-root .ofp-component__value {text-shadow:none}
+html[data-theme="light"] #omni-root .ofp-dial__needle {background:linear-gradient(90deg,#243a48,var(--ofp-control-accent))}
+html[data-theme="light"] #omni-root .ofp-keyboard__front-lip {box-shadow:0 2px 3px rgba(40,58,75,.18),inset 0 1px rgba(255,255,255,.7)}
+
+
+
+/* OMNI front-panel studio — focused workspace
+   Keep the editor chrome quiet; reveal catalogues and properties on demand. */
+#omni-root>.omni-front-panel {
+  min-height:0;
+  background:var(--bg);
+  color:var(--omni-text);
+}
+#omni-root .ofp-toolbar {
+  min-height:48px;
+  padding:7px 14px;
+  border-bottom:1px solid var(--omni-border);
+  background:var(--omni-panel);
+}
+#omni-root .ofp-toolbar__identity {
+  display:flex;
+  align-items:center;
+  gap:9px;
+}
+#omni-root .ofp-kicker {
+  color:var(--omni-muted);
+  font:600 9px/1 var(--font-mono);
+  letter-spacing:.12em;
+}
+#omni-root .ofp-toolbar__title {
+  padding-left:9px;
+  border-left:1px solid var(--omni-border);
+  color:var(--omni-text);
+  font:550 13px/1.2 var(--font-body);
+  letter-spacing:0;
+}
+#omni-root .ofp-toolbar__actions {
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+#omni-root .ofp-action {
+  min-height:29px;
+  padding:0 11px;
+  border:1px solid var(--omni-border-strong);
+  border-radius:4px;
+  color:var(--omni-text);
+  background:var(--omni-panel-soft);
+  font:500 11px/1 var(--font-body);
+  letter-spacing:0;
+  text-transform:none;
+}
+#omni-root .ofp-action:hover,
+#omni-root .ofp-menu-action:hover {border-color:var(--cyan);background:rgba(125,228,255,.06)}
+#omni-root .ofp-action--primary {
+  border-color:rgba(125,228,255,.4);
+  color:#dff7fc;
+  background:#21414b;
+}
+#omni-root .ofp-action--primary:hover {background:#2a505d}
+
+#omni-root .ofp-toolbar-menu {position:relative}
+#omni-root .ofp-toolbar-menu__trigger {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-height:29px;
+  padding:0 10px;
+  border:1px solid var(--omni-border-strong);
+  border-radius:4px;
+  color:var(--omni-muted);
+  background:var(--omni-panel-soft);
+  font:500 11px var(--font-body);
+  cursor:pointer;
+  list-style:none;
+}
+#omni-root .ofp-toolbar-menu__trigger::-webkit-details-marker {display:none}
+#omni-root .ofp-toolbar-menu__trigger::after {
+  width:5px;height:5px;
+  border-right:1px solid currentColor;
+  border-bottom:1px solid currentColor;
+  content:'';
+  transform:rotate(45deg) translateY(-2px);
+}
+#omni-root .ofp-toolbar-menu__panel {
+  position:absolute;
+  z-index:40;
+  top:calc(100% + 5px);
+  right:0;
+  display:grid;
+  gap:2px;
+  min-width:160px;
+  padding:5px;
+  border:1px solid var(--omni-border-strong);
+  border-radius:5px;
+  background:var(--omni-panel);
+  box-shadow:0 10px 24px rgba(0,0,0,.24);
+}
+#omni-root .ofp-menu-action {
+  min-height:30px;
+  padding:0 9px;
+  border:1px solid transparent;
+  border-radius:3px;
+  color:var(--omni-text);
+  background:transparent;
+  font:500 11px var(--font-body);
+  text-align:left;
+  cursor:pointer;
+}
+
+#omni-root .ofp-workspace {
+  display:grid;
+  grid-template-columns:52px 0 minmax(0,1fr) 0;
+  min-width:0;
+  min-height:0;
+  overflow:hidden;
+  flex:1;
+  background:var(--bg);
+  transition:grid-template-columns .16s ease;
+}
+#omni-root .ofp-workspace.is-library-open {grid-template-columns:52px 226px minmax(0,1fr) 0}
+#omni-root .ofp-workspace.is-inspector-open {grid-template-columns:52px 0 minmax(0,1fr) 286px}
+#omni-root .ofp-workspace.is-library-open.is-inspector-open {grid-template-columns:52px 226px minmax(0,1fr) 286px}
+
+#omni-root .ofp-rail {
+  grid-column:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:5px;
+  min-width:0;
+  padding:8px 4px;
+  border-right:1px solid var(--omni-border);
+  background:var(--omni-panel);
+}
+#omni-root .ofp-rail-button {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  width:42px;
+  min-height:45px;
+  padding:4px 2px;
+  border:1px solid transparent;
+  border-radius:4px;
+  color:var(--omni-muted);
+  background:transparent;
+  cursor:pointer;
+}
+#omni-root .ofp-rail-button:hover {color:var(--omni-text);background:rgba(255,255,255,.045)}
+#omni-root .ofp-rail-button[aria-pressed="true"] {
+  border-color:rgba(125,228,255,.28);
+  color:var(--omni-text);
+  background:rgba(125,228,255,.09);
+}
+#omni-root .ofp-rail-icon {font:400 17px/1 var(--font-body)}
+#omni-root .ofp-rail-label {font:500 8px/1 var(--font-body);letter-spacing:0}
+#omni-root .ofp-library {
+  grid-column:2;
+  display:none;
+  min-width:0;
+  min-height:0;
+  overflow:auto;
+  padding:13px 11px;
+  border-right:1px solid var(--omni-border);
+  background:var(--omni-panel);
+}
+#omni-root .ofp-workspace.is-library-open .ofp-library {display:flex;flex-direction:column}
+#omni-root .ofp-library-pane[hidden],
+#omni-root .ofp-layers-panel[hidden] {display:none!important}
+#omni-root .ofp-library-pane {display:flex;flex-direction:column;gap:7px;min-height:0}
+#omni-root .ofp-library .ofp-panel-heading {gap:4px;margin:0 0 4px}
+#omni-root .ofp-library .ofp-panel-heading strong {font:550 13px var(--font-body);letter-spacing:0}
+#omni-root .ofp-help {margin:0 0 4px;color:var(--omni-muted);font:10px/1.45 var(--font-body)}
+#omni-root .ofp-library-search {
+  min-height:32px;
+  padding:0 9px;
+  border:1px solid var(--omni-border-strong);
+  border-radius:4px;
+  color:var(--omni-text);
+  background:var(--omni-panel-soft);
+  font:11px var(--font-body);
+}
+#omni-root .ofp-library-search:focus,
+#omni-root .ofp-input:focus,
+#omni-root .ofp-select:focus,
+#omni-root .ofp-textarea:focus {outline:1px solid var(--cyan);outline-offset:1px}
+#omni-root .ofp-library-group {
+  display:grid;
+  gap:4px;
+  margin:7px 0 0;
+  padding-top:7px;
+  border-top:1px solid var(--omni-border);
+}
+#omni-root .ofp-library-group__heading {
+  min-height:23px;
+  color:var(--omni-muted);
+  font:550 10px var(--font-body);
+  letter-spacing:0;
+}
+#omni-root .ofp-library-grid {display:grid;grid-template-columns:1fr;gap:1px}
+#omni-root .ofp-library-item {
+  display:flex;
+  align-items:center;
+  min-height:30px;
+  padding:4px 6px;
+  border:1px solid transparent;
+  border-radius:3px;
+  color:var(--omni-text);
+  background:transparent;
+  font:400 11px var(--font-body);
+  text-align:left;
+  cursor:pointer;
+  transition:background .12s ease,border-color .12s ease;
+}
+#omni-root .ofp-library-item:hover {border-color:var(--omni-border);background:rgba(255,255,255,.045)}
+#omni-root .ofp-library-item:active {background:rgba(125,228,255,.1)}
+#omni-root .ofp-library-preview {display:none}
+#omni-root .ofp-library-item__label {color:inherit;font:inherit}
+#omni-root .ofp-library-item[hidden],
+#omni-root .ofp-library-group[hidden] {display:none!important}
+#omni-root .ofp-layers-panel {display:block;min-width:0}
+#omni-root .ofp-layers-panel .ofp-panel-heading {margin:0 0 10px}
+#omni-root .ofp-layers-panel .ofp-panel-heading strong {font:550 13px var(--font-body)}
+#omni-root .ofp-layers-list {gap:2px}
+#omni-root .ofp-layer-row {min-height:30px;padding:2px;border-radius:3px}
+#omni-root .ofp-layer-name {font:11px var(--font-body)}
+#omni-root .ofp-layer-icon {width:22px;height:26px;font:11px var(--font-body)}
+
+#omni-root .ofp-stage-panel {
+  grid-column:3;
+  display:flex;
+  min-width:0;
+  min-height:0;
+  flex-direction:column;
+  padding:0 14px 8px;
+  background:var(--bg);
+}
+#omni-root .ofp-stage-head {
+  min-height:41px;
+  flex:none;
+  padding:0 2px;
+  border-bottom:1px solid var(--omni-border);
+}
+#omni-root .ofp-stage-head strong {margin:0;color:var(--omni-text);font:550 12px var(--font-body)}
+#omni-root .ofp-stage-dimensions {margin-right:9px;color:var(--omni-muted);font:10px var(--font-mono);letter-spacing:0}
+#omni-root .ofp-stage-zoom-button,
+#omni-root .ofp-stage-zoom-fit {
+  min-width:27px;
+  height:25px;
+  padding:0 7px;
+  border:1px solid var(--omni-border);
+  border-radius:3px;
+  color:var(--omni-muted);
+  background:var(--omni-panel);
+  font:11px var(--font-body);
+  cursor:pointer;
+}
+#omni-root .ofp-stage-zoom {min-width:43px;color:var(--omni-text);font:10px var(--font-mono);text-align:center}
+#omni-root .ofp-stage-zoom-fit {min-width:39px}
+#omni-root .ofp-design-tools {
+  display:flex;
+  align-items:center;
+  gap:4px;
+  min-height:38px;
+  flex:none;
+  padding:5px 0;
+  border-bottom:1px solid var(--omni-border);
+}
+#omni-root .ofp-tool-toggle,
+#omni-root .ofp-tool-group__trigger {
+  min-height:27px;
+  padding:0 9px;
+  border:1px solid transparent;
+  border-radius:3px;
+  color:var(--omni-muted);
+  background:transparent;
+  font:500 10px var(--font-body);
+  letter-spacing:0;
+  cursor:pointer;
+}
+#omni-root .ofp-tool-toggle:hover,
+#omni-root .ofp-tool-group__trigger:hover {border-color:var(--omni-border);color:var(--omni-text);background:rgba(255,255,255,.04)}
+#omni-root .ofp-tool-toggle[aria-pressed="true"] {border-color:rgba(125,228,255,.3);color:var(--omni-text);background:rgba(125,228,255,.1)}
+#omni-root .ofp-tool-group {position:relative;display:block;flex:none}
+#omni-root .ofp-tool-group__trigger {display:flex;align-items:center;gap:8px;list-style:none}
+#omni-root .ofp-tool-group__trigger::-webkit-details-marker {display:none}
+#omni-root .ofp-tool-group__trigger::after {
+  width:5px;height:5px;
+  border-right:1px solid currentColor;border-bottom:1px solid currentColor;
+  content:'';transform:rotate(45deg) translateY(-2px);
+}
+#omni-root .ofp-tool-group__panel {
+  position:absolute;
+  z-index:35;
+  top:calc(100% + 4px);
+  left:0;
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:3px;
+  min-width:200px;
+  max-width:min(320px,80vw);
+  max-height:55vh;
+  overflow:auto;
+  padding:6px;
+  border:1px solid var(--omni-border-strong);
+  border-radius:4px;
+  background:var(--omni-panel);
+  box-shadow:0 12px 28px rgba(0,0,0,.24);
+}
+#omni-root .ofp-tool-group__panel .ofp-tool-toggle {text-align:left}
+#omni-root .ofp-tool-select {
+  grid-column:1/-1;
+  min-height:29px;
+  border:1px solid var(--omni-border);
+  border-radius:3px;
+  color:var(--omni-text);
+  background:var(--omni-panel-soft);
+  font:10px var(--font-body);
+}
+#omni-root .ofp-viewport {
+  display:flex;
+  min-width:0;
+  min-height:0;
+  flex:1;
+  align-items:center;
+  justify-content:center;
+  overflow:auto;
+  padding:26px;
+  background-color:var(--bg);
+  background-image:radial-gradient(rgba(140,155,170,.16) .7px,transparent .7px);
+  background-size:18px 18px;
+}
+#omni-root .ofp-faceplate {
+  border-radius:5px;
+  box-shadow:0 7px 22px rgba(0,0,0,.24),inset 0 1px rgba(255,255,255,.1);
+}
+#omni-root .ofp-stage-foot {
+  min-height:24px;
+  padding:5px 2px 0;
+  border-top:1px solid var(--omni-border);
+  color:var(--omni-muted);
+  font:9px var(--font-body);
+  letter-spacing:0;
+}
+#omni-root .ofp-stage-foot span:last-child {color:var(--omni-muted)}
+
+#omni-root .ofp-inspector {
+  grid-column:4;
+  display:none;
+  min-width:0;
+  min-height:0;
+  overflow:auto;
+  padding:13px 12px;
+  border-left:1px solid var(--omni-border);
+  background:var(--omni-panel);
+  scrollbar-width:thin;
+}
+#omni-root .ofp-workspace.is-inspector-open .ofp-inspector {display:flex;flex-direction:column;gap:10px}
+#omni-root .ofp-inspector[hidden] {display:none!important}
+#omni-root .ofp-inspector__heading {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin:0;
+  padding:0 0 10px;
+  border-bottom:1px solid var(--omni-border);
+}
+#omni-root .ofp-inspector__heading strong {display:block;margin-top:3px;font:550 13px var(--font-body)}
+#omni-root .ofp-inspector-close {
+  width:27px;height:27px;
+  border:1px solid var(--omni-border);
+  border-radius:3px;
+  color:var(--omni-muted);
+  background:transparent;
+  font:17px/1 var(--font-body);
+  cursor:pointer;
+}
+#omni-root .ofp-inspector-close:hover {color:var(--omni-text);background:rgba(255,255,255,.05)}
+#omni-root .ofp-inspector-tabs {
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:2px;
+  padding:2px;
+  border:1px solid var(--omni-border);
+  border-radius:4px;
+  background:var(--omni-panel-soft);
+}
+#omni-root .ofp-inspector-tab {
+  min-height:28px;
+  border-radius:2px;
+  font:500 10px var(--font-body);
+}
+#omni-root .ofp-inspector-tab[aria-selected="true"] {
+  border-color:var(--omni-border);
+  color:var(--omni-text);
+  background:var(--omni-panel);
+  box-shadow:none;
+}
+#omni-root .ofp-inspector__body {gap:10px;padding:0 1px 18px}
+#omni-root .ofp-field {gap:4px;color:var(--omni-muted);font:10px var(--font-body);letter-spacing:0}
+#omni-root .ofp-input,
+#omni-root .ofp-select,
+#omni-root .ofp-textarea {
+  min-height:30px;
+  padding:5px 7px;
+  border:1px solid var(--omni-border-strong);
+  border-radius:3px;
+  color:var(--omni-text);
+  background:var(--omni-panel-soft);
+  font:11px var(--font-body);
+}
+#omni-root .ofp-color {height:30px;border:1px solid var(--omni-border);border-radius:3px}
+#omni-root .ofp-inspector-action {
+  min-height:29px;
+  border-radius:3px;
+  font:500 10px var(--font-body);
+  letter-spacing:0;
+  text-transform:none;
+}
+#omni-root .ofp-inspector-action--danger {color:#dc8b84}
+#omni-root .ofp-advanced {
+  border-top:1px solid var(--omni-border);
+  padding-top:7px;
+}
+#omni-root .ofp-advanced__summary {
+  min-height:25px;
+  color:var(--omni-muted);
+  font:500 10px var(--font-body);
+  cursor:pointer;
+  list-style:none;
+}
+#omni-root .ofp-advanced__summary::-webkit-details-marker {display:none}
+#omni-root .ofp-advanced__summary::after {
+  float:right;
+  width:5px;height:5px;margin:4px 3px 0 0;
+  border-right:1px solid currentColor;border-bottom:1px solid currentColor;
+  content:'';transform:rotate(45deg);
+}
+#omni-root .ofp-advanced[open]>.ofp-advanced__summary::after {transform:rotate(225deg)}
+#omni-root .ofp-advanced__body {display:grid;gap:9px;padding:8px 0 3px}
+#omni-root .ofp-panel-heading--subsection {margin:5px 0 0;padding-top:8px;border-top:1px solid var(--omni-border)}
+#omni-root .ofp-panel-heading--subsection strong {font:550 11px var(--font-body)}
+#omni-root .ofp-material-presets__grid {grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}
+#omni-root .ofp-material-preset {padding:5px;border-radius:3px}
+#omni-root .ofp-binding-status {
+  padding:8px;
+  border:1px solid var(--omni-border);
+  border-radius:3px;
+  color:var(--cyan);
+  background:rgba(125,228,255,.035);
+  font:10px/1.4 var(--font-body);
+}
+#omni-root .ofp-binding-intro {margin:0;color:var(--omni-muted);font:10px/1.45 var(--font-body)}
+#omni-root .ofp-empty-state {gap:8px;padding:20px;color:var(--ofp-text)}
+#omni-root .ofp-empty-state strong {font:550 16px var(--font-body);letter-spacing:-.02em}
+#omni-root .ofp-empty-state p {max-width:30ch;margin:0;color:rgba(230,238,244,.68);font:11px/1.5 var(--font-body)}
+#omni-root .ofp-empty-state__action {
+  min-height:30px;padding:0 10px;border:1px solid rgba(255,255,255,.25);border-radius:3px;
+  color:var(--ofp-text);background:rgba(255,255,255,.06);font:500 10px var(--font-body);
+}
+#omni-root .ofp-component.is-selected {outline:1px solid rgba(125,228,255,.8);outline-offset:2px}
+#omni-root .ofp-component.is-selected::after {border-color:transparent}
+
+html[data-theme="light"] #omni-root .ofp-toolbar,
+html[data-theme="light"] #omni-root .ofp-rail,
+html[data-theme="light"] #omni-root .ofp-library,
+html[data-theme="light"] #omni-root .ofp-inspector {background:#eef1f4;color:#283847}
+html[data-theme="light"] #omni-root .ofp-workspace,
+html[data-theme="light"] #omni-root .ofp-stage-panel,
+html[data-theme="light"] #omni-root .ofp-viewport {background-color:#e3e7eb}
+html[data-theme="light"] #omni-root .ofp-viewport {background-image:radial-gradient(rgba(65,80,95,.18) .7px,transparent .7px)}
+html[data-theme="light"] #omni-root .ofp-toolbar__title,
+html[data-theme="light"] #omni-root .ofp-stage-head strong,
+html[data-theme="light"] #omni-root .ofp-inspector__heading strong {color:#283847}
+html[data-theme="light"] #omni-root .ofp-action,
+html[data-theme="light"] #omni-root .ofp-toolbar-menu__trigger,
+html[data-theme="light"] #omni-root .ofp-menu-action,
+html[data-theme="light"] #omni-root .ofp-stage-zoom-button,
+html[data-theme="light"] #omni-root .ofp-stage-zoom-fit,
+html[data-theme="light"] #omni-root .ofp-tool-group__trigger,
+html[data-theme="light"] #omni-root .ofp-input,
+html[data-theme="light"] #omni-root .ofp-select,
+html[data-theme="light"] #omni-root .ofp-textarea {
+  color:#34495d;border-color:rgba(42,58,73,.18);background:#f8fafb;
+}
+html[data-theme="light"] #omni-root .ofp-action--primary {color:#15485a;border-color:#a8d5df;background:#d8edf1}
+html[data-theme="light"] #omni-root .ofp-rail-button {color:#53677a}
+html[data-theme="light"] #omni-root .ofp-rail-button[aria-pressed="true"] {color:#15566d;border-color:rgba(8,127,159,.25);background:rgba(8,127,159,.08)}
+html[data-theme="light"] #omni-root .ofp-library-item {color:#34495d}
+html[data-theme="light"] #omni-root .ofp-library-item:hover {background:rgba(42,58,73,.05)}
+html[data-theme="light"] #omni-root .ofp-tool-toggle,
+html[data-theme="light"] #omni-root .ofp-inspector-tab {color:#53677a}
+html[data-theme="light"] #omni-root .ofp-tool-toggle[aria-pressed="true"],
+html[data-theme="light"] #omni-root .ofp-inspector-tab[aria-selected="true"] {color:#15566d;border-color:rgba(8,127,159,.24);background:#e3f0f3}
+html[data-theme="light"] #omni-root .ofp-tool-group__panel,
+html[data-theme="light"] #omni-root .ofp-toolbar-menu__panel {border-color:rgba(42,58,73,.2);background:#f5f7f9;box-shadow:0 10px 24px rgba(30,45,60,.12)}
+html[data-theme="light"] #omni-root .ofp-tool-group__panel .ofp-tool-toggle {color:#34495d}
+html[data-theme="light"] #omni-root .ofp-inspector-close {color:#52677c;border-color:rgba(42,58,73,.2)}
+html[data-theme="light"] #omni-root .ofp-advanced__summary,
+html[data-theme="light"] #omni-root .ofp-field,
+html[data-theme="light"] #omni-root .ofp-help,
+html[data-theme="light"] #omni-root .ofp-stage-foot {color:#5b6e80}
+html[data-theme="light"] #omni-root .ofp-binding-status {color:#12647b;background:rgba(8,127,159,.045)}
+
+@media(max-width:980px) {
+  #omni-root .ofp-workspace.is-library-open {grid-template-columns:48px 198px minmax(0,1fr) 0}
+  #omni-root .ofp-workspace.is-inspector-open {grid-template-columns:48px 0 minmax(0,1fr) 250px}
+  #omni-root .ofp-workspace.is-library-open.is-inspector-open {grid-template-columns:48px 198px minmax(0,1fr) 250px}
+}
+@media(max-width:720px) {
+  #omni-root .ofp-workspace,
+  #omni-root .ofp-workspace.is-library-open,
+  #omni-root .ofp-workspace.is-inspector-open,
+  #omni-root .ofp-workspace.is-library-open.is-inspector-open {grid-template-columns:44px minmax(0,1fr)}
+  #omni-root .ofp-library {
+    position:absolute;z-index:20;top:0;bottom:0;left:44px;width:min(250px,72vw);
+    border:1px solid var(--omni-border);box-shadow:0 12px 28px rgba(0,0,0,.22);
+  }
+  #omni-root .ofp-inspector {
+    position:absolute;z-index:21;top:0;right:0;bottom:0;width:min(290px,82vw);
+    border:1px solid var(--omni-border);box-shadow:0 12px 28px rgba(0,0,0,.22);
+  }
+  #omni-root .ofp-stage-panel {grid-column:2;padding-inline:8px}
+  #omni-root .ofp-stage-head {min-height:36px}
+  #omni-root .ofp-design-tools {min-height:34px;overflow:visible}
+  #omni-root .ofp-viewport {padding:14px}
+  #omni-root .ofp-stage-foot {font-size:8px}
+  #omni-root .ofp-toolbar {padding-inline:9px}
+}
+@media(max-width:480px) {
+  #omni-root .ofp-kicker {display:none}
+  #omni-root .ofp-toolbar__title {padding-left:0;border-left:0}
+  #omni-root .ofp-stage-dimensions {display:none}
+  #omni-root .ofp-stage-foot span {white-space:normal}
+}
+
+
+/* Both OMNI workspaces share one compact menu/status row. Menus stay left,
+   the live message stays right, and MIDI Map is an engine-only peer control. */
+#omni-root .omni-commandbar {
+  display:flex!important;
+  flex-flow:row nowrap;
+  align-items:center;
+  gap:2px;
+  min-width:0;
+  min-height:37px;
+  padding:4px clamp(10px,1.4vw,18px);
+  overflow:visible;
+  border-top:1px solid var(--omni-border);
+  background:rgba(8,11,16,.28);
+}
+html[data-theme="light"] #omni-root .omni-commandbar {
+  border-color:rgba(43,59,78,.12);
+  background:rgba(244,247,250,.85);
+}
+#omni-root .omni-commandbar > .omni-menu {
+  position:relative;
+  z-index:1;
+  order:0!important;
+  flex:0 0 auto;
+  min-width:0;
+}
+#omni-root .omni-commandbar .omni-menu--front-only {
+  order:0!important;
+}
+#omni-root .omni-commandbar .omni-menu__trigger {
+  display:flex;
+  align-items:center;
+  gap:7px;
+  min-height:27px;
+  padding:0 8px;
+  border:1px solid transparent;
+  border-radius:4px;
+  color:var(--omni-muted);
+  background:transparent;
+  font:500 9px/1 var(--font-body);
+  letter-spacing:0;
+  white-space:nowrap;
+}
+#omni-root .omni-commandbar .omni-menu--front-only .omni-menu__trigger {
+  color:var(--omni-muted);
+  border-color:transparent;
+  background:transparent;
+}
+#omni-root .omni-commandbar .omni-menu__trigger::after {
+  width:5px;
+  height:5px;
+  border-width:1px;
+}
+#omni-root .omni-commandbar .omni-menu__trigger:hover,
+#omni-root .omni-commandbar .omni-menu__trigger:focus-visible,
+#omni-root .omni-commandbar .omni-menu[open] > .omni-menu__trigger {
+  border-color:var(--omni-border-strong);
+  color:var(--omni-text);
+  background:rgba(255,255,255,.045);
+  outline:none;
+}
+html[data-theme="light"] #omni-root .omni-commandbar .omni-menu__trigger:hover,
+html[data-theme="light"] #omni-root .omni-commandbar .omni-menu__trigger:focus-visible,
+html[data-theme="light"] #omni-root .omni-commandbar .omni-menu[open] > .omni-menu__trigger {
+  color:#19384b;
+  background:rgba(8,127,159,.06);
+}
+#omni-root .omni-commandbar > .omni-midi-map-button {
+  order:0!important;
+  flex:0 0 auto;
+  min-height:27px;
+  margin:0 0 0 4px;
+  padding:0 9px;
+  border:1px solid rgba(125,228,255,.25);
+  border-radius:4px;
+  color:#c5d5e5;
+  background:rgba(125,228,255,.045);
+  font:600 8px/1 var(--font-body);
+  letter-spacing:.045em;
+  white-space:nowrap;
+  transform:none;
+}
+#omni-root .omni-commandbar > .omni-midi-map-button:hover {
+  border-color:rgba(125,228,255,.52);
+  color:#f1f8ff;
+  background:rgba(125,228,255,.1);
+  box-shadow:none;
+  transform:none;
+}
+html[data-theme="light"] #omni-root .omni-commandbar > .omni-midi-map-button {
+  border-color:rgba(8,127,159,.24);
+  color:#344b61;
+  background:rgba(8,127,159,.045);
+}
+html[data-theme="light"] #omni-root .omni-commandbar > .omni-midi-map-button:hover {
+  border-color:rgba(8,127,159,.45);
+  color:#173b52;
+  background:rgba(8,127,159,.09);
+}
+#omni-root .omni-commandbar > .omni-status {
+  display:flex!important;
+  flex:0 1 auto;
+  align-items:center;
+  justify-content:flex-end!important;
+  min-width:100px;
+  max-width:min(35vw,440px);
+  margin:0 0 0 auto!important;
+  padding:2px 3px 2px 12px;
+  color:var(--omni-muted);
+  font:9px/1.35 var(--font-body);
+  text-align:right!important;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+#omni-root .omni-commandbar > .omni-status::before {
+  flex:0 0 5px;
+  order:2;
+  margin:0 0 1px 9px;
+}
+#omni-root .omni-commandbar .omni-front-only-command[hidden],
+#omni-root .omni-commandbar .omni-menu--front-only[hidden],
+#omni-root .omni-commandbar .omni-midi-map-button[hidden] {display:none!important}
+#omni-root .omni-commandbar .omni-menu__panel {
+  top:calc(100% + 5px);
+  max-height:min(70vh,560px);
+  z-index:60;
+}
+#omni-root .omni-commandbar .omni-menu[open] {z-index:55}
+#omni-root .omni-commandbar .omni-menu__item.omni-tb {
+  min-height:32px;
+  font:500 10px/1.2 var(--font-body);
+  letter-spacing:0;
+  text-transform:none;
+}
+#omni-root .omni-app-header.is-front-view .omni-commandbar > .omni-menu,
+#omni-root .omni-app-header:not(.is-front-view) .omni-commandbar > .omni-menu:not(.omni-menu--front-only) {
+  display:block;
+}
+@media(max-width:1050px) {
+  #omni-root .omni-commandbar > .omni-status {
+    min-width:84px;
+    max-width:24vw;
+    font-size:8px;
+  }
+}
+@media(max-width:760px) {
+  #omni-root .omni-commandbar {
+    flex-wrap:wrap;
+    row-gap:3px;
+    min-height:0;
+    padding:5px 9px;
+  }
+  #omni-root .omni-commandbar > .omni-status {
+    flex:1 0 100%;
+    min-width:0;
+    max-width:none;
+    padding:3px 3px 1px;
+  }
+}
+@media(max-width:420px) {
+  #omni-root .omni-commandbar .omni-menu__trigger {
+    min-height:25px;
+    padding-inline:6px;
+    font-size:8px;
+  }
+  #omni-root .omni-commandbar {gap:1px}
+  #omni-root .omni-commandbar > .omni-midi-map-button {
+    min-height:25px;
+    padding-inline:7px;
+    font-size:7px;
+  }
+}
+#omni-root .ofp-toolbar-menu__panel {
+  max-height:min(70vh,560px);
+  overflow:auto;
+}
+#omni-root .ofp-menu-action--danger {
+  color:#d78a83;
+}
+html[data-theme="light"] #omni-root .ofp-menu-action--danger {
+  color:#ad4942;
+}
+
+
+/* Light-surface contrast and faceplate-colour-safe empty states. */
+#omni-root .ofp-empty-state p {
+  color:var(--ofp-text);
+  opacity:.72;
+}
+#omni-root .ofp-empty-state__action {
+  border-color:color-mix(in srgb,var(--ofp-text) 38%,transparent);
+  color:var(--ofp-text);
+  background:color-mix(in srgb,var(--ofp-text) 8%,transparent);
+}
+#omni-root .ofp-empty-state__action:hover {
+  border-color:color-mix(in srgb,var(--ofp-text) 58%,transparent);
+  background:color-mix(in srgb,var(--ofp-text) 14%,transparent);
+}
+html[data-theme="light"] #omni-root .ofp-inspector-action--danger,
+html[data-theme="light"] #omni-root dialog.ofp-check-dialog .ofp-check-item--error>span {
+  color:#ad4942;
+}
+
+/* Small labels on the metallic keybed need contrast against its light finish. */
+html[data-theme="light"] #omni-root .ofp-keyboard__octave-mark {
+  color:#435664;
+}
+
+/* Encoder readouts follow each control's own accent on every panel finish. */
+#omni-root .ofp-component--encoder .ofp-component__value {
+  color:var(--ofp-control-accent);
+}

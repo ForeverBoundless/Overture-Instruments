@@ -113,7 +113,7 @@ class HohnerD6App {
     const toneButtons = el('div','d6-tone-switches',tone.body);
     ['BRILLIANT','TREBLE','MEDIUM','SOFT'].forEach((label,index) => {
       const b = el('button','d6-rocker',toneButtons);
-      b.type = 'button'; b.innerHTML = '<span>' + String(index+1).padStart(2,'0') + '</span><b>' + label + '</b>';
+      b.type = 'button'; b.innerHTML = '<span>' + String(index+1) + '</span><b>' + label + '</b>';
       b.addEventListener('click',()=>{const next=this.patch.toneFilters.slice();next[index]=!next[index];this.set('toneFilters',next);this.updateToneButtons();});
       this.toneButtons ||= []; this.toneButtons.push(b);
     });

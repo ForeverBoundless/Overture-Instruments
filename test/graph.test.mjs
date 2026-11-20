@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { LiveGraph, connectionError, defaultPatch, validatePatch } from '../js/omni/graph.js?v=20261117-omni-module-expansion-r3';
-import { MODULES, modulePorts } from '../js/omni/modules.js?v=20261117-omni-module-expansion-r3';
+import { MODULES, modulePorts } from '../js/omni/modules.js?v=20261118-organ-drawbar-r1';
 import { TEMPLATES } from '../js/omni/templates.js?v=20261117-omni-module-expansion-r3';
 
 
@@ -28,7 +28,10 @@ test('expanded instrument modules and starter templates are registered and valid
 });
 
 test('default OMNI patch validates and rejects audio feedback', () => {
-  const patch = validatePatch(defaultPatch());
+  const legacyPatch = defaultPatch();
+  assert.equal(Object.hasOwn(legacyPatch, 'frontPanel'), false);
+  const patch = validatePatch(legacyPatch);
+  assert.equal(Object.hasOwn(patch, 'frontPanel'), false);
   assert.equal(patch.modules.length, 7);
   const byId = Object.fromEntries(patch.modules.map((module) => [module.id, module]));
   assert.match(connectionError(byId, { module: 'vca1', port: 'out' }, { module: 'flt1', port: 'in' }, patch.connections), /feedback loop/);

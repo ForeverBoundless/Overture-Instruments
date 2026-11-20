@@ -69,7 +69,7 @@ class MellotronApp {
   updateTapeReadout() {
     const sound = SOUND_NAMES[this.patch.frame]?.[this.patch.track] || 'UNASSIGNED TAPE';
     this.tapeName.textContent = sound.toUpperCase();
-    this.tapeTrack.textContent = `TRACK ${'ABC'[this.patch.track]} / FRAME ${String(this.patch.frame + 1).padStart(2, '0')}`;
+    this.tapeTrack.textContent = `TRACK ${'ABC'[this.patch.track]} / FRAME ${String(this.patch.frame + 1)}`;
     this.display.set(sound.toUpperCase(), `FRAME ${this.patch.frame + 1} · TRACK ${'ABC'[this.patch.track]}`);
   }
   build() {

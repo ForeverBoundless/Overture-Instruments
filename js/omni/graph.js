@@ -5,7 +5,7 @@
  * Patch JSON (schema 1):
  * { schema: 1, name, modules: [{ id, type, x, y, params }], connections: [{ id, from: {module, port}, to: {module, port} }], global: { master } }
  */
-import { MODULES, modulePorts } from './modules.js?v=20261117-omni-module-expansion-r3';
+import { MODULES, modulePorts } from './modules.js?v=20261118-organ-drawbar-r1';
 import { ALGORITHMS } from '../data/dx7Algorithms.js';
 
 export const SCHEMA = 1;
@@ -80,12 +80,104 @@ export function validatePatch(raw) {
       bindings,
     };
   }) : [];
+  const panel = raw.frontPanel && typeof raw.frontPanel === 'object' ? raw.frontPanel : null;
+  const frontPanel = panel ? (() => {
+    const width = Math.min(1800, Math.max(800, Number(panel.width) || 1240));
+    const height = Math.min(900, Math.max(360, Number(panel.height) || 520));
+    const allowed = new Set(['knob','dial','slider','dropdown','button','switch','encoder','drawbars','keyboard','pitchwheel','modwheel','module','screen','oled','led','meter','pad','label','section']);
+    const color = (value, fallback) => /^#[0-9a-f]{6}$/i.test(String(value || '')) ? value : fallback;
+    const componentIds = new Set();
+    const guideIds = new Set();
+    const uniqueId = (raw, used, prefix) => {
+      const base = String(raw || uid(prefix)).replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 48) || uid(prefix);
+      let candidate = base, suffix = 1;
+      while (used.has(candidate)) candidate = base.slice(0, 44) + '-' + suffix++;
+      used.add(candidate);
+      return candidate;
+    };
+    const components = Array.isArray(panel.components) ? panel.components.slice(0, 100).filter((item) => item && allowed.has(item.type)).map((item) => {
+      const module = byId[String(item.bind?.moduleId || '')];
+      const parameter = module && MODULES[module.type].params.find((entry) => entry.key === item.bind?.paramKey);
+      const bind = module ? (['module','drawbars'].includes(item.type) ? { moduleId: module.id } : (parameter ? { moduleId: module.id, paramKey: parameter.key } : null)) : null;
+      const w = Math.min(760, Math.max(48, Number(item.w) || 120));
+      const h = Math.min(440, Math.max(36, Number(item.h) || 80));
+      const component = {
+        id: uniqueId(item.id, componentIds, 'fp'),
+        type: item.type,
+        label: String(item.label || item.type).slice(0, 40),
+        x: Math.min(width - Math.min(width, w), Math.max(0, Number(item.x) || 0)),
+        y: Math.min(height - Math.min(height, h), Math.max(0, Number(item.y) || 0)),
+        w: Math.min(width, w),
+        h: Math.min(height, h),
+        value: Math.min(1, Math.max(0, Number.isFinite(Number(item.value)) ? Number(item.value) : 0)),
+        accent: color(item.accent, '#ffb75e'),
+        surface: color(item.surface, '#26313d'),
+        textColor: color(item.textColor, '#edf3fa'),
+        borderColor: color(item.borderColor, color(item.accent, '#ffb75e')),
+        finish: ['matte','brushed','anodized','walnut','ivory'].includes(item.finish) ? item.finish : 'matte',
+        margin: Math.min(180, Math.max(0, Number.isFinite(Number(item.margin)) ? Number(item.margin) : 8)),
+        padding: Math.min(48, Math.max(0, Number.isFinite(Number(item.padding)) ? Number(item.padding) : 7)),
+        gap: Math.min(32, Math.max(0, Number.isFinite(Number(item.gap)) ? Number(item.gap) : 5)),
+        radius: Math.min(32, Math.max(0, Number.isFinite(Number(item.radius)) ? Number(item.radius) : 7)),
+        fontSize: Math.min(28, Math.max(6, Number.isFinite(Number(item.fontSize)) ? Number(item.fontSize) : 8)),
+        borderWidth: Math.min(6, Math.max(0, Number.isFinite(Number(item.borderWidth)) ? Number(item.borderWidth) : 1)),
+        shadow: ['none','soft','hard'].includes(item.shadow) ? item.shadow : 'soft',
+        orientation: item.orientation === 'vertical' ? 'vertical' : 'horizontal',
+        hidden: Boolean(item.hidden),
+        locked: Boolean(item.locked),
+        ...(bind ? { bind } : {}),
+        ...(item.action === 'panic' ? { action: 'panic' } : {}),
+        ...(item.type === 'screen' || item.type === 'oled' || item.type === 'label' || item.type === 'section' ? { text: String(item.text || '').slice(0, 240) } : {}),
+        ...(item.type === 'keyboard' ? { startNote: Math.min(96, Math.max(0, Number.isFinite(Number(item.startNote)) ? Number(item.startNote) : 48)), octaves: Math.min(5, Math.max(1, Math.round(Number(item.octaves) || 2))) } : {}),
+        ...(item.type === 'pad' ? { note: Math.min(127, Math.max(0, Number.isFinite(Number(item.note)) ? Number(item.note) : 60)) } : {}),
+      };
+      return component;
+    }) : [];
+    const guides = Array.isArray(panel.guides) ? panel.guides.slice(0, 80).filter((guide) => guide && ['x','y'].includes(guide.axis)).map((guide) => ({
+      id: uniqueId(guide.id, guideIds, 'guide'),
+      axis: guide.axis,
+      position: Math.min(guide.axis === 'x' ? width : height, Math.max(0, Number(guide.position) || 0)),
+      color: color(guide.color, '#7de4ff'),
+    })) : [];
+    const measurements = Array.isArray(panel.measurements) ? panel.measurements.slice(0, 100).filter((measurement) => measurement && ['x1','y1','x2','y2'].every((key) => Number.isFinite(Number(measurement[key])))).map((measurement) => ({
+      x1: Math.min(width, Math.max(0, Number(measurement.x1))),
+      y1: Math.min(height, Math.max(0, Number(measurement.y1))),
+      x2: Math.min(width, Math.max(0, Number(measurement.x2))),
+      y2: Math.min(height, Math.max(0, Number(measurement.y2))),
+    })) : [];
+    return {
+      version: 1,
+      width,
+      height,
+      finish: ['matte','brushed','anodized','walnut','ivory'].includes(panel.finish) ? panel.finish : 'matte',
+      panelColor: color(panel.panelColor, '#252d35'),
+      panelBorderColor: color(panel.panelBorderColor, '#667583'),
+      panelBorderWidth: Math.min(8, Math.max(0, Number.isFinite(Number(panel.panelBorderWidth)) ? Number(panel.panelBorderWidth) : 1)),
+      panelRadius: Math.min(40, Math.max(0, Number.isFinite(Number(panel.panelRadius)) ? Number(panel.panelRadius) : 14)),
+      accent: color(panel.accent, '#ffb75e'),
+      textColor: color(panel.textColor, '#edf3fa'),
+      unit: ['px','mm','in'].includes(panel.unit) ? panel.unit : 'mm',
+      zoom: Math.min(3, Math.max(.25, Number.isFinite(Number(panel.zoom)) && panel.zoom !== undefined ? Number(panel.zoom) : 1)),
+      safeMargin: Math.min(450, Math.max(0, Number.isFinite(Number(panel.safeMargin)) && panel.safeMargin !== undefined ? Number(panel.safeMargin) : 24)),
+      gridSize: Math.min(450, Math.max(4, Number.isFinite(Number(panel.gridSize)) && panel.gridSize !== undefined ? Number(panel.gridSize) : 28)),
+      showRulers: panel.showRulers !== false,
+      showGrid: panel.showGrid !== false,
+      showGuides: panel.showGuides !== false,
+      showSmartGuides: panel.showSmartGuides !== false,
+      showSafeMargin: panel.showSafeMargin !== false,
+      snap: panel.snap !== false,
+      guides,
+      measurements,
+      components,
+    };
+  })() : null;
   return {
     schema: SCHEMA,
     name: typeof raw.name === 'string' ? raw.name.slice(0, 60) : 'Untitled',
     modules, connections,
     global: { master: Math.min(1, Math.max(0, Number(raw.global?.master) || 0.8)) },
     macros,
+    ...(frontPanel ? { frontPanel } : {}),
   };
 }
 

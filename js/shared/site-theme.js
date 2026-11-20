@@ -93,9 +93,26 @@
     if (!parent) {
       if (toggle.parentElement !== document.body) document.body.appendChild(toggle);
       toggle.classList.add('site-theme-toggle--floating');
+      toggle.classList.remove('site-theme-toggle--omni');
       return;
     }
-    if (toggle.parentElement !== parent) parent.appendChild(toggle);
+    const account = appBar?.querySelector('.omni-account');
+    // account-shell.js wraps the account anchor after this script creates it.
+    // Insert before the direct-child wrapper rather than trying to insert before
+    // a nested anchor (which throws NotFoundError and used to hide the theme toggle).
+    const accountSlot = account
+      ? (account.parentElement === parent ? account : account.closest('.header-account-wrap'))
+      : null;
+    if (accountSlot?.parentElement === parent) {
+      // Do not move an already-correct toggle. The observer below watches
+      // subtree mutations, so needless insertions would schedule itself again.
+      if (toggle.parentElement !== parent || toggle.nextSibling !== accountSlot) {
+        parent.insertBefore(toggle, accountSlot);
+      }
+    } else if (toggle.parentElement !== parent || toggle.nextSibling !== null) {
+      parent.appendChild(toggle);
+    }
+    toggle.classList.toggle('site-theme-toggle--omni', Boolean(appBar));
     toggle.classList.remove('site-theme-toggle--floating');
   };
 

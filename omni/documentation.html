@@ -1,0 +1,469 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="OMNI documentation: build modular sound engines, use MIDI and performance controls, design front panels, record, save and export instruments.">
+<meta name="theme-color" content="#0b0e13">
+<script>(function(){try{var t=localStorage.getItem('overture-theme')==='light'?'light':'dark';document.documentElement.dataset.theme=t;document.documentElement.style.colorScheme=t;}catch(e){document.documentElement.dataset.theme='dark';document.documentElement.style.colorScheme='dark';}})();</script>
+<title>OMNI Documentation | Overture Instruments</title>
+<link rel="icon" href="/ui/Logos/OvertureLogo.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/brand.css">
+<link rel="stylesheet" href="/css/site-footer.css">
+<link rel="stylesheet" href="/css/site-theme.css?v=20261117-inter-type-r1">
+<link rel="stylesheet" href="/css/site-theme-polish.css?v=20261117-inter-type-r1">
+<link rel="stylesheet" href="/css/omni-documentation.css?v=20261120-omni-docs-r6">
+<script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
+<script defer src="/_vercel/insights/script.js"></script>
+<script src="/js/shared/site-theme.js" defer></script>
+<script src="/js/shared/site-nav.js" defer></script>
+<script src="/js/shared/supabase-config.js"></script>
+<script type="module" src="/js/shared/account-shell.js?v=20261102-contributions-menu"></script>
+<script src="/js/shared/pwa.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@5/dist/email.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js" defer></script>
+<script src="/js/shared/contact.js?v=20261029-modalfix" defer></script>
+</head>
+<body class="omni-docs-page">
+<div class="site-noise" aria-hidden="true"></div>
+<header class="site-header" id="top">
+  <a class="site-brand" href="/" aria-label="Overture Instruments home">
+    <span class="site-brand__mark"><img src="/ui/Logos/OvertureLogo.png" alt="" width="24" height="24"></span>
+    <span class="site-brand__wordmark">OVERTURE INSTRUMENTS</span>
+  </a>
+  <nav class="main-nav" id="main-nav" aria-label="Main navigation">
+    <a href="/about">About</a>
+    <a href="/library">Library</a>
+    <a href="/omni" aria-current="page">OMNI</a>
+    <a href="/community">Community</a>
+    <a href="/experiments">Experiments</a>
+  </nav>
+  <a class="header-account" href="/account" aria-label="Open your Overture account"><span class="header-account__label">LOG IN</span></a>
+  <button class="menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="main-nav">
+    <span></span><span></span>
+  </button>
+</header>
+
+<main class="omni-docs-shell" id="documentation">
+  <header class="omni-docs-intro" aria-labelledby="omni-docs-title">
+    <h1 id="omni-docs-title">OMNI documentation</h1>
+    <p>Build a sound engine, connect modules, perform with MIDI, and design a playable front panel.</p>
+  </header>
+
+  <div class="omni-docs-layout">
+    <aside class="omni-docs-nav" aria-label="Documentation sections">
+      <p class="omni-docs-nav__label">ON THIS PAGE</p>
+      <nav class="omni-docs-nav__links">
+        <a href="#overview"><span>1</span> Overview</a>
+        <a href="#quick-start"><span>2</span> Quick start</a>
+        <a href="#engine-view"><span>3</span> Engine View</a>
+        <a href="#modules"><span>4</span> Module catalogue</a>
+        <a href="#connections"><span>5</span> Connections</a>
+        <a href="#performance-midi"><span>6</span> Performance &amp; MIDI</a>
+        <a href="#recording-macros"><span>7</span> Recording &amp; macros</a>
+        <a href="#patches"><span>8</span> Patches &amp; templates</a>
+        <a href="#front-panel"><span>9</span> Front-end View</a>
+        <a href="#preview-export"><span>10</span> Preview &amp; export</a>
+        <a href="#shortcuts"><span>11</span> Shortcuts</a>
+        <a href="#troubleshooting"><span>12</span> Troubleshooting</a>
+      </nav>
+      <div class="omni-docs-nav__foot">
+        <span>Need the editor?</span>
+        <a href="/omni?editor=1">Open Engine View <span aria-hidden="true">↗</span></a>
+      </div>
+    </aside>
+
+    <article class="omni-docs-content">
+      <section class="omni-doc-section" id="overview" aria-labelledby="overview-title">
+        <div class="omni-doc-section__head">
+          <h2 id="overview-title">1. What is OMNI?</h2>
+        </div>
+        <p class="omni-doc-lead">OMNI is a browser-based modular instrument designer. You build a sound system from modules, connect their inputs and outputs, then play the result through the built-in keyboard or a MIDI controller.</p>
+        <p>The instrument has two linked workspaces. <strong>Engine View</strong> is where sound is created: modules live on a patch canvas and connections define how audio, control signals and note events move through the instrument. <strong>Front-end View</strong> is where you design the control panel that a player will use. Its controls can be bound to the same modules and parameters in the engine.</p>
+        <div class="omni-doc-callout">
+          <strong>One engine, two ways to work.</strong>
+          Front-end View does not create a second audio graph. A bound knob, slider, switch or drawbar writes to its selected engine parameter, while keyboards, wheels and pads use OMNI's existing performance APIs.
+        </div>
+        <p>OMNI opens in Engine View by default. You can switch workspaces from the centred selector in the editor's top bar. Audio does not start automatically; press <strong>POWER ON</strong> when you are ready to play.</p>
+      </section>
+
+      <section class="omni-doc-section" id="quick-start" aria-labelledby="quick-start-title">
+        <div class="omni-doc-section__head">
+          <h2 id="quick-start-title">2. Quick start</h2>
+        </div>
+        <p class="omni-doc-lead">The fastest way to understand the signal flow is to open a template, power on the engine, and follow the connections from the keyboard to the output.</p>
+        <ol class="omni-doc-steps">
+          <li><strong>Open a starting point.</strong><span>From the OMNI launcher, choose <em>Templates</em> and open a patch. Choose <em>New Patch</em> to start with the default instrument, or open <em>Empty Canvas</em> to build from an output module.</span></li>
+          <li><strong>Add or move modules.</strong><span>In Engine View, click a module in the searchable library to add it, or drag it onto the canvas. Drag a module by its header to move it.</span></li>
+          <li><strong>Connect the signal path.</strong><span>Drag from an output port on the right side of a module to a compatible input on another module. The port colours indicate the signal type.</span></li>
+          <li><strong>Power on and play.</strong><span>Press <em>POWER ON</em> in the performance pane. Play the on-screen keyboard, use the computer-keyboard note layout, or connect a MIDI controller.</span></li>
+          <li><strong>Save your work.</strong><span>Use <em>File → Save patch…</em> to save to this browser. Export a JSON patch file when you need a portable backup.</span></li>
+        </ol>
+        <div class="omni-doc-inline-links">
+          <a href="/omni">OMNI launcher</a>
+          <a href="/omni?editor=1">Open the editor directly</a>
+        </div>
+      </section>
+
+      <section class="omni-doc-section" id="engine-view" aria-labelledby="engine-view-title">
+        <div class="omni-doc-section__head">
+          <h2 id="engine-view-title">3. Engine View</h2>
+        </div>
+        <p class="omni-doc-lead">Engine View is a patch canvas: each module performs one job, and the connections between modules form the instrument.</p>
+        <div class="omni-doc-subsection">
+          <h3>Module library</h3>
+          <p>Use the search field to filter the module list by name. Click a module to add it near the current canvas view, or drag it onto a specific position. Select a module on the canvas to open its parameters in the inspector. Each module also has an information control that opens its technical reference.</p>
+        </div>
+        <div class="omni-doc-subsection">
+          <h3>Canvas navigation</h3>
+          <p>Drag empty canvas space to pan and scroll to zoom. Use <em>View → Zoom in</em>, <em>Zoom out</em> or <em>Fit patch to canvas</em> when you need a specific view. The grid snap control can be turned on or off.</p>
+        </div>
+        <div class="omni-doc-subsection">
+          <h3>Select and edit</h3>
+          <p>Click a module to select it. Shift-click adds or removes modules from the selection; Shift-drag on empty canvas draws a selection box. Drag the header of a selected module to move the group. Use the Edit menu to undo, redo, select all, copy, paste, duplicate or delete.</p>
+          <p>Module parameters can be changed in the inspector. Numeric controls update the live graph while audio is running. Structural edits update the graph connections and affected modules.</p>
+        </div>
+        <div class="omni-doc-subsection">
+          <h3>Top-bar menus</h3>
+          <div class="omni-doc-menu-grid">
+            <div><strong>File</strong><p>Create a patch, open templates, save or load a saved patch, import or export patch JSON, and export an SVG schematic.</p></div>
+            <div><strong>Edit</strong><p>Undo and redo, manage selections, copy, paste, duplicate and delete modules or front-panel controls.</p></div>
+            <div><strong>View</strong><p>Zoom, fit the canvas, toggle grid snapping, and show or hide the performance pane.</p></div>
+            <div><strong>Audio / MIDI</strong><p>Record audio or MIDI, stop held notes, request MIDI access and open MIDI assignments.</p></div>
+            <div><strong>Help</strong><p>Open the in-app guide and keyboard-shortcut reference. Front-end View also provides its studio guide and design check.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="omni-doc-section" id="modules" aria-labelledby="modules-title">
+        <div class="omni-doc-section__head">
+          <h2 id="modules-title">4. Module catalogue</h2>
+        </div>
+        <p class="omni-doc-lead">The current engine defines 56 module types. The groups below organise them by what they do; they are a reference for the available building blocks, not a required order for wiring a patch.</p>
+        <div class="omni-doc-module-grid">
+          <div class="omni-doc-module-card">
+            <h3>Performance &amp; note tools</h3>
+            <p>Keyboard &amp; MIDI; Step Sequencer; Clock / Trigger; Euclidean Rhythm; Random Melody; Arpeggiator; Chord Generator (2–8 voices); Note Transpose / Velocity; Note Echo.</p>
+          </div>
+          <div class="omni-doc-module-card">
+            <h3>Sound sources</h3>
+            <p>Oscillator; Noise Generator; Sub Oscillator; Supersaw; Additive Oscillator; Plucked String; Drum Voice; 2-Op FM; TR-808 Bass Drum; TR-808 Snare Drum.</p>
+          </div>
+          <div class="omni-doc-module-card">
+            <h3>Instrument-derived voices</h3>
+            <p>DX7 FM Voice; SEM Poly Synth; Mellotron Tape Voice; OB-Xa Poly Voice; Pro 3 Wavetable Oscillator; Super 8 Binaural Voice; Nord Tonewheel Organ; Clavinet D6 Voice.</p>
+          </div>
+          <div class="omni-doc-module-card">
+            <h3>Filters &amp; effects</h3>
+            <p>Filter; Moog Ladder Filter; MS-20 Dual Filter; Juno Chorus; Delay / Echo; Reverb; Distortion; Bitcrusher; Compressor; 3-Band EQ; Ring Modulator; Formant Filter; Stereo Panner; Phaser; Tremolo; Comb Resonator; Stereo Widener.</p>
+          </div>
+          <div class="omni-doc-module-card">
+            <h3>Mixing &amp; amplification</h3>
+            <p>Mixer (2–8 inputs); VCA (Amplifier); Crossfader; Audio Output.</p>
+          </div>
+          <div class="omni-doc-module-card">
+            <h3>Modulation &amp; control</h3>
+            <p>Envelope (ADSR); AR Envelope / Looper; LFO; LFO with Fade &amp; Offset; Sample &amp; Hold / Random; CV Mixer / Offset; Slew Limiter; Envelope Follower.</p>
+          </div>
+        </div>
+        <p class="omni-doc-note">Instrument-derived modules are Overture's software implementations and models. Their names describe the instrument or circuit ideas they draw from; they are not licensed copies of proprietary firmware, factory banks or hardware designs.</p>
+      </section>
+
+      <section class="omni-doc-section" id="connections" aria-labelledby="connections-title">
+        <div class="omni-doc-section__head">
+          <h2 id="connections-title">5. Connections &amp; signal types</h2>
+        </div>
+        <p class="omni-doc-lead">A connection carries one kind of information from a module output to a compatible module input. Matching the port type is as important as choosing the right module.</p>
+        <div class="omni-doc-table-wrap">
+          <table class="omni-doc-table">
+            <thead><tr><th>Signal</th><th>Colour</th><th>What it carries</th><th>Typical use</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Audio</strong></td><td><span class="omni-doc-signal omni-doc-signal--audio">AMBER</span></td><td>Sound flowing through the instrument.</td><td>Oscillator → filter → VCA → effects → output.</td></tr>
+              <tr><td><strong>CV</strong></td><td><span class="omni-doc-signal omni-doc-signal--cv">CYAN</span></td><td>Continuous control values.</td><td>Envelope or LFO → filter cutoff, pitch modulation or amplifier gain.</td></tr>
+              <tr><td><strong>Note</strong></td><td><span class="omni-doc-signal omni-doc-signal--note">GREEN</span></td><td>Note events, including pitch, velocity and gate state.</td><td>Keyboard or sequencer → oscillator, drum voice or envelope.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h3>Making a connection</h3>
+        <ul>
+          <li>Drag from an output port to a compatible input port. The editor highlights valid destinations as you connect.</li>
+          <li>You can also click an output port, then click one of its highlighted compatible inputs.</li>
+          <li>To remove a wire, select it and press Delete or Backspace.</li>
+        </ul>
+        <div class="omni-doc-callout">
+          <strong>Think in signal paths.</strong>
+          A sound source usually needs a route to <em>Audio Output</em>. A keyboard or sequencer sends note events to a playable voice; envelopes often receive the same note or gate event so they can shape amplitude or filter movement.
+        </div>
+        <p>OMNI checks port compatibility and prevents unsupported audio/CV feedback loops. If a connection is rejected, check that the output and input are intended for the same signal type.</p>
+      </section>
+
+      <section class="omni-doc-section" id="performance-midi" aria-labelledby="performance-midi-title">
+        <div class="omni-doc-section__head">
+          <h2 id="performance-midi-title">6. Performance &amp; MIDI</h2>
+        </div>
+        <p class="omni-doc-lead">The performance pane gives you a keyboard and real-time controls for playing the current patch without adding a separate instrument or audio graph.</p>
+        <div class="omni-doc-feature-grid">
+          <div><h3>Built-in keyboard</h3><p>The performance keyboard spans five octaves, C2–C7. Use the octave − / + buttons to transpose its playing range. Computer-keyboard notes are also available.</p></div>
+          <div><h3>Voice mode</h3><p>Choose MONO or POLY in the performance controls. The keyboard module also exposes its voice-mode parameter in Engine View.</p></div>
+          <div><h3>Pitch &amp; modulation</h3><p>The pitch wheel bends the played notes. The mod wheel sends modulation to modules that respond to it. Both can be controlled from the interface or a mapped MIDI controller.</p></div>
+          <div><h3>Master &amp; panic</h3><p>Adjust MASTER for the output level. PANIC sends all-notes-off behaviour to release notes that remain held.</p></div>
+        </div>
+        <h3>Connecting a MIDI controller</h3>
+        <ol>
+          <li>Connect your controller and open <em>MIDI → Request MIDI access</em>.</li>
+          <li>Grant the browser's MIDI permission when prompted. The MIDI status area reports whether a device is connected.</li>
+          <li>Open <em>MIDI → MIDI assignments…</em> or the <em>MIDI MAP</em> button to assign controller messages to supported controls.</li>
+          <li>Move a mapped hardware control and confirm that its target changes. You can edit or clear assignments in the MIDI map.</li>
+        </ol>
+        <p>Web MIDI support and device access depend on the browser and its permissions. If a controller is not listed, check the browser's MIDI permission and reconnect the device before requesting access again.</p>
+        <p>To make more room for the patch, use <em>View → Hide Performance Pane</em>. Choose <em>Show Performance Pane</em> to bring it back.</p>
+      </section>
+
+      <section class="omni-doc-section" id="recording-macros" aria-labelledby="recording-macros-title">
+        <div class="omni-doc-section__head">
+          <h2 id="recording-macros-title">7. Recording &amp; macros</h2>
+        </div>
+        <div class="omni-doc-subsection">
+          <h3>Audio recording</h3>
+          <p>Choose <em>Audio → Record audio…</em> to capture the live master output. Start audio first with <em>POWER ON</em>, begin recording, then stop the recording from the same menu. OMNI downloads a browser-supported audio recording. The available container and codec depend on the browser.</p>
+        </div>
+        <div class="omni-doc-subsection">
+          <h3>MIDI recording</h3>
+          <p>Choose <em>Audio → Record MIDI…</em> to capture performance events as a Standard MIDI File. The recorder receives note events from the live graph, including notes produced by keyboards, sequencers, clocks, arpeggiators, chord generators and note-processing modules. Incoming MIDI control data can include CC, pitch bend, channel aftertouch, polyphonic aftertouch and program changes.</p>
+          <p>Stop the recording from the same menu to export the MIDI file. Notes that remain held are closed when recording stops.</p>
+        </div>
+        <div class="omni-doc-subsection">
+          <h3>Macros</h3>
+          <p>Macros provide a single control for several numeric module parameters. A macro can be assigned to a MIDI CC so one hardware control can move several related values together. Use them for linked changes such as filter, effect and modulation amounts.</p>
+        </div>
+      </section>
+
+      <section class="omni-doc-section" id="patches" aria-labelledby="patches-title">
+        <div class="omni-doc-section__head">
+          <h2 id="patches-title">8. Patches, templates &amp; sharing</h2>
+        </div>
+        <div class="omni-doc-subsection">
+          <h3>Start from a template</h3>
+          <p>Templates are complete example patches with modules, connections and starting parameter values. Open them from the launcher with <em>TEMPLATES</em>, or from <em>File → Templates…</em> inside Engine View. They are starting points; change any module or connection after opening.</p>
+        </div>
+        <div class="omni-doc-subsection">
+          <h3>Save locally</h3>
+          <p>Use <em>File → Save patch…</em> to save the current instrument in this browser. Use the saved-patch selector in the File menu to reopen a local save. Browser-local patches are tied to the current browser profile and storage; export a JSON backup before clearing browser data or moving to another device.</p>
+        </div>
+        <div class="omni-doc-subsection">
+          <h3>Import and export</h3>
+          <ul>
+            <li><strong>Export patch JSON</strong> saves the complete patch data, including its optional front-panel layout.</li>
+            <li><strong>Import patch JSON</strong> loads a compatible OMNI patch file into the editor.</li>
+            <li><strong>Export SVG schematic</strong> produces a vector diagram of the Engine View module graph.</li>
+            <li><strong>Export library</strong> from the launcher backs up the patches currently shown in the library.</li>
+          </ul>
+        </div>
+        <div class="omni-doc-subsection">
+          <h3>Account and Community patches</h3>
+          <p>The launcher can show saves from this device, private account patches and published Community patches together. Sign in to your Overture account to use account sync and private cloud saves. Published patches are shared through the Community library and remain separate from private account saves.</p>
+        </div>
+      </section>
+
+      <section class="omni-doc-section" id="front-panel" aria-labelledby="front-panel-title">
+        <div class="omni-doc-section__head">
+          <h2 id="front-panel-title">9. Front-end View</h2>
+        </div>
+        <p class="omni-doc-lead">Front-end View is a visual studio for designing the panel a player will interact with. It is stored as part of the patch, so the front panel can travel with the sound engine.</p>
+        <div class="omni-doc-subsection">
+          <h3>The three working areas</h3>
+          <ul>
+            <li><strong>Component library:</strong> search and browse visual controls. Click an item to insert it, or drag it onto the faceplate.</li>
+            <li><strong>Faceplate canvas:</strong> position and resize controls, arrange layers and use layout guides.</li>
+            <li><strong>Inspector and layers:</strong> edit a component's Layout, Appearance and Behaviour settings; control visibility, locking and stacking order in the layer list.</li>
+          </ul>
+        </div>
+        <div class="omni-doc-subsection">
+          <h3>Available components</h3>
+          <p>The palette includes knobs, rotary encoders, sliders, dropdowns, buttons, switches, drawbars, keyboards, pitch and modulation wheels, performance pads, meters, LEDs, LCD/OLED displays, module bays, text labels and section dividers. Knobs and rotary encoders are separate control types; the duplicate Dial option is not used.</p>
+        </div>
+        <div class="omni-doc-subsection">
+          <h3>Bind a control to the engine</h3>
+          <ol>
+            <li>Select a component on the faceplate.</li>
+            <li>Open the <strong>Behaviour</strong> area of the inspector.</li>
+            <li>Choose an OMNI module first, then choose one of that module's compatible parameters.</li>
+            <li>Check the parameter range and LIVE state, then move the control while audio is running to confirm that the engine responds.</li>
+          </ol>
+          <p>Unbound visual parts do not change the sound. The panel uses the existing patch and live parameter API; it does not create another audio engine.</p>
+        </div>
+        <div class="omni-doc-subsection">
+          <h3>Layout &amp; appearance</h3>
+          <p><strong>Layout</strong> controls position and dimensions. <strong>Appearance</strong> controls surface and accent colours, legends, borders, materials, spacing, padding, corner radius, border thickness and shadow. Panel-level settings define the faceplate dimensions, finish, frame and global colours. Hardware palettes provide coordinated starting combinations, and individual colours remain editable.</p>
+        </div>
+        <div class="omni-doc-subsection">
+          <h3>Arrange the faceplate</h3>
+          <p>Use multi-selection to move or edit a group. The Arrange menu provides alignment, distribution and matched dimensions. The layer stack can hide, lock or reorder components. Rulers, grid snapping, guides, safe margins and measurements help with placement; these are editing aids rather than exported faceplate elements.</p>
+        </div>
+      </section>
+
+      <section class="omni-doc-section" id="preview-export" aria-labelledby="preview-export-title">
+        <div class="omni-doc-section__head">
+          <h2 id="preview-export-title">10. Preview, design check &amp; export</h2>
+        </div>
+        <div class="omni-doc-subsection">
+          <h3>Navigate the faceplate canvas</h3>
+          <p>Choose the Pan tool in the View group to drag the canvas, even when the pointer starts over a component. You can also drag blank canvas space, hold Space while dragging, or use the middle mouse button. Ctrl/⌘+wheel and the zoom controls zoom the faceplate. Use Fit to return the whole panel to the workspace.</p>
+        </div>
+        <div class="omni-doc-subsection">
+          <h3>Test the live panel</h3>
+          <p>Choose <strong>Test</strong> or <strong>TEST PANEL</strong> to temporarily pause layout editing and interact with the live keyboard, wheels, pads and bound controls. Exit test mode to edit the design again.</p>
+        </div>
+        <div class="omni-doc-subsection">
+          <h3>Design Check</h3>
+          <p>Design Check reports components outside the faceplate, controls that are very small, missing labels, invalid or missing engine bindings, and likely overlaps. Review its findings, then adjust the affected controls. It checks layout and bindings; it does not test audio quality or every screen size.</p>
+        </div>
+        <div class="omni-doc-subsection">
+          <h3>Preview and export formats</h3>
+          <div class="omni-doc-table-wrap">
+            <table class="omni-doc-table">
+              <thead><tr><th>Format</th><th>What it contains</th></tr></thead>
+              <tbody>
+                <tr><td><strong>SVG</strong></td><td>Scalable vector artwork of the faceplate.</td></tr>
+                <tr><td><strong>PNG</strong></td><td>Raster faceplate image at 1×, 2× or 3×.</td></tr>
+                <tr><td><strong>JPEG</strong></td><td>Flattened raster faceplate image at 1× or 2×.</td></tr>
+                <tr><td><strong>Front-panel JSON</strong></td><td>Editable panel-only layout that can be imported into another patch.</td></tr>
+                <tr><td><strong>Print sheet / PDF</strong></td><td>Opens a browser print layout. Choose “Save as PDF” in the print dialog.</td></tr>
+                <tr><td><strong>OMNI patch JSON</strong></td><td>The full instrument patch, including the optional front-panel layout.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p>The Preview window renders the faceplate inline. Rulers, grids, guides, measurements, safe margins, selections and editor handles are not part of the exported artwork.</p>
+        </div>
+        <div class="omni-doc-callout">
+          <strong>CAD note</strong>
+          SVG is the current vector interchange format. Native CAD/B-rep export, constraint solving and manufacturer-ready mechanical drawings are not implemented.
+        </div>
+        <div class="omni-doc-subsection">
+          <h3>Performance Report</h3>
+          <p>The report shows total, visible and hidden component counts, per-type counts, SVG source size and the time spent on the most recent synchronous DOM build. That timing is not audio latency, browser paint time or end-to-end interaction latency.</p>
+        </div>
+      </section>
+
+      <section class="omni-doc-section" id="shortcuts" aria-labelledby="shortcuts-title">
+        <div class="omni-doc-section__head">
+          <h2 id="shortcuts-title">11. Keyboard shortcuts</h2>
+        </div>
+        <p class="omni-doc-lead">The shortcuts below apply while the OMNI editor is active. Some browser or operating-system shortcuts may take precedence.</p>
+        <div class="omni-doc-table-wrap">
+          <table class="omni-doc-table omni-doc-shortcuts">
+            <thead><tr><th>Action</th><th>Shortcut</th></tr></thead>
+            <tbody>
+              <tr><td>Play computer-keyboard notes</td><td><kbd>A–;</kbd> and <kbd>W</kbd> / <kbd>E</kbd> / <kbd>T</kbd> / <kbd>Y</kbd> / <kbd>U</kbd> / <kbd>O</kbd> / <kbd>P</kbd></td></tr>
+              <tr><td>Pitch bend up / down</td><td><kbd>Tab</kbd> / <kbd>Left Shift</kbd> (release to centre)</td></tr>
+              <tr><td>Mod wheel</td><td><kbd>↑</kbd> / <kbd>↓</kbd> (hold)</td></tr>
+              <tr><td>Keyboard octave</td><td><kbd>−</kbd> / <kbd>+</kbd></td></tr>
+              <tr><td>Undo / redo</td><td><kbd>Ctrl/⌘ Z</kbd> / <kbd>Ctrl/⌘ Shift Z</kbd></td></tr>
+              <tr><td>Select all / copy / paste</td><td><kbd>Ctrl/⌘ A</kbd> / <kbd>C</kbd> / <kbd>V</kbd></td></tr>
+              <tr><td>Duplicate / delete selection</td><td><kbd>Ctrl/⌘ D</kbd> / <kbd>Delete</kbd></td></tr>
+              <tr><td>Canvas navigation</td><td>Drag to pan · Scroll to zoom · Fit in the View menu</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>For the full in-app list, open <em>Help → Keyboard shortcuts</em>.</p>
+      </section>
+
+      <section class="omni-doc-section" id="troubleshooting" aria-labelledby="troubleshooting-title">
+        <div class="omni-doc-section__head">
+          <h2 id="troubleshooting-title">12. Troubleshooting &amp; common questions</h2>
+        </div>
+        <div class="omni-doc-faq">
+          <details>
+            <summary>Why is there no sound?</summary>
+            <p>Press <strong>POWER ON</strong> to start the audio engine. Then check that a note source reaches a playable voice, that the voice's audio output has a path to <strong>Audio Output</strong>, and that the output level is not at zero. A voice may also need a gate or envelope connection to open its amplifier.</p>
+          </details>
+          <details>
+            <summary>Why can't I connect two ports?</summary>
+            <p>The two ports may carry different signal types, or the connection may create an unsupported feedback loop. Try another compatible input and check the port colours: amber for audio, cyan for CV and green for note events.</p>
+          </details>
+          <details>
+            <summary>Why is my MIDI controller not listed?</summary>
+            <p>Check that the browser supports Web MIDI, that the page has permission, and that the controller is connected. Use <em>MIDI → Request MIDI access</em> to refresh the connection status.</p>
+          </details>
+          <details>
+            <summary>Why doesn't a front-panel control change the sound?</summary>
+            <p>Visual controls are not automatically connected to the engine. Select the component and bind it in Behaviour by choosing a module and one of its compatible parameters. Keyboard, wheel and pad components use the shared performance engine.</p>
+          </details>
+          <details>
+            <summary>Why didn't my printed PDF appear?</summary>
+            <p>The print sheet opens in a new browser window. Allow pop-ups for the site, then use the browser's print dialog and choose “Save as PDF”.</p>
+          </details>
+          <details>
+            <summary>Can I export the faceplate as a CAD model?</summary>
+            <p>Not currently. Export SVG for vector artwork, or use the editable panel JSON to preserve the layout. SVG is not a 3D CAD model.</p>
+          </details>
+          <details>
+            <summary>Does OMNI save my patches to my account automatically?</summary>
+            <p>Browser-local saves stay in the current browser profile. Sign in from the launcher to use account and Community patch features, and keep a JSON export when you need a portable backup.</p>
+          </details>
+        </div>
+        <div class="omni-docs-end-links">
+          <a class="community-button community-button--primary" href="/omni">RETURN TO OMNI</a>
+          <a class="community-button community-button--quiet" href="/omni?editor=1">OPEN ENGINE VIEW</a>
+        </div>
+      </section>
+    </article>
+  </div>
+</main>
+
+<footer class="site-footer omni-docs-footer">
+  <div class="footer-top">
+    <a class="footer-brand" href="#top" aria-label="Back to top">
+      <img src="/ui/Logos/OvertureLogo.png" alt="" width="34" height="34">
+      <span>OVERTURE <b>INSTRUMENTS</b></span>
+    </a>
+    <button class="footer-contact" type="button" id="contact-open">Contact</button>
+    <a class="footer-github" href="https://github.com/ForeverBoundless/Overture-Instruments" target="_blank" rel="noopener noreferrer">
+      <span>Explore the open-source codebase</span><b aria-hidden="true">↗</b>
+    </a>
+  </div>
+  <div class="footer-bottom">
+    <span>© <span id="copyright-year">2026</span> Overture Instruments</span>
+    <span class="footer-disclaimer">Independent, unofficial project. Not affiliated with, endorsed by, or sponsored by any manufacturer represented here. All trademarks and brand names belong to their respective owners.</span>
+    <a href="#top" class="back-to-top">BACK TO TOP ↑</a>
+  </div>
+</footer>
+
+<div class="contact-modal" id="contact-modal" hidden>
+  <div class="contact-modal__backdrop" data-contact-close></div>
+  <form class="contact-modal__panel" id="contact-form" role="dialog" aria-modal="true" aria-labelledby="contact-title">
+    <div class="contact-modal__head">
+      <h2 id="contact-title">Get in touch</h2>
+      <button type="button" class="contact-modal__close" aria-label="Close" data-contact-close>×</button>
+    </div>
+    <input type="text" name="_honey" tabindex="-1" autocomplete="off" style="display:none">
+    <label class="contact-field"><span>Name <em>(optional)</em></span><input type="text" name="name" autocomplete="name"></label>
+    <label class="contact-field"><span>Subject</span><input type="text" name="subject" required></label>
+    <div class="contact-field">
+      <span>Message</span>
+      <div class="contact-toolbar" aria-label="Formatting">
+        <button type="button" data-command="bold"><b>B</b></button>
+        <button type="button" data-command="italic"><i>I</i></button>
+        <button type="button" data-command="code">&lt;/&gt;</button>
+        <button type="button" data-command="heading">H</button>
+        <button type="button" data-command="bullets">•</button>
+        <button type="button" data-command="numbered">1.</button>
+        <button type="button" data-command="quote">"</button>
+        <button type="button" data-command="link">🔗</button>
+      </div>
+      <div class="contact-editor__body" contenteditable="true" role="textbox" aria-label="Message" aria-multiline="true" data-placeholder="Write your message…"></div>
+      <textarea name="body" class="contact-editor__source" tabindex="-1" aria-hidden="true"></textarea>
+    </div>
+    <p class="contact-status" role="status" aria-live="polite"></p>
+    <div class="contact-modal__actions">
+      <button type="button" class="contact-cancel" data-contact-close>Cancel</button>
+      <button type="submit" class="button button--primary">Send email</button>
+    </div>
+  </form>
+</div>
+</body>
+</html>
