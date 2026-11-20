@@ -26,11 +26,11 @@ test('OMNI chord interval sliders expose the complete ±32-semitone range', asyn
   assert.ok((await readFile(new URL('../js/omni/graph.js', import.meta.url), 'utf8')).includes(`from './modules.js?v=20261118-organ-drawbar-r1'`));
   assert.ok(worker.includes(`/js/omni/graph.js?v=20261119-front-panel-r2`));
   assert.ok(worker.includes(`/js/omni/modules.js?v=20261118-organ-drawbar-r1`));
-  assert.ok(page.includes('omni.css?v=20261119-front-panel-r2'));
-  assert.ok(page.includes('omni-launcher.js?v=20261119-front-panel-r2'));
+  assert.ok(page.includes('omni.css?v=20261119-front-panel-r3'));
+  assert.ok(page.includes('omni-launcher.js?v=20261119-front-panel-r3'));
   assert.match(worker, /overture-shell-v\d+/);
-  assert.ok(worker.includes('/css/omni.css?v=20261119-front-panel-r2'));
-  assert.ok(worker.includes('/js/omni-launcher.js?v=20261119-front-panel-r2'));
+  assert.ok(worker.includes('/css/omni.css?v=20261119-front-panel-r3'));
+  assert.ok(worker.includes('/js/omni-launcher.js?v=20261119-front-panel-r3'));
 });
 
 test('OMNI exposes recording, searchable modules and editing shortcuts', async () => {
@@ -105,7 +105,7 @@ test('OMNI performance deck keeps octave controls in the keyboard header and giv
   assert.match(page, /omni-launcher\.js\?v=20261119-front-panel-r2/);
   assert.match(worker, /overture-shell-v\d+/);
   assert.match(worker, /omni\.css\?v=20261119-front-panel-r2/);
-  assert.ok(worker.includes('/js/omni-launcher.js?v=20261119-front-panel-r2'));
+  assert.ok(worker.includes('/js/omni-launcher.js?v=20261119-front-panel-r3'));
 });
 
 
@@ -262,7 +262,7 @@ test('OMNI exposes native SEM and Mellotron instrument modules and refreshes off
   assert.match(worker, /overture-shell-v\d+/);
   assert.match(worker, /OberheimEightVoiceProcessor\.js/);
   assert.match(worker, /MellotronProcessor\.js/);
-  assert.ok(worker.includes('/js/omni-launcher.js?v=20261119-front-panel-r2'));
+  assert.ok(worker.includes('/js/omni-launcher.js?v=20261119-front-panel-r3'));
 });
 
 
@@ -352,6 +352,23 @@ test('OMNI front-panel workspaces and precision design tools are integrated', as
   assert.match(editor, /colorField\('Panel colour'/);
   assert.match(editor, /selectField\('Material'/);
   assert.match(editor, /exportSVG/);
+  assert.match(editor, /exportPNG/);
+  assert.match(editor, /exportJPEG/);
+  assert.match(editor, /exportJSON/);
+  assert.match(editor, /printPDF/);
+  assert.match(editor, /openPreview/);
+  assert.match(editor, /runDesignCheck/);
+  assert.match(editor, /toggleTestMode/);
+  assert.match(editor, /showPerformanceReport/);
+  assert.match(editor, /renderComponentLayout/);
+  assert.match(editor, /renderComponentAppearance/);
+  assert.match(editor, /renderComponentBehavior/);
+  assert.match(source, /frontOnlyGroup\('Insert'\)/);
+  assert.match(source, /frontOnlyGroup\('Arrange'\)/);
+  assert.match(source, /frontOnlyGroup\('Inspect'\)/);
+  assert.match(source, /frontOnlyGroup\('Export'\)/);
+  assert.match(source, /Export raster · PNG · 3×/);
+  assert.match(source, /Test live front-panel controls/);
   assert.match(editor, /setParam\(/);
   assert.match(graph, /frontPanel/);
   assert.match(graph, /measurements/);
@@ -364,11 +381,13 @@ test('OMNI front-panel workspaces and precision design tools are integrated', as
   assert.match(css, /html\[data-theme="light"\].*ofp-library/);
   assert.match(page, /omni\.css\?v=20261119-front-panel-r2/);
   assert.match(launcher, /omni\.js\?v=20261119-front-panel-r2/);
-  assert.match(worker, /overture-shell-v136/);
+  assert.match(worker, /overture-shell-v137/);
   assert.match(worker, /front-panel\.js\?v=20261119-front-panel-r2/);
   assert.match(worker, /graph\.js\?v=20261119-front-panel-r2/);
   assert.match(readme, /Front-end View/);
   assert.match(architecture, /OMNI front-panel studio/);
+  assert.match(readme, /Front-Panel Studio guide/);
+  assert.match(architecture, /Test mode temporarily disables layout editing/);
 });
 
 test('OMNI front-panel validation remains backwards-compatible and sanitizes imported layouts', async () => {
