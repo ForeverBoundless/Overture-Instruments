@@ -16,6 +16,10 @@ Run `npm test` before opening a pull request. It runs three groups of checks:
 
 The automated suite cannot verify physical MIDI devices, microphone permissions, audible glitches, or browser-specific latency. For audio-facing changes, manually check the affected instrument, note-on and note-off behaviour, a saved preset, and a reload in Chrome or Edge. For the Mellotron, listen for clean note starts and releases and check that tape-style playback ends as expected. For the Eight Voice, check voice allocation, tuning, filter modes, and note release. For visual changes, inspect both light and dark themes and a narrow viewport.
 
+## Interface copy and number formatting
+
+Use ordinary decimal numbers for visible numbering and counts. Write `1`, not `01` or `001`, for section numbers, steps, labels, experiment titles, counters and preset or index displays. Do not zero-pad numbers for visual styling with `padStart(..., '0')` or CSS `decimal-leading-zero`. Preserve leading zeroes only when they are part of an external value or format that must be reproduced exactly.
+
 ## Working on OMNI
 
 ### Documentation is part of every OMNI change
