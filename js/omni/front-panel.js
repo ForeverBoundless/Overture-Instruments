@@ -335,16 +335,7 @@ export class FrontPanelEditor {
     toggle(view, 'Safe area', 'showSafeMargin', 'Show or hide the safe margin');
     toggle(view, 'Guides', 'showGuides', 'Show or hide alignment guides');
     toggle(view, 'Smart guides', 'showSmartGuides', 'Show or hide smart alignment feedback');
-    this.measureButton = button(view, 'Measure distance', 'Measure a distance on the faceplate', () => {
-      this.tool = this.tool === 'measure' ? 'select' : 'measure';
-      this.measureButton.setAttribute('aria-pressed', String(this.tool === 'measure'));
-      this.viewport.classList.toggle('is-measuring', this.tool === 'measure');
-      if (this.tool === 'measure') {
-        this.panMode = false;
-        this.panModeButton.setAttribute('aria-pressed', 'false');
-        this.selectToolButton.setAttribute('aria-pressed', 'false');
-      }
-    }, this.tool === 'measure');
+    this.measureButton = button(view, 'Measure distance', 'Measure a distance on the faceplate', () => this.toggleMeasureTool(), this.tool === 'measure');
     button(view, 'Add vertical guide', 'Place a vertical alignment guide', () => this.startGuide('x'));
     button(view, 'Add horizontal guide', 'Place a horizontal alignment guide', () => this.startGuide('y'));
     button(view, 'Clear measurements', 'Remove all saved measurements', () => { this.state.measurements = []; this.render(); this.commit(); });
@@ -398,6 +389,19 @@ export class FrontPanelEditor {
     this.faceplate.querySelectorAll('.ofp-component').forEach((node) => node.classList.remove('is-selected'));
     this.renderInspector();
     this.renderLayers();
+  }
+
+  toggleMeasureTool() {
+    this.tool = this.tool === 'measure' ? 'select' : 'measure';
+    this.measureButton?.setAttribute('aria-pressed', String(this.tool === 'measure'));
+    this.viewport.classList.toggle('is-measuring', this.tool === 'measure');
+    if (this.tool === 'measure') {
+      this.panMode = false;
+      this.panModeButton?.setAttribute('aria-pressed', 'false');
+      this.selectToolButton?.setAttribute('aria-pressed', 'false');
+    } else {
+      this.selectToolButton?.setAttribute('aria-pressed', 'true');
+    }
   }
 
   startGuide(axis) {
