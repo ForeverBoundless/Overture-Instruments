@@ -1647,7 +1647,7 @@ html[data-theme="light"] #omni-root .omni-organ-drawbar__value {color:#087f9f}
    OMNI Front-end Studio — precision tools and hardware surfaces
    ============================================================ */
 .omni-view-switch{display:flex;align-items:center;gap:3px;flex:0 0 auto;padding:3px;border:1px solid var(--omni-border-strong);border-radius:9px;background:rgba(0,0,0,.16)}
-.omni-view-switch__button{min-height:31px;padding:0 12px;border:0;border-radius:6px;color:var(--omni-muted);background:transparent;font:600 9px/1 var(--font-mono);letter-spacing:.07em;cursor:pointer;white-space:nowrap}
+.omni-view-switch__button{min-height:31px;padding:0 12px;border:0;border-radius:6px;color:var(--omni-muted);background:transparent;font:600 9px/1 'Inter Variable','Inter','Segoe UI',sans-serif;letter-spacing:.07em;cursor:pointer;white-space:nowrap}
 .omni-view-switch__button[aria-pressed="true"]{color:#15202a;background:linear-gradient(135deg,#9ceaff,#5bc9e7);box-shadow:0 2px 12px rgba(75,193,224,.18)}
 #omni-root>.omni-main[hidden],#omni-root>.omni-perf[hidden],#omni-root>.omni-front-panel[hidden]{display:none!important}
 #omni-root>.omni-front-panel{min-height:0;overflow:hidden;background:var(--bg);color:var(--omni-text);display:flex;flex-direction:column}
