@@ -93,9 +93,13 @@
     if (!parent) {
       if (toggle.parentElement !== document.body) document.body.appendChild(toggle);
       toggle.classList.add('site-theme-toggle--floating');
+      toggle.classList.remove('site-theme-toggle--omni');
       return;
     }
-    if (toggle.parentElement !== parent) parent.appendChild(toggle);
+    const account = appBar?.querySelector('.omni-account');
+    if (account) parent.insertBefore(toggle, account);
+    else if (toggle.parentElement !== parent) parent.appendChild(toggle);
+    toggle.classList.toggle('site-theme-toggle--omni', Boolean(appBar));
     toggle.classList.remove('site-theme-toggle--floating');
   };
 
