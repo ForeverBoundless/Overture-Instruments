@@ -2399,3 +2399,10 @@ html[data-theme="light"] #omni-root .ofp-component__title {text-shadow:none}
 
 /* Status stays at the far right in both engine and front-end workspace modes. */
 #omni-root .omni-status--command {text-align:right!important;justify-content:flex-end!important}
+
+#omni-root dialog.ofp-preview-dialog .ofp-preview-dialog__artwork {
+  display:block;width:auto;height:auto;max-width:100%;max-height:72vh;object-fit:contain;
+  filter:drop-shadow(0 16px 30px rgba(0,0,0,.5));
+}
+#omni-root dialog.ofp-preview-dialog .ofp-preview-dialog__stage {width:100%;min-width:0}
+html[data-theme="light"] #omni-root dialog.ofp-preview-dialog .ofp-preview-dialog__artwork {filter:drop-shadow(0 12px 24px rgba(39,58,77,.2))}
