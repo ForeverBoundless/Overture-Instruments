@@ -2400,12 +2400,95 @@ html[data-theme="light"] #omni-root .ofp-component__title {text-shadow:none}
 /* Status stays at the far right in both engine and front-end workspace modes. */
 #omni-root .omni-status--command {text-align:right!important;justify-content:flex-end!important}
 
-#omni-root dialog.ofp-preview-dialog .ofp-preview-dialog__artwork {
-  display:block;width:auto;height:auto;max-width:100%;max-height:72vh;object-fit:contain;
-  filter:drop-shadow(0 16px 30px rgba(0,0,0,.5));
+/* The preview uses the same real controls as the editor, with all editing chrome removed. */
+#omni-root dialog.ofp-preview-dialog {
+  width:min(1120px,calc(100vw - 32px));
+  max-height:calc(100dvh - 36px);
 }
-#omni-root dialog.ofp-preview-dialog .ofp-preview-dialog__stage {width:100%;min-width:0}
-html[data-theme="light"] #omni-root dialog.ofp-preview-dialog .ofp-preview-dialog__artwork {filter:drop-shadow(0 12px 24px rgba(39,58,77,.2))}
+#omni-root dialog.ofp-preview-dialog[open] {
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+#omni-root dialog.ofp-preview-dialog .ofp-preview-dialog__header {
+  flex:0 0 auto;
+  min-height:62px;
+}
+#omni-root .ofp-preview-dialog__title {min-width:0}
+#omni-root .ofp-preview-dialog__title strong {
+  overflow:hidden;
+  max-width:min(52vw,620px);
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+#omni-root .ofp-preview-dialog__state {
+  display:flex;
+  align-items:center;
+  gap:7px;
+  margin-left:auto;
+  color:#a9e8c0;
+  font:600 8px var(--font-mono);
+  letter-spacing:.1em;
+  white-space:nowrap;
+}
+#omni-root .ofp-preview-dialog__state-dot {
+  width:6px;height:6px;flex:none;border-radius:50%;
+  background:#82e6a8;box-shadow:0 0 9px rgba(130,230,168,.6);
+}
+#omni-root dialog.ofp-preview-dialog .ofp-preview-dialog__stage {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex:1 1 auto;
+  width:100%;
+  min-width:0;
+  min-height:240px;
+  max-height:calc(100dvh - 150px);
+  padding:24px;
+  overflow:auto;
+}
+#omni-root .ofp-preview-dialog__frame {
+  position:relative;
+  flex:0 0 auto;
+  min-width:0;
+}
+#omni-root .ofp-preview-faceplate {
+  position:absolute;
+  left:0;
+  top:0;
+  transform-origin:top left;
+  overflow:hidden;
+  pointer-events:auto;
+}
+#omni-root .ofp-preview-faceplate .ofp-component {cursor:default}
+#omni-root .ofp-preview-faceplate .ofp-component__title {cursor:default}
+#omni-root .ofp-preview-faceplate .ofp-component::after,
+#omni-root .ofp-preview-faceplate .ofp-component__resize {display:none!important}
+#omni-root dialog.ofp-preview-dialog .ofp-preview-dialog__footer {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  flex:0 0 auto;
+  min-height:37px;
+  padding:7px 16px;
+  border-top:1px solid var(--omni-border);
+  color:var(--omni-muted);
+  font:9px var(--font-body);
+}
+html[data-theme="light"] #omni-root .ofp-preview-dialog__state {color:#24774e}
+html[data-theme="light"] #omni-root .ofp-preview-dialog__state-dot {background:#29975f;box-shadow:0 0 8px rgba(41,151,95,.35)}
+html[data-theme="light"] #omni-root dialog.ofp-preview-dialog .ofp-preview-dialog__footer {
+  border-color:rgba(43,59,78,.14);
+  color:#5b6e80;
+}
+@media(max-width:620px) {
+  #omni-root dialog.ofp-preview-dialog {width:calc(100vw - 16px);max-height:calc(100dvh - 16px)}
+  #omni-root dialog.ofp-preview-dialog .ofp-preview-dialog__header {flex-wrap:wrap;gap:9px;padding:11px}
+  #omni-root .ofp-preview-dialog__state {margin-left:0}
+  #omni-root dialog.ofp-preview-dialog .ofp-preview-dialog__stage {min-height:200px;max-height:calc(100dvh - 170px);padding:12px}
+  #omni-root dialog.ofp-preview-dialog .ofp-preview-dialog__footer {align-items:flex-start;flex-direction:column;gap:4px;padding:8px 11px}
+}
 
 #omni-root .ofp-viewport.is-pan-tool {cursor:grab}
 #omni-root .ofp-viewport.is-pan-tool .ofp-component {cursor:grab}
