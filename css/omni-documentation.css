@@ -17,6 +17,10 @@ body.omni-docs-page {
   background:
     radial-gradient(ellipse at 50% -10%, rgba(30,112,192,.16), transparent 43%),
     var(--bg);
+  --amber: var(--cyan);
+  --amber-bright: var(--cyan);
+  --green: var(--cyan);
+  --oi-button-hover-background: rgba(125,228,255,.075);
   font: 14px/1.65 var(--font-body);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -36,106 +40,29 @@ body.omni-docs-page {
   margin: 0 auto;
   padding: clamp(126px, 13vw, 166px) 0 88px;
 }
-.omni-docs-hero {
-  position: relative;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(150px, 220px);
-  align-items: end;
-  gap: 34px;
-  overflow: hidden;
-  padding: clamp(28px, 4.7vw, 58px);
-  border: 1px solid var(--oi-panel-border);
-  border-radius: 20px;
-  background: var(--card-bg);
-  box-shadow: var(--card-shadow);
+.omni-docs-intro {
+  max-width: 850px;
+  margin: 0 0 24px;
 }
-.omni-docs-hero::before {
-  position: absolute;
-  top: -150px;
-  right: -110px;
-  width: 520px;
-  height: 420px;
-  content: "";
-  pointer-events: none;
-  background: radial-gradient(ellipse, rgba(39,143,219,.16), transparent 68%);
-}
-.omni-docs-hero__copy,
-.omni-docs-hero__facts { position: relative; z-index: 1; min-width: 0; }
-.omni-docs-breadcrumb {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 9px;
-  margin-bottom: 30px;
-  color: var(--faint);
-  font: 9px/1.4 var(--font-mono);
-  letter-spacing: .1em;
-}
-.omni-docs-breadcrumb a {
-  color: var(--cyan);
-  text-decoration: none;
-}
-.omni-docs-breadcrumb a:hover { text-decoration: underline; text-underline-offset: 4px; }
-.omni-docs-kicker,
-.omni-docs-nav__label,
-.omni-doc-section__number {
-  color: var(--cyan);
-  font: 9px/1.4 var(--font-mono);
-  letter-spacing: .15em;
-  text-transform: uppercase;
-}
-.omni-docs-kicker { margin: 0 0 10px; }
-.omni-docs-hero h1 {
+.omni-docs-intro h1 {
   margin: 0;
   color: var(--ink);
-  font: 550 clamp(38px, 6.1vw, 72px)/.99 var(--font-display);
-  letter-spacing: -.075em;
+  font: 520 clamp(30px, 4.2vw, 48px)/1.08 var(--font-display);
+  letter-spacing: -.055em;
 }
-.omni-docs-hero h1 em {
-  color: var(--amber);
-  font-style: normal;
-}
-.omni-docs-hero__summary {
-  max-width: 690px;
-  margin: 22px 0 0;
+.omni-docs-intro p {
+  max-width: 760px;
+  margin: 10px 0 0;
   color: var(--muted);
-  font-size: clamp(13px, 1.25vw, 15px);
-  line-height: 1.8;
-}
-.omni-docs-hero__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 9px;
-  margin-top: 27px;
-}
-.omni-docs-hero__facts {
-  display: grid;
-  gap: 0;
-  border-left: 1px solid var(--line);
-}
-.omni-docs-hero__facts > div {
-  display: grid;
-  gap: 4px;
-  padding: 15px 0 15px 23px;
-  border-bottom: 1px solid var(--line);
-}
-.omni-docs-hero__facts > div:last-child { border-bottom: 0; }
-.omni-docs-hero__facts strong {
-  color: var(--ink);
-  font: 450 28px/1 var(--font-display);
-  letter-spacing: -.06em;
-}
-.omni-docs-hero__facts span {
-  color: var(--faint);
-  font: 8px/1.4 var(--font-mono);
-  letter-spacing: .1em;
+  font-size: 13px;
+  line-height: 1.75;
 }
 .omni-docs-layout {
   display: grid;
-  grid-template-columns: 238px minmax(0, 1fr);
+  grid-template-columns: minmax(190px, 238px) minmax(0, 1fr);
   align-items: start;
   gap: 24px;
-  margin-top: 25px;
+  margin-top: 0;
 }
 .omni-docs-nav {
   position: sticky;
@@ -193,15 +120,18 @@ body.omni-docs-page {
   text-transform: uppercase;
 }
 .omni-docs-nav__foot a {
-  color: var(--amber);
+  color: var(--cyan);
   font-size: 10px;
   font-weight: 600;
   text-decoration: none;
 }
 .omni-docs-nav__foot a:hover { text-decoration: underline; text-underline-offset: 3px; }
-.omni-docs-content { display: grid; min-width: 0; gap: 15px; }
+.omni-docs-content { display: grid; grid-template-columns: minmax(0, 1fr); width: 100%; min-width: 0; gap: 15px; }
 .omni-doc-section {
+  display: block;
+  width: 100%;
   min-width: 0;
+  box-sizing: border-box;
   padding: clamp(22px, 3vw, 34px);
   border: 1px solid var(--oi-panel-border);
   border-radius: 14px;
@@ -224,14 +154,17 @@ body.omni-docs-page {
   letter-spacing: -.015em;
 }
 .omni-doc-section p {
+  width: 100%;
   max-width: 900px;
   margin: 9px 0;
+  word-break: normal;
+  overflow-wrap: normal;
   color: var(--muted);
   font-size: 12px;
   line-height: 1.82;
 }
 .omni-doc-section strong { color: var(--ink); font-weight: 650; }
-.omni-doc-section em { color: var(--amber); font-style: normal; }
+.omni-doc-section em { color: var(--cyan); font-style: normal; }
 .omni-doc-lead {
   margin: 0 0 17px !important;
   color: var(--ink) !important;
@@ -248,7 +181,7 @@ body.omni-docs-page {
   font-size: 12px;
   line-height: 1.75;
 }
-.omni-doc-section li::marker { color: var(--amber); }
+.omni-doc-section li::marker { color: var(--cyan); }
 .omni-doc-steps {
   counter-reset: omni-steps;
   margin: 18px 0 20px !important;
@@ -271,7 +204,7 @@ body.omni-docs-page {
   border-radius: 8px;
   color: var(--cyan);
   background: var(--oi-button-background);
-  content: counter(omni-steps, decimal-leading-zero);
+  content: counter(omni-steps, decimal);
   font: 9px/1 var(--font-mono);
 }
 .omni-doc-steps li strong,
@@ -293,7 +226,7 @@ body.omni-docs-page {
 .omni-doc-note { color: var(--faint) !important; font-size: 10px !important; }
 .omni-doc-inline-links { display: flex; flex-wrap: wrap; gap: 17px; margin-top: 16px; }
 .omni-doc-inline-links a {
-  color: var(--amber);
+  color: var(--cyan);
   font-size: 11px;
   font-weight: 600;
   text-decoration: none;
@@ -374,9 +307,9 @@ body.omni-docs-page {
   font: 8px/1.2 var(--font-mono);
   letter-spacing: .07em;
 }
-.omni-doc-signal--audio { color: var(--amber); }
+.omni-doc-signal--audio { color: var(--cyan); }
 .omni-doc-signal--cv { color: var(--cyan); }
-.omni-doc-signal--note { color: var(--green); }
+.omni-doc-signal--note { color: var(--cyan); }
 .omni-doc-shortcuts td:last-child {
   color: var(--ink);
   font-family: var(--font-mono);
@@ -429,7 +362,9 @@ html[data-theme="light"] body.omni-docs-page {
     radial-gradient(ellipse at 92% 16%, rgba(58,143,177,.09), transparent 32%),
     var(--bg);
 }
-html[data-theme="light"] .omni-docs-hero::before { opacity: .45; }
+html[data-theme="light"] body.omni-docs-page {
+  --oi-button-hover-background: rgba(8,127,159,.08);
+}
 html[data-theme="light"] .omni-doc-callout { background: rgba(255,255,255,.48); }
 html[data-theme="light"] .omni-doc-module-card,
 html[data-theme="light"] .omni-doc-menu-grid > div,
@@ -438,21 +373,13 @@ html[data-theme="light"] .omni-doc-faq details {
   background: rgba(255,255,255,.42);
 }
 @media (max-width: 1000px) {
-  .omni-docs-hero { grid-template-columns: minmax(0, 1fr) 180px; gap: 22px; }
-  .omni-docs-layout { grid-template-columns: 205px minmax(0, 1fr); gap: 16px; }
+  .omni-docs-layout { grid-template-columns: minmax(175px, 205px) minmax(0, 1fr); gap: 16px; }
   .omni-docs-nav { padding-inline: 8px; }
   .omni-docs-nav__links a { gap: 7px; padding-inline: 8px; }
 }
 @media (max-width: 820px) {
   .omni-docs-shell { width: calc(100% - 42px); padding-top: 112px; padding-bottom: 70px; }
-  .omni-docs-hero { grid-template-columns: minmax(0, 1fr); }
-  .omni-docs-hero__facts {
-    grid-template-columns: repeat(3, minmax(0,1fr));
-    border-top: 1px solid var(--line);
-    border-left: 0;
-  }
-  .omni-docs-hero__facts > div { padding: 12px 10px 0 0; border-right: 1px solid var(--line); border-bottom: 0; }
-  .omni-docs-hero__facts > div:last-child { border-right: 0; }
+  .omni-docs-intro { margin-bottom: 20px; }
   .omni-docs-layout { grid-template-columns: minmax(0,1fr); }
   .omni-docs-nav {
     position: sticky;
@@ -475,11 +402,7 @@ html[data-theme="light"] .omni-doc-faq details {
 }
 @media (max-width: 560px) {
   .omni-docs-shell { width: calc(100% - 32px); padding-top: 100px; }
-  .omni-docs-hero { padding: 25px 21px; border-radius: 15px; }
-  .omni-docs-breadcrumb { margin-bottom: 24px; }
-  .omni-docs-hero__summary { margin-top: 16px; }
-  .omni-docs-hero__facts strong { font-size: 23px; }
-  .omni-docs-hero__facts span { font-size: 7px; letter-spacing: .06em; }
+  .omni-docs-intro h1 { font-size: clamp(28px, 8vw, 38px); }
   .omni-doc-section { padding: 22px 18px; }
   .omni-doc-menu-grid,
   .omni-doc-module-grid,
