@@ -322,7 +322,7 @@ class OmniApp {
     const frontAction = (menu, label, fn, title = label) => action(menu, label, fn, title);
     const insertMenu = frontOnlyGroup('Insert');
     [
-      ['Knob','knob'],['Dial','dial'],['Rotary encoder','encoder'],['Fader','slider'],['Dropdown','dropdown'],
+      ['Knob','knob'],['Rotary encoder','encoder'],['Fader','slider'],['Dropdown','dropdown'],
       ['Push button','button'],['Toggle switch','switch'],['Nine drawbars','drawbars'],['Keyboard','keyboard'],
       ['Pitch wheel','pitchwheel'],['Mod wheel','modwheel'],['Performance pad','pad'],['Module bay','module'],
       ['LCD display','screen'],['OLED display','oled'],['LED indicator','led'],['Level meter','meter'],
