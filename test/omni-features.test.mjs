@@ -149,10 +149,16 @@ test('OMNI launcher links to a complete, theme-aware documentation page', async 
   assert.match(css, /--oi-community-button-background:\s*linear-gradient/);
   assert.match(css, /omni-docs-page \.contact-modal \.button--primary/);
   assert.match(css, /omni-docs-page \.site-header \.header-account:hover/);
-  assert.doesNotMatch(css, /body\.omni-docs-page\s*\{[^}]*--(?:amber|amber-bright|green):\s*var\(--cyan\)/s);
-  assert.match(css, /\.omni-doc-signal--audio\s*\{\s*color:\s*var\(--amber\)/);
+  assert.match(css, /body\.omni-docs-page\s*\{[^}]*--amber:\s*var\(--cyan\)/s);
+  assert.match(css, /body\.omni-docs-page\s*\{[^}]*--amber-bright:\s*var\(--cyan\)/s);
+  assert.match(css, /body\.omni-docs-page\s*\{[^}]*--green:\s*var\(--cyan\)/s);
+  assert.match(css, /--omni-signal-audio:\s*#ffb75e/i);
+  assert.match(css, /--omni-signal-note:\s*#82e6a8/i);
+  assert.match(css, /--omni-signal-audio:\s*#ad5f00/i);
+  assert.match(css, /--omni-signal-note:\s*#167747/i);
+  assert.match(css, /\.omni-doc-signal--audio\s*\{\s*color:\s*var\(--omni-signal-audio\)/);
   assert.match(css, /\.omni-doc-signal--cv\s*\{\s*color:\s*var\(--cyan\)/);
-  assert.match(css, /\.omni-doc-signal--note\s*\{\s*color:\s*var\(--green\)/);
+  assert.match(css, /\.omni-doc-signal--note\s*\{\s*color:\s*var\(--omni-signal-note\)/);
   for (const section of ['overview','quick-start','engine-view','modules','connections','performance-midi','recording-macros','patches','front-panel','preview-export','shortcuts','troubleshooting']) {
     assert.ok(page.includes('id="' + section + '"'), 'missing documentation section: ' + section);
     assert.ok(page.includes('href="#' + section + '"'), 'missing section navigation link: ' + section);
