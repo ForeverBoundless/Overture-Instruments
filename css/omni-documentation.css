@@ -18,6 +18,11 @@ body.omni-docs-page {
     radial-gradient(ellipse at 50% -10%, rgba(30,112,192,.16), transparent 43%),
     var(--bg);
   --oi-button-hover-background: rgba(125,228,255,.075);
+  --amber: var(--cyan);
+  --amber-bright: var(--cyan);
+  --green: var(--cyan);
+  --omni-signal-audio: #ffb75e;
+  --omni-signal-note: #82e6a8;
   --oi-primary-border: var(--cyan);
   --oi-primary-ink: #082230;
   --oi-primary-background: linear-gradient(135deg, #d9f7ff, #83dcf7);
@@ -326,9 +331,9 @@ body.omni-docs-page {
   font: 8px/1.2 var(--font-mono);
   letter-spacing: .07em;
 }
-.omni-doc-signal--audio { color: var(--amber); }
+.omni-doc-signal--audio { color: var(--omni-signal-audio); }
 .omni-doc-signal--cv { color: var(--cyan); }
-.omni-doc-signal--note { color: var(--green); }
+.omni-doc-signal--note { color: var(--omni-signal-note); }
 .omni-doc-shortcuts td:last-child {
   color: var(--ink);
   font-family: var(--font-mono);
@@ -377,6 +382,8 @@ body.omni-docs-page {
 .omni-docs-footer { position: relative; z-index: 1; }
 html[data-theme="light"] body.omni-docs-page {
   --oi-button-hover-background: rgba(8,127,159,.08);
+  --omni-signal-audio: #ad5f00;
+  --omni-signal-note: #167747;
   --oi-primary-border: #087f9f;
   --oi-primary-ink: #073440;
   --oi-primary-background: linear-gradient(135deg, #dff5fb, #a8e0ed);
