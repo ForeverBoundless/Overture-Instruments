@@ -3454,26 +3454,177 @@ html[data-theme="light"] #omni-root .ofp-binding-status {color:#12647b;backgroun
 }
 
 
-/* In Front-end View the editor owns its tools. Keep the global status line,
-   but suppress the engine command bar and the legacy duplicate panel menus. */
-#omni-root .omni-app-header.is-front-view .omni-commandbar > .omni-menu,
-#omni-root .omni-app-header.is-front-view .omni-commandbar > .omni-midi-map-button {
-  display:none!important;
-}
-#omni-root .omni-app-header.is-front-view .omni-commandbar {
+/* Both OMNI workspaces share one compact menu/status row. Menus stay left,
+   the live message stays right, and MIDI Map is an engine-only peer control. */
+#omni-root .omni-commandbar {
   display:flex!important;
-  min-height:29px;
-  justify-content:flex-end;
-  padding:3px 16px;
+  flex-flow:row nowrap;
+  align-items:center;
+  gap:2px;
+  min-width:0;
+  min-height:37px;
+  padding:4px clamp(10px,1.4vw,18px);
+  overflow:visible;
   border-top:1px solid var(--omni-border);
+  background:rgba(8,11,16,.28);
 }
-#omni-root .omni-app-header.is-front-view .omni-commandbar > .omni-status {
+html[data-theme="light"] #omni-root .omni-commandbar {
+  border-color:rgba(43,59,78,.12);
+  background:rgba(244,247,250,.85);
+}
+#omni-root .omni-commandbar > .omni-menu {
+  position:relative;
+  z-index:1;
+  order:0!important;
+  flex:0 0 auto;
+  min-width:0;
+}
+#omni-root .omni-commandbar .omni-menu--front-only {
+  order:0!important;
+}
+#omni-root .omni-commandbar .omni-menu__trigger {
+  display:flex;
+  align-items:center;
+  gap:7px;
+  min-height:27px;
+  padding:0 8px;
+  border:1px solid transparent;
+  border-radius:4px;
+  color:var(--omni-muted);
+  background:transparent;
+  font:500 9px/1 var(--font-body);
+  letter-spacing:0;
+  white-space:nowrap;
+}
+#omni-root .omni-commandbar .omni-menu--front-only .omni-menu__trigger {
+  color:var(--omni-muted);
+  border-color:transparent;
+  background:transparent;
+}
+#omni-root .omni-commandbar .omni-menu__trigger::after {
+  width:5px;
+  height:5px;
+  border-width:1px;
+}
+#omni-root .omni-commandbar .omni-menu__trigger:hover,
+#omni-root .omni-commandbar .omni-menu__trigger:focus-visible,
+#omni-root .omni-commandbar .omni-menu[open] > .omni-menu__trigger {
+  border-color:var(--omni-border-strong);
+  color:var(--omni-text);
+  background:rgba(255,255,255,.045);
+  outline:none;
+}
+html[data-theme="light"] #omni-root .omni-commandbar .omni-menu__trigger:hover,
+html[data-theme="light"] #omni-root .omni-commandbar .omni-menu__trigger:focus-visible,
+html[data-theme="light"] #omni-root .omni-commandbar .omni-menu[open] > .omni-menu__trigger {
+  color:#19384b;
+  background:rgba(8,127,159,.06);
+}
+#omni-root .omni-commandbar > .omni-midi-map-button {
+  order:0!important;
+  flex:0 0 auto;
+  min-height:27px;
+  margin:0 0 0 4px;
+  padding:0 9px;
+  border:1px solid rgba(125,228,255,.25);
+  border-radius:4px;
+  color:#c5d5e5;
+  background:rgba(125,228,255,.045);
+  font:600 8px/1 var(--font-body);
+  letter-spacing:.045em;
+  white-space:nowrap;
+  transform:none;
+}
+#omni-root .omni-commandbar > .omni-midi-map-button:hover {
+  border-color:rgba(125,228,255,.52);
+  color:#f1f8ff;
+  background:rgba(125,228,255,.1);
+  box-shadow:none;
+  transform:none;
+}
+html[data-theme="light"] #omni-root .omni-commandbar > .omni-midi-map-button {
+  border-color:rgba(8,127,159,.24);
+  color:#344b61;
+  background:rgba(8,127,159,.045);
+}
+html[data-theme="light"] #omni-root .omni-commandbar > .omni-midi-map-button:hover {
+  border-color:rgba(8,127,159,.45);
+  color:#173b52;
+  background:rgba(8,127,159,.09);
+}
+#omni-root .omni-commandbar > .omni-status {
   display:flex!important;
-  width:auto;
-  max-width:min(620px,100%);
+  flex:0 1 auto;
+  align-items:center;
+  justify-content:flex-end!important;
+  min-width:100px;
+  max-width:min(35vw,440px);
   margin:0 0 0 auto!important;
+  padding:2px 3px 2px 12px;
+  color:var(--omni-muted);
+  font:9px/1.35 var(--font-body);
   text-align:right!important;
-  justify-content:flex-end;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+#omni-root .omni-commandbar > .omni-status::before {
+  flex:0 0 5px;
+  order:2;
+  margin:0 0 1px 9px;
+}
+#omni-root .omni-commandbar .omni-front-only-command[hidden],
+#omni-root .omni-commandbar .omni-menu--front-only[hidden],
+#omni-root .omni-commandbar .omni-midi-map-button[hidden] {display:none!important}
+#omni-root .omni-commandbar .omni-menu__panel {
+  top:calc(100% + 5px);
+  max-height:min(70vh,560px);
+  z-index:60;
+}
+#omni-root .omni-commandbar .omni-menu[open] {z-index:55}
+#omni-root .omni-commandbar .omni-menu__item.omni-tb {
+  min-height:32px;
+  font:500 10px/1.2 var(--font-body);
+  letter-spacing:0;
+  text-transform:none;
+}
+#omni-root .omni-app-header.is-front-view .omni-commandbar > .omni-menu,
+#omni-root .omni-app-header:not(.is-front-view) .omni-commandbar > .omni-menu:not(.omni-menu--front-only) {
+  display:block;
+}
+@media(max-width:1050px) {
+  #omni-root .omni-commandbar > .omni-status {
+    min-width:84px;
+    max-width:24vw;
+    font-size:8px;
+  }
+}
+@media(max-width:760px) {
+  #omni-root .omni-commandbar {
+    flex-wrap:wrap;
+    row-gap:3px;
+    min-height:0;
+    padding:5px 9px;
+  }
+  #omni-root .omni-commandbar > .omni-status {
+    flex:1 0 100%;
+    min-width:0;
+    max-width:none;
+    padding:3px 3px 1px;
+  }
+}
+@media(max-width:420px) {
+  #omni-root .omni-commandbar .omni-menu__trigger {
+    min-height:25px;
+    padding-inline:6px;
+    font-size:8px;
+  }
+  #omni-root .omni-commandbar {gap:1px}
+  #omni-root .omni-commandbar > .omni-midi-map-button {
+    min-height:25px;
+    padding-inline:7px;
+    font-size:7px;
+  }
 }
 #omni-root .ofp-toolbar-menu__panel {
   max-height:min(70vh,560px);
