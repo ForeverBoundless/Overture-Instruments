@@ -23,7 +23,7 @@ test('OMNI chord interval sliders expose the complete ±32-semitone range', asyn
   assert.ok(css.includes('.omni-param__bounds'));
   assert.ok(source.includes(`'./omni/modules.js?v=20261118-organ-drawbar-r1'`));
   assert.ok(source.includes(`'./omni/graph.js?v=20261119-front-panel-r2'`));
-  assert.ok((await readFile(new URL('../js/omni/graph.js', import.meta.url), 'utf8')).includes(`from './modules.js?v=20261118-organ-drawbar-r1'`));
+  assert.ok((await readFile(new URL('../js/omni/graph.js', import.meta.url), 'utf8')).includes(`from './modules.js?v=20261117-omni-module-expansion-r3'`));
   assert.ok(worker.includes(`/js/omni/graph.js?v=20261119-front-panel-r2`));
   assert.ok(worker.includes(`/js/omni/modules.js?v=20261118-organ-drawbar-r1`));
   assert.ok(page.includes('omni.css?v=20261119-front-panel-r2'));
@@ -255,7 +255,7 @@ test('OMNI exposes native SEM and Mellotron instrument modules and refreshes off
   assert.match(mellotron, /this\.scheduled\[0\]\.frame <= currentFrame \+ i/);
   assert.match(mellotron, /this\.p\.release/);
   assert.match(app, /20261117-omni-module-expansion-r3/);
-  assert.match(graph, /20261118-organ-drawbar-r1/);
+  assert.match(graph, /20261117-omni-module-expansion-r3/);
   assert.match(templates, /SEM Warm Ensemble/);
   assert.match(templates, /Mellotron Choir/);
   assert.match(page, /omni-launcher\.js\?v=20261119-front-panel-r2/);
