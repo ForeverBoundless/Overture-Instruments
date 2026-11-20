@@ -1483,52 +1483,144 @@ export class FrontPanelEditor {
   }
 
   renderComponentBehavior(component) {
+    const modules = this.app.patch.modules
+      .map((module) => ({ module, definition: MODULES[module.type] }))
+      .filter((item) => item.definition);
+    const numericParameters = (module) => {
+      const definition = MODULES[module.type];
+      return (definition?.params || []).filter((parameter) =>
+        Number.isFinite(Number(parameter.min)) &&
+        Number.isFinite(Number(parameter.max)) &&
+        Number(parameter.max) > Number(parameter.min)
+      );
+    };
+
     if (component.type === 'module') {
-      const modules = [['', 'Unassigned module']];
-      this.app.patch.modules.forEach((module) => modules.push([module.id, MODULES[module.type]?.name + ' · ' + module.id]));
-      this.selectField('Connected module', component.bind?.moduleId || '', modules, (value) => {
+      const options = [['', 'Choose an OMNI module…']];
+      modules.forEach(({ module, definition }) => options.push([module.id, definition.name + ' · ' + module.id]));
+      this.selectField('Connected module', component.bind?.moduleId || '', options, (value) => {
         component.bind = value ? { moduleId: value } : null;
-        this.render(); this.commit();
+        this.render();
+        this.commit();
       });
-    } else if (['knob','dial','encoder','slider','dropdown','switch','meter','drawbars','button'].includes(component.type)) {
-      const bindings = [['', 'Not connected']];
-      this.app.patch.modules.forEach((module) => {
-        const definition = MODULES[module.type];
-        if (!definition) return;
-        if (component.type === 'drawbars' && !definition.params.some((parameter) => parameter.key === 'drawbar1')) return;
-        definition.params.forEach((parameter) => {
-          if (component.type === 'dropdown' && !parameter.options) return;
-          bindings.push([module.id + '::' + parameter.key, definition.name + ' · ' + parameter.label + ' (' + module.id + ')']);
+      make('p', 'ofp-field-note', this.inspectorBody, 'A module bay identifies a live module on the faceplate. Audio routing remains in Engine View.');
+      return;
+    }
+
+    const numericTypes = ['knob', 'dial', 'encoder', 'slider', 'switch', 'meter', 'button'];
+    const isDrawbars = component.type === 'drawbars';
+    const isDropdown = component.type === 'dropdown';
+    const canBind = numericTypes.includes(component.type) || isDropdown || isDrawbars;
+
+    if (canBind) {
+      const parametersFor = (moduleId) => {
+        const selected = modules.find((item) => item.module.id === moduleId);
+        if (!selected) return [];
+        const params = selected.definition.params || [];
+        if (isDrawbars) {
+          return params.some((parameter) => parameter.key === 'drawbar1')
+            ? [{ key: 'drawbar1', label: 'Nine drawbars', parameter: params.find((parameter) => parameter.key === 'drawbar1') }]
+            : [];
+        }
+        if (isDropdown) {
+          return params.filter((parameter) => Array.isArray(parameter.options))
+            .map((parameter) => ({ key: parameter.key, label: parameter.label, parameter }));
+        }
+        return numericParameters(selected.module)
+          .map((parameter) => ({ key: parameter.key, label: parameter.label, parameter }));
+      };
+
+      const eligible = modules.filter(({ module }) => parametersFor(module.id).length > 0);
+      const currentModuleId = component.bind?.moduleId || '';
+      const selectedModuleId = eligible.some(({ module }) => module.id === currentModuleId) ? currentModuleId : '';
+      const moduleOptions = [['', 'Choose a module…'], ...eligible.map(({ module, definition }) => [module.id, definition.name + ' · ' + module.id])];
+      this.selectField('OMNI module', selectedModuleId, moduleOptions, (value) => {
+        if (!value) {
+          component.bind = null;
+          if (component.type === 'button') component.action = 'none';
+        } else {
+          const first = parametersFor(value)[0];
+          component.bind = isDrawbars ? { moduleId: value } : { moduleId: value, paramKey: first?.key || '' };
+          if (component.type === 'button') component.action = 'toggle';
+        }
+        this.render();
+        this.commit();
+      });
+
+      if (selectedModuleId && !isDrawbars) {
+        const parameters = parametersFor(selectedModuleId);
+        const currentKey = component.bind?.paramKey || '';
+        const parameterOptions = parameters.map((item) => [item.key, item.label]);
+        this.selectField('Module parameter', currentKey, parameterOptions, (value) => {
+          component.bind = value ? { moduleId: selectedModuleId, paramKey: value } : null;
+          if (component.type === 'button') component.action = value ? 'toggle' : 'none';
+          this.render();
+          this.commit();
         });
-      });
-      const current = component.type === 'drawbars' ? component.bind?.moduleId || '' : component.bind ? component.bind.moduleId + '::' + component.bind.paramKey : '';
-      this.selectField('Engine parameter', current, bindings, (value) => {
-        if (!value) component.bind = null;
-        else if (component.type === 'drawbars') component.bind = { moduleId: value.split('::')[0] };
-        else component.bind = { moduleId: value.split('::')[0], paramKey: value.split('::')[1] };
-        this.render(); this.commit();
-      });
-      if (component.type === 'drawbars') make('p', 'ofp-field-note', this.inspectorBody, 'Connect to a tonewheel organ module with nine drawbar parameters.');
+        const selected = parameters.find((item) => item.key === currentKey);
+        if (selected && !isDropdown) {
+          const range = selected.parameter;
+          const rangeReadout = make('div', 'ofp-binding-range', this.inspectorBody);
+          make('span', '', rangeReadout, 'ENGINE RANGE');
+          make('strong', '', rangeReadout, String(range.min) + ' – ' + String(range.max));
+          make('span', '', rangeReadout, 'Step ' + (range.step ?? 0.01) + (range.log ? ' · logarithmic' : ''));
+        }
+      } else if (selectedModuleId && isDrawbars) {
+        make('p', 'ofp-field-note', this.inspectorBody, 'All nine drawbars bind to drawbar1–drawbar9 on this organ module.');
+      }
+
+      if (!eligible.length) {
+        make('p', 'ofp-field-note', this.inspectorBody, isDropdown
+          ? 'Add an OMNI module with a parameter that offers discrete options.'
+          : 'Add an OMNI module with numeric parameters first. Then choose the module and the parameter you want this control to change.');
+      } else if (!selectedModuleId) {
+        make('p', 'ofp-field-note', this.inspectorBody, 'Choose an OMNI module, then choose one of its parameters. Moving this control will update that module in the live sound engine.');
+      }
     }
+
     if (component.type === 'button') {
-      this.selectField('Button action', component.action || 'none', [['none','No action'],['panic','All notes off']], (value) => { component.action = value; this.commit(); });
+      this.selectField('Button action', component.action || (component.bind?.paramKey ? 'toggle' : 'none'), [
+        ['none', 'No action'],
+        ['panic', 'All notes off'],
+        ['toggle', 'Toggle bound parameter'],
+      ], (value) => {
+        component.action = value;
+        if (value === 'panic' || value === 'none') component.bind = null;
+        this.render();
+        this.commit();
+      });
     }
-    if (component.type === 'pad') this.inputField('MIDI note', component.note ?? 60, 'number', (value) => { component.note = clamp(value, 0, 127); this.render(); this.commit(); });
-    if (['screen','oled','label','section'].includes(component.type)) {
+
+    if (component.type === 'pad') {
+      this.inputField('MIDI note', component.note ?? 60, 'number', (value) => {
+        component.note = clamp(value, 0, 127);
+        this.render();
+        this.commit();
+      });
+    }
+    if (['screen', 'oled', 'label', 'section'].includes(component.type)) {
       const textarea = make('textarea', 'ofp-textarea', this.inspectorBody);
       textarea.value = component.text || '';
       textarea.rows = 4;
-      textarea.addEventListener('change', () => { component.text = textarea.value.slice(0, 240); this.render(); this.commit(); });
+      textarea.addEventListener('change', () => {
+        component.text = textarea.value.slice(0, 240);
+        this.render();
+        this.commit();
+      });
       this.field('Text / display content', textarea);
     }
-    if (!['module','knob','dial','encoder','slider','dropdown','switch','meter','drawbars','button','pad','screen','oled','label','section'].includes(component.type)) {
-      make('p','ofp-field-note',this.inspectorBody,'This control is a performance surface. Its MIDI and engine response follow the shared OMNI performance settings.');
-    }
-    const bindingState = component.bind?.moduleId ? 'Connected to ' + (this.getModule(component.bind.moduleId)?.id || 'a missing module') : 'No engine binding';
-    make('p','ofp-binding-status',this.inspectorBody,bindingState);
+    const bound = this.getParameter(component);
+    const bindingState = bound
+      ? 'LIVE · ' + bound.definition.name + ' / ' + bound.parameter.label
+      : component.bind?.moduleId
+        ? 'Module or parameter is missing.'
+        : canBind
+          ? 'NOT CONNECTED · choose a module and parameter above.'
+          : 'PERFORMANCE CONTROL · uses the shared OMNI engine.';
+    make('p', 'ofp-binding-status' + (bound ? ' is-connected' : ''), this.inspectorBody, bindingState);
   }
 
-    renderPanelSettings() {
+  renderPanelSettings() {
     this.inputField('Panel width (' + this.state.unit + ')', this.unitValue(this.state.width), 'number', (value) => {
       this.state.width = clamp(this.unitPixels(value), 800, 1800);
       this.state.components.forEach((item) => { item.w = Math.min(item.w, this.state.width); item.x = clamp(item.x, 0, this.state.width - item.w); });
