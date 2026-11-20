@@ -127,7 +127,7 @@ class OmniApp {
     catch { this.performanceVisible = true; }
     if (savedWorkspace && typeof savedWorkspace.performanceVisible === 'boolean' && !this.communitySource) this.performanceVisible = savedWorkspace.performanceVisible;
     const keyboardModule = this.patch.modules.find((module) => module.type === 'keyboard');
-    this.workspaceView = savedWorkspace?.workspaceView === 'front' ? 'front' : 'engine';
+    this.workspaceView = 'engine';
     this.voiceMode = keyboardModule ? (Number(keyboardModule.params?.mode) === 1 ? 'mono' : 'poly') : (savedWorkspace?.voiceMode === 'mono' ? 'mono' : 'poly');
     this.octaveShift = Number.isFinite(Number(savedWorkspace?.octaveShift)) ? Math.min(3, Math.max(-3, Number(savedWorkspace.octaveShift))) : 0;
     this.keyboardPointerNotes = new Map();
@@ -568,11 +568,11 @@ class OmniApp {
     const keyboardMeta = el('div', 'omni-key-group__head', keyboardGroup);
     const keyboardIdentity = el('div', 'omni-key-group__identity', keyboardMeta);
     el('span', 'omni-key-group__title', keyboardIdentity, 'BUILT-IN KEYBOARD');
-    el('span', 'omni-key-group__hint', keyboardIdentity, 'C2 – C6');
+    el('span', 'omni-key-group__hint', keyboardIdentity, 'C2 – C7');
     const kbWrap = el('div', 'omni-keys', keyboardGroup);
     this.keyboard = new Keyboard({
       startOctave: 2,
-      octaves: 4,
+      octaves: 5,
       onNoteOn: (note, velocity) => {
         const midi = noteToMidi(note) + this.octaveShift * 12;
         this.keyboardPointerNotes.set(note, midi);
