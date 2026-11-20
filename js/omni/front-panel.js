@@ -555,6 +555,22 @@ export class FrontPanelEditor {
     return Number(component.value ?? 0.5);
   }
 
+  rangeRatio(range, value) {
+    const number = Number(value);
+    if (range.log && range.min > 0 && range.max > range.min) {
+      return clamp((Math.log(Math.max(range.min, number)) - Math.log(range.min)) / (Math.log(range.max) - Math.log(range.min)), 0, 1);
+    }
+    return range.max > range.min ? clamp((number - range.min) / (range.max - range.min), 0, 1) : 0;
+  }
+
+  toInputValue(value, range) {
+    return range.log && range.min > 0 ? Math.log(Math.max(range.min, Number(value))) : Number(value);
+  }
+
+  fromInputValue(value, range) {
+    return range.log && range.min > 0 ? Math.exp(Number(value)) : Number(value);
+  }
+
   getRange(component, key = null) {
     const bound = this.getParameter(component, key);
     if (bound) {
@@ -572,14 +588,14 @@ export class FrontPanelEditor {
     const range = this.getRange(component, key);
     const input = make('input', className);
     input.type = 'range';
-    input.min = String(range.min);
-    input.max = String(range.max);
-    input.step = String(range.step);
-    input.value = String(clamp(this.getValue(component, key), range.min, range.max));
+    input.min = String(this.toInputValue(range.min, range));
+    input.max = String(this.toInputValue(range.max, range));
+    input.step = String(range.log ? 0.001 : range.step);
+    input.value = String(this.toInputValue(clamp(this.getValue(component, key), range.min, range.max), range));
     input.setAttribute('aria-label', component.label + (key ? ' ' + key : ''));
     input.dataset.componentId = component.id;
     input.addEventListener('input', () => {
-      const value = Number(input.value);
+      const value = this.fromInputValue(Number(input.value), range);
       if (component.type === 'pitchwheel') {
         this.app.pitchBend = value;
         this.app.live?.setPitchBend(value * 2);
@@ -615,7 +631,7 @@ export class FrontPanelEditor {
     const node = this.faceplate.querySelector('[data-component-id="' + component.id + '"]');
     if (!node) return;
     const range = this.getRange(component, key);
-    const ratio = range.max > range.min ? clamp((value - range.min) / (range.max - range.min), 0, 1) : 0;
+    const ratio = this.rangeRatio(range, value);
     node.style.setProperty('--ofp-value', String(ratio));
     const output = node.querySelector('[data-ofp-role="value"]');
     if (output) output.textContent = range.log ? Math.round(value).toLocaleString() : (Number(value).toFixed(range.step >= 1 ? 0 : 2));
@@ -669,7 +685,7 @@ export class FrontPanelEditor {
       control.appendChild(input);
       const range = this.getRange(component);
       const value = this.getValue(component);
-      const ratio = range.max > range.min ? clamp((value - range.min) / (range.max - range.min), 0, 1) : 0;
+      const ratio = this.rangeRatio(range, value);
       ring.style.setProperty('--ofp-angle', String(-135 + ratio * 270) + 'deg');
       const output = make('output', 'ofp-component__value', node, range.log ? String(Math.round(value)) : value.toFixed(range.step >= 1 ? 0 : 2));
       output.dataset.ofpRole = 'value';
@@ -1228,7 +1244,9 @@ export class FrontPanelEditor {
         const input = node?.querySelector('input[type="range"]');
         if (!input) return;
         const value = this.getValue(component);
-        input.value = String(clamp(value, Number(input.min), Number(input.max)));
+        const range = this.getRange(component);
+        const inputValue = this.toInputValue(clamp(value, range.min, range.max), range);
+        input.value = String(clamp(inputValue, Number(input.min), Number(input.max)));
         this.updateComponentVisual(component, null, value);
       } else if (component.type === 'dropdown') {
         const node = this.faceplate.querySelector('[data-component-id="' + component.id + '"]');
@@ -1282,7 +1300,7 @@ export class FrontPanelEditor {
       '<text x="' + x + '" y="' + y + '" fill="' + color + '" font-family="Arial,sans-serif" font-size="' + size + '" text-anchor="' + anchor + '" ' + extra + '>' + esc(value) + '</text>';
     const valueRatio = (component,key=null) => {
       const range=this.getRange(component,key), value=this.getValue(component,key);
-      return range.max>range.min ? clamp((value-range.min)/(range.max-range.min),0,1) : 0;
+      return this.rangeRatio(range,value);
     };
     const defs = [
       '<pattern id="ofp-brushed" width="4" height="4" patternUnits="userSpaceOnUse"><path d="M0 1H4 M0 3H4" stroke="#ffffff" stroke-opacity=".12" stroke-width=".5"/></pattern>',
