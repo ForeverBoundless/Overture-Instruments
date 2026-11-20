@@ -1274,6 +1274,12 @@ export class FrontPanelEditor {
     component[key] = value;
     const node = this.faceplate.querySelector('[data-component-id="' + component.id + '"]');
     if (node) {
+      const variables = {
+        margin: '--ofp-clearance', padding: '--ofp-padding', gap: '--ofp-gap',
+        radius: '--ofp-radius', fontSize: '--ofp-font-size', borderWidth: '--ofp-border-width',
+      };
+      if (variables[key]) node.style.setProperty(variables[key], value + 'px');
+      if (key === 'shadow') node.dataset.shadow = value;
       if (key === 'x') node.style.left = value + 'px';
       if (key === 'y') node.style.top = value + 'px';
       if (key === 'w') node.style.width = value + 'px';
