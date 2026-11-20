@@ -216,10 +216,13 @@ body.omni-docs-page {
   display: grid;
   grid-template-columns: 34px minmax(0, 1fr);
   align-items: start;
-  gap: 13px;
+  column-gap: 13px;
+  row-gap: 2px;
   counter-increment: omni-steps;
 }
 .omni-doc-steps li::before {
+  grid-column: 1;
+  grid-row: 1 / span 2;
   display: grid;
   width: 30px;
   height: 30px;
@@ -233,8 +236,17 @@ body.omni-docs-page {
 }
 .omni-doc-steps li strong,
 .omni-doc-steps li span { display: block; }
-.omni-doc-steps li strong { padding-top: 2px; }
-.omni-doc-steps li span { margin-top: 2px; color: var(--muted); }
+.omni-doc-steps li strong {
+  grid-column: 2;
+  grid-row: 1;
+  padding-top: 2px;
+}
+.omni-doc-steps li span {
+  grid-column: 2;
+  grid-row: 2;
+  margin-top: 2px;
+  color: var(--muted);
+}
 .omni-doc-callout {
   margin: 19px 0;
   padding: 15px 17px;
