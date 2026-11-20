@@ -172,6 +172,319 @@ export class FrontPanelEditor {
     this.renderInspector();
   }
 
+
+  buildDesignTools() {
+    const tools = make('div', 'ofp-design-tools', this.stagePanel);
+    const toggle = (label, key) => {
+      const button = make('button', 'ofp-tool-toggle', tools, label);
+      button.type = 'button';
+      button.setAttribute('aria-pressed', String(Boolean(this.state[key])));
+      button.addEventListener('click', () => {
+        this.state[key] = !this.state[key];
+        button.setAttribute('aria-pressed', String(this.state[key]));
+        this.render();
+        this.commit();
+      });
+      return button;
+    };
+    toggle('RULERS', 'showRulers');
+    toggle('GRID', 'showGrid');
+    toggle('GUIDES', 'showGuides');
+    toggle('SMART', 'showSmartGuides');
+    toggle('SAFE AREA', 'showSafeMargin');
+    this.snapButton = toggle('SNAP', 'snap');
+    this.measureButton = make('button', 'ofp-tool-toggle', tools, 'MEASURE');
+    this.measureButton.type = 'button';
+    this.measureButton.setAttribute('aria-pressed', 'false');
+    this.measureButton.addEventListener('click', () => {
+      this.tool = this.tool === 'measure' ? 'select' : 'measure';
+      this.measureButton.setAttribute('aria-pressed', String(this.tool === 'measure'));
+      this.viewport.classList.toggle('is-measuring', this.tool === 'measure');
+    });
+    const unit = make('select', 'ofp-tool-select', tools);
+    [['px','PX'],['mm','MM'],['in','IN']].forEach(([value,label]) => {
+      const option = make('option', '', unit, label); option.value = value;
+    });
+    unit.value = this.state.unit || 'mm';
+    unit.setAttribute('aria-label', 'Ruler measurement units');
+    unit.addEventListener('change', () => { this.state.unit = unit.value; this.renderRulers(); this.renderInspector(); this.commit(); });
+    const addGuide = (axis, label) => {
+      const button = make('button', 'ofp-tool-toggle', tools, label);
+      button.type = 'button';
+      button.addEventListener('click', () => {
+        this.pendingGuideAxis = axis;
+        this.tool = 'guide';
+        this.viewport.classList.add('is-placing-guide');
+        this.app.msg('Click the faceplate to place a ' + (axis === 'x' ? 'vertical' : 'horizontal') + ' guide.');
+      });
+    };
+    addGuide('x', '+ V GUIDE');
+    addGuide('y', '+ H GUIDE');
+    const clearMeasures = make('button', 'ofp-tool-toggle', tools, 'CLEAR MEASURE');
+    clearMeasures.type = 'button';
+    clearMeasures.addEventListener('click', () => { this.state.measurements = []; this.render(); this.commit(); });
+    this.stagePanel.insertBefore(tools, this.horizontalRuler);
+    const align = make('div', 'ofp-align-tools', this.stagePanel);
+    make('span', 'ofp-align-tools__label', align, 'ALIGN');
+    [['left','LEFT'],['centerX','CENTRE X'],['right','RIGHT'],['top','TOP'],['centerY','CENTRE Y'],['bottom','BOTTOM'],['distributeX','SPACE X']].forEach(([mode,label]) => {
+      const button = make('button', 'ofp-tool-toggle ofp-tool-toggle--compact', align, label);
+      button.type = 'button'; button.title = 'Align selected controls: ' + label.toLowerCase();
+      button.addEventListener('click', () => this.alignSelection(mode));
+    });
+    this.stagePanel.insertBefore(align, this.horizontalRuler);
+  }
+
+  buildLayerPanel() {
+    this.layersPanel = make('section', 'ofp-layers-panel', this.library);
+    const head = make('div', 'ofp-panel-heading', this.layersPanel);
+    make('span', 'ofp-panel-heading__eyebrow', head, 'LAYERS');
+    make('strong', '', head, 'Faceplate stack');
+    this.layersList = make('div', 'ofp-layers-list', this.layersPanel);
+    this.renderLayers();
+  }
+
+  renderLayers() {
+    if (!this.layersList) return;
+    this.layersList.replaceChildren();
+    [...this.state.components].reverse().forEach((component) => {
+      const row = make('div', 'ofp-layer-row', this.layersList);
+      row.classList.toggle('is-selected', this.selectedIds?.has(component.id) || component.id === this.selectedId);
+      const select = make('button', 'ofp-layer-name', row, component.label || component.type);
+      select.type = 'button'; select.title = component.type + ' · ' + component.id;
+      select.addEventListener('click', (event) => this.select(component.id, event.shiftKey || event.ctrlKey || event.metaKey));
+      const visibility = make('button', 'ofp-layer-icon', row, component.hidden ? '○' : '●');
+      visibility.type = 'button'; visibility.title = component.hidden ? 'Show layer' : 'Hide layer';
+      visibility.setAttribute('aria-label', visibility.title);
+      visibility.addEventListener('click', () => { component.hidden = !component.hidden; this.render(); this.commit(); });
+      const lock = make('button', 'ofp-layer-icon', row, component.locked ? '▣' : '◇');
+      lock.type = 'button'; lock.title = component.locked ? 'Unlock layer' : 'Lock layer';
+      lock.setAttribute('aria-label', lock.title);
+      lock.addEventListener('click', () => { component.locked = !component.locked; this.render(); this.commit(); });
+      const up = make('button', 'ofp-layer-icon', row, '↑'); up.type = 'button'; up.title = 'Bring forward';
+      up.addEventListener('click', () => this.moveLayer(component.id, 1));
+      const down = make('button', 'ofp-layer-icon', row, '↓'); down.type = 'button'; down.title = 'Send backward';
+      down.addEventListener('click', () => this.moveLayer(component.id, -1));
+    });
+    if (!this.state.components.length) make('p', 'ofp-help', this.layersList, 'Your panel has no components yet.');
+  }
+
+  moveLayer(componentId, direction) {
+    const index = this.state.components.findIndex((item) => item.id === componentId);
+    const next = index + direction;
+    if (index < 0 || next < 0 || next >= this.state.components.length) return;
+    const [item] = this.state.components.splice(index, 1);
+    this.state.components.splice(next, 0, item);
+    this.render();
+    this.commit();
+  }
+
+  alignSelection(mode) {
+    const ids = this.selectedIds?.size ? this.selectedIds : (this.selectedId ? new Set([this.selectedId]) : new Set());
+    const items = this.state.components.filter((item) => ids.has(item.id) && !item.locked);
+    if (items.length < 2) { this.app.msg('Select at least two unlocked layers to align them.'); return; }
+    const left = Math.min(...items.map((item) => item.x));
+    const right = Math.max(...items.map((item) => item.x + item.w));
+    const top = Math.min(...items.map((item) => item.y));
+    const bottom = Math.max(...items.map((item) => item.y + item.h));
+    if (mode === 'left') items.forEach((item) => { item.x = left; });
+    if (mode === 'right') items.forEach((item) => { item.x = right - item.w; });
+    if (mode === 'centerX') items.forEach((item) => { item.x = (left + right - item.w) / 2; });
+    if (mode === 'top') items.forEach((item) => { item.y = top; });
+    if (mode === 'bottom') items.forEach((item) => { item.y = bottom - item.h; });
+    if (mode === 'centerY') items.forEach((item) => { item.y = (top + bottom - item.h) / 2; });
+    if (mode === 'distributeX' && items.length > 2) {
+      const ordered = [...items].sort((a,b) => a.x-b.x);
+      const occupied = ordered.reduce((sum,item)=>sum+item.w,0);
+      const gap = (right-left-occupied)/(ordered.length-1);
+      let cursor = left;
+      ordered.forEach((item)=>{item.x=cursor;cursor+=item.w+gap;});
+    }
+    this.render();
+    this.commit();
+  }
+
+  bindEditorShortcuts() {
+    this.el.addEventListener('keydown', (event) => {
+      if (this.el.hidden) return;
+      const editable = event.target.closest('input,textarea,select,[contenteditable="true"]');
+      if (editable) return;
+      const command = event.ctrlKey || event.metaKey;
+      if (command && event.key.toLowerCase() === 'd') { event.preventDefault(); event.stopPropagation(); this.duplicateSelected(); }
+      else if (command && event.key.toLowerCase() === 'z') { event.preventDefault(); event.stopPropagation(); event.shiftKey ? this.app.redo() : this.app.undo(); }
+      else if (event.key === 'Delete' || event.key === 'Backspace') { event.preventDefault(); event.stopPropagation(); this.removeSelected(); }
+      else if (event.key.startsWith('Arrow') && this.selectedId) {
+        const item = this.getComponent(this.selectedId); if (!item || item.locked) return;
+        const step = event.shiftKey ? 10 : 1;
+        if (event.key === 'ArrowLeft') item.x = Math.max(0, item.x-step);
+        if (event.key === 'ArrowRight') item.x = Math.min(this.state.width-item.w, item.x+step);
+        if (event.key === 'ArrowUp') item.y = Math.max(0, item.y-step);
+        if (event.key === 'ArrowDown') item.y = Math.min(this.state.height-item.h, item.y+step);
+        const node = this.faceplate.querySelector('[data-component-id="' + item.id + '"]');
+        if (node) { node.style.left=item.x+'px'; node.style.top=item.y+'px'; }
+        this.commit(); this.renderRulers(); event.preventDefault(); event.stopPropagation();
+      }
+    });
+  }
+
+  unitValue(px) {
+    if (this.state.unit === 'mm') return px / 3.7795275591;
+    if (this.state.unit === 'in') return px / 96;
+    return px;
+  }
+
+  unitText(px) {
+    const value = this.unitValue(px);
+    const digits = this.state.unit === 'px' ? 0 : 1;
+    return value.toFixed(digits) + ' ' + (this.state.unit || 'mm');
+  }
+
+  toPanelPoint(event) {
+    const rect = this.faceplate.getBoundingClientRect();
+    const scale = this.currentScale || 1;
+    return {
+      x: clamp((event.clientX - rect.left) / scale, 0, this.state.width),
+      y: clamp((event.clientY - rect.top) / scale, 0, this.state.height),
+    };
+  }
+
+  renderRulers() {
+    if (!this.horizontalRuler || !this.verticalRuler) return;
+    this.horizontalRuler.hidden = !this.state.showRulers;
+    this.verticalRuler.hidden = !this.state.showRulers;
+    if (!this.state.showRulers) return;
+    this.horizontalRuler.replaceChildren();
+    this.verticalRuler.replaceChildren();
+    const xStep = this.state.width > 1500 ? 200 : 100;
+    const yStep = this.state.height > 650 ? 100 : 50;
+    for (let x=0; x<=this.state.width; x+=xStep) {
+      const tick = make('span','ofp-ruler__tick',this.horizontalRuler,this.unitText(x));
+      tick.style.left=(x/this.state.width*100)+'%';
+    }
+    for (let y=0; y<=this.state.height; y+=yStep) {
+      const tick = make('span','ofp-ruler__tick',this.verticalRuler,this.unitText(y));
+      tick.style.top=(y/this.state.height*100)+'%';
+    }
+  }
+
+  renderDesignOverlays() {
+    const overlays = make('div','ofp-overlays',this.faceplate);
+    if (this.state.showGrid) {
+      const grid = make('div','ofp-grid-overlay',overlays);
+      const size = Math.max(4, Number(this.state.gridSize) || 28);
+      grid.style.backgroundSize = size+'px '+size+'px';
+    }
+    if (this.state.showSafeMargin) {
+      const safe = make('div','ofp-safe-margin',overlays);
+      const margin = clamp(this.state.safeMargin ?? 24,0,120);
+      safe.style.inset = margin+'px';
+    }
+    if (this.state.showGuides) {
+      (this.state.guides || []).forEach((guide) => {
+        const line = make('div','ofp-guide-line ofp-guide-line--'+guide.axis,overlays);
+        line.style.setProperty('--ofp-guide-color',safeColor(guide.color,'#7de4ff'));
+        if (guide.axis === 'x') line.style.left=guide.position+'px';
+        else line.style.top=guide.position+'px';
+        line.title='Drag guide to reposition';
+        line.addEventListener('pointerdown',(event)=>{
+          event.preventDefault(); event.stopPropagation();
+          const start=this.toPanelPoint(event), origin=guide.position;
+          const move=(next)=>{
+            const point=this.toPanelPoint(next);
+            guide.position=clamp(origin+(guide.axis==='x'?point.x-start.x:point.y-start.y),0,guide.axis==='x'?this.state.width:this.state.height);
+            line.style[guide.axis==='x'?'left':'top']=guide.position+'px';
+          };
+          const finish=()=>{document.removeEventListener('pointermove',move);document.removeEventListener('pointerup',finish);this.commit();this.renderRulers();};
+          document.addEventListener('pointermove',move);document.addEventListener('pointerup',finish,{once:true});
+        });
+      });
+    }
+    this.smartGuideLayer=make('div','ofp-smart-guides',overlays);
+    const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+    svg.setAttribute('class','ofp-measurements');svg.setAttribute('viewBox','0 0 '+this.state.width+' '+this.state.height);
+    svg.setAttribute('width',String(this.state.width));svg.setAttribute('height',String(this.state.height));
+    (this.state.measurements||[]).forEach((m)=>{
+      const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+      line.setAttribute('x1',m.x1);line.setAttribute('y1',m.y1);line.setAttribute('x2',m.x2);line.setAttribute('y2',m.y2);
+      line.setAttribute('stroke','#7de4ff');line.setAttribute('stroke-width','1.5');line.setAttribute('stroke-dasharray','6 4');
+      svg.appendChild(line);
+      const midX=(m.x1+m.x2)/2,midY=(m.y1+m.y2)/2;
+      const label=document.createElementNS('http://www.w3.org/2000/svg','text');
+      label.setAttribute('x',midX+7);label.setAttribute('y',midY-7);label.setAttribute('fill','#7de4ff');label.setAttribute('font-size','12');
+      label.textContent=this.unitText(Math.hypot(m.x2-m.x1,m.y2-m.y1));svg.appendChild(label);
+    });
+    overlays.appendChild(svg);
+    this.measureSvg=svg;
+  }
+
+  renderSmartGuides(alignX=null,alignY=null) {
+    if (!this.smartGuideLayer || !this.state.showSmartGuides) return;
+    this.smartGuideLayer.replaceChildren();
+    if (alignX!==null) { const line=make('div','ofp-smart-guide ofp-smart-guide--vertical',this.smartGuideLayer);line.style.left=alignX+'px'; }
+    if (alignY!==null) { const line=make('div','ofp-smart-guide ofp-smart-guide--horizontal',this.smartGuideLayer);line.style.top=alignY+'px'; }
+  }
+
+  clearSmartGuides() { this.smartGuideLayer?.replaceChildren(); }
+
+  snapPosition(component,x,y) {
+    if (this.state.snap) {
+      const size=Math.max(1,Number(this.state.gridSize)||28);
+      x=Math.round(x/size)*size;y=Math.round(y/size)*size;
+    }
+    const limit=9/(this.currentScale||1);
+    let alignX=null,alignY=null,bestX=limit,bestY=limit;
+    const xs=[x,x+component.w/2,x+component.w],ys=[y,y+component.h/2,y+component.h];
+    const candidates=this.state.components.filter((item)=>item.id!==component.id&&!item.hidden);
+    candidates.forEach((item)=>{
+      const targetsX=[item.x,item.x+item.w/2,item.x+item.w];
+      const targetsY=[item.y,item.y+item.h/2,item.y+item.h];
+      xs.forEach((pos,index)=>targetsX.forEach((target)=>{
+        const d=Math.abs(pos-target);if(d<bestX){bestX=d;alignX=target;x+=target-pos;}
+      }));
+      ys.forEach((pos,index)=>targetsY.forEach((target)=>{
+        const d=Math.abs(pos-target);if(d<bestY){bestY=d;alignY=target;y+=target-pos;}
+      }));
+    });
+    (this.state.guides||[]).forEach((guide)=>{
+      const current=guide.axis==='x'?x+component.w/2:y+component.h/2;
+      const d=Math.abs(current-guide.position);
+      if(d<limit){if(guide.axis==='x'){x+=guide.position-current;alignX=guide.position;}else{y+=guide.position-current;alignY=guide.position;}}
+    });
+    return {x:clamp(x,0,this.state.width-component.w),y:clamp(y,0,this.state.height-component.h),alignX,alignY};
+  }
+
+  beginMeasurement(event) {
+    event.preventDefault();event.stopPropagation();
+    const start=this.toPanelPoint(event);
+    const draft={x1:start.x,y1:start.y,x2:start.x,y2:start.y};
+    this.measureDraft=draft;
+    const update=()=>{
+      const svg=this.measureSvg;if(!svg)return;
+      svg.querySelector('[data-draft]')?.remove();
+      const line=document.createElementNS('http://www.w3.org/2000/svg','line');
+      line.dataset.draft='true';line.setAttribute('x1',draft.x1);line.setAttribute('y1',draft.y1);line.setAttribute('x2',draft.x2);line.setAttribute('y2',draft.y2);
+      line.setAttribute('stroke','#ffb75e');line.setAttribute('stroke-width','2');line.setAttribute('stroke-dasharray','4 3');svg.appendChild(line);
+      this.app.msg('Measure: '+this.unitText(Math.hypot(draft.x2-draft.x1,draft.y2-draft.y1))+' · ΔX '+this.unitText(Math.abs(draft.x2-draft.x1))+' · ΔY '+this.unitText(Math.abs(draft.y2-draft.y1)));
+    };
+    const move=(next)=>{const point=this.toPanelPoint(next);draft.x2=point.x;draft.y2=point.y;update();};
+    const finish=()=>{
+      document.removeEventListener('pointermove',move);document.removeEventListener('pointerup',finish);
+      if(Math.hypot(draft.x2-draft.x1,draft.y2-draft.y1)>2){this.state.measurements.push(draft);this.commit();}
+      this.measureDraft=null;this.render();
+    };
+    document.addEventListener('pointermove',move);document.addEventListener('pointerup',finish,{once:true});
+  }
+
+  placeGuide(event) {
+    event.preventDefault();event.stopPropagation();
+    const point=this.toPanelPoint(event);
+    const axis=this.pendingGuideAxis;
+    const coordinate=axis==='x'?point.x:point.y;
+    this.state.guides ||= [];
+    this.state.guides.push({id:id(),axis,position:coordinate,color:'#7de4ff'});
+    this.pendingGuideAxis=null;this.tool='select';this.viewport.classList.remove('is-placing-guide');
+    this.render();this.commit();
+  }
+
   glyph(type) {
     return ({
       knob: '◉', dial: '◌', slider: '▥', dropdown: '⌄', button: '▣', switch: '⏻', encoder: '◉',
