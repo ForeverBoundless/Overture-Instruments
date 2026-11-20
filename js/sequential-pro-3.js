@@ -328,7 +328,7 @@ class Pro3App{
   const waveButton=document.createElement('label');waveButton.className='hp-action';waveButton.textContent='Load wavetable';
   const waveInput=document.createElement('input');waveInput.type='file';waveInput.accept='.wav,audio/wav';waveButton.appendChild(waveInput);footer.appendChild(waveButton);
   waveInput.addEventListener('change',async()=>{const file=waveInput.files?.[0];if(!file)return;try{if(!this.engine.ctx)throw new Error('Power on audio first.');const decoded=await this.engine.ctx.decodeAudioData(await file.arrayBuffer()),data=decoded.getChannelData(0);if(data.length<64||data.length>65536)throw new Error('Use a single-cycle WAV between 64 and 65,536 samples.');this.engine.post({t:'wavetable',data:Array.from(data)});this.hwDisplay.set('WAVETABLE LOADED','USER SINGLE CYCLE · BANK 32');}catch(e){this.hwDisplay.set('WAVETABLE FAILED',e.message);alert(e.message);}});
-  this.refreshHardwarePresetList=(selected='f:0')=>{this.hwPresets.replaceChildren();FACTORY.forEach((item,i)=>{const o=document.createElement('option');o.value='f:'+i;o.textContent=String(i+1).padStart(2,'0')+' · '+item.name;this.hwPresets.appendChild(o);});this.store.items.forEach(item=>{const o=document.createElement('option');o.value='u:'+item.id;o.textContent='User · '+item.name;this.hwPresets.appendChild(o);});this.hwPresets.value=selected;};this.hwPresets.dataset.overturePresetSelector='true';
+  this.refreshHardwarePresetList=(selected='f:0')=>{this.hwPresets.replaceChildren();FACTORY.forEach((item,i)=>{const o=document.createElement('option');o.value='f:'+i;o.textContent=String(i+1)+' · '+item.name;this.hwPresets.appendChild(o);});this.store.items.forEach(item=>{const o=document.createElement('option');o.value='u:'+item.id;o.textContent='User · '+item.name;this.hwPresets.appendChild(o);});this.hwPresets.value=selected;};this.hwPresets.dataset.overturePresetSelector='true';
    this.hwPresets.getCommunityPresetSelection=()=>{
     const value=this.hwPresets.value;
     if(value.startsWith('f:')){const index=Number(value.slice(2)),item=FACTORY[index];return item?{kind:'factory',index,value,name:item.name}:null;}
@@ -348,7 +348,7 @@ class Pro3App{
   const rowsEl=this.matrixDialog.querySelector('.p3-matrix');this.matrixRows=[];
   for(let i=0;i<32;i++){
    const route=document.createElement('div');route.className='p3-route';
-   const num=document.createElement('strong');num.textContent=String(i+1).padStart(2,'0');
+   const num=document.createElement('strong');num.textContent=String(i+1);
    const src=document.createElement('select');SOURCES.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;src.appendChild(o);});src.setAttribute('aria-label','Route '+(i+1)+' source');
    const dst=document.createElement('select');DESTS.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;dst.appendChild(o);});dst.setAttribute('aria-label','Route '+(i+1)+' destination');
    const amount=document.createElement('input');amount.type='range';amount.min='-1';amount.max='1';amount.step='.01';amount.setAttribute('aria-label','Route '+(i+1)+' depth');
