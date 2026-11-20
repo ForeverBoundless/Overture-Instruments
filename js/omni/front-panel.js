@@ -1352,7 +1352,7 @@ export class FrontPanelEditor {
   }
 
   renderComponentAppearance(component) {
-    this.selectField('Material finish', component.finish || this.state.finish, FINISHES, (value) => {
+    this.selectField('Material', component.finish || this.state.finish, FINISHES, (value) => {
       component.finish = value;
       this.render();
       this.commit();
