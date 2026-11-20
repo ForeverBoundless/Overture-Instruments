@@ -2192,7 +2192,7 @@ html[data-theme="light"] #omni-root dialog.ofp-guide-dialog .ofp-guide-content__
 #omni-root .omni-front-only-command[hidden],
 #omni-root .omni-menu--front-only[hidden],
 #omni-root .omni-midi-map-button[hidden] {display:none!important}
-#omni-root .omni-menu--front-only {order:0}
+#omni-root .omni-menu--front-only {order:-1}
 #omni-root .omni-menu--front-only .omni-menu__trigger {color:var(--cyan);border-color:rgba(125,228,255,.18)}
 #omni-root .omni-menu--front-only[open] .omni-menu__trigger {border-color:rgba(125,228,255,.45);background:rgba(125,228,255,.07)}
 #omni-root .omni-commandbar {display:flex;align-items:center;gap:8px}
