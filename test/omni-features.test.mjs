@@ -132,7 +132,7 @@ test('community publish login link honours Supabase hidden state in every respon
   ]);
   assert.match(css, /#community-account-link\[hidden\][\s\S]*display:none !important/);
   assert.match(page, /community\.css\?v=20261117-community-signal-r1/);
-  assert.match(worker, /community\.css\?v=20261114-publish-layout/);
+  assert.match(worker, /community\.css\?v=20261117-community-signal-r1/);
 });
 
 test('light-mode accent effects retain the original luminous brand colours', async () => {
