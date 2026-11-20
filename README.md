@@ -4,7 +4,7 @@
 
 **Free, browser-based instrument emulators and creative tools for anyone who wants to explore sound.**
 
-[Open Overture Instruments](https://overture-instruments.vercel.app/) · [Instrument library](https://overture-instruments.vercel.app/library) · [OMNI](https://overture-instruments.vercel.app/omni) · [Community](https://overture-instruments.vercel.app/community) · [Experiments](https://overture-instruments.vercel.app/experiments) · [Account](https://overture-instruments.vercel.app/account) · [Source code](https://github.com/ForeverBoundless/Overture-Instruments)
+[Open Overture Instruments](https://overture-instruments.vercel.app/) · [Instrument library](https://overture-instruments.vercel.app/library) · [OMNI](https://overture-instruments.vercel.app/omni) · [OMNI documentation](https://overture-instruments.vercel.app/omni/documentation) · [Community](https://overture-instruments.vercel.app/community) · [Experiments](https://overture-instruments.vercel.app/experiments) · [Account](https://overture-instruments.vercel.app/account) · [Source code](https://github.com/ForeverBoundless/Overture-Instruments)
 
 ---
 
@@ -113,30 +113,23 @@ Counts shown in the interface describe the current application data and program 
 
 ## Overture OMNI
 
-**OMNI is a browser-based modular instrument designer.** Instead of starting with a finished instrument panel, you assemble a sound system from functional modules and connect their inputs and outputs on a patch canvas.
+**OMNI is a browser-based modular instrument designer.** Build an instrument by combining sound sources, filters, amplifiers, effects, modulation and performance modules, then connect their ports on a live patch canvas.
 
-OMNI now has two linked workspaces. **Engine View** is the modular audio graph. **Front-end View** is a visual instrument-panel studio where you lay out and style the controls that a finished instrument will present. The front panel starts as an empty faceplate and supports rotary knobs, encoders, sliders, switches, dropdowns, parameter-toggle buttons, drawbars, keyboards, wheels, performance pads, module bays, meters, LCD/OLED displays, indicators, text labels and section dividers. Select a control, then choose an OMNI module and one of its compatible parameters in the Behaviour inspector; the control updates that module through OMNI's live parameter API. Keyboard, pitch/modulation wheels and pads use the shared performance engine. The visual layout is stored inside the patch and travels with local, JSON and Community patch data.
+OMNI has two linked workspaces. **Engine View** is the sound engine: modules form an editable graph, and audio, control-voltage (CV) and note-event connections define how a patch behaves. **Front-end View** is a visual instrument-panel studio for laying out the controls a player will use. The faceplate begins empty and supports knobs, rotary encoders, sliders, switches, dropdowns, buttons, drawbars, keyboards, pitch/modulation wheels, performance pads, meters, displays, indicators, module bays, text labels and dividers. Bind a component to a compatible module parameter in the Behaviour inspector to control the live engine. Keyboard, wheels and pads use the shared performance engine; the front panel is stored with the patch.
 
-The current catalogue contains 48 module types grouped around performance, sources, processing, modulation, instrument-specific modules, and output. Examples include:
+The current engine catalogue contains **56 module types** across performance, sound generation, processing, modulation, output and instrument-derived voices. It includes oscillators, noise and drum sources; mixers, filters, VCAs and effects; ADSR/AR envelopes and LFOs; sequencers, clocks, Euclidean rhythms, arpeggiators, chord and note-processing modules; and software voices and circuit-inspired modules such as DX7 FM, SEM, Mellotron, OB-Xa, Pro 3, Super 8, Nord organ and Clavinet modules. The in-app information panel provides a technical reference for every module, describing its purpose, relevant hardware principles, practical uses and the Overture implementation. These references distinguish physical circuit behaviour from software models.
 
-- **Sound sources:** oscillators, noise, sub-oscillator, supersaw, additive oscillator, plucked-string voice, drum voice, and FM sources.
-- **Processing:** mixers, filters, amplifiers, delay, reverb, distortion, bitcrushing, compression, EQ, ring modulation, phasing, panning, crossfading, and resonators.
-- **Modulation and control:** ADSR and AR envelopes, LFOs, sample and hold, CV mixing and offset, slew limiting, and envelope following.
-- **Performance and sequencing:** keyboard and MIDI input, step sequencing, clocks and triggers, Euclidean rhythm, random melody, arpeggiation, chords, note transposition and velocity processing, and note echo.
-- **Instrument-derived modules:** the Moog ladder filter, MS-20 dual filter, Juno chorus, DX7 FM voice, an eight-voice SEM polyphonic synthesizer, and a Mellotron tape-replay source. The SEM module reuses the Eight Voice worklet; the Mellotron module reuses the M400's finite, procedural tape-replay model and its six frames / three tracks (it does not bundle licensed tape recordings).
+The editor supports module search, grid snapping, fit-to-view, multi-selection, group movement, copy/paste, undo/redo and live parameter editing. The performance pane includes a five-octave keyboard, pitch and modulation wheels, octave controls, master level and panic. Compatible MIDI controllers can send notes and control messages; OMNI also supports MIDI CC mapping.
 
-OMNI distinguishes between **audio**, **CV (control-voltage/audio-rate control)**, and **note-event** connections. Connection checks prevent incompatible port types and block unsupported audio/CV feedback loops. The live graph is built with the Web Audio API, while selected instrument-derived modules reuse Overture's audio engines. Every module also has a technical reference, opened with the information button in the inspector when that module is selected. Each reference explains the module's purpose, the relevant real-world circuit architecture where one exists, practical uses, and how the digital OMNI implementation works; it distinguishes hardware principles from software models.
+OMNI can record the live master output to a browser-supported audio file and record live-graph note events to a Standard MIDI File. MIDI recording includes supported controller data such as CC, pitch bend, channel and polyphonic aftertouch, sustain and program changes. Macros can map one control to several numeric module parameters and can be assigned to MIDI CCs.
 
-You can add, move, duplicate, and remove modules; connect or disconnect ports; edit module parameters; play the patch from the on-screen keyboard or a compatible MIDI controller; and map MIDI CCs to available controls. The editor supports module search, grid snapping, fit-to-view, shift-click and box multi-selection, group movement, and copy/paste of selected modules with their internal connections.
+Patches can be saved in the browser, imported or exported as JSON, and exported as SVG schematics. The launcher combines local patches with private account saves and published Community patches. Front-end View includes a searchable component library, Layout / Appearance / Behaviour inspectors, layer visibility and ordering, guides, rulers, snapping, alignment, distribution, live Test mode and a large inline SVG preview. Faceplates can be exported as SVG, PNG, JPEG, editable panel JSON or a browser print sheet that can be saved as PDF. **Native CAD/B-rep export is not currently supported.**
 
-OMNI can record its live master output to a browser-supported audio file. MIDI recording captures notes at playable sound-module inputs, including events generated by OMNI sequencers, clocks, arpeggiators, chord and note-processing modules, plus incoming keyboard/MIDI notes. It exports a standard multichannel MIDI file and includes CC automation, pitch bend, channel/poly aftertouch, sustain and program changes. Sequencer note timestamps use the audio clock. Structural edits reconcile only changed graph nodes/edges, keeping unchanged modules (including running clocks) alive. Macro controls can map one slider to several numeric module parameters and can be assigned to MIDI CCs.
-
-Patches can be saved in the browser, imported or exported as JSON, and exported as SVG schematics. Front-end View uses the OMNI command bar, with contextual Insert, Arrange, Inspect and Export menus; MIDI Map is hidden there, and the brightness toggle stays beside the account control while the workspace switch remains centred. The faceplate starts empty. The searchable component library shows visual previews; the inspector separates Layout, Appearance and Behaviour; and the layer stack supports ordering, visibility and locks. In Behaviour, choose a compatible OMNI module and then the exact parameter to bind; the control writes through the same `setParam` path used by Engine View, so values update in the patch and the live graph. Knobs and encoders are distinct component types, with the duplicate Dial palette option removed. The workspace includes rulers, grid snapping, guides, measurement, alignment and distribution. Use the Pan tool in the View group, drag blank canvas, hold Space while dragging, or use the middle mouse button to pan; Ctrl/⌘+wheel and the zoom controls zoom the faceplate. The keyboard is drawn as a multi-octave keybed and controls share the engine's note and performance APIs. Appearance offers per-control materials, colours and hardware palettes. Preview renders inline SVG; exports include SVG, PNG at 1× / 2× / 3×, JPEG at 1× / 2×, editable panel JSON and a browser print sheet that can be saved as PDF. Design Check inspects layout and parameter bindings; the Performance Report describes design complexity and DOM-build time, not audio latency. **Native CAD export is not currently supported.** See the [Front-Panel Studio guide](docs/FRONT-PANEL-STUDIO.md) for workflows and manual checks.
+For setup instructions and a complete section-by-section walkthrough, see the **[OMNI documentation](https://overture-instruments.vercel.app/omni/documentation)**. The [Front-Panel Studio guide](docs/FRONT-PANEL-STUDIO.md) describes the editor's design workflow and verification checks. Additions or changes to OMNI must update the user-facing documentation in the same pull request; see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 [Open OMNI](https://overture-instruments.vercel.app/omni)
 
 ---
-
 ## Overture Experiments
 
 Overture Experiments is a collection of eight small, hands-on sound laboratories in the spirit of interactive science simulations. Each lab encourages you to change a small number of parameters, hear what happens, and connect the result to a visual representation of the signal. No musical background or MIDI controller is required.
@@ -239,12 +232,14 @@ The repository includes a `vercel.json` configuration with `cleanUrls` enabled. 
 ├── about.html                 # Project background and founder story
 ├── library.html               # Instrument library shell
 ├── omni.html                  # OMNI modular workspace shell
+├── omni/
+│   └── documentation.html     # Section-by-section OMNI user guide
 ├── experiments.html           # Experiments index
 ├── community.html              # Community patch library
 ├── login.html                  # Sign-in, account creation and password recovery\n├── account.html                # Account and profile settings\n├── contributions.html          # Contributor profiles and published items
 ├── html/                      # Individual instrument page documents
 ├── experiments/               # Individual experiment route documents
-├── css/                       # Site, library, instrument, OMNI and lab styles
+├── css/                       # Site, library, instrument, OMNI and lab styles (including omni-documentation.css)
 ├── js/
 │   ├── engine/                # Audio engines, processors, MIDI and envelopes
 │   ├── data/                  # Presets, programs, patterns, tuning and algorithms
