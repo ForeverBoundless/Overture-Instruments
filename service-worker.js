@@ -13,6 +13,7 @@ const APP_SHELL = [
   '/css/omni.css?v=20261119-front-panel-r2',
   '/js/omni/front-panel.js?v=20261119-front-panel-r2',
   '/js/omni/graph.js?v=20261119-front-panel-r2',
+  '/js/omni/templates.js?v=20261119-front-panel-r2',
   '/css/omni-launcher.css?v=20261118-rename-modal-blue-r2',
   '/css/site-footer.css?v=20261118-omni-shell-r3',
   '/contributions',
