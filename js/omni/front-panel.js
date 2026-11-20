@@ -777,6 +777,9 @@ export class FrontPanelEditor {
       pad.addEventListener('pointerup', up);
       pad.addEventListener('pointercancel', up);
       pad.addEventListener('lostpointercapture', () => { if (active) { active = false; pad.classList.remove('is-active'); this.app.noteOff(note, 1); } });
+      pad.addEventListener('keydown', (event) => { if (event.key === 'Enter' || event.key === ' ') down(event); });
+      pad.addEventListener('keyup', (event) => { if (event.key === 'Enter' || event.key === ' ') up(event); });
+      pad.addEventListener('blur', () => { if (active) up({}); });
     } else if (component.type === 'label') {
       make('span', 'ofp-free-label', node, component.text || component.label || 'TEXT');
     } else if (component.type === 'section') {
