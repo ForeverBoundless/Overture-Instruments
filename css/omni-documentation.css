@@ -17,9 +17,6 @@ body.omni-docs-page {
   background:
     radial-gradient(ellipse at 50% -10%, rgba(30,112,192,.16), transparent 43%),
     var(--bg);
-  --amber: var(--cyan);
-  --amber-bright: var(--cyan);
-  --green: var(--cyan);
   --oi-button-hover-background: rgba(125,228,255,.075);
   --oi-primary-border: var(--cyan);
   --oi-primary-ink: #082230;
@@ -329,9 +326,9 @@ body.omni-docs-page {
   font: 8px/1.2 var(--font-mono);
   letter-spacing: .07em;
 }
-.omni-doc-signal--audio { color: var(--cyan); }
+.omni-doc-signal--audio { color: var(--amber); }
 .omni-doc-signal--cv { color: var(--cyan); }
-.omni-doc-signal--note { color: var(--cyan); }
+.omni-doc-signal--note { color: var(--green); }
 .omni-doc-shortcuts td:last-child {
   color: var(--ink);
   font-family: var(--font-mono);
@@ -453,7 +450,7 @@ html[data-theme="light"] .omni-doc-faq details {
   .omni-docs-nav__links a { transition: none; }
 }
 
-/* Keep the shared site chrome on the same blue accent as OMNI documentation. */
+/* Keep shared site chrome blue while preserving amber/green signal-type colours in the guide. */
 .omni-docs-page .site-header .header-account:hover,
 .omni-docs-page .site-header .header-account:focus-visible {
   border-color: var(--cyan) !important;
