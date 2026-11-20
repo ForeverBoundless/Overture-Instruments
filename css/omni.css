@@ -2038,12 +2038,13 @@ body>dialog.ofp-preview-dialog::backdrop,body>dialog.ofp-check-dialog::backdrop,
 body>dialog.ofp-preview-dialog .ofp-preview-dialog__header,
 body>dialog.ofp-check-dialog .ofp-check-dialog__header,body>dialog.ofp-guide-dialog .ofp-check-dialog__header {display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 16px;border-bottom:1px solid var(--omni-border)}
 body>dialog.ofp-preview-dialog .ofp-preview-dialog__header strong,
-body>dialog.ofp-check-dialog .ofp-check-dialog__header,body>dialog.ofp-guide-dialog .ofp-check-dialog__header strong {display:block;margin-top:3px;font:600 15px var(--font-body)}
+body>dialog.ofp-check-dialog .ofp-check-dialog__header strong,
+body>dialog.ofp-guide-dialog .ofp-check-dialog__header strong {display:block;margin-top:3px;font:600 15px var(--font-body)}
 body>dialog.ofp-preview-dialog .ofp-preview-dialog__stage {display:grid;place-items:center;min-height:300px;max-height:calc(100dvh - 130px);padding:24px;overflow:auto;background:radial-gradient(ellipse at center,rgba(125,228,255,.06),transparent 66%),#090e14}
 body>dialog.ofp-preview-dialog .ofp-preview-dialog__image {display:block;width:min(100%,1200px);height:auto;max-height:72vh;object-fit:contain;filter:drop-shadow(0 16px 30px rgba(0,0,0,.5))}
-body>dialog.ofp-check-dialog .ofp-check-summary,body>dialog.ofp-check-dialog .ofp-check-summary {display:flex;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--omni-border);color:var(--omni-muted);font:10px var(--font-mono)}
-body>dialog.ofp-check-dialog .ofp-check-summary,body>dialog.ofp-check-dialog .ofp-check-summary strong {color:var(--omni-text)}
-body>dialog.ofp-check-dialog .ofp-check-list,body>dialog.ofp-guide-dialog .ofp-guide-content,#omni-root .ofp-guide-content {display:grid;gap:8px;padding:14px 16px 18px}
+body>dialog.ofp-check-dialog .ofp-check-summary {display:flex;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid var(--omni-border);color:var(--omni-muted);font:10px var(--font-mono)}
+body>dialog.ofp-check-dialog .ofp-check-summary strong {color:var(--omni-text)}
+body>dialog.ofp-check-dialog .ofp-check-list,body>dialog.ofp-guide-dialog .ofp-guide-content {display:grid;gap:8px;padding:14px 16px 18px}
 body>dialog.ofp-check-dialog .ofp-check-item {display:grid;grid-template-columns:72px 1fr;gap:10px;align-items:start;padding:9px 10px;border:1px solid var(--omni-border);border-radius:7px;background:rgba(255,255,255,.025)}
 body>dialog.ofp-check-dialog .ofp-check-item>span {color:var(--amber);font:700 8px var(--font-mono);letter-spacing:.1em}
 body>dialog.ofp-check-dialog .ofp-check-item--error>span {color:#ff8c82}
