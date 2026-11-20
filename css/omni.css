@@ -1781,7 +1781,7 @@ html[data-theme="light"] #omni-root .ofp-component[data-finish="ivory"]{color:#2
 .ofp-component[data-finish="anodized"]{background-image:linear-gradient(145deg,rgba(125,228,255,.18),transparent 58%),linear-gradient(180deg,rgba(255,255,255,.1),rgba(0,0,0,.2))}
 .ofp-component[data-finish="walnut"]{background-image:repeating-linear-gradient(0deg,rgba(130,78,45,.24) 0 2px,transparent 2px 7px),linear-gradient(145deg,rgba(255,213,169,.1),rgba(0,0,0,.2))}
 .ofp-component[data-finish="ivory"]{background-image:linear-gradient(145deg,rgba(255,255,255,.35),rgba(210,216,218,.05));box-shadow:0 4px 12px rgba(0,0,0,.17),inset 0 1px rgba(255,255,255,.5)}
-.ofp-component[data-finish="ivory"] .ofp-component__title,.ofp-component[data-finish="ivory"] .ofp-free-label,.ofp-component[data-finish="ivory"] .ofp-section__text{color:#283644}
+
 @media(max-width:1250px){.ofp-workspace{grid-template-columns:184px minmax(0,1fr) 244px}.ofp-library,.ofp-inspector{padding:12px 9px}.ofp-tool-toggle{font-size:7px;padding-inline:5px}}
 @media(max-width:900px){.ofp-workspace{grid-template-columns:152px minmax(0,1fr)}.ofp-inspector{position:absolute;right:9px;top:150px;bottom:45px;z-index:8;width:240px;border:1px solid var(--omni-border);border-radius:9px;box-shadow:var(--omni-shadow)}}
 @media(max-width:600px){.omni-topbar{flex-wrap:wrap}.omni-view-switch{order:5;width:100%}.omni-view-switch__button{flex:1}.ofp-toolbar{align-items:flex-start;flex-direction:column}.ofp-workspace{grid-template-columns:118px minmax(0,1fr)}.ofp-library{padding:9px 6px}.ofp-library-item{font-size:8px;padding:5px}.ofp-library-item__glyph{width:14px}.ofp-inspector{top:188px;right:6px;width:min(205px,60vw)}.ofp-stage-panel{padding:7px}.ofp-stage-foot{flex-wrap:wrap;font-size:6px}.ofp-align-tools{display:none}.ofp-design-tools{flex-wrap:nowrap;overflow:auto;max-width:100%}.ofp-tool-toggle{flex:0 0 auto}}
@@ -1797,3 +1797,16 @@ html[data-theme="light"] #omni-root .ofp-component[data-finish="ivory"]{color:#2
 .ofp-guide-setting .ofp-field{min-width:0}
 .ofp-guide-setting .ofp-color{width:42px}
 html[data-theme="light"] #omni-root .ofp-guide-setting{border-color:rgba(43,59,78,.15);background:rgba(255,255,255,.5)}
+
+html[data-theme="light"] #omni-root .ofp-help,
+html[data-theme="light"] #omni-root .ofp-field,
+html[data-theme="light"] #omni-root .ofp-panel-heading__eyebrow,
+html[data-theme="light"] #omni-root .ofp-stage-head,
+html[data-theme="light"] #omni-root .ofp-stage-foot,
+html[data-theme="light"] #omni-root .ofp-stage-dimensions,
+html[data-theme="light"] #omni-root .ofp-layer-icon,
+html[data-theme="light"] #omni-root .ofp-guide-setting__name { color:#60758a; }
+html[data-theme="light"] #omni-root .ofp-guide-setting .ofp-field { color:#60758a; }
+html[data-theme="light"] #omni-root .ofp-layer-row.is-selected { border-color:rgba(8,127,159,.36);background:rgba(8,127,159,.055); }
+html[data-theme="light"] #omni-root .ofp-layer-icon:hover { color:#087f9f;background:rgba(8,127,159,.08); }
+html[data-theme="light"] #omni-root .ofp-stage-foot { border-color:rgba(43,59,78,.14); }
