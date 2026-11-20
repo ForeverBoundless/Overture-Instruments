@@ -76,7 +76,7 @@ export class FrontPanelEditor {
       width: 1240,
       height: 520,
       finish: 'brushed',
-      unit: 'mm', safeMargin: 24, gridSize: 28,
+      unit: 'mm', zoom: 1, safeMargin: 24, gridSize: 28,
       showRulers: true, showGrid: true, showGuides: true, showSmartGuides: true, showSafeMargin: true, snap: true,
       guides: [{ id: id(), axis: 'x', position: 620, color: '#7de4ff' }, { id: id(), axis: 'y', position: 205, color: '#ffb75e' }],
       measurements: [],
@@ -110,7 +110,7 @@ export class FrontPanelEditor {
     const actions = make('div', 'ofp-toolbar__actions', toolbar);
     this.fitButton = make('button', 'ofp-action', actions, 'FIT PANEL');
     this.fitButton.type = 'button';
-    this.fitButton.addEventListener('click', () => this.scaleFaceplate());
+    this.fitButton.addEventListener('click', () => { this.state.zoom = 1; this.scaleFaceplate(); this.commit(); });
     this.resetButton = make('button', 'ofp-action', actions, 'RESET LAYOUT');
     this.resetButton.type = 'button';
     this.resetButton.addEventListener('click', () => {
@@ -193,6 +193,10 @@ export class FrontPanelEditor {
     toggle('GUIDES', 'showGuides');
     toggle('SMART', 'showSmartGuides');
     toggle('SAFE AREA', 'showSafeMargin');
+    const zoomOut = make('button', 'ofp-tool-toggle', tools, '− ZOOM');
+    zoomOut.type = 'button'; zoomOut.addEventListener('click', () => { this.state.zoom = clamp((this.state.zoom || 1) - .15, .25, 3); this.scaleFaceplate(); this.commit(); });
+    const zoomIn = make('button', 'ofp-tool-toggle', tools, '+ ZOOM');
+    zoomIn.type = 'button'; zoomIn.addEventListener('click', () => { this.state.zoom = clamp((this.state.zoom || 1) + .15, .25, 3); this.scaleFaceplate(); this.commit(); });
     this.snapButton = toggle('SNAP', 'snap');
     this.measureButton = make('button', 'ofp-tool-toggle', tools, 'MEASURE');
     this.measureButton.type = 'button';
@@ -337,6 +341,12 @@ export class FrontPanelEditor {
     const value = this.unitValue(px);
     const digits = this.state.unit === 'px' ? 0 : 1;
     return value.toFixed(digits) + ' ' + (this.state.unit || 'mm');
+  }
+
+  unitPixels(value) {
+    if (this.state.unit === 'mm') return Number(value) * 3.7795275591;
+    if (this.state.unit === 'in') return Number(value) * 96;
+    return Number(value);
   }
 
   toPanelPoint(event) {
@@ -622,7 +632,7 @@ export class FrontPanelEditor {
     this.faceplate.style.setProperty('--ofp-panel-color', safeColor(this.state.panelColor, '#252d35'));
     this.faceplate.style.setProperty('--ofp-accent', safeColor(this.state.accent, '#ffb75e'));
     this.faceplate.style.setProperty('--ofp-text', safeColor(this.state.textColor, '#edf3fa'));
-    this.stageDimensions.textContent = this.state.width + ' × ' + this.state.height;
+    this.stageDimensions.textContent = this.unitText(this.state.width) + ' × ' + this.unitText(this.state.height);
     this.state.components.forEach((component) => this.renderComponent(component));
     this.renderDesignOverlays();
     this.renderRulers();
@@ -1017,11 +1027,11 @@ export class FrontPanelEditor {
       this.commit();
     });
     const position = make('div', 'ofp-field-grid', this.inspectorBody);
-    this.inputField('X position (px)', component.x, 'number', (value) => this.updateComponentProperty(component, 'x', clamp(value, 0, this.state.width - component.w)), position);
-    this.inputField('Y position (px)', component.y, 'number', (value) => this.updateComponentProperty(component, 'y', clamp(value, 0, this.state.height - component.h)), position);
+    this.inputField('X position (' + this.state.unit + ')', this.unitValue(component.x), 'number', (value) => this.updateComponentProperty(component, 'x', clamp(this.unitPixels(value), 0, this.state.width - component.w)), position);
+    this.inputField('Y position (' + this.state.unit + ')', this.unitValue(component.y), 'number', (value) => this.updateComponentProperty(component, 'y', clamp(this.unitPixels(value), 0, this.state.height - component.h)), position);
     const dimensions = make('div', 'ofp-field-grid', this.inspectorBody);
-    this.inputField('Width (px)', component.w, 'number', (value) => this.updateComponentProperty(component, 'w', clamp(value, 48, Math.min(760, this.state.width - component.x))), dimensions);
-    this.inputField('Height (px)', component.h, 'number', (value) => this.updateComponentProperty(component, 'h', clamp(value, 42, Math.min(440, this.state.height - component.y))), dimensions);
+    this.inputField('Width (' + this.state.unit + ')', this.unitValue(component.w), 'number', (value) => this.updateComponentProperty(component, 'w', clamp(this.unitPixels(value), 48, Math.min(760, this.state.width - component.x))), dimensions);
+    this.inputField('Height (' + this.state.unit + ')', this.unitValue(component.h), 'number', (value) => this.updateComponentProperty(component, 'h', clamp(this.unitPixels(value), 42, Math.min(440, this.state.height - component.y))), dimensions);
 
     if (component.type === 'module') {
       const modules = [['', 'No module']];
@@ -1085,7 +1095,7 @@ export class FrontPanelEditor {
     }, colors);
     this.selectField('Visibility', component.hidden ? 'hidden' : 'visible', [['visible','Visible'],['hidden','Hidden']], (value) => { component.hidden = value === 'hidden'; this.render(); this.commit(); });
     this.selectField('Layer lock', component.locked ? 'locked' : 'unlocked', [['unlocked','Unlocked'],['locked','Locked']], (value) => { component.locked = value === 'locked'; this.render(); this.commit(); });
-    this.inputField('Clearance / margin', component.margin ?? 8, 'number', (value) => this.updateComponentProperty(component, 'margin', clamp(value, 0, 48)));
+    this.inputField('Clearance / margin (' + this.state.unit + ')', this.unitValue(component.margin ?? 8), 'number', (value) => this.updateComponentProperty(component, 'margin', clamp(this.unitPixels(value), 0, 180)));
     this.colorField('Legend colour', component.textColor || this.state.textColor, (value, commit) => { component.textColor = value; this.faceplate.querySelector('[data-component-id="' + component.id + '"]')?.style.setProperty('--ofp-control-text', value); if (commit) this.commit(); });
     this.colorField('Border colour', component.borderColor || component.accent || this.state.accent, (value, commit) => { component.borderColor = value; this.faceplate.querySelector('[data-component-id="' + component.id + '"]')?.style.setProperty('--ofp-control-border', value); if (commit) this.commit(); });
     if (component.type === 'pad') this.inputField('MIDI note', component.note ?? 60, 'number', (value) => { component.note = clamp(value, 0, 127); this.render(); this.commit(); });
@@ -1101,14 +1111,14 @@ export class FrontPanelEditor {
   }
 
   renderPanelSettings() {
-    this.inputField('Panel width', this.state.width, 'number', (value) => {
-      this.state.width = clamp(value, 800, 1800);
+    this.inputField('Panel width (' + this.state.unit + ')', this.unitValue(this.state.width), 'number', (value) => {
+      this.state.width = clamp(this.unitPixels(value), 800, 1800);
       this.state.components.forEach((item) => { item.x = clamp(item.x, 0, this.state.width - 36); });
       this.render();
       this.commit();
     });
-    this.inputField('Panel height', this.state.height, 'number', (value) => {
-      this.state.height = clamp(value, 360, 900);
+    this.inputField('Panel height (' + this.state.unit + ')', this.unitValue(this.state.height), 'number', (value) => {
+      this.state.height = clamp(this.unitPixels(value), 360, 900);
       this.state.components.forEach((item) => { item.y = clamp(item.y, 0, this.state.height - 36); });
       this.render();
       this.commit();
@@ -1119,8 +1129,8 @@ export class FrontPanelEditor {
       this.render();
       this.commit();
     });
-    this.inputField('Safe margin (px)', this.state.safeMargin ?? 24, 'number', (value) => { this.state.safeMargin = clamp(value, 0, 120); this.render(); this.commit(); });
-    this.inputField('Grid spacing (px)', this.state.gridSize ?? 28, 'number', (value) => { this.state.gridSize = clamp(value, 4, 120); this.render(); this.commit(); });
+    this.inputField('Safe margin (' + this.state.unit + ')', this.unitValue(this.state.safeMargin ?? 24), 'number', (value) => { this.state.safeMargin = clamp(this.unitPixels(value), 0, 450); this.render(); this.commit(); });
+    this.inputField('Grid spacing (' + this.state.unit + ')', this.unitValue(this.state.gridSize ?? 28), 'number', (value) => { this.state.gridSize = clamp(this.unitPixels(value), 4, 450); this.render(); this.commit(); });
     this.selectField('Units', this.state.unit || 'mm', [['px','Pixels'],['mm','Millimetres'],['in','Inches']], (value) => { this.state.unit = value; this.render(); this.commit(); });
     this.colorField('Panel colour', this.state.panelColor, (value, commit) => {
       this.state.panelColor = value;
@@ -1157,8 +1167,8 @@ export class FrontPanelEditor {
     if (!this.viewport || !this.faceplate) return;
     const availableWidth = Math.max(100, this.viewport.clientWidth - 34);
     const availableHeight = Math.max(100, this.viewport.clientHeight - 34);
-    const scale = Math.min(1, availableWidth / this.state.width, availableHeight / this.state.height);
-    this.currentScale = Math.max(0.18, scale);
+    const fit = Math.min(1, availableWidth / this.state.width, availableHeight / this.state.height);
+    this.currentScale = clamp(fit * clamp(this.state.zoom ?? 1, .25, 3), 0.18, 3);
     this.faceplate.style.transform = 'scale(' + this.currentScale + ')';
     this.stage.style.width = (this.state.width * this.currentScale) + 'px';
     this.stage.style.height = (this.state.height * this.currentScale) + 'px';
