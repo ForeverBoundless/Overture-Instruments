@@ -640,6 +640,7 @@ class OmniApp {
     if (!['engine','front'].includes(view)) return;
     this.workspaceView = view;
     this.appHeader?.classList.toggle('is-front-view', view === 'front');
+    if (view !== 'front') this.frontPanelEditor?.el.querySelectorAll('details[open]').forEach(menu => { menu.open = false; });
     this.main.hidden = view === 'front';
     this.frontPanelEditor.el.hidden = view !== 'front';
     this.performancePane.hidden = view === 'front' || !this.performanceVisible;
