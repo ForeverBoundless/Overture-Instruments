@@ -696,7 +696,8 @@ class OmniApp {
       requestAnimationFrame(() => editor.scaleFaceplate());
       if (announce) this.msg('Front-end design workspace.');
     }).catch((error) => {
-      if (this.workspaceView === 'front') this.setWorkspaceView('engine', false);
+      if (this.workspaceView !== 'front') return;
+      this.setWorkspaceView('engine', false);
       this.msg('Front-panel studio could not be loaded: ' + (error?.message || String(error)), true);
     });
   }
