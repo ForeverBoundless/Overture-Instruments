@@ -367,7 +367,7 @@ test('OMNI front-panel workspaces and precision design tools are integrated', as
   assert.match(editor, /getRawValue/);
   assert.match(editor, /parametersFor/);
   assert.match(editor, /Choose an OMNI module/);
-  assert.match(editor, /Choose a module, then choose one of its parameters/);
+  assert.match(editor, /Choose an OMNI module, then choose one of its parameters/);
   assert.match(editor, /ofp-empty-state/);
   assert.match(editor, /components: \[\]/);
   assert.match(editor, /ofp-keyboard__rear-rail/);
