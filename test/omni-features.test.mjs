@@ -255,7 +255,7 @@ test('OMNI exposes native SEM and Mellotron instrument modules and refreshes off
   assert.match(mellotron, /this\.scheduled\[0\]\.frame <= currentFrame \+ i/);
   assert.match(mellotron, /this\.p\.release/);
   assert.match(app, /20261117-omni-module-expansion-r3/);
-  assert.match(graph, /20261117-omni-module-expansion-r3/);
+  assert.match(graph, /20261118-organ-drawbar-r1/);
   assert.match(templates, /SEM Warm Ensemble/);
   assert.match(templates, /Mellotron Choir/);
   assert.match(page, /omni-launcher\.js\?v=20261119-front-panel-r2/);
