@@ -81,6 +81,7 @@ export class FrontPanelEditor {
       guides: [{ id: id(), axis: 'x', position: 620, color: '#7de4ff' }, { id: id(), axis: 'y', position: 205, color: '#ffb75e' }],
       measurements: [],
       panelColor: '#252d35',
+      panelBorderColor: '#667583', panelBorderWidth: 1, panelRadius: 14,
       accent: '#ffb75e',
       textColor: '#edf3fa',
       components: [
@@ -666,6 +667,9 @@ export class FrontPanelEditor {
     this.faceplate.style.setProperty('--ofp-panel-color', safeColor(this.state.panelColor, '#252d35'));
     this.faceplate.style.setProperty('--ofp-accent', safeColor(this.state.accent, '#ffb75e'));
     this.faceplate.style.setProperty('--ofp-text', safeColor(this.state.textColor, '#edf3fa'));
+    this.faceplate.style.borderColor = safeColor(this.state.panelBorderColor, '#667583');
+    this.faceplate.style.borderWidth = clamp(this.state.panelBorderWidth ?? 1, 0, 8) + 'px';
+    this.faceplate.style.borderRadius = clamp(this.state.panelRadius ?? 14, 0, 40) + 'px';
     this.stageDimensions.textContent = this.unitText(this.state.width) + ' × ' + this.unitText(this.state.height);
     this.state.components.forEach((component) => this.renderComponent(component));
     this.renderDesignOverlays();
@@ -1237,6 +1241,25 @@ export class FrontPanelEditor {
       removeGuide.type = 'button';
       removeGuide.addEventListener('click', () => { this.state.guides.splice(index, 1); this.render(); this.commit(); });
     });
+    const measureHead = make('div', 'ofp-panel-heading', this.inspectorBody);
+    make('span', 'ofp-panel-heading__eyebrow', measureHead, 'MEASUREMENTS');
+    make('strong', '', measureHead, (this.state.measurements || []).length + ' saved distances');
+    (this.state.measurements || []).forEach((measurement, index) => {
+      const row = make('div', 'ofp-guide-setting', this.inspectorBody);
+      const dx = Math.abs(measurement.x2 - measurement.x1);
+      const dy = Math.abs(measurement.y2 - measurement.y1);
+      const distance = Math.hypot(dx, dy);
+      make('span', 'ofp-guide-setting__name', row, 'MEASUREMENT ' + (index + 1));
+      make('span', 'ofp-measurement-readout', row, 'DIST ' + this.unitText(distance) + ' · X ' + this.unitText(dx) + ' · Y ' + this.unitText(dy));
+      const removeMeasurement = make('button', 'ofp-inspector-action ofp-inspector-action--danger', row, 'REMOVE MEASUREMENT');
+      removeMeasurement.type = 'button';
+      removeMeasurement.addEventListener('click', () => { this.state.measurements.splice(index, 1); this.render(); this.commit(); });
+    });
+    const clearMeasurementList = make('button', 'ofp-inspector-action ofp-inspector-action--danger', this.inspectorBody, 'CLEAR MEASUREMENTS');
+    clearMeasurementList.type = 'button';
+    clearMeasurementList.disabled = !(this.state.measurements || []).length;
+    clearMeasurementList.addEventListener('click', () => { this.state.measurements = []; this.render(); this.commit(); });
+
     const guideActions = make('div', 'ofp-field-grid', this.inspectorBody);
     [['x','ADD VERTICAL'],['y','ADD HORIZONTAL']].forEach(([axis,label]) => {
       const button = make('button', 'ofp-inspector-action', guideActions, label);
@@ -1252,6 +1275,22 @@ export class FrontPanelEditor {
     clearGuides.type = 'button';
     clearGuides.addEventListener('click', () => { this.state.guides = []; this.render(); this.commit(); });
     this.selectField('Units', this.state.unit || 'mm', [['px','Pixels'],['mm','Millimetres'],['in','Inches']], (value) => { this.state.unit = value; this.render(); this.commit(); });
+    this.colorField('Panel frame colour', this.state.panelBorderColor || '#667583', (value, commit) => {
+      this.state.panelBorderColor = value;
+      this.faceplate.style.borderColor = value;
+      if (commit) this.commit();
+    });
+    const frameMetrics = make('div', 'ofp-field-grid', this.inspectorBody);
+    this.inputField('Frame width (px)', this.state.panelBorderWidth ?? 1, 'number', (value) => {
+      this.state.panelBorderWidth = clamp(value, 0, 8);
+      this.faceplate.style.borderWidth = this.state.panelBorderWidth + 'px';
+      this.commit();
+    }, frameMetrics);
+    this.inputField('Panel radius (px)', this.state.panelRadius ?? 14, 'number', (value) => {
+      this.state.panelRadius = clamp(value, 0, 40);
+      this.faceplate.style.borderRadius = this.state.panelRadius + 'px';
+      this.commit();
+    }, frameMetrics);
     this.colorField('Panel colour', this.state.panelColor, (value, commit) => {
       this.state.panelColor = value;
       this.faceplate.style.setProperty('--ofp-panel-color', value);
