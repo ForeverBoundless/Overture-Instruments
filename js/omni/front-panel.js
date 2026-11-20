@@ -13,6 +13,7 @@ const clamp = (value, min, max) => Math.min(max, Math.max(min, Number(value) || 
 const clone = (value) => JSON.parse(JSON.stringify(value));
 const TYPES = [
   ['knob', 'Knob', 'CONTROLS'],
+  ['dial', 'Dial', 'CONTROLS'],
   ['slider', 'Slider', 'CONTROLS'],
   ['dropdown', 'Dropdown', 'CONTROLS'],
   ['button', 'Button', 'CONTROLS'],
@@ -837,7 +838,7 @@ export class FrontPanelEditor {
 
   glyph(type) {
     return ({
-      knob: '◉', slider: '▥', dropdown: '⌄', button: '▣', switch: '⏻', encoder: '◉',
+      knob: '◉', dial: '◉', slider: '▥', dropdown: '⌄', button: '▣', switch: '⏻', encoder: '◉',
       drawbars: 'Ⅲ', keyboard: '▤', pitchwheel: '↕', modwheel: '≋', meter: '▥', pad: '▣', label: 'T', section: '▤',
       module: '▦', screen: '▭', oled: '▰', led: '●',
     })[type] || '＋';
@@ -976,6 +977,8 @@ export class FrontPanelEditor {
     const meterFill = node.querySelector('.ofp-meter__fill'); if (meterFill) meterFill.style.width = (ratio * 100) + '%';
     const ring = node.querySelector('.ofp-knob__ring');
     if (ring) ring.style.setProperty('--ofp-angle', String(-135 + ratio * 270) + 'deg');
+    const pointer = node.querySelector('.ofp-knob__indicator, .ofp-dial__needle');
+    if (pointer) pointer.style.transform = 'rotate(' + (-135 + ratio * 270) + 'deg)';
     const toggle = node.querySelector('.ofp-switch'); if (toggle) { toggle.classList.toggle('is-on', value > (range.min + range.max) / 2); const label = toggle.querySelector('.ofp-switch__label'); if (label) label.textContent = value > (range.min + range.max) / 2 ? 'ON' : 'OFF'; }
     const wheelCap = node.querySelector('.ofp-wheel__cap'); if (wheelCap) node.style.setProperty('--ofp-wheel-position', (10 + (1 - ratio) * 80) + '%');
   }
@@ -1042,24 +1045,34 @@ export class FrontPanelEditor {
     const title = make('div', 'ofp-component__title', node, component.label || component.type.toUpperCase());
     title.title = 'Drag to move';
     if (component.type === 'knob' || component.type === 'dial' || component.type === 'encoder') {
-      const control = make('div', 'ofp-knob', node);
+      const isDial = component.type === 'dial';
+      const control = make('div', 'ofp-knob' + (isDial ? ' ofp-dial' : ''), node);
       const scale = make('div', 'ofp-knob__scale', control);
       for (let tick = 0; tick <= 10; tick += 1) {
+        const angle = -135 + tick * 27;
         const mark = make('span', 'ofp-knob__tick', scale);
-        mark.style.transform = 'rotate(' + (-135 + tick * 27) + 'deg) translateY(-42px)';
+        mark.style.transform = 'rotate(' + angle + 'deg) translateY(-42px)';
         mark.classList.toggle('is-major', tick % 2 === 0);
+        if (isDial && tick % 2 === 0) {
+          const number = make('span', 'ofp-dial__number', scale, String(tick / 2));
+          number.style.transform = 'rotate(' + angle + 'deg) translateY(-32px) rotate(' + (-angle) + 'deg)';
+        }
       }
       const ring = make('div', 'ofp-knob__ring', control);
       make('div', 'ofp-knob__bezel', control);
       const cap = make('div', 'ofp-knob__cap', control);
-      make('span', 'ofp-knob__indicator', cap);
+      if (isDial) make('span', 'ofp-dial__needle', control);
+      else make('span', 'ofp-knob__indicator', cap);
       const input = this.buildInput(component, null, 'ofp-knob__input');
       control.appendChild(input);
       const range = this.getRange(component);
       const value = this.getValue(component);
       const ratio = this.rangeRatio(range, value);
+      const angle = -135 + ratio * 270;
       node.style.setProperty('--ofp-value', String(ratio));
-      ring.style.setProperty('--ofp-angle', String(-135 + ratio * 270) + 'deg');
+      node.style.setProperty('--ofp-angle', angle + 'deg');
+      const pointer = control.querySelector('.ofp-knob__indicator, .ofp-dial__needle');
+      if (pointer) pointer.style.transform = 'rotate(' + angle + 'deg)';
       const output = make('output', 'ofp-component__value', node, range.log ? String(Math.round(value)) : value.toFixed(range.step >= 1 ? 0 : 2));
       output.dataset.ofpRole = 'value';
     } else if (component.type === 'slider') {
@@ -1193,14 +1206,14 @@ export class FrontPanelEditor {
   }
 
   renderKeyboard(component, node) {
-    const board = make('div', 'ofp-keyboard', node);
-    const rearRail = make('div', 'ofp-keyboard__rear-rail', board);
-    make('span', 'ofp-keyboard__brand', rearRail, 'OVERTURE');
-    make('span', 'ofp-keyboard__model', rearRail, 'PERFORMANCE KEYBED');
-    const keywell = make('div', 'ofp-keyboard__keywell', board);
-    const keys = make('div', 'ofp-keyboard__keys', keywell);
     const octaves = clamp(Math.round(component.octaves ?? 2), 1, 5);
     const start = clamp(Math.round(Number(component.startNote ?? 48) / 12) * 12, 0, 127 - 12 * octaves);
+    const board = make('div', 'ofp-keyboard', node);
+    const rearRail = make('div', 'ofp-keyboard__rear-rail', board);
+    make('span', 'ofp-keyboard__brand', rearRail, 'OMNI');
+    make('span', 'ofp-keyboard__model', rearRail, octaves + ' OCTAVE KEYBED');
+    const keywell = make('div', 'ofp-keyboard__keywell', board);
+    const keys = make('div', 'ofp-keyboard__keys', keywell);
     const whiteSemitones = [0, 2, 4, 5, 7, 9, 11];
     const whiteCount = 7 * octaves;
     const whiteWidth = 100 / whiteCount;
@@ -1230,11 +1243,7 @@ export class FrontPanelEditor {
         this.bindKey(key, note);
       });
     }
-    const frontLip = make('div', 'ofp-keyboard__front-lip', board);
-    make('span', 'ofp-keyboard__screw', frontLip);
-    make('span', 'ofp-keyboard__screw', frontLip);
-    make('span', 'ofp-keyboard__screw', frontLip);
-    make('span', 'ofp-keyboard__screw', frontLip);
+    make('div', 'ofp-keyboard__front-lip', board);
   }
 
   bindKey(key, note) {
@@ -1367,7 +1376,13 @@ export class FrontPanelEditor {
     else if (multi) {
       if (this.selectedIds.has(componentId)) this.selectedIds.delete(componentId); else this.selectedIds.add(componentId);
       this.selectedId = this.selectedIds.has(componentId) ? componentId : [...this.selectedIds].at(-1) || null;
-    } else { this.selectedId = componentId; this.selectedIds = new Set([componentId]); }
+    } else {
+      this.selectedId = componentId;
+      this.selectedIds = new Set([componentId]);
+      const component = this.getComponent(componentId);
+      const bindable = ['knob','dial','encoder','slider','dropdown','button','switch','drawbars','meter'];
+      if (component && bindable.includes(component.type) && !component.bind?.moduleId) this.inspectorTab = 'behavior';
+    }
     this.faceplate.querySelectorAll('.ofp-component').forEach((node) => node.classList.toggle('is-selected', this.selectedIds.has(node.dataset.componentId)));
     this.renderLayers();
     this.renderInspector();
@@ -1636,6 +1651,7 @@ export class FrontPanelEditor {
     const canBind = numericTypes.includes(component.type) || isDropdown || isDrawbars;
 
     if (canBind) {
+      make('p', 'ofp-field-note ofp-binding-intro', this.inspectorBody, 'Connect this control to a live OMNI module parameter. Moving it will change that parameter in the synthesis engine.');
       const parametersFor = (moduleId) => {
         const selected = modules.find((item) => item.module.id === moduleId);
         if (!selected) return [];
