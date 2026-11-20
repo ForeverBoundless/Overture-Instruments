@@ -8,8 +8,7 @@ const dependencyGroups = [
   ['./omni/modules.js?v=20261118-organ-drawbar-r1', './omni/moduleInfo.js?v=20261117-omni-module-expansion-r3', './omni/graph.js?v=20261119-front-panel-r2', './omni/templates.js?v=20261119-front-panel-r2'],
   ['./shared/presetStore.js', './shared/audioRecorder.js', './shared/midiRecorder.js'],
   ['../ui/Keyboard.js', '../ui/Wheel.js', './engine/MidiManager.js'],
-  ['./shared/panel.js', './shared/midiMap.js'],
-  ['./omni/front-panel.js?v=20261119-front-panel-r15']
+  ['./shared/panel.js', './shared/midiMap.js']
 ];
 let completedGroups = 0;
 const loaded = [];
@@ -45,8 +44,7 @@ const [
   { PitchWheel, ModWheel },
   { MidiManager, midiNoteName },
   { noteToMidi, KEY_TO_SEMI },
-  { registerMidiTarget, registerMidiTargetProvider },
-  { FrontPanelEditor }
+  { registerMidiTarget, registerMidiTargetProvider }
 ] = loaded;
 assertModuleInfoCoverage(MODULES);
 
@@ -640,8 +638,27 @@ class OmniApp {
       });
       return out;
     });
-    this.frontPanelEditor = new FrontPanelEditor(this, root);
     this.setWorkspaceView(this.workspaceView || 'engine', false);
+  }
+
+  ensureFrontPanelEditor() {
+    if (this.frontPanelEditor) return Promise.resolve(this.frontPanelEditor);
+    if (!this.frontPanelEditorPromise) {
+      this.frontPanelEditorPromise = import('./omni/front-panel.js?v=20261119-front-panel-r15')
+        .then(({ FrontPanelEditor }) => {
+          if (typeof FrontPanelEditor !== 'function') throw new Error('The front-panel editor module did not export its editor.');
+          const root = document.getElementById('omni-root');
+          if (!root) throw new Error('The OMNI workspace is unavailable.');
+          this.frontPanelEditor = new FrontPanelEditor(this, root);
+          this.frontPanelEditor.el.hidden = this.workspaceView !== 'front';
+          return this.frontPanelEditor;
+        })
+        .catch((error) => {
+          this.frontPanelEditorPromise = null;
+          throw error;
+        });
+    }
+    return this.frontPanelEditorPromise;
   }
 
   setWorkspaceView(view, announce = true) {
@@ -650,7 +667,7 @@ class OmniApp {
     this.appHeader?.classList.toggle('is-front-view', view === 'front');
     if (view !== 'front') this.frontPanelEditor?.el.querySelectorAll('details[open]').forEach(menu => { menu.open = false; });
     this.main.hidden = view === 'front';
-    this.frontPanelEditor.el.hidden = view !== 'front';
+    if (this.frontPanelEditor) this.frontPanelEditor.el.hidden = view !== 'front';
     this.performancePane.hidden = view === 'front' || !this.performanceVisible;
     this.engineViewButton.setAttribute('aria-pressed', String(view === 'engine'));
     this.frontViewButton.setAttribute('aria-pressed', String(view === 'front'));
@@ -658,9 +675,30 @@ class OmniApp {
     this.commandbar?.querySelectorAll('.omni-menu--front-only').forEach((item) => { item.hidden = view !== 'front'; });
     if (this.midiMapButton) this.midiMapButton.hidden = view === 'front';
     this.persistWorkspace();
-    if (view === 'engine') requestAnimationFrame(() => { this.applyView(); this.renderWires(); });
-    else requestAnimationFrame(() => this.frontPanelEditor.scaleFaceplate());
-    if (announce) this.msg(view === 'front' ? 'Front-end design workspace.' : 'Sound engine workspace.');
+
+    if (view === 'engine') {
+      requestAnimationFrame(() => {
+        if (this.workspaceView !== 'engine') return;
+        this.applyView();
+        this.renderWires();
+      });
+      if (announce) this.msg('Sound engine workspace.');
+      return;
+    }
+
+    if (!this.frontPanelEditor && announce) this.msg('Loading front-panel studio…');
+    this.ensureFrontPanelEditor().then((editor) => {
+      if (this.workspaceView !== 'front') {
+        editor.el.hidden = true;
+        return;
+      }
+      editor.el.hidden = false;
+      requestAnimationFrame(() => editor.scaleFaceplate());
+      if (announce) this.msg('Front-end design workspace.');
+    }).catch((error) => {
+      if (this.workspaceView === 'front') this.setWorkspaceView('engine', false);
+      this.msg('Front-panel studio could not be loaded: ' + (error?.message || String(error)), true);
+    });
   }
 
   msg(text, error = false) { this.status.textContent = text; this.status.classList.toggle('is-error', error); }
