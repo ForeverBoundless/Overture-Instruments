@@ -128,8 +128,8 @@ export function validatePatch(raw) {
         ...(bind ? { bind } : {}),
         ...(item.action === 'panic' ? { action: 'panic' } : {}),
         ...(item.type === 'screen' || item.type === 'oled' || item.type === 'label' || item.type === 'section' ? { text: String(item.text || '').slice(0, 240) } : {}),
-        ...(item.type === 'keyboard' ? { startNote: Math.min(96, Math.max(0, Number(item.startNote) || 48)), octaves: Math.min(5, Math.max(1, Math.round(Number(item.octaves) || 2))) } : {}),
-        ...(item.type === 'pad' ? { note: Math.min(127, Math.max(0, Number(item.note) || 60)) } : {}),
+        ...(item.type === 'keyboard' ? { startNote: Math.min(96, Math.max(0, Number.isFinite(Number(item.startNote)) ? Number(item.startNote) : 48)), octaves: Math.min(5, Math.max(1, Math.round(Number(item.octaves) || 2))) } : {}),
+        ...(item.type === 'pad' ? { note: Math.min(127, Math.max(0, Number.isFinite(Number(item.note)) ? Number(item.note) : 60)) } : {}),
       };
       return component;
     }) : [];
@@ -157,9 +157,9 @@ export function validatePatch(raw) {
       accent: color(panel.accent, '#ffb75e'),
       textColor: color(panel.textColor, '#edf3fa'),
       unit: ['px','mm','in'].includes(panel.unit) ? panel.unit : 'mm',
-      zoom: Math.min(3, Math.max(.25, Number(panel.zoom) || 1)),
-      safeMargin: Math.min(450, Math.max(0, Number(panel.safeMargin) || 24)),
-      gridSize: Math.min(120, Math.max(4, Number(panel.gridSize) || 28)),
+      zoom: Math.min(3, Math.max(.25, Number.isFinite(Number(panel.zoom)) && panel.zoom !== undefined ? Number(panel.zoom) : 1)),
+      safeMargin: Math.min(450, Math.max(0, Number.isFinite(Number(panel.safeMargin)) && panel.safeMargin !== undefined ? Number(panel.safeMargin) : 24)),
+      gridSize: Math.min(450, Math.max(4, Number.isFinite(Number(panel.gridSize)) && panel.gridSize !== undefined ? Number(panel.gridSize) : 28)),
       showRulers: panel.showRulers !== false,
       showGrid: panel.showGrid !== false,
       showGuides: panel.showGuides !== false,
