@@ -2413,3 +2413,72 @@ html[data-theme="light"] #omni-root dialog.ofp-preview-dialog .ofp-preview-dialo
 #omni-root .ofp-viewport.is-panning {cursor:grabbing}
 #omni-root .ofp-tool-toggle[aria-pressed="true"] {border-color:rgba(125,228,255,.5);color:#10202b;background:linear-gradient(135deg,#a8edff,#63cde7)}
 html[data-theme="light"] #omni-root .ofp-tool-toggle[aria-pressed="true"] {color:#fff;background:#087f9f}
+
+
+/* OMNI front-panel refinement: give each rotary control a distinct identity. */
+#omni-root .ofp-component--dial .ofp-knob {width:min(94px,82%);filter:drop-shadow(0 5px 6px rgba(0,0,0,.2))}
+#omni-root .ofp-component--dial .ofp-knob__scale {inset:0}
+#omni-root .ofp-component--dial .ofp-knob__tick {height:5px;width:2px;transform-origin:1px 42px}
+#omni-root .ofp-component--dial .ofp-knob__tick.is-major {height:8px}
+#omni-root .ofp-component--dial .ofp-knob__ring {
+  inset:8px;
+  background:conic-gradient(from 225deg,var(--ofp-control-accent) 0deg,var(--ofp-control-accent) calc(var(--ofp-value,.5)*270deg),rgba(120,137,151,.35) calc(var(--ofp-value,.5)*270deg),rgba(120,137,151,.35) 270deg,transparent 270deg);
+  mask:radial-gradient(circle,transparent 77%,#000 79% 100%);
+}
+#omni-root .ofp-component--dial .ofp-knob__bezel {inset:19px;border-width:1px;background:radial-gradient(circle at 35% 25%,rgba(255,255,255,.17),transparent 35%),linear-gradient(145deg,#34424d,#111820)}
+#omni-root .ofp-component--dial .ofp-knob__cap {width:42%;border-color:rgba(255,255,255,.24);background:radial-gradient(circle at 35% 25%,#566570,#202b35 62%,#0b1118)}
+#omni-root .ofp-dial__needle {
+  position:absolute;z-index:2;top:5px;left:calc(50% - 1px);width:2px;height:23px;border-radius:2px;
+  background:var(--ofp-control-accent);box-shadow:0 0 5px color-mix(in srgb,var(--ofp-control-accent) 65%,transparent);
+  transform-origin:1px 42px;pointer-events:none;
+}
+#omni-root .ofp-dial__number {
+  position:absolute;top:50%;left:50%;width:12px;margin-left:-6px;margin-top:-4px;
+  color:var(--ofp-control-text);font:6px/1 var(--font-mono);text-align:center;opacity:.72;pointer-events:none;
+}
+#omni-root .ofp-component--dial .ofp-knob__indicator {display:none}
+#omni-root .ofp-component--knob .ofp-knob__indicator {transform-origin:50% 100%}
+#omni-root .ofp-component--dial .ofp-knob__input {z-index:4}
+#omni-root .ofp-binding-intro {margin:0 0 2px}
+html[data-theme="light"] #omni-root .ofp-component--dial .ofp-knob__bezel {background:linear-gradient(145deg,#dce5eb,#8494a1 58%,#5c6b77)}
+html[data-theme="light"] #omni-root .ofp-component--dial .ofp-knob__cap {background:linear-gradient(145deg,#f2f5f7,#aab7c0 62%,#73828d)}
+
+/* Cleaner keyboard: remove redundant trim and let the keys carry the design. */
+#omni-root .ofp-keyboard {padding:0 7px 5px;border-radius:4px}
+#omni-root .ofp-keyboard__rear-rail {flex-basis:13px;padding-inline:6px}
+#omni-root .ofp-keyboard__brand {font-size:6px;letter-spacing:.2em}
+#omni-root .ofp-keyboard__model {font-size:5px;letter-spacing:.1em}
+#omni-root .ofp-keyboard__keywell {padding:2px 2px 0}
+#omni-root .ofp-keyboard__keys {inset:2px 2px 0}
+#omni-root .ofp-keyboard__front-lip {flex-basis:5px;padding:0 5px;border-radius:0 0 2px 2px}
+#omni-root .ofp-keyboard__octave-mark {bottom:4px;font-size:5px}
+#omni-root .ofp-key--white {border-bottom-width:3px}
+#omni-root .ofp-key--black {height:59%;border-bottom-width:2px}
+#omni-root .ofp-key--black:active,#omni-root .ofp-key--black.is-active {height:57%}
+
+/* Keep the workspace switch optically centred and consistently legible. */
+#omni-root .omni-view-switch {
+  top:50%!important;left:50%!important;transform:translate(-50%,-50%)!important;
+  min-height:37px;align-items:center;padding:3px;
+  border-color:var(--omni-border-strong);background:var(--omni-panel-soft);
+  box-shadow:inset 0 1px rgba(255,255,255,.035);
+}
+#omni-root .omni-view-switch__button {display:inline-flex;align-items:center;justify-content:center;min-height:29px;line-height:1}
+#omni-root .omni-view-switch__button[aria-pressed="false"] {color:var(--omni-muted)}
+#omni-root .omni-view-switch__button[aria-pressed="true"] {color:#15202a}
+html[data-theme="light"] #omni-root .omni-view-switch {
+  border-color:rgba(43,59,78,.18);background:linear-gradient(180deg,#f6f9fb,#e6edf3);
+  box-shadow:inset 0 1px #fff,0 2px 8px rgba(35,55,75,.06);
+}
+html[data-theme="light"] #omni-root .omni-view-switch__button {color:#526579}
+html[data-theme="light"] #omni-root .omni-view-switch__button[aria-pressed="true"] {
+  color:#102a38;background:linear-gradient(135deg,#b7effb,#70cfe5);box-shadow:0 1px 5px rgba(23,119,148,.18);
+}
+#omni-root .omni-commandbar .omni-menu--front-only {order:0}
+#omni-root .omni-commandbar .omni-menu--front-only:first-of-type {margin-left:0}
+@media(max-width:900px) {
+  #omni-root .omni-view-switch {position:static!important;transform:none!important;margin:0 0 0 auto!important}
+}
+@media(max-width:620px) {
+  #omni-root .omni-view-switch {position:static!important;transform:none!important;margin:0!important}
+}
