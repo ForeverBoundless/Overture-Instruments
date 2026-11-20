@@ -1091,6 +1091,7 @@ export class FrontPanelEditor {
       const bindings = [['', 'Not connected']];
       this.app.patch.modules.forEach((module) => {
         const definition = MODULES[module.type];
+        if (component.type === 'drawbars' && !definition.params.some((parameter) => parameter.key === 'drawbar1')) return;
         definition.params.forEach((parameter) => {
           if (component.type === 'dropdown' && !parameter.options) return;
           bindings.push([module.id + '::' + parameter.key, definition.name + ' · ' + parameter.label + ' (' + module.id + ')']);
