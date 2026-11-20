@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { LiveGraph, connectionError, defaultPatch, validatePatch } from '../js/omni/graph.js?v=20261117-omni-module-expansion-r3';
-import { MODULES, modulePorts } from '../js/omni/modules.js?v=20261117-omni-module-expansion-r3';
+import { MODULES, modulePorts } from '../js/omni/modules.js?v=20261118-organ-drawbar-r1';
 import { TEMPLATES } from '../js/omni/templates.js?v=20261117-omni-module-expansion-r3';
 
 
