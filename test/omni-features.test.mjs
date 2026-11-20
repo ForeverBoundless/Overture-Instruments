@@ -145,16 +145,19 @@ test('OMNI launcher links to a complete, theme-aware documentation page', async 
   assert.match(page, /<h2 id="quick-start-title">2\. Quick start<\/h2>/);
   assert.match(css, /\.omni-docs-layout\s*\{[^}]*display:\s*flex/s);
   assert.match(css, /\.omni-docs-content\s*\{[^}]*min-width:\s*0/s);
+  assert.match(css, /omni-docs-page \.site-footer[\s\S]*?--amber:\s*var\(--cyan\)/);
+  assert.match(css, /omni-docs-page \.contact-modal \.button--primary/);
+  assert.match(css, /omni-docs-page \.site-header \.header-account:hover/);
     assert.ok(page.includes('href="#' + section + '"'), 'missing section navigation link: ' + section);
   }
   assert.ok(page.includes('/js/shared/site-theme.js'));
   assert.ok(page.includes('/js/shared/site-nav.js'));
-  assert.ok(page.includes('/css/omni-documentation.css?v=20261119-omni-docs-r2'));
+  assert.ok(page.includes('/css/omni-documentation.css?v=20261119-omni-docs-r3'));
   assert.match(css, /html\[data-theme="light"\]/);
   assert.match(css, /var\(--bg\)/);
   assert.ok(worker.includes("'/omni/documentation'"));
-  assert.ok(worker.includes("'/css/omni-documentation.css?v=20261119-omni-docs-r2'"));
-  assert.match(worker, /overture-shell-v154/);
+  assert.ok(worker.includes("'/css/omni-documentation.css?v=20261119-omni-docs-r3'"));
+  assert.match(worker, /overture-shell-v155/);
   assert.match(routes, /"cleanUrls": true/);
 });
 
@@ -519,7 +522,7 @@ test('OMNI front-panel workspaces and precision design tools are integrated', as
   assert.match(css, /html\[data-theme="light"\].*ofp-library/);
   assert.match(page, /omni\.css\?v=20261119-front-panel-r17/);
   assert.match(launcher, /omni\.js\?v=20261119-front-panel-r17/);
-  assert.match(worker, /overture-shell-v154/);
+  assert.match(worker, /overture-shell-v155/);
   assert.match(worker, /front-panel\.js\?v=20261119-front-panel-r15/);
   assert.match(worker, /graph\.js\?v=20261119-front-panel-r2/);
   assert.match(readme, /Front-end View/);
