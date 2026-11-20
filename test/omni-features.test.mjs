@@ -379,6 +379,13 @@ test('visible site numbering uses plain numbers without zero-padding', async () 
   const zeroPadding = /\.padStart\s*\(\s*\d+\s*,\s*(['"])0\1\s*\)|decimal-leading-zero|\bEXPERIMENT\s+0{1,2}[1-9]\d*\b|\bINSTRUMENT\s+0{1,2}[1-9]\d*\b/i;
   for (const [index, source] of sources.entries()) {
     assert.doesNotMatch(source, zeroPadding, `zero-padded visible numbering found in ${files[index]}`);
+    if (files[index].endsWith('.html')) {
+      assert.doesNotMatch(
+        source,
+        /<(?:i|span|b|strong)\\b[^>]*>\\s*0+[1-9]\\d*\\s*<\\/(?:i|span|b|strong)>/i,
+        `zero-padded number label found in ${files[index]}`,
+      );
+    }
   }
 });
 
