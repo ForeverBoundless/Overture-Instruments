@@ -510,6 +510,7 @@ test('OMNI front-panel studio parses and keeps its canvas-first editing layout',
   assert.match(editor, /this\.inspector\.hidden = !this\.inspectorOpen/);
   assert.match(editor, /showRulers: false/);
   assert.match(editor, /showGrid: false/);
+  assert.match(editor, /snap: false/);
   assert.match(css, /grid-template-columns:52px 0 minmax\(0,1fr\) 0/);
   assert.match(css, /\.ofp-workspace\.is-library-open \{grid-template-columns:52px 226px/);
   assert.match(css, /\.ofp-workspace\.is-inspector-open \{grid-template-columns:52px 0 minmax\(0,1fr\) 286px/);
