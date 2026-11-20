@@ -145,6 +145,9 @@ test('OMNI launcher links to a complete, theme-aware documentation page', async 
   assert.match(css, /\.omni-docs-layout\s*\{[^}]*display:\s*grid/s);
   assert.match(css, /grid-template-columns:\s*minmax\(0,\s*1fr\)/);
   assert.match(css, /\.omni-docs-content\s*\{[^}]*display:\s*block/s);
+  assert.match(css, /\.omni-doc-steps li::before\s*\{[^}]*grid-column:\s*1;[^}]*grid-row:\s*1\s*\/\s*span 2;/s);
+  assert.match(css, /\.omni-doc-steps li strong\s*\{[^}]*grid-column:\s*2;[^}]*grid-row:\s*1;/s);
+  assert.match(css, /\.omni-doc-steps li span\s*\{[^}]*grid-column:\s*2;[^}]*grid-row:\s*2;/s);
   assert.match(css, /omni-docs-page \.site-footer[\s\S]*?--amber:\s*var\(--cyan\)/);
   assert.match(css, /--oi-community-button-background:\s*linear-gradient/);
   assert.match(css, /omni-docs-page \.contact-modal \.button--primary/);
@@ -165,12 +168,12 @@ test('OMNI launcher links to a complete, theme-aware documentation page', async 
   }
   assert.ok(page.includes('/js/shared/site-theme.js'));
   assert.ok(page.includes('/js/shared/site-nav.js'));
-  assert.ok(page.includes('/css/omni-documentation.css?v=20261119-omni-docs-r5'));
+  assert.ok(page.includes('/css/omni-documentation.css?v=20261120-omni-docs-r6'));
   assert.match(css, /html\[data-theme="light"\]/);
   assert.match(css, /var\(--bg\)/);
   assert.ok(worker.includes("'/omni/documentation'"));
-  assert.ok(worker.includes("'/css/omni-documentation.css?v=20261119-omni-docs-r5'"));
-  assert.match(worker, /overture-shell-v157/);
+  assert.ok(worker.includes("'/css/omni-documentation.css?v=20261120-omni-docs-r6'"));
+  assert.match(worker, /overture-shell-v158/);
   assert.match(routes, /"cleanUrls": true/);
 });
 
@@ -570,7 +573,7 @@ test('OMNI front-panel workspaces and precision design tools are integrated', as
   assert.match(css, /html\[data-theme="light"\].*ofp-library/);
   assert.match(page, /omni\.css\?v=20261119-front-panel-r17/);
   assert.match(launcher, /omni\.js\?v=20261119-front-panel-r17/);
-  assert.match(worker, /overture-shell-v157/);
+  assert.match(worker, /overture-shell-v158/);
   assert.match(worker, /front-panel\.js\?v=20261119-front-panel-r15/);
   assert.match(worker, /graph\.js\?v=20261119-front-panel-r2/);
   assert.match(readme, /Front-end View/);
