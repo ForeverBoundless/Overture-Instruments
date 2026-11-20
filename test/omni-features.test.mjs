@@ -340,6 +340,8 @@ test('OMNI theme control is stable and front-panel code stays outside the engine
   assert.ok(css.includes('html[data-theme="light"] #omni-root dialog.ofp-preview-dialog'));
   assert.ok(css.includes('html[data-theme="light"] #omni-root .ofp-preview-dialog__stage'));
   assert.ok(css.includes('html[data-theme="light"] #omni-root .ofp-inspector-action--danger'));
+  assert.ok(css.includes('html[data-theme="light"] #omni-root .ofp-keyboard__octave-mark'));
+  assert.ok(css.includes('color:var(--ofp-control-accent)'));
   assert.ok(css.includes('color:#ad4942'));
   assert.ok(css.includes('#omni-root .ofp-empty-state p'));
   assert.ok(css.includes('color:var(--ofp-text)'));
