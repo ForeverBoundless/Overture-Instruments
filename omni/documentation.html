@@ -16,7 +16,7 @@
 <link rel="stylesheet" href="/css/site-footer.css">
 <link rel="stylesheet" href="/css/site-theme.css?v=20261117-inter-type-r1">
 <link rel="stylesheet" href="/css/site-theme-polish.css?v=20261117-inter-type-r1">
-<link rel="stylesheet" href="/css/omni-documentation.css?v=20261119-omni-docs-r1">
+<link rel="stylesheet" href="/css/omni-documentation.css?v=20261119-omni-docs-r2">
 <script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
 <script defer src="/_vercel/insights/script.js"></script>
 <script src="/js/shared/site-theme.js" defer></script>
@@ -49,37 +49,24 @@
 </header>
 
 <main class="omni-docs-shell" id="documentation">
-  <section class="omni-docs-hero" aria-labelledby="omni-docs-title">
-    <div class="omni-docs-hero__copy">
-      <div class="omni-docs-breadcrumb"><a href="/omni">OVERTURE OMNI</a><span>/</span><span>DOCUMENTATION</span></div>
-      <p class="omni-docs-kicker">MODULAR INSTRUMENT DESIGNER</p>
-      <h1 id="omni-docs-title">OMNI <em>documentation</em></h1>
-      <p class="omni-docs-hero__summary">A practical guide to building a sound engine, connecting modules, performing with a keyboard or MIDI controller, and designing a playable front panel.</p>
-      <div class="omni-docs-hero__actions">
-        <a class="community-button community-button--primary" href="/omni">OPEN OMNI</a>
-        <a class="community-button community-button--quiet" href="/omni?editor=1">OPEN ENGINE VIEW</a>
-      </div>
-    </div>
-    <div class="omni-docs-hero__facts" aria-label="OMNI at a glance">
-      <div><strong>56</strong><span>ENGINE MODULE TYPES</span></div>
-      <div><strong>02</strong><span>LINKED WORKSPACES</span></div>
-      <div><strong>01</strong><span>SHARED SOUND ENGINE</span></div>
-    </div>
-  </section>
+  <header class="omni-docs-intro" aria-labelledby="omni-docs-title">
+    <h1 id="omni-docs-title">OMNI documentation</h1>
+    <p>Build a sound engine, connect modules, perform with MIDI, and design a playable front panel.</p>
+  </header>
 
   <div class="omni-docs-layout">
     <aside class="omni-docs-nav" aria-label="Documentation sections">
       <p class="omni-docs-nav__label">ON THIS PAGE</p>
       <nav class="omni-docs-nav__links">
-        <a href="#overview"><span>01</span> Overview</a>
-        <a href="#quick-start"><span>02</span> Quick start</a>
-        <a href="#engine-view"><span>03</span> Engine View</a>
-        <a href="#modules"><span>04</span> Module catalogue</a>
-        <a href="#connections"><span>05</span> Connections</a>
-        <a href="#performance-midi"><span>06</span> Performance &amp; MIDI</a>
-        <a href="#recording-macros"><span>07</span> Recording &amp; macros</a>
-        <a href="#patches"><span>08</span> Patches &amp; templates</a>
-        <a href="#front-panel"><span>09</span> Front-end View</a>
+        <a href="#overview"><span>1</span> Overview</a>
+        <a href="#quick-start"><span>2</span> Quick start</a>
+        <a href="#engine-view"><span>3</span> Engine View</a>
+        <a href="#modules"><span>4</span> Module catalogue</a>
+        <a href="#connections"><span>5</span> Connections</a>
+        <a href="#performance-midi"><span>6</span> Performance &amp; MIDI</a>
+        <a href="#recording-macros"><span>7</span> Recording &amp; macros</a>
+        <a href="#patches"><span>8</span> Patches &amp; templates</a>
+        <a href="#front-panel"><span>9</span> Front-end View</a>
         <a href="#preview-export"><span>10</span> Preview &amp; export</a>
         <a href="#shortcuts"><span>11</span> Shortcuts</a>
         <a href="#troubleshooting"><span>12</span> Troubleshooting</a>
@@ -93,7 +80,7 @@
     <article class="omni-docs-content">
       <section class="omni-doc-section" id="overview" aria-labelledby="overview-title">
         <div class="omni-doc-section__head">
-          <span class="omni-doc-section__number">01 / FOUNDATION</span>
+          <span class="omni-doc-section__number">1 / FOUNDATION</span>
           <h2 id="overview-title">What is OMNI?</h2>
         </div>
         <p class="omni-doc-lead">OMNI is a browser-based modular instrument designer. You build a sound system from modules, connect their inputs and outputs, then play the result through the built-in keyboard or a MIDI controller.</p>
@@ -107,7 +94,7 @@
 
       <section class="omni-doc-section" id="quick-start" aria-labelledby="quick-start-title">
         <div class="omni-doc-section__head">
-          <span class="omni-doc-section__number">02 / FIRST PATCH</span>
+          <span class="omni-doc-section__number">2 / FIRST PATCH</span>
           <h2 id="quick-start-title">Quick start</h2>
         </div>
         <p class="omni-doc-lead">The fastest way to understand the signal flow is to open a template, power on the engine, and follow the connections from the keyboard to the output.</p>
@@ -126,7 +113,7 @@
 
       <section class="omni-doc-section" id="engine-view" aria-labelledby="engine-view-title">
         <div class="omni-doc-section__head">
-          <span class="omni-doc-section__number">03 / SOUND DESIGN</span>
+          <span class="omni-doc-section__number">3 / SOUND DESIGN</span>
           <h2 id="engine-view-title">Engine View</h2>
         </div>
         <p class="omni-doc-lead">Engine View is a patch canvas: each module performs one job, and the connections between modules form the instrument.</p>
@@ -157,7 +144,7 @@
 
       <section class="omni-doc-section" id="modules" aria-labelledby="modules-title">
         <div class="omni-doc-section__head">
-          <span class="omni-doc-section__number">04 / BUILDING BLOCKS</span>
+          <span class="omni-doc-section__number">4 / BUILDING BLOCKS</span>
           <h2 id="modules-title">Module catalogue</h2>
         </div>
         <p class="omni-doc-lead">The current engine defines 56 module types. The groups below organise them by what they do; they are a reference for the available building blocks, not a required order for wiring a patch.</p>
@@ -192,7 +179,7 @@
 
       <section class="omni-doc-section" id="connections" aria-labelledby="connections-title">
         <div class="omni-doc-section__head">
-          <span class="omni-doc-section__number">05 / ROUTING</span>
+          <span class="omni-doc-section__number">5 / ROUTING</span>
           <h2 id="connections-title">Connections &amp; signal types</h2>
         </div>
         <p class="omni-doc-lead">A connection carries one kind of information from a module output to a compatible module input. Matching the port type is as important as choosing the right module.</p>
@@ -221,7 +208,7 @@
 
       <section class="omni-doc-section" id="performance-midi" aria-labelledby="performance-midi-title">
         <div class="omni-doc-section__head">
-          <span class="omni-doc-section__number">06 / PLAYING</span>
+          <span class="omni-doc-section__number">6 / PLAYING</span>
           <h2 id="performance-midi-title">Performance &amp; MIDI</h2>
         </div>
         <p class="omni-doc-lead">The performance pane gives you a keyboard and real-time controls for playing the current patch without adding a separate instrument or audio graph.</p>
@@ -244,7 +231,7 @@
 
       <section class="omni-doc-section" id="recording-macros" aria-labelledby="recording-macros-title">
         <div class="omni-doc-section__head">
-          <span class="omni-doc-section__number">07 / CAPTURE &amp; CONTROL</span>
+          <span class="omni-doc-section__number">7 / CAPTURE &amp; CONTROL</span>
           <h2 id="recording-macros-title">Recording &amp; macros</h2>
         </div>
         <div class="omni-doc-subsection">
@@ -264,7 +251,7 @@
 
       <section class="omni-doc-section" id="patches" aria-labelledby="patches-title">
         <div class="omni-doc-section__head">
-          <span class="omni-doc-section__number">08 / LIBRARY</span>
+          <span class="omni-doc-section__number">8 / LIBRARY</span>
           <h2 id="patches-title">Patches, templates &amp; sharing</h2>
         </div>
         <div class="omni-doc-subsection">
@@ -292,7 +279,7 @@
 
       <section class="omni-doc-section" id="front-panel" aria-labelledby="front-panel-title">
         <div class="omni-doc-section__head">
-          <span class="omni-doc-section__number">09 / INSTRUMENT DESIGN</span>
+          <span class="omni-doc-section__number">9 / INSTRUMENT DESIGN</span>
           <h2 id="front-panel-title">Front-end View</h2>
         </div>
         <p class="omni-doc-lead">Front-end View is a visual studio for designing the panel a player will interact with. It is stored as part of the patch, so the front panel can travel with the sound engine.</p>
