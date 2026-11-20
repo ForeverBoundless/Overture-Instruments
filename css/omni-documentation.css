@@ -510,3 +510,9 @@ html[data-theme="light"] .omni-docs-page .contact-field input:focus,
 html[data-theme="light"] .omni-docs-page .contact-field textarea:focus {
   box-shadow: 0 0 0 3px rgba(8,127,159,.12);
 }
+
+/* Small return link above the documentation title. */
+.omni-docs-back {
+  margin: 0 0 16px;
+  text-decoration: none;
+}
