@@ -28,7 +28,10 @@ test('expanded instrument modules and starter templates are registered and valid
 });
 
 test('default OMNI patch validates and rejects audio feedback', () => {
-  const patch = validatePatch(defaultPatch());
+  const legacyPatch = defaultPatch();
+  assert.equal(Object.hasOwn(legacyPatch, 'frontPanel'), false);
+  const patch = validatePatch(legacyPatch);
+  assert.equal(Object.hasOwn(patch, 'frontPanel'), false);
   assert.equal(patch.modules.length, 7);
   const byId = Object.fromEntries(patch.modules.map((module) => [module.id, module]));
   assert.match(connectionError(byId, { module: 'vca1', port: 'out' }, { module: 'flt1', port: 'in' }, patch.connections), /feedback loop/);
