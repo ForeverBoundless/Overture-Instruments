@@ -756,9 +756,26 @@ export class FrontPanelEditor {
       const pad = make('button', 'ofp-pad', node, component.label || 'PAD');
       pad.type = 'button';
       const note = clamp(component.note ?? 60, 0, 127);
-      const down = (event) => { event.preventDefault(); pad.classList.add('is-active'); this.app.noteOn(note, .9, 1); };
-      const up = () => { pad.classList.remove('is-active'); this.app.noteOff(note, 1); };
-      pad.addEventListener('pointerdown', down); pad.addEventListener('pointerup', up); pad.addEventListener('pointercancel', up); pad.addEventListener('lostpointercapture', up);
+      let active = false;
+      const down = (event) => {
+        if (active) return;
+        event.preventDefault();
+        active = true;
+        try { pad.setPointerCapture(event.pointerId); } catch { /* optional pointer capture */ }
+        pad.classList.add('is-active');
+        this.app.noteOn(note, .9, 1);
+      };
+      const up = (event) => {
+        if (!active) return;
+        active = false;
+        pad.classList.remove('is-active');
+        try { pad.releasePointerCapture(event.pointerId); } catch { /* pointer may already be released */ }
+        this.app.noteOff(note, 1);
+      };
+      pad.addEventListener('pointerdown', down);
+      pad.addEventListener('pointerup', up);
+      pad.addEventListener('pointercancel', up);
+      pad.addEventListener('lostpointercapture', () => { if (active) { active = false; pad.classList.remove('is-active'); this.app.noteOff(note, 1); } });
     } else if (component.type === 'label') {
       make('span', 'ofp-free-label', node, component.text || component.label || 'TEXT');
     } else if (component.type === 'section') {
