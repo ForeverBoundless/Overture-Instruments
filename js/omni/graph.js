@@ -80,12 +80,82 @@ export function validatePatch(raw) {
       bindings,
     };
   }) : [];
+  const panel = raw.frontPanel && typeof raw.frontPanel === 'object' ? raw.frontPanel : null;
+  const frontPanel = panel ? (() => {
+    const width = Math.min(1800, Math.max(800, Number(panel.width) || 1240));
+    const height = Math.min(900, Math.max(360, Number(panel.height) || 520));
+    const allowed = new Set(['knob','dial','slider','dropdown','button','switch','encoder','drawbars','keyboard','pitchwheel','modwheel','module','screen','oled','led','meter','pad','label','section']);
+    const color = (value, fallback) => /^#[0-9a-f]{6}$/i.test(String(value || '')) ? value : fallback;
+    const components = Array.isArray(panel.components) ? panel.components.slice(0, 100).filter((item) => item && allowed.has(item.type)).map((item) => {
+      const module = byId[String(item.bind?.moduleId || '')];
+      const parameter = module && MODULES[module.type].params.find((entry) => entry.key === item.bind?.paramKey);
+      const bind = module ? (item.type === 'module' ? { moduleId: module.id } : (parameter ? { moduleId: module.id, paramKey: parameter.key } : null)) : null;
+      const component = {
+        id: String(item.id || uid('fp')).slice(0, 60),
+        type: item.type,
+        label: String(item.label || item.type).slice(0, 40),
+        x: Math.min(width - 36, Math.max(0, Number(item.x) || 0)),
+        y: Math.min(height - 36, Math.max(0, Number(item.y) || 0)),
+        w: Math.min(760, Math.max(48, Number(item.w) || 120)),
+        h: Math.min(440, Math.max(36, Number(item.h) || 80)),
+        value: Math.min(1, Math.max(0, Number.isFinite(Number(item.value)) ? Number(item.value) : 0)),
+        accent: color(item.accent, '#ffb75e'),
+        surface: color(item.surface, '#26313d'),
+        textColor: color(item.textColor, '#edf3fa'),
+        borderColor: color(item.borderColor, color(item.accent, '#ffb75e')),
+        finish: ['matte','brushed','anodized','walnut','ivory'].includes(item.finish) ? item.finish : 'matte',
+        margin: Math.min(48, Math.max(0, Number(item.margin) || 0)),
+        hidden: Boolean(item.hidden),
+        locked: Boolean(item.locked),
+        ...(bind ? { bind } : {}),
+        ...(item.action === 'panic' ? { action: 'panic' } : {}),
+        ...(item.type === 'screen' || item.type === 'oled' || item.type === 'label' || item.type === 'section' ? { text: String(item.text || '').slice(0, 240) } : {}),
+        ...(item.type === 'keyboard' ? { startNote: Math.min(96, Math.max(0, Number(item.startNote) || 48)) } : {}),
+        ...(item.type === 'pad' ? { note: Math.min(127, Math.max(0, Number(item.note) || 60)) } : {}),
+      };
+      return component;
+    }) : [];
+    const guides = Array.isArray(panel.guides) ? panel.guides.slice(0, 80).filter((guide) => guide && ['x','y'].includes(guide.axis)).map((guide) => ({
+      id: String(guide.id || uid('guide')).slice(0, 60),
+      axis: guide.axis,
+      position: Math.min(guide.axis === 'x' ? width : height, Math.max(0, Number(guide.position) || 0)),
+      color: color(guide.color, '#7de4ff'),
+    })) : [];
+    const measurements = Array.isArray(panel.measurements) ? panel.measurements.slice(0, 100).filter((measurement) => measurement && ['x1','y1','x2','y2'].every((key) => Number.isFinite(Number(measurement[key])))).map((measurement) => ({
+      x1: Math.min(width, Math.max(0, Number(measurement.x1))),
+      y1: Math.min(height, Math.max(0, Number(measurement.y1))),
+      x2: Math.min(width, Math.max(0, Number(measurement.x2))),
+      y2: Math.min(height, Math.max(0, Number(measurement.y2))),
+    })) : [];
+    return {
+      version: 1,
+      width,
+      height,
+      finish: ['matte','brushed','anodized','walnut','ivory'].includes(panel.finish) ? panel.finish : 'matte',
+      panelColor: color(panel.panelColor, '#252d35'),
+      accent: color(panel.accent, '#ffb75e'),
+      textColor: color(panel.textColor, '#edf3fa'),
+      unit: ['px','mm','in'].includes(panel.unit) ? panel.unit : 'mm',
+      safeMargin: Math.min(120, Math.max(0, Number(panel.safeMargin) || 24)),
+      gridSize: Math.min(120, Math.max(4, Number(panel.gridSize) || 28)),
+      showRulers: panel.showRulers !== false,
+      showGrid: panel.showGrid !== false,
+      showGuides: panel.showGuides !== false,
+      showSmartGuides: panel.showSmartGuides !== false,
+      showSafeMargin: panel.showSafeMargin !== false,
+      snap: panel.snap !== false,
+      guides,
+      measurements,
+      components,
+    };
+  })() : null;
   return {
     schema: SCHEMA,
     name: typeof raw.name === 'string' ? raw.name.slice(0, 60) : 'Untitled',
     modules, connections,
     global: { master: Math.min(1, Math.max(0, Number(raw.global?.master) || 0.8)) },
     macros,
+    ...(frontPanel ? { frontPanel } : {}),
   };
 }
 
