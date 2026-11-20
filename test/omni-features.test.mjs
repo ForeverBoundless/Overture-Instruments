@@ -391,7 +391,7 @@ test('OMNI front-panel workspaces and precision design tools are integrated', as
   assert.match(editor, /template\.innerHTML/);
   assert.match(editor, /zoomBy\(factor, clientX = null, clientY = null\)/);
   assert.match(editor, /this\.zoomReadout\.textContent/);
-  assert.match(editor, /button,a,\\[role="button"\\]/);
+  assert.ok(editor.includes('button,a,[role="button"]'));
   assert.match(source, /frontOnlyGroup\('Insert'\)/);
   assert.match(source, /frontOnlyGroup\('Arrange'\)/);
   assert.match(source, /frontOnlyGroup\('Inspect'\)/);
