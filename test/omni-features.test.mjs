@@ -321,6 +321,22 @@ test('Community share action uses the violet accent in dark and light themes', a
 });
 
 
+test('OMNI front-panel preview runs real controls without editor handles', async () => {
+  const [editor, css] = await Promise.all([
+    readFile(new URL('../js/omni/front-panel.js', import.meta.url), 'utf8'),
+    readFile(new URL('../css/omni.css', import.meta.url), 'utf8'),
+  ]);
+  assert.match(editor, /this\.state\.components\.forEach\(\(component\) => this\.renderComponent\(component, faceplate, true\)\)/);
+  assert.match(editor, /if \(!preview\) \{[\s\S]*this\.bindComponentDrag\(node, component\)[\s\S]*this\.bindResize\(resize, node, component\)/);
+  assert.match(editor, /\[this\.faceplate, this\.previewFaceplate\]/);
+  assert.match(editor, /refreshValues\(\)[\s\S]*const nodes = this\.componentNodes\(component\)/);
+  assert.match(editor, /this\.app\.noteOn\(note/);
+  assert.match(editor, /this\.app\.setParam\(bound\.module\.id/);
+  assert.match(editor, /new ResizeObserver\(\(\) => this\.scalePreviewFaceplate\(\)\)/);
+  assert.match(css, /\.ofp-preview-faceplate \.ofp-component__resize \{display:none!important\}/);
+  assert.match(css, /\.ofp-preview-dialog__state-dot/);
+});
+
 test('OMNI front-panel workspaces and precision design tools are integrated', async () => {
   const [source, editor, graph, css, page, launcher, worker, readme, architecture, theme] = await Promise.all([
     readFile(new URL('../js/omni.js', import.meta.url), 'utf8'),
@@ -388,7 +404,12 @@ test('OMNI front-panel workspaces and precision design tools are integrated', as
   assert.match(editor, /ofp-dial__needle/);
   assert.match(editor, /ofp-dial__input/);
   assert.match(editor, /ofp-binding-intro/);
-  assert.match(editor, /template\.innerHTML/);
+  assert.match(editor, /renderPreviewFaceplate\(\)/);
+  assert.match(editor, /renderComponent\(component, parent = this\.faceplate, preview = false\)/);
+  assert.match(editor, /componentNodes\(component\)/);
+  assert.match(editor, /this\.previewFaceplate/);
+  assert.match(css, /\.ofp-preview-faceplate/);
+  assert.match(css, /\.ofp-preview-dialog__frame/);
   assert.match(editor, /zoomBy\(factor, clientX = null, clientY = null\)/);
   assert.match(editor, /this\.zoomReadout\.textContent/);
   assert.ok(editor.includes('button,a,[role="button"]'));
