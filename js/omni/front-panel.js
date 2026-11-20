@@ -34,19 +34,19 @@ const TYPES = [
 ];
 
 const MATERIAL_PRESETS = [
-  { id: 'graphite', label: 'Graphite / cyan', finish: 'anodized', surface: '#19232b', accent: '#7de4ff', text: '#e8f0f5', border: '#667987' },
-  { id: 'brushed', label: 'Brushed / amber', finish: 'brushed', surface: '#8c989f', accent: '#e6a94e', text: '#1b252d', border: '#d1d9de' },
-  { id: 'walnut', label: 'Walnut / cream', finish: 'walnut', surface: '#65412f', accent: '#e8bd7e', text: '#f2e5d2', border: '#a77b58' },
-  { id: 'ivory', label: 'Ivory / oxide red', finish: 'ivory', surface: '#e5ddc9', accent: '#bb5149', text: '#303941', border: '#9c927d' },
-  { id: 'slate', label: 'Slate / green', finish: 'matte', surface: '#263b3a', accent: '#82e6a8', text: '#e7f0e9', border: '#718f86' },
+  { id: 'graphite', label: 'Black anodised · ice', finish: 'anodized', surface: '#202a31', accent: '#77d6e8', text: '#edf4f6', border: '#70828c' },
+  { id: 'brushed', label: 'Satin aluminium · amber', finish: 'brushed', surface: '#a2abb0', accent: '#b87538', text: '#202a30', border: '#d9e0e3' },
+  { id: 'walnut', label: 'American walnut · cream', finish: 'walnut', surface: '#4b2d20', accent: '#d9ad70', text: '#f4e6d2', border: '#9d7048' },
+  { id: 'ivory', label: 'Warm enamel · oxide', finish: 'ivory', surface: '#e9e1ce', accent: '#a84d40', text: '#353a3d', border: '#b7ae9b' },
+  { id: 'forest', label: 'Forest enamel · brass', finish: 'matte', surface: '#293e3a', accent: '#b9a36b', text: '#eaf0e8', border: '#768b7f' },
 ];
 
 const FINISHES = [
-  ['matte', 'Matte powder coat'],
-  ['brushed', 'Brushed aluminium'],
-  ['anodized', 'Black anodized aluminium'],
-  ['walnut', 'Walnut veneer'],
-  ['ivory', 'Ivory enamel'],
+  ['matte', 'Fine-texture powder coat'],
+  ['brushed', 'Satin-brushed aluminium'],
+  ['anodized', 'Black anodised aluminium'],
+  ['walnut', 'Natural walnut veneer'],
+  ['ivory', 'Gloss ivory enamel'],
 ];
 const safeColor = (value, fallback) => /^#[0-9a-f]{6}$/i.test(String(value || '')) ? value : fallback;
 
@@ -218,10 +218,23 @@ export class FrontPanelEditor {
 
     this.stagePanel = make('section', 'ofp-stage-panel', this.workspace);
     const stageHead = make('div', 'ofp-stage-head', this.stagePanel);
-    const stageName = make('div', '', stageHead);
+    const stageName = make('div', 'ofp-stage-head__identity', stageHead);
     make('span', 'ofp-panel-heading__eyebrow', stageName, 'DESIGN CANVAS');
     make('strong', '', stageName, 'Instrument faceplate');
-    this.stageDimensions = make('span', 'ofp-stage-dimensions', stageHead);
+    const stageTools = make('div', 'ofp-stage-head__tools', stageHead);
+    this.stageDimensions = make('span', 'ofp-stage-dimensions', stageTools);
+    this.zoomReadout = make('output', 'ofp-stage-zoom', stageTools, '100%');
+    this.zoomOutButton = make('button', 'ofp-stage-zoom-button', stageTools, '−');
+    this.zoomOutButton.type = 'button';
+    this.zoomOutButton.setAttribute('aria-label', 'Zoom out');
+    this.zoomOutButton.addEventListener('click', () => this.zoomBy(.8));
+    this.zoomInButton = make('button', 'ofp-stage-zoom-button', stageTools, '+');
+    this.zoomInButton.type = 'button';
+    this.zoomInButton.setAttribute('aria-label', 'Zoom in');
+    this.zoomInButton.addEventListener('click', () => this.zoomBy(1.25));
+    this.zoomFitButton = make('button', 'ofp-stage-zoom-fit', stageTools, 'FIT');
+    this.zoomFitButton.type = 'button';
+    this.zoomFitButton.addEventListener('click', () => this.fitToViewport());
     this.viewport = make('div', 'ofp-viewport', this.stagePanel);
     this.stage = make('div', 'ofp-stage', this.viewport);
     this.faceplate = make('div', 'ofp-faceplate', this.stage);
@@ -345,93 +358,113 @@ export class FrontPanelEditor {
 
   zoomBy(factor, clientX = null, clientY = null) {
     const viewport = this.viewport;
-    if (!viewport) return;
+    if (!viewport || !Number.isFinite(factor) || factor <= 0) return;
     const viewportRect = viewport.getBoundingClientRect();
-    const faceplateRect = this.faceplate.getBoundingClientRect();
+    const oldRect = this.faceplate.getBoundingClientRect();
     const anchorX = Number.isFinite(clientX) ? clientX : viewportRect.left + viewportRect.width / 2;
     const anchorY = Number.isFinite(clientY) ? clientY : viewportRect.top + viewportRect.height / 2;
-    const pointX = (anchorX - faceplateRect.left) / (this.currentScale || 1);
-    const pointY = (anchorY - faceplateRect.top) / (this.currentScale || 1);
-    this.state.zoom = clamp((this.state.zoom || 1) * factor, .25, 4);
+    const oldScale = this.currentScale || 1;
+    const localX = (anchorX - oldRect.left) / oldScale;
+    const localY = (anchorY - oldRect.top) / oldScale;
+    this.state.zoom = clamp((Number(this.state.zoom) || 1) * factor, .25, 4);
     this.scaleFaceplate();
+    // Force layout before measuring the new transform so pointer-anchored zoom
+    // stays under the cursor instead of jumping toward the top-left corner.
+    void this.stage.offsetWidth;
     const nextRect = this.faceplate.getBoundingClientRect();
-    const nextX = nextRect.left + pointX * this.currentScale;
-    const nextY = nextRect.top + pointY * this.currentScale;
-    viewport.scrollLeft += nextX - anchorX;
-    viewport.scrollTop += nextY - anchorY;
+    viewport.scrollLeft += nextRect.left + localX * this.currentScale - anchorX;
+    viewport.scrollTop += nextRect.top + localY * this.currentScale - anchorY;
     this.commit();
   }
 
-    bindViewportNavigation() {
+  bindViewportNavigation() {
     const viewport = this.viewport;
     if (!viewport) return;
     const isEditable = (target) => target?.closest?.('input,textarea,select,[contenteditable="true"]');
     document.addEventListener('keydown', (event) => {
       if (this.el.hidden || event.code !== 'Space' || isEditable(event.target) || event.repeat) return;
       this.spacePressed = true;
-      if (this.el && !this.el.hidden) event.preventDefault();
+      event.preventDefault();
       viewport.classList.add('is-pan-ready');
     });
     document.addEventListener('keyup', (event) => {
       if (event.code !== 'Space') return;
       this.spacePressed = false;
-      viewport.classList.remove('is-pan-ready');
-      viewport.classList.remove('is-panning');
+      viewport.classList.remove('is-pan-ready', 'is-panning');
     });
     window.addEventListener('blur', () => {
       this.spacePressed = false;
-      viewport.classList.remove('is-pan-ready','is-panning');
       this.panState = null;
+      viewport.classList.remove('is-pan-ready', 'is-panning');
     });
+
     viewport.addEventListener('wheel', (event) => {
-      if (!this.el || this.el.hidden || !(event.ctrlKey || event.metaKey)) return;
+      if (this.el.hidden || !(event.ctrlKey || event.metaKey)) return;
       event.preventDefault();
       this.zoomBy(Math.exp(-event.deltaY * .002), event.clientX, event.clientY);
     }, { passive: false });
+
+    const stopPan = (event) => {
+      const pan = this.panState;
+      if (!pan || (event.pointerId !== undefined && event.pointerId !== pan.pointerId)) return;
+      viewport.removeEventListener('pointermove', movePan);
+      viewport.removeEventListener('pointerup', stopPan);
+      viewport.removeEventListener('pointercancel', stopPan);
+      try { viewport.releasePointerCapture(pan.pointerId); } catch { /* capture may already be released */ }
+      viewport.classList.remove('is-panning');
+      this.panState = null;
+      if (!pan.moved && pan.clickToClear) this.select(null);
+    };
+    const movePan = (event) => {
+      const pan = this.panState;
+      if (!pan || event.pointerId !== pan.pointerId) return;
+      const dx = event.clientX - pan.startX;
+      const dy = event.clientY - pan.startY;
+      if (Math.hypot(dx, dy) > 3) pan.moved = true;
+      viewport.scrollLeft = pan.scrollLeft - dx;
+      viewport.scrollTop = pan.scrollTop - dy;
+    };
+
     viewport.addEventListener('pointerdown', (event) => {
-      if (event.button !== 0 && event.button !== 1) return;
-      const overComponent = event.target.closest?.('.ofp-component');
-      if (overComponent && !this.spacePressed && !this.panMode && event.button !== 1) return;
-      if (this.tool === 'measure' || this.pendingGuideAxis) return;
-      if (event.target.closest?.('button,input,select,textarea')) return;
-      event.preventDefault();
+      if (this.el.hidden || (event.button !== 0 && event.button !== 1)) return;
       const target = event.target;
-      const startX = event.clientX;
-      const startY = event.clientY;
-      const scrollLeft = viewport.scrollLeft;
-      const scrollTop = viewport.scrollTop;
-      const pan = { pointerId: event.pointerId, startX, startY, scrollLeft, scrollTop, target, moved: false, clickToClear: !overComponent && event.button === 0 && !this.panMode };
+      const overComponent = target.closest?.('.ofp-component');
+      const explicitPan = event.button === 1 || this.spacePressed || this.panMode;
+      const blankCanvas = !overComponent && !target.closest?.('.ofp-ruler');
+      const shouldPan = explicitPan || (blankCanvas && event.button === 0);
+      if (!shouldPan || this.tool === 'measure' || this.pendingGuideAxis) return;
+      if (!explicitPan && target.closest?.('button,input,select,textarea,[contenteditable="true"]')) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+      const pan = {
+        pointerId: event.pointerId,
+        startX: event.clientX,
+        startY: event.clientY,
+        scrollLeft: viewport.scrollLeft,
+        scrollTop: viewport.scrollTop,
+        moved: false,
+        clickToClear: blankCanvas && event.button === 0 && !this.panMode && !this.spacePressed,
+      };
       this.panState = pan;
       viewport.classList.add('is-panning');
-      try { viewport.setPointerCapture(event.pointerId); } catch { /* optional pointer capture */ }
-      const move = (next) => {
-        if (next.pointerId !== pan.pointerId) return;
-        const dx = next.clientX - startX;
-        const dy = next.clientY - startY;
-        if (Math.hypot(dx,dy) > 3) pan.moved = true;
-        viewport.scrollLeft = scrollLeft - dx;
-        viewport.scrollTop = scrollTop - dy;
-      };
-      const finish = (next) => {
-        if (next?.pointerId !== undefined && next.pointerId !== pan.pointerId) return;
-        document.removeEventListener('pointermove',move);
-        document.removeEventListener('pointerup',finish);
-        document.removeEventListener('pointercancel',finish);
-        try { viewport.releasePointerCapture(pan.pointerId); } catch { /* optional */ }
-        viewport.classList.remove('is-panning');
-        this.panState = null;
-        if (!pan.moved && pan.clickToClear) this.select(null);
-      };
-      document.addEventListener('pointermove',move);
-      document.addEventListener('pointerup',finish);
-      document.addEventListener('pointercancel',finish);
+      try { viewport.setPointerCapture(event.pointerId); } catch { /* pointer capture is not supported by every input */ }
+      viewport.addEventListener('pointermove', movePan);
+      viewport.addEventListener('pointerup', stopPan);
+      viewport.addEventListener('pointercancel', stopPan);
     }, true);
+    viewport.addEventListener('contextmenu', (event) => {
+      if (event.button === 1 || this.panMode || this.spacePressed) event.preventDefault();
+    });
   }
 
   fitToViewport() {
     this.state.zoom = 1;
     this.scaleFaceplate();
-    if (this.viewport) { this.viewport.scrollTop = 0; this.viewport.scrollLeft = 0; }
+    if (this.viewport) {
+      this.viewport.scrollTop = 0;
+      this.viewport.scrollLeft = 0;
+    }
     this.commit();
   }
 
@@ -514,11 +547,22 @@ export class FrontPanelEditor {
       svg.appendChild(node);
     };
     const metal = '#b8c5cf', dark = '#18232e', accent = '#7de4ff';
-    if (['knob','dial','encoder'].includes(type)) {
-      shape('circle',{cx:32,cy:22,r:15,fill:'#101820',stroke:accent,'stroke-width':2});
-      shape('circle',{cx:32,cy:22,r:10,fill:'url(#none)',stroke:metal,'stroke-width':2});
-      shape('path',{d:'M32 13 L36 21',stroke:accent,'stroke-width':2.5,'stroke-linecap':'round'});
-      for(let i=0;i<9;i++){const a=(-120+i*30)*Math.PI/180;shape('line',{x1:32+Math.cos(a)*19,y1:22+Math.sin(a)*19,x2:32+Math.cos(a)*22,y2:22+Math.sin(a)*22,stroke:metal,'stroke-width':1.4});}
+    if (type === 'knob') {
+      shape('circle',{cx:32,cy:22,r:16,fill:'#0d141b',stroke:'#7d8c96','stroke-width':2});
+      for(let i=0;i<18;i++){const a=(i*20)*Math.PI/180;shape('line',{x1:32+Math.cos(a)*13,y1:22+Math.sin(a)*13,x2:32+Math.cos(a)*15,y2:22+Math.sin(a)*15,stroke:'#8d9ba4','stroke-width':1});}
+      shape('circle',{cx:32,cy:22,r:11,fill:'#35434d',stroke:'#0a1016','stroke-width':1.5});
+      shape('path',{d:'M32 13 L32 19',stroke:accent,'stroke-width':2.5,'stroke-linecap':'round'});
+    } else if (type === 'dial') {
+      shape('circle',{cx:32,cy:22,r:18,fill:'#121b23',stroke:'#a1adb5','stroke-width':1.6});
+      shape('circle',{cx:32,cy:22,r:13,fill:'#34434d',stroke:accent,'stroke-width':1});
+      for(let i=0;i<=10;i++){const a=(-135+i*27)*Math.PI/180;shape('line',{x1:32+Math.cos(a)*15,y1:22+Math.sin(a)*15,x2:32+Math.cos(a)*18,y2:22+Math.sin(a)*18,stroke:metal,'stroke-width':i%2===0?1.8:1});}
+      shape('path',{d:'M32 22 L24 13',stroke:'#f2f5f6','stroke-width':2.2,'stroke-linecap':'round'});
+      shape('circle',{cx:32,cy:22,r:2.5,fill:accent});
+    } else if (type === 'encoder') {
+      shape('circle',{cx:32,cy:22,r:17,fill:'#090f15',stroke:accent,'stroke-width':1.2});
+      for(let i=0;i<28;i++){const a=i*Math.PI/14;shape('line',{x1:32+Math.cos(a)*15,y1:22+Math.sin(a)*15,x2:32+Math.cos(a)*18,y2:22+Math.sin(a)*18,stroke:metal,'stroke-width':1.4});}
+      shape('circle',{cx:32,cy:22,r:11,fill:'#56636c',stroke:'#d0d8dd','stroke-width':1});
+      shape('circle',{cx:32,cy:22,r:4,fill:'#202b33',stroke:accent,'stroke-width':1});
     } else if (type === 'keyboard') {
       shape('rect',{x:4,y:7,width:56,height:30,rx:2,fill:dark,stroke:metal});
       for(let i=0;i<7;i++)shape('rect',{x:5+i*7.8,y:8,width:7.3,height:28,fill:'#e8edf0',stroke:'#87949e','stroke-width':.5});
@@ -1044,25 +1088,52 @@ export class FrontPanelEditor {
     node.style.setProperty('--ofp-control-border', safeColor(component.borderColor, component.accent || this.state.accent));
     const title = make('div', 'ofp-component__title', node, component.label || component.type.toUpperCase());
     title.title = 'Drag to move';
-    if (component.type === 'knob' || component.type === 'dial' || component.type === 'encoder') {
-      const isDial = component.type === 'dial';
-      const control = make('div', 'ofp-knob' + (isDial ? ' ofp-dial' : ''), node);
+    if (component.type === 'dial') {
+      const control = make('div', 'ofp-dial', node);
+      const scale = make('div', 'ofp-dial__scale', control);
+      for (let tick = 0; tick <= 20; tick += 1) {
+        const angle = -135 + tick * 13.5;
+        const mark = make('span', 'ofp-dial__tick', scale);
+        mark.style.transform = 'rotate(' + angle + 'deg) translateY(-42px)';
+        mark.classList.toggle('is-major', tick % 5 === 0);
+        if (tick % 5 === 0) {
+          const number = make('span', 'ofp-dial__number', scale, String(tick * 5));
+          number.style.transform = 'rotate(' + angle + 'deg) translateY(-31px) rotate(' + (-angle) + 'deg)';
+        }
+      }
+      make('div', 'ofp-dial__face', control);
+      const needle = make('span', 'ofp-dial__needle', control);
+      make('span', 'ofp-dial__hub', control);
+      const input = this.buildInput(component, null, 'ofp-dial__input');
+      control.appendChild(input);
+      const range = this.getRange(component);
+      const value = this.getValue(component);
+      const ratio = this.rangeRatio(range, value);
+      const angle = -135 + ratio * 270;
+      node.style.setProperty('--ofp-value', String(ratio));
+      needle.style.transform = 'rotate(' + angle + 'deg)';
+      const output = make('output', 'ofp-component__value', node, range.log ? String(Math.round(value)) : value.toFixed(range.step >= 1 ? 0 : 2));
+      output.dataset.ofpRole = 'value';
+    } else if (component.type === 'knob' || component.type === 'encoder') {
+      const isEncoder = component.type === 'encoder';
+      const control = make('div', 'ofp-knob' + (isEncoder ? ' ofp-encoder' : ''), node);
       const scale = make('div', 'ofp-knob__scale', control);
       for (let tick = 0; tick <= 10; tick += 1) {
         const angle = -135 + tick * 27;
         const mark = make('span', 'ofp-knob__tick', scale);
         mark.style.transform = 'rotate(' + angle + 'deg) translateY(-42px)';
         mark.classList.toggle('is-major', tick % 2 === 0);
-        if (isDial && tick % 2 === 0) {
-          const number = make('span', 'ofp-dial__number', scale, String(tick / 2));
-          number.style.transform = 'rotate(' + angle + 'deg) translateY(-32px) rotate(' + (-angle) + 'deg)';
-        }
       }
       const ring = make('div', 'ofp-knob__ring', control);
       make('div', 'ofp-knob__bezel', control);
       const cap = make('div', 'ofp-knob__cap', control);
-      if (isDial) make('span', 'ofp-dial__needle', control);
-      else make('span', 'ofp-knob__indicator', cap);
+      make('span', 'ofp-knob__indicator', cap);
+      if (isEncoder) {
+        for (let groove = 0; groove < 24; groove += 1) {
+          const tooth = make('span', 'ofp-encoder__tooth', control);
+          tooth.style.transform = 'rotate(' + (groove * 15) + 'deg)';
+        }
+      }
       const input = this.buildInput(component, null, 'ofp-knob__input');
       control.appendChild(input);
       const range = this.getRange(component);
@@ -1070,8 +1141,8 @@ export class FrontPanelEditor {
       const ratio = this.rangeRatio(range, value);
       const angle = -135 + ratio * 270;
       node.style.setProperty('--ofp-value', String(ratio));
-      node.style.setProperty('--ofp-angle', angle + 'deg');
-      const pointer = control.querySelector('.ofp-knob__indicator, .ofp-dial__needle');
+      ring.style.setProperty('--ofp-angle', angle + 'deg');
+      const pointer = control.querySelector('.ofp-knob__indicator');
       if (pointer) pointer.style.transform = 'rotate(' + angle + 'deg)';
       const output = make('output', 'ofp-component__value', node, range.log ? String(Math.round(value)) : value.toFixed(range.step >= 1 ? 0 : 2));
       output.dataset.ofpRole = 'value';
@@ -1210,8 +1281,8 @@ export class FrontPanelEditor {
     const start = clamp(Math.round(Number(component.startNote ?? 48) / 12) * 12, 0, 127 - 12 * octaves);
     const board = make('div', 'ofp-keyboard', node);
     const rearRail = make('div', 'ofp-keyboard__rear-rail', board);
-    make('span', 'ofp-keyboard__brand', rearRail, 'OMNI');
-    make('span', 'ofp-keyboard__model', rearRail, octaves + ' OCTAVE KEYBED');
+    make('span', 'ofp-keyboard__brand', rearRail, 'OVERTURE');
+    make('span', 'ofp-keyboard__model', rearRail, octaves + ' OCTAVE · PERFORMANCE KEYBED');
     const keywell = make('div', 'ofp-keyboard__keywell', board);
     const keys = make('div', 'ofp-keyboard__keys', keywell);
     const whiteSemitones = [0, 2, 4, 5, 7, 9, 11];
@@ -1905,6 +1976,9 @@ export class FrontPanelEditor {
     this.stage.style.marginTop = Math.max(16,(this.viewport.clientHeight-scaledHeight)/2) + 'px';
     this.stage.style.marginRight = '16px';
     this.stage.style.marginBottom = '16px';
+    if (this.zoomReadout) this.zoomReadout.textContent = Math.round((this.state.zoom || 1) * 100) + '%';
+    if (this.zoomOutButton) this.zoomOutButton.disabled = (this.state.zoom || 1) <= .25;
+    if (this.zoomInButton) this.zoomInButton.disabled = (this.state.zoom || 1) >= 4;
     this.renderRulers();
   }
 
@@ -1986,17 +2060,20 @@ export class FrontPanelEditor {
       return this.rangeRatio(range,value);
     };
     const defs = [
-      '<pattern id="ofp-brushed" width="4" height="4" patternUnits="userSpaceOnUse"><path d="M0 1H4 M0 3H4" stroke="#ffffff" stroke-opacity=".12" stroke-width=".5"/></pattern>',
-      '<pattern id="ofp-walnut" width="22" height="9" patternUnits="userSpaceOnUse"><path d="M0 2 C6 0 12 4 22 2 M0 7 C7 5 15 9 22 7" fill="none" stroke="#6e452d" stroke-opacity=".65" stroke-width=".8"/></pattern>',
-      '<linearGradient id="ofp-anodized" x2="0" y2="1"><stop offset="0" stop-color="#ffffff" stop-opacity=".14"/><stop offset=".48" stop-color="#6bc8df" stop-opacity=".06"/><stop offset="1" stop-color="#000000" stop-opacity=".2"/></linearGradient>',
-      '<linearGradient id="ofp-ivory" x2="0" y2="1"><stop offset="0" stop-color="#ffffff" stop-opacity=".35"/><stop offset="1" stop-color="#b3b9bc" stop-opacity=".12"/></linearGradient>',
+      '<pattern id="ofp-matte" width="5" height="5" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r=".35" fill="#ffffff" fill-opacity=".16"/><circle cx="4" cy="3" r=".3" fill="#000000" fill-opacity=".2"/></pattern>',
+      '<pattern id="ofp-brushed" width="6" height="6" patternUnits="userSpaceOnUse"><path d="M0 1H6 M0 3H6 M0 5H6" stroke="#ffffff" stroke-opacity=".17" stroke-width=".45"/><path d="M0 2H6" stroke="#17242c" stroke-opacity=".12" stroke-width=".5"/></pattern>',
+      '<pattern id="ofp-walnut" width="34" height="14" patternUnits="userSpaceOnUse"><path d="M0 2 C8 -1 15 6 34 2 M0 7 C10 4 19 11 34 7 M0 12 C8 9 23 15 34 12" fill="none" stroke="#b47c50" stroke-opacity=".42" stroke-width=".8"/><path d="M10 0 C16 4 12 8 20 14" fill="none" stroke="#24140d" stroke-opacity=".3" stroke-width="1"/></pattern>',
+      '<pattern id="ofp-anodized" width="4" height="4" patternUnits="userSpaceOnUse"><path d="M0 0V4 M2 0V4" stroke="#a9c6d2" stroke-opacity=".09" stroke-width=".55"/><path d="M3 0V4" stroke="#000000" stroke-opacity=".2" stroke-width=".5"/></pattern>',
+      '<linearGradient id="ofp-ivory" x2="0" y2="1"><stop offset="0" stop-color="#ffffff" stop-opacity=".5"/><stop offset=".38" stop-color="#f7f1e4" stop-opacity=".18"/><stop offset="1" stop-color="#8e8a7d" stop-opacity=".13"/></linearGradient>',
+      '<linearGradient id="ofp-enamel-highlight" x2="0" y2="1"><stop offset="0" stop-color="#ffffff" stop-opacity=".32"/><stop offset=".14" stop-color="#ffffff" stop-opacity=".04"/><stop offset="1" stop-color="#000000" stop-opacity=".08"/></linearGradient>',
       '<filter id="ofp-soft-shadow" x="-25%" y="-25%" width="150%" height="165%"><feGaussianBlur in="SourceAlpha" stdDeviation="3"/><feOffset dy="4"/><feComponentTransfer><feFuncA type="linear" slope=".38"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>',
       '<filter id="ofp-hard-shadow" x="-25%" y="-25%" width="150%" height="170%"><feGaussianBlur in="SourceAlpha" stdDeviation="1"/><feOffset dy="7"/><feComponentTransfer><feFuncA type="linear" slope=".48"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>',
     ].join('');
     const materialOverlay = (x,y,w,h,finish) => {
-      if (finish === 'brushed') return rect(x,y,w,h,'url(#ofp-brushed)','none',7,'opacity=".75"');
-      if (finish === 'walnut') return rect(x,y,w,h,'url(#ofp-walnut)','none',7,'opacity=".8"');
-      if (finish === 'anodized') return rect(x,y,w,h,'url(#ofp-anodized)','none',7);
+      if (finish === 'matte') return rect(x,y,w,h,'url(#ofp-matte)','none',7,'opacity=".58"');
+      if (finish === 'brushed') return rect(x,y,w,h,'url(#ofp-brushed)','none',7,'opacity=".82"');
+      if (finish === 'walnut') return rect(x,y,w,h,'url(#ofp-walnut)','none',7,'opacity=".85"');
+      if (finish === 'anodized') return rect(x,y,w,h,'url(#ofp-anodized)','none',7,'opacity=".9"');
       if (finish === 'ivory') return rect(x,y,w,h,'url(#ofp-ivory)','none',7);
       return '';
     };
@@ -2018,12 +2095,30 @@ export class FrontPanelEditor {
         shape += materialOverlay(x,y,w,h,finish);
       }
       const cx=x+w/2, cy=y+h/2;
-      if (['knob','dial','encoder'].includes(component.type)) {
-        const r=Math.min(w,h)*.25, ratio=valueRatio(component), angle=(-135+ratio*270)*Math.PI/180;
-        shape += '<circle cx="'+cx+'" cy="'+(y+h*.56)+'" r="'+(r*1.25)+'" fill="#111820" stroke="'+accent+'" stroke-width="2"/>';
-        shape += '<circle cx="'+cx+'" cy="'+(y+h*.56)+'" r="'+r+'" fill="#56616b" stroke="#aeb9c2" stroke-opacity=".55"/>';
-        shape += '<path d="M '+cx+' '+(y+h*.56-r*.65)+' L '+(cx+Math.sin(angle)*r*.75)+' '+(y+h*.56-Math.cos(angle)*r*.75)+'" stroke="'+accent+'" stroke-width="3" stroke-linecap="round"/>';
-        shape += '<path d="M '+(cx-r*1.5)+' '+(y+h*.56+r*1.55)+' A '+(r*1.5)+' '+(r*1.5)+' 0 1 1 '+(cx+r*1.5)+' '+(y+h*.56+r*1.55)+'" fill="none" stroke="'+accent+'" stroke-opacity=".65"/>';
+      if (component.type === 'dial') {
+        const r=Math.min(w,h)*.31, ratio=valueRatio(component), angle=(-135+ratio*270)*Math.PI/180, faceY=y+h*.58;
+        shape += '<circle cx="'+cx+'" cy="'+faceY+'" r="'+(r*1.2)+'" fill="#0b1118" stroke="'+border+'" stroke-width="2"/>';
+        shape += '<circle cx="'+cx+'" cy="'+faceY+'" r="'+r+'" fill="'+surface+'" stroke="'+accent+'" stroke-opacity=".7" stroke-width="1.2"/>';
+        for(let tick=0;tick<=20;tick++){
+          const a=(-135+tick*13.5)*Math.PI/180, major=tick%5===0, inner=r*.94, outer=r*(major?1.12:1.05);
+          shape += '<path d="M '+(cx+Math.sin(a)*inner)+' '+(faceY-Math.cos(a)*inner)+' L '+(cx+Math.sin(a)*outer)+' '+(faceY-Math.cos(a)*outer)+'" stroke="'+legend+'" stroke-opacity="'+(major?'.9':'.45')+'" stroke-width="'+(major?1.8:1)+'"/>';
+          if(major){
+            const label=tick*5, tx=cx+Math.sin(a)*r*1.29, ty=faceY-Math.cos(a)*r*1.29+2;
+            shape += text(tx,ty,String(label),legend,Math.max(5,fontSize-2),'middle');
+          }
+        }
+        const tipX=cx+Math.sin(angle)*r*.85, tipY=faceY-Math.cos(angle)*r*.85;
+        shape += '<path d="M '+cx+' '+faceY+' L '+tipX+' '+tipY+'" stroke="#f5f7f8" stroke-width="2.4" stroke-linecap="round"/>';
+        shape += '<circle cx="'+cx+'" cy="'+faceY+'" r="'+(r*.12)+'" fill="'+accent+'" stroke="#111820" stroke-width="1"/>';
+      } else if (component.type === 'knob' || component.type === 'encoder') {
+        const r=Math.min(w,h)*.25, ratio=valueRatio(component), angle=(-135+ratio*270)*Math.PI/180, faceY=y+h*.56;
+        shape += '<circle cx="'+cx+'" cy="'+faceY+'" r="'+(r*1.25)+'" fill="#101820" stroke="'+border+'" stroke-width="2"/>';
+        if(component.type==='encoder'){
+          for(let tooth=0;tooth<32;tooth++){const a=tooth*Math.PI/16;shape += '<path d="M '+(cx+Math.cos(a)*r*1.12)+' '+(faceY+Math.sin(a)*r*1.12)+' L '+(cx+Math.cos(a)*r*1.28)+' '+(faceY+Math.sin(a)*r*1.28)+'" stroke="'+legend+'" stroke-opacity=".8" stroke-width="1.2"/>';}
+        }
+        shape += '<circle cx="'+cx+'" cy="'+faceY+'" r="'+r+'" fill="'+surface+'" stroke="#aeb9c2" stroke-opacity=".55"/>';
+        shape += '<path d="M '+cx+' '+(faceY-r*.65)+' L '+(cx+Math.sin(angle)*r*.75)+' '+(faceY-Math.cos(angle)*r*.75)+'" stroke="'+accent+'" stroke-width="3" stroke-linecap="round"/>';
+        shape += '<path d="M '+(cx-r*1.5)+' '+(faceY+r*1.55)+' A '+(r*1.5)+' '+(r*1.5)+' 0 1 1 '+(cx+r*1.5)+' '+(faceY+r*1.55)+'" fill="none" stroke="'+accent+'" stroke-opacity=".65"/>';
       } else if (component.type === 'slider') {
         const ratio=valueRatio(component);
         if (component.orientation === 'horizontal') {
@@ -2206,25 +2301,45 @@ export class FrontPanelEditor {
     close.type = 'button';
     close.addEventListener('click', () => dialog.close());
     const viewport = make('div', 'ofp-preview-dialog__stage', dialog);
-    const markup = this.exportSVGMarkup();
-    const parsed = new DOMParser().parseFromString(markup, 'image/svg+xml');
-    if (parsed.querySelector('parsererror') || parsed.documentElement.localName !== 'svg') {
+
+    try {
+      const template = document.createElement('template');
+      template.innerHTML = this.exportSVGMarkup().trim();
+      const sourceSvg = template.content.querySelector('svg');
+      if (!sourceSvg || sourceSvg.namespaceURI !== 'http://www.w3.org/2000/svg') {
+        throw new Error('The exported faceplate did not contain a valid SVG element.');
+      }
+      const svg = document.importNode(sourceSvg, true);
+      svg.setAttribute('class', 'ofp-preview-dialog__artwork');
+      svg.setAttribute('role', 'img');
+      svg.setAttribute('aria-label', 'Front-panel artwork preview');
+      svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+      svg.style.display = 'block';
+      svg.style.width = '100%';
+      svg.style.height = 'auto';
+      svg.style.maxWidth = '100%';
+      svg.style.maxHeight = '72vh';
+      viewport.appendChild(svg);
+    } catch (error) {
       dialog.remove();
       this.previewDialog = null;
-      this.app.msg('The faceplate preview could not be rendered. Check the current design and try again.', true);
+      this.app.msg('Preview could not be generated: ' + (error?.message || 'Invalid front-panel artwork.'), true);
       return;
     }
-    const svg = document.importNode(parsed.documentElement, true);
-    svg.setAttribute('class', 'ofp-preview-dialog__artwork');
-    svg.setAttribute('role', 'img');
-    svg.setAttribute('aria-label', 'Front-panel artwork preview');
-    viewport.appendChild(svg);
+
     dialog.addEventListener('close', () => { dialog.remove(); this.previewDialog = null; }, { once: true });
     dialog.addEventListener('click', (event) => { if (event.target === dialog) dialog.close(); });
-    dialog.showModal();
+    try {
+      dialog.showModal();
+      close.focus({ preventScroll: true });
+    } catch (error) {
+      dialog.remove();
+      this.previewDialog = null;
+      this.app.msg('Preview could not be opened: ' + (error?.message || 'Dialog unavailable.'), true);
+    }
   }
 
-  runDesignCheck() {
+    runDesignCheck() {
     const components = this.state.components.filter((item) => !item.hidden);
     const findings = [];
     components.forEach((item) => {
