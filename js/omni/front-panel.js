@@ -1399,6 +1399,9 @@ export class FrontPanelEditor {
     const esc = (value) => String(value ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;');
     const width = this.state.width, height = this.state.height;
     const background = safeColor(this.state.panelColor, '#252d35');
+    const panelBorder = safeColor(this.state.panelBorderColor, '#667583');
+    const panelBorderWidth = clamp(this.state.panelBorderWidth ?? 1, 0, 8);
+    const panelRadius = clamp(this.state.panelRadius ?? 14, 0, 40);
     const globalAccent = safeColor(this.state.accent, '#ffb75e');
     const globalText = safeColor(this.state.textColor, '#edf3fa');
     const rect = (x,y,w,h,fill,stroke='none',radius=4,extra='') =>
@@ -1515,7 +1518,7 @@ export class FrontPanelEditor {
     }).join('');
     const panelFinish=materialOverlay(0,0,width,height,this.state.finish||'matte');
     const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="'+width+'" height="'+height+'" viewBox="0 0 '+width+' '+height+'"><defs>'+defs+'</defs>'
-      + rect(0,0,width,height,background,'#ffffff',16)
+      + rect(0,0,width,height,background,panelBorder,panelRadius,'stroke-width="'+panelBorderWidth+'"')
       + panelFinish + componentMarkup + '</svg>';
     const blob = new Blob([svg], { type: 'image/svg+xml' });
     const url = URL.createObjectURL(blob);
