@@ -2406,3 +2406,10 @@ html[data-theme="light"] #omni-root .ofp-component__title {text-shadow:none}
 }
 #omni-root dialog.ofp-preview-dialog .ofp-preview-dialog__stage {width:100%;min-width:0}
 html[data-theme="light"] #omni-root dialog.ofp-preview-dialog .ofp-preview-dialog__artwork {filter:drop-shadow(0 12px 24px rgba(39,58,77,.2))}
+
+#omni-root .ofp-viewport.is-pan-tool {cursor:grab}
+#omni-root .ofp-viewport.is-pan-tool .ofp-component {cursor:grab}
+#omni-root .ofp-viewport.is-pan-tool .ofp-component__title {cursor:grab}
+#omni-root .ofp-viewport.is-panning {cursor:grabbing}
+#omni-root .ofp-tool-toggle[aria-pressed="true"] {border-color:rgba(125,228,255,.5);color:#10202b;background:linear-gradient(135deg,#a8edff,#63cde7)}
+html[data-theme="light"] #omni-root .ofp-tool-toggle[aria-pressed="true"] {color:#fff;background:#087f9f}
