@@ -788,7 +788,7 @@ async function bootLauncher() {
 }
 
 if (isEditor) {
-  import('./omni.js?v=20261119-front-panel-r3');
+  import('./omni.js?v=20261119-front-panel-r4');
 } else {
   void bootLauncher();
 }
