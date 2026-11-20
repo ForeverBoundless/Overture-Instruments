@@ -27,10 +27,10 @@ test('OMNI chord interval sliders expose the complete ±32-semitone range', asyn
   assert.ok(worker.includes(`/js/omni/graph.js?v=20261119-front-panel-r2`));
   assert.ok(worker.includes(`/js/omni/modules.js?v=20261118-organ-drawbar-r1`));
   assert.ok(page.includes('omni.css?v=20261119-front-panel-r16'));
-  assert.ok(page.includes('omni-launcher.js?v=20261119-front-panel-r16'));
+  assert.ok(page.includes('omni-launcher.js?v=20261119-front-panel-r17'));
   assert.match(worker, /overture-shell-v\d+/);
   assert.ok(worker.includes('/css/omni.css?v=20261119-front-panel-r16'));
-  assert.ok(worker.includes('/js/omni-launcher.js?v=20261119-front-panel-r16'));
+  assert.ok(worker.includes('/js/omni-launcher.js?v=20261119-front-panel-r17'));
 });
 
 test('OMNI exposes recording, searchable modules and editing shortcuts', async () => {
@@ -102,26 +102,35 @@ test('OMNI performance deck keeps octave controls in the keyboard header and giv
   assert.match(css, /\.omni-keys \.lp-keyboard[^}]*width:100%/);
   assert.match(css, /\.omni-keys \.lp-keyboard[^}]*min-width:520px/);
   assert.match(page, /omni\.css\?v=20261119-front-panel-r16/);
-  assert.match(page, /omni-launcher\.js\?v=20261119-front-panel-r16/);
+  assert.match(page, /omni-launcher\.js\?v=20261119-front-panel-r17/);
   assert.match(worker, /overture-shell-v\d+/);
   assert.match(worker, /omni\.css\?v=20261119-front-panel-r16/);
-  assert.ok(worker.includes('/js/omni-launcher.js?v=20261119-front-panel-r16'));
+  assert.ok(worker.includes('/js/omni-launcher.js?v=20261119-front-panel-r17'));
 });
 
 
-test('OMNI keyboard spans four octaves and status text avoids the centered theme toggle', async () => {
+test('OMNI keyboard spans five octaves and status text avoids the centered theme toggle', async () => {
   const [source, css, page, worker] = await Promise.all([
     readFile(new URL('../js/omni.js', import.meta.url), 'utf8'),
     readFile(new URL('../css/omni.css', import.meta.url), 'utf8'),
     readFile(new URL('../omni.html', import.meta.url), 'utf8'),
     readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
+    readFile(new URL('../ui/Keyboard.js', import.meta.url), 'utf8'),
   ]);
-  assert.match(source, /octaves:\s*4/);
-  assert.match(source, /C2 – C6/);
+  assert.match(source, /octaves:\s*5/);
+  assert.match(source, /C2 – C7/);
+  assert.match(keyboard, /const whiteKeyWidthPct = 100 \/ whiteKeys\.length;/);
   assert.match(css, /\.omni-commandbar > \.omni-status[\s\S]*text-align:right/);
   assert.match(source, /commandbar\.appendChild\(this\.status\)/);
-  assert.match(page, /omni-launcher\.js\?v=20261119-front-panel-r16/);
+  assert.match(page, /omni-launcher\.js\?v=20261119-front-panel-r17/);
   assert.match(worker, /overture-shell-v\d+/);
+});
+
+
+test('OMNI always opens in Engine View, regardless of the saved workspace view', async () => {
+  const source = await readFile(new URL('../js/omni.js', import.meta.url), 'utf8');
+  assert.match(source, /this\.workspaceView = 'engine';/);
+  assert.doesNotMatch(source, /this\.workspaceView = savedWorkspace\?\.workspaceView/);
 });
 
 test('community publish login link honours Supabase hidden state in every responsive layout', async () => {
@@ -195,7 +204,7 @@ test('OMNI performance pane can be shown/hidden from View and remembers its stat
   assert.match(source, /localStorage\.setItem\('overture\.omni\.performance-visible'/);
   assert.match(source, /this\.performanceToggleBtn\.setAttribute\('aria-pressed'/);
   assert.match(css, /#omni-root > \.omni-perf\[hidden\]\s*\{\s*display:none !important/);
-  assert.match(page, /omni-launcher\.js\?v=20261119-front-panel-r16/);
+  assert.match(page, /omni-launcher\.js\?v=20261119-front-panel-r17/);
   assert.match(worker, /overture-shell-v\d+/);
 });
 
@@ -258,11 +267,11 @@ test('OMNI exposes native SEM and Mellotron instrument modules and refreshes off
   assert.match(graph, /20261118-organ-drawbar-r1/);
   assert.match(templates, /SEM Warm Ensemble/);
   assert.match(templates, /Mellotron Choir/);
-  assert.match(page, /omni-launcher\.js\?v=20261119-front-panel-r16/);
+  assert.match(page, /omni-launcher\.js\?v=20261119-front-panel-r17/);
   assert.match(worker, /overture-shell-v\d+/);
   assert.match(worker, /OberheimEightVoiceProcessor\.js/);
   assert.match(worker, /MellotronProcessor\.js/);
-  assert.ok(worker.includes('/js/omni-launcher.js?v=20261119-front-panel-r16'));
+  assert.ok(worker.includes('/js/omni-launcher.js?v=20261119-front-panel-r17'));
 });
 
 
@@ -292,7 +301,7 @@ test('every OMNI module has a complete technical reference and the inspector can
   assert.match(styles, /html\[data-theme="light"\] \.omni-info-dialog/);
   assert.match(styles, /\.omni-info-dialog\s*\{/);
   assert.match(page, /omni-info\.css\?v=20261114-info-type/);
-  assert.match(page, /omni-launcher\.js\?v=20261119-front-panel-r16/);
+  assert.match(page, /omni-launcher\.js\?v=20261119-front-panel-r17/);
   assert.match(worker, /overture-shell-v\d+/);
   assert.match(worker, /omni-info\.css\?v=20261114-info-type/);
   assert.match(worker, /moduleInfo\.js\?v=20261117-omni-module-expansion-r3/);
@@ -463,8 +472,8 @@ test('OMNI front-panel workspaces and precision design tools are integrated', as
   assert.match(css, /\.ofp-layers-panel/);
   assert.match(css, /html\[data-theme="light"\].*ofp-library/);
   assert.match(page, /omni\.css\?v=20261119-front-panel-r16/);
-  assert.match(launcher, /omni\.js\?v=20261119-front-panel-r16/);
-  assert.match(worker, /overture-shell-v150/);
+  assert.match(launcher, /omni\.js\?v=20261119-front-panel-r17/);
+  assert.match(worker, /overture-shell-v151/);
   assert.match(worker, /front-panel\.js\?v=20261119-front-panel-r15/);
   assert.match(worker, /graph\.js\?v=20261119-front-panel-r2/);
   assert.match(readme, /Front-end View/);
