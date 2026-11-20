@@ -31,6 +31,15 @@ const TYPES = [
   ['oled', 'OLED display', 'DISPLAYS'],
   ['led', 'LED indicator', 'DISPLAYS'],
 ];
+
+const MATERIAL_PRESETS = [
+  { id: 'graphite', label: 'Graphite / cyan', finish: 'anodized', surface: '#19232b', accent: '#7de4ff', text: '#e8f0f5', border: '#667987' },
+  { id: 'brushed', label: 'Brushed / amber', finish: 'brushed', surface: '#8c989f', accent: '#e6a94e', text: '#1b252d', border: '#d1d9de' },
+  { id: 'walnut', label: 'Walnut / cream', finish: 'walnut', surface: '#65412f', accent: '#e8bd7e', text: '#f2e5d2', border: '#a77b58' },
+  { id: 'ivory', label: 'Ivory / oxide red', finish: 'ivory', surface: '#e5ddc9', accent: '#bb5149', text: '#303941', border: '#9c927d' },
+  { id: 'slate', label: 'Slate / green', finish: 'matte', surface: '#263b3a', accent: '#82e6a8', text: '#e7f0e9', border: '#718f86' },
+];
+
 const FINISHES = [
   ['matte', 'Matte powder coat'],
   ['brushed', 'Brushed aluminium'],
@@ -46,7 +55,12 @@ export class FrontPanelEditor {
     this.selectedId = null;
     this.selectedIds = new Set();
     this.dragState = null;
-    this.state = app.patch.frontPanel ? clone(app.patch.frontPanel) : this.defaultLayout();
+    const savedPanel = app.patch.frontPanel;
+    const legacyStarterLabels = ['INSTRUMENT','CUTOFF','RESONANCE','ATTACK','WAVEFORM','ALL NOTES OFF','OSCILLATOR','KEYBOARD  /  2 OCTAVES','PITCH','MOD','STATUS DISPLAY','AUDIO'];
+    const legacyStarterLayout = savedPanel?.components?.length === 12 &&
+      savedPanel.width === 1240 && savedPanel.height === 520 &&
+      legacyStarterLabels.every((label) => savedPanel.components.some((item) => String(item.label || '').toUpperCase() === label));
+    this.state = savedPanel && !legacyStarterLayout ? clone(savedPanel) : this.defaultLayout();
     app.patch.frontPanel = this.state;
     this.build(root);
     this.render();
@@ -95,7 +109,7 @@ export class FrontPanelEditor {
     this.fitButton = make('button', 'ofp-action', actions, 'FIT PANEL');
     this.fitButton.type = 'button';
     this.fitButton.addEventListener('click', () => { this.state.zoom = 1; this.scaleFaceplate(); this.commit(); });
-    this.resetButton = make('button', 'ofp-action', actions, 'RESET LAYOUT');
+    this.resetButton = make('button', 'ofp-action', actions, 'CLEAR PANEL');
     this.resetButton.type = 'button';
     this.resetButton.addEventListener('click', () => {
       if (!window.confirm('Clear the faceplate and start with an empty layout?')) return;
@@ -1319,8 +1333,8 @@ export class FrontPanelEditor {
     const count = this.state.components.length;
     const component = {
       id: id(), type, label: type === 'button' ? 'BUTTON' : label.toUpperCase(),
-      x: clamp(Number.isFinite(Number(x)) ? Number(x) - size[0] / 2 : 24 + (count % 4) * 34, 0, this.state.width - size[0]),
-      y: clamp(Number.isFinite(Number(y)) ? Number(y) - size[1] / 2 : 24 + (count % 4) * 30, 0, this.state.height - size[1]),
+      x: clamp(Number.isFinite(x) ? x - size[0] / 2 : (this.state.width - size[0]) / 2 + (count % 4) * 26, 0, this.state.width - size[0]),
+      y: clamp(Number.isFinite(y) ? y - size[1] / 2 : (this.state.height - size[1]) / 2 + (count % 4) * 22, 0, this.state.height - size[1]),
       w: size[0], h: size[1], value: 0.5,
       accent: this.state.accent, surface: '#26313d', textColor: this.state.textColor,
       finish: this.state.finish, margin: 8, padding: 7, gap: 5, radius: 7, fontSize: 8, borderWidth: 1, shadow: 'soft', orientation: 'horizontal', hidden: false, locked: false,
@@ -1460,7 +1474,48 @@ export class FrontPanelEditor {
     remove.addEventListener('click', () => this.removeSelected());
   }
 
-  renderComponentAppearance(component) {
+  applyMaterialPreset(presetId, component = null) {
+    const preset = MATERIAL_PRESETS.find((item) => item.id === presetId);
+    if (!preset) return;
+    if (component) {
+      component.finish = preset.finish;
+      component.surface = preset.surface;
+      component.accent = preset.accent;
+      component.textColor = preset.text;
+      component.borderColor = preset.border;
+    } else {
+      this.state.finish = preset.finish;
+      this.state.panelColor = preset.surface;
+      this.state.accent = preset.accent;
+      this.state.textColor = preset.text;
+      this.state.panelBorderColor = preset.border;
+    }
+    this.render();
+    this.commit();
+  }
+
+  renderMaterialPresets(parent, component = null) {
+    const group = make('div', 'ofp-material-presets', parent);
+    make('span', 'ofp-panel-heading__eyebrow', group, 'HARDWARE PALETTES');
+    const grid = make('div', 'ofp-material-presets__grid', group);
+    MATERIAL_PRESETS.forEach((preset) => {
+      const button = make('button', 'ofp-material-preset', grid);
+      button.type = 'button';
+      button.title = preset.label;
+      button.setAttribute('aria-label', 'Apply ' + preset.label + ' palette');
+      button.dataset.finish = preset.finish;
+      const chips = make('span', 'ofp-material-preset__chips', button);
+      [preset.surface,preset.accent,preset.text].forEach((colour) => {
+        const chip = make('span', '', chips);
+        chip.style.backgroundColor = colour;
+      });
+      make('span', 'ofp-material-preset__label', button, preset.label);
+      button.addEventListener('click', () => this.applyMaterialPreset(preset.id, component));
+    });
+  }
+
+    renderComponentAppearance(component) {
+    this.renderMaterialPresets(this.inspectorBody, component);
     this.selectField('Material', component.finish || this.state.finish, FINISHES, (value) => {
       component.finish = value;
       this.render();
@@ -1636,6 +1691,7 @@ export class FrontPanelEditor {
   }
 
   renderPanelSettings() {
+    this.renderMaterialPresets(this.inspectorBody);
     this.inputField('Panel width (' + this.state.unit + ')', this.unitValue(this.state.width), 'number', (value) => {
       this.state.width = clamp(this.unitPixels(value), 800, 1800);
       this.state.components.forEach((item) => { item.w = Math.min(item.w, this.state.width); item.x = clamp(item.x, 0, this.state.width - item.w); });
