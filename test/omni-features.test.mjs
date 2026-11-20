@@ -137,27 +137,30 @@ test('OMNI launcher links to a complete, theme-aware documentation page', async 
     readFile(new URL('../vercel.json', import.meta.url), 'utf8'),
   ]);
   assert.ok(launcher.includes('class="community-button community-button--quiet" id="omni-documentation" href="/omni/documentation">DOCUMENTATION</a>'));
-  for (const section of ['overview','quick-start','engine-view','modules','connections','performance-midi','recording-macros','patches','front-panel','preview-export','shortcuts','troubleshooting']) {
-    assert.ok(page.includes('id="' + section + '"'), 'missing documentation section: ' + section);
   assert.match(page, /class="omni-docs-intro"/);
   assert.doesNotMatch(page, /omni-docs-hero|omni-doc-section__number/);
   assert.match(page, /<h2 id="overview-title">1\. What is OMNI\?<\/h2>/);
   assert.match(page, /<h2 id="quick-start-title">2\. Quick start<\/h2>/);
-  assert.match(css, /\.omni-docs-layout\s*\{[^}]*display:\s*flex/s);
-  assert.match(css, /\.omni-docs-content\s*\{[^}]*min-width:\s*0/s);
+  assert.equal((page.match(/<h2 id="[^"]+">\d+\./g) || []).length, 12);
+  assert.match(css, /\.omni-docs-layout\s*\{[^}]*display:\s*grid/s);
+  assert.match(css, /grid-template-columns:\s*minmax\(0,\s*1fr\)/);
+  assert.match(css, /\.omni-docs-content\s*\{[^}]*display:\s*block/s);
   assert.match(css, /omni-docs-page \.site-footer[\s\S]*?--amber:\s*var\(--cyan\)/);
+  assert.match(css, /--oi-community-button-background:\s*linear-gradient/);
   assert.match(css, /omni-docs-page \.contact-modal \.button--primary/);
   assert.match(css, /omni-docs-page \.site-header \.header-account:hover/);
+  for (const section of ['overview','quick-start','engine-view','modules','connections','performance-midi','recording-macros','patches','front-panel','preview-export','shortcuts','troubleshooting']) {
+    assert.ok(page.includes('id="' + section + '"'), 'missing documentation section: ' + section);
     assert.ok(page.includes('href="#' + section + '"'), 'missing section navigation link: ' + section);
   }
   assert.ok(page.includes('/js/shared/site-theme.js'));
   assert.ok(page.includes('/js/shared/site-nav.js'));
-  assert.ok(page.includes('/css/omni-documentation.css?v=20261119-omni-docs-r3'));
+  assert.ok(page.includes('/css/omni-documentation.css?v=20261119-omni-docs-r4'));
   assert.match(css, /html\[data-theme="light"\]/);
   assert.match(css, /var\(--bg\)/);
   assert.ok(worker.includes("'/omni/documentation'"));
-  assert.ok(worker.includes("'/css/omni-documentation.css?v=20261119-omni-docs-r3'"));
-  assert.match(worker, /overture-shell-v155/);
+  assert.ok(worker.includes("'/css/omni-documentation.css?v=20261119-omni-docs-r4'"));
+  assert.match(worker, /overture-shell-v156/);
   assert.match(routes, /"cleanUrls": true/);
 });
 
@@ -351,6 +354,34 @@ test('every OMNI module has a complete technical reference and the inspector can
 
 
 
+
+test('visible site numbering uses plain numbers without zero-padding', async () => {
+  const files = [
+    '../index.html',
+    '../experiments.html',
+    '../experiments/oscillator-lab.html',
+    '../omni/documentation.html',
+    '../css/omni-documentation.css',
+    '../js/about.js',
+    '../js/library.js',
+    '../js/experiments/labs.js',
+    '../js/engine/app.js',
+    '../js/hohner-d6.js',
+    '../js/mellotron-m400.js',
+    '../js/nord-c2d.js',
+    '../js/sub37.js',
+    '../js/sequential-pro-3.js',
+    '../js/udo-super-8.js',
+    '../js/shared/panel.js',
+    '../ui/OLEDDisplay.js',
+  ];
+  const sources = await Promise.all(files.map((file) => readFile(new URL(file, import.meta.url), 'utf8')));
+  const zeroPadding = /\.padStart\s*\(\s*\d+\s*,\s*(['"])0\1\s*\)|decimal-leading-zero|\bEXPERIMENT\s+0{1,2}[1-9]\d*\b|\bINSTRUMENT\s+0{1,2}[1-9]\d*\b/i;
+  for (const [index, source] of sources.entries()) {
+    assert.doesNotMatch(source, zeroPadding, `zero-padded visible numbering found in ${files[index]}`);
+  }
+});
+
 test('OMNI workspace tabs use the site-wide Inter typeface', async () => {
   const css = await readFile(new URL('../css/omni.css', import.meta.url), 'utf8');
   const rule = css.split('\n').find((line) => line.includes('.omni-view-switch__button{')) || '';
@@ -522,7 +553,7 @@ test('OMNI front-panel workspaces and precision design tools are integrated', as
   assert.match(css, /html\[data-theme="light"\].*ofp-library/);
   assert.match(page, /omni\.css\?v=20261119-front-panel-r17/);
   assert.match(launcher, /omni\.js\?v=20261119-front-panel-r17/);
-  assert.match(worker, /overture-shell-v155/);
+  assert.match(worker, /overture-shell-v156/);
   assert.match(worker, /front-panel\.js\?v=20261119-front-panel-r15/);
   assert.match(worker, /graph\.js\?v=20261119-front-panel-r2/);
   assert.match(readme, /Front-end View/);
