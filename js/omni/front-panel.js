@@ -315,7 +315,7 @@ export class FrontPanelEditor {
     if (!viewport) return;
     const isEditable = (target) => target?.closest?.('input,textarea,select,[contenteditable="true"]');
     document.addEventListener('keydown', (event) => {
-      if (event.code !== 'Space' || isEditable(event.target) || event.repeat) return;
+      if (this.el.hidden || event.code !== 'Space' || isEditable(event.target) || event.repeat) return;
       this.spacePressed = true;
       if (this.el && !this.el.hidden) event.preventDefault();
       viewport.classList.add('is-pan-ready');
@@ -1561,7 +1561,8 @@ export class FrontPanelEditor {
       return (definition?.params || []).filter((parameter) =>
         Number.isFinite(Number(parameter.min)) &&
         Number.isFinite(Number(parameter.max)) &&
-        Number(parameter.max) > Number(parameter.min)
+        Number(parameter.max) > Number(parameter.min) &&
+        !Array.isArray(parameter.options)
       );
     };
 
@@ -2162,7 +2163,10 @@ export class FrontPanelEditor {
       if (item.x < 0 || item.y < 0 || item.x + item.w > this.state.width || item.y + item.h > this.state.height) findings.push({ level: 'error', message: (item.label || item.type) + ' extends beyond the faceplate.' });
       if (item.w < 58 || item.h < 42) findings.push({ level: 'warning', message: (item.label || item.type) + ' is very small and may be difficult to use.' });
       if (!String(item.label || '').trim()) findings.push({ level: 'warning', message: item.type + ' has no visible label.' });
-      if (['knob','dial','encoder','slider','dropdown','switch','meter','drawbars'].includes(item.type) && (!item.bind?.moduleId || (item.type !== 'drawbars' && !item.bind?.paramKey))) findings.push({ level: 'warning', message: (item.label || item.type) + ' is not connected to an engine parameter.' });
+      const hasValidParameter = item.type === 'drawbars'
+        ? Boolean(this.getParameter(item, 'drawbar1'))
+        : Boolean(this.getParameter(item));
+      if (['knob','dial','encoder','slider','dropdown','switch','meter','drawbars'].includes(item.type) && !hasValidParameter) findings.push({ level: 'warning', message: (item.label || item.type) + ' is not connected to a valid engine parameter.' });
       if (item.type === 'button' && item.action === 'toggle' && (!item.bind?.moduleId || !item.bind?.paramKey)) findings.push({ level: 'warning', message: (item.label || item.type) + ' is set to toggle a parameter but has no valid module binding.' });
     });
     for (let i=0;i<components.length;i++) for(let j=i+1;j<components.length;j++) {
