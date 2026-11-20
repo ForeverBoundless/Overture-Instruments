@@ -3452,3 +3452,36 @@ html[data-theme="light"] #omni-root .ofp-binding-status {color:#12647b;backgroun
   #omni-root .ofp-stage-dimensions {display:none}
   #omni-root .ofp-stage-foot span {white-space:normal}
 }
+
+
+/* In Front-end View the editor owns its tools. Keep the global status line,
+   but suppress the engine command bar and the legacy duplicate panel menus. */
+#omni-root .omni-app-header.is-front-view .omni-commandbar > .omni-menu,
+#omni-root .omni-app-header.is-front-view .omni-commandbar > .omni-midi-map-button {
+  display:none!important;
+}
+#omni-root .omni-app-header.is-front-view .omni-commandbar {
+  display:flex!important;
+  min-height:29px;
+  justify-content:flex-end;
+  padding:3px 16px;
+  border-top:1px solid var(--omni-border);
+}
+#omni-root .omni-app-header.is-front-view .omni-commandbar > .omni-status {
+  display:flex!important;
+  width:auto;
+  max-width:min(620px,100%);
+  margin:0 0 0 auto!important;
+  text-align:right!important;
+  justify-content:flex-end;
+}
+#omni-root .ofp-toolbar-menu__panel {
+  max-height:min(70vh,560px);
+  overflow:auto;
+}
+#omni-root .ofp-menu-action--danger {
+  color:#d78a83;
+}
+html[data-theme="light"] #omni-root .ofp-menu-action--danger {
+  color:#ad4942;
+}
