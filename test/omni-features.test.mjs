@@ -461,7 +461,7 @@ test('OMNI front-panel workspaces and precision design tools are integrated', as
   assert.match(css, /\.ofp-layers-panel/);
   assert.match(css, /html\[data-theme="light"\].*ofp-library/);
   assert.match(page, /omni\.css\?v=20261119-front-panel-r16/);
-  assert.match(launcher, /omni\.js\?v=20261119-front-panel-r15/);
+  assert.match(launcher, /omni\.js\?v=20261119-front-panel-r16/);
   assert.match(worker, /overture-shell-v150/);
   assert.match(worker, /front-panel\.js\?v=20261119-front-panel-r15/);
   assert.match(worker, /graph\.js\?v=20261119-front-panel-r2/);
