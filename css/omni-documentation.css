@@ -50,7 +50,8 @@ body.omni-docs-page {
   font: 520 clamp(30px, 4.2vw, 48px)/1.08 var(--font-display);
   letter-spacing: -.055em;
 }
-.omni-docs-intro p {
+ .omni-docs-intro p {
+  width: 100%;
   max-width: 760px;
   margin: 10px 0 0;
   color: var(--muted);
@@ -58,14 +59,16 @@ body.omni-docs-page {
   line-height: 1.75;
 }
 .omni-docs-layout {
-  display: grid;
-  grid-template-columns: minmax(190px, 238px) minmax(0, 1fr);
-  align-items: start;
+  display: flex;
+  align-items: flex-start;
   gap: 24px;
-  margin-top: 0;
+  width: 100%;
+  min-width: 0;
 }
-.omni-docs-nav {
+ .omni-docs-nav {
   position: sticky;
+  flex: 0 0 238px;
+  width: 238px;
   top: 20px;
   min-width: 0;
   max-height: calc(100vh - 40px);
@@ -126,7 +129,15 @@ body.omni-docs-page {
   text-decoration: none;
 }
 .omni-docs-nav__foot a:hover { text-decoration: underline; text-underline-offset: 3px; }
-.omni-docs-content { display: grid; grid-template-columns: minmax(0, 1fr); width: 100%; min-width: 0; gap: 15px; }
+ .omni-docs-content {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  width: auto;
+  max-width: none;
+  min-width: 0;
+  gap: 15px;
+}
 .omni-doc-section {
   display: block;
   width: 100%;
@@ -139,8 +150,7 @@ body.omni-docs-page {
   box-shadow: var(--oi-panel-shadow-soft);
   scroll-margin-top: 20px;
 }
-.omni-doc-section__head { margin-bottom: 18px; }
-.omni-doc-section__number { display: block; margin-bottom: 9px; color: var(--faint); }
+.omni-doc-section__head { margin-bottom: 16px; }
 .omni-doc-section h2 {
   margin: 0;
   color: var(--ink);
@@ -153,7 +163,8 @@ body.omni-docs-page {
   font: 620 13px/1.35 var(--font-display);
   letter-spacing: -.015em;
 }
-.omni-doc-section p {
+ .omni-doc-section p {
+  display: block;
   width: 100%;
   max-width: 900px;
   margin: 9px 0;
@@ -373,16 +384,18 @@ html[data-theme="light"] .omni-doc-faq details {
   background: rgba(255,255,255,.42);
 }
 @media (max-width: 1000px) {
-  .omni-docs-layout { grid-template-columns: minmax(175px, 205px) minmax(0, 1fr); gap: 16px; }
-  .omni-docs-nav { padding-inline: 8px; }
+  .omni-docs-layout { gap: 16px; }
+  .omni-docs-nav { flex-basis: 205px; width: 205px; padding-inline: 8px; }
   .omni-docs-nav__links a { gap: 7px; padding-inline: 8px; }
 }
 @media (max-width: 820px) {
   .omni-docs-shell { width: calc(100% - 42px); padding-top: 112px; padding-bottom: 70px; }
   .omni-docs-intro { margin-bottom: 20px; }
-  .omni-docs-layout { grid-template-columns: minmax(0,1fr); }
+  .omni-docs-layout { flex-direction: column; }
   .omni-docs-nav {
     position: sticky;
+    flex: 0 0 auto;
+    width: 100%;
     top: 8px;
     z-index: 10;
     max-height: none;
@@ -398,6 +411,7 @@ html[data-theme="light"] .omni-doc-faq details {
     scrollbar-width: thin;
   }
   .omni-docs-nav__links a { flex: 0 0 auto; padding: 8px 9px; white-space: nowrap; }
+  .omni-docs-content { flex: 0 0 auto; width: 100%; }
   .omni-docs-nav__foot { display: none; }
 }
 @media (max-width: 560px) {
