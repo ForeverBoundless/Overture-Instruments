@@ -324,8 +324,12 @@ export class FrontPanelEditor {
       make('summary', 'ofp-tool-group__trigger', details, label);
       return make('div', 'ofp-tool-group__panel', details);
     };
-    const toggle = (parent, label, key, title) =>
-      button(parent, label, title, () => this.toggleViewSetting(key), this.state[key]);
+    this.viewButtons = {};
+    const toggle = (parent, label, key, title) => {
+      const control = button(parent, label, title, () => this.toggleViewSetting(key), this.state[key]);
+      this.viewButtons[key] = control;
+      return control;
+    };
 
     this.selectToolButton = button(toolbar, 'Select', 'Select and move controls', () => {
       this.tool = 'select';
@@ -340,7 +344,7 @@ export class FrontPanelEditor {
       this.selectToolButton.setAttribute('aria-pressed', String(!this.panMode));
       this.viewport.classList.toggle('is-pan-tool', this.panMode);
     }, this.panMode);
-    this.snapButton = button(toolbar, 'Snap', 'Snap controls to the layout grid', () => this.toggleViewSetting('snap'), this.state.snap);
+    this.snapButton = toggle(toolbar, 'Snap', 'snap', 'Snap controls to the layout grid');
 
     const view = group('View');
     toggle(view, 'Rulers', 'showRulers', 'Show or hide measurement rulers');
@@ -348,17 +352,16 @@ export class FrontPanelEditor {
     toggle(view, 'Safe area', 'showSafeMargin', 'Show or hide the safe margin');
     toggle(view, 'Guides', 'showGuides', 'Show or hide alignment guides');
     toggle(view, 'Smart guides', 'showSmartGuides', 'Show or hide smart alignment feedback');
-    button(view, 'Measure distance', 'Measure a distance on the faceplate', () => {
+    this.measureButton = button(view, 'Measure distance', 'Measure a distance on the faceplate', () => {
       this.tool = this.tool === 'measure' ? 'select' : 'measure';
-      this.measureButton?.setAttribute('aria-pressed', String(this.tool === 'measure'));
+      this.measureButton.setAttribute('aria-pressed', String(this.tool === 'measure'));
       this.viewport.classList.toggle('is-measuring', this.tool === 'measure');
       if (this.tool === 'measure') {
         this.panMode = false;
         this.panModeButton.setAttribute('aria-pressed', 'false');
         this.selectToolButton.setAttribute('aria-pressed', 'false');
       }
-    });
-    this.measureButton = view.querySelector('button:last-of-type');
+    }, this.tool === 'measure');
     button(view, 'Add vertical guide', 'Place a vertical alignment guide', () => this.startGuide('x'));
     button(view, 'Add horizontal guide', 'Place a horizontal alignment guide', () => this.startGuide('y'));
     button(view, 'Clear measurements', 'Remove all saved measurements', () => { this.state.measurements = []; this.render(); this.commit(); });
@@ -380,6 +383,7 @@ export class FrontPanelEditor {
       ['Align to panel top','panelTop'],['Align to panel bottom','panelBottom'],
       ['Centre on panel horizontally','panelCenterX'],['Centre on panel vertically','panelCenterY']
     ].forEach(([label, mode]) => button(arrange, label, label, () => this.alignSelection(mode)));
+    this.stagePanel.insertBefore(toolbar, this.horizontalRuler);
   }
   toggleLibrary(mode = 'add') {
     const alreadyOpen = this.workspace.classList.contains('is-library-open');
@@ -422,6 +426,7 @@ export class FrontPanelEditor {
 
   toggleViewSetting(key) {
     this.state[key] = !this.state[key];
+    this.viewButtons?.[key]?.setAttribute('aria-pressed', String(this.state[key]));
     this.render();
     this.commit();
   }
