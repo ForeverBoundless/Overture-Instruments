@@ -13,7 +13,6 @@ const clamp = (value, min, max) => Math.min(max, Math.max(min, Number(value) || 
 const clone = (value) => JSON.parse(JSON.stringify(value));
 const TYPES = [
   ['knob', 'Knob', 'CONTROLS'],
-  ['dial', 'Dial', 'CONTROLS'],
   ['slider', 'Slider', 'CONTROLS'],
   ['dropdown', 'Dropdown', 'CONTROLS'],
   ['button', 'Button', 'CONTROLS'],
@@ -33,11 +32,11 @@ const TYPES = [
   ['led', 'LED indicator', 'DISPLAYS'],
 ];
 const FINISHES = [
-  ['matte', 'Matte'],
+  ['matte', 'Matte powder coat'],
   ['brushed', 'Brushed aluminium'],
-  ['anodized', 'Anodized'],
-  ['walnut', 'Walnut'],
-  ['ivory', 'Ivory'],
+  ['anodized', 'Black anodized aluminium'],
+  ['walnut', 'Walnut veneer'],
+  ['ivory', 'Ivory enamel'],
 ];
 const safeColor = (value, fallback) => /^#[0-9a-f]{6}$/i.test(String(value || '')) ? value : fallback;
 
@@ -58,51 +57,34 @@ export class FrontPanelEditor {
   }
 
   defaultLayout() {
-    const find = (type) => this.app.patch.modules.find((item) => item.type === type);
-    const bind = (type, key) => {
-      const module = find(type);
-      return module ? { moduleId: module.id, paramKey: key } : null;
-    };
-    const component = (type, label, x, y, w, h, extra = {}) => ({
-      id: id(), type, label, x, y, w, h, value: 0.5,
-      accent: '#ffb75e', surface: '#26313d', textColor: '#edf3fa',
-      finish: 'matte', margin: 8, padding: 7, gap: 5, radius: 7, fontSize: 8, borderWidth: 1, shadow: 'soft', orientation: 'horizontal', hidden: false, locked: false, ...extra,
-    });
-    const filter = find('filter') || find('ladder');
-    const osc = find('oscillator');
-    const env = find('envelope');
-    const keyboard = find('keyboard');
     return {
       version: 1,
       width: 1240,
-      height: 520,
-      finish: 'brushed',
-      unit: 'mm', zoom: 1, safeMargin: 24, gridSize: 28,
-      showRulers: true, showGrid: true, showGuides: true, showSmartGuides: true, showSafeMargin: true, snap: true,
-      guides: [{ id: id(), axis: 'x', position: 620, color: '#7de4ff' }, { id: id(), axis: 'y', position: 205, color: '#ffb75e' }],
+      height: 560,
+      finish: 'anodized',
+      unit: 'mm',
+      zoom: 1,
+      safeMargin: 28,
+      gridSize: 24,
+      showRulers: true,
+      showGrid: true,
+      showGuides: false,
+      showSmartGuides: true,
+      showSafeMargin: false,
+      snap: true,
+      guides: [],
       measurements: [],
-      panelColor: '#252d35',
-      panelBorderColor: '#667583', panelBorderWidth: 1, panelRadius: 14,
-      accent: '#ffb75e',
-      textColor: '#edf3fa',
-      components: [
-        component('screen', 'INSTRUMENT', 26, 22, 238, 76, { text: 'OVERTURE  /  OMNI\nUSER-DESIGNED INSTRUMENT', surface: '#111b25', accent: '#7de4ff' }),
-        component('knob', 'CUTOFF', 296, 23, 112, 132, { bind: filter ? { moduleId: filter.id, paramKey: 'cutoff' } : null }),
-        component('dial', 'RESONANCE', 422, 23, 112, 132, { bind: filter ? { moduleId: filter.id, paramKey: 'resonance' } : null }),
-        component('slider', 'ATTACK', 554, 30, 74, 148, { bind: env ? { moduleId: env.id, paramKey: 'attack' } : null }),
-        component('dropdown', 'WAVEFORM', 650, 38, 174, 54, { bind: osc ? { moduleId: osc.id, paramKey: 'wave' } : null }),
-        component('button', 'ALL NOTES OFF', 856, 38, 142, 54, { action: 'panic', accent: '#82e6a8' }),
-        component('module', 'OSCILLATOR', 1018, 24, 194, 88, { bind: osc ? { moduleId: osc.id } : null }),
-        component('keyboard', 'KEYBOARD  /  2 OCTAVES', 26, 228, 720, 168, { startNote: 48 }),
-        component('pitchwheel', 'PITCH', 772, 220, 94, 176),
-        component('modwheel', 'MOD', 882, 220, 94, 176),
-        component('oled', 'STATUS DISPLAY', 1000, 220, 212, 106, { text: 'READY\nPATCH DESIGNER', surface: '#071218', accent: '#7de4ff' }),
-        component('led', 'AUDIO', 1030, 352, 154, 42, { accent: '#82e6a8' }),
-      ],
+      panelColor: '#252b32',
+      panelBorderColor: '#66717b',
+      panelBorderWidth: 1,
+      panelRadius: 12,
+      accent: '#e7a94e',
+      textColor: '#e7edf2',
+      components: [],
     };
   }
 
-  build(root) {
+    build(root) {
     this.el = make('section', 'omni-front-panel', root);
     this.el.hidden = true;
     const toolbar = make('div', 'ofp-toolbar', this.el);
@@ -116,7 +98,7 @@ export class FrontPanelEditor {
     this.resetButton = make('button', 'ofp-action', actions, 'RESET LAYOUT');
     this.resetButton.type = 'button';
     this.resetButton.addEventListener('click', () => {
-      if (!window.confirm('Replace this front-panel layout with the starter design?')) return;
+      if (!window.confirm('Clear the faceplate and start with an empty layout?')) return;
       this.state = this.defaultLayout();
       this.selectedId = null;
       this.selectedIds?.clear();
@@ -187,7 +169,10 @@ export class FrontPanelEditor {
     this.faceplate.addEventListener('pointerdown', (event) => {
       if (this.tool === 'measure') { this.beginMeasurement(event); return; }
       if (this.pendingGuideAxis) { this.placeGuide(event); return; }
-      if (event.target === this.faceplate || event.target === this.stage) this.select(null);
+      if (event.target === this.faceplate || event.target === this.stage) {
+        if (this.panState) return;
+        this.select(null);
+      }
     }, true);
     this.faceplate.addEventListener('dragover', (event) => {
       if (event.dataTransfer?.types?.includes('text/omni-front-component')) {
@@ -211,6 +196,7 @@ export class FrontPanelEditor {
     make('span', '', this.stageFoot, 'DRAG TO POSITION');
     make('span', '', this.stageFoot, 'SELECT A CONTROL TO EDIT');
     make('span', '', this.stageFoot, 'PATCH-BINDABLE CONTROLS UPDATE THE ENGINE');
+    this.bindViewportNavigation();
     this.buildDesignTools();
     this.buildLayerPanel();
     this.bindEditorShortcuts();
@@ -293,10 +279,86 @@ export class FrontPanelEditor {
     this.commit();
   }
 
-  zoomBy(factor) {
-    this.state.zoom = clamp((this.state.zoom || 1) * factor, .25, 3);
+  zoomBy(factor, clientX = null, clientY = null) {
+    const viewport = this.viewport;
+    if (!viewport) return;
+    const rect = viewport.getBoundingClientRect();
+    const anchorX = Number.isFinite(clientX) ? clientX : rect.left + rect.width / 2;
+    const anchorY = Number.isFinite(clientY) ? clientY : rect.top + rect.height / 2;
+    const before = this.currentScale || 1;
+    const panelX = (viewport.scrollLeft + anchorX - rect.left) / before;
+    const panelY = (viewport.scrollTop + anchorY - rect.top) / before;
+    this.state.zoom = clamp((this.state.zoom || 1) * factor, .25, 4);
     this.scaleFaceplate();
+    const after = this.currentScale || 1;
+    viewport.scrollLeft = Math.max(0, panelX * after - (anchorX - rect.left));
+    viewport.scrollTop = Math.max(0, panelY * after - (anchorY - rect.top));
     this.commit();
+  }
+
+  bindViewportNavigation() {
+    const viewport = this.viewport;
+    if (!viewport) return;
+    const isEditable = (target) => target?.closest?.('input,textarea,select,[contenteditable="true"]');
+    document.addEventListener('keydown', (event) => {
+      if (event.code !== 'Space' || isEditable(event.target) || event.repeat) return;
+      this.spacePressed = true;
+      if (this.el && !this.el.hidden) event.preventDefault();
+      viewport.classList.add('is-pan-ready');
+    });
+    document.addEventListener('keyup', (event) => {
+      if (event.code !== 'Space') return;
+      this.spacePressed = false;
+      viewport.classList.remove('is-pan-ready');
+      viewport.classList.remove('is-panning');
+    });
+    window.addEventListener('blur', () => {
+      this.spacePressed = false;
+      viewport.classList.remove('is-pan-ready','is-panning');
+      this.panState = null;
+    });
+    viewport.addEventListener('wheel', (event) => {
+      if (!this.el || this.el.hidden || !(event.ctrlKey || event.metaKey)) return;
+      event.preventDefault();
+      this.zoomBy(Math.exp(-event.deltaY * .002), event.clientX, event.clientY);
+    }, { passive: false });
+    viewport.addEventListener('pointerdown', (event) => {
+      if (event.button !== 0 && event.button !== 1) return;
+      const overComponent = event.target.closest?.('.ofp-component');
+      if (overComponent && !this.spacePressed && event.button !== 1) return;
+      if (event.target.closest?.('button,input,select,textarea')) return;
+      event.preventDefault();
+      const target = event.target;
+      const startX = event.clientX;
+      const startY = event.clientY;
+      const scrollLeft = viewport.scrollLeft;
+      const scrollTop = viewport.scrollTop;
+      const pan = { pointerId: event.pointerId, startX, startY, scrollLeft, scrollTop, target, moved: false, clickToClear: !overComponent && event.button === 0 };
+      this.panState = pan;
+      viewport.classList.add('is-panning');
+      try { viewport.setPointerCapture(event.pointerId); } catch { /* optional pointer capture */ }
+      const move = (next) => {
+        if (next.pointerId !== pan.pointerId) return;
+        const dx = next.clientX - startX;
+        const dy = next.clientY - startY;
+        if (Math.hypot(dx,dy) > 3) pan.moved = true;
+        viewport.scrollLeft = scrollLeft - dx;
+        viewport.scrollTop = scrollTop - dy;
+      };
+      const finish = (next) => {
+        if (next?.pointerId !== undefined && next.pointerId !== pan.pointerId) return;
+        document.removeEventListener('pointermove',move);
+        document.removeEventListener('pointerup',finish);
+        document.removeEventListener('pointercancel',finish);
+        try { viewport.releasePointerCapture(pan.pointerId); } catch { /* optional */ }
+        viewport.classList.remove('is-panning');
+        this.panState = null;
+        if (!pan.moved && pan.clickToClear) this.select(null);
+      };
+      document.addEventListener('pointermove',move);
+      document.addEventListener('pointerup',finish);
+      document.addEventListener('pointercancel',finish);
+    }, true);
   }
 
   fitToViewport() {
@@ -306,7 +368,7 @@ export class FrontPanelEditor {
     this.commit();
   }
 
-  selectAllComponents() {
+    selectAllComponents() {
     this.selectedIds = new Set(this.state.components.filter((item) => !item.hidden).map((item) => item.id));
     this.selectedId = this.selectedIds.size === 1 ? [...this.selectedIds][0] : null;
     this.faceplate.querySelectorAll('.ofp-component').forEach((node) => node.classList.toggle('is-selected', this.selectedIds.has(node.dataset.componentId)));
@@ -709,7 +771,7 @@ export class FrontPanelEditor {
 
   glyph(type) {
     return ({
-      knob: '◉', dial: '◌', slider: '▥', dropdown: '⌄', button: '▣', switch: '⏻', encoder: '◉',
+      knob: '◉', slider: '▥', dropdown: '⌄', button: '▣', switch: '⏻', encoder: '◉',
       drawbars: 'Ⅲ', keyboard: '▤', pitchwheel: '↕', modwheel: '≋', meter: '▥', pad: '▣', label: 'T', section: '▤',
       module: '▦', screen: '▭', oled: '▰', led: '●',
     })[type] || '＋';
@@ -857,6 +919,15 @@ export class FrontPanelEditor {
     this.faceplate.style.borderWidth = clamp(this.state.panelBorderWidth ?? 1, 0, 8) + 'px';
     this.faceplate.style.borderRadius = clamp(this.state.panelRadius ?? 14, 0, 40) + 'px';
     this.stageDimensions.textContent = this.unitText(this.state.width) + ' × ' + this.unitText(this.state.height);
+    if (!this.state.components.length) {
+      const empty = make('div','ofp-empty-state',this.faceplate);
+      make('span','ofp-empty-state__eyebrow',empty,'NO CONTROLS YET');
+      make('strong','',empty,'Build your instrument faceplate');
+      make('p','',empty,'Choose a control from the Components library or use Insert in the menu. Select it to connect it to an OMNI module.');
+      const add = make('button','ofp-empty-state__action',empty,'BROWSE COMPONENTS');
+      add.type = 'button';
+      add.addEventListener('click', () => this.componentSearch?.focus());
+    }
     this.state.components.forEach((component) => this.renderComponent(component));
     this.renderDesignOverlays();
     this.renderRulers();
@@ -1201,7 +1272,7 @@ export class FrontPanelEditor {
   addComponent(type, x = null, y = null) {
     const label = TYPES.find((item) => item[0] === type)?.[1] || type;
     const size = ({
-      knob: [112, 132], dial: [112, 132], encoder: [112, 132], slider: [74, 148], dropdown: [170, 54],
+      knob: [112, 138], dial: [112, 138], encoder: [112, 138], slider: [74, 148], dropdown: [170, 54],
       button: [140, 54], switch: [110, 68], drawbars: [270, 160], keyboard: [520, 150],
       meter: [118, 92], pad: [92, 92], label: [170, 42], section: [220, 36],
       pitchwheel: [92, 172], modwheel: [92, 172], module: [190, 88],
@@ -1396,7 +1467,7 @@ export class FrontPanelEditor {
         component.bind = value ? { moduleId: value } : null;
         this.render(); this.commit();
       });
-    } else if (['knob','dial','encoder','slider','dropdown','switch','meter','drawbars'].includes(component.type)) {
+    } else if (['knob','dial','encoder','slider','dropdown','switch','meter','drawbars','button'].includes(component.type)) {
       const bindings = [['', 'Not connected']];
       this.app.patch.modules.forEach((module) => {
         const definition = MODULES[module.type];
@@ -1562,18 +1633,24 @@ export class FrontPanelEditor {
   }
 
   scaleFaceplate() {
-    if (!this.viewport || !this.faceplate) return;
-    const availableWidth = Math.max(100, this.viewport.clientWidth - 34);
-    const availableHeight = Math.max(100, this.viewport.clientHeight - 34);
-    const fit = Math.min(1, availableWidth / this.state.width, availableHeight / this.state.height);
-    this.currentScale = clamp(fit * clamp(this.state.zoom ?? 1, .25, 3), 0.18, 3);
+    if (!this.viewport || !this.faceplate || !this.stage) return;
+    const availableWidth = Math.max(100, this.viewport.clientWidth - 48);
+    const availableHeight = Math.max(100, this.viewport.clientHeight - 48);
+    const fitScale = Math.min(1, availableWidth / this.state.width, availableHeight / this.state.height);
+    this.currentScale = clamp(fitScale * clamp(this.state.zoom ?? 1, .25, 4), 0.18, 4);
+    const scaledWidth = this.state.width * this.currentScale;
+    const scaledHeight = this.state.height * this.currentScale;
     this.faceplate.style.transform = 'scale(' + this.currentScale + ')';
-    this.stage.style.width = (this.state.width * this.currentScale) + 'px';
-    this.stage.style.height = (this.state.height * this.currentScale) + 'px';
+    this.stage.style.width = scaledWidth + 'px';
+    this.stage.style.height = scaledHeight + 'px';
+    this.stage.style.marginLeft = Math.max(16,(this.viewport.clientWidth-scaledWidth)/2) + 'px';
+    this.stage.style.marginTop = Math.max(16,(this.viewport.clientHeight-scaledHeight)/2) + 'px';
+    this.stage.style.marginRight = '16px';
+    this.stage.style.marginBottom = '16px';
     this.renderRulers();
   }
 
-  refreshValues() {
+    refreshValues() {
     this.state.components.forEach((component) => {
       if (component.type === 'switch' || component.type === 'meter') {
         this.updateComponentVisual(component, null, this.getValue(component));
