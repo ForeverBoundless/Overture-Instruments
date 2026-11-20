@@ -233,7 +233,7 @@ export class FrontPanelEditor {
     this.stagePanel.insertBefore(tools, this.horizontalRuler);
     const align = make('div', 'ofp-align-tools', this.stagePanel);
     make('span', 'ofp-align-tools__label', align, 'ALIGN');
-    [['left','LEFT'],['centerX','CENTRE X'],['right','RIGHT'],['top','TOP'],['centerY','CENTRE Y'],['bottom','BOTTOM'],['distributeX','SPACE X'],['distributeY','SPACE Y'],['sameWidth','SAME WIDTH'],['sameHeight','SAME HEIGHT']].forEach(([mode,label]) => {
+    [['left','LEFT'],['centerX','CENTRE X'],['right','RIGHT'],['top','TOP'],['centerY','CENTRE Y'],['bottom','BOTTOM'],['distributeX','SPACE X'],['distributeY','SPACE Y'],['sameWidth','SAME WIDTH'],['sameHeight','SAME HEIGHT'],['panelLeft','PANEL LEFT'],['panelRight','PANEL RIGHT'],['panelTop','PANEL TOP'],['panelBottom','PANEL BOTTOM'],['panelCenterX','PANEL CENTRE X'],['panelCenterY','PANEL CENTRE Y']].forEach(([mode,label]) => {
       const button = make('button', 'ofp-tool-toggle ofp-tool-toggle--compact', align, label);
       button.type = 'button'; button.title = 'Align selected controls: ' + label.toLowerCase();
       button.addEventListener('click', () => this.alignSelection(mode));
@@ -315,6 +315,12 @@ export class FrontPanelEditor {
     }
     if (mode === 'sameWidth') { const width = Math.min(...items.map((item)=>this.state.width-item.x)); items.forEach((item)=>{item.w=clamp(width,48,760);}); }
     if (mode === 'sameHeight') { const height = Math.min(...items.map((item)=>this.state.height-item.y)); items.forEach((item)=>{item.h=clamp(height,36,440);}); }
+    if (mode === 'panelLeft') items.forEach((item)=>{item.x=0;});
+    if (mode === 'panelRight') items.forEach((item)=>{item.x=this.state.width-item.w;});
+    if (mode === 'panelTop') items.forEach((item)=>{item.y=0;});
+    if (mode === 'panelBottom') items.forEach((item)=>{item.y=this.state.height-item.h;});
+    if (mode === 'panelCenterX') items.forEach((item)=>{item.x=(this.state.width-item.w)/2;});
+    if (mode === 'panelCenterY') items.forEach((item)=>{item.y=(this.state.height-item.h)/2;});
     this.render();
     this.commit();
   }
@@ -409,7 +415,7 @@ export class FrontPanelEditor {
     }
     if (this.state.showSafeMargin) {
       const safe = make('div','ofp-safe-margin',overlays);
-      const margin = clamp(this.state.safeMargin ?? 24,0,120);
+      const margin = clamp(this.state.safeMargin ?? 24,0,450);
       safe.style.inset = margin+'px';
     }
     if (this.state.showGuides) {
@@ -963,8 +969,15 @@ export class FrontPanelEditor {
       const originH = component.h;
       try { handle.setPointerCapture(event.pointerId); } catch { /* optional */ }
       const move = (moveEvent) => {
-        component.w = clamp(originW + (moveEvent.clientX - startX) / scale, 48, Math.min(760, this.state.width - component.x));
-        component.h = clamp(originH + (moveEvent.clientY - startY) / scale, 42, Math.min(440, this.state.height - component.y));
+        let nextW = clamp(originW + (moveEvent.clientX - startX) / scale, 48, Math.min(760, this.state.width - component.x));
+        let nextH = clamp(originH + (moveEvent.clientY - startY) / scale, 36, Math.min(440, this.state.height - component.y));
+        if (this.state.snap) {
+          const grid = Math.max(1, Number(this.state.gridSize) || 28);
+          nextW = clamp(Math.round(nextW / grid) * grid, 48, Math.min(760, this.state.width - component.x));
+          nextH = clamp(Math.round(nextH / grid) * grid, 36, Math.min(440, this.state.height - component.y));
+        }
+        component.w = nextW;
+        component.h = nextH;
         node.style.width = component.w + 'px';
         node.style.height = component.h + 'px';
       };
