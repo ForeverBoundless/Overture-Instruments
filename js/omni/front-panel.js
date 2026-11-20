@@ -1199,6 +1199,9 @@ export class FrontPanelEditor {
         const node = this.faceplate.querySelector('[data-component-id="' + component.id + '"]');
         const select = node?.querySelector('select');
         if (select) select.value = String(this.getValue(component));
+      } else if (component.type === 'led') {
+        const node = this.faceplate.querySelector('[data-component-id="' + component.id + '"]');
+        node?.querySelector('.ofp-led')?.classList.toggle('is-on', Boolean(this.app.ctx));
       }
     });
   }
