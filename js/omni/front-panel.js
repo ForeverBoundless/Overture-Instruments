@@ -16,7 +16,13 @@ const TYPES = [
   ['slider', 'Slider', 'CONTROLS'],
   ['dropdown', 'Dropdown', 'CONTROLS'],
   ['button', 'Button', 'CONTROLS'],
+  ['switch', 'Toggle switch', 'CONTROLS'],
+  ['encoder', 'Rotary encoder', 'CONTROLS'],
   ['drawbars', 'Nine drawbars', 'CONTROLS'],
+  ['meter', 'Level meter', 'DISPLAYS'],
+  ['pad', 'Performance pad', 'PERFORMANCE'],
+  ['label', 'Text label', 'LAYOUT'],
+  ['section', 'Section divider', 'LAYOUT'],
   ['keyboard', 'Keyboard', 'PERFORMANCE'],
   ['pitchwheel', 'Pitch wheel', 'PERFORMANCE'],
   ['modwheel', 'Mod wheel', 'PERFORMANCE'],
@@ -58,7 +64,7 @@ export class FrontPanelEditor {
     const component = (type, label, x, y, w, h, extra = {}) => ({
       id: id(), type, label, x, y, w, h, value: 0.5,
       accent: '#ffb75e', surface: '#26313d', textColor: '#edf3fa',
-      finish: 'matte', ...extra,
+      finish: 'matte', margin: 8, hidden: false, locked: false, ...extra,
     });
     const filter = find('filter') || find('ladder');
     const osc = find('oscillator');
@@ -69,6 +75,10 @@ export class FrontPanelEditor {
       width: 1240,
       height: 520,
       finish: 'brushed',
+      unit: 'mm', safeMargin: 24, gridSize: 28,
+      showRulers: true, showGrid: true, showGuides: true, showSmartGuides: true, showSafeMargin: true, snap: true,
+      guides: [{ id: id(), axis: 'x', position: 620, color: '#7de4ff' }, { id: id(), axis: 'y', position: 205, color: '#ffb75e' }],
+      measurements: [],
       panelColor: '#252d35',
       accent: '#ffb75e',
       textColor: '#edf3fa',
@@ -142,14 +152,21 @@ export class FrontPanelEditor {
     this.stage = make('div', 'ofp-stage', this.viewport);
     this.faceplate = make('div', 'ofp-faceplate', this.stage);
     this.faceplate.addEventListener('pointerdown', (event) => {
-      if (event.target === this.faceplate || event.target === this.stage) {
-        this.select(null);
-      }
-    });
+      if (this.tool === 'measure') { this.beginMeasurement(event); return; }
+      if (this.pendingGuideAxis) { this.placeGuide(event); return; }
+      if (event.target === this.faceplate || event.target === this.stage) this.select(null);
+    }, true);
+    this.horizontalRuler = make('div', 'ofp-ruler ofp-ruler--horizontal', this.stagePanel);
+    this.viewportRow = make('div', 'ofp-viewport-row', this.stagePanel);
+    this.verticalRuler = make('div', 'ofp-ruler ofp-ruler--vertical', this.viewportRow);
+    this.viewportRow.appendChild(this.viewport);
     this.stageFoot = make('div', 'ofp-stage-foot', this.stagePanel);
     make('span', '', this.stageFoot, 'DRAG TO POSITION');
     make('span', '', this.stageFoot, 'SELECT A CONTROL TO EDIT');
     make('span', '', this.stageFoot, 'PATCH-BINDABLE CONTROLS UPDATE THE ENGINE');
+    this.buildDesignTools();
+    this.buildLayerPanel();
+    this.bindEditorShortcuts();
 
     this.inspector = make('aside', 'ofp-inspector', this.workspace);
     this.renderInspector();
@@ -157,8 +174,8 @@ export class FrontPanelEditor {
 
   glyph(type) {
     return ({
-      knob: '◉', dial: '◌', slider: '▥', dropdown: '⌄', button: '▣',
-      drawbars: 'Ⅲ', keyboard: '▤', pitchwheel: '↕', modwheel: '≋',
+      knob: '◉', dial: '◌', slider: '▥', dropdown: '⌄', button: '▣', switch: '⏻', encoder: '◉',
+      drawbars: 'Ⅲ', keyboard: '▤', pitchwheel: '↕', modwheel: '≋', meter: '▥', pad: '▣', label: 'T', section: '▤',
       module: '▦', screen: '▭', oled: '▰', led: '●',
     })[type] || '＋';
   }
@@ -269,6 +286,7 @@ export class FrontPanelEditor {
     node.style.setProperty('--ofp-value', String(ratio));
     const output = node.querySelector('[data-ofp-role="value"]');
     if (output) output.textContent = range.log ? Math.round(value).toLocaleString() : (Number(value).toFixed(range.step >= 1 ? 0 : 2));
+    const meterFill = node.querySelector('.ofp-meter__fill'); if (meterFill) meterFill.style.width = (ratio * 100) + '%';
     const ring = node.querySelector('.ofp-knob__ring');
     if (ring) ring.style.setProperty('--ofp-angle', String(-135 + ratio * 270) + 'deg');
   }
@@ -283,6 +301,9 @@ export class FrontPanelEditor {
     this.faceplate.style.setProperty('--ofp-text', safeColor(this.state.textColor, '#edf3fa'));
     this.stageDimensions.textContent = this.state.width + ' × ' + this.state.height;
     this.state.components.forEach((component) => this.renderComponent(component));
+    this.renderDesignOverlays();
+    this.renderRulers();
+    this.renderLayers();
     this.renderInspector();
     requestAnimationFrame(() => this.scaleFaceplate());
   }
@@ -297,11 +318,16 @@ export class FrontPanelEditor {
     node.style.setProperty('--ofp-control-accent', safeColor(component.accent, this.state.accent));
     node.style.setProperty('--ofp-control-surface', safeColor(component.surface, '#26313d'));
     node.style.setProperty('--ofp-control-text', safeColor(component.textColor, this.state.textColor));
+    node.style.setProperty('--ofp-control-border', safeColor(component.borderColor, component.accent || this.state.accent));
     node.dataset.finish = component.finish || 'matte';
-    node.classList.toggle('is-selected', component.id === this.selectedId);
+    node.classList.toggle('is-selected', this.selectedIds?.has(component.id) || component.id === this.selectedId);
+    node.classList.toggle('is-locked', Boolean(component.locked));
+    node.hidden = Boolean(component.hidden);
+    node.style.setProperty('--ofp-clearance', Math.max(0, Number(component.margin) || 0) + 'px');
+    node.style.setProperty('--ofp-control-border', safeColor(component.borderColor, component.accent || this.state.accent));
     const title = make('div', 'ofp-component__title', node, component.label || component.type.toUpperCase());
     title.title = 'Drag to move';
-    if (component.type === 'knob' || component.type === 'dial') {
+    if (component.type === 'knob' || component.type === 'dial' || component.type === 'encoder') {
       const control = make('div', 'ofp-knob', node);
       const ring = make('div', 'ofp-knob__ring', control);
       make('div', 'ofp-knob__cap', control);
@@ -336,6 +362,17 @@ export class FrontPanelEditor {
       select.addEventListener('change', () => {
         this.changeParameter(component, null, Number(select.value), true);
       });
+    } else if (component.type === 'switch') {
+      const button = make('button', 'ofp-switch' + (this.getValue(component) > .5 ? ' is-on' : ''), node);
+      button.type = 'button';
+      make('span', 'ofp-switch__track', button);
+      make('span', 'ofp-switch__label', button, this.getValue(component) > .5 ? 'ON' : 'OFF');
+      button.addEventListener('click', () => {
+        const bound = this.getParameter(component);
+        if (bound) { const midpoint = (bound.parameter.min + bound.parameter.max) / 2; this.changeParameter(component, null, this.getValue(component) > midpoint ? bound.parameter.min : bound.parameter.max, true); }
+        else { component.value = component.value > .5 ? 0 : 1; this.commit(); }
+        this.render();
+      });
     } else if (component.type === 'button') {
       const button = make('button', 'ofp-hardware-button', node, component.label || 'BUTTON');
       button.type = 'button';
@@ -360,6 +397,23 @@ export class FrontPanelEditor {
       const display = make('div', 'ofp-display', node);
       const lines = String(component.text || 'DISPLAY TEXT').split('\\n');
       lines.slice(0, 4).forEach((line, index) => make('span', 'ofp-display__line' + (index === 0 ? ' is-primary' : ''), display, line));
+    } else if (component.type === 'meter') {
+      const meter = make('div', 'ofp-meter', node);
+      make('span', 'ofp-meter__fill', meter).style.width = (clamp(this.getValue(component), 0, 1) * 100) + '%';
+      const output = make('output', 'ofp-component__value', node, Math.round(clamp(this.getValue(component), 0, 1) * 100) + '%');
+      output.dataset.ofpRole = 'value';
+    } else if (component.type === 'pad') {
+      const pad = make('button', 'ofp-pad', node, component.label || 'PAD');
+      pad.type = 'button';
+      const note = clamp(component.note ?? 60, 0, 127);
+      const down = (event) => { event.preventDefault(); pad.classList.add('is-active'); this.app.noteOn(note, .9, 1); };
+      const up = () => { pad.classList.remove('is-active'); this.app.noteOff(note, 1); };
+      pad.addEventListener('pointerdown', down); pad.addEventListener('pointerup', up); pad.addEventListener('pointercancel', up); pad.addEventListener('lostpointercapture', up);
+    } else if (component.type === 'label') {
+      make('span', 'ofp-free-label', node, component.text || component.label || 'TEXT');
+    } else if (component.type === 'section') {
+      make('span', 'ofp-section__line', node);
+      make('strong', 'ofp-section__text', node, component.text || component.label || 'SECTION');
     } else if (component.type === 'led') {
       const led = make('span', 'ofp-led', node);
       led.classList.toggle('is-on', Boolean(this.app.ctx));
@@ -499,19 +553,24 @@ export class FrontPanelEditor {
     });
   }
 
-  select(componentId) {
-    this.selectedId = componentId;
-    this.faceplate.querySelectorAll('.ofp-component').forEach((node) => {
-      node.classList.toggle('is-selected', node.dataset.componentId === componentId);
-    });
+  select(componentId, multi = false) {
+    this.selectedIds ||= new Set();
+    if (componentId === null) { this.selectedId = null; this.selectedIds.clear(); }
+    else if (multi) {
+      if (this.selectedIds.has(componentId)) this.selectedIds.delete(componentId); else this.selectedIds.add(componentId);
+      this.selectedId = this.selectedIds.has(componentId) ? componentId : [...this.selectedIds].at(-1) || null;
+    } else { this.selectedId = componentId; this.selectedIds = new Set([componentId]); }
+    this.faceplate.querySelectorAll('.ofp-component').forEach((node) => node.classList.toggle('is-selected', this.selectedIds.has(node.dataset.componentId)));
+    this.renderLayers();
     this.renderInspector();
   }
 
   addComponent(type) {
     const label = TYPES.find((item) => item[0] === type)?.[1] || type;
     const size = ({
-      knob: [112, 132], dial: [112, 132], slider: [74, 148], dropdown: [170, 54],
-      button: [140, 54], drawbars: [270, 160], keyboard: [520, 150],
+      knob: [112, 132], dial: [112, 132], encoder: [112, 132], slider: [74, 148], dropdown: [170, 54],
+      button: [140, 54], switch: [110, 68], drawbars: [270, 160], keyboard: [520, 150],
+      meter: [118, 92], pad: [92, 92], label: [170, 42], section: [220, 36],
       pitchwheel: [92, 172], modwheel: [92, 172], module: [190, 88],
       screen: [220, 76], oled: [180, 96], led: [120, 42],
     })[type] || [120, 80];
@@ -522,13 +581,16 @@ export class FrontPanelEditor {
       y: clamp(24 + (count % 4) * 30, 0, this.state.height - size[1]),
       w: size[0], h: size[1], value: 0.5,
       accent: this.state.accent, surface: '#26313d', textColor: this.state.textColor,
-      finish: this.state.finish,
+      finish: this.state.finish, margin: 8, hidden: false, locked: false,
     };
     if (type === 'button') component.action = 'none';
+    if (type === 'pad') component.note = 60;
+    if (type === 'label' || type === 'section') component.text = label.toUpperCase();
     if (type === 'keyboard') component.startNote = 48;
     if (type === 'screen' || type === 'oled') component.text = 'YOUR TEXT\\nDISPLAY CONTENT';
     this.state.components.push(component);
     this.selectedId = component.id;
+    this.selectedIds = new Set([component.id]);
     this.render();
     this.commit();
   }
@@ -537,6 +599,7 @@ export class FrontPanelEditor {
     if (!this.selectedId) return;
     this.state.components = this.state.components.filter((item) => item.id !== this.selectedId);
     this.selectedId = null;
+    this.selectedIds?.clear();
     this.render();
     this.commit();
   }
@@ -545,11 +608,12 @@ export class FrontPanelEditor {
     const component = this.getComponent(this.selectedId);
     if (!component) return;
     const copy = clone(component);
-    copy.id = id();
+    copy.id = id(); copy.locked = false; copy.hidden = false;
     copy.x = clamp(copy.x + 26, 0, this.state.width - copy.w);
     copy.y = clamp(copy.y + 26, 0, this.state.height - copy.h);
     this.state.components.push(copy);
     this.selectedId = copy.id;
+    this.selectedIds = new Set([copy.id]);
     this.render();
     this.commit();
   }
@@ -646,7 +710,7 @@ export class FrontPanelEditor {
         this.commit();
       });
     }
-    if (component.type === 'screen' || component.type === 'oled') {
+    if (component.type === 'screen' || component.type === 'oled' || component.type === 'label' || component.type === 'section') {
       const textarea = make('textarea', 'ofp-textarea', this.inspectorBody);
       textarea.value = component.text || '';
       textarea.rows = 4;
@@ -673,6 +737,13 @@ export class FrontPanelEditor {
       if (commit) this.commit();
       else this.faceplate.querySelector('[data-component-id="' + component.id + '"]')?.style.setProperty('--ofp-control-surface', value);
     }, colors);
+    this.selectField('Visibility', component.hidden ? 'hidden' : 'visible', [['visible','Visible'],['hidden','Hidden']], (value) => { component.hidden = value === 'hidden'; this.render(); this.commit(); });
+    this.selectField('Layer lock', component.locked ? 'locked' : 'unlocked', [['unlocked','Unlocked'],['locked','Locked']], (value) => { component.locked = value === 'locked'; this.render(); this.commit(); });
+    this.inputField('Clearance / margin', component.margin ?? 8, 'number', (value) => this.updateComponentProperty(component, 'margin', clamp(value, 0, 48)));
+    this.colorField('Legend colour', component.textColor || this.state.textColor, (value, commit) => { component.textColor = value; this.faceplate.querySelector('[data-component-id="' + component.id + '"]')?.style.setProperty('--ofp-control-text', value); if (commit) this.commit(); });
+    this.colorField('Border colour', component.borderColor || component.accent || this.state.accent, (value, commit) => { component.borderColor = value; this.faceplate.querySelector('[data-component-id="' + component.id + '"]')?.style.setProperty('--ofp-control-border', value); if (commit) this.commit(); });
+    if (component.type === 'pad') this.inputField('MIDI note', component.note ?? 60, 'number', (value) => { component.note = clamp(value, 0, 127); this.render(); this.commit(); });
+    if (component.type === 'label' || component.type === 'section') this.inputField('Text', component.text || '', 'text', (value) => { component.text = value.slice(0, 80); this.render(); this.commit(); });
     if (component.type !== 'keyboard' && component.type !== 'pitchwheel' && component.type !== 'modwheel') {
       const duplicate = make('button', 'ofp-inspector-action', this.inspectorBody, 'DUPLICATE CONTROL');
       duplicate.type = 'button';
@@ -702,6 +773,9 @@ export class FrontPanelEditor {
       this.render();
       this.commit();
     });
+    this.inputField('Safe margin (px)', this.state.safeMargin ?? 24, 'number', (value) => { this.state.safeMargin = clamp(value, 0, 120); this.render(); this.commit(); });
+    this.inputField('Grid spacing (px)', this.state.gridSize ?? 28, 'number', (value) => { this.state.gridSize = clamp(value, 4, 120); this.render(); this.commit(); });
+    this.selectField('Units', this.state.unit || 'mm', [['px','Pixels'],['mm','Millimetres'],['in','Inches']], (value) => { this.state.unit = value; this.render(); this.commit(); });
     this.colorField('Panel colour', this.state.panelColor, (value, commit) => {
       this.state.panelColor = value;
       this.faceplate.style.setProperty('--ofp-panel-color', value);
@@ -746,7 +820,7 @@ export class FrontPanelEditor {
 
   refreshValues() {
     this.state.components.forEach((component) => {
-      if (component.type === 'knob' || component.type === 'dial' || component.type === 'slider' || component.type === 'pitchwheel' || component.type === 'modwheel') {
+      if (['knob','dial','encoder','slider','pitchwheel','modwheel','meter'].includes(component.type)) {
         const node = this.faceplate.querySelector('[data-component-id="' + component.id + '"]');
         const input = node?.querySelector('input[type="range"]');
         if (!input) return;
@@ -770,7 +844,6 @@ export class FrontPanelEditor {
 
   commit() {
     this.app.patch.frontPanel = this.state;
-    this.app.persistWorkspace();
     this.app.pushHistory();
   }
 
