@@ -9,7 +9,7 @@ const dependencyGroups = [
   ['./shared/presetStore.js', './shared/audioRecorder.js', './shared/midiRecorder.js'],
   ['../ui/Keyboard.js', '../ui/Wheel.js', './engine/MidiManager.js'],
   ['./shared/panel.js', './shared/midiMap.js'],
-  ['./omni/front-panel.js?v=20261119-front-panel-r10']
+  ['./omni/front-panel.js?v=20261119-front-panel-r11']
 ];
 let completedGroups = 0;
 const loaded = [];
