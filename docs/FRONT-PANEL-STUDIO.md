@@ -22,7 +22,7 @@ The global theme control sits immediately beside the account control. The Engine
 4. Use multi-selection and the Arrange menu for alignment, distribution, and matched dimensions. Use the layer stack to hide, lock, or reorder overlapping elements.
 5. Use rulers, grid snapping, guides, and measurements to refine placement. These are editing aids and are not included in exports.
 6. Run **Design Check** to find out-of-bounds controls, very small controls, empty labels, unbound engine controls, and likely overlaps.
-7. Use **Test Panel** to interact with the live keyboard, wheels, pads, and bound controls while temporarily disabling layout edits. Drag on blank canvas space to pan, use Space+drag or middle-button drag to pan over the faceplate, and use Ctrl/⌘+wheel or the zoom controls to zoom. The preview renders the generated SVG inline rather than loading a separate image URL. Exit test mode to continue editing.
+7. Use **Test Panel** to interact with the live keyboard, wheels, pads, and bound controls while temporarily disabling layout edits. Choose the **Pan tool** in the View group to drag the canvas even when the pointer starts over a control. Otherwise, drag blank canvas space, use Space+drag or middle-button drag, and use Ctrl/⌘+wheel or the zoom controls to zoom. The preview renders the generated SVG inline rather than loading a separate image URL. Exit test mode to continue editing.
 8. Preview the artwork, then export it in the format needed.
 
 ## Appearance and materials
