@@ -379,7 +379,7 @@ test('OMNI front-panel validation remains backwards-compatible and sanitizes imp
   patch.modules.push(organ);
   patch.frontPanel = {
     width: 1240, height: 520, finish: 'walnut', unit: 'mm', zoom: 1.5,
-    panelColor: '#252d35', safeMargin: 400, gridSize: 28,
+    panelColor: '#252d35', panelBorderColor: '#ff9f0a', panelBorderWidth: 4, panelRadius: 20, safeMargin: 400, gridSize: 28,
     guides: [{ id: 'g1', axis: 'x', position: 600, color: '#7de4ff' }],
     measurements: [{ x1: 10, y1: 10, x2: 100, y2: 100 }],
     components: [
@@ -413,6 +413,9 @@ test('OMNI front-panel validation remains backwards-compatible and sanitizes imp
   assert.equal(validated.frontPanel.components[6].shadow, 'hard');
   assert.notEqual(validated.frontPanel.components[3].id, validated.frontPanel.components[4].id);
   assert.match(validated.frontPanel.components[3].id, /^[a-zA-Z0-9_-]+$/);
+  assert.equal(validated.frontPanel.panelBorderColor, '#ff9f0a');
+  assert.equal(validated.frontPanel.panelBorderWidth, 4);
+  assert.equal(validated.frontPanel.panelRadius, 20);
   assert.equal(validated.frontPanel.finish, 'walnut');
   assert.equal(validated.frontPanel.unit, 'mm');
   assert.equal(validated.frontPanel.zoom, 1.5);
@@ -422,4 +425,5 @@ test('OMNI front-panel validation remains backwards-compatible and sanitizes imp
   const unsafe = graph.validatePatch({ ...patch, frontPanel: { ...patch.frontPanel, panelColor: 'url(javascript:alert(1))', zoom: 99, components: patch.frontPanel.components } });
   assert.equal(unsafe.frontPanel.panelColor, '#252d35');
   assert.equal(unsafe.frontPanel.zoom, 3);
+  assert.equal(unsafe.frontPanel.panelBorderColor, '#ff9f0a');
 });
