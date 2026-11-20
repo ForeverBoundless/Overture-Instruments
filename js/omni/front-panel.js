@@ -338,7 +338,7 @@ export class FrontPanelEditor {
       this.selectToolButton.setAttribute('aria-pressed', 'true');
       this.panModeButton.setAttribute('aria-pressed', 'false');
     }, true);
-    this.panModeButton = button(toolbar, 'Hand', 'Pan the canvas without selecting controls', () => {
+    this.panModeButton = button(toolbar, 'Hand', 'Pan tool — move around the canvas without selecting controls', () => {
       this.panMode = !this.panMode;
       this.panModeButton.setAttribute('aria-pressed', String(this.panMode));
       this.selectToolButton.setAttribute('aria-pressed', String(!this.panMode));
@@ -1580,6 +1580,8 @@ export class FrontPanelEditor {
     this.state.components = this.state.components.filter((item) => !ids.has(item.id));
     this.selectedId = null;
     this.selectedIds?.clear();
+    this.inspectorOpen = false;
+    this.workspace.classList.remove('is-inspector-open');
     this.render();
     this.commit();
   }
@@ -1760,7 +1762,7 @@ export class FrontPanelEditor {
     make('summary', 'ofp-advanced__summary', presets, 'Material presets');
     const presetBody = make('div', 'ofp-advanced__body', presets);
     this.renderMaterialPresets(presetBody, component);
-    this.selectField('Finish', component.finish || this.state.finish, FINISHES, (value) => {
+    this.selectField('Material', component.finish || this.state.finish, FINISHES, (value) => {
       component.finish = value;
       this.render();
       this.commit();
@@ -1955,7 +1957,7 @@ export class FrontPanelEditor {
       this.render();
       this.commit();
     });
-    this.selectField('Finish', this.state.finish, FINISHES, (value) => {
+    this.selectField('Material', this.state.finish, FINISHES, (value) => {
       this.state.finish = value;
       this.state.components.forEach((item) => { if (!item.finish) item.finish = value; });
       this.render();
