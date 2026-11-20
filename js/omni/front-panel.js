@@ -639,6 +639,7 @@ export class FrontPanelEditor {
     const ring = node.querySelector('.ofp-knob__ring');
     if (ring) ring.style.setProperty('--ofp-angle', String(-135 + ratio * 270) + 'deg');
     const toggle = node.querySelector('.ofp-switch'); if (toggle) { toggle.classList.toggle('is-on', value > (range.min + range.max) / 2); const label = toggle.querySelector('.ofp-switch__label'); if (label) label.textContent = value > (range.min + range.max) / 2 ? 'ON' : 'OFF'; }
+    const wheelCap = node.querySelector('.ofp-wheel__cap'); if (wheelCap) node.style.setProperty('--ofp-wheel-position', (10 + (1 - ratio) * 80) + '%');
   }
 
   render() {
