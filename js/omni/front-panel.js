@@ -1128,35 +1128,50 @@ export class FrontPanelEditor {
 
   renderKeyboard(component, node) {
     const board = make('div', 'ofp-keyboard', node);
-    const whiteSemitones = [0, 2, 4, 5, 7, 9, 11];
-    const start = Number(component.startNote) || 48;
+    const rearRail = make('div', 'ofp-keyboard__rear-rail', board);
+    make('span', 'ofp-keyboard__brand', rearRail, 'OVERTURE');
+    make('span', 'ofp-keyboard__model', rearRail, 'PERFORMANCE KEYBED');
+    const keywell = make('div', 'ofp-keyboard__keywell', board);
+    const keys = make('div', 'ofp-keyboard__keys', keywell);
+    const start = Math.round(Number(component.startNote ?? 48) / 12) * 12;
     const octaves = clamp(Math.round(component.octaves ?? 2), 1, 5);
+    const whiteSemitones = [0, 2, 4, 5, 7, 9, 11];
     const whiteCount = 7 * octaves;
     const whiteWidth = 100 / whiteCount;
     for (let index = 0; index < whiteCount; index += 1) {
       const octave = Math.floor(index / 7);
       const semitone = whiteSemitones[index % 7];
       const note = start + octave * 12 + semitone;
-      const key = make('button', 'ofp-key ofp-key--white', board);
+      const key = make('button', 'ofp-key ofp-key--white', keys);
       key.type = 'button';
       key.style.left = (index * whiteWidth) + '%';
       key.style.width = whiteWidth + '%';
       this.bindKey(key, note);
+      if (semitone === 0) {
+        const marker = make('span', 'ofp-keyboard__octave-mark', key);
+        marker.textContent = 'C' + (Math.floor(start / 12) - 1 + octave);
+      }
     }
-    const blackOffsets = [0.70, 1.72, 3.70, 4.72, 5.72];
+    const blackOffsets = [0.68, 1.68, 3.68, 4.68, 5.68];
     const blackSemitones = [1, 3, 6, 8, 10];
     for (let octave = 0; octave < octaves; octave += 1) {
       blackSemitones.forEach((semitone, index) => {
         const note = start + octave * 12 + semitone;
-        const key = make('button', 'ofp-key ofp-key--black', board);
+        const key = make('button', 'ofp-key ofp-key--black', keys);
         key.type = 'button';
         key.style.left = ((octave * 7 + blackOffsets[index]) * whiteWidth) + '%';
+        key.style.width = (whiteWidth * .62) + '%';
         this.bindKey(key, note);
       });
     }
+    const frontLip = make('div', 'ofp-keyboard__front-lip', board);
+    make('span', 'ofp-keyboard__screw', frontLip);
+    make('span', 'ofp-keyboard__screw', frontLip);
+    make('span', 'ofp-keyboard__screw', frontLip);
+    make('span', 'ofp-keyboard__screw', frontLip);
   }
 
-  bindKey(key, note) {
+    bindKey(key, note) {
     let active = false;
     const down = (event) => {
       if (active) return;
@@ -1428,7 +1443,7 @@ export class FrontPanelEditor {
     this.inputField('Height (' + this.state.unit + ')', this.unitValue(component.h), 'number', (value) => this.updateComponentProperty(component, 'h', clamp(this.unitPixels(value), 42, Math.min(440, this.state.height - component.y))), dimensions);
     this.inputField('Clearance / margin (' + this.state.unit + ')', this.unitValue(component.margin ?? 8), 'number', (value) => this.updateComponentProperty(component, 'margin', clamp(this.unitPixels(value), 0, 180)));
     if (component.type === 'keyboard') {
-      this.inputField('Starting MIDI note', component.startNote ?? 48, 'number', (value) => { component.startNote = clamp(value, 0, 96); this.render(); this.commit(); });
+      this.inputField('Starting C MIDI note', component.startNote ?? 48, 'number', (value) => { component.startNote = clamp(Math.round(value / 12) * 12, 0, 108); this.render(); this.commit(); });
       this.inputField('Octaves', component.octaves ?? 2, 'number', (value) => { component.octaves = clamp(Math.round(value), 1, 5); this.render(); this.commit(); });
     }
     if (component.type === 'slider') this.selectField('Orientation', component.orientation || 'horizontal', [['horizontal','Horizontal'],['vertical','Vertical']], (value) => { component.orientation = value; this.render(); this.commit(); });
