@@ -117,6 +117,7 @@ export class FrontPanelEditor {
       if (!window.confirm('Replace this front-panel layout with the starter design?')) return;
       this.state = this.defaultLayout();
       this.selectedId = null;
+      this.selectedIds?.clear();
       this.render();
       this.commit();
     });
@@ -1107,6 +1108,7 @@ export class FrontPanelEditor {
     this.colorField('Legend colour', component.textColor || this.state.textColor, (value, commit) => { component.textColor = value; this.faceplate.querySelector('[data-component-id="' + component.id + '"]')?.style.setProperty('--ofp-control-text', value); if (commit) this.commit(); });
     this.colorField('Border colour', component.borderColor || component.accent || this.state.accent, (value, commit) => { component.borderColor = value; this.faceplate.querySelector('[data-component-id="' + component.id + '"]')?.style.setProperty('--ofp-control-border', value); if (commit) this.commit(); });
     if (component.type === 'pad') this.inputField('MIDI note', component.note ?? 60, 'number', (value) => { component.note = clamp(value, 0, 127); this.render(); this.commit(); });
+    if (component.type === 'keyboard') this.inputField('Starting MIDI note', component.startNote ?? 48, 'number', (value) => { component.startNote = clamp(value, 0, 96); this.render(); this.commit(); });
     if (component.type !== 'keyboard' && component.type !== 'pitchwheel' && component.type !== 'modwheel') {
       const duplicate = make('button', 'ofp-inspector-action', this.inspectorBody, 'DUPLICATE CONTROL');
       duplicate.type = 'button';
@@ -1138,6 +1140,39 @@ export class FrontPanelEditor {
     });
     this.inputField('Safe margin (' + this.state.unit + ')', this.unitValue(this.state.safeMargin ?? 24), 'number', (value) => { this.state.safeMargin = clamp(this.unitPixels(value), 0, 450); this.render(); this.commit(); });
     this.inputField('Grid spacing (' + this.state.unit + ')', this.unitValue(this.state.gridSize ?? 28), 'number', (value) => { this.state.gridSize = clamp(this.unitPixels(value), 4, 450); this.render(); this.commit(); });
+    const guideHead = make('div', 'ofp-panel-heading', this.inspectorBody);
+    make('span', 'ofp-panel-heading__eyebrow', guideHead, 'GUIDES');
+    make('strong', '', guideHead, 'Alignment references');
+    (this.state.guides || []).forEach((guide, index) => {
+      const row = make('div', 'ofp-guide-setting', this.inspectorBody);
+      make('span', 'ofp-guide-setting__name', row, (guide.axis === 'x' ? 'VERTICAL' : 'HORIZONTAL') + ' GUIDE');
+      this.inputField('Position (' + this.state.unit + ')', this.unitValue(guide.position), 'number', (value) => {
+        guide.position = clamp(this.unitPixels(value), 0, guide.axis === 'x' ? this.state.width : this.state.height);
+        this.render(); this.commit();
+      }, row);
+      this.colorField('Colour', guide.color || '#7de4ff', (value, commit) => {
+        guide.color = value;
+        this.faceplate.querySelectorAll('.ofp-guide-line')[index]?.style.setProperty('--ofp-guide-color', value);
+        if (commit) this.commit();
+      }, row);
+      const removeGuide = make('button', 'ofp-inspector-action ofp-inspector-action--danger', row, 'REMOVE GUIDE');
+      removeGuide.type = 'button';
+      removeGuide.addEventListener('click', () => { this.state.guides.splice(index, 1); this.render(); this.commit(); });
+    });
+    const guideActions = make('div', 'ofp-field-grid', this.inspectorBody);
+    [['x','ADD VERTICAL'],['y','ADD HORIZONTAL']].forEach(([axis,label]) => {
+      const button = make('button', 'ofp-inspector-action', guideActions, label);
+      button.type = 'button';
+      button.addEventListener('click', () => {
+        this.pendingGuideAxis = axis;
+        this.tool = 'guide';
+        this.viewport.classList.add('is-placing-guide');
+        this.app.msg('Click the faceplate to position the guide.');
+      });
+    });
+    const clearGuides = make('button', 'ofp-inspector-action ofp-inspector-action--danger', this.inspectorBody, 'CLEAR ALL GUIDES');
+    clearGuides.type = 'button';
+    clearGuides.addEventListener('click', () => { this.state.guides = []; this.render(); this.commit(); });
     this.selectField('Units', this.state.unit || 'mm', [['px','Pixels'],['mm','Millimetres'],['in','Inches']], (value) => { this.state.unit = value; this.render(); this.commit(); });
     this.colorField('Panel colour', this.state.panelColor, (value, commit) => {
       this.state.panelColor = value;
