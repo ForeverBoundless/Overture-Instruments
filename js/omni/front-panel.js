@@ -84,7 +84,7 @@ export class FrontPanelEditor {
       accent: '#ffb75e',
       textColor: '#edf3fa',
       components: [
-        component('screen', 'INSTRUMENT', 26, 22, 238, 76, { text: 'OVERTURE  /  OMNI\\nUSER-DESIGNED INSTRUMENT', surface: '#111b25', accent: '#7de4ff' }),
+        component('screen', 'INSTRUMENT', 26, 22, 238, 76, { text: 'OVERTURE  /  OMNI\nUSER-DESIGNED INSTRUMENT', surface: '#111b25', accent: '#7de4ff' }),
         component('knob', 'CUTOFF', 296, 23, 112, 132, { bind: filter ? { moduleId: filter.id, paramKey: 'cutoff' } : null }),
         component('dial', 'RESONANCE', 422, 23, 112, 132, { bind: filter ? { moduleId: filter.id, paramKey: 'resonance' } : null }),
         component('slider', 'ATTACK', 554, 30, 74, 148, { bind: env ? { moduleId: env.id, paramKey: 'attack' } : null }),
@@ -94,7 +94,7 @@ export class FrontPanelEditor {
         component('keyboard', 'KEYBOARD  /  2 OCTAVES', 26, 228, 720, 168, { startNote: 48 }),
         component('pitchwheel', 'PITCH', 772, 220, 94, 176),
         component('modwheel', 'MOD', 882, 220, 94, 176),
-        component('oled', 'STATUS DISPLAY', 1000, 220, 212, 106, { text: 'READY\\nPATCH DESIGNER', surface: '#071218', accent: '#7de4ff' }),
+        component('oled', 'STATUS DISPLAY', 1000, 220, 212, 106, { text: 'READY\nPATCH DESIGNER', surface: '#071218', accent: '#7de4ff' }),
         component('led', 'AUDIO', 1030, 352, 154, 42, { accent: '#82e6a8' }),
       ],
     };
@@ -355,6 +355,14 @@ export class FrontPanelEditor {
     if (!this.state.showRulers) return;
     this.horizontalRuler.replaceChildren();
     this.verticalRuler.replaceChildren();
+    const scale = this.currentScale || 1;
+    const rulerWidth = this.state.width * scale;
+    const rulerHeight = this.state.height * scale;
+    this.horizontalRuler.style.width = rulerWidth + 'px';
+    this.horizontalRuler.style.marginLeft = 'calc(24px + (100% - 24px - ' + rulerWidth + 'px) / 2)';
+    this.verticalRuler.style.height = rulerHeight + 'px';
+    this.verticalRuler.style.marginTop = 'auto';
+    this.verticalRuler.style.marginBottom = 'auto';
     const xStep = this.state.width > 1500 ? 200 : 100;
     const yStep = this.state.height > 650 ? 100 : 50;
     for (let x=0; x<=this.state.width; x+=xStep) {
@@ -710,7 +718,7 @@ export class FrontPanelEditor {
       make('span', 'ofp-module__ports', node, module ? MODULES[module.type]?.category || 'MODULE' : 'MODULE BAY');
     } else if (component.type === 'screen' || component.type === 'oled') {
       const display = make('div', 'ofp-display', node);
-      const lines = String(component.text || 'DISPLAY TEXT').split('\\n');
+      const lines = String(component.text || 'DISPLAY TEXT').split('\n');
       lines.slice(0, 4).forEach((line, index) => make('span', 'ofp-display__line' + (index === 0 ? ' is-primary' : ''), display, line));
     } else if (component.type === 'meter') {
       const meter = make('div', 'ofp-meter', node);
@@ -924,7 +932,7 @@ export class FrontPanelEditor {
     if (type === 'pad') component.note = 60;
     if (type === 'label' || type === 'section') component.text = label.toUpperCase();
     if (type === 'keyboard') component.startNote = 48;
-    if (type === 'screen' || type === 'oled') component.text = 'YOUR TEXT\\nDISPLAY CONTENT';
+    if (type === 'screen' || type === 'oled') component.text = 'YOUR TEXT\nDISPLAY CONTENT';
     this.state.components.push(component);
     this.selectedId = component.id;
     this.selectedIds = new Set([component.id]);
@@ -1008,11 +1016,11 @@ export class FrontPanelEditor {
       this.commit();
     });
     const position = make('div', 'ofp-field-grid', this.inspectorBody);
-    this.inputField('X position', component.x, 'number', (value) => this.updateComponentProperty(component, 'x', clamp(value, 0, this.state.width - 36)), position);
-    this.inputField('Y position', component.y, 'number', (value) => this.updateComponentProperty(component, 'y', clamp(value, 0, this.state.height - 36)), position);
+    this.inputField('X position (px)', component.x, 'number', (value) => this.updateComponentProperty(component, 'x', clamp(value, 0, this.state.width - component.w)), position);
+    this.inputField('Y position (px)', component.y, 'number', (value) => this.updateComponentProperty(component, 'y', clamp(value, 0, this.state.height - component.h)), position);
     const dimensions = make('div', 'ofp-field-grid', this.inspectorBody);
-    this.inputField('Width', component.w, 'number', (value) => this.updateComponentProperty(component, 'w', clamp(value, 48, Math.min(760, this.state.width - component.x))), dimensions);
-    this.inputField('Height', component.h, 'number', (value) => this.updateComponentProperty(component, 'h', clamp(value, 42, Math.min(440, this.state.height - component.y))), dimensions);
+    this.inputField('Width (px)', component.w, 'number', (value) => this.updateComponentProperty(component, 'w', clamp(value, 48, Math.min(760, this.state.width - component.x))), dimensions);
+    this.inputField('Height (px)', component.h, 'number', (value) => this.updateComponentProperty(component, 'h', clamp(value, 42, Math.min(440, this.state.height - component.y))), dimensions);
 
     if (component.type === 'module') {
       const modules = [['', 'No module']];
@@ -1153,6 +1161,7 @@ export class FrontPanelEditor {
     this.faceplate.style.transform = 'scale(' + this.currentScale + ')';
     this.stage.style.width = (this.state.width * this.currentScale) + 'px';
     this.stage.style.height = (this.state.height * this.currentScale) + 'px';
+    this.renderRulers();
   }
 
   refreshValues() {
