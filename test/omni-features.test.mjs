@@ -390,7 +390,7 @@ test('OMNI front-panel workspaces and precision design tools are integrated', as
   assert.match(editor, /ofp-empty-state/);
   assert.match(editor, /components: \[\]/);
   assert.match(editor, /ofp-keyboard__rear-rail/);
-  assert.match(editor, /ofp-preview-dialog__artwork/);
+  assert.match(editor, /ofp-preview-faceplate/);
   assert.match(editor, /MATERIAL_PRESETS/);
   assert.match(editor, /isLegacyStarterLayout/);
   assert.match(source, /this\.midiMapButton\.hidden = view === 'front'/);
