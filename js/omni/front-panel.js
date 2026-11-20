@@ -1430,6 +1430,8 @@ export class FrontPanelEditor {
       '<pattern id="ofp-walnut" width="22" height="9" patternUnits="userSpaceOnUse"><path d="M0 2 C6 0 12 4 22 2 M0 7 C7 5 15 9 22 7" fill="none" stroke="#6e452d" stroke-opacity=".65" stroke-width=".8"/></pattern>',
       '<linearGradient id="ofp-anodized" x2="0" y2="1"><stop offset="0" stop-color="#ffffff" stop-opacity=".14"/><stop offset=".48" stop-color="#6bc8df" stop-opacity=".06"/><stop offset="1" stop-color="#000000" stop-opacity=".2"/></linearGradient>',
       '<linearGradient id="ofp-ivory" x2="0" y2="1"><stop offset="0" stop-color="#ffffff" stop-opacity=".35"/><stop offset="1" stop-color="#b3b9bc" stop-opacity=".12"/></linearGradient>',
+      '<filter id="ofp-soft-shadow" x="-25%" y="-25%" width="150%" height="165%"><feGaussianBlur in="SourceAlpha" stdDeviation="3"/><feOffset dy="4"/><feComponentTransfer><feFuncA type="linear" slope=".38"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>',
+      '<filter id="ofp-hard-shadow" x="-25%" y="-25%" width="150%" height="170%"><feGaussianBlur in="SourceAlpha" stdDeviation="1"/><feOffset dy="7"/><feComponentTransfer><feFuncA type="linear" slope=".48"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>',
     ].join('');
     const materialOverlay = (x,y,w,h,finish) => {
       if (finish === 'brushed') return rect(x,y,w,h,'url(#ofp-brushed)','none',7,'opacity=".75"');
@@ -1444,11 +1446,15 @@ export class FrontPanelEditor {
       const surface=safeColor(component.surface,'#26313d');
       const legend=safeColor(component.textColor,globalText);
       const border=safeColor(component.borderColor,accent);
+      const radius=clamp(component.radius ?? 7,0,32);
+      const borderWidth=clamp(component.borderWidth ?? 1,0,6);
+      const fontSize=clamp(component.fontSize ?? 8,6,28);
+      const shadow=component.shadow==='hard'?'url(#ofp-hard-shadow)':component.shadow==='none'?'':'url(#ofp-soft-shadow)';
       const finish=FINISHES.some(([key])=>key===component.finish)?component.finish:'matte';
       const label=esc(component.label || component.type.toUpperCase());
       let shape='';
       if (!['label','section'].includes(component.type)) {
-        shape += rect(x,y,w,h,surface,border,7,'stroke-opacity=".55"');
+        shape += rect(x,y,w,h,surface,border,radius,'stroke-opacity=".72" stroke-width="'+borderWidth+'"');
         shape += materialOverlay(x,y,w,h,finish);
       }
       const cx=x+w/2, cy=y+h/2;
@@ -1500,7 +1506,7 @@ export class FrontPanelEditor {
         }
       } else if (component.type === 'module') {
         const module=component.bind?.moduleId?this.getModule(component.bind.moduleId):null;
-        shape += text(cx,y+45,module?MODULES[module.type]?.name||module.type:'UNASSIGNED MODULE',legend,12,'middle','font-weight="bold"');
+        shape += text(cx,y+45,module?MODULES[module.type]?.name||module.type:'UNASSIGNED MODULE',legend,fontSize,'middle','font-weight="bold"');
         shape += text(cx,y+62,module?module.id:'MODULE BAY',accent,8,'middle');
       } else if (component.type === 'screen' || component.type === 'oled') {
         shape += rect(x+8,y+25,w-16,h-33,'#061118',accent,3,'stroke-width="1.2"');
@@ -1519,15 +1525,15 @@ export class FrontPanelEditor {
       } else if (component.type === 'section') {
         shape += '<path d="M '+(x+6)+' '+cy+' H '+(x+w-6)+'" stroke="'+accent+'" stroke-width="1.5"/>';
       } else if (component.type === 'label') {
-        shape += text(cx,cy+4,component.text||component.label,legend,12,'middle');
+        shape += text(cx,cy+4,component.text||component.label,legend,fontSize,'middle');
       }
       if (component.type !== 'label' && component.type !== 'section') {
-        shape += text(cx,y+16,label,legend,8,'middle','letter-spacing="1"');
+        shape += text(cx,y+16,label,legend,fontSize,'middle','letter-spacing="1"');
       } else if (component.type === 'section') {
         shape += '<rect x="'+(x+w*.2)+'" y="'+(cy-9)+'" width="'+(w*.6)+'" height="18" fill="'+background+'"/>';
-        shape += text(cx,cy+3,component.text||component.label,legend,8,'middle','letter-spacing="1"');
+        shape += text(cx,cy+3,component.text||component.label,legend,fontSize,'middle','letter-spacing="1"');
       }
-      return '<g data-component="'+esc(component.id)+'">'+shape+'</g>';
+      return '<g data-component="'+esc(component.id)+'"'+(shadow?' filter="'+shadow+'"':'')+'>'+shape+'</g>';
     }).join('');
     const panelFinish=materialOverlay(0,0,width,height,this.state.finish||'matte');
     const svg = '<svg xmlns="http://www.w3.org/2000/svg" width="'+width+'" height="'+height+'" viewBox="0 0 '+width+' '+height+'"><defs>'+defs+'</defs>'
