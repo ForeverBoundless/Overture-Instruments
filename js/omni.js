@@ -461,6 +461,7 @@ class OmniApp {
     this.pitchWheel = new PitchWheel({ onChange: (value) => {
       this.pitchBend = value;
       this.live?.setPitchBend(value * 2);
+      this.frontPanelEditor?.refreshValues();
     } });
     pitchWrap.append(this.pitchWheel.el);
     const modWrap = el('div', 'omni-wheel-control', wheelBank);
@@ -468,6 +469,7 @@ class OmniApp {
     this.modWheel = new ModWheel({ onChange: (value) => {
       this.modWheelValue = value;
       this.live?.setModWheel(value);
+      this.frontPanelEditor?.refreshValues();
     } });
     modWrap.append(this.modWheel.el);
     registerMidiTarget(this.pitchWheel.el, {
@@ -924,8 +926,8 @@ class OmniApp {
       onNoteOff: (n, channel) => this.noteOff(n, channel),
       onAllNotesOff: () => this.allOff(), onAllSoundOff: () => this.allOff(),
       onControlChange: (controller, value, channel) => this.midiRecorder.controlChange(controller, value, { channel, time: this.ctx?.currentTime }),
-      onPitchBend: (_range, normalized, channel, raw) => { this.pitchWheel.setExternalValue(normalized); this.midiRecorder.pitchBend(raw, { channel, time: this.ctx?.currentTime }); },
-      onModWheel: (value) => this.modWheel.setExternalValue(value),
+      onPitchBend: (_range, normalized, channel, raw) => { this.pitchWheel.setExternalValue(normalized); this.frontPanelEditor?.refreshValues(); this.midiRecorder.pitchBend(raw, { channel, time: this.ctx?.currentTime }); },
+      onModWheel: (value) => { this.modWheel.setExternalValue(value); this.frontPanelEditor?.refreshValues(); },
       onAftertouch: (value, channel) => this.midiRecorder.aftertouch(Math.round(value * 127), { channel, time: this.ctx?.currentTime }),
       onPolyAftertouch: (note, value, channel) => this.midiRecorder.polyAftertouch(note, Math.round(value * 127), { channel, time: this.ctx?.currentTime }),
       onProgramChange: (program, channel) => this.midiRecorder.programChange(program, { channel, time: this.ctx?.currentTime }),
