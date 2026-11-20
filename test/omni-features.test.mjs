@@ -334,7 +334,7 @@ test('every OMNI module has a complete technical reference and the inspector can
   assert.match(worker, /moduleInfo\.js\?v=20261117-omni-module-expansion-r3/);
   assert.match(contributorGuide, /every module must also have a complete entry in `js\/omni\/moduleInfo\.js`/);
   assert.match(contributorGuide, /Every new or changed user-facing OMNI feature must include a documentation update in the same pull request/);
-  assert.match(contributorGuide, /omni\\/documentation\\.html/);
+  assert.ok(contributorGuide.includes('omni/documentation.html'));
   assert.ok(readme.includes(`**${Object.keys(catalogue.MODULES).length} module types**`));
   assert.ok(userGuide.includes(`${Object.keys(catalogue.MODULES).length} module types`));
   assert.ok(readme.includes('https://overture-instruments.vercel.app/omni/documentation'));
@@ -344,9 +344,9 @@ test('every OMNI module has a complete technical reference and the inspector can
 
 test('OMNI workspace tabs use the site-wide Inter typeface', async () => {
   const css = await readFile(new URL('../css/omni.css', import.meta.url), 'utf8');
-  const rule = css.match(/\.omni-view-switch__button\\s*\\{[^}]*\\}/)?.[0] || '';
+  const rule = css.split('\n').find((line) => line.includes('.omni-view-switch__button{')) || '';
   assert.ok(rule.includes("font:600 9px/1 'Inter Variable','Inter','Segoe UI',sans-serif"));
-  assert.doesNotMatch(rule, /var\\(--font-mono\\)/);
+  assert.ok(!rule.includes('var(--font-mono)'));
 });
 
 test('OMNI dependency import order matches the destructured module bindings', async () => {
