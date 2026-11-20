@@ -161,49 +161,6 @@ export class FrontPanelEditor {
     this.testModeButton.setAttribute('aria-pressed', 'false');
     this.testModeButton.addEventListener('click', () => this.toggleTestMode());
 
-    const exportMenu = make('details', 'ofp-toolbar-menu', actions);
-    make('summary', 'ofp-toolbar-menu__trigger', exportMenu, 'Export');
-    const exportPanel = make('div', 'ofp-toolbar-menu__panel', exportMenu);
-    const exportAction = (label, callback) => {
-      const button = make('button', 'ofp-menu-action', exportPanel, label);
-      button.type = 'button';
-      button.addEventListener('click', () => { exportMenu.open = false; callback(); });
-      return button;
-    };
-    exportAction('SVG artwork', () => this.exportSVG());
-    exportAction('PNG · 1×', () => this.exportPNG(1));
-    exportAction('PNG · 2×', () => this.exportPNG(2));
-    exportAction('PNG · 3×', () => this.exportPNG(3));
-    exportAction('JPEG · 1×', () => this.exportJPEG(1));
-    exportAction('JPEG · 2×', () => this.exportJPEG(2));
-    exportAction('Editable layout · JSON', () => this.exportJSON());
-    exportAction('Print / Save as PDF', () => this.printPDF());
-
-    const moreMenu = make('details', 'ofp-toolbar-menu', actions);
-    make('summary', 'ofp-toolbar-menu__trigger', moreMenu, 'More');
-    const morePanel = make('div', 'ofp-toolbar-menu__panel', moreMenu);
-    const moreAction = (label, callback, danger = false) => {
-      const button = make('button', 'ofp-menu-action', morePanel, label);
-      button.type = 'button';
-      if (danger) button.classList.add('ofp-menu-action--danger');
-      button.addEventListener('click', () => { moreMenu.open = false; callback(); });
-      return button;
-    };
-    moreAction('Save instrument…', () => this.app.save());
-    moreAction('Import layout…', () => this.importJSON());
-    moreAction('Front-panel guide', () => this.openGuide());
-    moreAction('Performance report', () => this.showPerformanceReport());
-    moreAction('Design check', () => this.runDesignCheck());
-    this.resetButton = moreAction('Clear panel…', () => {
-      if (!window.confirm('Clear the faceplate and start with an empty layout?')) return;
-      this.state = this.defaultLayout();
-      this.selectedId = null;
-      this.selectedIds?.clear();
-      this.inspectorOpen = false;
-      this.workspace?.classList.remove('is-inspector-open');
-      this.render();
-      this.commit();
-    }, true);
 
     this.workspace = make('div', 'ofp-workspace', this.el);
     this.libraryOpen = false;
@@ -1596,6 +1553,23 @@ export class FrontPanelEditor {
     this.workspace.classList.remove('is-library-open');
     this.addRailButton?.setAttribute('aria-pressed', 'false');
     this.layersRailButton?.setAttribute('aria-pressed', 'false');
+    this.render();
+    this.commit();
+  }
+
+  clearLayout() {
+    this.state = this.defaultLayout();
+    this.selectedId = null;
+    this.selectedIds?.clear();
+    this.inspectorOpen = false;
+    this.libraryOpen = false;
+    this.libraryMode = 'add';
+    this.workspace?.classList.remove('is-library-open', 'is-inspector-open');
+    this.addRailButton?.setAttribute('aria-pressed', 'false');
+    this.layersRailButton?.setAttribute('aria-pressed', 'false');
+    this.panelSettingsButton?.setAttribute('aria-pressed', 'false');
+    this.cataloguePane?.setAttribute('hidden', '');
+    this.layersPanel?.setAttribute('hidden', '');
     this.render();
     this.commit();
   }
