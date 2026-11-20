@@ -89,22 +89,24 @@ export function validatePatch(raw) {
     const components = Array.isArray(panel.components) ? panel.components.slice(0, 100).filter((item) => item && allowed.has(item.type)).map((item) => {
       const module = byId[String(item.bind?.moduleId || '')];
       const parameter = module && MODULES[module.type].params.find((entry) => entry.key === item.bind?.paramKey);
-      const bind = module ? (item.type === 'module' ? { moduleId: module.id } : (parameter ? { moduleId: module.id, paramKey: parameter.key } : null)) : null;
+      const bind = module ? (['module','drawbars'].includes(item.type) ? { moduleId: module.id } : (parameter ? { moduleId: module.id, paramKey: parameter.key } : null)) : null;
+      const w = Math.min(760, Math.max(48, Number(item.w) || 120));
+      const h = Math.min(440, Math.max(36, Number(item.h) || 80));
       const component = {
         id: String(item.id || uid('fp')).slice(0, 60),
         type: item.type,
         label: String(item.label || item.type).slice(0, 40),
-        x: Math.min(width - 36, Math.max(0, Number(item.x) || 0)),
-        y: Math.min(height - 36, Math.max(0, Number(item.y) || 0)),
-        w: Math.min(760, Math.max(48, Number(item.w) || 120)),
-        h: Math.min(440, Math.max(36, Number(item.h) || 80)),
+        x: Math.min(width - Math.min(width, w), Math.max(0, Number(item.x) || 0)),
+        y: Math.min(height - Math.min(height, h), Math.max(0, Number(item.y) || 0)),
+        w: Math.min(width, w),
+        h: Math.min(height, h),
         value: Math.min(1, Math.max(0, Number.isFinite(Number(item.value)) ? Number(item.value) : 0)),
         accent: color(item.accent, '#ffb75e'),
         surface: color(item.surface, '#26313d'),
         textColor: color(item.textColor, '#edf3fa'),
         borderColor: color(item.borderColor, color(item.accent, '#ffb75e')),
         finish: ['matte','brushed','anodized','walnut','ivory'].includes(item.finish) ? item.finish : 'matte',
-        margin: Math.min(48, Math.max(0, Number(item.margin) || 0)),
+        margin: Math.min(180, Math.max(0, Number(item.margin) || 0)),
         hidden: Boolean(item.hidden),
         locked: Boolean(item.locked),
         ...(bind ? { bind } : {}),
@@ -137,7 +139,7 @@ export function validatePatch(raw) {
       textColor: color(panel.textColor, '#edf3fa'),
       unit: ['px','mm','in'].includes(panel.unit) ? panel.unit : 'mm',
       zoom: Math.min(3, Math.max(.25, Number(panel.zoom) || 1)),
-      safeMargin: Math.min(120, Math.max(0, Number(panel.safeMargin) || 24)),
+      safeMargin: Math.min(450, Math.max(0, Number(panel.safeMargin) || 24)),
       gridSize: Math.min(120, Math.max(4, Number(panel.gridSize) || 28)),
       showRulers: panel.showRulers !== false,
       showGrid: panel.showGrid !== false,
