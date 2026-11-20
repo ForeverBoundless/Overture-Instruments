@@ -389,15 +389,28 @@ test('OMNI front-panel validation remains backwards-compatible and sanitizes imp
       { id: 'drawbars1', type: 'drawbars', x: 20, y: 200, bind: { moduleId: organ.id }, margin: 150 },
       { id: 'bad id', type: 'label', x: 10, y: 10, text: 'SAFE TEXT' },
       { id: 'bad id', type: 'label', x: 30, y: 30, text: 'SECOND LABEL' },
+      { id: 'keys1', type: 'keyboard', x: 40, y: 320, w: 560, h: 140, startNote: 48, octaves: 4 },
+      { id: 'slider1', type: 'slider', x: 650, y: 40, w: 64, h: 140, orientation: 'vertical', padding: 12, gap: 8, radius: 14, fontSize: 12, borderWidth: 4, shadow: 'hard' },
     ],
   };
   const validated = graph.validatePatch(patch);
-  assert.equal(validated.frontPanel.components.length, 5);
+  assert.equal(validated.frontPanel.components.length, 7);
   assert.equal(validated.frontPanel.components[0].bind.moduleId, filter.id);
   assert.equal(validated.frontPanel.components[0].bind.paramKey, 'cutoff');
+  assert.equal(validated.frontPanel.components[0].padding, 7);
+  assert.equal(validated.frontPanel.components[0].radius, 7);
+  assert.equal(validated.frontPanel.components[0].shadow, 'soft');
   assert.equal(validated.frontPanel.components[1].bind, undefined);
   assert.equal(validated.frontPanel.components[2].bind.moduleId, organ.id);
   assert.ok(validated.frontPanel.components[2].margin <= 180);
+  assert.equal(validated.frontPanel.components[5].octaves, 4);
+  assert.equal(validated.frontPanel.components[6].orientation, 'vertical');
+  assert.equal(validated.frontPanel.components[6].padding, 12);
+  assert.equal(validated.frontPanel.components[6].gap, 8);
+  assert.equal(validated.frontPanel.components[6].radius, 14);
+  assert.equal(validated.frontPanel.components[6].fontSize, 12);
+  assert.equal(validated.frontPanel.components[6].borderWidth, 4);
+  assert.equal(validated.frontPanel.components[6].shadow, 'hard');
   assert.notEqual(validated.frontPanel.components[3].id, validated.frontPanel.components[4].id);
   assert.match(validated.frontPanel.components[3].id, /^[a-zA-Z0-9_-]+$/);
   assert.equal(validated.frontPanel.finish, 'walnut');
