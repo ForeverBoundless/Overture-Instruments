@@ -335,6 +335,9 @@ test('OMNI front-panel preview runs real controls without editor handles', async
   assert.match(editor, /new ResizeObserver\(\(\) => this\.scalePreviewFaceplate\(\)\)/);
   assert.match(css, /\.ofp-preview-faceplate \.ofp-component__resize \{display:none!important\}/);
   assert.match(css, /\.ofp-preview-dialog__state-dot/);
+  assert.match(css, /width:min\(1680px,calc\(100vw - 24px\)\)/);
+  assert.match(css, /height:min\(1040px,calc\(100dvh - 24px\)\)/);
+  assert.match(editor, /Math\.min\(1\.35, availableWidth \/ this\.state\.width, availableHeight \/ this\.state\.height\)/);
 });
 
 test('OMNI front-panel workspaces and precision design tools are integrated', async () => {
