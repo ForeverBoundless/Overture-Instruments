@@ -2453,9 +2453,11 @@ export class FrontPanelEditor {
 
   scalePreviewFaceplate() {
     if (!this.previewViewport || !this.previewFrame || !this.previewFaceplate) return;
-    const availableWidth = Math.max(120, this.previewViewport.clientWidth - 48);
-    const availableHeight = Math.max(120, this.previewViewport.clientHeight - 48);
-    const scale = Math.min(1, availableWidth / this.state.width, availableHeight / this.state.height);
+    const availableWidth = Math.max(120, this.previewViewport.clientWidth - 56);
+    const availableHeight = Math.max(120, this.previewViewport.clientHeight - 56);
+    // Let the faceplate grow on large displays so its controls are genuinely
+    // usable in preview, while always fitting the available viewport.
+    const scale = Math.min(1.35, availableWidth / this.state.width, availableHeight / this.state.height);
     const width = this.state.width * scale;
     const height = this.state.height * scale;
     this.previewFrame.style.width = width + 'px';
