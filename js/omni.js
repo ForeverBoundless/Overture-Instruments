@@ -345,10 +345,15 @@ class OmniApp {
     frontAction(inspectMenu,'Selected control properties',()=>this.frontPanelEditor?.focusInspector());
     frontAction(inspectMenu,'Run design check',()=>this.frontPanelEditor?.runDesignCheck());
     frontAction(inspectMenu,'Open visual preview',()=>this.frontPanelEditor?.openPreview());
+    frontAction(inspectMenu,'Test live front-panel controls',()=>this.frontPanelEditor?.toggleTestMode());
+    frontAction(inspectMenu,'Performance report',()=>this.frontPanelEditor?.showPerformanceReport());
     const exportMenu = frontOnlyGroup('Export');
     frontAction(exportMenu,'Export vector artwork · SVG',()=>this.frontPanelEditor?.exportSVG());
-    frontAction(exportMenu,'Export raster · PNG',()=>this.frontPanelEditor?.exportPNG(2));
-    frontAction(exportMenu,'Export raster · JPEG',()=>this.frontPanelEditor?.exportJPEG(1));
+    frontAction(exportMenu,'Export raster · PNG · 1×',()=>this.frontPanelEditor?.exportPNG(1));
+    frontAction(exportMenu,'Export raster · PNG · 2×',()=>this.frontPanelEditor?.exportPNG(2));
+    frontAction(exportMenu,'Export raster · PNG · 3×',()=>this.frontPanelEditor?.exportPNG(3));
+    frontAction(exportMenu,'Export raster · JPEG · 1×',()=>this.frontPanelEditor?.exportJPEG(1));
+    frontAction(exportMenu,'Export raster · JPEG · 2×',()=>this.frontPanelEditor?.exportJPEG(2));
     frontAction(exportMenu,'Export editable layout · JSON',()=>this.frontPanelEditor?.exportJSON());
     frontAction(exportMenu,'Print sheet / Save as PDF',()=>this.frontPanelEditor?.printPDF());
     this.frontPanelCommandMenus = [insertMenu.details,arrangeMenu.details,inspectMenu.details,exportMenu.details];
