@@ -1791,3 +1791,9 @@ html[data-theme="light"] #omni-root .ofp-component[data-finish="ivory"]{color:#2
 
 #omni-root>.omni-front-panel{grid-row:2 / 4}
 .ofp-workspace{position:relative;overflow:hidden}
+
+.ofp-guide-setting{display:grid;grid-template-columns:1fr auto;gap:7px;align-items:center;padding:8px;border:1px solid var(--omni-border);border-radius:6px;background:var(--omni-panel-soft)}
+.ofp-guide-setting__name{grid-column:1/-1;color:var(--omni-muted);font:8px var(--font-mono);letter-spacing:.1em}
+.ofp-guide-setting .ofp-field{min-width:0}
+.ofp-guide-setting .ofp-color{width:42px}
+html[data-theme="light"] #omni-root .ofp-guide-setting{border-color:rgba(43,59,78,.15);background:rgba(255,255,255,.5)}
