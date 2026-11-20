@@ -428,4 +428,22 @@ test('OMNI front-panel validation remains backwards-compatible and sanitizes imp
   assert.equal(unsafe.frontPanel.panelColor, '#252d35');
   assert.equal(unsafe.frontPanel.zoom, 3);
   assert.equal(unsafe.frontPanel.panelBorderColor, '#ff9f0a');
+  const zeroValues = graph.validatePatch({
+    ...patch,
+    frontPanel: {
+      ...patch.frontPanel,
+      safeMargin: 0,
+      gridSize: 450,
+      zoom: 0,
+      components: [
+        { id: 'low-key', type: 'keyboard', x: 0, y: 0, w: 500, h: 120, startNote: 0, octaves: 1 },
+        { id: 'low-pad', type: 'pad', x: 520, y: 0, w: 90, h: 90, note: 0 },
+      ],
+    },
+  });
+  assert.equal(zeroValues.frontPanel.safeMargin, 0);
+  assert.equal(zeroValues.frontPanel.gridSize, 450);
+  assert.equal(zeroValues.frontPanel.zoom, .25);
+  assert.equal(zeroValues.frontPanel.components[0].startNote, 0);
+  assert.equal(zeroValues.frontPanel.components[1].note, 0);
 });
