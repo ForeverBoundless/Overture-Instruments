@@ -1072,21 +1072,39 @@ export class FrontPanelEditor {
     if (commit) this.commit();
   }
 
+  componentNodes(component) {
+    const nodes = [];
+    [this.faceplate, this.previewFaceplate].forEach((surface) => {
+      if (!surface) return;
+      surface.querySelectorAll('.ofp-component[data-component-id]').forEach((node) => {
+        if (node.dataset.componentId === component.id) nodes.push(node);
+      });
+    });
+    return nodes;
+  }
+
   updateComponentVisual(component, key, value) {
-    const node = this.faceplate.querySelector('[data-component-id="' + component.id + '"]');
-    if (!node) return;
     const range = this.getRange(component, key);
     const ratio = this.rangeRatio(range, value);
-    node.style.setProperty('--ofp-value', String(ratio));
-    const output = node.querySelector('[data-ofp-role="value"]');
-    if (output) output.textContent = range.log ? Math.round(value).toLocaleString() : (Number(value).toFixed(range.step >= 1 ? 0 : 2));
-    const meterFill = node.querySelector('.ofp-meter__fill'); if (meterFill) meterFill.style.width = (ratio * 100) + '%';
-    const ring = node.querySelector('.ofp-knob__ring');
-    if (ring) ring.style.setProperty('--ofp-angle', String(-135 + ratio * 270) + 'deg');
-    const pointer = node.querySelector('.ofp-knob__indicator, .ofp-dial__needle');
-    if (pointer) pointer.style.transform = 'rotate(' + (-135 + ratio * 270) + 'deg)';
-    const toggle = node.querySelector('.ofp-switch'); if (toggle) { toggle.classList.toggle('is-on', value > (range.min + range.max) / 2); const label = toggle.querySelector('.ofp-switch__label'); if (label) label.textContent = value > (range.min + range.max) / 2 ? 'ON' : 'OFF'; }
-    const wheelCap = node.querySelector('.ofp-wheel__cap'); if (wheelCap) node.style.setProperty('--ofp-wheel-position', (10 + (1 - ratio) * 80) + '%');
+    this.componentNodes(component).forEach((node) => {
+      node.style.setProperty('--ofp-value', String(ratio));
+      const output = node.querySelector('[data-ofp-role="value"]');
+      if (output) output.textContent = range.log ? Math.round(value).toLocaleString() : Number(value).toFixed(range.step >= 1 ? 0 : 2);
+      const meterFill = node.querySelector('.ofp-meter__fill');
+      if (meterFill) meterFill.style.width = (ratio * 100) + '%';
+      const ring = node.querySelector('.ofp-knob__ring');
+      if (ring) ring.style.setProperty('--ofp-angle', String(-135 + ratio * 270) + 'deg');
+      const pointer = node.querySelector('.ofp-knob__indicator, .ofp-dial__needle');
+      if (pointer) pointer.style.transform = 'rotate(' + (-135 + ratio * 270) + 'deg)';
+      const toggle = node.querySelector('.ofp-switch');
+      if (toggle) {
+        const on = value > (range.min + range.max) / 2;
+        toggle.classList.toggle('is-on', on);
+        const label = toggle.querySelector('.ofp-switch__label');
+        if (label) label.textContent = on ? 'ON' : 'OFF';
+      }
+      if (node.querySelector('.ofp-wheel__cap')) node.style.setProperty('--ofp-wheel-position', (10 + (1 - ratio) * 80) + '%');
+    });
   }
 
   render() {
@@ -1120,10 +1138,10 @@ export class FrontPanelEditor {
     requestAnimationFrame(() => this.scaleFaceplate());
   }
 
-  renderComponent(component) {
-    const node = make('div', 'ofp-component ofp-component--' + component.type, this.faceplate);
+  renderComponent(component, parent = this.faceplate, preview = false) {
+    const node = make('div', 'ofp-component ofp-component--' + component.type, parent);
     node.dataset.componentId = component.id;
-    node.tabIndex = 0;
+    node.tabIndex = preview ? -1 : 0;
     node.setAttribute('role', 'group');
     node.setAttribute('aria-label', (component.label || component.type) + (component.locked ? ', locked' : ''));
     node.style.left = component.x + 'px';
@@ -1142,13 +1160,13 @@ export class FrontPanelEditor {
     node.dataset.shadow = ['none','soft','hard'].includes(component.shadow) ? component.shadow : 'soft';
     node.dataset.finish = component.finish || 'matte';
     node.dataset.orientation = component.orientation || 'horizontal';
-    node.classList.toggle('is-selected', this.selectedIds?.has(component.id) || component.id === this.selectedId);
-    node.classList.toggle('is-locked', Boolean(component.locked));
+    node.classList.toggle('is-selected', !preview && (this.selectedIds?.has(component.id) || component.id === this.selectedId));
+    node.classList.toggle('is-locked', !preview && Boolean(component.locked));
     node.hidden = Boolean(component.hidden);
     node.style.setProperty('--ofp-clearance', Math.max(0, Number(component.margin) || 0) + 'px');
     node.style.setProperty('--ofp-control-border', safeColor(component.borderColor, component.accent || this.state.accent));
     const title = make('div', 'ofp-component__title', node, component.label || component.type.toUpperCase());
-    title.title = 'Drag to move';
+    title.title = preview ? '' : 'Drag to move';
     if (component.type === 'dial') {
       const control = make('div', 'ofp-dial', node);
       const scale = make('div', 'ofp-dial__scale', control);
@@ -1245,7 +1263,7 @@ export class FrontPanelEditor {
         const bound = this.getParameter(component);
         if (bound) { const midpoint = (bound.parameter.min + bound.parameter.max) / 2; this.changeParameter(component, null, this.getValue(component) > midpoint ? bound.parameter.min : bound.parameter.max, true); }
         else { component.value = component.value > .5 ? 0 : 1; this.commit(); }
-        this.render();
+        this.updateComponentVisual(component, null, this.getValue(component));
       });
     } else if (component.type === 'button') {
       const button = make('button', 'ofp-hardware-button', node, component.label || 'BUTTON');
@@ -1329,12 +1347,14 @@ export class FrontPanelEditor {
         column.appendChild(this.buildInput(component, 'drawbar' + index, 'ofp-drawbar__input'));
       }
     }
-    this.bindComponentDrag(node, component);
-    const resize = make('button', 'ofp-component__resize', node);
-    resize.type = 'button';
-    resize.title = 'Resize component';
-    resize.setAttribute('aria-label', 'Resize ' + component.label);
-    this.bindResize(resize, node, component);
+    if (!preview) {
+      this.bindComponentDrag(node, component);
+      const resize = make('button', 'ofp-component__resize', node);
+      resize.type = 'button';
+      resize.title = 'Resize component';
+      resize.setAttribute('aria-label', 'Resize ' + component.label);
+      this.bindResize(resize, node, component);
+    }
   }
 
   renderKeyboard(component, node) {
@@ -2099,33 +2119,33 @@ export class FrontPanelEditor {
     this.renderRulers();
   }
 
-    refreshValues() {
+  refreshValues() {
     this.state.components.forEach((component) => {
+      const nodes = this.componentNodes(component);
+      if (!nodes.length) return;
+      const value = this.getValue(component);
       if (component.type === 'switch' || component.type === 'meter') {
-        this.updateComponentVisual(component, null, this.getValue(component));
+        this.updateComponentVisual(component, null, value);
         return;
       }
       if (['knob','dial','encoder','slider','pitchwheel','modwheel'].includes(component.type)) {
-        const node = this.faceplate.querySelector('[data-component-id="' + component.id + '"]');
-        const input = node?.querySelector('input[type="range"]');
-        if (!input) return;
-        const value = this.getValue(component);
         const range = this.getRange(component);
         const inputValue = this.toInputValue(clamp(value, range.min, range.max), range);
-        input.value = String(clamp(inputValue, Number(input.min), Number(input.max)));
+        nodes.forEach((node) => {
+          const input = node.querySelector('input[type="range"]');
+          if (input) input.value = String(clamp(inputValue, Number(input.min), Number(input.max)));
+        });
         this.updateComponentVisual(component, null, value);
       } else if (component.type === 'dropdown') {
-        const node = this.faceplate.querySelector('[data-component-id="' + component.id + '"]');
-        const select = node?.querySelector('select');
-        if (select) {
-          const options = this.getOptions(this.getParameter(component));
-          const rawValue = this.getRawValue(component);
-          const index = options.findIndex((item) => String(item.value) === String(rawValue));
-          if (index >= 0) select.selectedIndex = index;
-        }
+        const options = this.getOptions(this.getParameter(component));
+        const rawValue = this.getRawValue(component);
+        const index = options.findIndex((item) => String(item.value) === String(rawValue));
+        if (index >= 0) nodes.forEach((node) => {
+          const select = node.querySelector('select');
+          if (select) select.selectedIndex = index;
+        });
       } else if (component.type === 'led') {
-        const node = this.faceplate.querySelector('[data-component-id="' + component.id + '"]');
-        node?.querySelector('.ofp-led')?.classList.toggle('is-on', Boolean(this.app.ctx));
+        nodes.forEach((node) => node.querySelector('.ofp-led')?.classList.toggle('is-on', Boolean(this.app.ctx)));
       }
     });
   }
@@ -2134,14 +2154,14 @@ export class FrontPanelEditor {
     this.state.components.forEach((component) => {
       if (component.type !== 'module') return;
       const module = component.bind?.moduleId ? this.getModule(component.bind.moduleId) : null;
-      const node = this.faceplate.querySelector('[data-component-id="' + component.id + '"]');
-      if (!node) return;
-      const name = node.querySelector('.ofp-module__name');
-      const identity = node.querySelector('.ofp-module__id');
-      const category = node.querySelector('.ofp-module__ports');
-      if (name) name.textContent = module ? MODULES[module.type]?.name || module.type : 'Unassigned module';
-      if (identity) identity.textContent = module ? module.id + '  /  LIVE MODULE' : 'SELECT A MODULE IN PROPERTIES';
-      if (category) category.textContent = module ? MODULES[module.type]?.category || 'MODULE' : 'MODULE BAY';
+      this.componentNodes(component).forEach((node) => {
+        const name = node.querySelector('.ofp-module__name');
+        const identity = node.querySelector('.ofp-module__id');
+        const category = node.querySelector('.ofp-module__ports');
+        if (name) name.textContent = module ? MODULES[module.type]?.name || module.type : 'Unassigned module';
+        if (identity) identity.textContent = module ? module.id + '  /  LIVE MODULE' : 'SELECT A MODULE IN PROPERTIES';
+        if (category) category.textContent = module ? MODULES[module.type]?.category || 'MODULE' : 'MODULE BAY';
+      });
     });
     if (this.inspector && this.selectedId) this.renderInspector();
   }
@@ -2152,6 +2172,7 @@ export class FrontPanelEditor {
     this.selectedId = null;
     this.selectedIds?.clear();
     this.render();
+    this.renderPreviewFaceplate();
   }
 
   commit() {
@@ -2406,52 +2427,105 @@ export class FrontPanelEditor {
     this.app.msg('Print sheet opened. Choose “Save as PDF” in the print dialog.');
   }
 
+  renderPreviewFaceplate() {
+    const faceplate = this.previewFaceplate;
+    if (!faceplate) return;
+    faceplate.replaceChildren();
+    faceplate.classList.add('is-test-mode');
+    faceplate.dataset.finish = this.state.finish || 'matte';
+    faceplate.style.width = this.state.width + 'px';
+    faceplate.style.height = this.state.height + 'px';
+    faceplate.style.setProperty('--ofp-panel-color', safeColor(this.state.panelColor, '#252d35'));
+    faceplate.style.setProperty('--ofp-accent', safeColor(this.state.accent, '#ffb75e'));
+    faceplate.style.setProperty('--ofp-text', safeColor(this.state.textColor, '#edf3fa'));
+    faceplate.style.borderColor = safeColor(this.state.panelBorderColor, '#667583');
+    faceplate.style.borderWidth = clamp(this.state.panelBorderWidth ?? 1, 0, 8) + 'px';
+    faceplate.style.borderRadius = clamp(this.state.panelRadius ?? 14, 0, 40) + 'px';
+
+    if (!this.state.components.length) {
+      const empty = make('div', 'ofp-empty-state', faceplate);
+      make('strong', '', empty, 'Nothing to preview yet');
+      make('p', '', empty, 'Add controls to the faceplate, then reopen Preview to play the instrument.');
+    }
+    this.state.components.forEach((component) => this.renderComponent(component, faceplate, true));
+    this.scalePreviewFaceplate();
+  }
+
+  scalePreviewFaceplate() {
+    if (!this.previewViewport || !this.previewFrame || !this.previewFaceplate) return;
+    const availableWidth = Math.max(120, this.previewViewport.clientWidth - 48);
+    const availableHeight = Math.max(120, this.previewViewport.clientHeight - 48);
+    const scale = Math.min(1, availableWidth / this.state.width, availableHeight / this.state.height);
+    const width = this.state.width * scale;
+    const height = this.state.height * scale;
+    this.previewFrame.style.width = width + 'px';
+    this.previewFrame.style.height = height + 'px';
+    this.previewFaceplate.style.transform = 'scale(' + scale + ')';
+  }
+
   openPreview() {
+    this.previewResizeObserver?.disconnect();
+    this.previewResizeObserver = null;
     this.previewDialog?.remove();
+    this.previewDialog = null;
+    this.previewViewport = null;
+    this.previewFrame = null;
+    this.previewFaceplate = null;
+
     const dialog = make('dialog', 'ofp-preview-dialog', this.el);
     this.previewDialog = dialog;
     const header = make('header', 'ofp-preview-dialog__header', dialog);
-    const title = make('div', '', header);
-    make('span', 'ofp-panel-heading__eyebrow', title, 'FRONT-PANEL PREVIEW');
+    const title = make('div', 'ofp-preview-dialog__title', header);
+    make('span', 'ofp-panel-heading__eyebrow', title, 'INTERACTIVE FRONT-PANEL PREVIEW');
     make('strong', '', title, this.app.patch.name || 'Untitled instrument');
+    const state = make('div', 'ofp-preview-dialog__state', header);
+    make('span', 'ofp-preview-dialog__state-dot', state);
+    make('span', '', state, 'LIVE CONTROLS');
     const close = make('button', 'ofp-action', header, 'CLOSE');
     close.type = 'button';
     close.addEventListener('click', () => dialog.close());
-    const viewport = make('div', 'ofp-preview-dialog__stage', dialog);
 
-    try {
-      const template = document.createElement('template');
-      template.innerHTML = this.exportSVGMarkup().trim();
-      const sourceSvg = template.content.querySelector('svg');
-      if (!sourceSvg || sourceSvg.namespaceURI !== 'http://www.w3.org/2000/svg') {
-        throw new Error('The exported faceplate did not contain a valid SVG element.');
+    this.previewViewport = make('div', 'ofp-preview-dialog__stage', dialog);
+    this.previewFrame = make('div', 'ofp-preview-dialog__frame', this.previewViewport);
+    this.previewFaceplate = make('div', 'ofp-faceplate ofp-preview-faceplate', this.previewFrame);
+    const footer = make('footer', 'ofp-preview-dialog__footer', dialog);
+    make('span', '', footer, 'Play the keyboard and operate controls to test the instrument.');
+    make('span', '', footer, 'Power on OMNI audio to hear sound.');
+
+    const resizeObserver = typeof ResizeObserver === 'function'
+      ? new ResizeObserver(() => this.scalePreviewFaceplate())
+      : null;
+    this.previewResizeObserver = resizeObserver;
+
+    dialog.addEventListener('close', () => {
+      resizeObserver?.disconnect();
+      if (this.previewDialog === dialog) {
+        this.previewDialog = null;
+        this.previewViewport = null;
+        this.previewFrame = null;
+        this.previewFaceplate = null;
+        if (this.previewResizeObserver === resizeObserver) this.previewResizeObserver = null;
       }
-      const svg = document.importNode(sourceSvg, true);
-      svg.setAttribute('class', 'ofp-preview-dialog__artwork');
-      svg.setAttribute('role', 'img');
-      svg.setAttribute('aria-label', 'Front-panel artwork preview');
-      svg.setAttribute('preserveAspectRatio', 'xMidYMid meet');
-      svg.style.display = 'block';
-      svg.style.width = '100%';
-      svg.style.height = 'auto';
-      svg.style.maxWidth = '100%';
-      svg.style.maxHeight = '72vh';
-      viewport.appendChild(svg);
-    } catch (error) {
       dialog.remove();
-      this.previewDialog = null;
-      this.app.msg('Preview could not be generated: ' + (error?.message || 'Invalid front-panel artwork.'), true);
-      return;
-    }
-
-    dialog.addEventListener('close', () => { dialog.remove(); this.previewDialog = null; }, { once: true });
+    }, { once: true });
     dialog.addEventListener('click', (event) => { if (event.target === dialog) dialog.close(); });
+
     try {
+      this.renderPreviewFaceplate();
       dialog.showModal();
+      resizeObserver?.observe(this.previewViewport);
+      requestAnimationFrame(() => this.scalePreviewFaceplate());
       close.focus({ preventScroll: true });
     } catch (error) {
+      resizeObserver?.disconnect();
       dialog.remove();
-      this.previewDialog = null;
+      if (this.previewDialog === dialog) {
+        this.previewDialog = null;
+        this.previewViewport = null;
+        this.previewFrame = null;
+        this.previewFaceplate = null;
+        this.previewResizeObserver = null;
+      }
       this.app.msg('Preview could not be opened: ' + (error?.message || 'Dialog unavailable.'), true);
     }
   }
