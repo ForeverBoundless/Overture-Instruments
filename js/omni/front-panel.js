@@ -1203,6 +1203,22 @@ export class FrontPanelEditor {
     });
   }
 
+  refreshModuleReferences() {
+    this.state.components.forEach((component) => {
+      if (component.type !== 'module') return;
+      const module = component.bind?.moduleId ? this.getModule(component.bind.moduleId) : null;
+      const node = this.faceplate.querySelector('[data-component-id="' + component.id + '"]');
+      if (!node) return;
+      const name = node.querySelector('.ofp-module__name');
+      const identity = node.querySelector('.ofp-module__id');
+      const category = node.querySelector('.ofp-module__ports');
+      if (name) name.textContent = module ? MODULES[module.type]?.name || module.type : 'Unassigned module';
+      if (identity) identity.textContent = module ? module.id + '  /  LIVE MODULE' : 'SELECT A MODULE IN PROPERTIES';
+      if (category) category.textContent = module ? MODULES[module.type]?.category || 'MODULE' : 'MODULE BAY';
+    });
+    if (this.inspector && this.selectedId) this.renderInspector();
+  }
+
   setPatch(patch = this.app.patch) {
     this.state = patch.frontPanel ? clone(patch.frontPanel) : this.defaultLayout();
     patch.frontPanel = this.state;
