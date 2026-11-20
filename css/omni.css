@@ -1815,3 +1815,6 @@ html[data-theme="light"] #omni-root .ofp-layer-row.is-selected { border-color:rg
 html[data-theme="light"] #omni-root .ofp-layer-icon:hover { color:#087f9f;background:rgba(8,127,159,.08); }
 html[data-theme="light"] #omni-root .ofp-stage-foot { border-color:rgba(43,59,78,.14); }
 
+
+.ofp-measurement-readout{grid-column:1/-1;color:var(--cyan);font:8px/1.6 var(--font-mono);font-variant-numeric:tabular-nums}
+html[data-theme="light"] #omni-root .ofp-measurement-readout{color:#087f9f}
