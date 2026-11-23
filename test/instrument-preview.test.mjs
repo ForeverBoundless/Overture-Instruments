@@ -321,7 +321,9 @@ test('Worklet previews wait for the processor to receive queued events before ac
   const preview = await readFile(new URL('../js/shared/instrumentPreview.js', import.meta.url), 'utf8');
   assert.match(preview, /__preview_flush_ack/);
   assert.match(preview, /await acknowledged/);
-  assert.match(preview, /queueWorkletPhrase\(engine, context\);\s*return render\(context, engine\);/);
+  assert.match(preview, /messages\.push\(\.\.\.buildWorkletPhrase\(context\.sampleRate\)\);/);
+  assert.match(preview, /workletOptions\.processorOptions = \{ messages \};/);
+  assert.match(preview, /await engine\.start\(context\);[\s\S]*return render\(context, engine\);/);
   const processors = [
     'Prophet10Processor.js', 'DX7Processor.js', 'JunoProcessor.js', 'MS20Processor.js',
     'Pro3Processor.js', 'Super8Processor.js', 'OBXaProcessor.js', 'HohnerD6Processor.js',
