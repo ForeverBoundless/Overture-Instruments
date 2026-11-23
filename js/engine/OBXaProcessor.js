@@ -103,7 +103,7 @@ if((m.t==='noteOn'||m.t==='noteOff')&&Number.isFinite(m.frame)&&m.frame>currentF
     }else v.pitch=v.targetPitch;
     const group=this.p.mode==='full'?0:(v.i<half?0:1),lfo=group===0?lfo0:lfo1;
     const panelEnabled=this.p.mode==='full'||(group===0?this.p.modLowerEnabled:this.p.modUpperEnabled);
-    const depth=clamp(p.lfoAmount,0,1),pitch1=(p.lfoOsc1?lfo*depth*4:0)+(panelEnabled&&this.p.modPanelLfoOsc1?panelLfo*clamp(this.p.modPanelLfoDepth,0,1)*this.mod*4:0),pitch2=(p.lfoOsc2?lfo*depth*4:0)+(panelEnabled&&this.p.modPanelLfoOsc2?panelLfo*clamp(this.p.modPanelLfoDepth+this.mod,0,1)*4:0),filterMod=p.lfoFilter?lfo*depth*.24:0;
+    const depth=clamp(p.lfoAmount,0,1),pitch1=(p.lfoOsc1?lfo*depth*4:0)+(panelEnabled&&this.p.modPanelLfoOsc1?panelLfo*clamp(this.p.modPanelLfoDepth,0,1)*this.mod*4:0),pitch2=(p.lfoOsc2?lfo*depth*4:0)+(panelEnabled&&this.p.modPanelLfoOsc2?panelLfo*clamp(this.p.modPanelLfoDepth,0,1)*this.mod*4:0),filterMod=p.lfoFilter?lfo*depth*.24:0;
     const pwDepth=clamp(p.pulseWidthAmount,0,1),pw1=p.lfoPulse1?lfo*pwDepth*.42:0,pw2=p.lfoPulse2?lfo*pwDepth*.42:0;
     const unison=this.p.unison?(v.i-(count-1)/2)*this.p.unisonDetune*.11:0;
     const bend1=panelEnabled&&!this.p.bendOsc2Only?this.bend*this.p.bendRange:0,bend2=panelEnabled?this.bend*this.p.bendRange:0;
