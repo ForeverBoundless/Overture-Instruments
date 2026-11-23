@@ -77,12 +77,21 @@ test('OB-Xa validation preserves the selected pitch-bend range and both timbre t
   for (const bendRange of [1, 2, 3, 6, 12]) {
     const patch = validateOBXAPatch({
       mode: 'split', voiceCount: 8, bendRange, bendNarrow: bendRange <= 2,
-      transpose: 7, layerB: { transpose: -5, osc2Tune: 0.4 },
+      transpose: 47, osc2Detune: -37,
+      modPanelLfoRate: 0.8, modPanelLfoDepth: 0.65, modPanelLfoWave: 'saw', modPanelLfoOsc1: true, modPanelLfoOsc2: false,
+      layerB: { transpose: -47, osc2Tune: 0.4, osc2Detune: 23 },
     });
     assert.equal(patch.bendRange, bendRange);
     assert.equal(patch.bendNarrow, bendRange <= 2);
-    assert.equal(patch.transpose, 7);
-    assert.equal(patch.layerB.transpose, -5);
+    assert.equal(patch.transpose, 47);
+    assert.equal(patch.osc2Detune, -37);
+    assert.equal(patch.modPanelLfoRate, 0.8);
+    assert.equal(patch.modPanelLfoDepth, 0.65);
+    assert.equal(patch.modPanelLfoWave, 'saw');
+    assert.equal(patch.modPanelLfoOsc1, true);
+    assert.equal(patch.modPanelLfoOsc2, false);
+    assert.equal(patch.layerB.transpose, -47);
+    assert.equal(patch.layerB.osc2Detune, 23);
     assert.equal(patch.layerB.osc2Tune, 0.4);
   }
   const legacyNarrowPatch = validateOBXAPatch({ bendNarrow: true });
@@ -100,20 +109,26 @@ test('OB-Xa local preset save, JSON export/import and backup restore preserve al
     const store = new PresetStore({ key: 'test.obxa.programs', version: 3, validate: validateOBXAPatch });
     const patch = validateOBXAPatch({
       mode: 'double', voiceCount: 8, bendRange: 7,
-      transpose: 5, cutoff: 0.71,
-      layerB: { transpose: -9, osc2Tune: 0.45, lfoWave: 'square' },
+      transpose: 48, cutoff: 0.71, osc2Detune: 42,
+      modPanelLfoRate: 0.73, modPanelLfoDepth: 0.55, modPanelLfoWave: 'square', modPanelLfoOsc1: true,
+      layerB: { transpose: -48, osc2Tune: 0.45, osc2Detune: -63, lfoWave: 'square' },
     });
     const saved = store.save('Layered brass', patch, 'layered-brass');
     const singleExport = store.exportJSON(saved);
     const singleImport = store.parseImport(singleExport);
     assert.equal(singleImport.data.bendRange, 7);
-    assert.equal(singleImport.data.transpose, 5);
-    assert.equal(singleImport.data.layerB.transpose, -9);
+    assert.equal(singleImport.data.transpose, 48);
+    assert.equal(singleImport.data.osc2Detune, 42);
+    assert.equal(singleImport.data.modPanelLfoDepth, 0.55);
+    assert.equal(singleImport.data.modPanelLfoWave, 'square');
+    assert.equal(singleImport.data.layerB.transpose, -48);
+    assert.equal(singleImport.data.layerB.osc2Detune, -63);
     assert.equal(singleImport.data.layerB.osc2Tune, 0.45);
 
     const restored = new PresetStore({ key: 'test.obxa.programs', version: 3, validate: validateOBXAPatch });
     assert.equal(restored.items[0].data.bendRange, 7);
     assert.equal(restored.items[0].data.layerB.lfoWave, 'square');
+    assert.equal(restored.items[0].data.modPanelLfoOsc1, true);
 
     const backup = store.exportAllJSON();
     const backupValues = new Map();
@@ -124,12 +139,34 @@ test('OB-Xa local preset save, JSON export/import and backup restore preserve al
     const backupStore = new PresetStore({ key: 'test.obxa.programs', version: 3, validate: validateOBXAPatch });
     backupStore.importAll(backup);
     assert.equal(backupStore.items[0].data.bendRange, 7);
-    assert.equal(backupStore.items[0].data.transpose, 5);
-    assert.equal(backupStore.items[0].data.layerB.transpose, -9);
+    assert.equal(backupStore.items[0].data.transpose, 48);
+    assert.equal(backupStore.items[0].data.osc2Detune, 42);
+    assert.equal(backupStore.items[0].data.modPanelLfoRate, 0.73);
+    assert.equal(backupStore.items[0].data.layerB.transpose, -48);
+    assert.equal(backupStore.items[0].data.layerB.osc2Detune, -63);
   } finally {
     if (previousStorage === undefined) delete globalThis.localStorage;
     else globalThis.localStorage = previousStorage;
   }
+});
+
+
+test('OB-Xa engine includes the third modulation-panel LFO and manual AUTO-TUNE', async () => {
+  const processor = await readFile(new URL('../js/engine/OBXaProcessor.js', import.meta.url), 'utf8');
+  const app = await readFile(new URL('../js/obxa.js', import.meta.url), 'utf8');
+  assert.match(processor, /this\.lfos=\[\{phase:0,hold:0\},\{phase:0,hold:0\}\]/);
+  assert.match(processor, /this\.modPanelLfo=\{phase:0\}/);
+  assert.match(processor, /modPanelLfoValue\(dt\)/);
+  assert.match(processor, /m\.t==='autoTune'/);
+  assert.match(processor, /this\.p\.modPanelLfoOsc1/);
+  assert.match(processor, /this\.p\.modPanelLfoOsc2/);
+  assert.match(processor, /p\.osc2Detune\|\|0/);
+  assert.match(app, /MODULATION PANEL LFO/);
+  assert.match(app, /AUTO-TUNE/);
+  assert.match(app, /OSC 2 FREQUENCY/);
+  assert.match(app, /OSC 2 DETUNE/);
+  assert.match(app, /TIMBRE TRANSPOSE',min:-60,max:60/);
+  assert.match(processor, /v\.pan=v\.i<this\.halfCount\(\)\?-1:1/);
 });
 
 test('Community OB-Xa patches retain timbre A and B transpose while dropping master transpose switches', () => {
