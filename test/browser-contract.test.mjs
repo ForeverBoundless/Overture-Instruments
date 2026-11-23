@@ -111,7 +111,7 @@ test('OB-Xa exposes the hardware programmer, modulation panel and voice-pan cont
   assert.match(styles, /\.obxa-voice-grid/);
   assert.match(styles, /radial-gradient\(ellipse at 50% -20%,#314c63/);
   assert.match(page, /ob-xa\.css\?v=20261123-hardware-panel-r1/);
-  assert.match(page, /obxa\.js\?v=20261123-obxa-patch-r4/);
+  assert.match(page, /obxa\.js\?v=20261123-obxa-patch-r5/);
   assert.match(worker, /OBXaProcessor\.js\?v=20261123-audio-r4/);
   assert.match(worker, /obxa-patch\.js\?v=20261123-obxa-patch-r4/);
   assert.match(worker, /ob-xa\.css\?v=20261123-hardware-panel-r1/);
