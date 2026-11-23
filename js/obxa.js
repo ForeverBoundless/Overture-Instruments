@@ -2,7 +2,7 @@ import { WorkletEngine } from './shared/workletEngine.js';
 import { PresetStore } from './shared/presetStore.js';
 import { el, section, knob, select, toggle, button, display, performance, power, presetBar, footer } from './shared/panel.js';
 import { OBXA_PRESETS } from './data/obx-a-presets.js';
-import { DEF, GLOBAL_KEYS, LAYER_KEYS, validateOBXAPatch as validate } from './data/obxa-patch.js?v=20261123-obxa-patch-r2';
+import { DEF, GLOBAL_KEYS, LAYER_KEYS, OBXA_PROGRAM_GROUPS, OBXA_PROGRAM_COUNT, obxaProgramSlotId, obxaSpecialProgramSlotId, validateOBXAProgramRecord, validateOBXAPatch as validate } from './data/obxa-patch.js?v=20261123-obxa-patch-r3';
 import { consumeCommunityInstrumentPreset, createCommunityShareButton } from './shared/communityPreset.js';
 const NOTE_NAMES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
 const NOTES=Array.from({length:61},(_,i)=>{const n=36+i;return NOTE_NAMES[n%12]+(Math.floor(n/12)-1);});
@@ -10,15 +10,90 @@ class OBXaApp{
  constructor(){
   this.engine=new WorkletEngine(new URL('./engine/OBXaProcessor.js?v=20261123-audio-r2',import.meta.url).href,'obxa-processor');
   power('obxa-power',()=>this.engine.start(),()=>{this.perf?.flushPending();this.display?.set('OB-Xa READY',this.patch.voiceCount+' VOICES · TWO CONTROL GROUPS');});
-  this.patch=validate(DEF);this.layerIndex=0;this.ui={};this.store=new PresetStore({key:'overture.obxa.programs',version:3,validate});this.build();
+  this.patch=validate(DEF);this.layerIndex=0;this.ui={};this.manualMode=false;this.store=new PresetStore({key:'overture.obxa.programs',version:3,validate});this.hardwareStore=new PresetStore({key:'overture.obxa.hardware-programs',version:1,maxItems:136,validate:validateOBXAProgramRecord});this.seedHardwarePrograms();this.build();
   this.perf=performance(this.shell,{notes:NOTES,octaves:5,startOctave:2,started:()=>this.engine.started,midiStatusEl:this.midi,handlers:{
    noteOn:(n,v)=>this.engine.noteOn(n,v),noteOff:n=>this.engine.noteOff(n),bend:v=>this.engine.setPitchBend(v),mod:v=>this.engine.setModWheel(v),
-   sustain:d=>this.engine.setSustain(d),allOff:()=>this.engine.allNotesOff(),program:p=>this.presets.load('f:'+(p%OBXA_PRESETS.length)),
+   sustain:d=>this.engine.setSustain(d),allOff:()=>this.engine.allNotesOff(),program:p=>{const slot=Math.abs(Number(p)||0)%OBXA_PROGRAM_COUNT,group=Math.floor(slot/8),program=slot%8+1;this.ui.hwGroup?.setValue(String(group),true);this.refreshHardwareProgramOptions();this.ui.hwProgram?.setValue(String(program),true);this.loadHardwareProgram();},
    cc:(cc,value)=>{if(cc===4||cc===74)this.ui.cutoff.setValue(value/127);if(cc===7)this.ui.master.setValue(value/127);if(cc===71)this.ui.resonance.setValue(value/127);if(cc===66)this.ui.hold.setValue(value>=64);}
   }});
   this.presets.load('f:0');
   const community=consumeCommunityInstrumentPreset('ob-xa',validate);
   if(community){this.patch=community.data;this.layerIndex=0;this.refresh();this.display.set(community.title.toUpperCase(),'COMMUNITY OB-Xa PROGRAM');}
+ }
+
+ seedHardwarePrograms(){
+  OBXA_PRESETS.forEach((preset,index)=>{
+   const group=Math.floor(index/8),program=index%8+1,id=obxaProgramSlotId(group,program);
+   if(!this.hardwareStore.get(id))this.hardwareStore.save(preset.name,{kind:'sound',patch:preset.data},id);
+  });
+ }
+ patchSnapshot(){return JSON.parse(JSON.stringify(this.patch));}
+ refreshHardwareProgramOptions(){
+  if(!this.ui.hwProgram?.select||!this.ui.hwGroup?.select)return;
+  const group=Number(this.ui.hwGroup.select.value)||0,selectEl=this.ui.hwProgram.select,current=selectEl.value||'1';
+  selectEl.replaceChildren();
+  for(let program=1;program<=8;program++){
+   const record=this.hardwareStore.get(obxaProgramSlotId(group,program));
+   const option=document.createElement('option');
+   option.value=String(program);
+   option.textContent=record?program+' · '+record.name:program+' · EMPTY';
+   selectEl.appendChild(option);
+  }
+  selectEl.value=current;
+  if(!selectEl.value)selectEl.value='1';
+ }
+ refreshSpecialProgramOptions(){
+  if(!this.ui.specialProgram?.select||!this.ui.specialType?.select)return;
+  const mode=this.ui.specialType.select.value,selectEl=this.ui.specialProgram.select,current=selectEl.value||'1';
+  selectEl.replaceChildren();
+  for(let program=1;program<=8;program++){
+   const record=this.hardwareStore.get(obxaSpecialProgramSlotId(mode,program));
+   const option=document.createElement('option');
+   option.value=String(program);
+   option.textContent=record?program+' · '+record.name:program+' · EMPTY';
+   selectEl.appendChild(option);
+  }
+  selectEl.value=current;
+  if(!selectEl.value)selectEl.value='1';
+ }
+ saveHardwareProgram(){
+  const group=Number(this.ui.hwGroup.select.value)||0,program=Number(this.ui.hwProgram.select.value)||1,id=obxaProgramSlotId(group,program);
+  const existing=this.hardwareStore.get(id);
+  if(existing&&!confirm('Overwrite program '+OBXA_PROGRAM_GROUPS[group]+program+'?'))return;
+  const patch=this.patchSnapshot(),kind=patch.mode==='split'?'split':patch.mode==='double'?'double':'sound';
+  this.hardwareStore.save(existing?.name||('Program '+OBXA_PROGRAM_GROUPS[group]+program),{kind,patch},id);
+  this.refreshHardwareProgramOptions();
+  this.display.flash('PROGRAM '+OBXA_PROGRAM_GROUPS[group]+program+' WRITTEN');
+ }
+ loadHardwareProgram(){
+  const group=Number(this.ui.hwGroup.select.value)||0,program=Number(this.ui.hwProgram.select.value)||1;
+  const record=this.hardwareStore.get(obxaProgramSlotId(group,program));
+  if(!record){this.display.flash('PROGRAM SLOT EMPTY');return;}
+  this.applyHardwareProgram(record.data,record.name);
+ }
+ saveSpecialProgram(){
+  const mode=this.ui.specialType.select.value,program=Number(this.ui.specialProgram.select.value)||1,id=obxaSpecialProgramSlotId(mode,program);
+  if(this.patch.mode!==mode){this.display.flash('SELECT '+mode.toUpperCase()+' MODE FIRST');return;}
+  const existing=this.hardwareStore.get(id);
+  if(existing&&!confirm('Overwrite '+mode.toUpperCase()+' program '+program+'?'))return;
+  this.hardwareStore.save(existing?.name||mode.toUpperCase()+' '+program,{kind:mode,patch:this.patchSnapshot()},id);
+  this.refreshSpecialProgramOptions();
+  this.display.flash(mode.toUpperCase()+' PROGRAM '+program+' WRITTEN');
+ }
+ loadSpecialProgram(){
+  const mode=this.ui.specialType.select.value,program=Number(this.ui.specialProgram.select.value)||1;
+  const record=this.hardwareStore.get(obxaSpecialProgramSlotId(mode,program));
+  if(!record){this.display.flash(mode.toUpperCase()+' MEMORY EMPTY');return;}
+  this.applyHardwareProgram(record.data,record.name);
+ }
+ applyHardwareProgram(data,name){
+  this.manualMode=false;this.patch=validate(data.patch||data);this.layerIndex=0;this.refresh();
+  this.display.set(String(name||'OB-Xa PROGRAM').toUpperCase(),this.patch.mode.toUpperCase()+' · HARDWARE PROGRAM');
+ }
+ enterManualMode(){
+  if(this.patch.mode!=='full')this.patch.mode='full';
+  this.manualMode=true;this.layerIndex=0;this.refresh();
+  this.display.set('MANUAL','LIVE PANEL SETTINGS · FULL POLY');
  }
  currentLayer(){return this.layerIndex===1?this.patch.layerB:this.patch;}
  set(key,value){
