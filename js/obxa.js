@@ -2,31 +2,11 @@ import { WorkletEngine } from './shared/workletEngine.js';
 import { PresetStore } from './shared/presetStore.js';
 import { el, section, knob, select, toggle, button, display, performance, power, presetBar, footer } from './shared/panel.js';
 import { OBXA_PRESETS } from './data/obx-a-presets.js';
+import { DEF, GLOBAL_KEYS, LAYER_KEYS, validateOBXAPatch as validate } from './data/obxa-patch.js';
 import { consumeCommunityInstrumentPreset, createCommunityShareButton } from './shared/communityPreset.js';
 const NOTE_NAMES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
 const NOTES=Array.from({length:61},(_,i)=>{const n=36+i;return NOTE_NAMES[n%12]+(Math.floor(n/12)-1);});
-const GLOBAL_DEFAULTS={mode:'full',voiceCount:8,splitPoint:60,unison:false,unisonDetune:.12,bendRange:12,bendNarrow:false,bendOsc2Only:false,master:.7,masterTune:0,hold:false,layerBalance:.5,chordMode:false,portamentoMode:'linear',portamentoOffset:true,transposeDown:false,transposeUp:false,modLowerEnabled:true,modUpperEnabled:true};
-const LAYER_DEFAULTS={osc1Wave:'saw',osc2Wave:'saw',osc1Range:0,osc1Level:.82,osc2Level:.56,osc2Tune:0,pulseWidth:.5,sync:false,fEnvOsc2:false,osc1Route:true,osc2Route:true,osc2Half:false,noiseRoute:false,cutoff:.53,resonance:.13,filterMode:'24',filterTrack:true,filterEnv:.42,filterAttack:.08,filterDecay:.32,filterSustain:.12,filterRelease:.32,ampAttack:.015,ampDecay:.3,ampSustain:.76,ampRelease:.32,lfoRate:.16,lfoAmount:0,lfoWave:'sine',lfoTarget:'both',lfoOsc1:true,lfoOsc2:true,lfoFilter:false,pulseWidthAmount:0,lfoPulse1:false,lfoPulse2:false,transpose:0,portamento:0};
-const DEF={...GLOBAL_DEFAULTS,...LAYER_DEFAULTS},GLOBAL_KEYS=new Set(Object.keys(GLOBAL_DEFAULTS)),LAYER_KEYS=Object.keys(LAYER_DEFAULTS);
-const clamp=(v,a,b)=>Math.min(b,Math.max(a,Number(v)||0));
-const cleanLayer=(source={})=>{
- const out={...LAYER_DEFAULTS,...source};
- ['osc1Level','osc2Level','pulseWidth','cutoff','resonance','filterEnv','filterAttack','filterDecay','filterSustain','filterRelease','ampAttack','ampDecay','ampSustain','ampRelease','lfoRate','lfoAmount','pulseWidthAmount','portamento'].forEach(k=>out[k]=clamp(out[k],0,1));
- out.osc1Range=Math.round(clamp(out.osc1Range,-2,2));out.osc2Tune=clamp(out.osc2Tune,-1,1);out.transpose=Math.round(clamp(out.transpose,-24,24));
- ['osc1Wave','osc2Wave'].forEach(k=>out[k]=out[k]==='pulse'?'pulse':'saw');
- ['fEnvOsc2','sync','osc1Route','osc2Route','osc2Half','noiseRoute','filterTrack','lfoPulse1','lfoPulse2'].forEach(k=>out[k]=!!out[k]);delete out.lfoVca;
- ['lfoOsc1','lfoOsc2','lfoFilter'].forEach(k=>out[k]=source[k]===undefined?(k==='lfoOsc1'?(out.lfoTarget==='osc1'||out.lfoTarget==='both'):k==='lfoOsc2'?(out.lfoTarget==='osc2'||out.lfoTarget==='both'):out.lfoTarget==='filter'):!!source[k]);
- out.filterMode=String(out.filterMode)==='12'?'12':'24';out.lfoWave=['sine','square','s&h'].includes(out.lfoWave)?out.lfoWave:'sine';
- out.lfoTarget=['osc1','osc2','filter','both'].includes(out.lfoTarget)?out.lfoTarget:'both';return out;
-};
-const validate=data=>{
- if(!data||typeof data!=='object')throw new Error('Not an OB-Xa program.');
- const {layerB,...root}=data;const out={...GLOBAL_DEFAULTS,...cleanLayer(root)};
- if(data.mode==='unison'){out.mode='full';out.unison=true;}else out.mode=['full','split','double'].includes(data.mode)?data.mode:'full';
- out.voiceCount=[4,6,8].includes(Number(data.voiceCount))?Number(data.voiceCount):8;out.splitPoint=Math.round(clamp(data.splitPoint??60,36,96));
- out.unison=!!out.unison;out.unisonDetune=clamp(data.unisonDetune??.12,0,1);out.bendRange=Math.round(clamp(data.bendRange??2,1,12));
- out.bendOsc2Only=!!out.bendOsc2Only;out.bendNarrow=data.bendNarrow===undefined?Number(data.bendRange??12)<=2:!!data.bendNarrow;out.bendRange=out.bendNarrow?2:12;out.master=clamp(data.master??.7,0,1);out.masterTune=clamp(data.masterTune??0,-1,1);out.hold=!!out.hold;out.transposeDown=!!data.transposeDown;out.transposeUp=!!data.transposeUp;if(out.transposeDown&&out.transposeUp)out.transposeUp=false;out.modLowerEnabled=data.modLowerEnabled!==false;out.modUpperEnabled=data.modUpperEnabled!==false;if(out.mode==='full'){out.modLowerEnabled=true;out.modUpperEnabled=true;}
- const derivedB=layerB||{...out,osc1Wave:'pulse',osc2Wave:'saw',osc2Tune:Math.min(1,out.osc2Tune+.035),cutoff:Math.max(.08,out.cutoff-.07),resonance:Math.min(.9,out.resonance+.04),ampAttack:Math.min(1,out.ampAttack+.025)};
+ance+.04),ampAttack:Math.min(1,out.ampAttack+.025)};
  out.layerB=cleanLayer(derivedB);return out;
 };
 class OBXaApp{
@@ -46,8 +26,20 @@ class OBXaApp{
  currentLayer(){return this.layerIndex===1?this.patch.layerB:this.patch;}
  set(key,value){
   const global=GLOBAL_KEYS.has(key);
-  if(global){this.patch[key]=value;if(key==='bendNarrow'){this.patch.bendRange=value?2:12;this.engine.post({t:'param',key:'bendRange',value:this.patch.bendRange,layer:0});}if(['mode','voiceCount','unison','chordMode','transposeDown','transposeUp'].includes(key))this.engine.allNotesOff();if(key==='hold')this.engine.post({t:'hold',value:!!value});}
-  else this.currentLayer()[key]=value;
+  if(global){
+   this.patch[key]=value;
+   if(key==='bendNarrow'){
+    this.patch.bendRange=value?2:12;
+    this.ui.bendRange?.setValue(this.patch.bendRange,true);
+    this.engine.post({t:'param',key:'bendRange',value:this.patch.bendRange,layer:0});
+   }else if(key==='bendRange'){
+    this.patch.bendRange=Math.round(Math.max(1,Math.min(12,Number(value)||1)));
+    this.patch.bendNarrow=this.patch.bendRange<=2;
+    this.ui.bendNarrow?.setValue(this.patch.bendNarrow,true);
+   }
+   if(['mode','voiceCount','unison','chordMode','transposeDown','transposeUp'].includes(key))this.engine.allNotesOff();
+   if(key==='hold')this.engine.post({t:'hold',value:!!value});
+  }else this.currentLayer()[key]=value;
   this.engine.post({t:'param',key,value,layer:global?0:this.layerIndex});this.updateLayoutState();
  }
  selectLayer(value){this.layerIndex=Number(value)===1?1:0;this.renderLayerControls();this.display.set('EDIT TIMBRE '+(this.layerIndex?'B':'A'),'OB-Xa TWO-SYNTH PROGRAM');}
@@ -160,6 +152,6 @@ const allocation=section(rows,'KEYBOARD & VOICE ALLOCATION','FULL · SPLIT · DO
        getTitle:()=> 'Oberheim OB-Xa program'});
   footer(this.shell,'OBERHEIM OB-Xa · 4 / 6 / 8 VOICES · DUAL VCO · SELECTABLE 2 / 4-POLE VCF · PINK NOISE · POLYPHONIC GLIDE');this.updateLayoutState();
  }
- refresh(){['mode','voiceCount','splitPoint','unison','unisonDetune','bendNarrow','bendOsc2Only','transposeDown','transposeUp','modLowerEnabled','modUpperEnabled','master','masterTune','hold','layerBalance','chordMode','portamentoMode','portamentoOffset'].forEach(key=>{if(this.ui[key]?.setValue)this.ui[key].setValue(this.patch[key],true);});this.renderLayerControls();this.updateLayoutState();this.engine.post({t:'patch',patch:this.patch});}
+ refresh(){['mode','voiceCount','splitPoint','unison','unisonDetune','bendRange','bendNarrow','bendOsc2Only','transposeDown','transposeUp','modLowerEnabled','modUpperEnabled','master','masterTune','hold','layerBalance','chordMode','portamentoMode','portamentoOffset'].forEach(key=>{if(this.ui[key]?.setValue)this.ui[key].setValue(this.patch[key],true);});this.renderLayerControls();this.updateLayoutState();this.engine.post({t:'patch',patch:this.patch});}
 }
 new OBXaApp();
