@@ -77,7 +77,7 @@ test('OB-Xa validation preserves the selected pitch-bend range and both timbre t
   for (const bendRange of [1, 2, 3, 6, 12]) {
     const patch = validateOBXAPatch({
       mode: 'split', voiceCount: 8, bendRange, bendNarrow: bendRange <= 2,
-      transpose: 47, osc2Detune: -37,
+      transpose: 47, osc2Detune: -37, voicePan: [-1, -0.8, -0.6, -0.4, 0.4, 0.6, 0.8, 1],
       modPanelLfoRate: 0.8, modPanelLfoDepth: 0.65, modPanelLfoWave: 'saw', modPanelLfoOsc1: true, modPanelLfoOsc2: false,
       layerB: { transpose: -47, osc2Tune: 0.4, osc2Detune: 23 },
     });
@@ -85,6 +85,7 @@ test('OB-Xa validation preserves the selected pitch-bend range and both timbre t
     assert.equal(patch.bendNarrow, bendRange <= 2);
     assert.equal(patch.transpose, 47);
     assert.equal(patch.osc2Detune, -37);
+    assert.deepEqual(patch.voicePan, [-1, -0.8, -0.6, -0.4, 0.4, 0.6, 0.8, 1]);
     assert.equal(patch.modPanelLfoRate, 0.8);
     assert.equal(patch.modPanelLfoDepth, 0.65);
     assert.equal(patch.modPanelLfoWave, 'saw');
@@ -109,7 +110,7 @@ test('OB-Xa local preset save, JSON export/import and backup restore preserve al
     const store = new PresetStore({ key: 'test.obxa.programs', version: 3, validate: validateOBXAPatch });
     const patch = validateOBXAPatch({
       mode: 'double', voiceCount: 8, bendRange: 7,
-      transpose: 48, cutoff: 0.71, osc2Detune: 42,
+      transpose: 48, cutoff: 0.71, osc2Detune: 42, voicePan: [-1, -0.7, -0.3, -0.1, 0.1, 0.3, 0.7, 1],
       modPanelLfoRate: 0.73, modPanelLfoDepth: 0.55, modPanelLfoWave: 'square', modPanelLfoOsc1: true,
       layerB: { transpose: -48, osc2Tune: 0.45, osc2Detune: -63, lfoWave: 'square' },
     });
@@ -119,6 +120,7 @@ test('OB-Xa local preset save, JSON export/import and backup restore preserve al
     assert.equal(singleImport.data.bendRange, 7);
     assert.equal(singleImport.data.transpose, 48);
     assert.equal(singleImport.data.osc2Detune, 42);
+    assert.deepEqual(singleImport.data.voicePan, [-1, -0.7, -0.3, -0.1, 0.1, 0.3, 0.7, 1]);
     assert.equal(singleImport.data.modPanelLfoDepth, 0.55);
     assert.equal(singleImport.data.modPanelLfoWave, 'square');
     assert.equal(singleImport.data.layerB.transpose, -48);
@@ -141,6 +143,7 @@ test('OB-Xa local preset save, JSON export/import and backup restore preserve al
     assert.equal(backupStore.items[0].data.bendRange, 7);
     assert.equal(backupStore.items[0].data.transpose, 48);
     assert.equal(backupStore.items[0].data.osc2Detune, 42);
+    assert.deepEqual(backupStore.items[0].data.voicePan, [-1, -0.7, -0.3, -0.1, 0.1, 0.3, 0.7, 1]);
     assert.equal(backupStore.items[0].data.modPanelLfoRate, 0.73);
     assert.equal(backupStore.items[0].data.layerB.transpose, -48);
     assert.equal(backupStore.items[0].data.layerB.osc2Detune, -63);
