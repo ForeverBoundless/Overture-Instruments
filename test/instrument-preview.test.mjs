@@ -205,19 +205,41 @@ test('OB-Xa hardware program memories expose 120 group slots and dedicated Split
   assert.equal(doubleProgram.kind, 'double');
   assert.equal(splitProgram.patch.mode, 'split');
   assert.equal(doubleProgram.patch.mode, 'double');
+
+  const previousStorage = globalThis.localStorage;
+  const storage = new Map();
+  globalThis.localStorage = {
+    getItem: (key) => storage.get(key) ?? null,
+    setItem: (key, value) => storage.set(key, String(value)),
+  };
+  try {
+    const hardwareStore = new PresetStore({ key: 'test.obxa.hardware', version: 1, maxItems: 136, validate: validateOBXAProgramRecord });
+    hardwareStore.save('Brass', { kind: 'sound', patch: validateOBXAPatch({ cutoff: 0.7 }) }, obxaProgramSlotId(0, 1));
+    hardwareStore.save('Split Brass', { kind: 'split', patch: validateOBXAPatch({ mode: 'split', layerB: { cutoff: 0.3 } }) }, obxaSpecialProgramSlotId('split', 1));
+    hardwareStore.save('Double Strings', { kind: 'double', patch: validateOBXAPatch({ mode: 'double', layerB: { ampAttack: 0.4 } }) }, obxaSpecialProgramSlotId('double', 1));
+    const backup = hardwareStore.exportAllJSON();
+    const restoredStore = new PresetStore({ key: 'test.obxa.hardware.restore', version: 1, maxItems: 136, validate: validateOBXAProgramRecord });
+    assert.equal(restoredStore.importAll(backup).length, 3);
+    assert.equal(restoredStore.get('program:0:1').data.patch.cutoff, 0.7);
+    assert.equal(restoredStore.get('split:1').data.patch.mode, 'split');
+    assert.equal(restoredStore.get('double:1').data.patch.layerB.ampAttack, 0.4);
+  } finally {
+    if (previousStorage === undefined) delete globalThis.localStorage;
+    else globalThis.localStorage = previousStorage;
+  }
 });
 
 test('Community OB-Xa patches retain timbre A and B transpose while dropping master transpose switches', () => {
   const patch = {
     mode: 'split', transpose: 12, cutoff: 0.63, voicePan: [-1, -0.8, -0.6, -0.4, 0.4, 0.6, 0.8, 1],
-    modPanelLfoDepth: 0.6, modPanelLfoOsc1: true,
+    modPanelLfoDepth: 0.6, modPanelLfoDepthEnabled: true, modPanelLfoOsc1: true,
     layerB: { transpose: -7, osc2Tune: 0.2 },
     transposeUp: true, transposeDown: false,
   };
   const shared = stripCommunityInstrumentTranspose('ob-xa', patch);
   assert.deepEqual(shared, {
     mode: 'split', transpose: 12, cutoff: 0.63, voicePan: [-1, -0.8, -0.6, -0.4, 0.4, 0.6, 0.8, 1],
-    modPanelLfoDepth: 0.6, modPanelLfoOsc1: true,
+    modPanelLfoDepth: 0.6, modPanelLfoDepthEnabled: true, modPanelLfoOsc1: true,
     layerB: { transpose: -7, osc2Tune: 0.2 },
   });
   assert.equal(patch.layerB.transpose, -7, 'sharing must not mutate the live patch');
