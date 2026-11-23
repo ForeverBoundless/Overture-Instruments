@@ -8,7 +8,7 @@ const NOTE_NAMES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
 const NOTES=Array.from({length:61},(_,i)=>{const n=36+i;return NOTE_NAMES[n%12]+(Math.floor(n/12)-1);});
 class OBXaApp{
  constructor(){
-  this.engine=new WorkletEngine(new URL('./engine/OBXaProcessor.js?v=20261123-audio-r2',import.meta.url).href,'obxa-processor');
+  this.engine=new WorkletEngine(new URL('./engine/OBXaProcessor.js?v=20261123-audio-r3',import.meta.url).href,'obxa-processor');
   power('obxa-power',()=>this.engine.start(),()=>{this.perf?.flushPending();this.display?.set('OB-Xa READY',this.patch.voiceCount+' VOICES · TWO CONTROL GROUPS');});
   this.patch=validate(DEF);this.layerIndex=0;this.ui={};this.manualMode=false;this.memoryProtected=false;this.store=new PresetStore({key:'overture.obxa.programs',version:3,validate});this.hardwareStore=new PresetStore({key:'overture.obxa.hardware-programs',version:1,maxItems:136,validate:validateOBXAProgramRecord});this.seedHardwarePrograms();this.build();
   this.perf=performance(this.shell,{notes:NOTES,octaves:5,startOctave:2,started:()=>this.engine.started,midiStatusEl:this.midi,handlers:{
