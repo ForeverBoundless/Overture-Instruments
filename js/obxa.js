@@ -14,7 +14,7 @@ class OBXaApp{
   this.perf=performance(this.shell,{notes:NOTES,octaves:5,startOctave:2,started:()=>this.engine.started,midiStatusEl:this.midi,handlers:{
    noteOn:(n,v)=>this.engine.noteOn(n,v),noteOff:n=>this.engine.noteOff(n),bend:v=>this.engine.setPitchBend(v),mod:v=>this.engine.setModWheel(v),
    sustain:d=>this.engine.setSustain(d),allOff:()=>this.engine.allNotesOff(),program:p=>this.presets.load('f:'+(p%OBXA_PRESETS.length)),
-   cc:(cc,value)=>{if(cc===7)this.ui.master.setValue(value/127);if(cc===74)this.ui.cutoff.setValue(value/127);if(cc===71)this.ui.resonance.setValue(value/127);}
+   cc:(cc,value)=>{if(cc===4||cc===74)this.ui.cutoff.setValue(value/127);if(cc===7)this.ui.master.setValue(value/127);if(cc===71)this.ui.resonance.setValue(value/127);if(cc===66)this.ui.hold.setValue(value>=64);}
   }});
   this.presets.load('f:0');
   const community=consumeCommunityInstrumentPreset('ob-xa',validate);
