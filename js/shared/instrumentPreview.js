@@ -366,7 +366,7 @@ export const INSTRUMENT_PREVIEW_RENDERERS = Object.freeze({
   'mellotron-m400': (patch) => renderWorklet(offlineContext(STANDARD_PREVIEW_DURATION), '../engine/MellotronProcessor.js?v=20261104-declick', 'mellotron-processor', patch, 'mellotron-m400'),
   'oberheim-eight-voice': (patch) => renderWorklet(offlineContext(STANDARD_PREVIEW_DURATION), '../engine/OberheimEightVoiceProcessor.js?v=20261104-eightvoice-stable', 'oberheim-eight-voice-processor', patch, 'oberheim-eight-voice'),
   'hohner-d6': (patch) => renderWorklet(offlineContext(STANDARD_PREVIEW_DURATION), '../engine/HohnerD6Processor.js?v=20261106-audio-r1', 'hohner-d6-processor', patch, 'hohner-d6'),
-  'ob-xa': (patch) => renderWorklet(offlineContext(STANDARD_PREVIEW_DURATION), '../engine/OBXaProcessor.js?v=20261123-audio-r3', 'obxa-processor', patch, 'ob-xa'),
+  'ob-xa': (patch) => renderWorklet(offlineContext(STANDARD_PREVIEW_DURATION), '../engine/OBXaProcessor.js?v=20261123-audio-r4', 'obxa-processor', patch, 'ob-xa'),
   'sequential-pro-3': (patch) => renderWorklet(offlineContext(STANDARD_PREVIEW_DURATION), '../engine/Pro3Processor.js', 'pro3-processor', patch, 'sequential-pro-3'),
   'udo-super-8': (patch) => renderWorklet(offlineContext(STANDARD_PREVIEW_DURATION), '../engine/Super8Processor.js', 'super8-processor', patch, 'udo-super-8'),
 });
