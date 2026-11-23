@@ -118,7 +118,7 @@ class OBXaApp{
  }
  selectLayer(value){this.layerIndex=Number(value)===1?1:0;this.renderLayerControls();this.display.set('EDIT TIMBRE '+(this.layerIndex?'B':'A'),'OB-Xa TWO-SYNTH PROGRAM');}
  setMasterTranspose(key,value){const other=key==='transposeDown'?'transposeUp':'transposeDown';if(value){this.patch[other]=false;this.engine.post({t:'param',key:other,value:false,layer:0});this.ui[other]?.setValue(false,true);}this.set(key,!!value);}
- renderVoiceControls(){(this.patch.voicePan||[]).forEach((value,index)=>{this.ui.voicePans?.[index]?.setValue(value,true);this.ui.voiceEnables?.[index]?.setValue(this.patch.voiceEnabled[index],true);const unavailable=index>=Number(this.patch.voiceCount);if(this.ui.voicePans?.[index]?.el){this.ui.voicePans[index].el.classList.toggle('is-unavailable',unavailable);this.ui.voicePans[index].el.style.pointerEvents=unavailable?'none':'';}if(this.ui.voiceEnables?.[index])this.ui.voiceEnables[index].disabled=unavailable;});}
+ renderVoiceControls(){(this.patch.voicePan||[]).forEach((value,index)=>{this.ui.voicePans?.[index]?.setValue(value,true);const unavailable=index>=Number(this.patch.voiceCount);if(this.ui.voicePans?.[index]?.el){this.ui.voicePans[index].el.classList.toggle('is-unavailable',unavailable);this.ui.voicePans[index].el.style.pointerEvents=unavailable?'none':'';}});}
  renderLayerControls(){const source=this.currentLayer();LAYER_KEYS.forEach(key=>{if(this.ui[key]?.setValue)this.ui[key].setValue(source[key],true);});if(this.ui.layerEdit)this.ui.layerEdit.setValue(String(this.layerIndex),true);}
  updateLayoutState(){const full=this.patch.mode==='full';this.shell.classList.toggle('is-split',this.patch.mode==='split');this.shell.classList.toggle('is-dual',!full);if(full){['modLowerEnabled','modUpperEnabled'].forEach(key=>{if(!this.patch[key]){this.patch[key]=true;this.engine.post({t:'param',key,value:true,layer:0});}});}['modLowerEnabled','modUpperEnabled'].forEach(key=>{const control=this.ui[key];if(control){control.disabled=full;control.setAttribute('aria-disabled',String(full));control.setValue(this.patch[key],true);}});this.renderVoiceControls?.();}
  build(){
@@ -208,7 +208,7 @@ class OBXaApp{
   const transposeOptions=routeGroup(performanceGrid,'MASTER TRANSPOSE');
   this.ui.transposeDown=toggle(transposeOptions,'DOWN 1 OCTAVE',this.patch.transposeDown,v=>this.setMasterTranspose('transposeDown',v));
   this.ui.transposeUp=toggle(transposeOptions,'UP 1 OCTAVE',this.patch.transposeUp,v=>this.setMasterTranspose('transposeUp',v));
-  this.ui.autoTune=button(performanceBlock,'AUTO-TUNE',()=>{this.perf?.allOff();this.engine.post({t:'autoTune'});this.display.set('AUTO-TUNE','VOICE OSCILLATORS CALIBRATING');});
+  this.ui.autoTune=button(performanceBlock,'AUTO-TUNE',()=>{this.perf?.allOff();this.engine.post({t:'autoTune'});this.display.set('AUTO-TUNE','VOICE OSCILLATORS CALIBRATING');window.setTimeout(()=>this.display.set('AUTO-TUNE COMPLETE','ALL VOICE OSCILLATORS RETUNED'),220);});
 
   const assignmentBlock=modBlock(modGrid,'MODULATION PANEL ASSIGNMENT','Assign the pitch-bend lever and modulation-panel LFO to either or both voice groups.');
   const assignmentRoutes=routeGroup(assignmentBlock,'LOWER / UPPER VOICES');
@@ -237,15 +237,13 @@ const allocation=section(rows,'KEYBOARD & VOICE ALLOCATION','FULL · SPLIT · DO
   this.ui.layerEdit=select(allocation.body,'EDIT TIMBRE',[{value:'0',label:'LOWER / A'},{value:'1',label:'UPPER / B'}],'0',v=>this.selectLayer(v));
 
 
-  const panSection=section(rows,'VOICE CARDS','INTERNAL VOICE PAN POTS & VOICE DISABLE SWITCHES');
+
+  const panSection=section(rows,'VOICE PAN POTS','INTERNAL VOICE PAN CONTROLS · VOICES 1–4 LEFT, 5–8 RIGHT');
   const voiceGrid=el('div','obxa-voice-grid',panSection.body);
-  this.ui.voicePans=[];this.ui.voiceEnables=[];
+  this.ui.voicePans=[];
   for(let index=0;index<8;index++){
    const card=el('div','obxa-voice-card',voiceGrid);
    el('span','obxa-voice-card__number',card,'VOICE '+(index+1));
-   this.ui.voiceEnables[index]=toggle(card,'ENABLED',this.patch.voiceEnabled[index],value=>{
-    const enabled=this.patch.voiceEnabled.slice();enabled[index]=value;this.set('voiceEnabled',enabled);
-   });
    this.ui.voicePans[index]=knob(card,{label:'PAN',min:-1,max:1,value:this.patch.voicePan[index],formatValue:v=>Math.round(v*100)+'% '+(v<-.02?'L':v>.02?'R':'C'),onChange:value=>{
     const pans=this.patch.voicePan.slice();pans[index]=value;this.set('voicePan',pans);
    }});
