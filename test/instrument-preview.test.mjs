@@ -218,7 +218,8 @@ test('OB-Xa hardware program memories expose 120 group slots and dedicated Split
     hardwareStore.save('Split Brass', { kind: 'split', patch: validateOBXAPatch({ mode: 'split', layerB: { cutoff: 0.3 } }) }, obxaSpecialProgramSlotId('split', 1));
     hardwareStore.save('Double Strings', { kind: 'double', patch: validateOBXAPatch({ mode: 'double', layerB: { ampAttack: 0.4 } }) }, obxaSpecialProgramSlotId('double', 1));
     const backup = hardwareStore.exportAllJSON();
-    const restoredStore = new PresetStore({ key: 'test.obxa.hardware.restore', version: 1, maxItems: 136, validate: validateOBXAProgramRecord });
+    storage.clear();
+    const restoredStore = new PresetStore({ key: 'test.obxa.hardware', version: 1, maxItems: 136, validate: validateOBXAProgramRecord });
     assert.equal(restoredStore.importAll(backup).length, 3);
     assert.equal(restoredStore.get('program:0:1').data.patch.cutoff, 0.7);
     assert.equal(restoredStore.get('split:1').data.patch.mode, 'split');
