@@ -210,8 +210,8 @@ class OBXaApp{
   this.ui.transposeUp=toggle(transposeOptions,'UP 1 OCTAVE',this.patch.transposeUp,v=>this.setMasterTranspose('transposeUp',v));
   this.ui.autoTune=button(performanceBlock,'AUTO-TUNE',()=>{this.perf?.allOff();this.engine.post({t:'autoTune'});this.display.set('AUTO-TUNE','VOICE OSCILLATORS CALIBRATING');window.setTimeout(()=>this.display.set('AUTO-TUNE COMPLETE','ALL VOICE OSCILLATORS RETUNED'),220);});
 
-  const assignmentBlock=modBlock(modGrid,'MODULATION PANEL ASSIGNMENT','Assign the pitch-bend lever and modulation-panel LFO to either or both voice groups.');
-  const assignmentRoutes=routeGroup(assignmentBlock,'LOWER / UPPER VOICES');
+  const assignmentBlock=modBlock(modGrid,'VOICE ASSIGNMENT & HOLD','MODULATION / BEND ENABLE · assign the modulation-panel controls to the lower and upper voice groups.');
+  const assignmentRoutes=routeGroup(assignmentBlock,'MODULATION / BEND ENABLE');
   this.ui.modLowerEnabled=toggle(assignmentRoutes,'LOWER BANK',this.patch.modLowerEnabled,v=>this.set('modLowerEnabled',v));
   this.ui.modUpperEnabled=toggle(assignmentRoutes,'UPPER BANK',this.patch.modUpperEnabled,v=>this.set('modUpperEnabled',v));
   const memoryRow=el('div','obxa-mod-memory',assignmentBlock);
