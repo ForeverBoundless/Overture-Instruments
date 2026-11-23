@@ -60,3 +60,32 @@
  .obxa-mod-knobs .pn-select{grid-column:1/-1;max-width:220px;justify-self:start}
  .obxa-mod-switches .pn-button{font-size:7px}
 }
+
+/* Hardware programmer and voice-card controls: same blue-steel panel language. */
+.obxa-shell .pn-body.obxa-programmer-layout{display:flex;flex-direction:column;align-items:stretch;gap:11px}
+.obxa-programmer__row{display:grid;grid-template-columns:minmax(150px,.8fr) minmax(170px,1fr) auto;align-items:end;gap:10px;width:100%}
+.obxa-programmer__actions{display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-start;gap:7px}
+.obxa-programmer__special{display:grid;grid-template-columns:minmax(160px,1fr) minmax(110px,.55fr) auto;align-items:end;gap:10px;width:100%;padding-top:9px;border-top:1px solid #42678355}
+.obxa-programmer__hint{margin:0;color:#819eb2;font:500 7px/1.5 'DM Mono',monospace;letter-spacing:.02em}
+.obxa-programmer__actions .pn-button{min-width:68px}
+.obxa-programmer__actions .pn-button:disabled{opacity:.38;cursor:not-allowed;filter:saturate(.45)}
+.obxa-voice-grid{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));align-items:stretch;gap:8px;width:100%}
+.obxa-voice-card{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:7px;min-width:0;padding:9px 5px 7px;border:1px solid #3f617b;border-radius:4px;background:linear-gradient(155deg,#1b2a38,#111b26 68%,#0b121a);box-shadow:inset 0 1px #ffffff0b,0 2px 4px #0007}
+.obxa-voice-card__number{color:#9fc2dc;font:700 7px/1 'DM Mono',monospace;letter-spacing:.12em}
+.obxa-voice-card .pn-button{width:100%;padding-inline:3px;font-size:6px}
+.obxa-voice-card .pn-knob{width:100%;min-width:0;display:flex;justify-content:center}
+.obxa-voice-card .pn-knob .lp-knob-label{font-size:6px}
+.obxa-voice-card .pn-knob.is-unavailable{opacity:.32}
+@media(max-width:1000px){
+ .obxa-voice-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+@media(max-width:760px){
+ .obxa-programmer__row{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .obxa-programmer__row .obxa-programmer__actions{grid-column:1/-1}
+ .obxa-programmer__special{grid-template-columns:minmax(0,1fr) minmax(100px,.6fr)}
+ .obxa-programmer__special .obxa-programmer__actions{grid-column:1/-1}
+}
+@media(max-width:440px){
+ .obxa-voice-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .obxa-programmer__row,.obxa-programmer__special{grid-template-columns:minmax(0,1fr)}
+}
