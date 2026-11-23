@@ -172,7 +172,7 @@ test('OB-Xa engine includes the third modulation-panel LFO and manual AUTO-TUNE'
   assert.match(processor, /this\.p\.modPanelLfoOsc2/);
   assert.match(processor, /this\.p\.modPanelLfoDepthEnabled\?this\.p\.modPanelLfoDepth:0/);
   assert.match(processor, /p\.osc2Detune\|\|0/);
-  assert.match(preview, /OBXaProcessor\.js\?v=20261123-audio-r3/);
+  assert.match(preview, /OBXaProcessor\.js\?v=20261123-audio-r4/);
   assert.match(app, /MODULATION PANEL LFO/);
   assert.match(app, /AUTO-TUNE/);
   assert.match(app, /PULL UP TO ENABLE/);
