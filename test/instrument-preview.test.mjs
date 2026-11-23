@@ -116,7 +116,12 @@ test('OB-Xa local preset save, JSON export/import and backup restore preserve al
     assert.equal(restored.items[0].data.layerB.lfoWave, 'square');
 
     const backup = store.exportAllJSON();
-    const backupStore = new PresetStore({ key: 'test.obxa.backup', version: 3, validate: validateOBXAPatch });
+    const backupValues = new Map();
+    globalThis.localStorage = {
+      getItem: (key) => backupValues.get(key) ?? null,
+      setItem: (key, value) => backupValues.set(key, String(value)),
+    };
+    const backupStore = new PresetStore({ key: 'test.obxa.programs', version: 3, validate: validateOBXAPatch });
     backupStore.importAll(backup);
     assert.equal(backupStore.items[0].data.bendRange, 7);
     assert.equal(backupStore.items[0].data.transpose, 5);
