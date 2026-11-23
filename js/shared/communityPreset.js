@@ -49,17 +49,18 @@ export function stripCommunityInstrumentTranspose(instrumentId, data) {
   if (typeof instrumentId !== 'string' || !instrumentId || !copy || typeof copy !== 'object') return copy;
 
   const excludedKeys = new Set(['transpose', 'transposeUp', 'transposeDown']);
-  // OB-Xa stores octave transposition per timbre; these values are part of the patch.
-  if (instrumentId === 'ob-xa') excludedKeys.delete('transpose');
-  const visit = (value) => {
+  const visit = (value, depth = 0, parentKey = '') => {
     if (Array.isArray(value)) {
-      value.forEach(visit);
+      value.forEach((item) => visit(item, depth, parentKey));
       return;
     }
     if (!value || typeof value !== 'object') return;
     Object.keys(value).forEach((key) => {
-      if (excludedKeys.has(key)) delete value[key];
-      else visit(value[key]);
+      const isObXaTimbreTranspose = instrumentId === 'ob-xa'
+        && key === 'transpose'
+        && (depth === 0 || (depth === 1 && parentKey === 'layerB'));
+      if (excludedKeys.has(key) && !isObXaTimbreTranspose) delete value[key];
+      else visit(value[key], depth + 1, key);
     });
   };
   visit(copy);
