@@ -41,6 +41,7 @@ class OBXaApp{
  }
  selectLayer(value){this.layerIndex=Number(value)===1?1:0;this.renderLayerControls();this.display.set('EDIT TIMBRE '+(this.layerIndex?'B':'A'),'OB-Xa TWO-SYNTH PROGRAM');}
  setMasterTranspose(key,value){const other=key==='transposeDown'?'transposeUp':'transposeDown';if(value){this.patch[other]=false;this.engine.post({t:'param',key:other,value:false,layer:0});this.ui[other]?.setValue(false,true);}this.set(key,!!value);}
+ renderVoicePanControls(){(this.patch.voicePan||[]).forEach((value,index)=>this.ui['voicePan'+index]?.setValue(value,true));}
  renderLayerControls(){const source=this.currentLayer();LAYER_KEYS.forEach(key=>{if(this.ui[key]?.setValue)this.ui[key].setValue(source[key],true);});if(this.ui.layerEdit)this.ui.layerEdit.setValue(String(this.layerIndex),true);}
  updateLayoutState(){const full=this.patch.mode==='full';this.shell.classList.toggle('is-split',this.patch.mode==='split');this.shell.classList.toggle('is-dual',!full);if(full){['modLowerEnabled','modUpperEnabled'].forEach(key=>{if(!this.patch[key]){this.patch[key]=true;this.engine.post({t:'param',key,value:true,layer:0});}});}['modLowerEnabled','modUpperEnabled'].forEach(key=>{const control=this.ui[key];if(control){control.disabled=full;control.setAttribute('aria-disabled',String(full));control.setValue(this.patch[key],true);}});}
  build(){
@@ -155,12 +156,19 @@ const allocation=section(rows,'KEYBOARD & VOICE ALLOCATION','FULL · SPLIT · DO
   this.ui.masterTune=knob(ak,{label:'MASTER TUNE',min:-1,max:1,value:this.patch.masterTune,formatValue:v=>(v*100).toFixed(0)+' CENT',onChange:v=>this.set('masterTune',v)});
   this.ui.master=knob(ak,{label:'MASTER VOLUME',min:0,max:1,value:this.patch.master,onChange:v=>this.set('master',v)});
   this.ui.layerEdit=select(allocation.body,'EDIT TIMBRE',[{value:'0',label:'LOWER / A'},{value:'1',label:'UPPER / B'}],'0',v=>this.selectLayer(v));
+
+  const panSection=section(rows,'VOICE PAN POTS','Eight internal pan controls · voices 1–4 left, voices 5–8 right by default');
+  const panGrid=el('div','pn-knobs',panSection.body);
+  for(let index=0;index<8;index++){
+   this.ui['voicePan'+index]=knob(panGrid,{label:'VOICE '+(index+1),min:-1,max:1,value:this.patch.voicePan[index],formatValue:v=>Math.round(v*100)+'% '+(v<-.02?'L':v>.02?'R':'C'),onChange:value=>{const pans=this.patch.voicePan.slice();pans[index]=value;this.set('voicePan',pans);}});
+  }
+
   const memory=section(rows,'PROGRAMMER','OVERTURE OB-Xa PROGRAMS');
   this.presets=presetBar(memory.body,{factory:OBXA_PRESETS,store:this.store,display:this.display,filename:'oberheim-obxa-program',panic:()=>this.perf.allOff(),apply:(data,name)=>{this.patch=validate(data);this.layerIndex=0;this.refresh();this.display.set(name.toUpperCase(),'OB-Xa PROGRAM');},capture:()=>({...this.patch,layerB:{...this.patch.layerB}})});
   createCommunityShareButton(memory.body,{instrumentId:'ob-xa',className:'pn-btn',getData:()=>validate(this.patch),getAudioOutput: () => this.engine.output,
        getTitle:()=> 'Oberheim OB-Xa program'});
   footer(this.shell,'OBERHEIM OB-Xa · 4 / 6 / 8 VOICES · DUAL VCO · SELECTABLE 2 / 4-POLE VCF · PINK NOISE · POLYPHONIC GLIDE');this.updateLayoutState();
  }
- refresh(){['mode','voiceCount','splitPoint','unison','unisonDetune','bendRange','bendNarrow','bendOsc2Only','transposeDown','transposeUp','modLowerEnabled','modUpperEnabled','modPanelLfoRate','modPanelLfoDepth','modPanelLfoWave','modPanelLfoOsc1','modPanelLfoOsc2','master','masterTune','hold','layerBalance','chordMode','portamentoMode','portamentoOffset'].forEach(key=>{if(this.ui[key]?.setValue)this.ui[key].setValue(this.patch[key],true);});this.renderLayerControls();this.updateLayoutState();this.engine.post({t:'patch',patch:this.patch});}
+ refresh(){['mode','voiceCount','splitPoint','unison','unisonDetune','bendRange','bendNarrow','bendOsc2Only','transposeDown','transposeUp','modLowerEnabled','modUpperEnabled','modPanelLfoRate','modPanelLfoDepth','modPanelLfoWave','modPanelLfoOsc1','modPanelLfoOsc2','master','masterTune','hold','layerBalance','chordMode','portamentoMode','portamentoOffset'].forEach(key=>{if(this.ui[key]?.setValue)this.ui[key].setValue(this.patch[key],true);});this.renderLayerControls();this.renderVoicePanControls();this.updateLayoutState();this.engine.post({t:'patch',patch:this.patch});}
 }
 new OBXaApp();
