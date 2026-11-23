@@ -156,8 +156,11 @@ test('OB-Xa local preset save, JSON export/import and backup restore preserve al
 
 
 test('OB-Xa engine includes the third modulation-panel LFO and manual AUTO-TUNE', async () => {
-  const processor = await readFile(new URL('../js/engine/OBXaProcessor.js', import.meta.url), 'utf8');
-  const app = await readFile(new URL('../js/obxa.js', import.meta.url), 'utf8');
+  const [processor, app, preview] = await Promise.all([
+    readFile(new URL('../js/engine/OBXaProcessor.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/obxa.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/shared/instrumentPreview.js', import.meta.url), 'utf8'),
+  ]);
   assert.match(processor, /this\.lfos=\[\{phase:0,hold:0\},\{phase:0,hold:0\}\]/);
   assert.match(processor, /this\.modPanelLfo=\{phase:0\}/);
   assert.match(processor, /modPanelLfoValue\(dt\)/);
@@ -166,6 +169,7 @@ test('OB-Xa engine includes the third modulation-panel LFO and manual AUTO-TUNE'
   assert.match(processor, /this\.p\.modPanelLfoOsc2/);
   assert.match(processor, /panelLfo\*clamp\(this\.p\.modPanelLfoDepth,0,1\)\*this\.mod\*4/);
   assert.match(processor, /p\.osc2Detune\|\|0/);
+  assert.match(preview, /OBXaProcessor\.js\?v=20261123-audio-r2/);
   assert.match(app, /MODULATION PANEL LFO/);
   assert.match(app, /AUTO-TUNE/);
   assert.match(app, /cc===4\|\|cc===74/);
