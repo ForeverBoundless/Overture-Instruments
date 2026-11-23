@@ -86,6 +86,7 @@ test('OB-Xa validation preserves the selected pitch-bend range and both timbre t
     assert.equal(patch.transpose, 47);
     assert.equal(patch.osc2Detune, -37);
     assert.deepEqual(patch.voicePan, [-1, -0.8, -0.6, -0.4, 0.4, 0.6, 0.8, 1]);
+    assert.deepEqual(validateOBXAPatch({}).voicePan, [-1, -1, -1, -1, 1, 1, 1, 1], 'factory pan positions match the original');
     assert.equal(patch.modPanelLfoRate, 0.8);
     assert.equal(patch.modPanelLfoDepth, 0.65);
     assert.equal(patch.modPanelLfoWave, 'saw');
@@ -172,7 +173,7 @@ test('OB-Xa engine includes the third modulation-panel LFO and manual AUTO-TUNE'
   assert.match(app, /OSC 2 FREQUENCY/);
   assert.match(app, /OSC 2 DETUNE/);
   assert.match(app, /TIMBRE TRANSPOSE',min:-60,max:60/);
-  assert.match(processor, /v\.pan=v\.i<this\.halfCount\(\)\?-1:1/);
+  assert.match(processor, /v\.pan=clamp\(this\.p\.voicePan\?\.\[v\.i\]\?\?/);
 });
 
 test('Community OB-Xa patches retain timbre A and B transpose while dropping master transpose switches', () => {
