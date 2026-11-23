@@ -6,6 +6,7 @@ import { Prophet10Engine } from '../js/engine/Prophet10Engine.js';
 import { postWorkletMessage, INSTRUMENT_PREVIEW_RENDERERS } from '../js/shared/instrumentPreview.js';
 import { COMMUNITY_INSTRUMENTS } from '../js/data/communityInstruments.js';
 import { attachCommunityPresetMetadata, readCommunityPresetMetadata, stripCommunityPresetMetadata, stripCommunityInstrumentTranspose } from '../js/shared/communityPreset.js';
+import { validateOBXAPatch } from '../js/data/obxa-patch.js';
 
 test('Community preview WAV output has a valid PCM RIFF/WAVE header', async () => {
   const samples = [
@@ -69,6 +70,36 @@ test('Community instrument patches omit transpose at every nesting level and pre
     layers: [{ oscillator: { level: 0.8 } }],
   });
   assert.equal(patch.transpose, 12, 'normalization must not mutate the source patch');
+});
+
+test('OB-Xa validation preserves the selected pitch-bend range and both timbre transpositions', () => {
+  for (const bendRange of [1, 2, 3, 6, 12]) {
+    const patch = validateOBXAPatch({
+      mode: 'split', voiceCount: 8, bendRange, bendNarrow: bendRange <= 2,
+      transpose: 7, layerB: { transpose: -5, osc2Tune: 0.4 },
+    });
+    assert.equal(patch.bendRange, bendRange);
+    assert.equal(patch.bendNarrow, bendRange <= 2);
+    assert.equal(patch.transpose, 7);
+    assert.equal(patch.layerB.transpose, -5);
+    assert.equal(patch.layerB.osc2Tune, 0.4);
+  }
+  const legacyNarrowPatch = validateOBXAPatch({ bendNarrow: true, bendRange: 12 });
+  assert.equal(legacyNarrowPatch.bendRange, 2, 'legacy narrow-range patches remain compatible');
+});
+
+test('Community OB-Xa patches retain timbre A and B transpose while dropping master transpose switches', () => {
+  const patch = {
+    mode: 'split', transpose: 12, cutoff: 0.63,
+    layerB: { transpose: -7, osc2Tune: 0.2 },
+    transposeUp: true, transposeDown: false,
+  };
+  const shared = stripCommunityInstrumentTranspose('ob-xa', patch);
+  assert.deepEqual(shared, {
+    mode: 'split', transpose: 12, cutoff: 0.63,
+    layerB: { transpose: -7, osc2Tune: 0.2 },
+  });
+  assert.equal(patch.layerB.transpose, -7, 'sharing must not mutate the live patch');
 });
 
 test('Community selector metadata does not mutate instrument patch data', () => {
