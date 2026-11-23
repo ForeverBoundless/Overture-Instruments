@@ -6,7 +6,7 @@ import { Prophet10Engine } from '../js/engine/Prophet10Engine.js';
 import { postWorkletMessage, INSTRUMENT_PREVIEW_RENDERERS } from '../js/shared/instrumentPreview.js';
 import { COMMUNITY_INSTRUMENTS } from '../js/data/communityInstruments.js';
 import { attachCommunityPresetMetadata, readCommunityPresetMetadata, stripCommunityPresetMetadata, stripCommunityInstrumentTranspose } from '../js/shared/communityPreset.js';
-import { validateOBXAPatch } from '../js/data/obxa-patch.js';
+import { validateOBXAPatch, OBXA_PROGRAM_GROUPS, OBXA_PROGRAM_COUNT, obxaProgramSlotId, obxaSpecialProgramSlotId, validateOBXAProgramRecord } from '../js/data/obxa-patch.js';
 import { PresetStore } from '../js/shared/presetStore.js';
 
 test('Community preview WAV output has a valid PCM RIFF/WAVE header', async () => {
@@ -78,7 +78,7 @@ test('OB-Xa validation preserves the selected pitch-bend range and both timbre t
     const patch = validateOBXAPatch({
       mode: 'split', voiceCount: 8, bendRange, bendNarrow: bendRange <= 2,
       transpose: 47, osc2Detune: -37, voicePan: [-1, -0.8, -0.6, -0.4, 0.4, 0.6, 0.8, 1],
-      modPanelLfoRate: 0.8, modPanelLfoDepth: 0.65, modPanelLfoWave: 'saw', modPanelLfoOsc1: true, modPanelLfoOsc2: false,
+      modPanelLfoRate: 0.8, modPanelLfoDepth: 0.65, modPanelLfoDepthEnabled: true, modPanelLfoWave: 'saw', modPanelLfoOsc1: true, modPanelLfoOsc2: false,
       layerB: { transpose: -47, osc2Tune: 0.4, osc2Detune: 23 },
     });
     assert.equal(patch.bendRange, bendRange);
@@ -89,6 +89,7 @@ test('OB-Xa validation preserves the selected pitch-bend range and both timbre t
     assert.deepEqual(validateOBXAPatch({}).voicePan, [-1, -1, -1, -1, 1, 1, 1, 1], 'factory pan positions match the original');
     assert.equal(patch.modPanelLfoRate, 0.8);
     assert.equal(patch.modPanelLfoDepth, 0.65);
+    assert.equal(patch.modPanelLfoDepthEnabled, true);
     assert.equal(patch.modPanelLfoWave, 'saw');
     assert.equal(patch.modPanelLfoOsc1, true);
     assert.equal(patch.modPanelLfoOsc2, false);
@@ -112,7 +113,7 @@ test('OB-Xa local preset save, JSON export/import and backup restore preserve al
     const patch = validateOBXAPatch({
       mode: 'double', voiceCount: 8, bendRange: 7,
       transpose: 48, cutoff: 0.71, osc2Detune: 42, voicePan: [-1, -0.7, -0.3, -0.1, 0.1, 0.3, 0.7, 1],
-      modPanelLfoRate: 0.73, modPanelLfoDepth: 0.55, modPanelLfoWave: 'square', modPanelLfoOsc1: true,
+      modPanelLfoRate: 0.73, modPanelLfoDepth: 0.55, modPanelLfoDepthEnabled: true, modPanelLfoWave: 'square', modPanelLfoOsc1: true,
       layerB: { transpose: -48, osc2Tune: 0.45, osc2Detune: -63, lfoWave: 'square' },
     });
     const saved = store.save('Layered brass', patch, 'layered-brass');
@@ -123,6 +124,7 @@ test('OB-Xa local preset save, JSON export/import and backup restore preserve al
     assert.equal(singleImport.data.osc2Detune, 42);
     assert.deepEqual(singleImport.data.voicePan, [-1, -0.7, -0.3, -0.1, 0.1, 0.3, 0.7, 1]);
     assert.equal(singleImport.data.modPanelLfoDepth, 0.55);
+    assert.equal(singleImport.data.modPanelLfoDepthEnabled, true);
     assert.equal(singleImport.data.modPanelLfoWave, 'square');
     assert.equal(singleImport.data.layerB.transpose, -48);
     assert.equal(singleImport.data.layerB.osc2Detune, -63);
@@ -146,6 +148,7 @@ test('OB-Xa local preset save, JSON export/import and backup restore preserve al
     assert.equal(backupStore.items[0].data.osc2Detune, 42);
     assert.deepEqual(backupStore.items[0].data.voicePan, [-1, -0.7, -0.3, -0.1, 0.1, 0.3, 0.7, 1]);
     assert.equal(backupStore.items[0].data.modPanelLfoRate, 0.73);
+    assert.equal(backupStore.items[0].data.modPanelLfoDepthEnabled, true);
     assert.equal(backupStore.items[0].data.layerB.transpose, -48);
     assert.equal(backupStore.items[0].data.layerB.osc2Detune, -63);
   } finally {
@@ -167,17 +170,41 @@ test('OB-Xa engine includes the third modulation-panel LFO and manual AUTO-TUNE'
   assert.match(processor, /m\.t==='autoTune'/);
   assert.match(processor, /this\.p\.modPanelLfoOsc1/);
   assert.match(processor, /this\.p\.modPanelLfoOsc2/);
-  assert.match(processor, /panelLfo\*clamp\(this\.p\.modPanelLfoDepth,0,1\)\*this\.mod\*4/);
+  assert.match(processor, /this\.p\.modPanelLfoDepthEnabled\?this\.p\.modPanelLfoDepth:0/);
   assert.match(processor, /p\.osc2Detune\|\|0/);
-  assert.match(preview, /OBXaProcessor\.js\?v=20261123-audio-r2/);
+  assert.match(preview, /OBXaProcessor\.js\?v=20261123-audio-r3/);
   assert.match(app, /MODULATION PANEL LFO/);
   assert.match(app, /AUTO-TUNE/);
+  assert.match(app, /PULL UP TO ENABLE/);
   assert.match(app, /cc===4\|\|cc===74/);
   assert.match(app, /cc===66\)this\.ui\.hold\.setValue/);
   assert.match(app, /OSC 2 FREQUENCY/);
   assert.match(app, /OSC 2 DETUNE/);
   assert.match(app, /TIMBRE TRANSPOSE',min:-60,max:60/);
+  assert.match(app, /HARDWARE PROGRAMMER/);
+  assert.match(app, /120 PROGRAM LOCATIONS/);
+  assert.match(app, /MEMORY PROTECT/);
+  assert.match(app, /SPLIT \/ DOUBLE MEMORY/);
+  assert.match(app, /MANUAL/);
+  assert.match(app, /VOICE PAN POTS/);
   assert.match(processor, /v\.pan=clamp\(this\.p\.voicePan\?\.\[v\.i\]\?\?/);
+});
+
+
+test('OB-Xa hardware program memories expose 120 group slots and dedicated Split/Double banks', () => {
+  assert.equal(OBXA_PROGRAM_GROUPS.length, 15);
+  assert.equal(OBXA_PROGRAM_COUNT, 120);
+  assert.equal(obxaProgramSlotId(0, 1), 'program:0:1');
+  assert.equal(obxaProgramSlotId(14, 8), 'program:14:8');
+  assert.equal(obxaSpecialProgramSlotId('split', 8), 'split:8');
+  assert.equal(obxaSpecialProgramSlotId('double', 1), 'double:1');
+  assert.throws(() => obxaSpecialProgramSlotId('full', 1), /SPLIT or DOUBLE/);
+  const splitProgram = validateOBXAProgramRecord({ kind: 'split', patch: validateOBXAPatch({ mode: 'split' }) });
+  const doubleProgram = validateOBXAProgramRecord({ kind: 'double', patch: validateOBXAPatch({ mode: 'double' }) });
+  assert.equal(splitProgram.kind, 'split');
+  assert.equal(doubleProgram.kind, 'double');
+  assert.equal(splitProgram.patch.mode, 'split');
+  assert.equal(doubleProgram.patch.mode, 'double');
 });
 
 test('Community OB-Xa patches retain timbre A and B transpose while dropping master transpose switches', () => {
