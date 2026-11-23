@@ -84,7 +84,7 @@ test('OB-Xa validation preserves the selected pitch-bend range and both timbre t
     assert.equal(patch.layerB.transpose, -5);
     assert.equal(patch.layerB.osc2Tune, 0.4);
   }
-  const legacyNarrowPatch = validateOBXAPatch({ bendNarrow: true, bendRange: 12 });
+  const legacyNarrowPatch = validateOBXAPatch({ bendNarrow: true });
   assert.equal(legacyNarrowPatch.bendRange, 2, 'legacy narrow-range patches remain compatible');
 });
 
@@ -100,6 +100,9 @@ test('Community OB-Xa patches retain timbre A and B transpose while dropping mas
     layerB: { transpose: -7, osc2Tune: 0.2 },
   });
   assert.equal(patch.layerB.transpose, -7, 'sharing must not mutate the live patch');
+  assert.deepEqual(stripCommunityInstrumentTranspose('ob-xa', {
+    layerB: { transpose: 4, nested: { transpose: 9 } }, transposeUp: true,
+  }), { layerB: { transpose: 4, nested: {} } }, 'only root and layer B transpose are patch data');
 });
 
 test('Community selector metadata does not mutate instrument patch data', () => {
