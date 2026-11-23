@@ -2,7 +2,7 @@ import { WorkletEngine } from './shared/workletEngine.js';
 import { PresetStore } from './shared/presetStore.js';
 import { el, section, knob, select, toggle, button, display, performance, power, presetBar, footer } from './shared/panel.js';
 import { OBXA_PRESETS } from './data/obx-a-presets.js';
-import { DEF, GLOBAL_KEYS, LAYER_KEYS, validateOBXAPatch as validate } from './data/obxa-patch.js?v=20261123-obxa-patch-r1';
+import { DEF, GLOBAL_KEYS, LAYER_KEYS, validateOBXAPatch as validate } from './data/obxa-patch.js?v=20261123-obxa-patch-r2';
 import { consumeCommunityInstrumentPreset, createCommunityShareButton } from './shared/communityPreset.js';
 const NOTE_NAMES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
 const NOTES=Array.from({length:61},(_,i)=>{const n=36+i;return NOTE_NAMES[n%12]+(Math.floor(n/12)-1);});
@@ -54,7 +54,7 @@ class OBXaApp{
   this.ui.osc1Range=knob(ok,{label:'OSC 1 FREQUENCY',min:-2,max:2,value:this.currentLayer().osc1Range,formatValue:v=>(Math.round(v)>0?'+':'')+Math.round(v)+' OCT',onChange:v=>this.set('osc1Range',Math.round(v))});
   this.ui.osc1Level=knob(ok,{label:'OSC 1 LEVEL',min:0,max:1,value:this.currentLayer().osc1Level,onChange:v=>this.set('osc1Level',v)});
   this.ui.osc2Level=knob(ok,{label:'OSC 2 LEVEL',min:0,max:1,value:this.currentLayer().osc2Level,onChange:v=>this.set('osc2Level',v)});
-  this.ui.osc2Tune=knob(ok,{label:'OSC 2 DETUNE',min:-1,max:1,value:this.currentLayer().osc2Tune,formatValue:v=>(Math.round(v*60)/2).toFixed(1)+' ST',onChange:v=>this.set('osc2Tune',Math.round(v*60)/60)});
+  this.ui.osc2Tune=knob(ok,{label:'OSC 2 FREQUENCY',min:-1,max:1,value:this.currentLayer().osc2Tune,formatValue:v=>(Math.round(v*60)/2).toFixed(1)+' ST',onChange:v=>this.set('osc2Tune',Math.round(v*60)/60)});
   this.ui.pulseWidth=knob(ok,{label:'PULSE WIDTH',min:0,max:1,value:this.currentLayer().pulseWidth,onChange:v=>this.set('pulseWidth',v)});
   this.ui.osc1Wave=select(oscillators.body,'OSC 1 WAVEFORM',[{value:'saw',label:'SAWTOOTH'},{value:'pulse',label:'PULSE'}],this.currentLayer().osc1Wave,v=>this.set('osc1Wave',v));
   this.ui.osc2Wave=select(oscillators.body,'OSC 2 WAVEFORM',[{value:'saw',label:'SAWTOOTH'},{value:'pulse',label:'PULSE'}],this.currentLayer().osc2Wave,v=>this.set('osc2Wave',v));
@@ -110,6 +110,16 @@ class OBXaApp{
   this.ui.lfoPulse1=toggle(pulseRoutes,'OSC 1',this.currentLayer().lfoPulse1,v=>this.set('lfoPulse1',v));
   this.ui.lfoPulse2=toggle(pulseRoutes,'OSC 2',this.currentLayer().lfoPulse2,v=>this.set('lfoPulse2',v));
 
+  const panelLfoBlock=modBlock(modGrid,'MODULATION PANEL LFO','Third hardware LFO. The modulation lever controls its depth; assign it to either oscillator.');
+  const panelLfoControls=el('div','obxa-mod-knobs',panelLfoBlock);
+  this.ui.modPanelLfoRate=knob(panelLfoControls,{label:'RATE',min:0,max:1,value:this.patch.modPanelLfoRate,onChange:v=>this.set('modPanelLfoRate',v)});
+  this.ui.modPanelLfoDepth=knob(panelLfoControls,{label:'DEPTH',min:0,max:1,value:this.patch.modPanelLfoDepth,onChange:v=>this.set('modPanelLfoDepth',v)});
+  this.ui.modPanelLfoWave=select(panelLfoControls,'WAVEFORM',[{value:'sine',label:'SINE'},{value:'saw',label:'SAWTOOTH'},{value:'square',label:'SQUARE'}],this.patch.modPanelLfoWave,v=>this.set('modPanelLfoWave',v));
+  const panelLfoRoutes=routeGroup(panelLfoBlock,'FREQUENCY DESTINATION');
+  this.ui.modPanelLfoOsc1=toggle(panelLfoRoutes,'OSC 1',this.patch.modPanelLfoOsc1,v=>this.set('modPanelLfoOsc1',v));
+  this.ui.modPanelLfoOsc2=toggle(panelLfoRoutes,'OSC 2',this.patch.modPanelLfoOsc2,v=>this.set('modPanelLfoOsc2',v));
+
+
   const performanceBlock=modBlock(modGrid,'PERFORMANCE','Pitch-bend behaviour and master transposition.');
   const performanceGrid=el('div','obxa-mod-route-grid',performanceBlock);
   const bendOptions=routeGroup(performanceGrid,'PITCH BEND');
@@ -118,6 +128,7 @@ class OBXaApp{
   const transposeOptions=routeGroup(performanceGrid,'MASTER TRANSPOSE');
   this.ui.transposeDown=toggle(transposeOptions,'DOWN 1 OCTAVE',this.patch.transposeDown,v=>this.setMasterTranspose('transposeDown',v));
   this.ui.transposeUp=toggle(transposeOptions,'UP 1 OCTAVE',this.patch.transposeUp,v=>this.setMasterTranspose('transposeUp',v));
+  this.ui.autoTune=button(performanceBlock,'AUTO-TUNE',()=>{this.perf?.allOff();this.engine.post({t:'autoTune'});this.display.set('AUTO-TUNE COMPLETE','ALL VOICE OSCILLATORS RETUNED');});
 
   const assignmentBlock=modBlock(modGrid,'VOICE ASSIGNMENT & HOLD','Independent control of the lower and upper four-voice groups.');
   const assignmentRoutes=routeGroup(assignmentBlock,'MODULATION / BEND ENABLE');
@@ -134,8 +145,9 @@ const allocation=section(rows,'KEYBOARD & VOICE ALLOCATION','FULL · SPLIT · DO
   this.ui.splitPoint=knob(ak,{label:'SPLIT POINT',min:36,max:96,value:this.patch.splitPoint,formatValue:v=>NOTE_NAMES[Math.round(v)%12]+(Math.floor(Math.round(v)/12)-1),onChange:v=>this.set('splitPoint',Math.round(v))});
   this.ui.layerBalance=knob(ak,{label:'LOWER / UPPER BALANCE',min:0,max:1,value:this.patch.layerBalance,formatValue:v=>Math.round(v*100)+'% UPPER',onChange:v=>this.set('layerBalance',v)});
   this.ui.unison=toggle(allocation.body,'UNISON',this.patch.unison,v=>this.set('unison',v));
-  this.ui.unisonDetune=knob(ak,{label:'UNISON DETUNE',min:0,max:1,value:this.patch.unisonDetune,onChange:v=>this.set('unisonDetune',v)});
-  this.ui.transpose=knob(ak,{label:'TIMBRE TRANSPOSE',min:-24,max:24,value:this.currentLayer().transpose,formatValue:v=>(Math.round(v)>0?'+':'')+Math.round(v)+' ST',onChange:v=>this.set('transpose',Math.round(v))});
+  this.ui.unisonDetune=knob(ak,{label:'UNISON SPREAD · OVERTURE EXTRA',min:0,max:1,value:this.patch.unisonDetune,onChange:v=>this.set('unisonDetune',v)});
+  this.ui.osc2Detune=knob(ak,{label:'OSC 2 DETUNE',min:-100,max:100,value:this.currentLayer().osc2Detune,formatValue:v=>(Math.round(v)>0?'+':'')+Math.round(v)+' CENT',onChange:v=>this.set('osc2Detune',Math.round(v))});
+  this.ui.transpose=knob(ak,{label:'TIMBRE TRANSPOSE',min:-60,max:60,value:this.currentLayer().transpose,formatValue:v=>(Math.round(v)>0?'+':'')+Math.round(v)+' ST',onChange:v=>this.set('transpose',Math.round(v))});
   this.ui.portamento=knob(ak,{label:'PORTAMENTO',min:0,max:1,value:this.currentLayer().portamento,onChange:v=>this.set('portamento',v)});
   this.ui.portamentoMode=select(allocation.body,'GLIDE MODE',[{value:'linear',label:'LINEAR'},{value:'quantized',label:'QUANTIZED'}],this.patch.portamentoMode,v=>this.set('portamentoMode',v));
   this.ui.portamentoOffset=toggle(allocation.body,'PORTAMENTO OFFSET',this.patch.portamentoOffset,v=>this.set('portamentoOffset',v));
@@ -149,6 +161,6 @@ const allocation=section(rows,'KEYBOARD & VOICE ALLOCATION','FULL · SPLIT · DO
        getTitle:()=> 'Oberheim OB-Xa program'});
   footer(this.shell,'OBERHEIM OB-Xa · 4 / 6 / 8 VOICES · DUAL VCO · SELECTABLE 2 / 4-POLE VCF · PINK NOISE · POLYPHONIC GLIDE');this.updateLayoutState();
  }
- refresh(){['mode','voiceCount','splitPoint','unison','unisonDetune','bendRange','bendNarrow','bendOsc2Only','transposeDown','transposeUp','modLowerEnabled','modUpperEnabled','master','masterTune','hold','layerBalance','chordMode','portamentoMode','portamentoOffset'].forEach(key=>{if(this.ui[key]?.setValue)this.ui[key].setValue(this.patch[key],true);});this.renderLayerControls();this.updateLayoutState();this.engine.post({t:'patch',patch:this.patch});}
+ refresh(){['mode','voiceCount','splitPoint','unison','unisonDetune','bendRange','bendNarrow','bendOsc2Only','transposeDown','transposeUp','modLowerEnabled','modUpperEnabled','modPanelLfoRate','modPanelLfoDepth','modPanelLfoWave','modPanelLfoOsc1','modPanelLfoOsc2','master','masterTune','hold','layerBalance','chordMode','portamentoMode','portamentoOffset'].forEach(key=>{if(this.ui[key]?.setValue)this.ui[key].setValue(this.patch[key],true);});this.renderLayerControls();this.updateLayoutState();this.engine.post({t:'patch',patch:this.patch});}
 }
 new OBXaApp();
