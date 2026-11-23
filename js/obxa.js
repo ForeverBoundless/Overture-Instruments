@@ -10,7 +10,7 @@ class OBXaApp{
  constructor(){
   this.engine=new WorkletEngine(new URL('./engine/OBXaProcessor.js?v=20261123-audio-r2',import.meta.url).href,'obxa-processor');
   power('obxa-power',()=>this.engine.start(),()=>{this.perf?.flushPending();this.display?.set('OB-Xa READY',this.patch.voiceCount+' VOICES · TWO CONTROL GROUPS');});
-  this.patch=validate(DEF);this.layerIndex=0;this.ui={};this.manualMode=false;this.store=new PresetStore({key:'overture.obxa.programs',version:3,validate});this.hardwareStore=new PresetStore({key:'overture.obxa.hardware-programs',version:1,maxItems:136,validate:validateOBXAProgramRecord});this.seedHardwarePrograms();this.build();
+  this.patch=validate(DEF);this.layerIndex=0;this.ui={};this.manualMode=false;this.memoryProtected=false;this.store=new PresetStore({key:'overture.obxa.programs',version:3,validate});this.hardwareStore=new PresetStore({key:'overture.obxa.hardware-programs',version:1,maxItems:136,validate:validateOBXAProgramRecord});this.seedHardwarePrograms();this.build();
   this.perf=performance(this.shell,{notes:NOTES,octaves:5,startOctave:2,started:()=>this.engine.started,midiStatusEl:this.midi,handlers:{
    noteOn:(n,v)=>this.engine.noteOn(n,v),noteOff:n=>this.engine.noteOff(n),bend:v=>this.engine.setPitchBend(v),mod:v=>this.engine.setModWheel(v),
    sustain:d=>this.engine.setSustain(d),allOff:()=>this.engine.allNotesOff(),program:p=>{const slot=Math.abs(Number(p)||0)%OBXA_PROGRAM_COUNT,group=Math.floor(slot/8),program=slot%8+1;this.ui.hwGroup?.setValue(String(group),true);this.refreshHardwareProgramOptions();this.ui.hwProgram?.setValue(String(program),true);this.loadHardwareProgram();},
@@ -58,6 +58,7 @@ class OBXaApp{
  }
  saveHardwareProgram(){
   const group=Number(this.ui.hwGroup.select.value)||0,program=Number(this.ui.hwProgram.select.value)||1,id=obxaProgramSlotId(group,program);
+  if(this.memoryProtected){this.display.flash('MEMORY PROTECTED');return;}
   const existing=this.hardwareStore.get(id);
   if(existing&&!confirm('Overwrite program '+OBXA_PROGRAM_GROUPS[group]+program+'?'))return;
   const patch=this.patchSnapshot(),kind=patch.mode==='split'?'split':patch.mode==='double'?'double':'sound';
@@ -73,6 +74,7 @@ class OBXaApp{
  }
  saveSpecialProgram(){
   const mode=this.ui.specialType.select.value,program=Number(this.ui.specialProgram.select.value)||1,id=obxaSpecialProgramSlotId(mode,program);
+  if(this.memoryProtected){this.display.flash('MEMORY PROTECTED');return;}
   if(this.patch.mode!==mode){this.display.flash('SELECT '+mode.toUpperCase()+' MODE FIRST');return;}
   const existing=this.hardwareStore.get(id);
   if(existing&&!confirm('Overwrite '+mode.toUpperCase()+' program '+program+'?'))return;
@@ -118,7 +120,7 @@ class OBXaApp{
  setMasterTranspose(key,value){const other=key==='transposeDown'?'transposeUp':'transposeDown';if(value){this.patch[other]=false;this.engine.post({t:'param',key:other,value:false,layer:0});this.ui[other]?.setValue(false,true);}this.set(key,!!value);}
  renderVoiceControls(){(this.patch.voicePan||[]).forEach((value,index)=>{this.ui.voicePans?.[index]?.setValue(value,true);this.ui.voiceEnables?.[index]?.setValue(this.patch.voiceEnabled[index],true);const unavailable=index>=Number(this.patch.voiceCount);if(this.ui.voicePans?.[index]?.el){this.ui.voicePans[index].el.classList.toggle('is-unavailable',unavailable);this.ui.voicePans[index].el.style.pointerEvents=unavailable?'none':'';}if(this.ui.voiceEnables?.[index])this.ui.voiceEnables[index].disabled=unavailable;});}
  renderLayerControls(){const source=this.currentLayer();LAYER_KEYS.forEach(key=>{if(this.ui[key]?.setValue)this.ui[key].setValue(source[key],true);});if(this.ui.layerEdit)this.ui.layerEdit.setValue(String(this.layerIndex),true);}
- updateLayoutState(){const full=this.patch.mode==='full';this.shell.classList.toggle('is-split',this.patch.mode==='split');this.shell.classList.toggle('is-dual',!full);if(full){['modLowerEnabled','modUpperEnabled'].forEach(key=>{if(!this.patch[key]){this.patch[key]=true;this.engine.post({t:'param',key,value:true,layer:0});}});}['modLowerEnabled','modUpperEnabled'].forEach(key=>{const control=this.ui[key];if(control){control.disabled=full;control.setAttribute('aria-disabled',String(full));control.setValue(this.patch[key],true);}});}
+ updateLayoutState(){const full=this.patch.mode==='full';this.shell.classList.toggle('is-split',this.patch.mode==='split');this.shell.classList.toggle('is-dual',!full);if(full){['modLowerEnabled','modUpperEnabled'].forEach(key=>{if(!this.patch[key]){this.patch[key]=true;this.engine.post({t:'param',key,value:true,layer:0});}});}['modLowerEnabled','modUpperEnabled'].forEach(key=>{const control=this.ui[key];if(control){control.disabled=full;control.setAttribute('aria-disabled',String(full));control.setValue(this.patch[key],true);}});this.renderVoiceControls?.();}
  build(){
   const page=el('div','pn-page obxa-page',document.getElementById('obxa-root'));this.shell=el('main','pn-shell obxa-shell',page);
   const header=el('header','pn-header obxa-header',this.shell),brand=el('div','obxa-brand',header);
@@ -258,16 +260,16 @@ const allocation=section(rows,'KEYBOARD & VOICE ALLOCATION','FULL · SPLIT · DO
   this.ui.hwProgram=select(hardwareRow,'PROGRAM',Array.from({length:8},(_,i)=>({value:String(i+1),label:String(i+1)})),'1',()=>{});
   const hardwareActions=el('div','obxa-programmer__actions',programmer.body);
   button(hardwareActions,'LOAD',()=>this.loadHardwareProgram());
-  button(hardwareActions,'WRITE',()=>this.saveHardwareProgram());
+  this.ui.hwWrite=button(hardwareActions,'WRITE',()=>this.saveHardwareProgram());
   button(hardwareActions,'MANUAL',()=>this.enterManualMode());
-  this.ui.memoryProtect=toggle(hardwareActions,'MEMORY PROTECT',false,value=>{this.memoryProtected=value;this.display.flash(value?'MEMORY PROTECTED':'MEMORY WRITE ENABLED');});
+  this.ui.memoryProtect=toggle(hardwareActions,'MEMORY PROTECT',false,value=>{this.memoryProtected=value;this.ui.hwWrite.disabled=value;this.ui.specialWrite.disabled=value;this.display.flash(value?'MEMORY PROTECTED':'MEMORY WRITE ENABLED');});
   el('p','obxa-programmer__hint',programmer.body,OBXA_PRESETS.length+' built-in programs are preloaded. All 120 hardware locations can be overwritten or filled.');
   const specialRow=el('div','obxa-programmer__special',programmer.body);
   this.ui.specialType=select(specialRow,'SPLIT / DOUBLE MEMORY',[{value:'split',label:'SPLIT'},{value:'double',label:'DOUBLE'}],'split',()=>this.refreshSpecialProgramOptions());
   this.ui.specialProgram=select(specialRow,'PROGRAM',Array.from({length:8},(_,i)=>({value:String(i+1),label:String(i+1)})),'1',()=>{});
   const specialActions=el('div','obxa-programmer__actions',specialRow);
   button(specialActions,'RECALL',()=>this.loadSpecialProgram());
-  button(specialActions,'WRITE',()=>this.saveSpecialProgram());
+  this.ui.specialWrite=button(specialActions,'WRITE',()=>this.saveSpecialProgram());
   this.refreshHardwareProgramOptions();
   this.refreshSpecialProgramOptions();
 
