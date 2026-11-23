@@ -79,31 +79,42 @@ test('Hohner D6 and Oberheim OB-Xa are complete first-class emulator entries', a
 });
 
 
-test('OB-Xa covers the original modulation panel, oscillator detune, pan pots and Auto-Tune controls', async () => {
-  const [app, engine, patch, page, worker] = await Promise.all([
+test('OB-Xa exposes the hardware programmer, modulation panel and voice-pan controls in its blue-steel theme', async () => {
+  const [app, engine, patch, page, worker, styles] = await Promise.all([
     readFile(new URL('../js/obxa.js', import.meta.url), 'utf8'),
     readFile(new URL('../js/engine/OBXaProcessor.js', import.meta.url), 'utf8'),
     readFile(new URL('../js/data/obxa-patch.js', import.meta.url), 'utf8'),
     readFile(new URL('../html/ob-xa.html', import.meta.url), 'utf8'),
     readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
+    readFile(new URL('../css/ob-xa.css', import.meta.url), 'utf8'),
   ]);
   assert.match(app, /MODULATION PANEL LFO/);
+  assert.match(app, /PULL UP TO ENABLE/);
   assert.match(app, /AUTO-TUNE/);
   assert.match(app, /OSC 2 FREQUENCY/);
   assert.match(app, /OSC 2 DETUNE/);
   assert.match(app, /VOICE PAN POTS/);
+  assert.match(app, /HARDWARE PROGRAMMER/);
+  assert.match(app, /SPLIT \/ DOUBLE MEMORY/);
+  assert.match(app, /MEMORY PROTECT/);
+  assert.match(app, /enterManualMode/);
   assert.match(app, /TIMBRE TRANSPOSE',min:-60,max:60/);
   assert.match(engine, /this\.modPanelLfo=\{phase:0\}/);
   assert.match(engine, /modPanelLfoValue\(dt\)/);
   assert.match(engine, /m\.t==='autoTune'/);
   assert.match(engine, /this\.p\.voicePan\?\.\[v\.i\]/);
   assert.match(engine, /p\.osc2Detune\|\|0/);
-  assert.match(patch, /modPanelLfoDepth/);
+  assert.match(patch, /modPanelLfoDepthEnabled/);
   assert.match(patch, /osc2Detune/);
   assert.match(patch, /voicePan:\[-1,-1,-1,-1,1,1,1,1\]/);
-  assert.match(page, /obxa\.js\?v=20261123-obxa-patch-r2/);
-  assert.match(worker, /OBXaProcessor\.js\?v=20261123-audio-r2/);
-  assert.match(worker, /obxa-patch\.js\?v=20261123-obxa-patch-r2/);
+  assert.match(styles, /\.obxa-programmer-layout/);
+  assert.match(styles, /\.obxa-voice-grid/);
+  assert.match(styles, /radial-gradient\(ellipse at 50% -20%,#314c63/);
+  assert.match(page, /ob-xa\.css\?v=20261123-hardware-panel-r1/);
+  assert.match(page, /obxa\.js\?v=20261123-obxa-patch-r3/);
+  assert.match(worker, /OBXaProcessor\.js\?v=20261123-audio-r3/);
+  assert.match(worker, /obxa-patch\.js\?v=20261123-obxa-patch-r3/);
+  assert.match(worker, /ob-xa\.css\?v=20261123-hardware-panel-r1/);
 });
 
 test('all library cards use canonical metadata with declared preset provenance', () => {
