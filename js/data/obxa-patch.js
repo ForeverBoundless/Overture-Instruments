@@ -34,10 +34,15 @@ export const OBXA_PROGRAM_GROUPS=['A','B','C','D','AB','AC','AD','BC','BD','CD',
 export const OBXA_PROGRAM_COUNT=120;
 export const OBXA_SPLIT_PROGRAM_COUNT=8;
 export const OBXA_DOUBLE_PROGRAM_COUNT=8;
-export const obxaProgramSlotId=(groupIndex,programNumber)=>`program:${Math.max(0,Math.min(14,Math.trunc(groupIndex)||0))}:${Math.max(1,Math.min(8,Math.trunc(programNumber)||1)}`;
+export const obxaProgramSlotId=(groupIndex,programNumber)=>{
+ const group=Math.max(0,Math.min(14,Math.trunc(Number(groupIndex))||0));
+ const program=Math.max(1,Math.min(8,Math.trunc(Number(programNumber))||1));
+ return `program:${group}:${program}`;
+};
 export const obxaSpecialProgramSlotId=(mode,programNumber)=>{
  if(!['split','double'].includes(mode))throw new Error('OB-Xa special programs must be SPLIT or DOUBLE.');
- return `${mode}:${Math.max(1,Math.min(8,Math.trunc(programNumber)||1)}`;
+ const program=Math.max(1,Math.min(8,Math.trunc(Number(programNumber))||1));
+ return `${mode}:${program}`;
 };
 export const validateOBXAProgramRecord=data=>{
  if(!data||typeof data!=='object'||!data.patch)throw new Error('Not an OB-Xa hardware program.');
