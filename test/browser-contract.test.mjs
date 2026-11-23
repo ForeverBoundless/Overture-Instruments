@@ -146,19 +146,21 @@ test('Sub 37 keeps its top controls reachable and uses compact horizontal modula
     readFile(new URL('../css/sub37.css', import.meta.url), 'utf8'),
     readFile(new URL('../html/sub37.html', import.meta.url), 'utf8'),
   ]);
-  assert.match(tileStyles, /baseFrequency='\\.018 \\.18' numOctaves='3' seed='17'/);
-  assert.match(emulatorStyles, /baseFrequency='\\.018 \\.18' numOctaves='3' seed='17'/);
+  assert.match(tileStyles, /baseFrequency='\.018 \.18' numOctaves='3' seed='17'/);
+  assert.match(emulatorStyles, /baseFrequency='\.018 \.18' numOctaves='3' seed='17'/);
   assert.match(emulatorStyles, /background-size:96px 160px/);
   assert.match(emulatorStyles, /seed='43'/);
   assert.match(emulatorStyles, /font-family: 'Figtree'/);
-  assert.match(emulatorStyles, /#sub37-root\\s*\\{[^}]*place-items:\\s*start center/);
-  assert.match(emulatorStyles, /#sub37-root\\s*\\{[^}]*align-content:\\s*start/);
+  assert.ok(emulatorStyles.includes('#sub37-root { min-height: 100vh; padding: 18px; display: grid; place-items: start center; align-content: start; }'));
+  assert.ok(emulatorStyles.includes('#sub37-root { place-items: start center; align-content: start; }'));
   const responsiveStyles = emulatorStyles.slice(emulatorStyles.indexOf('Sub 37 responsive and typography correction'));
-  assert.match(responsiveStyles, /\\.sub37-shell\\s*\\{[^}]*min-width:\\s*0/);
-  assert.match(emulatorStyles, /@media \\(max-width: 480px\\)/);
-  assert.match(emulatorStyles, /\\.s37-mod-row \\.s37-section-body\\s*\\{[\\s\\S]*grid-template-columns:\\s*minmax\\(72px/);
-  assert.match(page, /sub37\\.css\\?v=20261123-scroll-r1/);
+  assert.match(responsiveStyles, /\.sub37-shell\s*\{[^}]*min-width:\s*0/);
+  assert.match(emulatorStyles, /@media \(max-width: 480px\)/);
+  assert.ok(emulatorStyles.includes('.s37-mod-row .s37-section-body {'));
+  assert.ok(emulatorStyles.includes('grid-template-columns: minmax(72px, 1fr) minmax(72px, 1fr)'));
+  assert.ok(page.includes('sub37.css?v=20261123-scroll-r1'));
 });
+
 test('instrument and experiment pages register the shared offline app shell', async () => {
   const paths = [
     '../about.html', '../library.html', '../omni.html', '../experiments.html',
