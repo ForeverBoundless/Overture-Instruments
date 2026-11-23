@@ -1,13 +1,14 @@
-/* Oberheim OB-Xa model: selectable 4 / 6 / 8 voices, two independent four-voice
- * control groups, dual VCOs, selectable 2 / 4 pole low-pass response, two ADSRs
- * and a VCA per voice. Procedural approximation, not component-exact circuitry. */
+/* Oberheim OB-Xa model: selectable 4 / 6 / 8 voices, two four-voice control
+ * groups, a separate modulation-panel LFO, dual VCOs, selectable 2 / 4 pole
+ * low-pass response, two ADSRs and a VCA per voice. Procedural approximation,
+ * not component-exact circuitry. */
 /* global sampleRate, currentFrame, registerProcessor, AudioWorkletProcessor */
 const clamp=(v,a,b)=>Math.min(b,Math.max(a,v)),hz=n=>440*Math.pow(2,(n-69)/12);
 const BLEP=(t,d)=>{if(t<d){t/=d;return t+t-t*t-1;}if(t>1-d){t=(t-1)/d;return t*t+t+t+1;}return 0;};
 const saw=(p,d)=>2*p-1-BLEP(p,d),pulse=(p,w,d)=>{const q=clamp(w,.05,.95);return (p<q?1:-1)+BLEP(p,d)-BLEP((p+1-q)%1,d);};
 const wave=(shape,p,w,d)=>shape==='pulse'?pulse(p,w,d):saw(p,d);
 const DEFAULT={mode:'full',voiceCount:8,splitPoint:60,unison:false,unisonDetune:.12,bendRange:12,bendNarrow:false,bendOsc2Only:false,master:.7,masterTune:0,hold:false,layerBalance:.5,chordMode:false,portamentoMode:'linear',portamentoOffset:true,transposeDown:false,transposeUp:false,modLowerEnabled:true,modUpperEnabled:true,modPanelLfoRate:.25,modPanelLfoDepth:0,modPanelLfoWave:'sine',modPanelLfoOsc1:false,modPanelLfoOsc2:false,voicePan:[-1,-1,-1,-1,1,1,1,1],osc1Wave:'saw',osc2Wave:'saw',osc1Range:0,osc1Level:.82,osc2Level:.56,osc2Tune:0,osc2Detune:0,pulseWidth:.5,sync:false,fEnvOsc2:false,osc1Route:true,osc2Route:true,osc2Half:false,noiseRoute:false,cutoff:.53,resonance:.13,filterMode:'24',filterTrack:true,filterEnv:.42,filterAttack:.08,filterDecay:.32,filterSustain:.12,filterRelease:.32,ampAttack:.015,ampDecay:.3,ampSustain:.76,ampRelease:.32,lfoRate:.16,lfoAmount:0,lfoWave:'sine',lfoTarget:'both',lfoOsc1:true,lfoOsc2:true,lfoFilter:false,pulseWidthAmount:0,lfoPulse1:false,lfoPulse2:false,transpose:0,portamento:0};
-const GLOBAL_KEYS=new Set(['mode','voiceCount','splitPoint','unison','unisonDetune','bendRange','bendNarrow','bendOsc2Only','master','masterTune','hold','layerBalance','chordMode','portamentoMode','portamentoOffset','transposeDown','transposeUp','modLowerEnabled','modUpperEnabled','modPanelLfoRate','modPanelLfoDepth','modPanelLfoWave','modPanelLfoOsc1','modPanelLfoOsc2']);
+const GLOBAL_KEYS=new Set(['mode','voiceCount','splitPoint','unison','unisonDetune','bendRange','bendNarrow','bendOsc2Only','master','masterTune','hold','layerBalance','chordMode','portamentoMode','portamentoOffset','transposeDown','transposeUp','modLowerEnabled','modUpperEnabled','modPanelLfoRate','modPanelLfoDepth','modPanelLfoWave','modPanelLfoOsc1','modPanelLfoOsc2','voicePan']);
 class XaVoice{
  constructor(i){this.i=i;this.note=-1;this.inputNote=-1;this.pitch=60;this.targetPitch=60;this.glideAccumulator=0;this.hasPlayed=false;this.layer=0;this.active=false;this.gate=false;this.order=0;this.phase1=Math.random();this.phase2=Math.random();this.amp=0;this.filterEnv=0;this.ampStage='idle';this.filterStage='idle';this.ic1a=0;this.ic2a=0;this.ic1b=0;this.ic2b=0;this.pan=0;this.vel=.8;this.rand=(Math.random()-.5)*.0005;this.tune1=(Math.random()-.5)*.055;this.tune2=(Math.random()-.5)*.085;this.filterTrim=(Math.random()-.5)*.018;this.ampTrim=.975+Math.random()*.05;this.driftPhase=Math.random()*Math.PI*2;this.driftRate=.035+Math.random()*.045;this.noiseSeed=((i+1)*17117)|0;this.pink=[0,0,0,0,0,0,0];this.glide=0;}
 }
