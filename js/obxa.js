@@ -2,13 +2,10 @@ import { WorkletEngine } from './shared/workletEngine.js';
 import { PresetStore } from './shared/presetStore.js';
 import { el, section, knob, select, toggle, button, display, performance, power, presetBar, footer } from './shared/panel.js';
 import { OBXA_PRESETS } from './data/obx-a-presets.js';
-import { DEF, GLOBAL_KEYS, LAYER_KEYS, validateOBXAPatch as validate } from './data/obxa-patch.js';
+import { DEF, GLOBAL_KEYS, LAYER_KEYS, validateOBXAPatch as validate } from './data/obxa-patch.js?v=20261123-obxa-patch-r1';
 import { consumeCommunityInstrumentPreset, createCommunityShareButton } from './shared/communityPreset.js';
 const NOTE_NAMES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
 const NOTES=Array.from({length:61},(_,i)=>{const n=36+i;return NOTE_NAMES[n%12]+(Math.floor(n/12)-1);});
-ance+.04),ampAttack:Math.min(1,out.ampAttack+.025)};
- out.layerB=cleanLayer(derivedB);return out;
-};
 class OBXaApp{
  constructor(){
   this.engine=new WorkletEngine(new URL('./engine/OBXaProcessor.js?v=20261106-audio-r1',import.meta.url).href,'obxa-processor');
