@@ -78,6 +78,34 @@ test('Hohner D6 and Oberheim OB-Xa are complete first-class emulator entries', a
   assert.match(worker, /ob-xa/);
 });
 
+
+test('OB-Xa covers the original modulation panel, oscillator detune, pan pots and Auto-Tune controls', async () => {
+  const [app, engine, patch, page, worker] = await Promise.all([
+    readFile(new URL('../js/obxa.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/engine/OBXaProcessor.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/data/obxa-patch.js', import.meta.url), 'utf8'),
+    readFile(new URL('../html/ob-xa.html', import.meta.url), 'utf8'),
+    readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
+  ]);
+  assert.match(app, /MODULATION PANEL LFO/);
+  assert.match(app, /AUTO-TUNE/);
+  assert.match(app, /OSC 2 FREQUENCY/);
+  assert.match(app, /OSC 2 DETUNE/);
+  assert.match(app, /VOICE PAN POTS/);
+  assert.match(app, /TIMBRE TRANSPOSE',min:-60,max:60/);
+  assert.match(engine, /this\.modPanelLfo=\{phase:0\}/);
+  assert.match(engine, /modPanelLfoValue\(dt\)/);
+  assert.match(engine, /m\.t==='autoTune'/);
+  assert.match(engine, /this\.p\.voicePan\?\.\[v\.i\]/);
+  assert.match(engine, /p\.osc2Detune\|\|0/);
+  assert.match(patch, /modPanelLfoDepth/);
+  assert.match(patch, /osc2Detune/);
+  assert.match(patch, /voicePan:\[-1,-1,-1,-1,1,1,1,1\]/);
+  assert.match(page, /obxa\.js\?v=20261123-obxa-patch-r2/);
+  assert.match(worker, /OBXaProcessor\.js\?v=20261123-audio-r2/);
+  assert.match(worker, /obxa-patch\.js\?v=20261123-obxa-patch-r2/);
+});
+
 test('all library cards use canonical metadata with declared preset provenance', () => {
   assert.equal(INSTRUMENTS.length, 14);
   assert.equal(INSTRUMENTS.every((instrument) => instrument.presetProvenance && instrument.description), true);
