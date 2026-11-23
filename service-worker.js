@@ -1,4 +1,4 @@
-const CACHE = 'overture-shell-v159';
+const CACHE = 'overture-shell-v160';
 const APP_SHELL = [
   '/account',
   '/login',
@@ -169,7 +169,7 @@ const APP_SHELL = [
   '/js/engine/Pro3Processor.js',
   '/js/engine/Super8Processor.js',
   '/js/engine/HohnerD6Processor.js?v=20261106-audio-r1',
-  '/js/engine/OBXaProcessor.js?v=20261106-audio-r1',
+  '/js/engine/OBXaProcessor.js?v=20261123-audio-r2',
   '/js/engine/OberheimEightVoiceProcessor.js?v=20261104-eightvoice-stable',
   '/js/engine/Sub37Engine.js',
   '/js/engine/TR808Engine.js',
@@ -206,8 +206,8 @@ const APP_SHELL = [
   '/js/roland-tr-808.js',
   '/js/oberheim-eight-voice.js',
   '/js/hohner-d6.js?v=20261106-audio-r1',
-  '/js/obxa.js?v=20261123-obxa-patch-r1',
-  '/js/data/obxa-patch.js?v=20261123-obxa-patch-r1',
+  '/js/obxa.js?v=20261123-obxa-patch-r2',
+  '/js/data/obxa-patch.js?v=20261123-obxa-patch-r2',
   '/js/shared/audioRecorder.js',
   '/js/shared/contact.js',
   '/js/shared/midiMap.js',
