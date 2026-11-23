@@ -7,6 +7,7 @@ import { postWorkletMessage, INSTRUMENT_PREVIEW_RENDERERS } from '../js/shared/i
 import { COMMUNITY_INSTRUMENTS } from '../js/data/communityInstruments.js';
 import { attachCommunityPresetMetadata, readCommunityPresetMetadata, stripCommunityPresetMetadata, stripCommunityInstrumentTranspose } from '../js/shared/communityPreset.js';
 import { validateOBXAPatch } from '../js/data/obxa-patch.js';
+import { PresetStore } from '../js/shared/presetStore.js';
 
 test('Community preview WAV output has a valid PCM RIFF/WAVE header', async () => {
   const samples = [
@@ -86,6 +87,44 @@ test('OB-Xa validation preserves the selected pitch-bend range and both timbre t
   }
   const legacyNarrowPatch = validateOBXAPatch({ bendNarrow: true });
   assert.equal(legacyNarrowPatch.bendRange, 2, 'legacy narrow-range patches remain compatible');
+});
+
+test('OB-Xa local preset save, JSON export/import and backup restore preserve all patch fields', () => {
+  const previousStorage = globalThis.localStorage;
+  const values = new Map();
+  globalThis.localStorage = {
+    getItem: (key) => values.get(key) ?? null,
+    setItem: (key, value) => values.set(key, String(value)),
+  };
+  try {
+    const store = new PresetStore({ key: 'test.obxa.programs', version: 3, validate: validateOBXAPatch });
+    const patch = validateOBXAPatch({
+      mode: 'double', voiceCount: 8, bendRange: 7,
+      transpose: 5, cutoff: 0.71,
+      layerB: { transpose: -9, osc2Tune: 0.45, lfoWave: 'square' },
+    });
+    const saved = store.save('Layered brass', patch, 'layered-brass');
+    const singleExport = store.exportJSON(saved);
+    const singleImport = store.parseImport(singleExport);
+    assert.equal(singleImport.data.bendRange, 7);
+    assert.equal(singleImport.data.transpose, 5);
+    assert.equal(singleImport.data.layerB.transpose, -9);
+    assert.equal(singleImport.data.layerB.osc2Tune, 0.45);
+
+    const restored = new PresetStore({ key: 'test.obxa.programs', version: 3, validate: validateOBXAPatch });
+    assert.equal(restored.items[0].data.bendRange, 7);
+    assert.equal(restored.items[0].data.layerB.lfoWave, 'square');
+
+    const backup = store.exportAllJSON();
+    const backupStore = new PresetStore({ key: 'test.obxa.backup', version: 3, validate: validateOBXAPatch });
+    backupStore.importAll(backup);
+    assert.equal(backupStore.items[0].data.bendRange, 7);
+    assert.equal(backupStore.items[0].data.transpose, 5);
+    assert.equal(backupStore.items[0].data.layerB.transpose, -9);
+  } finally {
+    if (previousStorage === undefined) delete globalThis.localStorage;
+    else globalThis.localStorage = previousStorage;
+  }
 });
 
 test('Community OB-Xa patches retain timbre A and B transpose while dropping master transpose switches', () => {
