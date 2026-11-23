@@ -1,6 +1,8 @@
 export const GLOBAL_DEFAULTS={mode:'full',voiceCount:8,splitPoint:60,unison:false,unisonDetune:.12,bendRange:12,bendNarrow:false,bendOsc2Only:false,master:.7,masterTune:0,hold:false,layerBalance:.5,chordMode:false,portamentoMode:'linear',portamentoOffset:true,transposeDown:false,transposeUp:false,modLowerEnabled:true,modUpperEnabled:true};
 export const LAYER_DEFAULTS={osc1Wave:'saw',osc2Wave:'saw',osc1Range:0,osc1Level:.82,osc2Level:.56,osc2Tune:0,pulseWidth:.5,sync:false,fEnvOsc2:false,osc1Route:true,osc2Route:true,osc2Half:false,noiseRoute:false,cutoff:.53,resonance:.13,filterMode:'24',filterTrack:true,filterEnv:.42,filterAttack:.08,filterDecay:.32,filterSustain:.12,filterRelease:.32,ampAttack:.015,ampDecay:.3,ampSustain:.76,ampRelease:.32,lfoRate:.16,lfoAmount:0,lfoWave:'sine',lfoTarget:'both',lfoOsc1:true,lfoOsc2:true,lfoFilter:false,pulseWidthAmount:0,lfoPulse1:false,lfoPulse2:false,transpose:0,portamento:0};
-export const DEF={...GLOBAL_DEFAULTS,...LAYER_DEFAULTS},GLOBAL_KEYS=new Set(Object.keys(GLOBAL_DEFAULTS)),LAYER_KEYS=Object.keys(LAYER_DEFAULTS);
+export const DEF={...GLOBAL_DEFAULTS,...LAYER_DEFAULTS};
+export const GLOBAL_KEYS=new Set(Object.keys(GLOBAL_DEFAULTS));
+export const LAYER_KEYS=Object.keys(LAYER_DEFAULTS);
 const clamp=(v,a,b)=>Math.min(b,Math.max(a,Number(v)||0));
 const cleanLayer=(source={})=>{
  const out={...LAYER_DEFAULTS,...source};
@@ -20,7 +22,7 @@ export const validateOBXAPatch=data=>{
  out.unison=!!out.unison;out.unisonDetune=clamp(data.unisonDetune??.12,0,1);
  out.bendOsc2Only=!!out.bendOsc2Only;
  const requestedBendRange=data.bendRange===undefined?(data.bendNarrow?2:12):Math.round(clamp(data.bendRange,1,12));
- out.bendRange=data.bendNarrow===true?2:requestedBendRange;
+ out.bendRange=requestedBendRange;
  out.bendNarrow=out.bendRange<=2;out.master=clamp(data.master??.7,0,1);out.masterTune=clamp(data.masterTune??0,-1,1);out.hold=!!out.hold;out.transposeDown=!!data.transposeDown;out.transposeUp=!!data.transposeUp;if(out.transposeDown&&out.transposeUp)out.transposeUp=false;out.modLowerEnabled=data.modLowerEnabled!==false;out.modUpperEnabled=data.modUpperEnabled!==false;if(out.mode==='full'){out.modLowerEnabled=true;out.modUpperEnabled=true;}
  const derivedB=layerB||{...out,osc1Wave:'pulse',osc2Wave:'saw',osc2Tune:Math.min(1,out.osc2Tune+.035),cutoff:Math.max(.08,out.cutoff-.07),resonance:Math.min(.9,out.resonance+.04),ampAttack:Math.min(1,out.ampAttack+.025)};
  out.layerB=cleanLayer(derivedB);return out;
