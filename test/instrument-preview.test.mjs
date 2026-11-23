@@ -163,9 +163,12 @@ test('OB-Xa engine includes the third modulation-panel LFO and manual AUTO-TUNE'
   assert.match(processor, /m\.t==='autoTune'/);
   assert.match(processor, /this\.p\.modPanelLfoOsc1/);
   assert.match(processor, /this\.p\.modPanelLfoOsc2/);
+  assert.match(processor, /panelLfo\*clamp\(this\.p\.modPanelLfoDepth,0,1\)\*this\.mod\*4/);
   assert.match(processor, /p\.osc2Detune\|\|0/);
   assert.match(app, /MODULATION PANEL LFO/);
   assert.match(app, /AUTO-TUNE/);
+  assert.match(app, /cc===4\|\|cc===74/);
+  assert.match(app, /cc===66\)this\.ui\.hold\.setValue/);
   assert.match(app, /OSC 2 FREQUENCY/);
   assert.match(app, /OSC 2 DETUNE/);
   assert.match(app, /TIMBRE TRANSPOSE',min:-60,max:60/);
@@ -174,13 +177,15 @@ test('OB-Xa engine includes the third modulation-panel LFO and manual AUTO-TUNE'
 
 test('Community OB-Xa patches retain timbre A and B transpose while dropping master transpose switches', () => {
   const patch = {
-    mode: 'split', transpose: 12, cutoff: 0.63,
+    mode: 'split', transpose: 12, cutoff: 0.63, voicePan: [-1, -0.8, -0.6, -0.4, 0.4, 0.6, 0.8, 1],
+    modPanelLfoDepth: 0.6, modPanelLfoOsc1: true,
     layerB: { transpose: -7, osc2Tune: 0.2 },
     transposeUp: true, transposeDown: false,
   };
   const shared = stripCommunityInstrumentTranspose('ob-xa', patch);
   assert.deepEqual(shared, {
-    mode: 'split', transpose: 12, cutoff: 0.63,
+    mode: 'split', transpose: 12, cutoff: 0.63, voicePan: [-1, -0.8, -0.6, -0.4, 0.4, 0.6, 0.8, 1],
+    modPanelLfoDepth: 0.6, modPanelLfoOsc1: true,
     layerB: { transpose: -7, osc2Tune: 0.2 },
   });
   assert.equal(patch.layerB.transpose, -7, 'sharing must not mutate the live patch');
