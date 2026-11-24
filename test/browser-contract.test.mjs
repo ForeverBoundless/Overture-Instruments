@@ -4,6 +4,16 @@ import { readFile } from 'node:fs/promises';
 import { INSTRUMENTS } from '../js/data/instruments.js';
 import { OBXA_PRESETS } from '../js/data/obx-a-presets.js';
 
+function assertPrecachedPageAssets(page, worker, pattern) {
+  const assets = [...page.matchAll(/<(?:link|script)\b[^>]*?\b(?:href|src)="([^"]+)"[^>]*>/g)]
+    .map(([, asset]) => asset)
+    .filter((asset) => pattern.test(asset));
+  assert.ok(assets.length, 'Expected the page to reference a matching first-party asset.');
+  for (const asset of assets) {
+    assert.ok(worker.includes("'" + asset + "'"), 'Active page asset is missing from the service-worker shell: ' + asset);
+  }
+}
+
 test('PWA shell exposes a manifest and worker registration', async () => {
   const [manifest, worker, home] = await Promise.all(['../manifest.webmanifest', '../service-worker.js', '../index.html'].map((file) => readFile(new URL(file, import.meta.url), 'utf8')));
   assert.match(manifest, /"display": "standalone"/);
@@ -153,10 +163,11 @@ test('Library search has a staggered entrance, accessible status, and no visible
 });
 
 test('Little Phatty uses a grouped responsive layout without viewport shrinking', async () => {
-  const [styles, engine, page] = await Promise.all([
+  const [styles, engine, page, worker] = await Promise.all([
     readFile(new URL('../css/little-phatty.css', import.meta.url), 'utf8'),
     readFile(new URL('../js/engine/app.js', import.meta.url), 'utf8'),
     readFile(new URL('../html/little-phatty.html', import.meta.url), 'utf8'),
+    readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
   ]);
   assert.match(styles, /grid-template-columns: repeat\(12, minmax\(0, 1fr\)\)/);
   assert.match(styles, /grid-template-areas:[\s\S]*"master master lfo lfo lfo lfo osc osc osc osc osc osc"[\s\S]*"master master filter filter filter filter env env env env output output"/);
@@ -176,7 +187,7 @@ test('Little Phatty uses a grouped responsive layout without viewport shrinking'
   assert.match(compactLayout, /@media \(max-width: 760px\)/);
   assert.match(engine, /natural, scrollable page flow/);
   assert.doesNotMatch(engine, /availH = window\.innerHeight/);
-  assert.match(page, /little-phatty\.css\?v=20261104-compact-centred/);
+  assertPrecachedPageAssets(page, worker, /\/css\/little-phatty\.css/);
 });
 
 test('Sub 37 keeps its top controls reachable and uses compact horizontal modulation buses', async () => {
@@ -453,7 +464,7 @@ test('Community reports, moderator review, strike escalation and protected accou
   assert.match(css, /community-report-dialog/);
   assert.match(css, /community-moderation-actions/);
   assert.match(worker, /overture-shell-v\d+/);
-  assert.match(worker, /20261114-publish-layout/);
+  assertPrecachedPageAssets(page, worker, /\/css\/community\.css|\/js\/community\.js/);
 });
 
 
@@ -571,7 +582,7 @@ test('Contribution page profile, toolbar and result counts have responsive align
     readFile(new URL('../js/contributions.js', import.meta.url), 'utf8'),
     readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
   ]);
-  assert.ok(page.includes('contributions.css?v=20261102-profile-3'));
+  assertPrecachedPageAssets(page, worker, /\/css\/contributions\.css|\/js\/contributions\.js/);
   assert.ok(page.includes('contributions.js?v=20261112-community-edit-r1'));
   assert.ok(css.includes('#contributions-count'));
   assert.ok(css.includes('.contributions-toolbar.is-owner'));
@@ -611,11 +622,12 @@ test('Login page has an optimized animated sound-field background with reduced-m
 
 
 test('Homepage library CTA logo is black in light mode', async () => {
-  const [home, index] = await Promise.all([
+  const [home, index, worker] = await Promise.all([
     readFile(new URL('../css/home.css', import.meta.url), 'utf8'),
     readFile(new URL('../index.html', import.meta.url), 'utf8'),
+    readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
   ]);
-  assert.ok(index.includes('home.css?v=20261105-rainbow-headline-glow'));
+  assertPrecachedPageAssets(index, worker, /\/css\/home\.css/);
   assert.ok(home.includes('html[data-theme="light"] a.showcase-cta[href="/library"] .showcase-cta__icon img'));
   assert.ok(home.includes('filter:brightness(0) !important'));
 });
@@ -632,9 +644,8 @@ test('library empty state appears before the coming-soon tile or banner', async 
   const comingSoonCreation = app.indexOf('const comingSoon = document.createElement');
   assert.ok(emptyStateInsertion >= 0 && comingSoonCreation > emptyStateInsertion);
   assert.match(styles, /\.library-search__empty\s*\{[^}]*grid-column:\s*1\s*\/\s*-1/s);
-  assert.ok(page.includes('library.css?v=20261106-tile-minimal-r1'));
   assert.match(worker, /overture-shell-v\d+/);
-  assert.ok(worker.includes('/css/library.css?v=20261106-tile-minimal-r1'));
+  assertPrecachedPageAssets(page, worker, /\/css\/library\.css/);
 });
 
 
@@ -701,9 +712,8 @@ test('Hohner D6 and OB-Xa library cards use minimalist instrument-specific surfa
   assert.doesNotMatch(styles, /hohner-d6-tile-art|obxa-tile-art/);
   assert.match(styles, /\.instrument-tile--hohner-d6 \.instrument-tile__display/);
   assert.match(styles, /\.instrument-tile--ob-xa \.instrument-tile__display/);
-  assert.ok(page.includes('library.css?v=20261106-tile-minimal-r1'));
   assert.match(worker, /overture-shell-v\d+/);
-  assert.ok(worker.includes('/css/library.css?v=20261106-tile-minimal-r1'));
+  assertPrecachedPageAssets(page, worker, /\/css\/library\.css/);
 });
 
 
@@ -786,12 +796,12 @@ test('Community OMNI drafts use an explicit not-applicable instrument value', as
   ]);
   assert.ok(page.includes('<option value="omni">Not applicable — OMNI patch</option>'));
   assert.ok(source.includes("instrument.value = 'omni'"));
-  assert.ok(source.includes("instrument.disabled = !isInstrumentPreset"));
+  assert.ok(source.includes("instrument.hidden = !isInstrumentPreset"));
+  assert.ok(source.includes("byId('community-instrument-wrap').hidden = !isInstrumentPreset"));
   assert.ok(source.includes("type === 'omni_patch' ? 'omni' : (instrumentId || 'little-phatty')"));
   assert.ok(source.includes("if (!INSTRUMENTS[instrument.value]) instrument.value = 'little-phatty'"));
   assert.ok(source.includes('function beginEdit'));
-  assert.ok(worker.includes('/js/community.js?v=20261112-omni-instrument-select-r1'));
-  assert.ok(page.includes('/js/community.js?v=20261112-omni-instrument-select-r1'));
+  assertPrecachedPageAssets(page, worker, /\/js\/community\.js/);
 });
 
 test('Shared emulator power cards support both span and div markup', async () => {
@@ -805,7 +815,7 @@ test('Shared emulator power cards support both span and div markup', async () =>
   ]);
   assert.ok(styles.includes('.pn-power > :is(span, div)'));
   assert.ok(styles.includes('.pn-power.is-starting > :is(span, div)'));
-  for (const page of pages) assert.match(page, /class="pn-power"/);
+  for (const page of pages) assert.match(page, /class="[^"]*\bpn-power\b[^"]*"/);
 });
 
 
@@ -907,7 +917,7 @@ test('Homepage includes a dedicated, theme-aware Community feature after Experim
   assert.match(styles, /\.feature-section--community/);
   assert.match(styles, /html\[data-theme="light"\] \.feature-section--community/);
   assert.match(styles, /@media \(max-width: 760px\)[\s\S]*feature-layout--community/);
-  assert.match(worker, /\/css\/home\.css\?v=20261116-community-feature/);
+  assertPrecachedPageAssets(page, worker, /\/css\/home\.css/);
 });
 
 
@@ -933,23 +943,24 @@ test('Community pages, homepage feature and emulator share action use the violet
   assert.match(homeCss, /html\[data-theme="light"\] \.community-feature-showcase/);
   assert.match(midiCss, /button\.oi-community-share[\s\S]*#e6d2ff/);
   assert.match(midiCss, /html\[data-theme="light"\] button\.oi-community-share[\s\S]*#eee2ff/);
-  assert.match(communityPage, /community\.css\?v=20261116-community-violet-r1/);
-  assert.match(profilePage, /contributions\.css\?v=20261116-community-purple/);
-  assert.match(homePage, /home\.css\?v=20261116-community-purple/);
+  assertPrecachedPageAssets(communityPage, worker, /\/css\/community\.css/);
+  assertPrecachedPageAssets(profilePage, worker, /\/css\/contributions\.css/);
+  assertPrecachedPageAssets(homePage, worker, /\/css\/home\.css/);
   assert.match(worker, /overture-shell-v\d+/);
 });
 
 
 test('Community violet remains the active highlight above the shared light-theme polish', async () => {
-  const [polish, home, theme] = await Promise.all([
+  const [polish, home, theme, worker] = await Promise.all([
     readFile(new URL('../css/site-theme-polish.css', import.meta.url), 'utf8'),
     readFile(new URL('../index.html', import.meta.url), 'utf8'),
     readFile(new URL('../css/site-theme.css', import.meta.url), 'utf8'),
+    readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
   ]);
   assert.match(polish, /body \.community-hero h1 em[\s\S]*--oi-community-accent-strong/);
   assert.match(polish, /main \.feature-section--community \.feature-copy h2 em/);
   assert.match(polish, /main \.feature-section--community \.eyebrow-dot--cyan/);
-  assert.match(home, /site-theme-polish\.css\?v=20261116-community-purple/);
+  assertPrecachedPageAssets(home, worker, /\/css\/site-theme-polish\.css/);
   assert.match(theme, /--oi-community-accent:\s*#c493ff/);
 });
 
@@ -970,8 +981,8 @@ test('Emulator pages use the shared Overture toolbar and the Community preview r
   assert.match(recorder, /oi-community-recorder__head/);
   assert.match(recorder, /html\[data-theme="light"\] \.oi-community-recorder/);
   assert.match(communityCss, /#community-root \.community-hero h1 em[\s\S]*#6930aa/);
-  assert.match(communityPage, /community\.css\?v=20261116-community-violet-r1/);
-  assert.match(worker, /\/css\/emulator-topbar\.css\?v=20261116-r1/);
+  assertPrecachedPageAssets(communityPage, worker, /\/css\/community\.css/);
+  assert.ok(worker.includes('/css/emulator-topbar.css?v=20261116-r3'));
   assert.match(worker, /overture-shell-v\d+/);
 });
 
@@ -991,12 +1002,12 @@ test('The homepage Community section and coming-soon banner share a continuous v
   assert.ok(styles.includes('.community-feature-region::before') && styles.includes('repeating-radial-gradient'));
   assert.ok(styles.includes('.community-feature-region .home-coming-soon'));
   assert.ok(styles.includes('html[data-theme="light"] .community-feature-region::before'));
-  assert.ok(page.includes('home.css?v=20261116-community-contours-r1'));
+  assertPrecachedPageAssets(page, worker, /\/css\/home\.css/);
   assert.ok(toolbar.includes('grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) auto'));
   assert.ok(phattyCss.includes('body.little-phatty-body.oi-emulator-topbar-active #app-root'));
   assert.ok(phattyPage.includes('little-phatty.css?v=20261116-toolbar-offset-r1'));
   assert.match(worker, /overture-shell-v\d+/);
-  assert.ok(worker.includes('community-contours-r1'));
+  assert.ok(worker.includes('/css/home.css?v=20261117-omni-denser-lines-r1'));
   assert.ok(worker.includes('toolbar-offset-r1'));
 });
 
