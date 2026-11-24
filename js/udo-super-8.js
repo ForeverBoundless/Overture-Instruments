@@ -356,7 +356,7 @@ class Super8App{
   const waveInput=document.createElement('input');waveInput.type='file';waveInput.multiple=true;waveInput.accept='.wav,audio/wav';waveLabel.appendChild(waveInput);footer.appendChild(waveLabel);
   waveInput.addEventListener('change',async()=>{try{if(!this.engine.ctx)throw new Error('Power on audio first.');const waves=[];for(const file of [...(waveInput.files||[])].slice(0,64)){const decoded=await this.engine.ctx.decodeAudioData(await file.arrayBuffer());const data=decoded.getChannelData(0);if(data.length<64||data.length>65536)throw new Error(file.name+' is not a supported single-cycle file.');const size=2048,down=Array.from({length:size},(_,i)=>{const pos=i*data.length/size,index=Math.floor(pos),frac=pos-index;return data[index]*(1-frac)+data[(index+1)%data.length]*frac;});waves.push(down);}if(waves.length){const p=this.p();p.userWaves=Array.from({length:64},(_,i)=>waves[i]??p.userWaves?.[i]??null);this.postPatch();this.display.flash(waves.length+' WAVES IMPORTED · SAVED WITH LAYER');}}catch(error){this.display.flash('Wave import failed');alert(error.message);}});
   this.refreshHardwarePresetList=(selected='f:0')=>{
-   const items=[...FACTORY.map((item,i)=>({value:'f:'+i,label:String(i+1).padStart(3,'0')+' · '+item.name})),...this.store.items.map(item=>({value:'u:'+item.id,label:'USER · '+item.name}))];
+   const items=[...FACTORY.map((item,i)=>({value:'f:'+i,label:String(i+1)+' · '+item.name})),...this.store.items.map(item=>({value:'u:'+item.id,label:'USER · '+item.name}))];
    this.hwPresetsControl.setOptions(items.map(item=>item.value),selected,items.map(item=>item.label));
   };
    this.hwPresets.getCommunityPresetSelection=()=>{

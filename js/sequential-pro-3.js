@@ -330,7 +330,7 @@ class Pro3App{
   const waveInput=document.createElement('input');waveInput.type='file';waveInput.accept='.wav,audio/wav';waveButton.appendChild(waveInput);footer.appendChild(waveButton);
   waveInput.addEventListener('change',async()=>{const file=waveInput.files?.[0];if(!file)return;try{if(!this.engine.ctx)throw new Error('Power on audio first.');const decoded=await this.engine.ctx.decodeAudioData(await file.arrayBuffer()),data=decoded.getChannelData(0);if(data.length<64||data.length>65536)throw new Error('Use a single-cycle WAV between 64 and 65,536 samples.');this.engine.post({t:'wavetable',data:Array.from(data)});this.hwDisplay.set('WAVETABLE LOADED','USER SINGLE CYCLE · BANK 32');}catch(e){this.hwDisplay.set('WAVETABLE FAILED',e.message);alert(e.message);}});
   this.refreshHardwarePresetList=(selected='f:0')=>{
-   const items=[...FACTORY.map((item,i)=>({value:'f:'+i,label:String(i+1).padStart(3,'0')+' · '+item.name})),...this.store.items.map(item=>({value:'u:'+item.id,label:'USER · '+item.name}))];
+   const items=[...FACTORY.map((item,i)=>({value:'f:'+i,label:String(i+1)+' · '+item.name})),...this.store.items.map(item=>({value:'u:'+item.id,label:'USER · '+item.name}))];
    this.hwPresetsControl.setOptions(items.map(item=>item.value),selected,items.map(item=>item.label));
   };
    this.hwPresets.getCommunityPresetSelection=()=>{

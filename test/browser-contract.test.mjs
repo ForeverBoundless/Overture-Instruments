@@ -47,7 +47,7 @@ test('Hohner D6 and Oberheim OB-Xa are complete first-class emulator entries', a
   assert.doesNotMatch(d6App, /label:\s*['\"]DAMPER['\"]/);
   assert.match(obPage, /ob-xa\.css/);
   assert.match(obApp, /EDIT TIMBRE/);
-  assert.match(obApp, /DOUBLE \/ LAYER/);
+  assert.match(obApp, /label:'DOUBLE'/);
   assert.match(obEngine, /mode==='double'/);
   assert.match(obEngine, /mode==='split'/);
   assert.match(obEngine, /pinkNoise/);
@@ -110,8 +110,8 @@ test('OB-Xa exposes the hardware programmer, modulation panel and voice-pan cont
   assert.match(styles, /\.obxa-programmer-layout/);
   assert.match(styles, /\.obxa-voice-grid/);
   assert.match(styles, /radial-gradient\(ellipse at 50% -20%,#314c63/);
-  assert.match(page, /ob-xa\.css\?v=20261123-hardware-panel-r1/);
-  assert.match(page, /obxa\.js\?v=20261123-obxa-patch-r5/);
+  assert.match(page, /ob-xa\.css\?v=20261123-discrete-controls-r1/);
+  assert.match(page, /obxa\.js\?v=20261123-discrete-controls-r1/);
   assert.match(worker, /OBXaProcessor\.js\?v=20261123-audio-r4/);
   assert.match(worker, /obxa-patch\.js\?v=20261123-obxa-patch-r4/);
   assert.match(worker, /ob-xa\.css\?v=20261123-hardware-panel-r1/);
@@ -176,7 +176,7 @@ test('Little Phatty uses a grouped responsive layout without viewport shrinking'
   assert.match(compactLayout, /@media \(max-width: 760px\)/);
   assert.match(engine, /natural, scrollable page flow/);
   assert.doesNotMatch(engine, /availH = window\.innerHeight/);
-  assert.match(page, /little-phatty\.css\?v=20261104-compact-centred/);
+  assert.match(page, /little-phatty\.css\?v=20261123-discrete-controls-r1/);
 });
 
 test('Sub 37 keeps its top controls reachable and uses compact horizontal modulation buses', async () => {
@@ -197,7 +197,7 @@ test('Sub 37 keeps its top controls reachable and uses compact horizontal modula
   assert.match(emulatorStyles, /@media \(max-width: 480px\)/);
   assert.ok(emulatorStyles.includes('.s37-mod-row .s37-section-body {'));
   assert.ok(emulatorStyles.includes('grid-template-columns: minmax(72px, 1fr) minmax(72px, 1fr)'));
-  assert.ok(page.includes('sub37.css?v=20261123-scroll-r1'));
+  assert.ok(page.includes('sub37.css?v=20261123-discrete-controls-r1'));
 });
 
 test('instrument and experiment pages register the shared offline app shell', async () => {
@@ -258,7 +258,8 @@ test('M400 and Eight Voice are complete instrument pages, not library-only entri
   assert.match(oberheimApp, /VCF CUTOFF/);
   assert.match(oberheimApp, /STEREO PAN/);
   assert.match(oberheimApp, /FILTER RESPONSE/);
-  assert.match(oberheimApp, /VCO 1 SHAPE/);
+  assert.match(oberheimApp, /VCO 1 SAW/);
+  assert.match(oberheimApp, /VCO 1 PULSE/);
   assert.match(oberheimApp, /LFO ROUTING/);
   assert.match(oberheimApp, /voiceUi\.forEach/);
   assert.match(oberheimEngine, /q\.cutoff/);
