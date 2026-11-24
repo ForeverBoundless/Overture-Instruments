@@ -70,7 +70,7 @@ test('hardware-specific choice controls use the corresponding control types', ()
   assert.doesNotMatch(nord, /cycleControl\('\.nord-click'/);
   assert.match(nord, /SHIFT \+ UP\/DOWN/);
   assert.doesNotMatch(nord, /cycleControl\('\.nord-rotary-speed'/);
-  assert.match(nord, /slowStop\.textContent = this\.rotaryMode === 'stop' \? 'STOP' : 'SLOW \/ STOP'/);
+  assert.match(nord, /slowStop\.textContent = 'SLOW \/ STOP'/);
   assert.match(read('css/nord-c2d.css'), /button\.stopped/);
   assert.match(read('js/engine/NordC2DEngine.js'), /setRotaryMode\(mode\)/);
   assert.match(obxa, /obxa-bank-groups__buttons/);
@@ -150,13 +150,13 @@ test('service-worker cache references match the repaired hardware control assets
   const nord = read('html/nord-c2d.html');
   const super8 = read('html/udo-super-8.html');
   assert.match(worker, /\/css\/panel\.css\?v=20261124-discrete-controls-r2/);
-  assert.match(worker, /\\/css\\/hardware-panel\\.css\\?v=20261124-discrete-controls-r3/);
+  assert.match(worker, /\/css\/hardware-panel\.css\?v=20261124-discrete-controls-r3/);
   assert.match(worker, /\/js\/sequential-pro-3\.js\?v=20261124-discrete-controls-r4/);
-  assert.match(worker, /\\/css\\/nord-c2d\\.css\\?v=20261124-discrete-controls-r4/);
-  assert.match(worker, /\\/js\\/nord-c2d\\.js\\?v=20261124-discrete-controls-r4/);
+  assert.match(worker, /\/css\/nord-c2d\.css\?v=20261124-discrete-controls-r4/);
+  assert.match(worker, /\/js\/nord-c2d\.js\?v=20261124-discrete-controls-r4/);
   assert.match(worker, /\/js\/udo-super-8\.js\?v=20261124-discrete-controls-r3/);
   assert.match(pro3, /hardware-panel\.css\?v=20261124-discrete-controls-r3/);
   assert.match(pro3, /sequential-pro-3\.js\?v=20261124-discrete-controls-r4/);
-  assert.match(nord, /nord-c2d\.js\\?v=20261124-discrete-controls-r4/);
+  assert.match(nord, /nord-c2d\.js\?v=20261124-discrete-controls-r4/);
   assert.match(super8, /hardware-panel\.css\?v=20261124-discrete-controls-r3/);
 });
