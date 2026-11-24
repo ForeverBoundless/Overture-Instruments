@@ -13,7 +13,7 @@ const clamp = (v, lo, hi) => (v < lo ? lo : v > hi ? hi : v);
 const sat = (x) => (x > 3 ? 1 : x < -3 ? -1 : (x * (27 + x * x)) / (27 + 9 * x * x));
 const DEFAULT = { lfoRate: 0.4, lfoDelay: 0, dcoLfo: 0, pwm: 0.3, pwmMode: 'man', range: 8, saw: true, pulse: false, sub: 0, noise: 0,
   hpf: 1, cutoff: 0.7, res: 0.1, envAmt: 0.3, envPolarity: 1, vcfLfo: 0, kbd: 0.5, vcaMode: 'env', vcaLevel: 0.8,
-  attack: 0.05, decay: 0.3, sustain: 0.7, release: 0.3, chorus: 0, portamento: 0, bendRange: 2, benderLfo: 0.1 };
+  attack: 0.05, decay: 0.3, sustain: 0.7, release: 0.3, chorus: 0, portamento: 0, bendRange: 2, vcfBendRange: 0, benderLfo: 0.1 };
 
 class Voice {
   constructor() { this.note = -1; this.gate = false; this.active = false; this.order = 0; this.rel = 0; this.pitch = 60; this.target = 60; this.ph = Math.random(); this.subPh = 0; this.prev = 0; this.env = 0; this.stage = 'idle'; this.s = [0, 0, 0, 0]; this.hp1 = 0; this.hp2 = 0; this.ls = 0; this.seed = (Math.random() * 2 ** 31) | 0; this.vel = 1; }
@@ -147,7 +147,7 @@ class JunoProcessor extends AudioWorkletProcessor {
         else if (hpFc) { const y = x - v.hp2 + hpA * v.hp1; v.hp2 = x; v.hp1 = y; x = y; }
         // VCF
         const envMod = v.env * p.envAmt * p.envPolarity * 7 * (1 - 0.3 * (1 - v.vel));
-        const cutSemi = 20 + p.cutoff * 110 + envMod * 12 + lfo * p.vcfLfo * 48 + (v.pitch - 60) * p.kbd;
+        const cutSemi = 20 + p.cutoff * 110 + envMod * 12 + lfo * p.vcfLfo * 48 + (v.pitch - 60) * p.kbd + this.bend * p.vcfBendRange;
         let fc = 20 * Math.pow(2, cutSemi / 12); if (fc > 0.45 * sr) fc = 0.45 * sr;
         const g = Math.tan(Math.PI * fc / sr); const G = g / (1 + g);
         const G2 = G * G, G4 = G2 * G2; const st = v.s;

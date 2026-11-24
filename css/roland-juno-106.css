@@ -9,3 +9,16 @@
 .juno-shell .pn-knob .lp-knob-label { color: #e8dfcf; }
 @media (max-width: 1200px) { .juno-row { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 @media (max-width: 760px) { .juno-row, .juno-row-bottom { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* Juno-106 maintained slide/lever switches (PWM mode and VCA control). */
+.juno-shell .pn-toggle-switch{display:grid;justify-items:center;align-content:start;gap:3px;min-width:52px;padding:2px 4px;color:var(--pn-muted);font:700 7px/1.1 'Inter Variable',sans-serif}
+.juno-shell .pn-toggle-switch__caption{min-height:14px;text-align:center;letter-spacing:.06em}
+.juno-shell .pn-toggle-switch__positions{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:4px;min-height:40px}
+.juno-shell .pn-toggle-switch__position-label{max-width:38px;color:#777f89;font:700 6px/1.1 'DM Mono',monospace;text-align:center;overflow-wrap:anywhere}
+.juno-shell .pn-toggle-switch__position-label.active{color:#ffbd68;text-shadow:0 0 5px #ff9f0a66}
+.juno-shell .pn-toggle-switch__actuator{appearance:none;display:grid;place-items:center;width:24px;height:38px;padding:3px;border:1px solid #646b74;border-radius:4px;background:linear-gradient(90deg,#111419,#3b414a 45%,#101317);box-shadow:inset 0 1px #ffffff24,0 2px 3px #0008;cursor:pointer}
+.juno-shell .pn-toggle-switch__rail{position:relative;display:block;width:12px;height:30px;border:1px solid #080a0d;border-radius:3px;background:linear-gradient(90deg,#07090c,#20252c 45%,#080a0d);box-shadow:inset 0 1px #fff2}
+.juno-shell .pn-toggle-switch__lever{position:absolute;top:1px;left:0;width:10px;height:13px;border:1px solid #777e87;border-radius:2px;background:linear-gradient(180deg,#e1e4e8,#777f88 50%,#383e45);box-shadow:0 1px 2px #000b,inset 0 1px #fff9;transition:transform .12s ease}
+.juno-shell .pn-toggle-switch__actuator[data-position="1"] .pn-toggle-switch__lever{transform:translateY(14px)}
+.juno-shell .pn-toggle-switch__actuator:focus-visible{outline:2px solid var(--pn-accent);outline-offset:3px}
+.juno-shell .pn-toggle-switch__readout{color:var(--pn-display-ink);font:6px/1.1 'DM Mono',monospace;text-align:center}

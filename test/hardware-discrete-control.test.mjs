@@ -160,3 +160,19 @@ test('service-worker cache references match the repaired hardware control assets
   assert.match(nord, /nord-c2d\.js\?v=20261124-discrete-controls-r4/);
   assert.match(super8, /hardware-panel\.css\?v=20261124-discrete-controls-r3/);
 });
+
+
+test('Juno-106 uses maintained switches and models the separate VCF bend control', () => {
+  const juno = read('js/roland-juno-106.js');
+  const processor = read('js/engine/JunoProcessor.js');
+  const panel = read('js/shared/panel.js');
+  const styles = read('css/roland-juno-106.css');
+  assert.match(panel, /export function switchControl/);
+  assert.match(juno, /switchControl\(dco\.body, 'PWM MODE'/);
+  assert.match(juno, /switchControl\(vca\.body, 'VCA CONTROL'/);
+  assert.match(juno, /label: 'DCO BEND SENS'/);
+  assert.match(juno, /label: 'VCF BEND SENS'/);
+  assert.match(processor, /vcfBendRange: 0/);
+  assert.match(processor, /this\.bend \* p\.vcfBendRange/);
+  assert.match(styles, /\.pn-toggle-switch__actuator/);
+});

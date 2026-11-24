@@ -146,6 +146,52 @@ export function choiceButtons(parent, label, options, value, onChange = () => {}
   Object.defineProperty(proxy, 'options', { get: () => choices.map((choice) => ({ ...choice })) });
   wrap.select = proxy; render(); return wrap;
 }
+
+/** Two-position maintained lever switch, for hardware selectors rather than button banks. */
+export function switchControl(parent, label, options, value, onChange = () => {}) {
+  const choices = normalizeChoices(options);
+  if (choices.length !== 2) throw new RangeError('A hardware lever switch requires exactly two positions.');
+  let current = choices.some((choice) => choice.value === String(value)) ? String(value) : choices[0].value;
+  const wrap = el('div', 'pn-toggle-switch', parent);
+  wrap.setAttribute('role', 'group');
+  wrap.setAttribute('aria-label', label);
+  el('span', 'pn-toggle-switch__caption', wrap, label);
+  const positions = el('div', 'pn-toggle-switch__positions', wrap);
+  const top = el('span', 'pn-toggle-switch__position-label', positions, choices[0].label);
+  const actuator = el('button', 'pn-toggle-switch__actuator', positions);
+  actuator.type = 'button';
+  actuator.setAttribute('role', 'switch');
+  actuator.setAttribute('aria-label', label);
+  const rail = el('span', 'pn-toggle-switch__rail', actuator);
+  el('span', 'pn-toggle-switch__lever', rail);
+  const bottom = el('span', 'pn-toggle-switch__position-label', positions, choices[1].label);
+  const readout = el('output', 'pn-toggle-switch__readout', wrap);
+  const render = () => {
+    const index = Math.max(0, choices.findIndex((choice) => choice.value === current));
+    const selected = choices[index];
+    wrap.dataset.position = String(index);
+    actuator.dataset.position = String(index);
+    actuator.setAttribute('aria-checked', String(index === 1));
+    actuator.setAttribute('aria-valuetext', selected.label);
+    top.classList.toggle('active', index === 0);
+    bottom.classList.toggle('active', index === 1);
+    readout.textContent = selected.label;
+  };
+  const setValue = (next, silent = false) => {
+    const found = choices.find((choice) => choice.value === String(next));
+    if (!found || found.value === current) return;
+    current = found.value;
+    render();
+    if (!silent) onChange(current);
+  };
+  actuator.addEventListener('click', () => setValue(current === choices[0].value ? choices[1].value : choices[0].value));
+  wrap.setValue = setValue;
+  wrap.getValue = () => current;
+  Object.defineProperty(wrap, 'value', { get: () => current, set: (next) => setValue(next, true) });
+  render();
+  return wrap;
+}
+
 export function dataEntry(parent, label, options, value, onChange = () => {}) {
   let choices = normalizeChoices(options);
   let index = Math.max(0, choices.findIndex((choice) => choice.value === String(value)));
