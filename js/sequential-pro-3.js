@@ -171,7 +171,15 @@ class Pro3App{
   b(global.body,'hold','Hold',{group:'GLOBAL',led:'amber'});
   this.hwModSourceButton=addButton(global.body,{label:'SOURCE',value:false,toggle:false,led:'amber',midiId:'PRO3:MOD-SOURCE',group:'MOD MATRIX',onChange:()=>this.openMatrixEditor?.('source')});
   this.hwModDestinationButton=addButton(global.body,{label:'DESTINATION',value:false,toggle:false,led:'amber',midiId:'PRO3:MOD-DESTINATION',group:'MOD MATRIX',onChange:()=>this.openMatrixEditor?.('destination')});
-  this.hwControls.all.push(this.hwModSourceButton,this.hwModDestinationButton);
+  this.hwModAmount=addKnob(global.body,{label:'AMOUNT',min:-1,max:1,value:this.patch.modRoutes[0].amount,step:.01,size:40,bipolar:true,midiId:'PRO3:MOD-AMOUNT',group:'MOD MATRIX',formatValue:v=>(v>0?'+':'')+Number(v).toFixed(2),onChange:value=>{
+   const slot=Math.max(0,Number(this.matrixSelectedSlot)||0);
+   this.patch.modRoutes[slot].amount=value;
+   this.postPatch();
+   this.hwMatrixAmount?.setValue(value,true);
+   this.renderMatrixRouteButtons?.();
+   this.refreshMatrixReadout?.();
+  }});
+  this.hwControls.all.push(this.hwModSourceButton,this.hwModDestinationButton,this.hwModAmount);
   const matrixAccess=document.createElement('button');
   matrixAccess.type='button';
   matrixAccess.className='p3-matrix-trigger';
@@ -412,6 +420,7 @@ class Pro3App{
    this.hwMatrixSlot.setValue(this.matrixSelectedSlot+1);
    this.hwMatrixSource.setValue(route.source);
    this.hwMatrixAmount.setValue(route.amount,true);
+   this.hwModAmount?.setValue(route.amount,true);
    this.hwMatrixDestination.setValue(route.destination);
    this.renderMatrixRouteButtons();
    this.refreshMatrixReadout();

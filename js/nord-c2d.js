@@ -179,6 +179,9 @@ class NordC2D {
     const stopMode = shell.querySelector('[data-rotary-stop-mode]');
     this.renderRotaryControls = () => {
       slowStop.classList.toggle('active', this.rotaryMode === 'slow' || this.rotaryMode === 'stop');
+      slowStop.classList.toggle('stopped', this.rotaryMode === 'stop');
+      slowStop.textContent = this.rotaryMode === 'stop' ? 'STOP' : 'SLOW / STOP';
+      slowStop.setAttribute('aria-label', this.rotaryMode === 'stop' ? 'Rotary speaker stopped' : 'Set rotary speaker to slow');
       fast.classList.toggle('active', this.rotaryMode === 'fast');
       stopMode.classList.toggle('active', this.rotaryStopMode);
       stopMode.setAttribute('aria-pressed', String(this.rotaryStopMode));

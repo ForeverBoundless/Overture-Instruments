@@ -63,12 +63,15 @@ test('hardware-specific choice controls use the corresponding control types', ()
   assert.match(nord, /data-rotary-speed="fast"/);
   assert.match(nord, /data-rotary-stop-mode/);
   assert.doesNotMatch(nord, /cycleControl\('\.nord-rotary-speed'/);
+  assert.match(nord, /slowStop\.textContent = this\.rotaryMode === 'stop' \? 'STOP' : 'SLOW \/ STOP'/);
+  assert.match(read('css/nord-c2d.css'), /button\.stopped/);
   assert.match(read('js/engine/NordC2DEngine.js'), /setRotaryMode\(mode\)/);
   assert.match(obxa, /obxa-bank-groups__buttons/);
   assert.match(obxa, /PROGRAM NUMBER/);
   assert.match(pro3, /SOFT KNOB 2 · SOURCE/);
   assert.match(pro3, /SOFT KNOB 4 · DESTINATION/);
   assert.match(pro3, /SOFT KNOB 3 · AMOUNT/);
+  assert.match(pro3, /label:'AMOUNT'/);
   assert.match(pro3, /label:'SOURCE'/);
   assert.match(pro3, /label:'DESTINATION'/);
   assert.match(pro3, /this\.openMatrixEditor/);

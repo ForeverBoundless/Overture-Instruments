@@ -90,3 +90,4 @@
 .nord-rotary-label{display:block;align-self:center;color:#ffd2d3;font:7px 'DM Mono',monospace;letter-spacing:.06em;margin-right:2px}
 .nord-system-row .nord-rotary-controls button.active{color:#400307;background:#ffcc51;border-color:#ffe9a0;box-shadow:inset 0 1px #fff8,0 0 6px #ffd45b55}
 @media(max-width:760px){.nord-rotary-controls{flex:1 1 100%;justify-content:flex-start}.nord-rotary-label{flex-basis:100%}}
+.nord-system-row .nord-rotary-controls button.stopped{color:#261006;background:linear-gradient(180deg,#ffcf86,#e98d36);border-color:#ffe0a8;box-shadow:inset 0 1px #fff8,0 0 7px #ffb45c77}
