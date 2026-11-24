@@ -118,8 +118,8 @@ test('SEM voice migration retains the old single-wave patch format', () => {
 
 test('all instrument pages load the revised controls and the new offline shell', () => {
   const serviceWorker = read('service-worker.js');
-  assert.match(serviceWorker, /overture-shell-v166/);
-  assert.match(serviceWorker, /20261123-discrete-controls-r2/);
+  assert.match(serviceWorker, /overture-shell-v168/);
+  assert.match(serviceWorker, /20261124-discrete-controls-r2/);
   assert.match(serviceWorker, /20261123-sem-mixer-r1/);
 });
 
@@ -134,4 +134,21 @@ test('hardware selector styles are defined and scoped to instrument surfaces', (
   assert.match(hardware, /\.hp-choice-control-bank/);
   assert.match(hardware, /\.hp-choice-control-button\.active/);
   assert.match(hardware, /\.hp-cycle-control-button/);
+});
+
+
+test('service-worker cache references match the repaired hardware control assets', async () => {
+  const worker = read('service-worker.js');
+  const pro3 = read('html/sequential-pro-3.html');
+  const nord = read('html/nord-c2d.html');
+  const super8 = read('html/udo-super-8.html');
+  assert.match(worker, /\/css\/panel\.css\?v=20261124-discrete-controls-r2/);
+  assert.match(worker, /\/css\/hardware-panel\.css\?v=20261124-discrete-controls-r3/);
+  assert.match(worker, /\/js\/sequential-pro-3\.js\?v=20261124-discrete-controls-r4/);
+  assert.match(worker, /\/js\/nord-c2d\.js\?v=20261124-discrete-controls-r3/);
+  assert.match(worker, /\/js\/udo-super-8\.js\?v=20261124-discrete-controls-r3/);
+  assert.match(pro3, /hardware-panel\.css\?v=20261124-discrete-controls-r3/);
+  assert.match(pro3, /sequential-pro-3\.js\?v=20261124-discrete-controls-r4/);
+  assert.match(nord, /nord-c2d\.js\?v=20261124-discrete-controls-r3/);
+  assert.match(super8, /hardware-panel\.css\?v=20261124-discrete-controls-r3/);
 });
