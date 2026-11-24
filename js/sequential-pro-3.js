@@ -169,11 +169,14 @@ class Pro3App{
   k(global.body,'distortion','Distortion',{size:40,group:'GLOBAL'});
   k(global.body,'glide','Glide Rate',{size:40,group:'GLOBAL'});
   b(global.body,'hold','Hold',{group:'GLOBAL',led:'amber'});
+  this.hwModSourceButton=addButton(global.body,{label:'SOURCE',value:false,toggle:false,led:'amber',midiId:'PRO3:MOD-SOURCE',group:'MOD MATRIX',onChange:()=>this.openMatrixEditor?.('source')});
+  this.hwModDestinationButton=addButton(global.body,{label:'DESTINATION',value:false,toggle:false,led:'amber',midiId:'PRO3:MOD-DESTINATION',group:'MOD MATRIX',onChange:()=>this.openMatrixEditor?.('destination')});
+  this.hwControls.all.push(this.hwModSourceButton,this.hwModDestinationButton);
   const matrixAccess=document.createElement('button');
   matrixAccess.type='button';
   matrixAccess.className='p3-matrix-trigger';
-  matrixAccess.textContent='MOD MATRIX';
-  matrixAccess.addEventListener('click',()=>{this.refreshMatrix();this.matrixDialog.showModal();});
+  matrixAccess.textContent='OVERTURE MATRIX EDITOR';
+  matrixAccess.addEventListener('click',()=>this.openMatrixEditor?.('slot'));
   global.body.appendChild(matrixAccess);
 
   const fx=addPanel(upper,{title:'Effects',sub:'stereo signal processors',className:'p3-fx'});
@@ -366,23 +369,68 @@ class Pro3App{
    };
   this.displayHardwarePreset=name=>{this.hwDisplay.set(name.toUpperCase(),'PRO 3 · PROGRAM');hw.program.textContent='PRO 3 · '+name;};
 
-  // ---- modulation matrix dialog ----
-  this.matrixDialog=document.createElement('dialog');this.matrixDialog.className='hp-dialog p3-matrix-dialog';
-  this.matrixDialog.innerHTML='<form method="dialog"><header><strong>MODULATION MATRIX · 32 ROUTES</strong><button aria-label="Close">×</button></header><p>Each route sends a source to a destination. Depth is bipolar: negative values invert the modulation.</p><div class="p3-matrix"></div></form>';
-  const rowsEl=this.matrixDialog.querySelector('.p3-matrix');this.matrixRows=[];
-  for(let i=0;i<32;i++){
-   const route=document.createElement('div');route.className='p3-route';
-   const num=document.createElement('strong');num.textContent=String(i+1);
-   let updateRoute=()=>{};
-   const srcControl=addSelect(route,{label:'SOURCE · SOFT KNOB',options:SOURCES,value:this.patch.modRoutes[i].source,group:'MOD MATRIX',onChange:()=>updateRoute()});
-   const dstControl=addSelect(route,{label:'DESTINATION · SOFT KNOB',options:DESTS,value:this.patch.modRoutes[i].destination,group:'MOD MATRIX',onChange:()=>updateRoute()});
-   const amount=document.createElement('input');amount.type='range';amount.min='-1';amount.max='1';amount.step='.01';amount.setAttribute('aria-label','Route '+(i+1)+' depth');
-   const val=document.createElement('output');
-   updateRoute=()=>{this.patch.modRoutes[i]={source:srcControl.getValue(),destination:dstControl.getValue(),amount:Number(amount.value)};val.value=Number(amount.value).toFixed(2);this.postPatch();};
-   amount.addEventListener('input',updateRoute);
-   route.append(num,amount,val);rowsEl.appendChild(route);this.matrixRows.push({src:srcControl.el,dst:dstControl.el,amount,val});
-  }
-  this.refreshMatrix=()=>this.matrixRows.forEach((row,i)=>{const r=this.patch.modRoutes[i];row.src.value=r.source;row.dst.value=r.destination;row.amount.value=String(r.amount);row.val.value=Number(r.amount).toFixed(2);});
+  // ---- modulation matrix editor ----
+  // The original panel uses SOURCE and DESTINATION buttons plus an AMOUNT knob.
+  // Its display exposes four Soft Knobs: slot, source, amount and destination.
+  this.matrixDialog=document.createElement('dialog');
+  this.matrixDialog.className='hp-dialog p3-matrix-dialog';
+  this.matrixDialog.innerHTML='<form method="dialog"><header><strong>MODULATION MATRIX · 32 ROUTES</strong><button aria-label="Close">×</button></header><p>Choose a route, then edit it with the four Soft Knobs. SOURCE and DESTINATION select the corresponding field, just as on the instrument.</p><output class="p3-matrix-focus"></output><div class="p3-matrix-soft-controls"></div><output class="p3-matrix-route-readout"></output><div class="p3-matrix-slot-grid"></div></form>';
+  const matrixControls=this.matrixDialog.querySelector('.p3-matrix-soft-controls');
+  const routeReadout=this.matrixDialog.querySelector('.p3-matrix-route-readout');
+  this.matrixFocusReadout=this.matrixDialog.querySelector('.p3-matrix-focus');
+  const routeSlots=Array.from({length:32},(_,i)=>i+1);
+  this.matrixSelectedSlot=0;
+  this.hwMatrixSlot=addSelect(matrixControls,{label:'SOFT KNOB 1 · SLOT',options:routeSlots,value:1,optionLabels:routeSlots.map(String),group:'MOD MATRIX',midiId:'PRO3:matrixSlot',onChange:value=>{this.matrixSelectedSlot=Number(value)-1;this.refreshMatrix();}});
+  this.hwMatrixSource=addSelect(matrixControls,{label:'SOFT KNOB 2 · SOURCE',options:SOURCES,value:this.patch.modRoutes[0].source,wide:true,group:'MOD MATRIX',midiId:'PRO3:matrixSource',onChange:value=>{this.patch.modRoutes[this.matrixSelectedSlot].source=value;this.postPatch();this.renderMatrixRouteButtons();this.refreshMatrixReadout();}});
+  this.hwMatrixAmount=addKnob(matrixControls,{label:'SOFT KNOB 3 · AMOUNT',min:-1,max:1,value:this.patch.modRoutes[0].amount,step:.01,size:44,bipolar:true,group:'MOD MATRIX',midiId:'PRO3:matrixAmount',formatValue:v=>(v>0?'+':'')+Number(v).toFixed(2),onChange:value=>{this.patch.modRoutes[this.matrixSelectedSlot].amount=value;this.postPatch();this.renderMatrixRouteButtons();this.refreshMatrixReadout();}});
+  this.hwMatrixDestination=addSelect(matrixControls,{label:'SOFT KNOB 4 · DESTINATION',options:DESTS,value:this.patch.modRoutes[0].destination,wide:true,group:'MOD MATRIX',midiId:'PRO3:matrixDestination',onChange:value=>{this.patch.modRoutes[this.matrixSelectedSlot].destination=value;this.postPatch();this.renderMatrixRouteButtons();this.refreshMatrixReadout();}});
+  this.hwControls.all.push(this.hwMatrixSlot,this.hwMatrixSource,this.hwMatrixAmount,this.hwMatrixDestination);
+
+  const slotGrid=this.matrixDialog.querySelector('.p3-matrix-slot-grid');
+  this.matrixRouteButtons=routeSlots.map((slot,index)=>{
+   const control=document.createElement('button');
+   control.type='button';control.className='p3-matrix-slot';control.textContent=String(slot);
+   control.addEventListener('click',()=>{this.matrixSelectedSlot=index;this.refreshMatrix();});
+   slotGrid.appendChild(control);
+   return control;
+  });
+  this.renderMatrixRouteButtons=()=>{
+   this.matrixRouteButtons.forEach((control,index)=>{
+    const route=this.patch.modRoutes[index];
+    control.classList.toggle('active',index===this.matrixSelectedSlot);
+    control.classList.toggle('has-depth',Math.abs(Number(route.amount)||0)>.0001);
+    control.title='Route '+(index+1)+': '+route.source+' → '+route.destination+' · amount '+Number(route.amount).toFixed(2);
+    control.setAttribute('aria-pressed',String(index===this.matrixSelectedSlot));
+   });
+  };
+  this.refreshMatrixReadout=()=>{
+   const route=this.patch.modRoutes[this.matrixSelectedSlot];
+   routeReadout.textContent='ROUTE '+(this.matrixSelectedSlot+1)+' · '+route.source+' → '+route.destination+' · AMOUNT '+(Number(route.amount)>0?'+':'')+Number(route.amount).toFixed(2);
+  };
+  this.refreshMatrix=()=>{
+   const route=this.patch.modRoutes[this.matrixSelectedSlot];
+   this.hwMatrixSlot.setValue(this.matrixSelectedSlot+1);
+   this.hwMatrixSource.setValue(route.source);
+   this.hwMatrixAmount.setValue(route.amount,true);
+   this.hwMatrixDestination.setValue(route.destination);
+   this.renderMatrixRouteButtons();
+   this.refreshMatrixReadout();
+  };
+  this.updateMatrixFocus=()=>{
+   this.hwModSourceButton.setValue(this.matrixFocus==='source',true);
+   this.hwModDestinationButton.setValue(this.matrixFocus==='destination',true);
+   this.matrixFocusReadout.textContent=this.matrixFocus==='source'
+    ? 'SOURCE BUTTON SELECTED · SOFT KNOB 2 EDITS SOURCE'
+    : this.matrixFocus==='destination'
+     ? 'DESTINATION BUTTON SELECTED · SOFT KNOB 4 EDITS DESTINATION'
+     : 'SELECT A ROUTE · USE SOFT KNOBS 1–4';
+  };
+  this.openMatrixEditor=(focus='slot')=>{
+   this.matrixFocus=focus;
+   this.updateMatrixFocus();
+   this.refreshMatrix();
+   if(!this.matrixDialog.open)this.matrixDialog.showModal();
+  };
   document.body.appendChild(this.matrixDialog);
 
   this.syncHardware=()=>{

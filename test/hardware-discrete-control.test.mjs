@@ -66,8 +66,13 @@ test('hardware-specific choice controls use the corresponding control types', ()
   assert.match(read('js/engine/NordC2DEngine.js'), /setRotaryMode\(mode\)/);
   assert.match(obxa, /obxa-bank-groups__buttons/);
   assert.match(obxa, /PROGRAM NUMBER/);
-  assert.match(pro3, /SOURCE · SOFT KNOB/);
-  assert.match(pro3, /DESTINATION · SOFT KNOB 4/);
+  assert.match(pro3, /SOFT KNOB 2 · SOURCE/);
+  assert.match(pro3, /SOFT KNOB 4 · DESTINATION/);
+  assert.match(pro3, /SOFT KNOB 3 · AMOUNT/);
+  assert.match(pro3, /label:'SOURCE'/);
+  assert.match(pro3, /label:'DESTINATION'/);
+  assert.match(pro3, /this\.openMatrixEditor/);
+  assert.match(read('css/sequential-pro-3.css'), /\.p3-matrix-soft-controls/);
   assert.match(pro3, /PARAPHONIC/);
   assert.match(pro3, /FILTER MODEL/);
   assert.match(pro3, /TRACK SEL/);

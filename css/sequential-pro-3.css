@@ -874,3 +874,19 @@ body.pn-body.hp-pro3-body {
   .p3-morph-actions { justify-content: flex-start; }
   .p3-morph-slider { grid-template-columns: minmax(72px, max-content) minmax(0,1fr); gap: 8px; }
 }
+
+/* Pro 3 modulation matrix: the front-panel buttons select the field and the
+   four detented Soft Knobs edit one selected route at a time. */
+.p3-matrix-focus,.p3-matrix-route-readout{display:block;margin:8px 0;padding:8px 10px;border:1px solid var(--hp-line);background:var(--hp-display-bg);color:var(--hp-display);font:8px/1.4 'DM Mono',monospace}
+.p3-matrix-soft-controls{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;align-items:end;padding:10px;border:1px solid var(--hp-line);border-radius:4px;background:var(--hp-section)}
+.p3-matrix-soft-controls>.hp-discrete-control,.p3-matrix-soft-controls>.hp-knob{min-width:0;width:100%}
+.p3-matrix-slot-grid{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:5px;margin-top:10px}
+.p3-matrix-slot{min-width:0;min-height:29px;border:1px solid var(--hp-line);border-radius:3px;background:linear-gradient(#3c4248,#20252a);color:var(--hp-ink);font:700 9px 'DM Mono',monospace;cursor:pointer}
+.p3-matrix-slot.has-depth{border-color:var(--hp-accent);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--hp-accent) 40%,transparent)}
+.p3-matrix-slot.active{color:#17110c;background:var(--hp-accent);border-color:#ffdda6;box-shadow:0 0 9px color-mix(in srgb,var(--hp-accent) 45%,transparent)}
+.p3-matrix-trigger{min-height:28px;padding:5px 9px;border:1px solid var(--hp-line);border-radius:3px;background:linear-gradient(#3c4248,#20252a);color:var(--hp-ink);font:700 7px InterLocal,Figtree,sans-serif;letter-spacing:.06em;cursor:pointer}
+.p3-matrix-trigger:hover{filter:brightness(1.18)}
+@media(max-width:700px){
+ .p3-matrix-soft-controls{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .p3-matrix-slot-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
