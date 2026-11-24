@@ -1,4 +1,4 @@
-const CACHE = 'overture-shell-v168';
+const CACHE = 'overture-shell-v169';
 const APP_SHELL = [
   '/account',
   '/login',
@@ -245,13 +245,13 @@ const APP_SHELL = [
   '/ui/Photos/Me3.png',
   '/css/panel.css?v=20261124-discrete-controls-r2',
   '/css/hardware-panel.css?v=20261124-discrete-controls-r3',
-  '/css/nord-c2d.css?v=20261124-discrete-controls-r3',
+  '/css/nord-c2d.css?v=20261124-discrete-controls-r4',
   '/js/shared/hardwarePanel.js?v=20261123-discrete-controls-r2',
   '/js/engine/app.js?v=20261123-discrete-controls-r1',
   '/js/hohner-d6.js?v=20261124-discrete-controls-r2',
   '/js/korg-ms-20.js?v=20261124-discrete-controls-r2',
   '/js/mellotron-m400.js?v=20261124-discrete-controls-r2',
-  '/js/nord-c2d.js?v=20261124-discrete-controls-r3',
+  '/js/nord-c2d.js?v=20261124-discrete-controls-r4',
   '/js/obxa.js?v=20261123-discrete-controls-r2',
   '/js/oberheim-eight-voice.js?v=20261124-discrete-controls-r2',
   '/js/prophet10.js?v=20261123-discrete-controls-r1',
