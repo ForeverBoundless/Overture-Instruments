@@ -252,3 +252,11 @@
 .s37-mod-row .s37-section-body > .s37-select-wrap select { width: 100%; min-width: 0; max-width: none; }
 .s37-mod-row .s37-section-body > .s37-knob-row { min-width: 0; flex-wrap: nowrap; justify-content: center; align-items: flex-end; }
 .s37-mod-row .s37-section-body .s37-knob { --knob-size: 42px; min-width: 42px; }
+
+/* Shared detented controls take the place of the old native select widgets. */
+.s37-select-wrap{display:flex!important;align-items:center;gap:5px;min-width:0;color:#afb2b7;font-size:7px}
+.s37-select-wrap .pn-hw-choice{min-width:54px}
+.s37-performance .s37-select-wrap{max-width:100%}
+.s37-mod-row .s37-section-body>.s37-select-wrap{width:auto;min-width:0}
+.s37-mod-row .s37-section-body>.s37-select-wrap .pn-hw-choice{width:100%;min-width:0}
+.s37-select-wrap .pn-hw-choice__readout{color:#c8f5ff}

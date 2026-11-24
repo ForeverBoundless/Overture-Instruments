@@ -168,31 +168,37 @@ class App {
     row1.appendChild(prevBtn);
     row1.appendChild(nextBtn);
 
-    const select = document.createElement('select');
-    select.id = 'preset-select';
-    PRESETS.forEach((p) => {
-      const opt = document.createElement('option');
-      opt.value = p.id;
-      opt.textContent = `${String(p.id)}  ${p.name}`;
-      select.appendChild(opt);
+    const presetReadout = document.createElement('div');
+    presetReadout.id = 'preset-select';
+    presetReadout.className = 'lp-preset-readout';
+    presetReadout.dataset.overturePresetSelector = 'true';
+    let selectedPresetId = String(PRESETS[0]?.id ?? 0);
+    const renderPresetReadout = () => {
+      const preset = PRESETS.find((item) => String(item.id) === selectedPresetId) || PRESETS[0];
+      presetReadout.textContent = preset ? `PRESET ${String(preset.id).padStart(3, '0')} · ${preset.name}` : 'NO PRESET';
+      presetReadout.title = preset?.name || '';
+    };
+    Object.defineProperty(presetReadout, 'value', {
+      get: () => selectedPresetId,
+      set: (value) => { selectedPresetId = String(value); renderPresetReadout(); },
     });
-    select.addEventListener('change', () => this._loadFactoryPreset(parseInt(select.value, 10)));
-    this._presetSelect = select;
-     select.dataset.overturePresetSelector = 'true';
-     select.getCommunityPresetSelection = () => {
-       const preset = PRESETS.find((item) => String(item.id) === String(select.value));
-       return preset ? { kind: 'factory', value: String(preset.id), index: PRESETS.indexOf(preset), name: preset.name } : null;
-     };
-     select.restoreCommunityPresetSelection = (selection) => {
-       const preset = PRESETS.find((item, index) =>
-         String(item.id) === String(selection.value)
-         || (selection.name && item.name === selection.name)
-         || (Number.isInteger(selection.index) && index === selection.index && (!selection.name || item.name === selection.name)));
-       if (!preset) return false;
-       select.value = String(preset.id);
-       return true;
-     };
-     if (this.communityPreset?.presetSelection) select.restoreCommunityPresetSelection(this.communityPreset.presetSelection);
+    presetReadout.getCommunityPresetSelection = () => {
+      const preset = PRESETS.find((item) => String(item.id) === selectedPresetId);
+      return preset ? { kind: 'factory', value: String(preset.id), index: PRESETS.indexOf(preset), name: preset.name } : null;
+    };
+    presetReadout.restoreCommunityPresetSelection = (selection) => {
+      const preset = PRESETS.find((item, index) =>
+        String(item.id) === String(selection.value)
+        || (selection.name && item.name === selection.name)
+        || (Number.isInteger(selection.index) && index === selection.index && (!selection.name || item.name === selection.name)));
+      if (!preset) return false;
+      presetReadout.value = preset.id;
+      return true;
+    };
+    this._presetSelect = presetReadout;
+    if (this.communityPreset?.presetSelection) presetReadout.restoreCommunityPresetSelection(this.communityPreset.presetSelection);
+    renderPresetReadout();
+
 
     const row2 = document.createElement('div');
     row2.className = 'preset-row';
@@ -227,7 +233,7 @@ class App {
     });
 
     wrap.appendChild(row1);
-    wrap.appendChild(select);
+    wrap.appendChild(presetReadout);
     wrap.appendChild(row2);
 
     return wrap;

@@ -2,7 +2,7 @@ import { WorkletEngine } from './shared/workletEngine.js';
 import { PresetStore } from './shared/presetStore.js';
 import { performance, power } from './shared/panel.js';
 import { registerMidiTargetProvider } from './shared/midiMap.js';
-import { createHardwareSurface,addPanel,addRow,addLabel,addKnob,addFader,addButton,addSelect,addDisplay,addKeyboard } from './shared/hardwarePanel.js';
+import { createHardwareSurface,addPanel,addRow,addLabel,addKnob,addFader,addButton,addSelect,addChoiceButtons,addDisplay,addKeyboard } from './shared/hardwarePanel.js';
 import { SUPER8_PRESETS } from './data/super8Presets.js';
 import { consumeCommunityInstrumentPreset, createCommunityShareButton, clearCommunitySource } from './shared/communityPreset.js';
 
@@ -186,7 +186,7 @@ class Super8App{
   const k=(parent,key,label,o={})=>remember('knobs',key,addKnob(parent,{label,min:o.min??0,max:o.max??1,value:owner(o.global)[key],step:o.step,size:o.size||46,small:o.small,bipolar:o.bipolar,midiId:'SUPER8:'+(o.global?'G:':'')+key,group:o.group||'SYNTHESIS',formatValue:o.fmt||(o.max>10?(v=>Number(v).toFixed(1)):o.max>5?(v=>String(Math.round(v))):fmt2),onChange:v=>o.global?this.setGlobal(key,v):this.set(key,v)}),o.global);
   const f=(parent,key,label,o={})=>remember('faders',key,addFader(parent,{label,value:this.p()[key],height:o.height||84,midiId:'SUPER8:'+key,group:o.group||'SYNTHESIS',onChange:v=>this.set(key,v)}));
   const b=(parent,key,label,o={})=>remember('buttons',key,addButton(parent,{label,value:!!owner(o.global)[key],led:o.led||'red',midiId:'SUPER8:'+(o.global?'G:':'')+key,group:o.group||'SYNTHESIS',onChange:v=>o.global?this.setGlobal(key,v):this.set(key,v)}),o.global);
-  const s=(parent,key,label,options,o={})=>remember('selects',key,addSelect(parent,{label,options,value:owner(o.global)[key],optionLabels:o.labels,wide:o.wide,midiId:'SUPER8:'+(o.global?'G:':'')+key,group:o.group||'SYNTHESIS',onChange:v=>{o.global?this.setGlobal(key,v):this.set(key,v);if(o.after)o.after(v);}}),o.global);
+  const s=(parent,key,label,options,o={})=>remember('selects',key,(o.buttons?addChoiceButtons:addSelect)(parent,{label,options,value:owner(o.global)[key],optionLabels:o.labels,wide:o.wide,midiId:'SUPER8:'+(o.global?'G:':'')+key,group:o.group||'SYNTHESIS',onChange:v=>{o.global?this.setGlobal(key,v):this.set(key,v);if(o.after)o.after(v);}}),o.global);
 
   // ---- top strip ----
   const top=addRow(p,'s8-top');
@@ -204,18 +204,18 @@ class Super8App{
   s(pr,'mode','Voice mode',['single','dual','split'],{global:true,group:'GLOBAL'});
   b(pr,'binaural','Binaural',{global:true,group:'GLOBAL',led:'amber'});b(pr,'mpe','MPE',{global:true,group:'GLOBAL',led:'amber'});b(pr,'hold','Hold',{group:'PERFORMANCE',led:'amber'});
   s(pr,'splitPoint','Split point',Array.from({length:49},(_,i)=>48+i),{global:true,group:'GLOBAL',labels:Array.from({length:49},(_,i)=>NOTE_NAMES[(48+i)%12]+(Math.floor((48+i)/12)-1))});
-  s(pr,'voiceMode','Voice assign',['solo','legato','poly1','poly2'],{group:'PERFORMANCE'});s(pr,'unison','Unison',['off','half','all','octave','fifth'],{group:'PERFORMANCE'});
+  s(pr,'voiceMode','Voice assign',['solo','legato','poly1','poly2'],{group:'PERFORMANCE',buttons:true});s(pr,'unison','Unison',['off','half','all','octave','fifth'],{group:'PERFORMANCE',buttons:true});
   const partPerformance=addRow(part.body,'s8-part-performance');
   k(partPerformance,'portamento','Portamento',{size:34,group:'PERFORMANCE'});k(partPerformance,'transpose','Transpose',{min:-24,max:24,step:1,size:34,bipolar:true,group:'PERFORMANCE',fmt:v=>(v>0?'+':'')+Math.round(v)});k(partPerformance,'bendRange','Bend range',{min:1,max:12,step:1,size:34,group:'PERFORMANCE',fmt:v=>String(Math.round(v))});
 
   // ---- oscillators ----
   const osc=addRow(p,'hp-main s8-osc');
   const d1=addPanel(osc,{title:'DDS 1',sub:'oscillator · super wave',className:'s8-dds1'});
-  s(d1.body,'dds1Wave','Waveform',WAVES1,{group:'DDS 1',wide:true});s(d1.body,'dds1Range','Range',[64,32,16,8,4,2],{group:'DDS 1'});
+  s(d1.body,'dds1Wave','DDS 1 WAVEFORM',WAVES1,{group:'DDS 1',wide:true,buttons:true});s(d1.body,'dds1Range','Range',[64,32,16,8,4,2],{group:'DDS 1'});
   s(d1.body,'altA','Wave A',Array.from({length:64},(_,i)=>i),{group:'DDS 1',labels:Array.from({length:64},(_,i)=>String(i+1))});s(d1.body,'altB','Wave B',Array.from({length:64},(_,i)=>i),{group:'DDS 1',labels:Array.from({length:64},(_,i)=>String(i+1))});
   s(d1.body,'superMode','Super',['off','half','on'],{group:'DDS 1'});const d1knobs=addRow(d1.body,'s8-mini-knobs');k(d1knobs,'detune','Detune',{size:34,group:'DDS 1'});k(d1knobs,'pwDrift','PW drift',{size:34,group:'DDS 1'});
   const d2=addPanel(osc,{title:'DDS 2',sub:'second oscillator · modes',className:'s8-dds2'});
-  s(d2.body,'dds2Wave','Waveform',WAVES2,{group:'DDS 2',wide:true});s(d2.body,'dds2Range','Range',[32,16,8,4,2,'LFO'],{group:'DDS 2'});
+  s(d2.body,'dds2Wave','DDS 2 WAVEFORM',WAVES2,{group:'DDS 2',wide:true,buttons:true});s(d2.body,'dds2Range','Range',[32,16,8,4,2,'LFO'],{group:'DDS 2'});
   s(d2.body,'dds2Mode','Mode',['normal','sync','ring','sub'],{group:'DDS 2'});s(d2.body,'subMode','Sub wave',['sine','square'],{group:'DDS 2'});
   const d2knobs=addRow(d2.body,'s8-mini-knobs');k(d2knobs,'dds2Tune','Fine tune',{min:-7,max:7,step:.01,bipolar:true,size:34,group:'DDS 2',fmt:v=>Number(v).toFixed(1)});k(d2knobs,'crossMod','Cross mod',{size:34,group:'DDS 2'});k(d2knobs,'dds2WaveMod','PWM',{size:34,group:'DDS 2'});
   const dm=addPanel(osc,{title:'DDS modulator',sub:'LFO 1 · ENV 1 · wave morph',className:'s8-ddsmod'});
@@ -231,7 +231,7 @@ class Super8App{
   const vf=addRow(vcf.body,'s8-faders');
   f(vf,'hpf','HPF',{group:'VCF',height:68});f(vf,'cutoff','LPF',{group:'VCF',height:68});f(vf,'resonance','Res',{group:'VCF',height:68});f(vf,'filterLfoAmount','LFO 1',{group:'VCF',height:68});f(vf,'filterOscAmount','DDS 2',{group:'VCF',height:68});
   const vs=addRow(vcf.body,'s8-selects');
-  s(vs,'drive','Drive',['off','1','2'],{group:'VCF'});s(vs,'keyTrack','Key track',['off','half','on'],{group:'VCF'});s(vs,'filterMod','Env source',['env1','both','env2'],{group:'VCF'});s(vs,'velocity','Velocity (VCA)',['off','half','on'],{group:'VCA'});
+  s(vs,'drive','Drive',['off','1','2'],{group:'VCF',buttons:true});s(vs,'keyTrack','Key track',['off','half','on'],{group:'VCF',buttons:true});s(vs,'filterMod','Env source',['env1','both','env2'],{group:'VCF',buttons:true});s(vs,'velocity','Velocity (VCA)',['off','half','on'],{group:'VCA',buttons:true});
   const envp=addPanel(mid,{title:'Envelopes',sub:'ENV 1 modulation · ENV 2 amplifier',className:'s8-env'});
   const e1=document.createElement('div');e1.className='p3-col s8-env-col';envp.body.appendChild(e1);addLabel(e1,'ENV 1');
   const e1f=addRow(e1,'hp-row-tight');[['env1Attack','A'],['env1Decay','D'],['env1Sustain','S'],['env1Release','R']].forEach(([key,l])=>f(e1f,key,l,{group:'ENVELOPE 1',height:80}));
@@ -262,12 +262,12 @@ class Super8App{
   const st=addRow(seqp.body,'s8-seq-top');
   this.hwSeqPageButtons=[];const pages=document.createElement('div');pages.className='s8-pages';st.appendChild(pages);
   ['1–16','17–32','33–48','49–64'].forEach((label,i)=>{const c=addButton(pages,{label,value:i===0,led:'amber',group:'SEQUENCER',onChange:()=>{this.seqPage=i;this.renderSeq();}});c.el.addEventListener('click',()=>{this.seqPage=i;this.renderSeq();});this.hwSeqPageButtons.push(c);});
-  s(st,'seqLength','Length',Array.from({length:64},(_,i)=>i+1),{group:'SEQUENCER'});s(st,'seqMode','Step mode',['step','slide','accent','rest','length'],{group:'SEQUENCER'});
+  s(st,'seqLength','Length',Array.from({length:64},(_,i)=>i+1),{group:'SEQUENCER'});s(st,'seqMode','Step mode',['step','slide','accent','rest','length'],{group:'SEQUENCER',buttons:true});
   k(st,'seqBpm','Tempo',{min:40,max:240,step:1,size:42,group:'SEQUENCER',fmt:v=>String(Math.round(v))});k(st,'seqSwing','Swing',{size:42,group:'SEQUENCER'});
   const play=b(st,'seqEnabled','Play',{group:'SEQUENCER',led:'green'});play.el.addEventListener('click',()=>this.engine.post({t:'transport',layer:this.active,play:!!this.p().seqEnabled}));
   const sd=document.createElement('div');sd.className='s8-divider';st.appendChild(sd);
   b(st,'arpEnabled','Arp on',{group:'ARPEGGIATOR',led:'green'});b(st,'arpHold','Hold',{group:'ARPEGGIATOR'});
-  s(st,'arpMode','Arp mode',['up','down','upDown','random','assign'],{group:'ARPEGGIATOR'});s(st,'arpDivision','Arp clock',[1,2,4,8,16],{group:'ARPEGGIATOR'});
+  s(st,'arpMode','Arp mode',['up','down','upDown','random','assign'],{group:'ARPEGGIATOR',buttons:true});s(st,'arpDivision','Arp clock',[1,2,4,8,16],{group:'ARPEGGIATOR'});
   k(st,'arpRange','Octaves',{min:1,max:4,step:1,size:42,group:'ARPEGGIATOR',fmt:v=>String(Math.round(v))});k(st,'arpSwing','Arp swing',{size:42,group:'ARPEGGIATOR'});
   const steps=document.createElement('div');steps.className='s8-steps';seqp.body.appendChild(steps);this.hwSeqButtons=[];
   for(let i=0;i<16;i++){const c=addButton(steps,{label:String(i+1),value:false,led:'red',group:'SEQUENCER',midiId:'SUPER8:SEQ:STEP:'+i,onChange:()=>this.toggleSeqStep(i)});this.hwSeqButtons.push(c);this.hwControls.all.push(c);}
@@ -341,20 +341,24 @@ class Super8App{
 
   // ---- memory and tools ----
   const footer=document.createElement('div');footer.className='hp-footer hp-super8-hardware-footer';p.appendChild(footer);
-  this.hwPresets=document.createElement('select');this.hwPresets.setAttribute('aria-label','Performance');footer.appendChild(this.hwPresets);
-  this.hwPresets.addEventListener('change',()=>this.presets.load(this.hwPresets.value));
+  this.hwPresetsControl=addSelect(footer,{label:'PERFORMANCE',options:['f:0'],value:'f:0',onChange:v=>this.presets.load(v)});
+  this.hwPresets=this.hwPresetsControl.el;this.hwPresets.dataset.overturePresetSelector='true';
+  this.hwPresets.setOptions=this.hwPresetsControl.setOptions;this.hwPresets.setValue=this.hwPresetsControl.setValue;
   const action=(label,fn)=>{const a=document.createElement('button');a.type='button';a.className='hp-action';a.textContent=label;a.addEventListener('click',fn);footer.appendChild(a);return a;};
   action('Save performance',()=>{const name=prompt('Name this performance','My Super 8 Performance');if(name===null)return;try{const item=this.store.save(name,clone(this.patch));this.refreshHardwarePresetList('u:'+item.id);this.displayHardwarePreset(item.name);}catch(e){alert(e.message);}});
   createCommunityShareButton(footer,{instrumentId:'udo-super-8',className:'hp-action',getData:()=>validate(clone(this.patch)),getAudioOutput: () => this.engine.output,
        getTitle:()=> 'UDO Super 8 performance'});
   action('Save layer',()=>{const name=prompt('Name this layer patch','My Layer Patch');if(name===null)return;try{const item=this.layerStores[this.active].save(name,clone(this.p()));this.refreshHardwareLayerList(item.id);}catch(e){alert(e.message);}});
-  this.hwLayerPresets=document.createElement('select');this.hwLayerPresets.setAttribute('aria-label','Layer patch');footer.appendChild(this.hwLayerPresets);
-  this.hwLayerPresets.addEventListener('change',()=>{const item=this.layerStores[this.active].get(this.hwLayerPresets.value);if(item){this.patch.layers[this.active]=cleanLayer(item.data);this.refresh();}});
+  this.hwLayerPresetsControl=addSelect(footer,{label:'LAYER PATCH',options:[''],optionLabels:['NO PATCH'],value:'',onChange:value=>{const item=value?this.layerStores[this.active].get(value):null;if(item){this.patch.layers[this.active]=cleanLayer(item.data);this.refresh();}}});
+  this.hwLayerPresets=this.hwLayerPresetsControl.el;this.hwLayerPresets.setOptions=this.hwLayerPresetsControl.setOptions;this.hwLayerPresets.setValue=this.hwLayerPresetsControl.setValue;
   action('Mod matrix',()=>{this.renderHardwareMatrix();this.matrixDialog.showModal();});
   const waveLabel=document.createElement('label');waveLabel.className='hp-action hp-super8-wave-import';waveLabel.textContent='Load waves';
   const waveInput=document.createElement('input');waveInput.type='file';waveInput.multiple=true;waveInput.accept='.wav,audio/wav';waveLabel.appendChild(waveInput);footer.appendChild(waveLabel);
   waveInput.addEventListener('change',async()=>{try{if(!this.engine.ctx)throw new Error('Power on audio first.');const waves=[];for(const file of [...(waveInput.files||[])].slice(0,64)){const decoded=await this.engine.ctx.decodeAudioData(await file.arrayBuffer());const data=decoded.getChannelData(0);if(data.length<64||data.length>65536)throw new Error(file.name+' is not a supported single-cycle file.');const size=2048,down=Array.from({length:size},(_,i)=>{const pos=i*data.length/size,index=Math.floor(pos),frac=pos-index;return data[index]*(1-frac)+data[(index+1)%data.length]*frac;});waves.push(down);}if(waves.length){const p=this.p();p.userWaves=Array.from({length:64},(_,i)=>waves[i]??p.userWaves?.[i]??null);this.postPatch();this.display.flash(waves.length+' WAVES IMPORTED · SAVED WITH LAYER');}}catch(error){this.display.flash('Wave import failed');alert(error.message);}});
-  this.refreshHardwarePresetList=(selected='f:0')=>{this.hwPresets.replaceChildren();FACTORY.forEach((item,i)=>{const o=document.createElement('option');o.value='f:'+i;o.textContent=String(i+1)+' · '+item.name;this.hwPresets.appendChild(o);});this.store.items.forEach(item=>{const o=document.createElement('option');o.value='u:'+item.id;o.textContent='User · '+item.name;this.hwPresets.appendChild(o);});this.hwPresets.value=selected;};this.hwPresets.dataset.overturePresetSelector='true';
+  this.refreshHardwarePresetList=(selected='f:0')=>{
+   const items=[...FACTORY.map((item,i)=>({value:'f:'+i,label:String(i+1).padStart(3,'0')+' · '+item.name})),...this.store.items.map(item=>({value:'u:'+item.id,label:'USER · '+item.name}))];
+   this.hwPresetsControl.setOptions(items.map(item=>item.value),selected,items.map(item=>item.label));
+  };
    this.hwPresets.getCommunityPresetSelection=()=>{
     const value=this.hwPresets.value;
     if(value.startsWith('f:')){const index=Number(value.slice(2)),item=FACTORY[index];return item?{kind:'factory',index,value,name:item.name}:null;}
@@ -366,7 +370,10 @@ class Super8App{
     if(index<0)return false;
     this.hwPresets.value='f:'+index;return true;
    };
-  this.refreshHardwareLayerList=selected=>{this.hwLayerPresets.replaceChildren();const first=document.createElement('option');first.value='';first.textContent='Layer patches…';this.hwLayerPresets.appendChild(first);this.layerStores[this.active].items.forEach(item=>{const o=document.createElement('option');o.value=item.id;o.textContent='Layer · '+item.name;this.hwLayerPresets.appendChild(o);});this.hwLayerPresets.value=selected||'';};
+  this.refreshHardwareLayerList=selected=>{
+   const items=[{value:'',label:'NO PATCH'},...this.layerStores[this.active].items.map(item=>({value:item.id,label:'LAYER · '+item.name}))];
+   this.hwLayerPresetsControl.setOptions(items.map(item=>item.value),selected||'',items.map(item=>item.label));
+  };
   this.displayHardwarePreset=name=>{this.hwDisplay.set(name.toUpperCase(),'SUPER 8 · PERFORMANCE');hw.program.textContent='SUPER 8 · '+name;};
 
   // ---- modulation matrix dialog ----

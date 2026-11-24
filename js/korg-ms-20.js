@@ -91,7 +91,7 @@ class MS20App {
     this.pitchStatusEl = el('div', 'pn-help ms-msg', esp.body, 'PITCH TRACKING: OFF');
     el('div', 'pn-help', esp.body, 'Enable the microphone and PITCH TO CV, then connect ESP PITCH CV OUT → TOTAL (PITCH). The ESP Processing preset includes this cable. Pitch tracking follows voiced fundamentals, not speech syllables; voice audio passthrough remains optional via ESP SIGNAL OUT → EXT SIGNAL IN.');
     const outS = section(r2, 'OUTPUT'); const ko = el('div', 'pn-knobs', outS.body); K(ko, 'volume', 'MASTER', (v) => `${Math.round(v * 100)}%`);
-    this.ui.bendRange = select(outS.body, 'BEND RANGE', [1, 2, 5, 7, 12].map((n) => ({ value: n, label: `${n} st` })), 2, (v) => this.set('bendRange', Number(v)));
+    this.ui.bendRange = select(outS.body, 'OVERTURE BEND RANGE', [1, 2, 5, 7, 12].map((n) => ({ value: n, label: `${n} st` })), 2, (v) => this.set('bendRange', Number(v)));
     // Patch panel
     const r3 = el('div', 'pn-row ms-row3', rows);
     const pp = section(r3, 'PATCH PANEL', 'CLICK AN OUTPUT, THEN AN INPUT • CLICK A CABLE TO REMOVE IT');

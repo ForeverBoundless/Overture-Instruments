@@ -1,6 +1,6 @@
 import { WorkletEngine } from './shared/workletEngine.js';
 import { PresetStore } from './shared/presetStore.js';
-import { el, section, knob, select, toggle, button, display, performance, power, presetBar, footer } from './shared/panel.js';
+import { el, section, knob, select, choiceButtons, toggle, button, display, performance, power, presetBar, footer } from './shared/panel.js';
 import { OBXA_PRESETS } from './data/obx-a-presets.js';
 import { DEF, GLOBAL_KEYS, LAYER_KEYS, OBXA_PROGRAM_GROUPS, OBXA_PROGRAM_COUNT, obxaProgramSlotId, obxaSpecialProgramSlotId, validateOBXAProgramRecord, validateOBXAPatch as validate } from './data/obxa-patch.js?v=20261123-obxa-patch-r4';
 import { consumeCommunityInstrumentPreset, createCommunityShareButton } from './shared/communityPreset.js';
@@ -29,32 +29,22 @@ class OBXaApp{
  }
  patchSnapshot(){return JSON.parse(JSON.stringify(this.patch));}
  refreshHardwareProgramOptions(){
-  if(!this.ui.hwProgram?.select||!this.ui.hwGroup?.select)return;
-  const group=Number(this.ui.hwGroup.select.value)||0,selectEl=this.ui.hwProgram.select,current=selectEl.value||'1';
-  selectEl.replaceChildren();
-  for(let program=1;program<=8;program++){
-   const record=this.hardwareStore.get(obxaProgramSlotId(group,program));
-   const option=document.createElement('option');
-   option.value=String(program);
-   option.textContent=record?program+' · '+record.name:program+' · EMPTY';
-   selectEl.appendChild(option);
-  }
-  selectEl.value=current;
-  if(!selectEl.value)selectEl.value='1';
+  if(!this.ui.hwProgram||!this.ui.hwGroup)return;
+  const group=Number(this.ui.hwGroup.value)||0,current=this.ui.hwProgram.value||'1';
+  const options=Array.from({length:8},(_,index)=>{
+   const program=index+1,record=this.hardwareStore.get(obxaProgramSlotId(group,program));
+   return {value:String(program),label:record?program+' · '+record.name:program+' · EMPTY'};
+  });
+  this.ui.hwProgram.setOptions(options,current,true);
  }
  refreshSpecialProgramOptions(){
-  if(!this.ui.specialProgram?.select||!this.ui.specialType?.select)return;
-  const mode=this.ui.specialType.select.value,selectEl=this.ui.specialProgram.select,current=selectEl.value||'1';
-  selectEl.replaceChildren();
-  for(let program=1;program<=8;program++){
-   const record=this.hardwareStore.get(obxaSpecialProgramSlotId(mode,program));
-   const option=document.createElement('option');
-   option.value=String(program);
-   option.textContent=record?program+' · '+record.name:program+' · EMPTY';
-   selectEl.appendChild(option);
-  }
-  selectEl.value=current;
-  if(!selectEl.value)selectEl.value='1';
+  if(!this.ui.specialProgram||!this.ui.specialType)return;
+  const mode=this.ui.specialType.value,current=this.ui.specialProgram.value||'1';
+  const options=Array.from({length:8},(_,index)=>{
+   const program=index+1,record=this.hardwareStore.get(obxaSpecialProgramSlotId(mode,program));
+   return {value:String(program),label:record?program+' · '+record.name:program+' · EMPTY'};
+  });
+  this.ui.specialProgram.setOptions(options,current,true);
  }
  saveHardwareProgram(){
   const group=Number(this.ui.hwGroup.select.value)||0,program=Number(this.ui.hwProgram.select.value)||1,id=obxaProgramSlotId(group,program);
@@ -134,15 +124,15 @@ class OBXaApp{
   this.ui.osc2Level=knob(ok,{label:'OSC 2 LEVEL',min:0,max:1,value:this.currentLayer().osc2Level,onChange:v=>this.set('osc2Level',v)});
   this.ui.osc2Tune=knob(ok,{label:'OSC 2 FREQUENCY',min:-1,max:1,value:this.currentLayer().osc2Tune,formatValue:v=>(Math.round(v*60)/2).toFixed(1)+' ST',onChange:v=>this.set('osc2Tune',Math.round(v*60)/60)});
   this.ui.pulseWidth=knob(ok,{label:'PULSE WIDTH',min:0,max:1,value:this.currentLayer().pulseWidth,onChange:v=>this.set('pulseWidth',v)});
-  this.ui.osc1Wave=select(oscillators.body,'OSC 1 WAVEFORM',[{value:'saw',label:'SAWTOOTH'},{value:'pulse',label:'PULSE'}],this.currentLayer().osc1Wave,v=>this.set('osc1Wave',v));
-  this.ui.osc2Wave=select(oscillators.body,'OSC 2 WAVEFORM',[{value:'saw',label:'SAWTOOTH'},{value:'pulse',label:'PULSE'}],this.currentLayer().osc2Wave,v=>this.set('osc2Wave',v));
+  this.ui.osc1Wave=choiceButtons(oscillators.body,'OSC 1 WAVEFORM SWITCH',[{value:'saw',label:'SAWTOOTH'},{value:'pulse',label:'PULSE'}],this.currentLayer().osc1Wave,v=>this.set('osc1Wave',v));
+  this.ui.osc2Wave=choiceButtons(oscillators.body,'OSC 2 WAVEFORM SWITCH',[{value:'saw',label:'SAWTOOTH'},{value:'pulse',label:'PULSE'}],this.currentLayer().osc2Wave,v=>this.set('osc2Wave',v));
   this.ui.fEnvOsc2=toggle(oscillators.body,'F-ENV → OSC 2',this.currentLayer().fEnvOsc2,v=>this.set('fEnvOsc2',v));
   this.ui.sync=toggle(oscillators.body,'OSC 2 SYNC',this.currentLayer().sync,v=>this.set('sync',v));
   const filter=section(top,'FILTER','TWO SELECTABLE LOW-PASS RESPONSES'),fk=el('div','pn-knobs',filter.body);
   this.ui.cutoff=knob(fk,{label:'FREQUENCY',min:0,max:1,value:this.currentLayer().cutoff,onChange:v=>this.set('cutoff',v)});
   this.ui.resonance=knob(fk,{label:'RESONANCE',min:0,max:1,value:this.currentLayer().resonance,onChange:v=>this.set('resonance',v)});
   this.ui.filterEnv=knob(fk,{label:'ENVELOPE MODULATION',min:0,max:1,value:this.currentLayer().filterEnv,onChange:v=>this.set('filterEnv',v)});
-  this.ui.filterMode=select(filter.body,'FILTER POLES',[{value:'12',label:'2-POLE · 12 dB/OCT'},{value:'24',label:'4-POLE · 24 dB/OCT'}],this.currentLayer().filterMode,v=>this.set('filterMode',v));
+  this.ui.filterMode=choiceButtons(filter.body,'FILTER POLES SWITCH',[{value:'12',label:'2-POLE'},{value:'24',label:'4-POLE'}],this.currentLayer().filterMode,v=>this.set('filterMode',v));
   const routes=el('div','obxa-switch-row',filter.body);
   this.ui.osc1Route=toggle(routes,'OSC 1',this.currentLayer().osc1Route,v=>this.set('osc1Route',v));
   this.ui.osc2Route=toggle(routes,'OSC 2',this.currentLayer().osc2Route,v=>this.set('osc2Route',v));
@@ -176,7 +166,7 @@ class OBXaApp{
   this.ui.lfoRate=knob(lfoControls,{label:'RATE',min:0,max:1,value:this.currentLayer().lfoRate,onChange:v=>this.set('lfoRate',v)});
   this.ui.lfoAmount=knob(lfoControls,{label:'FREQUENCY DEPTH',min:0,max:1,value:this.currentLayer().lfoAmount,onChange:v=>this.set('lfoAmount',v)});
   this.ui.pulseWidthAmount=knob(lfoControls,{label:'PULSE-WIDTH DEPTH',min:0,max:1,value:this.currentLayer().pulseWidthAmount,onChange:v=>this.set('pulseWidthAmount',v)});
-  this.ui.lfoWave=select(lfoControls,'WAVEFORM',[{value:'sine',label:'SINE'},{value:'square',label:'SQUARE'},{value:'s&h',label:'SAMPLE / HOLD'}],this.currentLayer().lfoWave,v=>this.set('lfoWave',v));
+  this.ui.lfoWave=choiceButtons(lfoControls,'WAVEFORM',[{value:'sine',label:'SINE'},{value:'square',label:'SQUARE'},{value:'s&h',label:'SAMPLE / HOLD'}],this.currentLayer().lfoWave,v=>this.set('lfoWave',v));
 
   const routesBlock=modBlock(modGrid,'MODULATION DESTINATIONS','Choose where the LFO is applied.');
   const routeGrid=el('div','obxa-mod-route-grid',routesBlock);
@@ -194,7 +184,7 @@ class OBXaApp{
   this.ui.modPanelLfoDepth=knob(panelLfoControls,{label:'DEPTH',min:0,max:1,value:this.patch.modPanelLfoDepth,onChange:v=>this.set('modPanelLfoDepth',v)});
   const panelDepthSwitch=routeGroup(panelLfoBlock,'DEPTH KNOB');
   this.ui.modPanelLfoDepthEnabled=toggle(panelDepthSwitch,'PULL UP TO ENABLE',this.patch.modPanelLfoDepthEnabled,v=>this.set('modPanelLfoDepthEnabled',v));
-  this.ui.modPanelLfoWave=select(panelLfoControls,'WAVEFORM',[{value:'sine',label:'SINE'},{value:'saw',label:'SAWTOOTH'},{value:'square',label:'SQUARE'}],this.patch.modPanelLfoWave,v=>this.set('modPanelLfoWave',v));
+  this.ui.modPanelLfoWave=choiceButtons(panelLfoControls,'MOD PANEL LFO SHAPE',[{value:'sine',label:'SINE'},{value:'saw',label:'SAWTOOTH'},{value:'square',label:'SQUARE'}],this.patch.modPanelLfoWave,v=>this.set('modPanelLfoWave',v));
   const panelLfoRoutes=routeGroup(panelLfoBlock,'FREQUENCY DESTINATION');
   this.ui.modPanelLfoOsc1=toggle(panelLfoRoutes,'OSC 1',this.patch.modPanelLfoOsc1,v=>this.set('modPanelLfoOsc1',v));
   this.ui.modPanelLfoOsc2=toggle(panelLfoRoutes,'OSC 2',this.patch.modPanelLfoOsc2,v=>this.set('modPanelLfoOsc2',v));
@@ -220,8 +210,8 @@ class OBXaApp{
   this.ui.clearChord=button(memoryRow,'CLEAR CHORD',()=>{this.engine.post({t:'clearChord'});this.display.set('CHORD MEMORY CLEARED','PLAY AND HOLD A NEW CHORD');});
   el('p','pn-help obxa-mod-help',assignmentBlock,'With HOLD on, play and release a chord to capture its intervals. Turn HOLD off to release held notes; CHORD MEMORY then transposes the stored voicing from each new root. Bank assignment is only editable in SPLIT and DOUBLE modes.');
 const allocation=section(rows,'KEYBOARD & VOICE ALLOCATION','FULL · SPLIT · DOUBLE · PROGRAMMABLE VOICE BANKS'),ak=el('div','pn-knobs',allocation.body);
-  this.ui.mode=select(allocation.body,'KEYBOARD MODE',[{value:'full',label:'FULL · POLY'},{value:'split',label:'SPLIT'},{value:'double',label:'DOUBLE / LAYER'}],this.patch.mode,v=>this.set('mode',v));
-  this.ui.voiceCount=select(allocation.body,'VOICE CONFIGURATION',[{value:'4',label:'4 VOICES'},{value:'6',label:'6 VOICES'},{value:'8',label:'8 VOICES'}],String(this.patch.voiceCount),v=>this.set('voiceCount',Number(v)));
+  this.ui.mode=choiceButtons(allocation.body,'KEYBOARD MODE',[{value:'full',label:'FULL'},{value:'split',label:'SPLIT'},{value:'double',label:'DOUBLE'}],this.patch.mode,v=>this.set('mode',v));
+  this.ui.voiceCount=select(allocation.body,'OVERTURE ENGINE VOICE COUNT',[{value:'4',label:'4 VOICES'},{value:'6',label:'6 VOICES'},{value:'8',label:'8 VOICES'}],String(this.patch.voiceCount),v=>this.set('voiceCount',Number(v)));
   this.ui.splitPoint=knob(ak,{label:'SPLIT POINT',min:36,max:96,value:this.patch.splitPoint,formatValue:v=>NOTE_NAMES[Math.round(v)%12]+(Math.floor(Math.round(v)/12)-1),onChange:v=>this.set('splitPoint',Math.round(v))});
   this.ui.layerBalance=knob(ak,{label:'LOWER / UPPER BALANCE',min:0,max:1,value:this.patch.layerBalance,formatValue:v=>Math.round(v*100)+'% UPPER',onChange:v=>this.set('layerBalance',v)});
   this.ui.unison=toggle(allocation.body,'UNISON',this.patch.unison,v=>this.set('unison',v));
@@ -229,12 +219,12 @@ const allocation=section(rows,'KEYBOARD & VOICE ALLOCATION','FULL · SPLIT · DO
   this.ui.osc2Detune=knob(ak,{label:'OSC 2 DETUNE',min:-100,max:100,value:this.currentLayer().osc2Detune,formatValue:v=>(Math.round(v)>0?'+':'')+Math.round(v)+' CENT',onChange:v=>this.set('osc2Detune',Math.round(v))});
   this.ui.transpose=knob(ak,{label:'TIMBRE TRANSPOSE',min:-60,max:60,value:this.currentLayer().transpose,formatValue:v=>(Math.round(v)>0?'+':'')+Math.round(v)+' ST',onChange:v=>this.set('transpose',Math.round(v))});
   this.ui.portamento=knob(ak,{label:'PORTAMENTO',min:0,max:1,value:this.currentLayer().portamento,onChange:v=>this.set('portamento',v)});
-  this.ui.portamentoMode=select(allocation.body,'GLIDE MODE',[{value:'linear',label:'LINEAR'},{value:'quantized',label:'QUANTIZED'}],this.patch.portamentoMode,v=>this.set('portamentoMode',v));
+  this.ui.portamentoMode=choiceButtons(allocation.body,'OVERTURE GLIDE STYLE',[{value:'linear',label:'PORTAMENTO'},{value:'quantized',label:'GLISSANDO'}],this.patch.portamentoMode,v=>this.set('portamentoMode',v));
   this.ui.portamentoOffset=toggle(allocation.body,'PORTAMENTO OFFSET',this.patch.portamentoOffset,v=>this.set('portamentoOffset',v));
   this.ui.bendRange=knob(ak,{label:'PITCH BEND RANGE',min:1,max:12,value:this.patch.bendRange,formatValue:v=>Math.round(v)+' ST',onChange:v=>this.set('bendRange',Math.round(v))});
   this.ui.masterTune=knob(ak,{label:'MASTER TUNE',min:-1,max:1,value:this.patch.masterTune,formatValue:v=>(v*100).toFixed(0)+' CENT',onChange:v=>this.set('masterTune',v)});
   this.ui.master=knob(ak,{label:'MASTER VOLUME',min:0,max:1,value:this.patch.master,onChange:v=>this.set('master',v)});
-  this.ui.layerEdit=select(allocation.body,'EDIT TIMBRE',[{value:'0',label:'LOWER / A'},{value:'1',label:'UPPER / B'}],'0',v=>this.selectLayer(v));
+  this.ui.layerEdit=choiceButtons(allocation.body,'EDIT TIMBRE',[{value:'0',label:'LOWER / A'},{value:'1',label:'UPPER / B'}],'0',v=>this.selectLayer(v));
 
 
 
@@ -254,8 +244,33 @@ const allocation=section(rows,'KEYBOARD & VOICE ALLOCATION','FULL · SPLIT · DO
   const programmer=section(rows,'HARDWARE PROGRAMMER','120 PROGRAM LOCATIONS · 8 SPLIT MEMORIES · 8 DOUBLE MEMORIES');
   programmer.body.classList.add('obxa-programmer-layout');
   const hardwareRow=el('div','obxa-programmer__row',programmer.body);
-  this.ui.hwGroup=select(hardwareRow,'GROUP',OBXA_PROGRAM_GROUPS.map((name,index)=>({value:String(index),label:name})), '0',()=>this.refreshHardwareProgramOptions());
-  this.ui.hwProgram=select(hardwareRow,'PROGRAM',Array.from({length:8},(_,i)=>({value:String(i+1),label:String(i+1)})),'1',()=>{});
+  const groupPanel=el('div','obxa-bank-groups',hardwareRow);
+  el('span','obxa-programmer__control-label',groupPanel,'GROUP BANKS · COMBINABLE');
+  const groupButtons=el('div','obxa-bank-groups__buttons',groupPanel);
+  let groupIndex=0,activeGroups=new Set(['A']);
+  const renderGroups=()=>{
+   groupButtons.querySelectorAll('button').forEach(control=>control.classList.toggle('lit',activeGroups.has(control.dataset.group)));
+   groupPanel.setAttribute('aria-label','Selected memory group '+(OBXA_PROGRAM_GROUPS[groupIndex]||'A'));
+  };
+  const setGroupIndex=(next)=>{
+   groupIndex=Math.max(0,Math.min(OBXA_PROGRAM_GROUPS.length-1,Number(next)||0));
+   activeGroups=new Set((OBXA_PROGRAM_GROUPS[groupIndex]||'A').split(''));
+   renderGroups();this.refreshHardwareProgramOptions();
+  };
+  ['A','B','C','D'].forEach(letter=>{
+   const control=button(groupButtons,letter,()=>{
+    if(activeGroups.has(letter)){if(activeGroups.size===1)return;activeGroups.delete(letter);}
+    else activeGroups.add(letter);
+    const combination=['A','B','C','D'].filter(item=>activeGroups.has(item)).join('');
+    const next=OBXA_PROGRAM_GROUPS.indexOf(combination);
+    if(next>=0){groupIndex=next;renderGroups();this.refreshHardwareProgramOptions();}
+   },letter==='A');
+   control.dataset.group=letter;
+  });
+  const groupProxy={};Object.defineProperty(groupProxy,'value',{get:()=>String(groupIndex),set:v=>setGroupIndex(v)});
+  this.ui.hwGroup={get value(){return String(groupIndex);},getValue:()=>String(groupIndex),setValue:(v)=>setGroupIndex(v),select:groupProxy};
+  renderGroups();
+  this.ui.hwProgram=choiceButtons(hardwareRow,'PROGRAM NUMBER',Array.from({length:8},(_,i)=>({value:String(i+1),label:String(i+1)})),'1',()=>{});
   const hardwareActions=el('div','obxa-programmer__actions',programmer.body);
   button(hardwareActions,'LOAD',()=>this.loadHardwareProgram());
   this.ui.hwWrite=button(hardwareActions,'WRITE',()=>this.saveHardwareProgram());
@@ -263,8 +278,8 @@ const allocation=section(rows,'KEYBOARD & VOICE ALLOCATION','FULL · SPLIT · DO
   this.ui.memoryProtect=toggle(hardwareActions,'MEMORY PROTECT',false,value=>{this.memoryProtected=value;this.ui.hwWrite.disabled=value;this.ui.specialWrite.disabled=value;this.display.flash(value?'MEMORY PROTECTED':'MEMORY WRITE ENABLED');});
   el('p','obxa-programmer__hint',programmer.body,OBXA_PRESETS.length+' built-in programs are preloaded. All 120 hardware locations can be overwritten or filled.');
   const specialRow=el('div','obxa-programmer__special',programmer.body);
-  this.ui.specialType=select(specialRow,'SPLIT / DOUBLE MEMORY',[{value:'split',label:'SPLIT'},{value:'double',label:'DOUBLE'}],'split',()=>this.refreshSpecialProgramOptions());
-  this.ui.specialProgram=select(specialRow,'PROGRAM',Array.from({length:8},(_,i)=>({value:String(i+1),label:String(i+1)})),'1',()=>{});
+  this.ui.specialType=choiceButtons(specialRow,'SPECIAL MEMORY',[{value:'split',label:'SPLIT'},{value:'double',label:'DOUBLE'}],'split',()=>this.refreshSpecialProgramOptions());
+  this.ui.specialProgram=choiceButtons(specialRow,'PROGRAM NUMBER',Array.from({length:8},(_,i)=>({value:String(i+1),label:String(i+1)})),'1',()=>{});
   const specialActions=el('div','obxa-programmer__actions',specialRow);
   button(specialActions,'RECALL',()=>this.loadSpecialProgram());
   this.ui.specialWrite=button(specialActions,'WRITE',()=>this.saveSpecialProgram());

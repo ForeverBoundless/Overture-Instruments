@@ -41,9 +41,6 @@ body.pn-body.hp-pro3-body,body.pn-body.hp-super8-body{min-height:100vh;overflow-
 .hp-fader-value{order:3;display:block;width:100%;min-height:8px;font:6px/1 'DM Mono',monospace!important;text-align:center;white-space:nowrap}
 .hp-button{z-index:4;cursor:pointer;touch-action:manipulation}
 .hp-button-label{z-index:6;top:auto!important;transform:translateX(-50%);max-width:54px;font:600 6px/1.05 'Saira',InterLocal,sans-serif!important;white-space:normal!important;text-align:center;overflow-wrap:anywhere}
-.hp-native-select{z-index:5;box-sizing:border-box;min-width:0}
-.hp-native-select>span{display:block;min-height:14px;font-size:6px;line-height:1.1;letter-spacing:.035em;white-space:normal;overflow-wrap:anywhere}
-.hp-native-select select{box-sizing:border-box;width:100%;min-width:0;max-width:100%;height:23px!important;padding:2px 3px!important;font-size:7px!important}
 .hp-keybed{z-index:15;display:block;overflow:hidden;box-sizing:border-box;touch-action:none}
 .hp-key,.hp-key-white,.hp-key-black{box-sizing:border-box;appearance:none;-webkit-appearance:none;outline:none;touch-action:none}
 .hp-key-white{z-index:1}
@@ -51,7 +48,7 @@ body.pn-body.hp-pro3-body,body.pn-body.hp-super8-body{min-height:100vh;overflow-
 .hp-wheel-wrap,.hp-touch-wrap{z-index:8}
 .hp-preset-strip{z-index:20}
 .hp-pro3-hardware-footer,.hp-super8-hardware-footer{display:flex;align-items:center;justify-content:flex-start;flex-wrap:wrap;gap:7px;box-sizing:border-box;max-width:100%;min-width:0}
-.hp-pro3-hardware-footer select,.hp-super8-hardware-footer select{max-width:100%;min-width:0}
+.hp-pro3-hardware-footer .hp-discrete-control,.hp-super8-hardware-footer .hp-discrete-control{max-width:100%;min-width:0}
 @media(max-width:700px){
  .hp-root{padding:8px 4px 28px}
  .hp-stage{max-width:calc(100vw - 8px)}
@@ -155,3 +152,13 @@ body.pn-body.hp-pro3-body,body.pn-body.hp-super8-body{min-height:100vh;overflow-
 
 /* Position dot is specific to the Pro 3 faceplate; leave Super 8 knob artwork unchanged. */
 .hp-pro3 .hp-knob-indicator{fill:#fff;stroke:#20262b;stroke-width:1.2;filter:drop-shadow(0 0 1px rgba(255,255,255,.48))}
+
+/* Detented rotary selectors replace generic browser select widgets. */
+.hp-discrete-control{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:2px;min-width:52px;max-width:100%;padding:3px 4px;border:1px solid color-mix(in srgb,var(--hp-line,#52606d) 55%,transparent);border-radius:4px;background:linear-gradient(180deg,color-mix(in srgb,var(--hp-control) 86%,#fff),var(--hp-control));box-sizing:border-box}
+.hp-discrete-control-label{display:block;min-height:13px;max-width:100%;font:700 7px/1.1 InterLocal,Figtree,sans-serif;letter-spacing:.06em;text-align:center;overflow-wrap:anywhere}
+.hp-discrete-control-value{display:block;min-height:17px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--hp-display,#9fe5ff);font:7px/1.3 'DM Mono',monospace;text-align:center}
+.hp-discrete-control-dial{width:40px!important;min-width:40px!important}
+.hp-discrete-control-dial .hp-control-label{display:none}
+.hp-discrete-control.is-disabled{cursor:not-allowed;filter:grayscale(1)}
+.hp-discrete-control-wide{min-width:76px}
+.hp-discrete-control:focus-within{outline:1px solid var(--hp-accent,#7de4ff);outline-offset:2px}

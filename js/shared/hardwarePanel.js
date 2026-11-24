@@ -104,17 +104,84 @@ export function addButton(parent,{label='',value=false,toggle=true,led='red',onC
  return {el:wrap,holder,getValue:()=>current,setValue};
 }
 
-/* Labelled drop-down. options may be values or {value,label}. */
+/* Detented rotary control for discrete hardware parameters. */
 export function addSelect(parent,{label,options,value,onChange=()=>{},midiId,group='',optionLabels,wide=false}){
- const wrap=node('label','hp-select'+(wide?' hp-select-wide':''),parent);node('span','hp-control-label',wrap,label);
- const select=node('select','',wrap);select.setAttribute('aria-label',label);
- options.forEach((v,i)=>{const o=node('option','',select,String(optionLabels?.[i]??v).toUpperCase());o.value=String(v);});
- select.value=String(value);
- const pick=()=>options.find(o=>String(o)===select.value);
- select.addEventListener('change',()=>onChange(pick()));
- const control={el:select,holder:wrap,getValue:()=>pick(),setValue:v=>{select.value=String(v);}};
- select._oiMidi={id:midiId||('HW:'+label),label,group,get:()=>{const i=options.findIndex(o=>String(o)===select.value);return Math.max(0,i)/(options.length-1||1);},set:t=>{const i=Math.round(clamp(t)*(options.length-1));select.value=String(options[i]);onChange(options[i]);}};
+ let values=[...options],labels=values.map((item,index)=>String(optionLabels?.[index]??item).toUpperCase());
+ const initial=values.findIndex(item=>String(item)===String(value));
+ let index=Math.max(0,initial);
+ const wrap=node('div','hp-discrete-control'+(wide?' hp-discrete-control-wide':''),parent);
+ wrap.setAttribute('role','group');wrap.setAttribute('aria-label',label);
+ const readout=node('span','hp-control-label hp-discrete-control-label',wrap,label);
+ const valueLabel=node('strong','hp-discrete-control-value',wrap,labels[index]??'—');
+ let dial;
+ const setIndex=(next,notify=false)=>{
+  const nextIndex=Math.max(0,Math.min(values.length-1,Math.round(Number(next)||0)));
+  if(nextIndex===index){dial?.setValue(index/(values.length-1||1),true);return;}
+  index=nextIndex;
+  dial?.setValue(index/(values.length-1||1),true);
+  valueLabel.textContent=labels[index]??'—';
+  valueLabel.title=labels[index]??'';
+  wrap.setAttribute('aria-valuetext',labels[index]??'—');
+  if(notify)onChange(values[index]);
+ };
+ dial=addKnob(wrap,{label:'',min:0,max:1,step:.01,value:index/(values.length-1||1),size:40,small:true,formatValue:v=>labels[Math.max(0,Math.min(labels.length-1,Math.round(v*(values.length-1))))]??'—',midiId:midiId||('HW:'+label),group,onChange:v=>setIndex(Math.round(clamp(v)*(values.length-1)),true)});
+ dial.el.classList.add('hp-discrete-control-dial');
+ valueLabel.textContent=labels[index]??'—';
+ const control={
+  el:wrap,holder:wrap,
+  getValue:()=>values[index],
+  setValue:v=>{const found=values.findIndex(item=>String(item)===String(v));if(found>=0)setIndex(found,false);},
+  setOptions:(next,nextValue=values[index],nextLabels=optionLabels)=>{
+   values=[...next];labels=values.map((item,i)=>String(nextLabels?.[i]??item).toUpperCase());
+   const found=values.findIndex(item=>String(item)===String(nextValue));index=found>=0?found:0;
+   dial.setValue(index/(values.length-1||1),true);valueLabel.textContent=labels[index]??'—';
+   valueLabel.title=labels[index]??'';wrap.setAttribute('aria-valuetext',labels[index]??'—');
+   wrap.setAttribute('aria-valuemax',String(Math.max(0,values.length-1)));
+  }
+ };
+ Object.defineProperty(wrap,'value',{get:()=>values[index],set:v=>control.setValue(v)});
+ Object.defineProperty(wrap,'disabled',{get:()=>wrap.getAttribute('aria-disabled')==='true',set:v=>{wrap.setAttribute('aria-disabled',String(!!v));wrap.classList.toggle('is-disabled',!!v);wrap.style.pointerEvents=v?'none':'';wrap.style.opacity=v?'.4':'';}});
+ wrap._oiMidi={id:midiId||('HW:'+label),label,group,get:()=>index/(values.length-1||1),set:t=>setIndex(Math.round(clamp(t)*(values.length-1)),true)};
+ wrap.dataset.midiGroup=group;
  return control;
+}
+
+
+/* Individual panel buttons for discrete states physically selected by keys or lamps. */
+export function addChoiceButtons(parent,{label,options,value,onChange=()=>{},optionLabels,midiId,group=''}){
+ const values=[...options],labels=values.map((item,index)=>String(optionLabels?.[index]??item).toUpperCase());
+ let index=Math.max(0,values.findIndex(item=>String(item)===String(value)));
+ const wrap=node('div','hp-choice-control',parent);
+ wrap.setAttribute('role','group');wrap.setAttribute('aria-label',label);
+ node('span','hp-control-label hp-choice-control-label',wrap,label);
+ const bank=node('div','hp-choice-control-bank',wrap);
+ const readout=node('output','hp-choice-control-readout',wrap);
+ const render=()=>{
+  bank.replaceChildren();
+  values.forEach((item,i)=>{
+   const control=node('button','hp-button hp-choice-control-button',bank,labels[i]);
+   control.type='button';control.setAttribute('aria-pressed',String(i===index));
+   control.classList.toggle('active',i===index);control.title=labels[i];
+   control.addEventListener('click',()=>setIndex(i,true));
+  });
+  readout.textContent=labels[index]??'—';wrap.setAttribute('aria-valuetext',labels[index]??'—');
+ };
+ const setIndex=(next,notify=false)=>{
+  const i=Math.max(0,Math.min(values.length-1,Math.round(Number(next)||0)));
+  if(i===index)return;index=i;render();if(notify)onChange(values[index]);
+ };
+ const control={
+  el:wrap,holder:wrap,getValue:()=>values[index],
+  setValue:v=>{const i=values.findIndex(item=>String(item)===String(v));if(i>=0)setIndex(i,false);},
+  setOptions:(next,nextValue=values[index],nextLabels=optionLabels)=>{
+   values.splice(0,values.length,...next);
+   labels.splice(0,labels.length,...values.map((item,i)=>String(nextLabels?.[i]??item).toUpperCase()));
+   const i=values.findIndex(item=>String(item)===String(nextValue));index=i>=0?i:0;render();
+  }
+ };
+ Object.defineProperty(wrap,'value',{get:()=>values[index],set:v=>control.setValue(v)});
+ wrap._oiMidi={id:midiId||('HW:'+label),label,group,get:()=>index/(values.length-1||1),set:v=>setIndex(Math.round(clamp(v)*(values.length-1)),true)};
+ wrap.dataset.midiGroup=group;render();return control;
 }
 
 export function addSlider(parent,{label,min=0,max=1,step=.001,value=0,onChange=()=>{},midiId,group=''}){

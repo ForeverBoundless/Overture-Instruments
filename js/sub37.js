@@ -5,6 +5,7 @@ import { Sub37Engine } from './engine/Sub37Engine.js';
 import { MidiManager, midiNoteName } from './engine/MidiManager.js';
 import { SUB37_PRESETS } from './data/sub37Presets.js';
 import { consumeCommunityInstrumentPreset, createCommunityShareButton, clearCommunitySource } from './shared/communityPreset.js';
+import { select as panelChoice } from './shared/panel.js';
 
 const KEY_TO_NOTE = { a: 'C3', w: 'C#3', s: 'D3', e: 'D#3', d: 'E3', f: 'F3', t: 'F#3', g: 'G3', y: 'G#3', h: 'A3', u: 'A#3', j: 'B3', k: 'C4', o: 'C#4', l: 'D4', p: 'D#4', ';': 'E4', "'": 'F4' };
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
@@ -215,13 +216,8 @@ class Sub37 {
   }
 
   _selector(label, values, value, onChange) {
-    const wrap = document.createElement('label'); wrap.className = 's37-select-wrap';
-    const caption = document.createElement('span'); caption.textContent = label;
-    const select = document.createElement('select');
-    values.forEach((item) => { const option = document.createElement('option'); option.value = item.value ?? item; option.textContent = item.label ?? item; select.appendChild(option); });
-    select.value = value; select.addEventListener('change', () => onChange(select.value));
-    wrap.append(caption, select);
-    wrap.setValue = (next, silent = false) => { select.value = next; if (!silent) onChange(select.value); };
+    const wrap = panelChoice(null, label, values, value, onChange);
+    wrap.classList.add('s37-select-wrap');
     return wrap;
   }
 
@@ -235,7 +231,7 @@ class Sub37 {
     const program = this._section('PROGRAMMING');
     const bank = this._selector('BANK / PRESET', SUB37_PRESETS.map((preset) => ({ value: preset.id, label: `${preset.bank}.${String(preset.slot)}  ${preset.name}` })), 0, (value) => this._applyPreset(Number(value)));
     this.presetSelect = bank; program.body.appendChild(bank);
-    const presetNode = bank.querySelector('select');
+    const presetNode = bank;
     presetNode.dataset.overturePresetSelector = 'true';
     presetNode.getCommunityPresetSelection = () => {
       const preset = SUB37_PRESETS.find((item) => String(item.id) === String(presetNode.value));
@@ -247,7 +243,7 @@ class Sub37 {
         || (selection.name && item.name === selection.name)
         || (Number.isInteger(selection.index) && index === selection.index && (!selection.name || item.name === selection.name)));
       if (!preset) return false;
-      presetNode.value = String(preset.id);
+      presetNode.setValue(String(preset.id), true);
       this.currentPreset = SUB37_PRESETS.indexOf(preset);
       return true;
     };
@@ -283,7 +279,7 @@ class Sub37 {
 
   _modSection(index) {
     const part = this._section(`MOD ${index + 1}`, 'ASSIGNABLE BUS'); const state = this.engine.modBusses[index];
-    const sync = () => this.engine.setModulation(index, { source: this.modSelectors[index].source.querySelector('select').value, destination: this.modSelectors[index].destination.querySelector('select').value, amount: this.knobs[`mod${index}Amount`].value });
+    const sync = () => this.engine.setModulation(index, { source: this.modSelectors[index].source.value, destination: this.modSelectors[index].destination.value, amount: this.knobs[`mod${index}Amount`].value });
     const source = this._selector('SOURCE', ['LFO 1', 'LFO 2', 'FILTER EG', 'AMP EG', 'OSC 2'], state.source, sync);
     const destination = this._selector('DESTINATION', ['PITCH', 'FILTER', 'WAVE', 'OSC 2', 'AMP'], state.destination, sync);
     this.modSelectors ??= []; this.modSelectors[index] = { source, destination };
@@ -442,7 +438,7 @@ class Sub37 {
   _captureCommunityPatch() {
     const base = SUB37_PRESETS[this.currentPreset] || SUB37_PRESETS[0];
     const value = (key, fallback) => Number.isFinite(Number(this.knobs[key]?.value)) ? Number(this.knobs[key].value) : fallback;
-    const selected = (control, fallback) => control?.querySelector('select')?.value ?? fallback;
+    const selected = (control, fallback) => control?.getValue?.() ?? fallback;
     const patch = JSON.parse(JSON.stringify(base));
     patch.osc1Shape = value('osc0Wave', patch.osc1Shape);
     patch.osc2Shape = value('osc1Wave', patch.osc2Shape);

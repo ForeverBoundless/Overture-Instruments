@@ -85,7 +85,7 @@ class DX7App {
     const g = section(row1, 'ALGORITHM', 'TOPOLOGY & FEEDBACK');
     g.body.classList.add('dx7-alg-body');
     const gc = el('div', 'dx7-alg-controls', g.body);
-    this.algSelect = select(gc, 'ALGORITHM', Array.from({ length: 32 }, (_, i) => ({ value: i + 1, label: `${i + 1}  (${ALGORITHMS[i].carriers.length} carrier${ALGORITHMS[i].carriers.length > 1 ? 's' : ''})` })), 1, (v) => this.edit((p) => { p.algorithm = Number(v); }));
+    this.algSelect = dataEntry(gc, 'ALGORITHM · DATA ENTRY', Array.from({ length: 32 }, (_, i) => ({ value: i + 1, label: `${String(i + 1).padStart(2, '0')} · ${ALGORITHMS[i].carriers.length} CARRIER${ALGORITHMS[i].carriers.length > 1 ? 'S' : ''}` })), 1, (v) => this.edit((p) => { p.algorithm = Number(v); }));
     const gk = el('div', 'pn-knobs', gc);
     this.knobs.feedback = knob(gk, { label: 'FEEDBACK', min: 0, max: 7, value: 5, formatValue: (v) => String(Math.round(v)), onChange: (v) => this.edit((p) => { p.feedback = Math.round(v); }) });
     this.knobs.transpose = knob(gk, { label: 'TRANSPOSE', min: -24, max: 24, value: 0, bipolar: true, formatValue: (v) => `${Math.round(v)} st`, onChange: (v) => this.edit((p) => { p.transpose = Math.round(v); }) });
@@ -100,13 +100,13 @@ class DX7App {
     const lk = el('div', 'pn-knobs', lfo.body);
     const lknob = (key, label, max, fmt) => { this.knobs[key] = knob(lk, { label, min: 0, max, value: 0, formatValue: fmt || ((v) => String(Math.round(v))), onChange: (v) => this.edit((p) => { p.lfo[key] = Math.round(v); }) }); };
     lknob('speed', 'SPEED', 99, (v) => `${(0.06 * Math.pow(10, (v / 99) * 2.8)).toFixed(2)} Hz`); lknob('delay', 'DELAY', 99); lknob('pmd', 'PITCH MOD', 99); lknob('amd', 'AMP MOD', 99); lknob('pms', 'PM SENS', 7);
-    this.lfoWave = select(lfo.body, 'WAVE', LFO_WAVES.map((w) => ({ value: w, label: { tri: 'TRIANGLE', saw: 'SAW DOWN', sqr: 'SQUARE', sine: 'SINE', sh: 'S&H' }[w] })), 'tri', (v) => this.edit((p) => { p.lfo.wave = v; }));
+    this.lfoWave = dataEntry(lfo.body, 'LFO WAVE · DATA ENTRY', LFO_WAVES.map((w) => ({ value: w, label: { tri: 'TRIANGLE', saw: 'SAW DOWN', sqr: 'SQUARE', sine: 'SINE', sh: 'S&H' }[w] })), 'tri', (v) => this.edit((p) => { p.lfo.wave = v; }));
     this.lfoSync = toggle(lfo.body, 'KEY SYNC', false, (v) => this.edit((p) => { p.lfo.sync = v; }));
     const ck = el('div', 'pn-knobs', lfo.body);
     this.knobs.wheelPitch = knob(ck, { label: 'WHEEL→PITCH', min: 0, max: 1, value: 1, formatValue: (v) => `${Math.round(v * 100)}%`, onChange: (v) => this.edit((p) => { p.wheelPitch = v; }) });
     this.knobs.wheelAmp = knob(ck, { label: 'WHEEL→AMP', min: 0, max: 1, value: 0, formatValue: (v) => `${Math.round(v * 100)}%`, onChange: (v) => this.edit((p) => { p.wheelAmp = v; }) });
     this.knobs.atPitch = knob(ck, { label: 'A.TOUCH→PITCH', min: 0, max: 1, value: 0, formatValue: (v) => `${Math.round(v * 100)}%`, onChange: (v) => this.edit((p) => { p.atPitch = v; }) });
-    this.bendSel = select(lfo.body, 'BEND RANGE', [0, 1, 2, 3, 4, 5, 7, 12].map((n) => ({ value: n, label: `${n} st` })), 2, (v) => this.edit((p) => { p.bendRange = Number(v); }));
+    this.bendSel = dataEntry(lfo.body, 'BEND RANGE · DATA ENTRY', [0, 1, 2, 3, 4, 5, 7, 12].map((n) => ({ value: n, label: `${n} ST` })), 2, (v) => this.edit((p) => { p.bendRange = Number(v); }));
 
     // Operator editor
     const row2 = el('div', 'pn-row dx7-row-op', rows);

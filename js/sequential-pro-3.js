@@ -2,7 +2,7 @@ import { WorkletEngine } from './shared/workletEngine.js';
 import { PresetStore } from './shared/presetStore.js';
 import { performance, power } from './shared/panel.js';
 import { registerMidiTargetProvider } from './shared/midiMap.js';
-import { createHardwareSurface,addPanel,addRow,addLabel,addKnob,addFader,addButton,addSelect,addSlider,addDisplay,addKeyboard,addWheel,addTouchStrip } from './shared/hardwarePanel.js';
+import { createHardwareSurface,addPanel,addRow,addLabel,addKnob,addFader,addButton,addSelect,addChoiceButtons,addSlider,addDisplay,addKeyboard,addWheel,addTouchStrip } from './shared/hardwarePanel.js';
 import { PRO3_PRESETS } from './data/pro3Presets.js';
 import { consumeCommunityInstrumentPreset, createCommunityShareButton, clearCommunitySource } from './shared/communityPreset.js';
 
@@ -319,8 +319,9 @@ class Pro3App{
 
   // ---- program memory ----
   const footer=document.createElement('div');footer.className='hp-footer';p.appendChild(footer);
-  this.hwPresets=document.createElement('select');this.hwPresets.setAttribute('aria-label','Program');footer.appendChild(this.hwPresets);
-  this.hwPresets.addEventListener('change',()=>{clearCommunitySource();this.presets.load(this.hwPresets.value);});
+  this.hwPresetsControl=addSelect(footer,{label:'PROGRAM',options:['f:0'],value:'f:0',onChange:v=>{clearCommunitySource();this.presets.load(v);}});
+  this.hwPresets=this.hwPresetsControl.el;this.hwPresets.dataset.overturePresetSelector='true';
+  this.hwPresets.setOptions=this.hwPresetsControl.setOptions;this.hwPresets.setValue=this.hwPresetsControl.setValue;
   const action=(label,fn)=>{const a=document.createElement('button');a.type='button';a.className='hp-action';a.textContent=label;a.addEventListener('click',fn);footer.appendChild(a);return a;};
   action('Save program',()=>{const name=prompt('Name this Pro 3 program','My Pro 3 Program');if(name===null)return;try{const item=this.store.save(name,clone(this.patch));this.refreshHardwarePresetList('u:'+item.id);this.hwDisplay.set(item.name.toUpperCase(),'USER PROGRAM SAVED');}catch(e){alert(e.message);}});
   createCommunityShareButton(footer,{instrumentId:'sequential-pro-3',className:'hp-action',getData:()=>clean(clone(this.patch)),getAudioOutput: () => this.engine.output,
@@ -328,7 +329,10 @@ class Pro3App{
   const waveButton=document.createElement('label');waveButton.className='hp-action';waveButton.textContent='Load wavetable';
   const waveInput=document.createElement('input');waveInput.type='file';waveInput.accept='.wav,audio/wav';waveButton.appendChild(waveInput);footer.appendChild(waveButton);
   waveInput.addEventListener('change',async()=>{const file=waveInput.files?.[0];if(!file)return;try{if(!this.engine.ctx)throw new Error('Power on audio first.');const decoded=await this.engine.ctx.decodeAudioData(await file.arrayBuffer()),data=decoded.getChannelData(0);if(data.length<64||data.length>65536)throw new Error('Use a single-cycle WAV between 64 and 65,536 samples.');this.engine.post({t:'wavetable',data:Array.from(data)});this.hwDisplay.set('WAVETABLE LOADED','USER SINGLE CYCLE · BANK 32');}catch(e){this.hwDisplay.set('WAVETABLE FAILED',e.message);alert(e.message);}});
-  this.refreshHardwarePresetList=(selected='f:0')=>{this.hwPresets.replaceChildren();FACTORY.forEach((item,i)=>{const o=document.createElement('option');o.value='f:'+i;o.textContent=String(i+1)+' · '+item.name;this.hwPresets.appendChild(o);});this.store.items.forEach(item=>{const o=document.createElement('option');o.value='u:'+item.id;o.textContent='User · '+item.name;this.hwPresets.appendChild(o);});this.hwPresets.value=selected;};this.hwPresets.dataset.overturePresetSelector='true';
+  this.refreshHardwarePresetList=(selected='f:0')=>{
+   const items=[...FACTORY.map((item,i)=>({value:'f:'+i,label:String(i+1).padStart(3,'0')+' · '+item.name})),...this.store.items.map(item=>({value:'u:'+item.id,label:'USER · '+item.name}))];
+   this.hwPresetsControl.setOptions(items.map(item=>item.value),selected,items.map(item=>item.label));
+  };
    this.hwPresets.getCommunityPresetSelection=()=>{
     const value=this.hwPresets.value;
     if(value.startsWith('f:')){const index=Number(value.slice(2)),item=FACTORY[index];return item?{kind:'factory',index,value,name:item.name}:null;}
@@ -349,13 +353,14 @@ class Pro3App{
   for(let i=0;i<32;i++){
    const route=document.createElement('div');route.className='p3-route';
    const num=document.createElement('strong');num.textContent=String(i+1);
-   const src=document.createElement('select');SOURCES.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;src.appendChild(o);});src.setAttribute('aria-label','Route '+(i+1)+' source');
-   const dst=document.createElement('select');DESTS.forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;dst.appendChild(o);});dst.setAttribute('aria-label','Route '+(i+1)+' destination');
+   let updateRoute=()=>{};
+   const srcControl=addSelect(route,{label:'SOURCE · SOFT KNOB',options:SOURCES,value:this.patch.modRoutes[i].source,group:'MOD MATRIX',onChange:()=>updateRoute()});
+   const dstControl=addSelect(route,{label:'DESTINATION · SOFT KNOB',options:DESTS,value:this.patch.modRoutes[i].destination,group:'MOD MATRIX',onChange:()=>updateRoute()});
    const amount=document.createElement('input');amount.type='range';amount.min='-1';amount.max='1';amount.step='.01';amount.setAttribute('aria-label','Route '+(i+1)+' depth');
    const val=document.createElement('output');
-   const update=()=>{this.patch.modRoutes[i]={source:src.value,destination:dst.value,amount:Number(amount.value)};val.value=Number(amount.value).toFixed(2);this.postPatch();};
-   src.addEventListener('change',update);dst.addEventListener('change',update);amount.addEventListener('input',update);
-   route.append(num,src,dst,amount,val);rowsEl.appendChild(route);this.matrixRows.push({src,dst,amount,val});
+   updateRoute=()=>{this.patch.modRoutes[i]={source:srcControl.getValue(),destination:dstControl.getValue(),amount:Number(amount.value)};val.value=Number(amount.value).toFixed(2);this.postPatch();};
+   amount.addEventListener('input',updateRoute);
+   route.append(num,amount,val);rowsEl.appendChild(route);this.matrixRows.push({src:srcControl.el,dst:dstControl.el,amount,val});
   }
   this.refreshMatrix=()=>this.matrixRows.forEach((row,i)=>{const r=this.patch.modRoutes[i];row.src.value=r.source;row.dst.value=r.destination;row.amount.value=String(r.amount);row.val.value=Number(r.amount).toFixed(2);});
   document.body.appendChild(this.matrixDialog);
