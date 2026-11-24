@@ -59,6 +59,11 @@ test('hardware-specific choice controls use the corresponding control types', ()
   assert.match(mellotron, /TRACK SELECT · A \/ B \/ C/);
   assert.match(dx7, /dataEntry\(gc, 'ALGORITHM/);
   assert.match(nord, /cycleControl\('\.nord-model'/);
+  assert.match(nord, /data-rotary-speed="slow"/);
+  assert.match(nord, /data-rotary-speed="fast"/);
+  assert.match(nord, /data-rotary-stop-mode/);
+  assert.doesNotMatch(nord, /cycleControl\('\.nord-rotary-speed'/);
+  assert.match(read('js/engine/NordC2DEngine.js'), /setRotaryMode\(mode\)/);
   assert.match(obxa, /obxa-bank-groups__buttons/);
   assert.match(obxa, /PROGRAM NUMBER/);
   assert.match(pro3, /SOURCE · SOFT KNOB/);

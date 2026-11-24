@@ -29,6 +29,8 @@ export class NordC2DEngine {
     this.program = { index: 1, live: false, dirty: false, memoryProtect: true };
     this.pipe = { stops: Array(21).fill(false), couplers: Array(7).fill(false), tremulant: false };
     this.rotary = false;
+    this.rotaryMode = 'slow';
+    this.rotaryEnabled = false;
     this.reverb = 0.18;
     this.drive = 0;
     this.masterLevel = 0.55;
@@ -108,7 +110,7 @@ export class NordC2DEngine {
     this.started = true;
     this.manuals.forEach((m, i) => this.setVibrato(i, m.vibrato));
     this.setExpression(this.expressionLevel);
-    if (this.rotaryEnabled) this.setRotary(this.rotary); else this.setRotaryEnabled(false);
+    if (this.rotaryEnabled) this.setRotaryMode(this.rotaryMode || (this.rotary ? 'fast' : 'slow')); else this.setRotaryEnabled(false);
     this._startTonewheelLeakage();
   }
 
@@ -290,14 +292,22 @@ export class NordC2DEngine {
     bus.dry.gain.setTargetAtTime(off ? 1 : chorus ? 0.5 : 0, t, 0.02);
   }
 
-  /** Rotary speaker: true = fast, false = slow. See setRotaryEnabled for the stop/bypass state. */
+  /** Compatibility wrapper for older callers that select only slow or fast. */
   setRotary(fast) {
-    this.rotary = !!fast;
-    if (!this.leslie) return;
+    return this.setRotaryMode(fast ? 'fast' : 'slow');
+  }
+
+  /** Select rotor speed. STOP is a stationary rotor with the Leslie path still engaged. */
+  setRotaryMode(mode) {
+    this.rotaryMode = ['slow', 'fast', 'stop'].includes(mode) ? mode : 'slow';
+    this.rotary = this.rotaryMode === 'fast';
+    if (!this.leslie) { this.rotaryEnabled = true; return; }
     const t = this.ctx.currentTime;
-    // Motor ramps: the horn speeds up quicker than the heavy bass drum.
-    this.leslie.horn.frequency.setTargetAtTime(fast ? 6.8 : 0.8, t, fast ? 0.6 : 1.2);
-    this.leslie.drum.frequency.setTargetAtTime(fast ? 5.9 : 0.7, t, fast ? 1.6 : 2.4);
+    const fast = this.rotaryMode === 'fast';
+    const stopped = this.rotaryMode === 'stop';
+    // The stop position holds both rotors stationary without bypassing the speaker model.
+    this.leslie.horn.frequency.setTargetAtTime(stopped ? 0 : fast ? 6.8 : 0.8, t, stopped ? 1.2 : fast ? 0.6 : 1.2);
+    this.leslie.drum.frequency.setTargetAtTime(stopped ? 0 : fast ? 5.9 : 0.7, t, stopped ? 2.4 : fast ? 1.6 : 2.4);
     this.setRotaryEnabled(true);
   }
 

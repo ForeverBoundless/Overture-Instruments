@@ -84,3 +84,9 @@
 .nord-pipe-controls,
 .nord-stop-grid,
 .nord-couplers { justify-content: center; }
+
+/* The C2D's rotary controls are independent hardware buttons, not one menu selector. */
+.nord-rotary-controls{display:flex;align-items:flex-end;gap:4px;flex-wrap:wrap;min-width:0}
+.nord-rotary-label{display:block;align-self:center;color:#ffd2d3;font:7px 'DM Mono',monospace;letter-spacing:.06em;margin-right:2px}
+.nord-system-row .nord-rotary-controls button.active{color:#400307;background:#ffcc51;border-color:#ffe9a0;box-shadow:inset 0 1px #fff8,0 0 6px #ffd45b55}
+@media(max-width:760px){.nord-rotary-controls{flex:1 1 100%;justify-content:flex-start}.nord-rotary-label{flex-basis:100%}}

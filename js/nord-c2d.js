@@ -62,6 +62,8 @@ class NordC2D {
     this.computerNotes = new Map();
     this.pendingMidiNotes = new Map();
     this.sliderSetters = {};
+    this.rotaryMode = 'slow';
+    this.rotaryStopMode = false;
     this._build();
     const community = consumeCommunityInstrumentPreset('nord-c2d', validateCommunityNord);
     if (community) this.applyCommunityPatch(community.data, community.title);
@@ -84,11 +86,10 @@ class NordC2D {
   /** Mod wheel / CC1 acts as the half-moon rotor switch: up = fast, down = slow. */
   _setRotorFromController(fast) {
     const button = document.querySelector('[data-action="rotary"]');
-    const speed = document.querySelector('.nord-rotary-speed');
     button?.classList.add('active');
-    if (speed) speed.value = fast ? 'Fast' : 'Slow';
-    this.engine.rotary = fast; this.engine.rotaryEnabled = true;
-    if (this.engine.started) this.engine.setRotary(fast);
+    this.rotaryMode = fast ? 'fast' : 'slow';
+    this.engine.setRotaryMode(this.rotaryMode);
+    this.renderRotaryControls?.();
   }
 
   _midiAllNotesOff() {
@@ -106,12 +107,12 @@ class NordC2D {
     const shell = document.createElement('main');
     shell.className = 'nord-shell';
     this.shell = shell;
-    shell.innerHTML = `<header class="nord-header"><img src="/ui/Logos/Nord_logo.png" alt="Nord" class="nord-logo"><div class="nord-title"><strong><b>c2d</b></strong><span>DUAL MANUAL ORGAN</span></div></header><section class="nord-top-panel"><div class="nord-brand-display"><small>PROGRAM <b class="nord-program-number">001</b></small><strong class="nord-program-name">B3 DRAWBAR PANEL</strong><span>LIVE MEMORY</span></div><div class="nord-global-controls"><label>ORGAN MODEL<button type="button" class="nord-model nord-setting-control" aria-label="Cycle organ model">MODEL · B3</button></label><button data-action="rotary">ROTARY</button><button data-action="reverb">REVERB</button><button data-action="drive">DRIVE</button><button data-action="split">TO GREAT</button><button data-action="pedal">PEDAL</button><button data-action="store">STORE</button></div><div class="nord-global-knobs"><label class="nord-control-slider"><span>MASTER LEVEL</span><i class="nord-slider-face" data-control="master" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="1" aria-valuenow=".55" aria-label="Master level"><b></b></i><output>55</output></label><label class="nord-control-slider"><span>REVERB</span><i class="nord-slider-face" data-control="reverb" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="1" aria-valuenow=".18" aria-label="Reverb"><b></b></i><output>18</output></label><label class="nord-control-slider"><span>DRIVE</span><i class="nord-slider-face" data-control="drive" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="1" aria-valuenow="0" aria-label="Drive"><b></b></i><output>0</output></label></div></section><section class="nord-system-row"><label>SOUND MENU · CROSSTALK<button type="button" class="nord-crosstalk nord-setting-control" aria-label="Cycle sound menu crosstalk">VINTAGE 3</button></label><label>SOUND MENU · KEY CLICK<button type="button" class="nord-click nord-setting-control" aria-label="Cycle sound menu key click">NORMAL</button></label><label>ROTARY SPEED<button type="button" class="nord-rotary-speed nord-setting-control" aria-label="Cycle rotary speed">STOP</button></label><label>PROGRAM <button data-program="previous">−</button><output class="nord-program-readout">001</output><button data-program="next">+</button></label></section><section class="nord-model-panel"></section><section class="nord-manuals"></section><footer class="nord-footer">NORD C2D • DUAL 37-KEY MANUALS • B3 / VX / FARF / PIPE • COMPUTER KEYBOARD READY</footer>`;
+    shell.innerHTML = `<header class="nord-header"><img src="/ui/Logos/Nord_logo.png" alt="Nord" class="nord-logo"><div class="nord-title"><strong><b>c2d</b></strong><span>DUAL MANUAL ORGAN</span></div></header><section class="nord-top-panel"><div class="nord-brand-display"><small>PROGRAM <b class="nord-program-number">001</b></small><strong class="nord-program-name">B3 DRAWBAR PANEL</strong><span>LIVE MEMORY</span></div><div class="nord-global-controls"><label>ORGAN MODEL<button type="button" class="nord-model nord-setting-control" aria-label="Cycle organ model">MODEL · B3</button></label><button data-action="rotary" aria-label="Enable Overture rotary simulation">ROTARY SIM</button><button data-action="reverb">REVERB</button><button data-action="drive">DRIVE</button><button data-action="split">TO GREAT</button><button data-action="pedal">PEDAL</button><button data-action="store">STORE</button></div><div class="nord-global-knobs"><label class="nord-control-slider"><span>MASTER LEVEL</span><i class="nord-slider-face" data-control="master" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="1" aria-valuenow=".55" aria-label="Master level"><b></b></i><output>55</output></label><label class="nord-control-slider"><span>REVERB</span><i class="nord-slider-face" data-control="reverb" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="1" aria-valuenow=".18" aria-label="Reverb"><b></b></i><output>18</output></label><label class="nord-control-slider"><span>DRIVE</span><i class="nord-slider-face" data-control="drive" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="1" aria-valuenow="0" aria-label="Drive"><b></b></i><output>0</output></label></div></section><section class="nord-system-row"><label>SOUND MENU · CROSSTALK<button type="button" class="nord-crosstalk nord-setting-control" aria-label="Cycle sound menu crosstalk">VINTAGE 3</button></label><label>SOUND MENU · KEY CLICK<button type="button" class="nord-click nord-setting-control" aria-label="Cycle sound menu key click">NORMAL</button></label><div class="nord-rotary-controls" role="group" aria-label="Rotary speaker controls"><span class="nord-rotary-label">ROTARY SPEED</span><button type="button" class="nord-rotary-speed nord-setting-control" data-rotary-speed="slow" aria-label="Slow or stop rotary speaker">SLOW / STOP</button><button type="button" class="nord-rotary-fast nord-setting-control" data-rotary-speed="fast" aria-label="Fast rotary speaker">FAST</button><button type="button" class="nord-rotary-stop-mode nord-setting-control" data-rotary-stop-mode aria-pressed="false">STOP MODE</button></div><label>PROGRAM <button data-program="previous">−</button><output class="nord-program-readout">001</output><button data-program="next">+</button></label></section><section class="nord-model-panel"></section><section class="nord-manuals"></section><footer class="nord-footer">NORD C2D • DUAL 37-KEY MANUALS • B3 / VX / FARF / PIPE • COMPUTER KEYBOARD READY</footer>`;
     root.appendChild(shell);
     shell.querySelectorAll('[data-action]').forEach((button) => button.addEventListener('click', () => {
       if (button.dataset.action === 'store') return; // momentary
       button.classList.toggle('active');
-      if (button.dataset.action === 'rotary') { const on = button.classList.contains('active'); this.engine.setRotaryEnabled(on); const speed = shell.querySelector('.nord-rotary-speed'); if (on && speed.value === 'Stop') { speed.value = 'Slow'; this.engine.setRotary(false); } }
+      if (button.dataset.action === 'rotary') { const on = button.classList.contains('active'); if (on) this.engine.setRotaryMode(this.rotaryMode); else this.engine.setRotaryEnabled(false); this.renderRotaryControls?.(); }
       if (button.dataset.action === 'reverb') this.engine.setReverb(button.classList.contains('active') ? 0.45 : 0.08);
     }));
     const controls = { master: 0.50, reverb: 0.18, drive: 0 };
@@ -169,11 +170,29 @@ class NordC2D {
     cycleControl('.nord-model', ['B3', 'VX', 'Farf', 'Pipe'], this.engine.model, (value) => this.engine.setModel(value));
     cycleControl('.nord-crosstalk', ['Clean', 'Vintage 1', 'Vintage 2', 'Vintage 3'], this.engine.crosstalk, (value) => this.engine.setCrosstalk(value));
     cycleControl('.nord-click', ['Low', 'Normal', 'High', 'Higher'], this.engine.keyClick, (value) => this.engine.setKeyClick(value));
-    cycleControl('.nord-rotary-speed', ['Slow', 'Stop', 'Fast'], 'Stop', (value) => {
-      const btn = shell.querySelector('[data-action="rotary"]');
-      if (value === 'Stop') { this.engine.setRotaryEnabled(false); btn.classList.remove('active'); }
-      else { this.engine.setRotary(value === 'Fast'); btn.classList.add('active'); }
+    const slowStop = shell.querySelector('[data-rotary-speed="slow"]');
+    const fast = shell.querySelector('[data-rotary-speed="fast"]');
+    const stopMode = shell.querySelector('[data-rotary-stop-mode]');
+    this.renderRotaryControls = () => {
+      slowStop.classList.toggle('active', this.rotaryMode === 'slow' || this.rotaryMode === 'stop');
+      fast.classList.toggle('active', this.rotaryMode === 'fast');
+      stopMode.classList.toggle('active', this.rotaryStopMode);
+      stopMode.setAttribute('aria-pressed', String(this.rotaryStopMode));
+      slowStop.title = this.rotaryStopMode ? 'Stop Mode: press to toggle between slow and stopped' : 'Set rotary speaker to slow';
+    };
+    const setRotaryMode = (mode) => {
+      this.rotaryMode = mode;
+      if (this.engine.rotaryEnabled) this.engine.setRotaryMode(mode);
+      else { this.engine.rotaryMode = mode; this.engine.rotary = mode === 'fast'; }
+      this.renderRotaryControls();
+    };
+    slowStop.addEventListener('click', () => {
+      if (this.rotaryStopMode) setRotaryMode(this.rotaryMode === 'stop' ? 'slow' : 'stop');
+      else setRotaryMode('slow');
     });
+    fast.addEventListener('click', () => setRotaryMode('fast'));
+    stopMode.addEventListener('click', () => { this.rotaryStopMode = !this.rotaryStopMode; this.renderRotaryControls(); });
+    this.renderRotaryControls();
     // The generic [data-action] listener above already toggled the button.
     shell.querySelector('[data-action="split"]').addEventListener('click', (event) => { this.engine.setGreatSplit(event.currentTarget.classList.contains('active')); });
     shell.querySelectorAll('[data-program]').forEach((button) => button.addEventListener('click', () => this._changeProgram(button.dataset.program)));
@@ -457,6 +476,12 @@ const banks = section.querySelector('.nord-manual-banks');
       pipe: { stops: [...this.engine.pipe.stops], couplers: [...this.engine.pipe.couplers], tremulant: this.engine.pipe.tremulant },
       rotary: this.engine.rotary,
       rotaryEnabled: !!this.engine.rotaryEnabled,
+      rotaryMode: this.rotaryMode,
+      rotaryStopMode: this.rotaryStopMode,
+      rotaryMode: this.rotaryMode,
+      rotaryStopMode: this.rotaryStopMode,
+      rotaryMode: this.rotaryMode,
+      rotaryStopMode: this.rotaryStopMode,
       reverb: this.engine.reverb,
       drive: this.engine.drive,
       masterLevel: this.engine.masterLevel,
@@ -498,9 +523,11 @@ const banks = section.querySelector('.nord-manual-banks');
     engine.setDrive(patch.drive ?? 0);
     engine.masterLevel = clamp(Number(patch.masterLevel) || 0, 0, 1);
     if (engine.output) engine.output.gain.value = engine.masterLevel;
-    engine.rotary = !!patch.rotary;
-    engine.setRotaryEnabled(!!patch.rotaryEnabled);
-    if (patch.rotaryEnabled) engine.setRotary(!!patch.rotary);
+    this.rotaryMode = patch.rotaryMode || (patch.rotaryEnabled ? (patch.rotary ? 'fast' : 'slow') : 'slow');
+    this.rotaryStopMode = !!patch.rotaryStopMode;
+    engine.rotary = this.rotaryMode === 'fast';
+    if (patch.rotaryEnabled) engine.setRotaryMode(this.rotaryMode);
+    else engine.setRotaryEnabled(false);
     engine.program.index = clamp(Number(patch.programIndex) || 1, 1, 126);
     this.octaves = [...patch.octaveShift];
     this.sliderSetters.master?.(engine.masterLevel);
@@ -510,8 +537,8 @@ const banks = section.querySelector('.nord-manual-banks');
     shell.querySelector('.nord-model').value = patch.model;
     shell.querySelector('.nord-crosstalk').value = engine.crosstalk;
     shell.querySelector('.nord-click').value = engine.keyClick;
-    shell.querySelector('.nord-rotary-speed').value = engine.rotaryEnabled ? (engine.rotary ? 'Fast' : 'Slow') : 'Stop';
     shell.querySelector('[data-action="rotary"]').classList.toggle('active', engine.rotaryEnabled);
+    this.renderRotaryControls?.();
     shell.querySelector('[data-action="reverb"]').classList.toggle('active', engine.reverb > .2);
     shell.querySelector('[data-action="split"]').classList.toggle('active', engine.greatSplit);
     shell.querySelector('.nord-program-number').textContent = String(engine.program.index);
