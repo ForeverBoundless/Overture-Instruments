@@ -1,4 +1,4 @@
-const CACHE = 'overture-shell-v163';
+const CACHE = 'overture-shell-v164';
 const APP_SHELL = [
   '/account',
   '/login',
@@ -213,6 +213,12 @@ const APP_SHELL = [
   '/js/shared/midiMap.js',
   '/js/shared/midiRecorder.js',
   '/js/shared/panel.js',
+  '/css/home.css?v=20261117-omni-denser-lines-r1',
+  '/js/home.js?v=20261105-rainbow-window-hit',
+  '/js/shared/contact.js?v=20261029-modalfix',
+  '/css/library.css',
+  '/css/panel.css?v=20261118-centered-r1',
+  '/css/hardware-panel.css?v=20261118-centered-r1',
   '/js/shared/presetStore.js',
   '/js/shared/pwa.js',
   '/js/shared/hardwarePanel.js',
