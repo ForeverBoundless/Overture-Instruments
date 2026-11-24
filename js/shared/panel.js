@@ -211,8 +211,8 @@ export function discreteFader(parent, label, options, value, onChange = () => {}
   input.max = String(choices.length - 1);
   input.step = '1';
   input.setAttribute('aria-label', label);
-  input.setAttribute('aria-valuemin', String(choices[0].label));
-  input.setAttribute('aria-valuemax', String(choices[choices.length - 1].label));
+  input.setAttribute('aria-valuemin', '0');
+  input.setAttribute('aria-valuemax', String(choices.length - 1));
   const readout = el('output', 'pn-discrete-fader__readout', wrap);
   const render = () => {
     const choice = choices[index];
