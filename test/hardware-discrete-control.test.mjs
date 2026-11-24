@@ -115,7 +115,7 @@ test('SEM voice migration retains the old single-wave patch format', () => {
 
 test('all instrument pages load the revised controls and the new offline shell', () => {
   const serviceWorker = read('service-worker.js');
-  assert.match(serviceWorker, /overture-shell-v165/);
+  assert.match(serviceWorker, /overture-shell-v166/);
   assert.match(serviceWorker, /20261123-discrete-controls-r2/);
   assert.match(serviceWorker, /20261123-sem-mixer-r1/);
 });

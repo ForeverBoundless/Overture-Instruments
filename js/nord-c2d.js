@@ -31,6 +31,10 @@ function validateCommunityNord(data) {
   return {
     ...copy,
     model: ['B3','VX','Farf','Pipe'].includes(copy.model) ? copy.model : 'B3',
+    rotary: !!copy.rotary,
+    rotaryEnabled: !!copy.rotaryEnabled,
+    rotaryMode: ['slow','fast','stop'].includes(copy.rotaryMode) ? copy.rotaryMode : (copy.rotaryEnabled ? (copy.rotary ? 'fast' : 'slow') : 'slow'),
+    rotaryStopMode: !!copy.rotaryStopMode,
     manuals: copy.manuals.map(manual),
     pipe: {
       stops: Array.from({ length: 21 }, (_, i) => !!copy.pipe?.stops?.[i]),
@@ -476,10 +480,6 @@ const banks = section.querySelector('.nord-manual-banks');
       pipe: { stops: [...this.engine.pipe.stops], couplers: [...this.engine.pipe.couplers], tremulant: this.engine.pipe.tremulant },
       rotary: this.engine.rotary,
       rotaryEnabled: !!this.engine.rotaryEnabled,
-      rotaryMode: this.rotaryMode,
-      rotaryStopMode: this.rotaryStopMode,
-      rotaryMode: this.rotaryMode,
-      rotaryStopMode: this.rotaryStopMode,
       rotaryMode: this.rotaryMode,
       rotaryStopMode: this.rotaryStopMode,
       reverb: this.engine.reverb,
