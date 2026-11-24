@@ -260,7 +260,7 @@ test('M400 and Eight Voice are complete instrument pages, not library-only entri
   assert.match(oberheimApp, /FILTER RESPONSE/);
   assert.match(oberheimApp, /osc1Saw/);
   assert.match(oberheimApp, /osc1Pulse/);
-  assert.match(oberheimApp, /VCO 1 PULSE/);
+  assert.match(oberheimApp, /const shape = key\.endsWith\('Saw'\) \? 'SAW' : 'PULSE'/);
   assert.match(oberheimApp, /LFO ROUTING/);
   assert.match(oberheimApp, /voiceUi\.forEach/);
   assert.match(oberheimEngine, /q\.cutoff/);
