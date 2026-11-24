@@ -69,13 +69,52 @@ test('Hohner D6 and Oberheim OB-Xa are complete first-class emulator entries', a
   assert.match(obEngine, /portamentoMode==='quantized'/);
   assert.match(obEngine, /inputNote===note/);
   assert.match(obEngine, /mode==='full'\?0:\(v\.i<half\?0:1\)/);
-  assert.match(obEngine, /enabled\?clamp\(p\.pulseWidthAmount/);
+  assert.match(obEngine, /pwDepth=clamp\(p\.pulseWidthAmount,0,1\)/);
   assert.match(obEngine, /width=clamp\(\.5-p\.pulseWidth\*\.45/);
   assert.doesNotMatch(obEngine, /lfoVca/);
   assert.match(obPage, /Oberheim OB-Xa from Overture Instruments/);
   assert.match(worker, /overture-shell-v\d+/);
   assert.match(worker, /hohner-d6/);
   assert.match(worker, /ob-xa/);
+});
+
+
+test('OB-Xa exposes the hardware programmer, modulation panel and voice-pan controls in its blue-steel theme', async () => {
+  const [app, engine, patch, page, worker, styles] = await Promise.all([
+    readFile(new URL('../js/obxa.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/engine/OBXaProcessor.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/data/obxa-patch.js', import.meta.url), 'utf8'),
+    readFile(new URL('../html/ob-xa.html', import.meta.url), 'utf8'),
+    readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
+    readFile(new URL('../css/ob-xa.css', import.meta.url), 'utf8'),
+  ]);
+  assert.match(app, /MODULATION PANEL LFO/);
+  assert.match(app, /PULL UP TO ENABLE/);
+  assert.match(app, /AUTO-TUNE/);
+  assert.match(app, /OSC 2 FREQUENCY/);
+  assert.match(app, /OSC 2 DETUNE/);
+  assert.match(app, /VOICE PAN POTS/);
+  assert.match(app, /HARDWARE PROGRAMMER/);
+  assert.match(app, /SPLIT \/ DOUBLE MEMORY/);
+  assert.match(app, /MEMORY PROTECT/);
+  assert.match(app, /enterManualMode/);
+  assert.match(app, /TIMBRE TRANSPOSE',min:-60,max:60/);
+  assert.match(engine, /this\.modPanelLfo=\{phase:0\}/);
+  assert.match(engine, /modPanelLfoValue\(dt\)/);
+  assert.match(engine, /m\.t==='autoTune'/);
+  assert.match(engine, /this\.p\.voicePan\?\.\[v\.i\]/);
+  assert.match(engine, /p\.osc2Detune\|\|0/);
+  assert.match(patch, /modPanelLfoDepthEnabled/);
+  assert.match(patch, /osc2Detune/);
+  assert.match(patch, /voicePan:\[-1,-1,-1,-1,1,1,1,1\]/);
+  assert.match(styles, /\.obxa-programmer-layout/);
+  assert.match(styles, /\.obxa-voice-grid/);
+  assert.match(styles, /radial-gradient\(ellipse at 50% -20%,#314c63/);
+  assert.match(page, /ob-xa\.css\?v=20261123-hardware-panel-r1/);
+  assert.match(page, /obxa\.js\?v=20261123-obxa-patch-r5/);
+  assert.match(worker, /OBXaProcessor\.js\?v=20261123-audio-r4/);
+  assert.match(worker, /obxa-patch\.js\?v=20261123-obxa-patch-r4/);
+  assert.match(worker, /ob-xa\.css\?v=20261123-hardware-panel-r1/);
 });
 
 test('all library cards use canonical metadata with declared preset provenance', () => {
@@ -140,7 +179,7 @@ test('Little Phatty uses a grouped responsive layout without viewport shrinking'
   assert.match(page, /little-phatty\.css\?v=20261104-compact-centred/);
 });
 
-test('Sub 37 side panels use the seeded wood grain from its Library tile', async () => {
+test('Sub 37 keeps its top controls reachable and uses compact horizontal modulation buses', async () => {
   const [tileStyles, emulatorStyles, page] = await Promise.all([
     readFile(new URL('../css/library.css', import.meta.url), 'utf8'),
     readFile(new URL('../css/sub37.css', import.meta.url), 'utf8'),
@@ -151,10 +190,14 @@ test('Sub 37 side panels use the seeded wood grain from its Library tile', async
   assert.match(emulatorStyles, /background-size:96px 160px/);
   assert.match(emulatorStyles, /seed='43'/);
   assert.match(emulatorStyles, /font-family: 'Figtree'/);
+  assert.ok(emulatorStyles.includes('#sub37-root { min-height: 100vh; padding: 18px; display: grid; place-items: start center; align-content: start; }'));
+  assert.ok(emulatorStyles.includes('#sub37-root { place-items: start center; align-content: start; }'));
   const responsiveStyles = emulatorStyles.slice(emulatorStyles.indexOf('Sub 37 responsive and typography correction'));
   assert.match(responsiveStyles, /\.sub37-shell\s*\{[^}]*min-width:\s*0/);
   assert.match(emulatorStyles, /@media \(max-width: 480px\)/);
-  assert.match(page, /sub37\.css\?v=20261104-responsive-wood-type/);
+  assert.ok(emulatorStyles.includes('.s37-mod-row .s37-section-body {'));
+  assert.ok(emulatorStyles.includes('grid-template-columns: minmax(72px, 1fr) minmax(72px, 1fr)'));
+  assert.ok(page.includes('sub37.css?v=20261123-scroll-r1'));
 });
 
 test('instrument and experiment pages register the shared offline app shell', async () => {

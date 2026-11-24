@@ -1,4 +1,4 @@
-const CACHE = 'overture-shell-v158';
+const CACHE = 'overture-shell-v163';
 const APP_SHELL = [
   '/account',
   '/login',
@@ -58,7 +58,7 @@ const APP_SHELL = [
   '/css/sequential-pro-3.css?v=20261119-pro3-final-r1',
   '/js/sequential-pro-3.js?v=20261119-pro3-final-r1',
   '/css/udo-super-8.css?v=20261119-lfo-brand-r1',
-  '/css/ob-xa.css?v=20261106-mays-mod-r1',
+  '/css/ob-xa.css?v=20261123-hardware-panel-r1',
   '/css/library.css?v=20261117-amber-signal-r1',
   '/css/library.css?v=20261119-tile-consistency-r1',
   '/js/library.js?v=20261119-tile-consistency-r1',
@@ -89,7 +89,7 @@ const APP_SHELL = [
   '/css/site-theme-polish.css?v=20261117-inter-type-r1',
   '/css/site-theme.css?v=20261117-inter-type-r1',
   '/css/site-theme.css?v=20261117-inter-type-r1',
-  '/css/sub37.css',
+  '/css/sub37.css?v=20261123-scroll-r1',
   '/css/yamaha-dx7.css',
   '/experiments',
   '/experiments/beats-lab',
@@ -169,7 +169,7 @@ const APP_SHELL = [
   '/js/engine/Pro3Processor.js',
   '/js/engine/Super8Processor.js',
   '/js/engine/HohnerD6Processor.js?v=20261106-audio-r1',
-  '/js/engine/OBXaProcessor.js?v=20261106-audio-r1',
+  '/js/engine/OBXaProcessor.js?v=20261123-audio-r4',
   '/js/engine/OberheimEightVoiceProcessor.js?v=20261104-eightvoice-stable',
   '/js/engine/Sub37Engine.js',
   '/js/engine/TR808Engine.js',
@@ -206,7 +206,8 @@ const APP_SHELL = [
   '/js/roland-tr-808.js',
   '/js/oberheim-eight-voice.js',
   '/js/hohner-d6.js?v=20261106-audio-r1',
-  '/js/obxa.js?v=20261106-mays-mod-r1',
+  '/js/obxa.js?v=20261123-obxa-patch-r5',
+  '/js/data/obxa-patch.js?v=20261123-obxa-patch-r4',
   '/js/shared/audioRecorder.js',
   '/js/shared/contact.js',
   '/js/shared/midiMap.js',
