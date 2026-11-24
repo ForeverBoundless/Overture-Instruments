@@ -598,6 +598,7 @@ const banks = section.querySelector('.nord-manual-banks');
     if (engine.output) engine.output.gain.value = engine.masterLevel;
     this.rotaryMode = patch.rotaryMode || (patch.rotaryEnabled ? (patch.rotary ? 'fast' : 'slow') : 'slow');
     this.rotaryStopMode = !!patch.rotaryStopMode;
+    if (this.rotaryStopMode && this.rotaryMode === 'slow') this.rotaryMode = 'fast';
     engine.rotary = this.rotaryMode === 'fast';
     if (patch.rotaryEnabled) engine.setRotaryMode(this.rotaryMode);
     else engine.setRotaryEnabled(false);

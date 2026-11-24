@@ -215,7 +215,7 @@ const APP_SHELL = [
   '/js/shared/panel.js',
   '/js/shared/presetStore.js',
   '/js/shared/pwa.js',
-  '/js/shared/hardwarePanel.js?v=20261124-discrete-controls-r4',
+  '/js/shared/hardwarePanel.js?v=20261123-discrete-controls-r2',
   '/js/shared/site-nav.js',
   '/js/shared/site-theme.js',
   '/js/shared/workletEngine.js',
