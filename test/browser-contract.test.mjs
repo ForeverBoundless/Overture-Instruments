@@ -58,7 +58,7 @@ test('Hohner D6 and Oberheim OB-Xa are complete first-class emulator entries', a
   assert.match(obApp, /PORTAMENTO/);
   assert.match(obApp, /CHORD MEMORY/);
   assert.match(obApp, /LOWER \/ UPPER BALANCE/);
-  assert.match(obApp, /GLIDE MODE/);
+  assert.match(obApp, /OVERTURE GLIDE STYLE/);
   assert.match(obApp, /MODULATION \/ BEND ENABLE/);
   assert.match(obApp, /UPPER BANK/);
   assert.match(obApp, /DOWN 1 OCTAVE/);
@@ -114,7 +114,7 @@ test('OB-Xa exposes the hardware programmer, modulation panel and voice-pan cont
   assert.match(page, /obxa\.js\?v=20261123-discrete-controls-r1/);
   assert.match(worker, /OBXaProcessor\.js\?v=20261123-audio-r4/);
   assert.match(worker, /obxa-patch\.js\?v=20261123-obxa-patch-r4/);
-  assert.match(worker, /ob-xa\.css\?v=20261123-hardware-panel-r1/);
+  assert.match(worker, /ob-xa\.css\?v=20261123-discrete-controls-r1/);
 });
 
 test('all library cards use canonical metadata with declared preset provenance', () => {
@@ -258,7 +258,8 @@ test('M400 and Eight Voice are complete instrument pages, not library-only entri
   assert.match(oberheimApp, /VCF CUTOFF/);
   assert.match(oberheimApp, /STEREO PAN/);
   assert.match(oberheimApp, /FILTER RESPONSE/);
-  assert.match(oberheimApp, /VCO 1 SAW/);
+  assert.match(oberheimApp, /osc1Saw/);
+  assert.match(oberheimApp, /osc1Pulse/);
   assert.match(oberheimApp, /VCO 1 PULSE/);
   assert.match(oberheimApp, /LFO ROUTING/);
   assert.match(oberheimApp, /voiceUi\.forEach/);
