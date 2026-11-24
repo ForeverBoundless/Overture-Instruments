@@ -49,6 +49,8 @@ test('hardware-specific choice controls use the corresponding control types', ()
   const obxa = read('js/obxa.js');
   const pro3 = read('js/sequential-pro-3.js');
   const super8 = read('js/udo-super-8.js');
+  const sub37 = read('js/sub37.js');
+  const hardware = read('js/shared/hardwarePanel.js');
   const eightVoice = read('js/oberheim-eight-voice.js');
 
   assert.match(juno, /DCO RANGE/);
@@ -60,8 +62,29 @@ test('hardware-specific choice controls use the corresponding control types', ()
   assert.match(obxa, /obxa-bank-groups__buttons/);
   assert.match(obxa, /PROGRAM NUMBER/);
   assert.match(pro3, /SOURCE · SOFT KNOB/);
-  assert.match(pro3, /DESTINATION · SOFT KNOB/);
-  assert.match(super8, /DDS 1 WAVEFORM/);
+  assert.match(pro3, /DESTINATION · SOFT KNOB 4/);
+  assert.match(pro3, /PARAPHONIC/);
+  assert.match(pro3, /FILTER MODEL/);
+  assert.match(pro3, /TRACK SEL/);
+  assert.match(pro3, /PRESS STEP 1–16/);
+  assert.match(pro3, /BANK/);
+  assert.match(pro3, /PROGRAM/);
+  assert.match(sub37, /s37-bank-preset/);
+  assert.match(sub37, /SELECT BANK · PRESS 1–16/);
+  assert.match(hardware, /export function addCycleButton/);
+  assert.match(super8, /o\.cycle\?addCycleButton/);
+  assert.match(super8, /UNISON SIZE · OVERTURE SHIFT\+MODE MAPPING/);
+  assert.match(super8, /label:'SHIFT'/);
+  assert.match(super8, /label:'PERF'/);
+  assert.match(super8, /this\.hwPerformanceShifted\?1:0/);
+  assert.match(super8, /SUPER8:PERFORMANCE:GROUP/);
+  assert.match(super8, /SUPER8:PERFORMANCE:BANK/);
+  assert.match(super8, /this\.hwPerformanceGroup\*64/);
+  assert.match(super8, />=128/);
+  assert.match(super8, /SUPER8:PERFORMANCE:PROGRAM/);
+  assert.match(super8, /const program=selectedIndex>=0&&Math\.floor\(selectedIndex\/8\)===this\.hwPerformanceBank/);
+  assert.match(super8, /this\.renderPerformanceKeys=\(\)=>/);
+  assert.match(super8, /DDS 1 WAVEFORM SWITCH/);
   assert.match(eightVoice, /osc1Saw/);
   assert.doesNotMatch(eightVoice, /VCO 1 WAVEFORM/);
 });
@@ -78,7 +101,7 @@ test('SEM voice migration retains the old single-wave patch format', () => {
 
 test('all instrument pages load the revised controls and the new offline shell', () => {
   const serviceWorker = read('service-worker.js');
-  assert.match(serviceWorker, /overture-shell-v164/);
-  assert.match(serviceWorker, /20261123-discrete-controls-r1/);
+  assert.match(serviceWorker, /overture-shell-v165/);
+  assert.match(serviceWorker, /20261123-discrete-controls-r2/);
   assert.match(serviceWorker, /20261123-sem-mixer-r1/);
 });

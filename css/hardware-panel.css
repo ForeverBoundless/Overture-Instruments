@@ -162,3 +162,23 @@ body.pn-body.hp-pro3-body,body.pn-body.hp-super8-body{min-height:100vh;overflow-
 .hp-discrete-control.is-disabled{cursor:not-allowed;filter:grayscale(1)}
 .hp-discrete-control-wide{min-width:76px}
 .hp-discrete-control:focus-within{outline:1px solid var(--hp-accent,#7de4ff);outline-offset:2px}
+
+/* UDO Super 8 hardware-style performance bank and program keys (A-H / 1-8). */
+.hp-super8-memory-label{display:block;flex:0 0 100%;color:var(--hp-muted);letter-spacing:.12em}
+.hp-super8-performance-memory{display:grid;grid-template-columns:minmax(0,1fr);gap:5px;flex:1 1 100%;min-width:220px;padding:7px;border:1px solid var(--hp-line);border-radius:4px;background:linear-gradient(180deg,color-mix(in srgb,var(--hp-control) 94%,#fff),var(--hp-control))}
+.hp-super8-performance-banks,.hp-super8-performance-programs{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px}
+.hp-super8-performance-banks .hp-btn,.hp-super8-performance-programs .hp-btn{min-width:0}
+.hp-super8-performance-banks .hp-button,.hp-super8-performance-programs .hp-button{min-width:0;width:100%;min-height:27px;padding:4px 1px}
+.hp-super8-performance-readout{display:block;min-height:23px;padding:5px 7px;border:2px solid #030506;border-radius:2px;background:var(--hp-display-bg);color:var(--hp-display);font:8px/1.35 'DM Mono',monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:680px){.hp-super8-performance-memory{min-width:100%}.hp-super8-memory-label{flex-basis:100%}}
+
+/* Small program track readout beside the Pro 3's TRACK SEL button. */
+.hp-track-select-readout{display:inline-flex;align-items:center;justify-content:center;min-width:62px;min-height:27px;padding:4px 7px;border:1px solid var(--hp-line);border-radius:3px;background:var(--hp-display-bg);color:var(--hp-display);font:8px/1.25 'DM Mono',monospace;white-space:nowrap}
+
+.hp-super8-performance-groups{display:flex;align-items:center;justify-content:flex-start;gap:5px;min-width:0;padding-bottom:4px;border-bottom:1px solid var(--hp-line)}
+.hp-super8-performance-groups .hp-cycle-control{display:flex;flex-direction:row;align-items:center;gap:7px;padding:0}
+.hp-super8-performance-groups .hp-cycle-control-label{margin:0}
+.hp-super8-performance-groups .hp-cycle-control-button{min-width:46px;min-height:27px}
+.hp-super8-performance-groups .hp-cycle-control-readout{min-width:50px;text-align:left}
+
+.hp-super8-performance-group-readout{display:inline-flex;align-items:center;justify-content:center;min-width:62px;min-height:25px;padding:4px 8px;border:1px solid var(--hp-line);border-radius:3px;background:var(--hp-display-bg);color:var(--hp-display);font:8px/1.2 'DM Mono',monospace;white-space:nowrap}

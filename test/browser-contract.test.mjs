@@ -111,7 +111,7 @@ test('OB-Xa exposes the hardware programmer, modulation panel and voice-pan cont
   assert.match(styles, /\.obxa-voice-grid/);
   assert.match(styles, /radial-gradient\(ellipse at 50% -20%,#314c63/);
   assert.match(page, /ob-xa\.css\?v=20261123-discrete-controls-r1/);
-  assert.match(page, /obxa\.js\?v=20261123-discrete-controls-r1/);
+  assert.match(page, /obxa\.js\?v=20261123-discrete-controls-r2/);
   assert.match(worker, /OBXaProcessor\.js\?v=20261123-audio-r4/);
   assert.match(worker, /obxa-patch\.js\?v=20261123-obxa-patch-r4/);
   assert.match(worker, /ob-xa\.css\?v=20261123-discrete-controls-r1/);
@@ -197,7 +197,7 @@ test('Sub 37 keeps its top controls reachable and uses compact horizontal modula
   assert.match(emulatorStyles, /@media \(max-width: 480px\)/);
   assert.ok(emulatorStyles.includes('.s37-mod-row .s37-section-body {'));
   assert.ok(emulatorStyles.includes('grid-template-columns: minmax(72px, 1fr) minmax(72px, 1fr)'));
-  assert.ok(page.includes('sub37.css?v=20261123-discrete-controls-r1'));
+  assert.ok(page.includes('sub37.css?v=20261123-discrete-controls-r2'));
 });
 
 test('instrument and experiment pages register the shared offline app shell', async () => {

@@ -184,6 +184,43 @@ export function addChoiceButtons(parent,{label,options,value,onChange=()=>{},opt
  wrap.dataset.midiGroup=group;render();return control;
 }
 
+/* Single illuminated pushbutton that steps through a hardware menu parameter. */
+export function addCycleButton(parent,{label,options,value,onChange=()=>{},optionLabels,buttonText='MODE',midiId,group=''}){
+ let values=[...options],labels=values.map((item,index)=>String(optionLabels?.[index]??item).toUpperCase());
+ let index=Math.max(0,values.findIndex(item=>String(item)===String(value)));
+ const wrap=node('div','hp-cycle-control',parent);
+ node('span','hp-control-label hp-cycle-control-label',wrap,label);
+ const button=node('button','hp-button hp-cycle-control-button',wrap);
+ button.type='button';
+ const readout=node('output','hp-cycle-control-readout',wrap);
+ const render=()=>{
+  const text=labels[index]??'—';
+  button.textContent=buttonText;
+  button.setAttribute('aria-label',`${label}: ${text}. Press to cycle.`);
+  button.setAttribute('aria-valuetext',text);
+  button.title=text;
+  readout.textContent=text;
+ };
+ const setIndex=(next,notify=false)=>{
+  const i=Math.max(0,Math.min(values.length-1,Math.round(Number(next)||0)));
+  if(i===index)return;
+  index=i;render();if(notify)onChange(values[index]);
+ };
+ const control={
+  el:button,holder:wrap,getValue:()=>values[index],
+  setValue:(next,silent=true)=>{const i=values.findIndex(item=>String(item)===String(next));if(i>=0)setIndex(i,!silent);},
+  setOptions:(next,nextValue=values[index],nextLabels=optionLabels)=>{
+   values=[...next];labels=values.map((item,i)=>String(nextLabels?.[i]??item).toUpperCase());
+   const i=values.findIndex(item=>String(item)===String(nextValue));index=i>=0?i:0;render();
+  }
+ };
+ button.addEventListener('click',()=>setIndex((index+1)%Math.max(1,values.length),true));
+ Object.defineProperty(button,'value',{get:()=>values[index],set:v=>control.setValue(v,true)});
+ button._oiMidi={id:midiId||('HW:'+label),label,group,get:()=>index/(values.length-1||1),set:v=>setIndex(Math.round(clamp(v)*(values.length-1)),true)};
+ button.dataset.midiGroup=group;render();return control;
+}
+
+
 export function addSlider(parent,{label,min=0,max=1,step=.001,value=0,onChange=()=>{},midiId,group=''}){
  const wrap=node('label','hp-slider',parent);node('span','hp-control-label',wrap,label);
  const input=node('input','',wrap);input.type='range';input.min=String(min);input.max=String(max);input.step=String(step);input.value=String(value);input.setAttribute('aria-label',label);

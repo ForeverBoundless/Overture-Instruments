@@ -211,7 +211,7 @@ class OBXaApp{
   el('p','pn-help obxa-mod-help',assignmentBlock,'With HOLD on, play and release a chord to capture its intervals. Turn HOLD off to release held notes; CHORD MEMORY then transposes the stored voicing from each new root. Bank assignment is only editable in SPLIT and DOUBLE modes.');
 const allocation=section(rows,'KEYBOARD & VOICE ALLOCATION','FULL · SPLIT · DOUBLE · PROGRAMMABLE VOICE BANKS'),ak=el('div','pn-knobs',allocation.body);
   this.ui.mode=choiceButtons(allocation.body,'KEYBOARD MODE',[{value:'full',label:'FULL'},{value:'split',label:'SPLIT'},{value:'double',label:'DOUBLE'}],this.patch.mode,v=>this.set('mode',v));
-  this.ui.voiceCount=select(allocation.body,'OVERTURE ENGINE VOICE COUNT',[{value:'4',label:'4 VOICES'},{value:'6',label:'6 VOICES'},{value:'8',label:'8 VOICES'}],String(this.patch.voiceCount),v=>this.set('voiceCount',Number(v)));
+  this.ui.voiceCount=choiceButtons(allocation.body,'OVERTURE ENGINE VOICE COUNT',[{value:'4',label:'4 VOICES'},{value:'6',label:'6 VOICES'},{value:'8',label:'8 VOICES'}],String(this.patch.voiceCount),v=>this.set('voiceCount',Number(v)));
   this.ui.splitPoint=knob(ak,{label:'SPLIT POINT',min:36,max:96,value:this.patch.splitPoint,formatValue:v=>NOTE_NAMES[Math.round(v)%12]+(Math.floor(Math.round(v)/12)-1),onChange:v=>this.set('splitPoint',Math.round(v))});
   this.ui.layerBalance=knob(ak,{label:'LOWER / UPPER BALANCE',min:0,max:1,value:this.patch.layerBalance,formatValue:v=>Math.round(v*100)+'% UPPER',onChange:v=>this.set('layerBalance',v)});
   this.ui.unison=toggle(allocation.body,'UNISON',this.patch.unison,v=>this.set('unison',v));

@@ -2,7 +2,7 @@ import { WorkletEngine } from './shared/workletEngine.js';
 import { PresetStore } from './shared/presetStore.js';
 import { performance, power } from './shared/panel.js';
 import { registerMidiTargetProvider } from './shared/midiMap.js';
-import { createHardwareSurface,addPanel,addRow,addLabel,addKnob,addFader,addButton,addSelect,addChoiceButtons,addSlider,addDisplay,addKeyboard,addWheel,addTouchStrip } from './shared/hardwarePanel.js';
+import { createHardwareSurface,addPanel,addRow,addLabel,addKnob,addFader,addButton,addSelect,addChoiceButtons,addSlider,addDisplay,addKeyboard,addWheel,addTouchStrip } from './shared/hardwarePanel.js?v=20261123-discrete-controls-r2';
 import { PRO3_PRESETS } from './data/pro3Presets.js';
 import { consumeCommunityInstrumentPreset, createCommunityShareButton, clearCommunitySource } from './shared/communityPreset.js';
 
@@ -118,6 +118,7 @@ class Pro3App{
   const track=Number(this.patch.seqTrack)||0,offset=this.seqPage*16;
   this.hwSteps?.forEach((c,i)=>{const v=this.patch.seqTracks[track]?.[offset+i];c.setValue(v!==null&&v!==undefined,true);});
   if(this.hwDest){this.hwDest.setValue(this.patch.seqDestinations[track]||'none');this.hwDest.el.disabled=track<3;}
+  if(this.hwTrackReadout)this.hwTrackReadout.textContent=this.trackSelectMode?'PRESS STEP 1–16':'TRACK '+(track+1);
  }
  applyMorph(t){
   if(!this.morphA||!this.morphB)return;
@@ -147,7 +148,7 @@ class Pro3App{
   };
   const f=(parent,key,label,o={})=>remember('faders',key,addFader(parent,{label,value:this.patch[key],height:o.height||84,midiId:'PRO3:'+key,group:o.group||'SYNTHESIS',onChange:v=>this.set(key,v)}));
   const b=(parent,key,label,o={})=>remember('buttons',key,addButton(parent,{label,value:!!this.patch[key],led:o.led||'red',midiId:'PRO3:'+key,group:o.group||'SYNTHESIS',onChange:v=>this.set(key,v)}));
-  const s=(parent,key,label,options,o={})=>{const c=addSelect(parent,{label,options,value:this.patch[key],optionLabels:o.labels,wide:o.wide,midiId:'PRO3:'+key,group:o.group||'SYNTHESIS',onChange:v=>{this.set(key,v);if(o.after)o.after(v);}});c.holder.dataset.key=key;c.el._oiMidi.id='PRO3:'+key;return remember('selects',key,c);};
+  const s=(parent,key,label,options,o={})=>{const make=o.buttons?addChoiceButtons:addSelect;const c=make(parent,{label,options,value:this.patch[key],optionLabels:o.labels,wide:o.wide,midiId:'PRO3:'+key,group:o.group||'SYNTHESIS',onChange:v=>{this.set(key,v);if(o.after)o.after(v);}});c.holder.dataset.key=key;c.el._oiMidi.id='PRO3:'+key;return remember('selects',key,c);};
 
   // ---- top strip: brand, display, voice, power ----
   const top=addRow(p,'p3-top');
@@ -156,7 +157,8 @@ class Pro3App{
   const model=document.createElement('div');model.className='p3-model';model.innerHTML='<strong>PRO 3</strong><span>Hybrid multi-filter monosynth</span>';brand.appendChild(model);
   this.hwDisplay=addDisplay(top,{brand:'PROGRAM / PARAMETER DISPLAY'});this.display=this.hwDisplay;this.display.flash=m=>this.hwDisplay.set(String(m).toUpperCase(),'PRO 3');this.hwDisplay.set('001 · PROLOGUE BASS','OVERTURE PROGRAM');
   const voice=addRow(top,'p3-voice');
-  s(voice,'mode','Voice mode',['mono','paraphonic'],{group:'PERFORMANCE',wide:true});
+  this.hwPara=addButton(voice,{label:'PARAPHONIC',value:this.patch.mode==='paraphonic',led:'amber',midiId:'PRO3:mode',group:'PERFORMANCE',onChange:v=>this.set('mode',v?'paraphonic':'mono')});
+  this.hwControls.all.push(this.hwPara);
   this.hwPower=addButton(voice,{label:'POWER',value:false,toggle:false,led:'green',group:'GLOBAL',onChange:async()=>{const ready=await this.activateAudio?.();this.hwPower?.setValue(!!ready,true);}});
 
   // ---- compact upper strip: global modulation, effects, sequencer and arp ----
@@ -187,11 +189,14 @@ class Pro3App{
 
   const seq=addPanel(upper,{title:'Sequencer',sub:'16 tracks · four 16-step phrases',className:'p3-seq'});
   const seqTop=addRow(seq.body,'p3-seq-top');
-  s(seqTop,'seqTrack','Track',Array.from({length:16},(_,i)=>i),{labels:Array.from({length:16},(_,i)=>i+1),group:'SEQUENCER',after:()=>this.renderSteps()});
-  s(seqTop,'seqPhrase','Phrase',['A','B','C','D'],{group:'SEQUENCER',after:v=>{this.seqPage=['A','B','C','D'].indexOf(v);this.renderSteps();}});
-  this.hwDest=addSelect(seqTop,{label:'Track destination',options:SEQ_DESTS,value:'note',wide:true,midiId:'PRO3:seqDestination',group:'SEQUENCER',onChange:v=>{const t=Number(this.patch.seqTrack)||0;this.patch.seqDestinations[t]=v;this.patch.seqDestination=v;this.postSequence();}});
+  this.trackSelectMode=false;
+  this.hwTrackSelect=addButton(seqTop,{label:'TRACK SEL',value:false,led:'amber',midiId:'PRO3:TRACK-SELECT',group:'SEQUENCER',onChange:on=>{this.trackSelectMode=!!on;this.hwTrackReadout.textContent=this.trackSelectMode?'PRESS STEP 1–16':'TRACK '+(Number(this.patch.seqTrack||0)+1);}});
+  this.hwTrackReadout=document.createElement('output');this.hwTrackReadout.className='hp-track-select-readout';this.hwTrackReadout.textContent='TRACK '+(Number(this.patch.seqTrack||0)+1);seqTop.appendChild(this.hwTrackReadout);
+  this.hwControls.all.push(this.hwTrackSelect);
+  s(seqTop,'seqPhrase','PHRASE',['A','B','C','D'],{group:'SEQUENCER',buttons:true,after:v=>{this.seqPage=['A','B','C','D'].indexOf(v);this.renderSteps();}});
+  this.hwDest=addSelect(seqTop,{label:'DESTINATION · SOFT KNOB 4',options:SEQ_DESTS,value:'note',wide:true,midiId:'PRO3:seqDestination',group:'SEQUENCER',onChange:v=>{const t=Number(this.patch.seqTrack)||0;this.patch.seqDestinations[t]=v;this.patch.seqDestination=v;this.postSequence();}});
   this.hwControls.all.push(this.hwDest);
-  s(seqTop,'seqMode','Play mode',['forward','reverse','forwardReverse','random'],{group:'SEQUENCER',wide:true});
+  s(seqTop,'seqMode','PLAY DIRECTION',['forward','reverse','forwardReverse','random'],{group:'SEQUENCER',buttons:true,wide:true,labels:['FWD','REV','FWD / REV','RANDOM']});
   s(seqTop,'seqLength','Length',Array.from({length:64},(_,i)=>i+1),{group:'SEQUENCER'});
   k(seqTop,'bpm','Tempo',{min:30,max:260,step:1,size:38,group:'SEQUENCER',fmt:v=>String(Math.round(v))});
   k(seqTop,'seqSwing','Swing',{size:38,group:'SEQUENCER'});
@@ -199,7 +204,7 @@ class Pro3App{
   b(seqTop,'seqEnabled','Play',{group:'SEQUENCER',led:'green'});
   b(seqTop,'seqRecord','Record',{group:'SEQUENCER'});
   const steps=document.createElement('div');steps.className='p3-steps';seq.body.appendChild(steps);this.hwSteps=[];
-  for(let i=0;i<16;i++){const c=addButton(steps,{label:String(i+1),value:false,led:'red',midiId:'PRO3:SEQ:STEP:'+i,group:'SEQUENCER',onChange:()=>this.toggleStep(i)});this.hwSteps.push(c);this.hwControls.all.push(c);}
+  for(let i=0;i<16;i++){const c=addButton(steps,{label:String(i+1),value:false,led:'red',midiId:'PRO3:SEQ:STEP:'+i,group:'SEQUENCER',onChange:()=>{if(this.trackSelectMode){this.set('seqTrack',i);this.trackSelectMode=false;this.hwTrackSelect?.setValue(false,true);this.hwTrackReadout.textContent='TRACK '+(i+1);this.renderSteps();}else this.toggleStep(i);}});this.hwSteps.push(c);this.hwControls.all.push(c);}
   const playBtn=this.hwControls.buttons.find(x=>x.key==='seqEnabled').control;
   playBtn.el.addEventListener('click',()=>this.engine.post({t:'transport',play:this.patch.seqEnabled}));
 
@@ -261,7 +266,7 @@ class Pro3App{
   k(mix.body,'noiseLevel','NOISE',{size:35,group:'MIXER'});
 
   const fl=addPanel(main,{title:'Filter',sub:'three selectable filter designs',className:'p3-filter'});
-  s(fl.body,'filterType','Model',['prophet6','ladder','stateVariable'],{group:'FILTER',wide:true,labels:['Prophet-6','Ladder','State variable']});
+  s(fl.body,'filterType','FILTER MODEL',['prophet6','ladder','stateVariable'],{group:'FILTER',buttons:true,wide:true,labels:['LP 1 · PROPHET','LP 2 · LADDER','STATE VARIABLE']});
   b(fl.body,'filterBp','Band pass',{group:'FILTER'});
   k(fl.body,'filterCutoff','Cutoff',{step:.005,size:60,group:'FILTER',accent:true});
   k(fl.body,'resonance','Resonance',{step:.005,size:42,group:'FILTER'});
@@ -319,7 +324,11 @@ class Pro3App{
 
   // ---- program memory ----
   const footer=document.createElement('div');footer.className='hp-footer';p.appendChild(footer);
-  this.hwPresetsControl=addSelect(footer,{label:'PROGRAM',options:['f:0'],value:'f:0',onChange:v=>{clearCommunitySource();this.presets.load(v);}});
+  this.hwBankControl=addSelect(footer,{label:'BANK',options:['factory','user'],optionLabels:['OVERTURE','USER'],value:'factory',onChange:value=>{
+   const target=value==='factory'?'f:0':(this.store.items[0]?('u:'+this.store.items[0].id):'user-empty');
+   this.refreshHardwarePresetList(target);
+  }});
+  this.hwPresetsControl=addSelect(footer,{label:'PROGRAM',options:['f:0'],value:'f:0',onChange:v=>{if(!v)return;clearCommunitySource();this.presets.load(v);}});
   this.hwPresets=this.hwPresetsControl.el;this.hwPresets.dataset.overturePresetSelector='true';
   this.hwPresets.setOptions=this.hwPresetsControl.setOptions;this.hwPresets.setValue=this.hwPresetsControl.setValue;
   const action=(label,fn)=>{const a=document.createElement('button');a.type='button';a.className='hp-action';a.textContent=label;a.addEventListener('click',fn);footer.appendChild(a);return a;};
@@ -330,8 +339,14 @@ class Pro3App{
   const waveInput=document.createElement('input');waveInput.type='file';waveInput.accept='.wav,audio/wav';waveButton.appendChild(waveInput);footer.appendChild(waveButton);
   waveInput.addEventListener('change',async()=>{const file=waveInput.files?.[0];if(!file)return;try{if(!this.engine.ctx)throw new Error('Power on audio first.');const decoded=await this.engine.ctx.decodeAudioData(await file.arrayBuffer()),data=decoded.getChannelData(0);if(data.length<64||data.length>65536)throw new Error('Use a single-cycle WAV between 64 and 65,536 samples.');this.engine.post({t:'wavetable',data:Array.from(data)});this.hwDisplay.set('WAVETABLE LOADED','USER SINGLE CYCLE · BANK 32');}catch(e){this.hwDisplay.set('WAVETABLE FAILED',e.message);alert(e.message);}});
   this.refreshHardwarePresetList=(selected='f:0')=>{
-   const items=[...FACTORY.map((item,i)=>({value:'f:'+i,label:String(i+1)+' · '+item.name})),...this.store.items.map(item=>({value:'u:'+item.id,label:'USER · '+item.name}))];
-   this.hwPresetsControl.setOptions(items.map(item=>item.value),selected,items.map(item=>item.label));
+   const user=String(selected).startsWith('u:')||String(selected)==='user-empty';
+   const items=user
+    ? this.store.items.map(item=>({value:'u:'+item.id,label:item.name}))
+    : FACTORY.map((item,i)=>({value:'f:'+i,label:String(i+1)+' · '+item.name}));
+   const safeItems=items.length?items:[{value:'',label:'NO USER PROGRAMS'}];
+   const resolved=safeItems.some(item=>item.value===selected)?selected:safeItems[0].value;
+   this.hwBankControl.setValue(user?'user':'factory');
+   this.hwPresetsControl.setOptions(safeItems.map(item=>item.value),resolved,safeItems.map(item=>item.label));
   };
    this.hwPresets.getCommunityPresetSelection=()=>{
     const value=this.hwPresets.value;
@@ -339,10 +354,15 @@ class Pro3App{
     const item=this.store.get(value.slice(2));return item?{kind:'user',id:item.id,value,name:item.name}:null;
    };
    this.hwPresets.restoreCommunityPresetSelection=selection=>{
+    if(selection.kind==='user'){
+     const user=(selection.id&&this.store.get(selection.id))||this.store.items.find(item=>item.name===selection.name);
+     if(!user)return false;
+     this.refreshHardwarePresetList('u:'+user.id);return true;
+    }
     let index=Number.isInteger(selection.index)?selection.index:-1;
     if(index<0||index>=FACTORY.length||(selection.name&&FACTORY[index]?.name!==selection.name))index=FACTORY.findIndex(item=>item.name===selection.name);
     if(index<0)return false;
-    this.hwPresets.value='f:'+index;return true;
+    this.refreshHardwarePresetList('f:'+index);return true;
    };
   this.displayHardwarePreset=name=>{this.hwDisplay.set(name.toUpperCase(),'PRO 3 · PROGRAM');hw.program.textContent='PRO 3 · '+name;};
 
@@ -370,6 +390,8 @@ class Pro3App{
    this.hwControls.faders.forEach(({key,control})=>control.setValue(this.patch[key],true));
    this.hwControls.buttons.forEach(({key,control})=>{if(this.patch[key]!==undefined)control.setValue(this.patch[key],true);});
    this.hwControls.selects.forEach(({key,control})=>control.setValue(this.patch[key]));
+   this.hwPara?.setValue(this.patch.mode==='paraphonic',true);
+   this.trackSelectMode=false;this.hwTrackSelect?.setValue(false,true);
    this.seqPage=Math.max(0,['A','B','C','D'].indexOf(this.patch.seqPhrase||'A'));
    this.renderSteps();this.refreshMatrix?.();
   };
