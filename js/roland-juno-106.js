@@ -1,7 +1,7 @@
 /** roland-juno-106.js - six-voice DCO polysynth page. Sound: js/engine/JunoProcessor.js */
 import { WorkletEngine } from './shared/workletEngine.js';
 import { PresetStore, num } from './shared/presetStore.js';
-import { el, section, knob, toggle, select, switchControl, display, performance, power, presetBar, footer } from './shared/panel.js';
+import { el, section, knob, toggle, select, switchControl, discreteFader, display, performance, power, presetBar, footer } from './shared/panel.js';
 import { JUNO_PRESETS } from './data/junoPresets.js';
 import { consumeCommunityInstrumentPreset, createCommunityShareButton } from './shared/communityPreset.js';
 
@@ -78,7 +78,7 @@ class JunoApp {
     this.ui.pulse = toggle(wb, 'PULSE ⎍', false, (v) => this.set('pulse', v)); this.ui.saw = toggle(wb, 'SAW ⩘', true, (v) => this.set('saw', v));
     const dk2 = el('div', 'pn-knobs', dco.body); K(dk2, 'sub', 'SUB OSC'); K(dk2, 'noise', 'NOISE');
     const hpf = section(r1, 'HPF');
-    this.ui.hpf = select(hpf.body, 'FREQ', [{ value: 0, label: '0 (BASS LIFT)' }, { value: 1, label: '1 (FLAT)' }, { value: 2, label: '2' }, { value: 3, label: '3' }], 1, (v) => this.set('hpf', Number(v)));
+    this.ui.hpf = discreteFader(hpf.body, 'HPF FREQ', [{ value: 0, label: '0 · BASS LIFT' }, { value: 1, label: '1 · FLAT' }, { value: 2, label: '2' }, { value: 3, label: '3' }], 1, (v) => this.set('hpf', Number(v)));
     const vcf = section(r1, 'VCF', '24 dB LOW-PASS');
     const fk = el('div', 'pn-knobs', vcf.body); K(fk, 'cutoff', 'FREQ', (v) => `${Math.round(20 * Math.pow(2, (20 + v * 110) / 12))} Hz`); K(fk, 'res', 'RES'); K(fk, 'envAmt', 'ENV'); K(fk, 'vcfLfo', 'LFO'); K(fk, 'kbd', 'KYBD');
     this.ui.envPolarity = toggle(vcf.body, 'ENV INVERT', false, (v) => this.set('envPolarity', v ? -1 : 1));

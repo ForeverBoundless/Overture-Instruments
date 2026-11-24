@@ -125,7 +125,7 @@ test('SEM voice migration retains the old single-wave patch format', () => {
 
 test('all instrument pages load the revised controls and the new offline shell', () => {
   const serviceWorker = read('service-worker.js');
-  assert.match(serviceWorker, /overture-shell-v173/);
+  assert.match(serviceWorker, /overture-shell-v169/);
   assert.match(serviceWorker, /20261124-discrete-controls-r2/);
   assert.match(serviceWorker, /20261123-sem-mixer-r1/);
 });
@@ -168,6 +168,8 @@ test('Juno-106 uses maintained switches and models the separate VCF bend control
   const panel = read('js/shared/panel.js');
   const styles = read('css/roland-juno-106.css');
   assert.match(panel, /export function switchControl/);
+  assert.match(panel, /export function discreteFader/);
+  assert.match(juno, /discreteFader\(hpf\.body, 'HPF FREQ'/);
   assert.match(juno, /switchControl\(dco\.body, 'PWM MODE'/);
   assert.match(juno, /switchControl\(vca\.body, 'VCA CONTROL'/);
   assert.match(juno, /label: 'DCO BEND SENS'/);
@@ -175,13 +177,14 @@ test('Juno-106 uses maintained switches and models the separate VCF bend control
   assert.match(processor, /vcfBendRange: 0/);
   assert.match(processor, /this\.bend \* p\.vcfBendRange/);
   assert.match(styles, /\.pn-toggle-switch__actuator/);
+  assert.match(styles, /\.pn-discrete-fader__input/);
 });
 
 
 test('Juno-106 lever switch and VCF-bend assets are precached at the active versions', () => {
   const worker = read('service-worker.js');
   const page = read('html/roland-juno-106.html');
-  assert.match(worker, /overture-shell-v173/);
+  assert.match(worker, /overture-shell-v170/);
   assert.match(worker, /roland-juno-106\.css\?v=20261124-discrete-controls-r1/);
   assert.match(worker, /roland-juno-106\.js\?v=20261124-discrete-controls-r2/);
   assert.match(page, /roland-juno-106\.css\?v=20261124-discrete-controls-r1/);

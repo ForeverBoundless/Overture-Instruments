@@ -192,6 +192,62 @@ export function switchControl(parent, label, options, value, onChange = () => {}
   return wrap;
 }
 
+
+/** Four-position panel fader for stepped analog controls such as the Juno HPF. */
+export function discreteFader(parent, label, options, value, onChange = () => {}) {
+  const choices = normalizeChoices(options);
+  if (!choices.length) throw new RangeError('A discrete fader needs at least one position.');
+  let index = Math.max(0, choices.findIndex((choice) => choice.value === String(value)));
+  const wrap = el('div', 'pn-discrete-fader', parent);
+  wrap.setAttribute('role', 'group');
+  wrap.setAttribute('aria-label', label);
+  el('span', 'pn-discrete-fader__caption', wrap, label);
+  const body = el('div', 'pn-discrete-fader__body', wrap);
+  const marks = el('div', 'pn-discrete-fader__marks', body);
+  const track = el('div', 'pn-discrete-fader__track-wrap', body);
+  const input = el('input', 'pn-discrete-fader__input', track);
+  input.type = 'range';
+  input.min = '0';
+  input.max = String(choices.length - 1);
+  input.step = '1';
+  input.setAttribute('aria-label', label);
+  input.setAttribute('aria-valuemin', String(choices[0].label));
+  input.setAttribute('aria-valuemax', String(choices[choices.length - 1].label));
+  const readout = el('output', 'pn-discrete-fader__readout', wrap);
+  const render = () => {
+    const choice = choices[index];
+    input.value = String(index);
+    input.setAttribute('aria-valuenow', String(index));
+    input.setAttribute('aria-valuetext', choice.label);
+    readout.textContent = choice.label;
+    readout.title = choice.label;
+    marks.replaceChildren();
+    choices.slice().reverse().forEach((item) => {
+      const mark = el('span', 'pn-discrete-fader__mark', marks, item.label.split(' ')[0]);
+      mark.classList.toggle('active', item.value === choice.value);
+    });
+  };
+  const setValue = (next, silent = false) => {
+    const found = choices.findIndex((choice) => choice.value === String(next));
+    if (found < 0 || found === index) return;
+    index = found;
+    render();
+    if (!silent) onChange(choices[index].value);
+  };
+  input.addEventListener('input', () => {
+    const next = Math.max(0, Math.min(choices.length - 1, Math.round(Number(input.value))));
+    if (next === index) return;
+    index = next;
+    render();
+    onChange(choices[index].value);
+  });
+  wrap.setValue = setValue;
+  wrap.getValue = () => choices[index].value;
+  Object.defineProperty(wrap, 'value', { get: () => choices[index].value, set: (next) => setValue(next, true) });
+  render();
+  return wrap;
+}
+
 export function dataEntry(parent, label, options, value, onChange = () => {}) {
   let choices = normalizeChoices(options);
   let index = Math.max(0, choices.findIndex((choice) => choice.value === String(value)));
