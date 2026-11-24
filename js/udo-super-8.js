@@ -20,7 +20,7 @@ const LAYER={
  lfo1Rate:.15,lfo1Delay:0,lfo1Wave:'sine',lfo1Mode:'free',lfo1HighFreq:false,lfo1KeyTrack:false,lrPhase:0,
  lfo2Rate:.15,lfo2Delay:0,lfo2Wave:'sine',lfo2Mode:'trig',lfo2RateAmount:1,lfo2Dds:0,lfo2Vcf:0,lfo2Vca:0,benderDds:.5,benderVcf:0,
  chorus:'off',chorusMix:.25,delayTime:.28,delayFeedback:.25,delayMod:.1,delayMix:.25,delaySync:false,delayFreeze:false,
- voiceMode:'poly1',unison:'off',modMatrix:Array(64).fill(0),
+ voiceMode:'poly1',unison:'off',unisonSize:'all',modMatrix:Array(64).fill(0),
  hold:false,seqEnabled:false,seqLength:16,seqMode:'step',seqSteps:Array(64).fill(null),seqChords:Array(64).fill(null),seqSlides:Array(64).fill(false),seqAccents:Array(64).fill(false),seqGates:Array(64).fill(.75),seqSwing:0,seqBpm:120,seqSlot:0,seqBanks:Array(16).fill(null),seqRecord:false,seqRecordStep:0,userWaves:Array(64).fill(null),
  arpEnabled:false,arpMode:'up',arpDivision:4,arpRange:1,arpSwing:0,arpHold:false,
  portamento:0,transpose:0,bendRange:2,velocity:'off',aftertouch:0
@@ -28,6 +28,9 @@ const LAYER={
 const GLOBAL={mode:'single',activeLayer:0,splitPoint:60,binaural:true,mpe:true,volume:.72,distortion:0,masterTune:0,benderX:0,benderY:0,expression:1};
 function cleanLayer(d={}){
  const p={...clone(LAYER),...d};
+ const unisonSizes=['half','all','octave','fifth'];
+ p.unison= p.unison==='off'||unisonSizes.includes(p.unison) ? p.unison : 'off';
+ p.unisonSize=unisonSizes.includes(d.unisonSize) ? d.unisonSize : (unisonSizes.includes(d.unison) ? d.unison : 'all');
  p.modMatrix=Array.from({length:64},(_,i)=>Number(d.modMatrix?.[i])||0);
  p.seqSteps=Array.from({length:64},(_,i)=>d.seqSteps?.[i]??null);
  p.seqChords=Array.from({length:64},(_,i)=>Array.isArray(d.seqChords?.[i])?d.seqChords[i].map(n=>Math.max(0,Math.min(127,Math.round(Number(n)||0)))):null);
@@ -204,7 +207,47 @@ class Super8App{
   s(pr,'mode','Voice mode',['single','dual','split'],{global:true,group:'GLOBAL'});
   b(pr,'binaural','Binaural',{global:true,group:'GLOBAL',led:'amber'});b(pr,'mpe','MPE',{global:true,group:'GLOBAL',led:'amber'});b(pr,'hold','Hold',{group:'PERFORMANCE',led:'amber'});
   s(pr,'splitPoint','Split point',Array.from({length:49},(_,i)=>48+i),{global:true,group:'GLOBAL',labels:Array.from({length:49},(_,i)=>NOTE_NAMES[(48+i)%12]+(Math.floor((48+i)/12)-1))});
-  s(pr,'voiceMode','MODE',['solo','legato','poly1','poly2'],{group:'PERFORMANCE',cycle:true});s(pr,'unison','UNISON SIZE · OVERTURE SHIFT+MODE MAPPING',['off','half','all','octave','fifth'],{group:'PERFORMANCE',cycle:true,buttonText:'SHIFT + MODE'});
+  const voiceModes=['solo','legato','poly1','poly2'];
+  const unisonSizes=['half','all','octave','fifth'];
+  const unisonLabels=['1/2','ALL','OCTAVE','OCTAVE + FIFTH'];
+  this.hwVoiceModeReadout=document.createElement('output');
+  this.hwVoiceModeReadout.className='hp-cycle-control-readout';
+  this.hwVoiceModeReadout.setAttribute('aria-live','polite');
+  this.hwVoiceModeControl=addButton(pr,{label:'MODE',value:false,toggle:false,led:'amber',midiId:'SUPER8:VOICE-MODE',group:'PERFORMANCE',onChange:()=>{
+   if(this.hwPerformanceShifted){
+    const current=unisonSizes.indexOf(this.p().unisonSize||'all');
+    const next=unisonSizes[(current+1+unisonSizes.length)%unisonSizes.length];
+    this.p().unisonSize=next;
+    if(this.p().unison!=='off')this.set('unison',next);
+    this.hwPerformanceShifted=false;
+    this.hwPerformanceShiftControl?.setValue(false,true);
+    this.display.flash('UNISON SIZE '+unisonLabels[unisonSizes.indexOf(next)]);
+   }else{
+    const current=voiceModes.indexOf(this.p().voiceMode);
+    const next=voiceModes[(current+1+voiceModes.length)%voiceModes.length];
+    this.set('voiceMode',next);
+    this.display.flash('VOICE MODE '+next.toUpperCase());
+   }
+   this.syncVoiceAssign?.();
+  }});
+  this.hwUnisonControl=addButton(pr,{label:'UNISON',value:this.p().unison!=='off',led:'amber',midiId:'SUPER8:UNISON',group:'PERFORMANCE',onChange:on=>{
+   if(on)this.set('unison',this.p().unisonSize||'all');
+   else{
+    if(unisonSizes.includes(this.p().unison))this.p().unisonSize=this.p().unison;
+    this.set('unison','off');
+   }
+   this.syncVoiceAssign?.();
+  }});
+  this.hwControls.all.push(this.hwVoiceModeControl,this.hwUnisonControl);
+  pr.appendChild(this.hwVoiceModeReadout);
+  this.syncVoiceAssign=()=>{
+   const sizeIndex=unisonSizes.indexOf(this.p().unisonSize||'all');
+   this.hwVoiceModeReadout.textContent=this.hwPerformanceShifted
+    ? 'U.SIZE · '+unisonLabels[Math.max(0,sizeIndex)]
+    : 'MODE · '+String(this.p().voiceMode||'poly1').toUpperCase();
+   this.hwVoiceModeControl.el.setAttribute('aria-label',this.hwPerformanceShifted?'MODE · SHIFT ACTIVE · PRESS TO CHANGE UNISON SIZE':'MODE · PRESS TO CYCLE VOICE MODE');
+   this.hwUnisonControl.setValue(this.p().unison!=='off',true);
+  };
   const partPerformance=addRow(part.body,'s8-part-performance');
   k(partPerformance,'portamento','Portamento',{size:34,group:'PERFORMANCE'});k(partPerformance,'transpose','Transpose',{min:-24,max:24,step:1,size:34,bipolar:true,group:'PERFORMANCE',fmt:v=>(v>0?'+':'')+Math.round(v)});k(partPerformance,'bendRange','Bend range',{min:1,max:12,step:1,size:34,group:'PERFORMANCE',fmt:v=>String(Math.round(v))});
 
@@ -354,11 +397,12 @@ class Super8App{
    this.hwPresets.getValue=()=>this.currentPerformanceValue;
    this.hwPresets.setValue=value=>this.refreshHardwarePresetList(String(value));
    this.hwPerformanceShifted=false;
-   this.hwPerformanceShiftControl=addButton(groupRow,{label:'SHIFT',value:false,led:'amber',midiId:'SUPER8:SHIFT',group:'PERFORMANCE',onChange:value=>{this.hwPerformanceShifted=!!value;}});
+   this.hwPerformanceShiftControl=addButton(groupRow,{label:'SHIFT',value:false,led:'amber',midiId:'SUPER8:SHIFT',group:'PERFORMANCE',onChange:value=>{this.hwPerformanceShifted=!!value;this.syncVoiceAssign?.();}});
    this.hwPerformanceGroupControl=addButton(groupRow,{label:'PERF',value:false,toggle:false,led:'green',midiId:'SUPER8:PERF',group:'PERFORMANCE',onChange:()=>{
     this.hwPerformanceGroup=this.hwPerformanceShifted?1:0;
     this.hwPerformanceShifted=false;
     this.hwPerformanceShiftControl.setValue(false,true);
+    this.syncVoiceAssign?.();
     this.renderPerformanceKeys?.();
    }});
    this.hwPerformanceGroupReadout=document.createElement('output');this.hwPerformanceGroupReadout.className='hp-super8-performance-group-readout';this.hwPerformanceGroupReadout.textContent='GROUP A';groupRow.appendChild(this.hwPerformanceGroupReadout);
@@ -460,6 +504,7 @@ class Super8App{
    this.hwControls.selects.forEach(({key,control,global})=>{const o=global?this.patch:this.p();if(key in o)control.setValue(o[key]);});
    this.renderHardwareBender();
    this.layerButtonsHardware.forEach((c,i)=>c.setValue(i===this.active,true));
+   this.syncVoiceAssign?.();
    this.refreshHardwareLayerList();this.renderSeq();this.renderHardwareMatrix();
   };
   this.hwControls.all.push({el:pad,_oiMidi:{id:'SUPER8:G:benderX',label:'Bender X · Pitch',group:'PERFORMANCE',get:()=>((this.patch.benderX+1)/2),set:v=>{this.patch.benderX=v*2-1;renderBender();post();}}});

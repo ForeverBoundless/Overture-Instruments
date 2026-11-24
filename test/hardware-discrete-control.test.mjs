@@ -73,7 +73,10 @@ test('hardware-specific choice controls use the corresponding control types', ()
   assert.match(sub37, /SELECT BANK · PRESS 1–16/);
   assert.match(hardware, /export function addCycleButton/);
   assert.match(super8, /o\.cycle\?addCycleButton/);
-  assert.match(super8, /UNISON SIZE · OVERTURE SHIFT\+MODE MAPPING/);
+  assert.match(super8, /label:'MODE'/);
+  assert.match(super8, /label:'UNISON'/);
+  assert.match(super8, /unisonSize/);
+  assert.doesNotMatch(super8, /UNISON SIZE · OVERTURE SHIFT\\\+MODE MAPPING/);
   assert.match(super8, /label:'SHIFT'/);
   assert.match(super8, /label:'PERF'/);
   assert.match(super8, /this\.hwPerformanceShifted\?1:0/);
