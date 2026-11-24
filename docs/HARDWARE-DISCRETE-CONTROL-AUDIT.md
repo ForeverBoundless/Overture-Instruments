@@ -28,7 +28,7 @@ The Overture patch browser is separate from each instrument's original panel. It
 - The common panel selector now renders a detented rotary control with a value readout and step buttons.
 - Hardware-panel selectors use a detented encoder-style control and support dynamic option lists.
 - Dedicated button-bank and data-entry helpers cover instruments whose originals use those mechanisms.
-- The shared Overture preset browser uses eight numbered buttons per bank and preserves local-preset and Community-preset selection.
+- Emulators without a native preset encoder use the shared numbered patch browser; the Little Phatty uses its VALUE/PRESET/ENTER hardware workflow. Factory, user and Community preset selection remain supported.
 - Instrument entry points, relevant stylesheets, and the offline shell cache were versioned together.
 
 ## Scope notes
