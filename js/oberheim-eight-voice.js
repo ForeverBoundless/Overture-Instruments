@@ -1,6 +1,6 @@
 import { WorkletEngine } from './shared/workletEngine.js';
 import { PresetStore, num } from './shared/presetStore.js';
-import { el, section, knob, select, display, performance, power, presetBar, footer } from './shared/panel.js';
+import { el, section, knob, select, choiceButtons, display, performance, power, presetBar, footer } from './shared/panel.js';
 import { OBERHEIM_EIGHT_VOICE_PRESETS } from './data/oberheimEightVoicePresets.js';
 import { consumeCommunityInstrumentPreset, createCommunityShareButton } from './shared/communityPreset.js';
 
@@ -99,7 +99,7 @@ class EightVoiceApp {
     this.ui.lfoAmount = knob(ek, { label: 'LFO MOD', min: 0, max: 1, value: DEF.lfoAmount, onChange: (v) => this.set('lfoAmount', v) });
     this.ui.release = knob(ek, { label: 'RELEASE', min: 0, max: 1, value: DEF.release, formatValue: (v) => `${(v * v * 4).toFixed(2)} s`, onChange: (v) => this.set('release', v) });
     this.ui.lfoRate = knob(ek, { label: 'LFO RATE', min: 0, max: 1, value: DEF.lfoRate, onChange: (v) => this.set('lfoRate', v) });
-    this.ui.lfoTarget = select(env.body, 'LFO ROUTING', [{ value: 'pitch', label: 'VIBRATO / PITCH' }, { value: 'filter', label: 'FILTER MOD' }], DEF.lfoTarget, (v) => this.set('lfoTarget', v));
+    this.ui.lfoTarget = choiceButtons(env.body, 'LFO ROUTING', [{ value: 'pitch', label: 'PITCH' }, { value: 'filter', label: 'FILTER' }], DEF.lfoTarget, (v) => this.set('lfoTarget', v));
     this.ui.bendRange = knob(ek, { label: 'BEND RANGE', min: 1, max: 12, value: DEF.bendRange, formatValue: (v) => `${Math.round(v)} st`, onChange: (v) => this.set('bendRange', Math.round(v)) });
     this.ui.master = knob(ek, { label: 'MASTER', min: 0, max: 1, value: DEF.master, onChange: (v) => { this.set('master', v); this.engine.setVolume(v); } });
     const voices = el('div', 'eight-voice-grid', rows);

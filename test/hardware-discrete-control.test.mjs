@@ -99,6 +99,7 @@ test('hardware-specific choice controls use the corresponding control types', ()
   assert.match(super8, /this\.renderPerformanceKeys=\(\)=>/);
   assert.match(super8, /DDS 1 WAVEFORM SWITCH/);
   assert.match(eightVoice, /osc1Saw/);
+  assert.match(eightVoice, /choiceButtons\(env\.body, 'LFO ROUTING'/);
   assert.doesNotMatch(eightVoice, /VCO 1 WAVEFORM/);
 });
 
