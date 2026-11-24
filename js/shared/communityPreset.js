@@ -582,7 +582,7 @@ const EMULATOR_TOPBAR_INFO = {
       summary: 'The M400 plays recorded tape sounds rather than synthesizing oscillators. Choose a tape frame, select one of its three tracks, and play the keyboard.',
       sections: [
         ['Choose a tape sound', 'Select one of the installed tape frames. Each frame contains three sounds; choose TRACK A, B or C to select the sound that plays. The monitor shows the selected sound and track.'],
-        ['Play notes', 'Use the on-screen keyboard or a MIDI keyboard. The playable range is G2–F6. The tape recordings have a finite playback length, so a held key does not loop indefinitely.'],
+        ['Play notes', 'Use the on-screen keyboard or a MIDI keyboard. The playable range is G2-F6. The tape recordings have a finite playback length, so a held key does not loop indefinitely.'],
         ['Tone and pitch', 'VOLUME controls output level, TONE changes the brightness, and PITCH shifts the tape playback speed and pitch. Save a frame registration when you want to keep your selection.'],
         ['MIDI', 'MIDI note input, program changes and supported controller messages are available when a controller is connected.']
       ]

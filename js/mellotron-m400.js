@@ -101,7 +101,7 @@ class MellotronApp {
       getData: () => validate(this.patch), getAudioOutput: () => this.engine.output,
        getTitle: () => 'Mellotron M400 frame',
     });
-    footer(this.shell, 'M400 · 47 ON-SCREEN NOTES · G2–F6 · 35-KEY TAPE RANGE · THREE SELECTABLE TAPE TRACKS · FINITE 8-SECOND REPLAY · ESC PANIC');
+    footer(this.shell, 'M400 · 47 ON-SCREEN NOTES · G2-F6 · 35-KEY TAPE RANGE · THREE SELECTABLE TAPE TRACKS · FINITE 8-SECOND REPLAY · ESC PANIC');
     this.updateTapeReadout();
   }
   refresh() {

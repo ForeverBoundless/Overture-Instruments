@@ -1907,11 +1907,11 @@ export class FrontPanelEditor {
           const range = selected.parameter;
           const rangeReadout = make('div', 'ofp-binding-range', this.inspectorBody);
           make('span', '', rangeReadout, 'ENGINE RANGE');
-          make('strong', '', rangeReadout, String(range.min) + ' – ' + String(range.max));
+          make('strong', '', rangeReadout, String(range.min) + ' - ' + String(range.max));
           make('span', '', rangeReadout, 'Step ' + (range.step ?? 0.01) + (range.log ? ' · logarithmic' : ''));
         }
       } else if (selectedModuleId && isDrawbars) {
-        make('p', 'ofp-field-note', this.inspectorBody, 'All nine drawbars bind to drawbar1–drawbar9 on this organ module.');
+        make('p', 'ofp-field-note', this.inspectorBody, 'All nine drawbars bind to drawbar1-drawbar9 on this organ module.');
       }
 
       if (!eligible.length) {

@@ -118,7 +118,7 @@ test('OMNI keyboard spans five octaves and status text avoids the centered theme
     readFile(new URL('../ui/Keyboard.js', import.meta.url), 'utf8'),
   ]);
   assert.match(source, /octaves:\s*5/);
-  assert.match(source, /C2 – C7/);
+  assert.match(source, /C2 - C7/);
   assert.match(keyboard, /const whiteKeyWidthPct = 100 \/ whiteKeys\.length;/);
   assert.match(css, /\.omni-commandbar > \.omni-status[\s\S]*text-align:right/);
   assert.match(source, /commandbar\.appendChild\(this\.status\)/);
@@ -276,14 +276,14 @@ test('OMNI output includes peak control and a high-frequency guard', async () =>
 });
 
 
-test('OMNI mixer exposes dynamic 2–8 inputs and MIDI controls follow the active channel count', async () => {
+test('OMNI mixer exposes dynamic 2-8 inputs and MIDI controls follow the active channel count', async () => {
   const [modules, graph, source, worker] = await Promise.all([
     readFile(new URL('../js/omni/modules.js', import.meta.url), 'utf8'),
     readFile(new URL('../js/omni/graph.js', import.meta.url), 'utf8'),
     readFile(new URL('../js/omni.js', import.meta.url), 'utf8'),
     readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
   ]);
-  assert.match(modules, /name: 'Mixer \(2–8 inputs\)'/);
+  assert.match(modules, /name: 'Mixer \(2-8 inputs\)'/);
   assert.match(modules, /getInputs\(params = \{\}\)/);
   assert.match(modules, /Array\.from\(\{ length: 8 \}/);
   assert.match(modules, /if \(direction === 'inputs' && typeof definition\.getInputs/);

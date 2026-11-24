@@ -168,7 +168,7 @@ async function signup(event) {
   const password = form.elements.password.value;
 
   if (!/^[a-z0-9_]{3,24}$/.test(username)) {
-    setStatus('Usernames must be 3–24 characters and contain only letters, numbers, or underscores.', true);
+    setStatus('Usernames must be 3-24 characters and contain only letters, numbers, or underscores.', true);
     return;
   }
   if (password.length < 8) {
@@ -245,7 +245,7 @@ async function saveProfile(event) {
   const username = $('account-username').value.trim().toLowerCase();
   const displayName = $('account-display-name').value.trim();
   if (!/^[a-z0-9_]{3,24}$/.test(username)) {
-    setStatus('Usernames must be 3–24 characters and contain only letters, numbers, or underscores.', true);
+    setStatus('Usernames must be 3-24 characters and contain only letters, numbers, or underscores.', true);
     return;
   }
 

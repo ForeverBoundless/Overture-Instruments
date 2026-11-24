@@ -211,9 +211,9 @@ test('patch validation rejects chord wires to ports above the selected voice cou
 });
 
 
-test('Chord Generator has 2–8 dynamic outputs and preserves the existing four-note minor seventh template', () => {
+test('Chord Generator has 2-8 dynamic outputs and preserves the existing four-note minor seventh template', () => {
   const chord = MODULES.chord;
-  assert.equal(chord.name, 'Chord Generator (2–8 voices)');
+  assert.equal(chord.name, 'Chord Generator (2-8 voices)');
   assert.deepEqual(chord.getOutputs({ voices: 2 }).map((port) => port.id), ['n1', 'n2']);
   assert.equal(modulePorts({ type: 'chord', params: { voices: 2 } }, 'outputs').length, 2);
   assert.equal(modulePorts({ type: 'chord', params: { voices: 8 } }, 'outputs').length, 8);
@@ -254,7 +254,7 @@ test('OMNI resonant and feedback modules have bounded parameter ranges', () => {
 
 test('Mixer exposes two to eight audio inputs and retains independent gain controls', () => {
   const mixer = MODULES.mixer;
-  assert.equal(mixer.name, 'Mixer (2–8 inputs)');
+  assert.equal(mixer.name, 'Mixer (2-8 inputs)');
   assert.deepEqual(mixer.getInputs({ channels: 2 }).map((port) => port.id), ['in1', 'in2']);
   assert.equal(modulePorts({ type: 'mixer', params: { channels: 8 } }, 'inputs').length, 8);
   const defaults = Object.fromEntries(mixer.params.map((parameter) => [parameter.key, parameter.default]));

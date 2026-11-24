@@ -261,7 +261,7 @@ class Super8App{
   const seqp=addPanel(p,{title:'Sequencer and arpeggiator',sub:'64 steps per part · four pages of 16',className:'s8-seq'});
   const st=addRow(seqp.body,'s8-seq-top');
   this.hwSeqPageButtons=[];const pages=document.createElement('div');pages.className='s8-pages';st.appendChild(pages);
-  ['1–16','17–32','33–48','49–64'].forEach((label,i)=>{const c=addButton(pages,{label,value:i===0,led:'amber',group:'SEQUENCER',onChange:()=>{this.seqPage=i;this.renderSeq();}});c.el.addEventListener('click',()=>{this.seqPage=i;this.renderSeq();});this.hwSeqPageButtons.push(c);});
+  ['1-16','17-32','33-48','49-64'].forEach((label,i)=>{const c=addButton(pages,{label,value:i===0,led:'amber',group:'SEQUENCER',onChange:()=>{this.seqPage=i;this.renderSeq();}});c.el.addEventListener('click',()=>{this.seqPage=i;this.renderSeq();});this.hwSeqPageButtons.push(c);});
   s(st,'seqLength','Length',Array.from({length:64},(_,i)=>i+1),{group:'SEQUENCER'});s(st,'seqMode','Step mode',['step','slide','accent','rest','length'],{group:'SEQUENCER'});
   k(st,'seqBpm','Tempo',{min:40,max:240,step:1,size:42,group:'SEQUENCER',fmt:v=>String(Math.round(v))});k(st,'seqSwing','Swing',{size:42,group:'SEQUENCER'});
   const play=b(st,'seqEnabled','Play',{group:'SEQUENCER',led:'green'});play.el.addEventListener('click',()=>this.engine.post({t:'transport',layer:this.active,play:!!this.p().seqEnabled}));

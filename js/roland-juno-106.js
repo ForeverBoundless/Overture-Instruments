@@ -39,7 +39,7 @@ class JunoApp {
         cc: (cc, v) => { if (cc === 7) this.ui.volume.setValue(v / 127); if (cc === 74) this.ui.cutoff.setValue(v / 127); if (cc === 71) this.ui.res.setValue(v / 127); if (cc === 65) this.ui.portamento.setValue(v >= 64 ? Math.max(0.15, this.patch.portamento) : 0); },
       },
     });
-    footer(this.shell, '6-VOICE DCO POLYSYNTH • STEREO CHORUS I / II • KEYS: A–\' PLAY, -/= OCTAVE, TAB/SHIFT BEND, ↑/↓ MOD, ESC PANIC');
+    footer(this.shell, '6-VOICE DCO POLYSYNTH • STEREO CHORUS I / II • KEYS: A-\' PLAY, -/= OCTAVE, TAB/SHIFT BEND, ↑/↓ MOD, ESC PANIC');
     power('juno-power', () => this.engine.start(), () => { this.send(); this.engine.setVolume(this.ui.volume.value); this.perf.flushPending(); this.disp.flash('AUDIO READY'); });
     this.presets.load('f:0');
     const community = consumeCommunityInstrumentPreset('juno-106', validate);

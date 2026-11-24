@@ -213,7 +213,7 @@ const BUTTONS = [
   { id: 'preset', x: 616, y: 302, label: 'PRESET', hold: true },
   { id: 'record', x: 690, y: 302, label: 'RECORD', kind: 'red', hold: true },
   { id: 'factory', x: 765, y: 302, label: 'FACTORY', kind: 'gray' },
-  { id: 'group', x: 812, y: 302, label: 'GROUP\nSELECT', kind: 'gray', noLed: true, top: 'Dec/–' },
+  { id: 'group', x: 812, y: 302, label: 'GROUP\nSELECT', kind: 'gray', noLed: true, top: 'Dec/-' },
   { id: 'bank', x: 859, y: 302, label: 'BANK\nSELECT', kind: 'gray', noLed: true, top: 'Inc/+', hold: true },
   ...[1, 2, 3, 4, 5, 6, 7, 8].map((n, i) => ({ id: `prog${n}`, x: 1008 + Math.round(i * 47.86), y: 302, label: String(n), kind: 'gray', prog: n - 1 })),
   { id: 'globals', x: 1417, y: 302, label: 'GLOBALS', kind: 'gray', leds: ['', ''], hold: true },
@@ -1997,14 +1997,14 @@ class Prophet10App {
       <h2>Prophet-10 — playing guide</h2>
       <p><b>Keys:</b> A W S E D F T G Y H U J K O L P ; ' play notes, <b>-</b>/<b>=</b> shift the computer keys by octaves. Click lower on an on-screen key to play louder. <b>Tab</b>/<b>Left Shift</b> bend pitch, <b>↑</b>/<b>↓</b> move the mod wheel.</p>
       <p><b>Knobs:</b> drag (Shift = fine), mouse wheel, or arrow keys when focused. Master Tune and Volume are the silver, non-programmable knobs.</p>
-      <p><b>Programs:</b> GROUP and BANK step the hundreds and tens digits, buttons 1–8 pick the program. FACTORY switches between the factory and user sets. PRESET off = live panel.</p>
-      <p><b>Saving:</b> press RECORD (flashes), optionally choose GROUP/BANK, then press 1–8 to store into the user set. RECORD then GLOBALS compares with the saved version. Hold RECORD and press PRESET for the Basic Program.</p>
+      <p><b>Programs:</b> GROUP and BANK step the hundreds and tens digits, buttons 1-8 pick the program. FACTORY switches between the factory and user sets. PRESET off = live panel.</p>
+      <p><b>Saving:</b> press RECORD (flashes), optionally choose GROUP/BANK, then press 1-8 to store into the user set. RECORD then GLOBALS compares with the saved version. Hold RECORD and press PRESET for the Basic Program.</p>
       <p><b>Hold functions</b> (hold the first button, or Shift-click it to latch, then press the second):<br>
-      UNISON + GROUP/BANK: voices, chord or poly-unison · UNISON + 1–8: detune · hold keys + UNISON: chord memory<br>
+      UNISON + GROUP/BANK: voices, chord or poly-unison · UNISON + 1-8: detune · hold keys + UNISON: chord memory<br>
       KEYBOARD (osc B) + GROUP/BANK: key priority · FREQ A (wheel-mod) + GROUP/BANK: bend range<br>
-      VELOCITY / AFTERTOUCH + GROUP/BANK: amounts · REV + 1–8: Q compensation (globals row 3 = PrG)<br>
+      VELOCITY / AFTERTOUCH + GROUP/BANK: amounts · REV + 1-8: Q compensation (globals row 3 = PrG)<br>
       PRESET + GROUP/BANK: normal / stack / split · PRESET tap: edit layer A/B · key + PRESET + BANK: split point · PRESET + VOLUME: balance · UNISON + PRESET: link layers</p>
-      <p><b>Globals:</b> GLOBALS once/twice selects the upper/lower row printed above buttons 1–8; GROUP/BANK change the value. BANK + GLOBALS opens row 3 (5-voice limit, round-robin, Q-comp mode). Pgm Dump saves a .syx file; drop a Prophet-5/10 .syx file anywhere on the page to import it into the user set.</p>
+      <p><b>Globals:</b> GLOBALS once/twice selects the upper/lower row printed above buttons 1-8; GROUP/BANK change the value. BANK + GLOBALS opens row 3 (5-voice limit, round-robin, Q-comp mode). Pgm Dump saves a .syx file; drop a Prophet-5/10 .syx file anywhere on the page to import it into the user set.</p>
       <p><b>MIDI:</b> notes on the selected channel (ALL by default), pitch bend, mod wheel (CC1), foot controller (CC4 → filter), volume (CC7), expression (CC11), brightness (CC74), sustain (CC64), channel and poly pressure, bank select (CC32) + program change, and the Prophet-5/10 parameter CC or NRPN map (Globals: Param Rcv).</p>
       <button type="button">CLOSE</button>`;
     card.querySelector('button').addEventListener('click', () => this._toggleHelp());

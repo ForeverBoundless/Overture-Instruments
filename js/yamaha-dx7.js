@@ -44,7 +44,7 @@ class DX7App {
         cc: (cc, v) => { if (cc === 7) this.knobs.volume.setValue(v / 127); },
       },
     });
-    footer(this.shell, '6-OPERATOR FM • 32 ALGORITHMS • 16 VOICES • KEYS: A–\' PLAY, -/= OCTAVE, TAB/SHIFT BEND, ↑/↓ MOD, ESC PANIC');
+    footer(this.shell, '6-OPERATOR FM • 32 ALGORITHMS • 16 VOICES • KEYS: A-\' PLAY, -/= OCTAVE, TAB/SHIFT BEND, ↑/↓ MOD, ESC PANIC');
     power('dx7-power', () => this.engine.start(), () => { this.send(); this.engine.setVolume(this.knobs.volume.value); this.perf.flushPending(); this.disp.flash('AUDIO READY'); });
     this.presets.load('f:0');
     const community = consumeCommunityInstrumentPreset('dx7', validateDX7);

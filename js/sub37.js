@@ -310,7 +310,7 @@ class Sub37 {
     this._knob(row, `osc${index}Fine`, 'FINE TUNE', -100, 100, 0, (v) => this.engine.setOscillator(index, { fineCents: v }), true, (v) => `${v > 0 ? '+' : ''}${v.toFixed(0)} ct`);
     const octave = this._selector('OCTAVE', ['16', '8', '4', '2'], '8', (value) => this.engine.setOscillator(index, { octave: Number(value) })); this[`osc${index}Octave`] = octave;
     const controls = document.createElement('div'); controls.className = 's37-osc-controls'; controls.appendChild(octave);
-    if (index === 1) { this.buttons.sync = this._toggle('OSC 1–2 SYNC', false, (on) => this.engine.voice?.setOsc2SyncEnabled(on)); controls.appendChild(this.buttons.sync); }
+    if (index === 1) { this.buttons.sync = this._toggle('OSC 1-2 SYNC', false, (on) => this.engine.voice?.setOsc2SyncEnabled(on)); controls.appendChild(this.buttons.sync); }
     section.body.append(row, controls);
     return section.section;
   }
@@ -364,7 +364,7 @@ class Sub37 {
     const lower = document.createElement('section'); lower.className = 's37-keybed'; const wheels = document.createElement('div'); wheels.className = 's37-wheels';
     this.pitchWheel = new PitchWheel({ onChange: (value) => this.engine.setPitchBend(value) }); this.modWheel = new ModWheel({ onChange: (value) => this.engine.setModWheel(value) }); wheels.append(this.pitchWheel.el, this.modWheel.el);
     const keyboardWrap = document.createElement('div'); keyboardWrap.className = 's37-keyboard-wrap'; this.keyboard = new Keyboard({ startOctave: 2, octaves: 3, onNoteOn: (note, velocity) => this._noteOn(note, velocity), onNoteOff: (note) => this._noteOff(note) }); keyboardWrap.appendChild(this.keyboard.el);
-    const octave = document.createElement('div'); octave.className = 's37-octave'; this.octaveReadout = document.createElement('span'); octave.append(this._button('KB OCT –', () => this._setOctave(this.engine.octaveShift - 1)), this.octaveReadout, this._button('KB OCT +', () => this._setOctave(this.engine.octaveShift + 1))); this._renderOctave();
+    const octave = document.createElement('div'); octave.className = 's37-octave'; this.octaveReadout = document.createElement('span'); octave.append(this._button('KB OCT -', () => this._setOctave(this.engine.octaveShift - 1)), this.octaveReadout, this._button('KB OCT +', () => this._setOctave(this.engine.octaveShift + 1))); this._renderOctave();
     lower.append(wheels, keyboardWrap, octave); return lower;
   }
 

@@ -45,7 +45,7 @@ class MS20App {
         cc: (cc, v) => { if (cc === 7) this.ui.volume.setValue(v / 127); if (cc === 74) this.ui.lpCut.setValue(v / 127); if (cc === 71) this.ui.lpPeak.setValue(v / 127); },
       },
     });
-    footer(this.shell, 'MONOPHONIC SEMI-MODULAR • HPF → LPF • PATCHABLE MG / EG / S&H / ESP • LOW-NOTE PRIORITY • KEYS: A–\' PLAY, -/= OCTAVE, ESC PANIC');
+    footer(this.shell, 'MONOPHONIC SEMI-MODULAR • HPF → LPF • PATCHABLE MG / EG / S&H / ESP • LOW-NOTE PRIORITY • KEYS: A-\' PLAY, -/= OCTAVE, ESC PANIC');
     power('ms20-power', () => this.engine.start(), () => { this.send(); this.perf.flushPending(); this.disp.flash('AUDIO READY'); });
     this.presets.load('f:0');
     const community = consumeCommunityInstrumentPreset('ms-20', validate);

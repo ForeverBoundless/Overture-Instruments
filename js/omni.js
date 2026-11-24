@@ -568,7 +568,7 @@ class OmniApp {
     const keyboardMeta = el('div', 'omni-key-group__head', keyboardGroup);
     const keyboardIdentity = el('div', 'omni-key-group__identity', keyboardMeta);
     el('span', 'omni-key-group__title', keyboardIdentity, 'BUILT-IN KEYBOARD');
-    el('span', 'omni-key-group__hint', keyboardIdentity, 'C2 – C7');
+    el('span', 'omni-key-group__hint', keyboardIdentity, 'C2 - C7');
     const kbWrap = el('div', 'omni-keys', keyboardGroup);
     this.keyboard = new Keyboard({
       startOctave: 2,
@@ -1672,7 +1672,7 @@ class OmniApp {
     const card = el('div', 'omni-guide-card omni-shortcuts', overlay);
     el('h2', '', card, 'Keyboard shortcuts');
     const rows = [
-      ['Play notes', 'A–; and W/E/T/Y/U/O/P note keys'],
+      ['Play notes', 'A-; and W/E/T/Y/U/O/P note keys'],
       ['Pitch bend up / down', 'Tab / Left Shift (release to centre)'],
       ['Mod wheel', 'Hold Arrow Up / Arrow Down'],
       ['Keyboard octave', '− / +'],
@@ -1700,7 +1700,7 @@ class OmniApp {
 <p><b>Build:</b> click a module in the library (or drag it onto the canvas). Drag a module by its header. Scroll to zoom, drag empty space to pan.</p>
 <p><b>Connect:</b> drag from an output port (right edge) to an input port (left edge), or click an output then a highlighted input. Colours: <span style="color:#ff9f0a">audio</span>, <span style="color:#7de4ff">control voltage</span>, <span style="color:#82e6a8">note/gate events</span>. Audio feeds audio inputs; CV feeds modulation inputs (filter cutoff, VCA gain, oscillator pitch mod); note ports carry key presses from the keyboard, sequencer, clock, arpeggiator or rhythm generators to oscillators, drums, envelopes and the FM voice. Note utilities (Chord, Transpose, Echo) sit between a note source and its destination.</p>
 <p><b>Edit:</b> select a module to change its parameters. Shift-click modules or Shift-drag on empty canvas to select a group; drag any selected header to move the group. Ctrl/Cmd+A selects all; Ctrl/Cmd+C/V copies and pastes; Ctrl/Cmd+D duplicates; Delete removes the selection. SNAP aligns modules to the grid and FIT VIEW frames the whole patch. Ctrl/Cmd+Z and Ctrl/Cmd+Shift+Z undo and redo.</p>
-<p><b>Play:</b> press POWER ON, then play the on-screen keys, your computer keys (A–') or a MIDI controller. Notes are monophonic per keyboard module (last note wins).</p>
+<p><b>Play:</b> press POWER ON, then play the on-screen keys, your computer keys (A-') or a MIDI controller. Notes are monophonic per keyboard module (last note wins).</p>
 <p><b>Record:</b> AUDIO REC captures the live master output after you power on audio and downloads a browser-supported audio file. MIDI REC records notes played on the on-screen/computer keyboard or an incoming MIDI controller, then exports a standard MIDI file at 120 BPM. It records note events, not sequencer-generated notes or controller automation.</p>
 <p><b>Keep:</b> SAVE stores the instrument in this browser; EXPORT/IMPORT JSON moves it between browsers; LIBRARY export backs up all saved patches; EXPORT SVG produces a schematic drawing. Structural changes rebuild the audio graph (a brief gap in sound is expected); parameter changes are live.</p>
 <button type="button">CLOSE</button></div>`;

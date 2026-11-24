@@ -122,7 +122,7 @@ export const MODULE_INFO = {
   },
   "pluck": {
     "summary": "A plucked-string voice that creates a pitched decay from a short burst of noise.",
-    "circuit": "The Karplus–Strong method is a digital feedback delay line. A short noise burst excites a buffer whose length sets the pitch; each pass through a low-pass filter and feedback loop removes energy, especially at high frequencies. This approximates the repeated reflections and losses of a vibrating string.",
+    "circuit": "The Karplus-Strong method is a digital feedback delay line. A short noise burst excites a buffer whose length sets the pitch; each pass through a low-pass filter and feedback loop removes energy, especially at high frequencies. This approximates the repeated reflections and losses of a vibrating string.",
     "use": "It produces plucked, struck, and string-like sounds without a sample of a real instrument. A high feedback value lengthens the decay; the low-pass damping controls how quickly the tone loses brightness.",
     "implementation": "OMNI excites a tuned delay-line model on incoming notes. Sustain controls feedback and brightness sets the damping cutoff; the result is a synthetic physical-model voice."
   },

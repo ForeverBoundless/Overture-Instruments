@@ -247,7 +247,7 @@ test('M400 and Eight Voice are complete instrument pages, not library-only entri
   assert.match(mellotronApp, /new WorkletEngine/);
   assert.match(mellotronApp, /notes: NOTES/);
   assert.match(mellotronApp, /length: 47/);
-  assert.match(mellotronApp, /G2–F6/);
+  assert.match(mellotronApp, /G2-F6/);
   assert.match(mellotronEngine, /finite/i);
   assert.match(mellotronApp, /VIRTUAL FRAME LIBRARY/);
   assert.match(mellotronApp, /THREE-TRACK HEAD/);
