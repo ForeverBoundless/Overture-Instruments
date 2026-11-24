@@ -56,18 +56,114 @@ export function toggle(parent, label, initial, onChange) {
   return b;
 }
 
-export function select(parent, label, options, value, onChange) {
-  const wrap = el('label', 'pn-select', parent);
-  el('span', '', wrap, label);
-  const s = el('select', '', wrap);
-  options.forEach((o) => { const opt = el('option', '', s, o.label ?? String(o)); opt.value = String(o.value ?? o); });
-  s.value = String(value);
-  s.addEventListener('change', () => onChange(s.value));
-  wrap.setValue = (v, silent) => { s.value = String(v); if (!silent) onChange(s.value); };
-  wrap.select = s;
+function normalizeChoices(options) {
+  return (options || []).map((option) => ({
+    value: String(option?.value ?? option),
+    label: String(option?.label ?? option?.value ?? option),
+  }));
+}
+export function select(parent, label, options, value, onChange = () => {}) {
+  let choices = normalizeChoices(options);
+  let current = choices.find((option) => option.value === String(value)) || choices[0] || { value: '', label: '—' };
+  let index = Math.max(0, choices.findIndex((option) => option.value === current.value));
+  const wrap = el('div', 'pn-hw-choice pn-hw-choice--rotary', parent);
+  wrap.setAttribute('role', 'group'); wrap.setAttribute('aria-label', label);
+  el('span', 'pn-hw-choice__caption', wrap, label);
+  const row = el('div', 'pn-hw-choice__row', wrap);
+  const previous = el('button', 'pn-hw-choice__step', row, '−'); previous.type = 'button';
+  previous.setAttribute('aria-label', label + ' previous position');
+  const dialWrap = el('div', 'pn-hw-choice__dial', row);
+  const readout = el('span', 'pn-hw-choice__readout', wrap, current.label);
+  const next = el('button', 'pn-hw-choice__step', row, '+'); next.type = 'button';
+  next.setAttribute('aria-label', label + ' next position');
+  const dial = new Knob({ label, min: 0, max: Math.max(1, choices.length - 1), value: index, size: 38,
+    formatValue: (v) => choices[Math.max(0, Math.min(choices.length - 1, Math.round(v)))]?.label || '—',
+    onChange: (v) => setIndex(Math.round(v), false) });
+  dial.el.classList.add('pn-hw-choice__knob'); dialWrap.appendChild(dial.el);
+  const render = () => {
+    current = choices[index] || { value: '', label: '—' };
+    readout.textContent = current.label; readout.title = current.label;
+    dial.max = Math.max(1, choices.length - 1); dial.setValue(index, true);
+    dial.el.setAttribute('aria-valuemax', String(Math.max(1, choices.length - 1)));
+    previous.disabled = next.disabled = choices.length < 2;
+    wrap.setAttribute('aria-valuetext', current.label);
+  };
+  function setIndex(nextIndex, silent = false) {
+    const nextValue = Math.max(0, Math.min(choices.length - 1, Math.round(Number(nextIndex) || 0)));
+    if (nextValue === index && current.value === choices[nextValue]?.value) return;
+    index = nextValue; render(); if (!silent) onChange(current.value);
+  }
+  const setValue = (nextValue, silent = false) => {
+    const nextIndex = choices.findIndex((option) => option.value === String(nextValue));
+    if (nextIndex >= 0) setIndex(nextIndex, silent);
+  };
+  const setOptions = (nextOptions, nextValue = current.value, silent = true) => {
+    choices = normalizeChoices(nextOptions);
+    const nextIndex = choices.findIndex((option) => option.value === String(nextValue));
+    index = nextIndex >= 0 ? nextIndex : 0; render();
+    if (!silent && choices[index]) onChange(choices[index].value);
+  };
+  previous.addEventListener('click', () => setIndex(index - 1));
+  next.addEventListener('click', () => setIndex(index + 1)); render();
+  wrap.setValue = setValue; wrap.setOptions = setOptions; wrap.getValue = () => current.value;
+  Object.defineProperty(wrap, 'value', { get: () => current.value, set: (v) => setValue(v, true) });
+  const proxy = {};
+  Object.defineProperty(proxy, 'value', { get: () => current.value, set: (v) => setValue(v, true) });
+  Object.defineProperty(proxy, 'options', { get: () => choices.map((option) => ({ ...option })) });
+  wrap.select = proxy;
   return wrap;
 }
-
+export function choiceButtons(parent, label, options, value, onChange = () => {}) {
+  let choices = normalizeChoices(options), current = String(value);
+  const wrap = el('div', 'pn-hw-choice pn-hw-choice--buttons', parent);
+  wrap.setAttribute('role', 'group'); wrap.setAttribute('aria-label', label);
+  el('span', 'pn-hw-choice__caption', wrap, label);
+  const buttons = el('div', 'pn-hw-choice__buttons', wrap);
+  const readout = el('span', 'pn-hw-choice__readout', wrap);
+  const render = () => {
+    buttons.replaceChildren();
+    choices.forEach((choice) => {
+      const control = el('button', 'pn-button pn-hw-choice__button', buttons, choice.label);
+      control.type = 'button'; control.setAttribute('aria-pressed', String(choice.value === current));
+      control.classList.toggle('lit', choice.value === current); control.title = choice.label;
+      control.addEventListener('click', () => setValue(choice.value));
+    });
+    readout.textContent = choices.find((choice) => choice.value === current)?.label || '—';
+  };
+  const setValue = (next, silent = false) => {
+    const found = choices.find((choice) => choice.value === String(next));
+    if (!found || found.value === current) return;
+    current = found.value; render(); if (!silent) onChange(current);
+  };
+  wrap.setValue = setValue; wrap.setOptions = (next, nextValue = current, silent = true) => {
+    choices = normalizeChoices(next);
+    current = choices.some((choice) => choice.value === String(nextValue)) ? String(nextValue) : choices[0]?.value || '';
+    render(); if (!silent && current) onChange(current);
+  };
+  wrap.getValue = () => current;
+  Object.defineProperty(wrap, 'value', { get: () => current, set: (v) => setValue(v, true) });
+  const proxy = {}; Object.defineProperty(proxy, 'value', { get: () => current, set: (v) => setValue(v, true) });
+  Object.defineProperty(proxy, 'options', { get: () => choices.map((choice) => ({ ...choice })) });
+  wrap.select = proxy; render(); return wrap;
+}
+export function dataEntry(parent, label, options, value, onChange = () => {}) {
+  let choices = normalizeChoices(options);
+  let index = Math.max(0, choices.findIndex((choice) => choice.value === String(value)));
+  const wrap = el('div', 'pn-data-entry', parent); el('span', 'pn-hw-choice__caption', wrap, label);
+  const display = el('output', 'pn-data-entry__display', wrap);
+  const controls = el('div', 'pn-data-entry__controls', wrap);
+  const down = el('button', 'pn-button', controls, '−1'); down.type = 'button';
+  const range = el('input', 'pn-data-entry__range', controls); range.type = 'range'; range.min = '0'; range.max = String(Math.max(0, choices.length - 1)); range.step = '1';
+  const up = el('button', 'pn-button', controls, '+1'); up.type = 'button';
+  const render = () => { display.textContent = choices[index]?.label || '—'; range.value = String(index); range.max = String(Math.max(0, choices.length - 1)); };
+  const setValue = (v, silent = false) => { const i = choices.findIndex((choice) => choice.value === String(v)); if (i < 0 || i === index) return; index = i; render(); if (!silent) onChange(choices[index].value); };
+  const stepBy = (amount) => { const i = Math.max(0, Math.min(choices.length - 1, index + amount)); if (i !== index) { index = i; render(); onChange(choices[index].value); } };
+  down.addEventListener('click', () => stepBy(-1)); up.addEventListener('click', () => stepBy(1));
+  range.addEventListener('input', () => { index = Number(range.value); render(); onChange(choices[index].value); });
+  wrap.setValue = setValue; wrap.getValue = () => choices[index]?.value ?? '';
+  Object.defineProperty(wrap, 'value', { get: () => wrap.getValue(), set: (v) => setValue(v, true) });
+  render(); return wrap;
+}
 export function display(parent) {
   const d = el('div', 'pn-display', parent);
   const top = el('div', '', d);
@@ -219,72 +315,106 @@ export function power(id, start, onReady, onError) {
  */
 export function presetBar(parent, opts) {
   const { factory, store, apply, capture, display: disp, filename = 'preset' } = opts;
-  const body = el('div', 'pn-body', parent);
-  let current = { kind: 'factory', index: 0 };
+  const body = el('div', 'pn-preset-browser', parent);
+  let current = { kind: 'factory', index: 0 }, page = 0;
+  const pageSize = 8;
   const options = () => [
-    ...factory.map((p, i) => ({ value: `f:${i}`, label: `${String(i + 1)}  ${p.name}` })),
-    ...store.items.map((it) => ({ value: `u:${it.id}`, label: `U  ${it.name}` })),
+    ...factory.map((preset, index) => ({ value: `f:${index}`, label: preset.name })),
+    ...store.items.map((item) => ({ value: `u:${item.id}`, label: item.name })),
   ];
-  const sel = select(body, 'PRESET', options(), 'f:0', (v) => load(v));
-  sel.select.dataset.overturePresetSelector = 'true';
-  const refresh = (value) => { const s = sel.select; s.replaceChildren(); options().forEach((o) => { const opt = el('option', '', s, o.label); opt.value = o.value; }); if (value) s.value = value; };
-  sel.select.getCommunityPresetSelection = () => {
-    if (current.kind === 'factory') {
-      const item = factory[current.index];
-      return item ? { kind: 'factory', index: current.index, value: `f:${current.index}`, name: item.name } : null;
-    }
-    const item = store.get(current.id);
-    return item ? { kind: 'user', id: item.id, value: `u:${item.id}`, name: item.name } : null;
+  const selectedValue = () => current.kind === 'factory' ? `f:${current.index}` : `u:${current.id}`;
+  el('div', 'pn-preset-browser__title', body, 'OVERTURE PATCH LIBRARY');
+  const displayRow = el('div', 'pn-preset-browser__display', body);
+  const patchNumber = el('span', 'pn-preset-browser__number', displayRow, '001');
+  const patchName = el('strong', 'pn-preset-browser__name', displayRow, factory[0]?.name || 'INITIAL PATCH');
+  const pageInfo = el('span', 'pn-preset-browser__page', displayRow, 'BANK 1');
+  const controls = el('div', 'pn-preset-browser__controls', body);
+  const previous = button(controls, '◀ BANK', () => { page = Math.max(0, page - 1); render(); });
+  const slots = el('div', 'pn-preset-browser__slots', body);
+  const next = button(controls, 'BANK ▶', () => { page = Math.min(Math.ceil(options().length / pageSize) - 1, page + 1); render(); });
+  body.dataset.overturePresetSelector = 'true';
+  body.getCommunityPresetSelection = () => {
+    if (current.kind === 'factory') { const item = factory[current.index]; return item ? { kind: 'factory', index: current.index, value: `f:${current.index}`, name: item.name } : null; }
+    const item = store.get(current.id); return item ? { kind: 'user', id: item.id, value: `u:${item.id}`, name: item.name } : null;
   };
-  sel.select.restoreCommunityPresetSelection = (selection) => {
-    let value = selection.value || '';
+  body.restoreCommunityPresetSelection = (selection) => {
     if (selection.kind === 'factory') {
       let index = Number.isInteger(selection.index) ? selection.index : -1;
       if (index < 0 || index >= factory.length || (selection.name && factory[index]?.name !== selection.name)) index = factory.findIndex((item) => item.name === selection.name);
-      if (index < 0) return false;
-      value = `f:${index}`;
-      current = { kind: 'factory', index };
+      if (index < 0) return false; current = { kind: 'factory', index };
     } else {
-      const userItem = (selection.id && store.get(selection.id)) || store.items.find((entry) => entry.name === selection.name);
-      if (userItem) {
-        value = `u:${userItem.id}`;
-        current = { kind: 'user', id: userItem.id };
-      } else {
-        const factoryIndex = factory.findIndex((item) => item.name === selection.name);
-        if (factoryIndex < 0) return false;
-        value = `f:${factoryIndex}`;
-        current = { kind: 'factory', index: factoryIndex };
-      }
+      const item = (selection.id && store.get(selection.id)) || store.items.find((entry) => entry.name === selection.name);
+      if (item) current = { kind: 'user', id: item.id };
+      else { const index = factory.findIndex((entry) => entry.name === selection.name); if (index < 0) return false; current = { kind: 'factory', index }; }
     }
-    if (!options().some((option) => option.value === value)) refresh(value);
-    sel.select.value = value;
-    return true;
+    const position = options().findIndex((option) => option.value === selectedValue());
+    if (position >= 0) page = Math.floor(position / pageSize);
+    render(); return true;
   };
-  function load(v) {
+  function render() {
+    const all = options(), index = all.findIndex((option) => option.value === selectedValue());
+    patchNumber.textContent = index >= 0 ? String(index + 1) : '---';
+    patchName.textContent = all[index]?.label || 'NO PATCH SELECTED';
+    pageInfo.textContent = `BANK ${page + 1} / ${Math.max(1, Math.ceil(all.length / pageSize))}`;
+    previous.disabled = page <= 0; next.disabled = page >= Math.ceil(all.length / pageSize) - 1;
+    slots.replaceChildren();
+    all.slice(page * pageSize, page * pageSize + pageSize).forEach((item, offset) => {
+      const number = page * pageSize + offset + 1;
+      const key = button(slots, String(number), () => load(item.value), item.value === selectedValue());
+      key.classList.add('pn-preset-browser__slot'); key.title = item.label;
+      key.setAttribute('aria-label', `Load patch ${number}: ${item.label}`);
+      key.setAttribute('aria-pressed', String(item.value === selectedValue()));
+    });
+  }
+  function refresh(value = selectedValue()) {
+    if (String(value).startsWith('f:')) current = { kind: 'factory', index: Number(String(value).slice(2)) };
+    else if (String(value).startsWith('u:')) current = { kind: 'user', id: String(value).slice(2) };
+    const position = options().findIndex((option) => option.value === selectedValue());
+    if (position >= 0) page = Math.floor(position / pageSize);
+    render();
+  }
+  function load(value) {
     clearCommunitySource();
-    if (v.startsWith('f:')) { const i = Number(v.slice(2)); current = { kind: 'factory', index: i }; apply(JSON.parse(JSON.stringify(factory[i].data)), factory[i].name); }
-    else { const it = store.get(v.slice(2)); if (!it) return; current = { kind: 'user', id: it.id }; apply(JSON.parse(JSON.stringify(it.data)), it.name); }
-    sel.select.value = v;
+    if (value.startsWith('f:')) {
+      const index = Number(value.slice(2)), item = factory[index]; if (!item) return;
+      current = { kind: 'factory', index }; page = Math.floor(index / pageSize); apply(JSON.parse(JSON.stringify(item.data)), item.name);
+    } else {
+      const item = store.get(value.slice(2)); if (!item) return;
+      current = { kind: 'user', id: item.id }; const position = options().findIndex((entry) => entry.value === value); if (position >= 0) page = Math.floor(position / pageSize); apply(JSON.parse(JSON.stringify(item.data)), item.name);
+    }
+    render();
   }
   const row = el('div', 'pn-buttons', body);
   button(row, 'SAVE', () => {
     const existing = current.kind === 'user' ? store.get(current.id) : null;
-    const name = prompt('Preset name', existing?.name || 'My preset');
-    if (name === null) return;
-    const it = store.save(name, capture(), existing?.id);
-    current = { kind: 'user', id: it.id };
-    refresh(`u:${it.id}`);
-    disp?.flash('SAVED');
+    const name = prompt('Preset name', existing?.name || 'My preset'); if (name === null) return;
+    const item = store.save(name, capture(), existing?.id); current = { kind: 'user', id: item.id };
+    refresh(selectedValue()); disp?.flash('SAVED');
   });
-  button(row, 'RENAME', () => { if (current.kind !== 'user') { disp?.flash('SAVE FIRST'); return; } const it = store.get(current.id); const n = prompt('New name', it.name); if (n) { store.rename(it.id, n); refresh(`u:${it.id}`); } });
-  button(row, 'DELETE', () => { if (current.kind !== 'user') { disp?.flash('FACTORY PRESET'); return; } if (!confirm('Delete this preset?')) return; store.remove(current.id); refresh('f:0'); load('f:0'); });
-  button(row, 'EXPORT', () => downloadText(`${filename}.json`, store.exportJSON({ name: current.kind === 'user' ? store.get(current.id).name : factory[current.index].name, data: capture() })));
+  button(row, 'RENAME', () => {
+    if (current.kind !== 'user') { disp?.flash('SAVE FIRST'); return; }
+    const item = store.get(current.id), name = prompt('New name', item.name);
+    if (name) { store.rename(item.id, name); refresh(selectedValue()); }
+  });
+  button(row, 'DELETE', () => {
+    if (current.kind !== 'user') { disp?.flash('FACTORY PRESET'); return; }
+    if (!confirm('Delete this preset?')) return;
+    store.remove(current.id); current = { kind: 'factory', index: 0 }; refresh('f:0'); load('f:0');
+  });
+  button(row, 'EXPORT', () => {
+    const item = current.kind === 'user' ? store.get(current.id) : factory[current.index];
+    if (item) downloadText(`${filename}.json`, store.exportJSON({ name: item.name, data: capture() }));
+  });
   button(row, 'IMPORT', () => pickFile('.json,application/json', (text) => {
-    try { const { name, data } = store.parseImport(text); const it = store.save(name, data); refresh(`u:${it.id}`); load(`u:${it.id}`); disp?.flash('IMPORTED'); }
-    catch (err) { disp?.flash(String(err.message).toUpperCase().slice(0, 30), 3000); alert(err.message); }
+    try {
+      const { name, data } = store.parseImport(text), item = store.save(name, data);
+      current = { kind: 'user', id: item.id }; refresh(selectedValue()); load(selectedValue()); disp?.flash('IMPORTED');
+    } catch (err) { disp?.flash(String(err.message).toUpperCase().slice(0, 30), 3000); alert(err.message); }
   }));
   button(row, 'PANIC', () => opts.panic?.());
-  return { load, refresh, get current() { return current; } };
+  Object.defineProperty(body, 'value', { get: selectedValue, set: (value) => refresh(String(value)) });
+  render();
+  return { load, refresh, get current() { return current; }, selector: body };
 }
 
 export function footer(parent, text) { el('footer', 'pn-footer', parent, text); }

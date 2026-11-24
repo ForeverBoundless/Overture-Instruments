@@ -1,6 +1,6 @@
 import { WorkletEngine } from './shared/workletEngine.js';
 import { PresetStore, num } from './shared/presetStore.js';
-import { el, section, knob, select, display, performance, power, presetBar, footer } from './shared/panel.js';
+import { el, section, knob, select, choiceButtons, display, performance, power, presetBar, footer } from './shared/panel.js';
 import { MELLOTRON_PRESETS } from './data/mellotronPresets.js';
 import { consumeCommunityInstrumentPreset, createCommunityShareButton } from './shared/communityPreset.js';
 
@@ -80,9 +80,9 @@ class MellotronApp {
     const right = el('div', 'pn-header-right', header); this.display = display(right); this.midi = el('div', 'pn-midi', right, 'MIDI: searching…');
     const rows = el('div', 'pn-rows', this.shell); const top = el('div', 'pn-row m400-top', rows);
     const frame = section(top, 'TAPE FRAME', 'VIRTUAL FRAME LIBRARY');
-    this.ui.frame = select(frame.body, 'INSTALLED FRAME', FRAMES, DEF.frame, (v) => this.set('frame', Number(v)));
+    this.ui.frame = choiceButtons(frame.body, 'TAPE FRAME · LOAD SIMULATION', FRAMES, DEF.frame, (v) => this.set('frame', Number(v)));
     const track = section(top, 'THREE-TRACK HEAD', 'SELECT ONE TRACK · A / B / C');
-    this.ui.track = select(track.body, 'PLAYBACK TRACK', TRACKS, DEF.track, (v) => this.set('track', Number(v)));
+    this.ui.track = choiceButtons(track.body, 'TRACK SELECT · A / B / C', TRACKS, DEF.track, (v) => this.set('track', Number(v)));
     const monitor = el('section', 'm400-monitor', top);
     el('div', 'm400-monitor__eyebrow', monitor, 'TAPE HEAD MONITOR');
     this.tapeName = el('strong', 'm400-monitor__name', monitor, '3 VIOLINS');

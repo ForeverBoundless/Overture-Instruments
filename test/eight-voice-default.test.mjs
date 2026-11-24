@@ -29,8 +29,10 @@ test('Eight Voice default factory patch is stable, consonant unison', () => {
   const patch = OBERHEIM_EIGHT_VOICE_PRESETS[0].data;
   assert.equal(patch.name, undefined);
   assert.equal(patch.tune, 0);
-  assert.equal(patch.wave1, 'saw');
-  assert.equal(patch.wave2, 'saw');
+  assert.equal(patch.osc1Saw, .8);
+  assert.equal(patch.osc1Pulse, 0);
+  assert.equal(patch.osc2Saw, .68);
+  assert.equal(patch.osc2Pulse, 0);
   assert.equal(patch.lfoAmount, 0);
   assert.equal(patch.lfoTarget, 'pitch');
   assert.equal(patch.voices.length, 8);
@@ -79,12 +81,12 @@ test('standalone and OMNI defaults use the same stable Eight Voice sound', async
     readFile(new URL('../js/omni/templates.js', import.meta.url), 'utf8'),
     readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
   ]);
-  assert.match(app, /const DEF = \{ cutoff: \.53,[^;]*lfoAmount: 0, lfoTarget: 'pitch'/);
-  assert.match(app, /OberheimEightVoiceProcessor\.js\?v=20261104-eightvoice-stable/);
+  assert.match(app, /const DEF = \{ cutoff: \.53,[^;]*osc1Saw: \.8, osc1Pulse: 0, osc2Saw: \.68, osc2Pulse: 0/);
+  assert.match(app, /OberheimEightVoiceProcessor\.js\?v=20261123-sem-mixer-r1/);
   assert.match(modules, /P\('tune', 'VCO 2 interval \(semitones\)', -12, 12, 0/);
   assert.match(modules, /P\('lfoAmount', 'LFO depth', 0, 0\.5, 0\)/);
-  assert.match(modules, /OberheimEightVoiceProcessor\.js\?v=20261104-eightvoice-stable/);
+  assert.match(modules, /OberheimEightVoiceProcessor\.js\?v=20261123-sem-mixer-r1/);
   assert.match(templates, /SEM Warm Ensemble[\s\S]*?lfoAmount: 0, lfoTarget: 0/);
   assert.match(worker, /overture-shell-v\d+/);
-  assert.match(worker, /OberheimEightVoiceProcessor\.js\?v=20261104-eightvoice-stable/);
+  assert.match(worker, /OberheimEightVoiceProcessor\.js\?v=20261123-sem-mixer-r1/);
 });

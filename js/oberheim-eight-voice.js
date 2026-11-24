@@ -4,18 +4,51 @@ import { el, section, knob, select, display, performance, power, presetBar, foot
 import { OBERHEIM_EIGHT_VOICE_PRESETS } from './data/oberheimEightVoicePresets.js';
 import { consumeCommunityInstrumentPreset, createCommunityShareButton } from './shared/communityPreset.js';
 
-const DEF = { cutoff: .53, resonance: .06, filterEnv: .2, filterMode: 'low', osc1: .8, osc2: .68, tune: 0, pulse: .5, wave1: 'saw', wave2: 'saw', attack: .16, decay: .42, sustain: .72, release: .52, master: .64, lfoRate: .13, lfoAmount: 0, lfoTarget: 'pitch', bendRange: 2 };
+const DEF = { cutoff: .53, resonance: .06, filterEnv: .2, filterMode: 'low', osc1Saw: .8, osc1Pulse: 0, osc2Saw: .68, osc2Pulse: 0, tune: 0, pulse: .5, attack: .16, decay: .42, sustain: .72, release: .52, master: .64, lfoRate: .13, lfoAmount: 0, lfoTarget: 'pitch', bendRange: 2 };
 const validate = (data) => {
   if (!data || typeof data !== 'object') throw new Error('Not an Eight Voice program.');
   const out = { ...DEF };
-  Object.keys(DEF).forEach((key) => { if (!(key in data)) return; out[key] = ['filterMode', 'wave1', 'wave2', 'lfoTarget'].includes(key) ? (key === 'filterMode' ? ['low', 'band', 'high', 'notch'].includes(data[key]) : key === 'lfoTarget' ? ['pitch', 'filter'].includes(data[key]) : ['saw', 'pulse'].includes(data[key])) ? data[key] : DEF[key] : key === 'bendRange' ? num(data[key], 1, 12, 2) : num(data[key], 0, 1, DEF[key]); });
-  out.voices = Array.from({ length: 8 }, (_, i) => { const v = Array.isArray(data.voices) ? data.voices[i] || {} : {}; return { level: num(v.level, 0, 1, .85), pan: num(v.pan, -1, 1, (i - 3.5) / 5), tune: num(v.tune, -.2, .2, 0), detune: num(v.detune, -.2, .2, 0), cutoff: num(v.cutoff, 0, 1, out.cutoff), resonance: num(v.resonance, 0, .85, out.resonance), osc1: num(v.osc1, 0, 1, out.osc1), osc2: num(v.osc2, 0, 1, out.osc2), filterEnv: num(v.filterEnv, 0, 1, out.filterEnv), filterMode: ['low', 'band', 'high', 'notch'].includes(v.filterMode) ? v.filterMode : out.filterMode, wave1: ['saw', 'pulse'].includes(v.wave1) ? v.wave1 : out.wave1, wave2: ['saw', 'pulse'].includes(v.wave2) ? v.wave2 : out.wave2 }; });
+  Object.keys(DEF).forEach((key) => {
+    if (!(key in data)) return;
+    out[key] = key === 'filterMode'
+      ? (['low', 'band', 'high', 'notch'].includes(data[key]) ? data[key] : DEF[key])
+      : key === 'lfoTarget'
+        ? (['pitch', 'filter'].includes(data[key]) ? data[key] : DEF[key])
+        : key === 'bendRange' ? num(data[key], 1, 12, 2) : num(data[key], 0, 1, DEF[key]);
+  });
+  // Older Community and factory programs stored one waveform choice plus
+  // one oscillator level. Migrate that pair into the SEM's separate saw/pulse
+  // mixer outputs without changing the original sound.
+  const legacyLevel = (value, fallback) => num(value, 0, 1, fallback);
+  ['1', '2'].forEach((oscillator) => {
+    const legacy = legacyLevel(data[`osc${oscillator}`], DEF[`osc${oscillator}Saw`] + DEF[`osc${oscillator}Pulse`]);
+    const wave = data[`wave${oscillator}`] === 'pulse' ? 'pulse' : 'saw';
+    out[`osc${oscillator}Saw`] = num(data[`osc${oscillator}Saw`], 0, 1, wave === 'saw' ? legacy : 0);
+    out[`osc${oscillator}Pulse`] = num(data[`osc${oscillator}Pulse`], 0, 1, wave === 'pulse' ? legacy : 0);
+  });
+  out.voices = Array.from({ length: 8 }, (_, i) => {
+    const v = Array.isArray(data.voices) ? data.voices[i] || {} : {};
+    const voice = {
+      level: num(v.level, 0, 1, .85), pan: num(v.pan, -1, 1, (i - 3.5) / 5),
+      tune: num(v.tune, -.2, .2, 0), detune: num(v.detune, -.2, .2, 0),
+      cutoff: num(v.cutoff, 0, 1, out.cutoff), resonance: num(v.resonance, 0, .85, out.resonance),
+      filterEnv: num(v.filterEnv, 0, 1, out.filterEnv),
+      filterMode: ['low', 'band', 'high', 'notch'].includes(v.filterMode) ? v.filterMode : out.filterMode,
+    };
+    ['1', '2'].forEach((oscillator) => {
+      const legacy = legacyLevel(v[`osc${oscillator}`], out[`osc${oscillator}Saw`] + out[`osc${oscillator}Pulse`]);
+      const wave = v[`wave${oscillator}`] === 'pulse' ? 'pulse' : (v[`wave${oscillator}`] === 'saw' ? 'saw' : (data[`wave${oscillator}`] === 'pulse' ? 'pulse' : 'saw'));
+      voice[`osc${oscillator}Saw`] = num(v[`osc${oscillator}Saw`], 0, 1, wave === 'saw' ? legacy : out[`osc${oscillator}Saw`]);
+      voice[`osc${oscillator}Pulse`] = num(v[`osc${oscillator}Pulse`], 0, 1, wave === 'pulse' ? legacy : out[`osc${oscillator}Pulse`]);
+    });
+    return voice;
+  });
   return out;
 };
 
 class EightVoiceApp {
   constructor() {
-    this.engine = new WorkletEngine(new URL('./engine/OberheimEightVoiceProcessor.js?v=20261104-eightvoice-stable', import.meta.url).href, 'oberheim-eight-voice-processor');
+    this.engine = new WorkletEngine(new URL('./engine/OberheimEightVoiceProcessor.js?v=20261123-sem-mixer-r1', import.meta.url).href, 'oberheim-eight-voice-processor');
     this.patch = validate(OBERHEIM_EIGHT_VOICE_PRESETS[0].data); this.ui = {}; this.voiceUi = [];
     this.store = new PresetStore({ key: 'overture.oberheim-eight-voice.programs', version: 1, validate });
     this.build();
@@ -32,7 +65,7 @@ class EightVoiceApp {
   set(key, value) {
     this.patch[key] = value;
     this.engine.post({ t: 'param', key, value });
-    const linked = ['cutoff', 'resonance', 'filterEnv', 'filterMode', 'osc1', 'osc2', 'wave1', 'wave2'];
+    const linked = ['cutoff', 'resonance', 'filterEnv', 'filterMode', 'osc1Saw', 'osc1Pulse', 'osc2Saw', 'osc2Pulse'];
     if (linked.includes(key)) {
       this.patch.voices?.forEach((voice, index) => {
         voice[key] = value;
@@ -50,11 +83,7 @@ class EightVoiceApp {
     const rows = el('div', 'pn-rows', this.shell); const global = el('div', 'pn-row eight-global', rows);
     const osc = section(global, 'OSCILLATOR MIX', 'EACH SEM · TWO VCOs');
     const ok = el('div', 'pn-knobs', osc.body);
-    this.ui.osc1 = knob(ok, { label: 'VCO 1', min: 0, max: 1, value: DEF.osc1, formatValue: (v) => `${Math.round(v * 100)}%`, onChange: (v) => this.set('osc1', v) });
-    this.ui.osc2 = knob(ok, { label: 'VCO 2', min: 0, max: 1, value: DEF.osc2, formatValue: (v) => `${Math.round(v * 100)}%`, onChange: (v) => this.set('osc2', v) });
-    this.ui.tune = knob(ok, { label: 'VCO 2 INTERVAL', min: 0, max: 1, value: DEF.tune, formatValue: (v) => `${(v * 12).toFixed(1)} st`, onChange: (v) => this.set('tune', v) });
-    this.ui.wave1 = select(osc.body, 'VCO 1 WAVEFORM', [{ value: 'saw', label: 'SAWTOOTH' }, { value: 'pulse', label: 'PULSE' }], DEF.wave1, (v) => this.set('wave1', v));
-    this.ui.wave2 = select(osc.body, 'VCO 2 WAVEFORM', [{ value: 'pulse', label: 'PULSE' }, { value: 'saw', label: 'SAWTOOTH' }], DEF.wave2, (v) => this.set('wave2', v));
+    this.ui.tune = knob(ok, { label: 'VCO 2 INTERVAL', min: 0, max: 1, value: 0, formatValue: (v) => `${(v * 12).toFixed(1)} st`, onChange: (v) => this.set('tune', v) });
     this.ui.pulse = knob(ok, { label: 'PULSE WIDTH', min: 0, max: 1, value: DEF.pulse, formatValue: (v) => `${Math.round(v * 100)}%`, onChange: (v) => this.set('pulse', v) });
     const filter = section(global, 'STATE VARIABLE VCF', '12 dB / OCTAVE · SEM RESPONSE');
     const fk = el('div', 'pn-knobs', filter.body);
@@ -101,14 +130,15 @@ class EightVoiceApp {
     control('tune', 'FINE TUNE', -.2, .2, 0, (v) => `${v >= 0 ? '+' : ''}${Math.round(v * 100)} ct`);
     control('cutoff', 'VCF CUTOFF', 0, 1, this.patch.cutoff, (v) => `${Math.round(v * 100)}%`);
     control('resonance', 'VCF RES', 0, .85, this.patch.resonance, (v) => `${Math.round(v * 100)}%`);
-    control('osc1', 'VCO 1 LEVEL', 0, 1, this.patch.osc1, (v) => `${Math.round(v * 100)}%`);
-    control('osc2', 'VCO 2 LEVEL', 0, 1, this.patch.osc2, (v) => `${Math.round(v * 100)}%`);
+    ['osc1Saw','osc1Pulse','osc2Saw','osc2Pulse'].forEach((key) => {
+      const oscillator = key.startsWith('osc1') ? 'VCO 1' : 'VCO 2';
+      const shape = key.endsWith('Saw') ? 'SAW' : 'PULSE';
+      control(key, `${oscillator} ${shape}`, 0, 1, initial[key] ?? this.patch[key], (v) => `${Math.round(v * 100)}%`);
+    });
     const choice = (key, label, options, fallback) => {
-      state[key] = select(sec.body, label, options, initial[key] ?? fallback, (value) => this.engine.post({ t: 'param', key: `voice${index}_${key}`, value }));
+      state[key] = select(sec.body, label, options, initial[key] ?? fallback, (value) => this.engine.post({ t: `param`, key: `voice${index}_${key}`, value }));
     };
     choice('filterMode', 'FILTER RESPONSE', [{ value: 'low', label: 'LOW PASS' }, { value: 'band', label: 'BAND PASS' }, { value: 'high', label: 'HIGH PASS' }, { value: 'notch', label: 'NOTCH' }], this.patch.filterMode);
-    choice('wave1', 'VCO 1 SHAPE', [{ value: 'saw', label: 'SAWTOOTH' }, { value: 'pulse', label: 'PULSE' }], this.patch.wave1);
-    choice('wave2', 'VCO 2 SHAPE', [{ value: 'pulse', label: 'PULSE' }, { value: 'saw', label: 'SAWTOOTH' }], this.patch.wave2);
     this.voiceUi[index] = state;
   }
   refresh() {

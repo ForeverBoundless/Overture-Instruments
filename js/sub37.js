@@ -5,6 +5,7 @@ import { Sub37Engine } from './engine/Sub37Engine.js';
 import { MidiManager, midiNoteName } from './engine/MidiManager.js';
 import { SUB37_PRESETS } from './data/sub37Presets.js';
 import { consumeCommunityInstrumentPreset, createCommunityShareButton, clearCommunitySource } from './shared/communityPreset.js';
+import { select as panelChoice } from './shared/panel.js';
 
 const KEY_TO_NOTE = { a: 'C3', w: 'C#3', s: 'D3', e: 'D#3', d: 'E3', f: 'F3', t: 'F#3', g: 'G3', y: 'G#3', h: 'A3', u: 'A#3', j: 'B3', k: 'C4', o: 'C#4', l: 'D4', p: 'D#4', ';': 'E4', "'": 'F4' };
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
@@ -24,6 +25,8 @@ class Sub37 {
     this.knobs = {};
     this.buttons = {};
     this.currentPreset = 0;
+    this.currentBank = 1;
+    this.bankSelectMode = false;
     this.activeKeys = new Set();
     this._modKeyDirection = 0;
     this._modRampRAF = null;
@@ -215,13 +218,8 @@ class Sub37 {
   }
 
   _selector(label, values, value, onChange) {
-    const wrap = document.createElement('label'); wrap.className = 's37-select-wrap';
-    const caption = document.createElement('span'); caption.textContent = label;
-    const select = document.createElement('select');
-    values.forEach((item) => { const option = document.createElement('option'); option.value = item.value ?? item; option.textContent = item.label ?? item; select.appendChild(option); });
-    select.value = value; select.addEventListener('change', () => onChange(select.value));
-    wrap.append(caption, select);
-    wrap.setValue = (next, silent = false) => { select.value = next; if (!silent) onChange(select.value); };
+    const wrap = panelChoice(null, label, values, value, onChange);
+    wrap.classList.add('s37-select-wrap');
     return wrap;
   }
 
@@ -233,13 +231,82 @@ class Sub37 {
   _buildPerformanceRow() {
     const row = document.createElement('div'); row.className = 's37-row s37-performance';
     const program = this._section('PROGRAMMING');
-    const bank = this._selector('BANK / PRESET', SUB37_PRESETS.map((preset) => ({ value: preset.id, label: `${preset.bank}.${String(preset.slot)}  ${preset.name}` })), 0, (value) => this._applyPreset(Number(value)));
-    this.presetSelect = bank; program.body.appendChild(bank);
-    const presetNode = bank.querySelector('select');
+    const presetNode = document.createElement('div');
+    presetNode.className = 's37-bank-preset';
     presetNode.dataset.overturePresetSelector = 'true';
+    presetNode.setAttribute('role', 'group');
+    presetNode.setAttribute('aria-label', 'Sub 37 bank and preset selection');
+    const heading = document.createElement('span');
+    heading.className = 's37-bank-preset__label';
+    heading.textContent = 'BANK / PRESET';
+    const readout = document.createElement('output');
+    readout.className = 's37-bank-preset__readout';
+    const bankButton = this._button('BANK', () => {
+      this.bankSelectMode = !this.bankSelectMode;
+      renderPresetSelection();
+      this._showMessage(this.bankSelectMode ? 'SELECT BANK 1–16' : 'BANK SELECT CANCELLED');
+    });
+    bankButton.classList.add('s37-bank-preset__bank');
+    const numberBank = document.createElement('div');
+    numberBank.className = 's37-bank-preset__numbers';
+    numberBank.setAttribute('role', 'group');
+    numberBank.setAttribute('aria-label', 'Preset numbers 1 through 16');
+    const presetButtons = [];
+    const currentPresetValue = () => String(this.currentPreset);
+    const renderPresetSelection = () => {
+      const preset = SUB37_PRESETS[this.currentPreset] || SUB37_PRESETS[0];
+      const presetBank = Math.floor(this.currentPreset / 16) + 1;
+      readout.textContent = this.bankSelectMode
+        ? 'SELECT BANK · PRESS 1–16'
+        : presetBank === this.currentBank
+          ? `BANK ${this.currentBank} · PRESET ${preset.slot} · ${preset.name}`
+          : `BANK ${this.currentBank} · SELECT PRESET 1–16`;
+      readout.title = readout.textContent;
+      bankButton.classList.toggle('lit', this.bankSelectMode);
+      bankButton.setAttribute('aria-pressed', String(this.bankSelectMode));
+      presetButtons.forEach((control, index) => {
+        const selected = !this.bankSelectMode && index + 1 === preset.slot && Math.floor(this.currentPreset / 16) + 1 === this.currentBank;
+        control.classList.toggle('lit', selected);
+        control.setAttribute('aria-pressed', String(selected));
+        control.setAttribute('aria-label', this.bankSelectMode ? `Select bank ${index + 1}` : `Load bank ${this.currentBank}, preset ${index + 1}`);
+      });
+    };
+    const selectProgramNumber = (number) => {
+      if (this.bankSelectMode) {
+        this.currentBank = number;
+        this.bankSelectMode = false;
+        renderPresetSelection();
+        this._showMessage(`BANK ${number} · SELECT PRESET`);
+        return;
+      }
+      this._applyPreset((this.currentBank - 1) * 16 + (number - 1));
+    };
+    for (let number = 1; number <= 16; number += 1) {
+      const control = this._button(String(number), () => selectProgramNumber(number));
+      control.classList.add('s37-bank-preset__number');
+      numberBank.appendChild(control);
+      presetButtons.push(control);
+    }
+    presetNode.append(heading, readout, bankButton, numberBank);
+    this.presetSelect = presetNode;
+    this.renderPresetSelection = renderPresetSelection;
+    Object.defineProperty(presetNode, 'value', {
+      get: currentPresetValue,
+      set: (value) => presetNode.setValue(value, true),
+    });
+    presetNode.getValue = currentPresetValue;
+    presetNode.setValue = (value, silent = false) => {
+      const index = Number(value);
+      if (!Number.isInteger(index) || index < 0 || index >= SUB37_PRESETS.length) return;
+      this.currentPreset = index;
+      this.currentBank = Math.floor(index / 16) + 1;
+      this.bankSelectMode = false;
+      renderPresetSelection();
+      if (!silent) this._applyPreset(index);
+    };
     presetNode.getCommunityPresetSelection = () => {
-      const preset = SUB37_PRESETS.find((item) => String(item.id) === String(presetNode.value));
-      return preset ? { kind: 'factory', value: String(preset.id), index: SUB37_PRESETS.indexOf(preset), name: preset.name } : null;
+      const preset = SUB37_PRESETS[this.currentPreset];
+      return preset ? { kind: 'factory', value: String(preset.id), index: preset.id, name: preset.name } : null;
     };
     presetNode.restoreCommunityPresetSelection = (selection) => {
       const preset = SUB37_PRESETS.find((item, index) =>
@@ -247,10 +314,11 @@ class Sub37 {
         || (selection.name && item.name === selection.name)
         || (Number.isInteger(selection.index) && index === selection.index && (!selection.name || item.name === selection.name)));
       if (!preset) return false;
-      presetNode.value = String(preset.id);
-      this.currentPreset = SUB37_PRESETS.indexOf(preset);
+      presetNode.setValue(String(preset.id), true);
       return true;
     };
+    program.body.appendChild(presetNode);
+    renderPresetSelection();
     const programButtons = document.createElement('div'); programButtons.className = 's37-button-grid';
     programButtons.append(this._button('PRESET', () => this._showMessage('PRESET MODE')), this._button('PANEL', () => this._showMessage('PANEL MODE')), this._button('SAVE', () => this._savePatch()), this._button('INIT', () => this._initPatch())); program.body.appendChild(programButtons);
     createCommunityShareButton(program.body, {
@@ -283,7 +351,7 @@ class Sub37 {
 
   _modSection(index) {
     const part = this._section(`MOD ${index + 1}`, 'ASSIGNABLE BUS'); const state = this.engine.modBusses[index];
-    const sync = () => this.engine.setModulation(index, { source: this.modSelectors[index].source.querySelector('select').value, destination: this.modSelectors[index].destination.querySelector('select').value, amount: this.knobs[`mod${index}Amount`].value });
+    const sync = () => this.engine.setModulation(index, { source: this.modSelectors[index].source.value, destination: this.modSelectors[index].destination.value, amount: this.knobs[`mod${index}Amount`].value });
     const source = this._selector('SOURCE', ['LFO 1', 'LFO 2', 'FILTER EG', 'AMP EG', 'OSC 2'], state.source, sync);
     const destination = this._selector('DESTINATION', ['PITCH', 'FILTER', 'WAVE', 'OSC 2', 'AMP'], state.destination, sync);
     this.modSelectors ??= []; this.modSelectors[index] = { source, destination };
@@ -393,7 +461,9 @@ class Sub37 {
     this.communityPreset = null;
     const preset = SUB37_PRESETS[clamp(index, 0, SUB37_PRESETS.length - 1)];
     this.currentPreset = preset.id;
+    this.currentBank = Math.floor(preset.id / 16) + 1;
     this.presetSelect?.setValue(String(preset.id), true);
+    this.renderPresetSelection?.();
     this._applyPatch(preset);
   }
 
@@ -442,7 +512,7 @@ class Sub37 {
   _captureCommunityPatch() {
     const base = SUB37_PRESETS[this.currentPreset] || SUB37_PRESETS[0];
     const value = (key, fallback) => Number.isFinite(Number(this.knobs[key]?.value)) ? Number(this.knobs[key].value) : fallback;
-    const selected = (control, fallback) => control?.querySelector('select')?.value ?? fallback;
+    const selected = (control, fallback) => control?.getValue?.() ?? fallback;
     const patch = JSON.parse(JSON.stringify(base));
     patch.osc1Shape = value('osc0Wave', patch.osc1Shape);
     patch.osc2Shape = value('osc1Wave', patch.osc2Shape);

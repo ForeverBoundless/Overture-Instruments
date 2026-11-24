@@ -89,3 +89,15 @@
  .obxa-voice-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
  .obxa-programmer__row,.obxa-programmer__special{grid-template-columns:minmax(0,1fr)}
 }
+
+/* OB-Xa group keys and discrete front-panel choices. */
+.obxa-shell .pn-hw-choice{color:#8fb6d1}
+.obxa-shell .pn-hw-choice__readout{color:#d7efff}
+.obxa-bank-groups{display:grid;gap:4px;min-width:140px}
+.obxa-programmer__control-label{color:#8fb6d1;font:700 7px/1.2 'DM Mono',monospace;letter-spacing:.08em}
+.obxa-bank-groups__buttons{display:grid;grid-template-columns:repeat(4,minmax(28px,1fr));gap:4px}
+.obxa-bank-groups__buttons .pn-button{min-width:28px;min-height:29px;font:800 10px 'DM Mono',monospace}
+.obxa-programmer__row{grid-template-columns:minmax(180px,1.2fr) minmax(130px,.6fr) auto}
+.obxa-programmer__special{grid-template-columns:minmax(130px,.7fr) minmax(120px,.6fr) auto}
+.obxa-programmer__special .pn-hw-choice--buttons{min-width:0}
+@media(max-width:760px){.obxa-programmer__row,.obxa-programmer__special{grid-template-columns:1fr}.obxa-bank-groups{min-width:0}}

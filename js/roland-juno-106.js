@@ -71,9 +71,9 @@ class JunoApp {
     const lfo = section(r1, 'LFO');
     const lk = el('div', 'pn-knobs', lfo.body); K(lk, 'lfoRate', 'RATE', (v) => `${(0.1 * Math.pow(300, v)).toFixed(2)} Hz`); K(lk, 'lfoDelay', 'DELAY');
     const dco = section(r1, 'DCO');
-    this.ui.range = select(dco.body, 'RANGE', [16, 8, 4].map((r) => ({ value: r, label: `${r}'` })), 8, (v) => this.set('range', Number(v)));
+    this.ui.range = choiceButtons(dco.body, 'DCO RANGE', [16, 8, 4].map((r) => ({ value: r, label: `${r}'` })), 8, (v) => this.set('range', Number(v)));
     const dk = el('div', 'pn-knobs', dco.body); K(dk, 'dcoLfo', 'LFO'); K(dk, 'pwm', 'PWM');
-    this.ui.pwmMode = select(dco.body, 'PWM SOURCE', [{ value: 'man', label: 'MANUAL' }, { value: 'lfo', label: 'LFO' }], 'man', (v) => this.set('pwmMode', v));
+    this.ui.pwmMode = choiceButtons(dco.body, 'PWM MODE SWITCH', [{ value: 'man', label: 'MANUAL' }, { value: 'lfo', label: 'LFO' }], 'man', (v) => this.set('pwmMode', v));
     const wb = el('div', 'pn-buttons', dco.body);
     this.ui.pulse = toggle(wb, 'PULSE ⎍', false, (v) => this.set('pulse', v)); this.ui.saw = toggle(wb, 'SAW ⩘', true, (v) => this.set('saw', v));
     const dk2 = el('div', 'pn-knobs', dco.body); K(dk2, 'sub', 'SUB OSC'); K(dk2, 'noise', 'NOISE');
@@ -83,7 +83,7 @@ class JunoApp {
     const fk = el('div', 'pn-knobs', vcf.body); K(fk, 'cutoff', 'FREQ', (v) => `${Math.round(20 * Math.pow(2, (20 + v * 110) / 12))} Hz`); K(fk, 'res', 'RES'); K(fk, 'envAmt', 'ENV'); K(fk, 'vcfLfo', 'LFO'); K(fk, 'kbd', 'KYBD');
     this.ui.envPolarity = toggle(vcf.body, 'ENV INVERT', false, (v) => this.set('envPolarity', v ? -1 : 1));
     const vca = section(r1, 'VCA');
-    this.ui.vcaMode = select(vca.body, 'MODE', [{ value: 'env', label: 'ENV' }, { value: 'gate', label: 'GATE' }], 'env', (v) => this.set('vcaMode', v));
+    this.ui.vcaMode = choiceButtons(vca.body, 'VCA CONTROL', [{ value: 'env', label: 'ENV' }, { value: 'gate', label: 'GATE' }], 'env', (v) => this.set('vcaMode', v));
     const vk = el('div', 'pn-knobs', vca.body); K(vk, 'vcaLevel', 'LEVEL');
     const env = section(r1, 'ENV');
     const ek = el('div', 'pn-knobs', env.body);
@@ -96,7 +96,7 @@ class JunoApp {
     const r2 = el('div', 'pn-row juno-row-bottom', rows);
     const perf = section(r2, 'PERFORMANCE');
     const pk = el('div', 'pn-knobs', perf.body); K(pk, 'portamento', 'PORTAMENTO', tfmt(1.5)); K(pk, 'benderLfo', 'BENDER→LFO');
-    this.ui.bendRange = select(perf.body, 'BEND RANGE', [1, 2, 3, 5, 7, 12].map((n) => ({ value: n, label: `${n} st` })), 2, (v) => this.set('bendRange', Number(v)));
+    this.ui.bendRange = knob(pk, { label: 'DCO BEND SENS', min: 1, max: 12, step: .1, value: 2, formatValue: (v) => `${v.toFixed(1)} st`, onChange: (v) => this.set('bendRange', v) });
     this.ui.volume = knob(pk, { label: 'VOLUME', min: 0, max: 1, value: this.patch.volume, formatValue: (v) => `${Math.round(v * 100)}%`, onChange: (v) => this.set('volume', v) });
     const pre = section(r2, 'PATCH MEMORY', 'ORIGINAL OVERTURE PATCHES');
     this.presets = presetBar(pre.body, {

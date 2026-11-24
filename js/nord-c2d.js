@@ -106,7 +106,7 @@ class NordC2D {
     const shell = document.createElement('main');
     shell.className = 'nord-shell';
     this.shell = shell;
-    shell.innerHTML = `<header class="nord-header"><img src="/ui/Logos/Nord_logo.png" alt="Nord" class="nord-logo"><div class="nord-title"><strong><b>c2d</b></strong><span>DUAL MANUAL ORGAN</span></div></header><section class="nord-top-panel"><div class="nord-brand-display"><small>PROGRAM <b class="nord-program-number">001</b></small><strong class="nord-program-name">B3 DRAWBAR PANEL</strong><span>LIVE MEMORY</span></div><div class="nord-global-controls"><label>ORGAN MODEL<select class="nord-model"><option>B3</option><option>VX</option><option>Farf</option><option>Pipe</option></select></label><button data-action="rotary">ROTARY</button><button data-action="reverb">REVERB</button><button data-action="drive">DRIVE</button><button data-action="split">TO GREAT</button><button data-action="pedal">PEDAL</button><button data-action="store">STORE</button></div><div class="nord-global-knobs"><label class="nord-control-slider"><span>MASTER LEVEL</span><i class="nord-slider-face" data-control="master" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="1" aria-valuenow=".55" aria-label="Master level"><b></b></i><output>55</output></label><label class="nord-control-slider"><span>REVERB</span><i class="nord-slider-face" data-control="reverb" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="1" aria-valuenow=".18" aria-label="Reverb"><b></b></i><output>18</output></label><label class="nord-control-slider"><span>DRIVE</span><i class="nord-slider-face" data-control="drive" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="1" aria-valuenow="0" aria-label="Drive"><b></b></i><output>0</output></label></div></section><section class="nord-system-row"><label>CROSSTALK<select class="nord-crosstalk"><option>Clean</option><option>Vintage 1</option><option>Vintage 2</option><option selected>Vintage 3</option></select></label><label>KEY CLICK<select class="nord-click"><option>Low</option><option selected>Normal</option><option>High</option><option>Higher</option></select></label><label>ROTARY SPEED<select class="nord-rotary-speed"><option>Slow</option><option selected>Stop</option><option>Fast</option></select></label><label>PROGRAM <button data-program="previous">−</button><output class="nord-program-readout">001</output><button data-program="next">+</button></label></section><section class="nord-model-panel"></section><section class="nord-manuals"></section><footer class="nord-footer">NORD C2D • DUAL 37-KEY MANUALS • B3 / VX / FARF / PIPE • COMPUTER KEYBOARD READY</footer>`;
+    shell.innerHTML = `<header class="nord-header"><img src="/ui/Logos/Nord_logo.png" alt="Nord" class="nord-logo"><div class="nord-title"><strong><b>c2d</b></strong><span>DUAL MANUAL ORGAN</span></div></header><section class="nord-top-panel"><div class="nord-brand-display"><small>PROGRAM <b class="nord-program-number">001</b></small><strong class="nord-program-name">B3 DRAWBAR PANEL</strong><span>LIVE MEMORY</span></div><div class="nord-global-controls"><label>ORGAN MODEL<button type="button" class="nord-model nord-setting-control" aria-label="Cycle organ model">MODEL · B3</button></label><button data-action="rotary">ROTARY</button><button data-action="reverb">REVERB</button><button data-action="drive">DRIVE</button><button data-action="split">TO GREAT</button><button data-action="pedal">PEDAL</button><button data-action="store">STORE</button></div><div class="nord-global-knobs"><label class="nord-control-slider"><span>MASTER LEVEL</span><i class="nord-slider-face" data-control="master" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="1" aria-valuenow=".55" aria-label="Master level"><b></b></i><output>55</output></label><label class="nord-control-slider"><span>REVERB</span><i class="nord-slider-face" data-control="reverb" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="1" aria-valuenow=".18" aria-label="Reverb"><b></b></i><output>18</output></label><label class="nord-control-slider"><span>DRIVE</span><i class="nord-slider-face" data-control="drive" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="1" aria-valuenow="0" aria-label="Drive"><b></b></i><output>0</output></label></div></section><section class="nord-system-row"><label>SOUND MENU · CROSSTALK<button type="button" class="nord-crosstalk nord-setting-control" aria-label="Cycle sound menu crosstalk">VINTAGE 3</button></label><label>SOUND MENU · KEY CLICK<button type="button" class="nord-click nord-setting-control" aria-label="Cycle sound menu key click">NORMAL</button></label><label>ROTARY SPEED<button type="button" class="nord-rotary-speed nord-setting-control" aria-label="Cycle rotary speed">STOP</button></label><label>PROGRAM <button data-program="previous">−</button><output class="nord-program-readout">001</output><button data-program="next">+</button></label></section><section class="nord-model-panel"></section><section class="nord-manuals"></section><footer class="nord-footer">NORD C2D • DUAL 37-KEY MANUALS • B3 / VX / FARF / PIPE • COMPUTER KEYBOARD READY</footer>`;
     root.appendChild(shell);
     shell.querySelectorAll('[data-action]').forEach((button) => button.addEventListener('click', () => {
       if (button.dataset.action === 'store') return; // momentary
@@ -148,10 +148,32 @@ class NordC2D {
         }
       });
     });
-    shell.querySelector('.nord-model').addEventListener('change', (event) => this.engine.setModel(event.target.value));
-    shell.querySelector('.nord-crosstalk').addEventListener('change', (event) => this.engine.setCrosstalk(event.target.value));
-    shell.querySelector('.nord-click').addEventListener('change', (event) => this.engine.setKeyClick(event.target.value));
-    shell.querySelector('.nord-rotary-speed').addEventListener('change', (event) => { const v = event.target.value; const btn = shell.querySelector('[data-action="rotary"]'); if (v === 'Stop') { this.engine.setRotaryEnabled(false); btn.classList.remove('active'); } else { this.engine.setRotary(v === 'Fast'); btn.classList.add('active'); } });
+    const cycleControl = (selector, values, initial, onChange) => {
+      const control = shell.querySelector(selector);
+      let index = Math.max(0, values.indexOf(initial));
+      const render = () => {
+        control.textContent = selector === '.nord-model' ? 'MODEL · ' + values[index] : values[index].toUpperCase();
+        control.dataset.value = values[index];
+        control.setAttribute('aria-pressed', 'false');
+      };
+      const setValue = (value, notify = true) => {
+        const next = values.indexOf(String(value));
+        if (next < 0) return;
+        index = next; render(); if (notify) onChange(values[index]);
+      };
+      Object.defineProperty(control, 'value', { get: () => values[index], set: (value) => setValue(value, false) });
+      control.addEventListener('click', () => setValue(values[(index + 1) % values.length]));
+      render();
+      return control;
+    };
+    cycleControl('.nord-model', ['B3', 'VX', 'Farf', 'Pipe'], this.engine.model, (value) => this.engine.setModel(value));
+    cycleControl('.nord-crosstalk', ['Clean', 'Vintage 1', 'Vintage 2', 'Vintage 3'], this.engine.crosstalk, (value) => this.engine.setCrosstalk(value));
+    cycleControl('.nord-click', ['Low', 'Normal', 'High', 'Higher'], this.engine.keyClick, (value) => this.engine.setKeyClick(value));
+    cycleControl('.nord-rotary-speed', ['Slow', 'Stop', 'Fast'], 'Stop', (value) => {
+      const btn = shell.querySelector('[data-action="rotary"]');
+      if (value === 'Stop') { this.engine.setRotaryEnabled(false); btn.classList.remove('active'); }
+      else { this.engine.setRotary(value === 'Fast'); btn.classList.add('active'); }
+    });
     // The generic [data-action] listener above already toggled the button.
     shell.querySelector('[data-action="split"]').addEventListener('click', (event) => { this.engine.setGreatSplit(event.currentTarget.classList.contains('active')); });
     shell.querySelectorAll('[data-program]').forEach((button) => button.addEventListener('click', () => this._changeProgram(button.dataset.program)));

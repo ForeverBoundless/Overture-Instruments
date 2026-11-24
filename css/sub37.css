@@ -252,3 +252,20 @@
 .s37-mod-row .s37-section-body > .s37-select-wrap select { width: 100%; min-width: 0; max-width: none; }
 .s37-mod-row .s37-section-body > .s37-knob-row { min-width: 0; flex-wrap: nowrap; justify-content: center; align-items: flex-end; }
 .s37-mod-row .s37-section-body .s37-knob { --knob-size: 42px; min-width: 42px; }
+
+/* Shared detented controls take the place of the old native select widgets. */
+.s37-select-wrap{display:flex!important;align-items:center;gap:5px;min-width:0;color:#afb2b7;font-size:7px}
+.s37-select-wrap .pn-hw-choice{min-width:54px}
+.s37-performance .s37-select-wrap{max-width:100%}
+.s37-mod-row .s37-section-body>.s37-select-wrap{width:auto;min-width:0}
+.s37-mod-row .s37-section-body>.s37-select-wrap .pn-hw-choice{width:100%;min-width:0}
+.s37-select-wrap .pn-hw-choice__readout{color:#c8f5ff}
+
+/* Sub 37's physical BANK button and sixteen numbered preset keys. */
+.s37-bank-preset{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"label bank" "readout readout" "numbers numbers";align-items:center;gap:5px;min-width:0;padding:6px;border:1px solid #575b62;border-radius:3px;background:linear-gradient(180deg,#272b31,#111317);box-shadow:inset 0 1px #ffffff12,0 2px 3px #0008}
+.s37-bank-preset__label{grid-area:label;color:#aeb4bc;font:700 7px/1.1 'Inter Variable',sans-serif;letter-spacing:.09em}
+.s37-bank-preset__bank{grid-area:bank;min-width:54px}
+.s37-bank-preset__readout{grid-area:readout;display:block;min-width:0;padding:5px 6px;border:2px solid #030506;border-radius:2px;background:#07100c;color:#a7f0a9;font:8px/1.35 'DM Mono',monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.s37-bank-preset__numbers{grid-area:numbers;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:4px}
+.s37-bank-preset__number{min-width:0;min-height:24px;padding:4px 1px;text-align:center}
+@media(max-width:520px){.s37-bank-preset{grid-template-columns:1fr auto}.s37-bank-preset__numbers{grid-template-columns:repeat(4,minmax(0,1fr))}}

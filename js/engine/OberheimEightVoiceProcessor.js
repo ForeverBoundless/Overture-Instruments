@@ -3,7 +3,7 @@
  * pan. The voices intentionally own all phase/filter/envelope state. */
 /* global sampleRate, registerProcessor, AudioWorkletProcessor */
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
-const DEF = { cutoff: .53, resonance: .06, filterEnv: .2, filterMode: 'low', osc1: .8, osc2: .68, tune: 0, pulse: .5, wave1: 'saw', wave2: 'saw', attack: .16, decay: .42, sustain: .72, release: .52, master: .64, lfoRate: .13, lfoAmount: 0, lfoTarget: 'pitch', bendRange: 2 };
+const DEF = { cutoff: .53, resonance: .06, filterEnv: .2, filterMode: 'low', osc1Saw: .8, osc1Pulse: 0, osc2Saw: .68, osc2Pulse: 0, osc1: .8, osc2: .68, tune: 0, pulse: .5, wave1: 'saw', wave2: 'saw', attack: .16, decay: .42, sustain: .72, release: .52, master: .64, lfoRate: .13, lfoAmount: 0, lfoTarget: 'pitch', bendRange: 2 };
 const polyBlep = (t, dt) => {
   if (t < dt) { t /= dt; return t + t - t * t - 1; }
   if (t > 1 - dt) { t = (t - 1) / dt; return t * t + t + t + 1; }
@@ -56,7 +56,30 @@ class EightVoiceProcessor extends AudioWorkletProcessor {
     this.dispatch(m);
   }
   dispatch(m) {
-    if (m.t === 'patch') this.p = { ...DEF, ...m.patch };
+    if (m.t === 'patch') {
+      const incoming = m.patch || {};
+      this.p = { ...DEF, ...incoming };
+      ['1','2'].forEach((oscillator) => {
+        if (!(`osc${oscillator}Saw` in incoming)) {
+          const shape = incoming[`wave${oscillator}`] === 'pulse' ? 'pulse' : 'saw';
+          const level = incoming[`osc${oscillator}`] ?? DEF[`osc${oscillator}`];
+          this.p[`osc${oscillator}Saw`] = shape === 'saw' ? level : 0;
+          this.p[`osc${oscillator}Pulse`] = shape === 'pulse' ? level : 0;
+        }
+      });
+      if (Array.isArray(incoming.voices)) this.p.voices = incoming.voices.map((voice) => {
+        const q = { ...voice };
+        ['1','2'].forEach((oscillator) => {
+          if (!(`osc${oscillator}Saw` in q)) {
+            const shape = q[`wave${oscillator}`] || incoming[`wave${oscillator}`] || 'saw';
+            const level = q[`osc${oscillator}`] ?? incoming[`osc${oscillator}`] ?? DEF[`osc${oscillator}`];
+            q[`osc${oscillator}Saw`] = shape === 'saw' ? level : 0;
+            q[`osc${oscillator}Pulse`] = shape === 'pulse' ? level : 0;
+          }
+        });
+        return q;
+      });
+    }
     else if (m.t === 'param' && (m.key in DEF || m.key.startsWith('voice'))) this.setParam(m.key, m.value);
     else if (m.t === 'noteOn') this.noteOn(m.note | 0, clamp(m.vel, .01, 1));
     else if (m.t === 'noteOff') this.v.forEach((v) => { if (v.note === (m.note | 0)) { v.gate = false; if (!this.sustain) v.stage = 'release'; } });
@@ -68,8 +91,23 @@ class EightVoiceProcessor extends AudioWorkletProcessor {
   }
   setParam(key, value) {
     const match = /^voice(\d+)_(.+)$/.exec(key);
-    if (match) { const i = Number(match[1]); this.p.voices ||= Array.from({ length: 8 }, () => ({})); this.p.voices[i][match[2]] = value; }
-    else this.p[key] = value;
+    const updateLegacyMixer = (target, name, next) => {
+      const number = name.slice(-1), levelKey = `osc${number}`, waveKey = `wave${number}`;
+      target[name] = next;
+      const level = target[levelKey] ?? DEF[levelKey], shape = target[waveKey] || 'saw';
+      target[`osc${number}Saw`] = shape === 'saw' ? level : 0;
+      target[`osc${number}Pulse`] = shape === 'pulse' ? level : 0;
+    };
+    if (match) {
+      const i = Number(match[1]), name = match[2];
+      this.p.voices ||= Array.from({ length: 8 }, () => ({}));
+      const voice = this.p.voices[i] ||= {};
+      if (name === 'osc1' || name === 'wave1' || name === 'osc2' || name === 'wave2') updateLegacyMixer(voice, name, value);
+      else voice[name] = value;
+    } else {
+      if (key === 'osc1' || key === 'wave1' || key === 'osc2' || key === 'wave2') updateLegacyMixer(this.p, key, value);
+      else this.p[key] = value;
+    }
   }
   noteOn(note, vel) {
     let v = this.v.find((x) => x.active && x.note === note);
@@ -101,9 +139,13 @@ class EightVoiceProcessor extends AudioWorkletProcessor {
         const inc1 = hz / sr; const inc2 = hz * Math.pow(2, (this.p.tune * 12 + (q.detune || 0)) / 12) / sr;
         v.phase1 += inc1; v.phase2 += inc2; if (v.phase1 >= 1) v.phase1 -= 1; if (v.phase2 >= 1) v.phase2 -= 1;
         const pulse = clamp(this.p.pulse + lfo * .15, .05, .95);
-        const osc1 = (q.wave1 ?? this.p.wave1) === 'pulse' ? wave(v.phase1, pulse, inc1) : saw(v.phase1, inc1);
-        const osc2 = (q.wave2 ?? this.p.wave2) === 'saw' ? saw(v.phase2, inc2) : wave(v.phase2, pulse, inc2);
-        const source = osc1 * (q.osc1 ?? this.p.osc1) * .5 + osc2 * (q.osc2 ?? this.p.osc2) * .5;
+        const osc1Saw = q.osc1Saw ?? this.p.osc1Saw ?? ((q.wave1 ?? this.p.wave1) === 'saw' ? (q.osc1 ?? this.p.osc1) : 0);
+        const osc1Pulse = q.osc1Pulse ?? this.p.osc1Pulse ?? ((q.wave1 ?? this.p.wave1) === 'pulse' ? (q.osc1 ?? this.p.osc1) : 0);
+        const osc2Saw = q.osc2Saw ?? this.p.osc2Saw ?? ((q.wave2 ?? this.p.wave2 ?? 'saw') === 'saw' ? (q.osc2 ?? this.p.osc2) : 0);
+        const osc2Pulse = q.osc2Pulse ?? this.p.osc2Pulse ?? ((q.wave2 ?? this.p.wave2) === 'pulse' ? (q.osc2 ?? this.p.osc2) : 0);
+        const osc1 = saw(v.phase1, inc1) * osc1Saw + wave(v.phase1, pulse, inc1) * osc1Pulse;
+        const osc2 = saw(v.phase2, inc2) * osc2Saw + wave(v.phase2, pulse, inc2) * osc2Pulse;
+        const source = (osc1 + osc2) * .5;
         const cutoff = 30 * Math.pow(2, 8.5 * clamp((q.cutoff ?? this.p.cutoff) + (this.p.lfoTarget === 'filter' ? lfo : 0) + (q.filterEnv ?? this.p.filterEnv) * v.env2, 0, 1));
         const g = Math.min(.5, 2 * Math.sin(Math.PI * Math.min(cutoff, sr * .42) / sr));
         const damping = 1.8 - clamp(q.resonance ?? this.p.resonance, 0, .85) * 1.65;
