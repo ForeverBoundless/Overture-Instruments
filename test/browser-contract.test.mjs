@@ -1166,3 +1166,29 @@ test('Little Phatty preset navigation follows the Stage Edition VALUE and PRESET
   assert.match(worker, /little-phatty\.css\?v=20261124-discrete-controls-r2/);
   assert.match(worker, /engine\/app\.js\?v=20261124-discrete-controls-r2/);
 });
+
+
+test('Juno-106 uses the real HPF fader, maintained switches and separate bend controls', async () => {
+  const [app, panel, processor, page, styles, worker] = await Promise.all([
+    readFile(new URL('../js/roland-juno-106.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/shared/panel.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/engine/JunoProcessor.js', import.meta.url), 'utf8'),
+    readFile(new URL('../html/roland-juno-106.html', import.meta.url), 'utf8'),
+    readFile(new URL('../css/roland-juno-106.css', import.meta.url), 'utf8'),
+    readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
+  ]);
+  assert.match(panel, /export function discreteFader/);
+  assert.match(app, /discreteFader\(hpf\.body, 'HPF FREQ'/);
+  assert.match(app, /switchControl\(dco\.body, 'PWM MODE'/);
+  assert.match(app, /switchControl\(vca\.body, 'VCA CONTROL'/);
+  assert.match(app, /label: 'DCO BEND SENS'/);
+  assert.match(app, /label: 'VCF BEND SENS'/);
+  assert.match(processor, /vcfBendRange: 0/);
+  assert.match(processor, /this\.bend \* p\.vcfBendRange/);
+  assert.match(styles, /\.pn-discrete-fader__input/);
+  assert.match(page, /roland-juno-106\.css\?v=20261124-discrete-controls-r2/);
+  assert.match(page, /roland-juno-106\.js\?v=20261124-discrete-controls-r3/);
+  assert.match(worker, /overture-shell-v173/);
+  assert.match(worker, /roland-juno-106\.css\?v=20261124-discrete-controls-r2/);
+  assert.match(worker, /roland-juno-106\.js\?v=20261124-discrete-controls-r3/);
+});
