@@ -1,4 +1,4 @@
-const CACHE = 'overture-shell-v172';
+const CACHE = 'overture-shell-v173';
 const APP_SHELL = [
   '/account',
   '/login',
@@ -82,7 +82,7 @@ const APP_SHELL = [
   '/css/knobs.css',
   '/css/panel.css',
   '/css/prophet10.css',
-  '/css/roland-juno-106.css',
+  '/css/roland-juno-106.css?v=20261124-discrete-controls-r2',
   '/css/roland-tr-808.css',
   '/css/site-footer.css',
   '/css/site-theme-polish.css?v=20261117-inter-type-r1',
@@ -255,7 +255,7 @@ const APP_SHELL = [
   '/js/obxa.js?v=20261123-discrete-controls-r2',
   '/js/oberheim-eight-voice.js?v=20261124-discrete-controls-r2',
   '/js/prophet10.js?v=20261124-discrete-controls-r2',
-  '/js/roland-juno-106.js?v=20261124-discrete-controls-r2',
+  '/js/roland-juno-106.js?v=20261124-discrete-controls-r3',
   '/js/roland-tr-808.js?v=20261124-discrete-controls-r2',
   '/js/sequential-pro-3.js?v=20261124-discrete-controls-r4',
   '/js/sub37.js?v=20261123-discrete-controls-r2',

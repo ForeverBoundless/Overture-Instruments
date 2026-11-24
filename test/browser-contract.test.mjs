@@ -1162,7 +1162,7 @@ test('Little Phatty preset navigation follows the Stage Edition VALUE and PRESET
   assert.match(styles, /\.lp-preset-compare\.panel-active/);
   assert.match(page, /little-phatty\.css\?v=20261124-discrete-controls-r2/);
   assert.match(page, /engine\/app\.js\?v=20261124-discrete-controls-r2/);
-  assert.match(worker, /overture-shell-v172/);
+  assert.match(worker, /overture-shell-v173/);
   assert.match(worker, /little-phatty\.css\?v=20261124-discrete-controls-r2/);
   assert.match(worker, /engine\/app\.js\?v=20261124-discrete-controls-r2/);
 });
