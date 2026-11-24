@@ -120,7 +120,8 @@ export function consumeCommunitySource(recordType, instrumentId = null) {
 }
 
 function installCommunityPreviewRecorder({ instrumentId, getAudioOutput }) {
-  const token = new URLSearchParams(window.location.search).get('communityPreviewRecording');
+  const search = typeof window !== 'undefined' ? (window.location?.search || '') : '';
+  const token = new URLSearchParams(search).get('communityPreviewRecording');
   if (!token) return null;
 
   const style = document.createElement('style');
