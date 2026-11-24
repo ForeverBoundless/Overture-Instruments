@@ -87,7 +87,11 @@ class App {
       this.oled?.showPreset(0, this.communityPreset.title);
     } else if (initial?.patch) {
       this._syncKnobsToPatch(initial.patch);
-      if (initial.source === 'factory' && this._presetSelect) { this._presetSelect.value = initial.presetId; this.oled?.showPreset(initial.presetId, initial.patch.name); }
+      if (initial.source === 'factory' && this._presetSelect) {
+        this._presetSelect.value = initial.presetId;
+        this._renderValueEncoder?.();
+        this.oled?.showPreset(initial.presetId, initial.patch.name);
+      }
     }
     // The Little Phatty uses the same natural, scrollable page flow as the
     // other emulators. CSS handles viewport changes without shrinking the
@@ -151,22 +155,39 @@ class App {
   _buildPresetControls() {
     const wrap = document.createElement('div');
     wrap.id = 'preset-controls';
-
     const row1 = document.createElement('div');
-    row1.className = 'preset-row';
-
-    const prevBtn = document.createElement('button');
-    prevBtn.className = 'lp-btn';
-    prevBtn.textContent = '◀ PRESET';
-    prevBtn.addEventListener('click', () => this._stepPreset(-1));
-
-    const nextBtn = document.createElement('button');
-    nextBtn.className = 'lp-btn';
-    nextBtn.textContent = 'PRESET ▶';
-    nextBtn.addEventListener('click', () => this._stepPreset(1));
-
-    row1.appendChild(prevBtn);
-    row1.appendChild(nextBtn);
+    row1.className = 'preset-row lp-preset-hardware-row';
+    const valueControl = document.createElement('div');
+    valueControl.className = 'lp-value-control';
+    const valueLabel = document.createElement('span');
+    valueLabel.className = 'lp-value-label';
+    valueLabel.textContent = 'VALUE';
+    const valueEncoder = document.createElement('button');
+    valueEncoder.type = 'button';
+    valueEncoder.className = 'lp-value-encoder';
+    valueEncoder.setAttribute('aria-label', 'VALUE encoder. Turn to select presets. Press to arm ten-step selection.');
+    valueEncoder.setAttribute('aria-valuemin', '1');
+    valueEncoder.setAttribute('aria-valuemax', String(PRESETS.length));
+    valueEncoder.setAttribute('aria-valuenow', '1');
+    valueEncoder.setAttribute('aria-valuetext', PRESETS[0]?.name || 'Preset 1');
+    valueEncoder.title = 'Turn to browse presets. Press, then turn for ten-preset increments.';
+    const valueIndicator = document.createElement('span');
+    valueIndicator.className = 'lp-value-encoder-indicator';
+    valueIndicator.setAttribute('aria-hidden', 'true');
+    const valueCap = document.createElement('span');
+    valueCap.className = 'lp-value-encoder-cap';
+    valueCap.textContent = 'PUSH';
+    valueEncoder.append(valueIndicator, valueCap);
+    const valueCount = document.createElement('output');
+    valueCount.className = 'lp-value-count';
+    const valueHint = document.createElement('span');
+    valueHint.className = 'lp-value-hint';
+    valueHint.textContent = 'TURN · PUSH + TURN ×10';
+    valueControl.append(valueLabel, valueEncoder, valueCount, valueHint);
+    this._valueEncoderButton = valueEncoder;
+    this._valueEncoderCount = valueCount;
+    this._valueEncoderHint = valueHint;
+    this._valueEncoderTenStep = false;
 
     const presetReadout = document.createElement('div');
     presetReadout.id = 'preset-select';
@@ -174,8 +195,16 @@ class App {
     presetReadout.dataset.overturePresetSelector = 'true';
     let selectedPresetId = String(PRESETS[0]?.id ?? 0);
     const renderPresetReadout = () => {
+      if (this.presetManager.currentPresetSource === 'user') {
+        const userPreset = this.presetManager.userPresets[this.presetManager.currentPresetId] || this.presetManager._lastAppliedPatch;
+        const userName = userPreset?.name || 'USER PRESET';
+        presetReadout.textContent = `USER ${String(this.presetManager.currentPresetId + 1).padStart(3, '0')} · ${userName}`;
+        presetReadout.title = userName;
+        return;
+      }
       const preset = PRESETS.find((item) => String(item.id) === selectedPresetId) || PRESETS[0];
-      presetReadout.textContent = preset ? `PRESET ${String(preset.id)} · ${preset.name}` : 'NO PRESET';
+      const index = Math.max(0, PRESETS.indexOf(preset));
+      presetReadout.textContent = preset ? `PRESET ${String(index + 1).padStart(3, '0')} · ${preset.name}` : 'NO PRESET';
       presetReadout.title = preset?.name || '';
     };
     Object.defineProperty(presetReadout, 'value', {
@@ -183,10 +212,21 @@ class App {
       set: (value) => { selectedPresetId = String(value); renderPresetReadout(); },
     });
     presetReadout.getCommunityPresetSelection = () => {
+      if (this.presetManager.currentPresetSource === 'user') {
+        const item = this.presetManager.userPresets[this.presetManager.currentPresetId];
+        return item ? { kind: 'user', value: `u:${this.presetManager.currentPresetId}`, index: this.presetManager.currentPresetId, name: item.name } : null;
+      }
       const preset = PRESETS.find((item) => String(item.id) === selectedPresetId);
       return preset ? { kind: 'factory', value: String(preset.id), index: PRESETS.indexOf(preset), name: preset.name } : null;
     };
     presetReadout.restoreCommunityPresetSelection = (selection) => {
+      if (selection.kind === 'user') {
+        const userIndex = Number.isInteger(selection.index) ? selection.index : -1;
+        const item = this.presetManager.userPresets[userIndex];
+        if (!item || (selection.name && item.name !== selection.name)) return false;
+        selectedPresetId = String(userIndex);
+        return true;
+      }
       const preset = PRESETS.find((item, index) =>
         String(item.id) === String(selection.value)
         || (selection.name && item.name === selection.name)
@@ -199,27 +239,32 @@ class App {
     if (this.communityPreset?.presetSelection) presetReadout.restoreCommunityPresetSelection(this.communityPreset.presetSelection);
     renderPresetReadout();
 
+    const presetButton = document.createElement('button');
+    presetButton.type = 'button';
+    presetButton.className = 'lp-btn lp-preset-compare';
+    presetButton.textContent = 'PRESET';
+    presetButton.setAttribute('aria-pressed', 'false');
+    presetButton.title = 'Compare the stored preset with the edited panel sound';
+    presetButton.addEventListener('click', () => this._togglePresetCompare());
+    this._presetCompareButton = presetButton;
+    row1.append(valueControl, presetButton);
 
     const row2 = document.createElement('div');
-    row2.className = 'preset-row';
+    row2.className = 'preset-row lp-preset-actions';
     const saveBtn = document.createElement('button');
-    saveBtn.className = 'lp-btn';
-    saveBtn.textContent = 'SAVE';
+    saveBtn.className = 'lp-btn lp-store-btn';
+    saveBtn.textContent = 'ENTER / STORE';
+    saveBtn.title = 'Store the edited sound as a user preset';
     saveBtn.addEventListener('click', () => this._openSaveDialog());
-
     const exportBtn = document.createElement('button');
     exportBtn.className = 'lp-btn';
     exportBtn.textContent = 'EXPORT';
     exportBtn.addEventListener('click', () => this._exportPresets());
-
     const importBtn = document.createElement('button');
     importBtn.className = 'lp-btn';
     importBtn.textContent = 'IMPORT';
     importBtn.addEventListener('click', () => this._openImportDialog());
-
-    row2.appendChild(saveBtn);
-    row2.appendChild(exportBtn);
-    row2.appendChild(importBtn);
+    row2.append(saveBtn, exportBtn, importBtn);
     createCommunityShareButton(row2, {
       instrumentId: 'little-phatty',
       className: 'lp-btn',
@@ -228,17 +273,80 @@ class App {
         return this.presetManager.captureCurrentPatch();
       },
       getAudioOutput: () => this.engine.limiter,
-       getAudioOutput: () => this.engine.limiter,
-       getTitle: () => this.presetManager._lastAppliedPatch?.name || 'Little Phatty patch',
+      getTitle: () => this.presetManager._lastAppliedPatch?.name || 'Little Phatty patch',
     });
 
-    wrap.appendChild(row1);
-    wrap.appendChild(presetReadout);
-    wrap.appendChild(row2);
-
+    wrap.append(row1, presetReadout, row2);
+    this._renderValueEncoder = () => {
+      const index = Math.max(0, Math.min(PRESETS.length - 1, Number(this.presetManager.currentPresetId) || 0));
+      const preset = PRESETS[index];
+      const angle = PRESETS.length > 1 ? -132 + (index / (PRESETS.length - 1)) * 264 : 0;
+      valueEncoder.style.setProperty('--value-angle', `${angle}deg`);
+      valueEncoder.setAttribute('aria-valuenow', String(index + 1));
+      valueEncoder.setAttribute('aria-valuetext', preset?.name || `Preset ${index + 1}`);
+      valueCount.textContent = `${String(index + 1).padStart(3, '0')} / ${String(PRESETS.length).padStart(3, '0')}`;
+      valueHint.textContent = this._valueEncoderTenStep ? '×10 STEP ARMED' : 'TURN · PUSH + TURN ×10';
+      valueEncoder.classList.toggle('is-armed', this._valueEncoderTenStep);
+      valueEncoder.setAttribute('aria-pressed', String(this._valueEncoderTenStep));
+      renderPresetReadout();
+      const panelActive = !!this._panelEdited && !this._compareActive;
+      presetButton.classList.toggle('panel-active', panelActive);
+      presetButton.classList.toggle('lit', !panelActive);
+      presetButton.setAttribute('aria-pressed', String(this._compareActive));
+      presetButton.title = panelActive
+        ? 'Panel Active · press to compare with the stored preset'
+        : 'Preset Active · press to compare with the edited panel sound';
+    };
+    const stepFromInput = (steps, shifted = false) => {
+      if (!steps) return;
+      const ten = shifted || this._valueEncoderTenStep;
+      this._valueEncoderTenStep = false;
+      this._stepPreset(steps * (ten ? 10 : 1));
+      this._renderValueEncoder();
+    };
+    let dragging = false, dragStartY = 0, suppressClick = false;
+    const dragStep = 10;
+    valueEncoder.addEventListener('pointerdown', (event) => {
+      if (event.button !== 0) return;
+      dragging = true; dragStartY = event.clientY; suppressClick = false;
+      valueEncoder.classList.add('is-turning');
+      valueEncoder.setPointerCapture?.(event.pointerId);
+    });
+    valueEncoder.addEventListener('pointermove', (event) => {
+      if (!dragging) return;
+      const steps = Math.trunc((dragStartY - event.clientY) / dragStep);
+      if (!steps) return;
+      dragStartY -= steps * dragStep;
+      suppressClick = true;
+      stepFromInput(steps);
+    });
+    const stopTurning = () => { dragging = false; valueEncoder.classList.remove('is-turning'); };
+    valueEncoder.addEventListener('pointerup', stopTurning);
+    valueEncoder.addEventListener('pointercancel', stopTurning);
+    valueEncoder.addEventListener('lostpointercapture', stopTurning);
+    valueEncoder.addEventListener('click', () => {
+      if (suppressClick) { suppressClick = false; return; }
+      this._valueEncoderTenStep = !this._valueEncoderTenStep;
+      this._renderValueEncoder();
+    });
+    valueEncoder.addEventListener('wheel', (event) => {
+      event.preventDefault();
+      stepFromInput(event.deltaY < 0 ? 1 : -1, event.shiftKey);
+    }, { passive: false });
+    valueEncoder.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowUp' || event.key === 'ArrowRight') {
+        event.preventDefault(); stepFromInput(1, event.shiftKey);
+      } else if (event.key === 'ArrowDown' || event.key === 'ArrowLeft') {
+        event.preventDefault(); stepFromInput(-1, event.shiftKey);
+      } else if (event.key === 'Home') {
+        event.preventDefault(); this._loadFactoryPreset(0);
+      } else if (event.key === 'End') {
+        event.preventDefault(); this._loadFactoryPreset(PRESETS.length - 1);
+      }
+    });
+    this._renderValueEncoder();
     return wrap;
   }
-
   _buildSectionsRow() {
     const row = document.createElement('div');
     row.id = 'sections-row';
@@ -281,7 +389,10 @@ class App {
 
   _rememberCurrentPresetState() {
     if (!this.engine?.started || !this.engine.voice) return;
+    if (this._compareActive) { this._compareActive = false; this._compareEditedPatch = null; }
+    this._panelEdited = true;
     this.presetManager.rememberCurrentState();
+    this._renderValueEncoder?.();
   }
 
   _buildOscSection() {
@@ -567,9 +678,20 @@ class App {
           this.presetManager._saveUserPresets();
           const communityIndex = this.presetManager.userPresets.length - 1;
           this.presetManager.loadUser(communityIndex);
+          this._panelEdited = false;
+          this._compareActive = false;
+          this._compareEditedPatch = null;
+          this._renderValueEncoder?.();
           this.oled?.showPreset(communityIndex, communityTitle);
           this.communityPreset = null;
-        } else this.presetManager.restoreLastSession();
+        } else {
+          this.presetManager.restoreLastSession();
+          this._panelEdited = false;
+          this._compareActive = false;
+          this._compareEditedPatch = null;
+          this._presetSelect.value = this.presetManager.currentPresetId;
+          this._renderValueEncoder?.();
+        }
         this._flushPendingMidiNotes();
         document.removeEventListener('launcher:launch', unlock);
         document.removeEventListener('pointerdown', this._standaloneUnlock);
@@ -968,14 +1090,41 @@ class App {
   _loadFactoryPreset(id) {
     clearCommunitySource();
     this.communityPreset = null;
-    const patch = this.presetManager.loadFactory(id);
-    this._presetSelect.value = id;
-    this.oled.showPreset(id, patch.name);
+    const next = ((Number(id) || 0) % PRESETS.length + PRESETS.length) % PRESETS.length;
+    const patch = this.presetManager.loadFactory(next);
+    this._panelEdited = false;
+    this._compareActive = false;
+    this._compareEditedPatch = null;
+    this._valueEncoderTenStep = false;
+    this._presetSelect.value = next;
+    this._renderValueEncoder?.();
+    this.oled.showPreset(next, patch.name);
   }
 
   _stepPreset(delta) {
     const next = (this.presetManager.currentPresetId + delta + PRESETS.length) % PRESETS.length;
     this._loadFactoryPreset(next);
+  }
+
+  _togglePresetCompare() {
+    if (!this.engine.started) { this.oled?.showParameter('AUDIO', 'CLICK TO START', 1600); return; }
+    if (this._compareActive) {
+      const edited = this._compareEditedPatch;
+      if (edited) this.presetManager.applyPatch(edited, { remember: false, cache: false });
+      this._compareActive = false;
+      this._compareEditedPatch = null;
+      this._panelEdited = true;
+      this.oled?.showParameter('PANEL ACTIVE', 'EDITED SOUND');
+    } else {
+      const stored = this.presetManager._lastAppliedPatch;
+      if (!stored) return;
+      this._compareEditedPatch = this.presetManager.captureCurrentPatch();
+      this._compareActive = true;
+      this._panelEdited = false;
+      this.presetManager.applyPatch(stored, { remember: false, cache: false });
+      this.oled?.showParameter('PRESET ACTIVE', 'STORED SOUND');
+    }
+    this._renderValueEncoder?.();
   }
 
   _syncKnobsToPatch(patch) {

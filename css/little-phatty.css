@@ -1400,3 +1400,24 @@ body.little-phatty-body.oi-emulator-topbar-active #app-root {
  background:linear-gradient(#111a15,#090d0b);box-shadow:inset 0 0 12px #000;font:9px/1.2 'DM Mono',monospace;
  letter-spacing:.035em;text-align:center;text-overflow:ellipsis;overflow:hidden;white-space:nowrap;
 }
+
+/* Little Phatty Stage Edition interface controls: VALUE encoder and PRESET compare switch. */
+.little-phatty-body .lp-preset-hardware-row{display:grid!important;grid-template-columns:minmax(82px,1fr) minmax(48px,.72fr);align-items:center;justify-items:center;gap:8px!important;min-height:86px}
+.little-phatty-body .lp-value-control{display:grid;grid-template-columns:auto auto;grid-template-rows:auto auto auto;align-items:center;justify-items:center;column-gap:7px;row-gap:2px;min-width:0}
+.little-phatty-body .lp-value-label{grid-column:1/-1;color:#cbd0d7;font:800 7px/1 'Inter Variable',Inter,sans-serif;letter-spacing:.16em}
+.little-phatty-body .lp-value-encoder{position:relative;display:grid;place-items:center;width:45px;height:45px;padding:0;border:1px solid #08090b;border-radius:50%;background:radial-gradient(circle at 32% 24%,#747982 0%,#42474f 19%,#252930 48%,#101216 76%,#08090b 100%);box-shadow:inset 0 1px #ffffff5c,inset 0 -3px 4px #000c,0 2px 3px #000b;cursor:ns-resize;touch-action:none;user-select:none}
+.little-phatty-body .lp-value-encoder::before{content:'';position:absolute;inset:4px;border:1px solid #9ba1aa55;border-radius:50%;box-shadow:inset 0 1px #ffffff22;pointer-events:none}
+.little-phatty-body .lp-value-encoder-indicator{position:absolute;top:5px;left:calc(50% - 1px);width:2px;height:8px;border-radius:2px;background:#f4f5f7;box-shadow:0 0 3px #fff9;transform:rotate(var(--value-angle,0deg));transform-origin:1px 17.5px;pointer-events:none}
+.little-phatty-body .lp-value-encoder-cap{display:grid;place-items:center;width:21px;height:21px;border:1px solid #090a0c;border-radius:50%;color:#d7dbe0;background:radial-gradient(circle at 34% 28%,#50555d,#20242a 68%,#0a0c0e);box-shadow:inset 0 1px #ffffff30,0 1px 2px #000c;font:600 5px/1 'DM Mono',monospace;letter-spacing:.03em;pointer-events:none}
+.little-phatty-body .lp-value-encoder.is-armed{border-color:#e7a63e;box-shadow:inset 0 1px #ffffff5c,inset 0 -3px 4px #000c,0 0 0 2px #ffad3044,0 2px 3px #000b}
+.little-phatty-body .lp-value-encoder.is-turning{cursor:grabbing}
+.little-phatty-body .lp-value-encoder:focus-visible{outline:2px solid #ffb13b;outline-offset:3px}
+.little-phatty-body .lp-value-count{grid-column:2;color:#9df0a6;font:7px/1 'DM Mono',monospace;white-space:nowrap}
+.little-phatty-body .lp-value-hint{grid-column:1/-1;color:#aab0b8;font:5px/1.2 'DM Mono',monospace;text-align:center;white-space:nowrap}
+.little-phatty-body .lp-preset-compare{position:relative;align-self:center;min-width:52px;min-height:34px;flex:0 0 auto!important}
+.little-phatty-body .lp-preset-compare.lit::before{background:radial-gradient(circle at 50% 35%,#ffe7a5 0%,#e3a52b 42%,#9a5e12 100%);box-shadow:0 0 8px #ffb33d88,inset 0 1px #fff}
+.little-phatty-body .lp-preset-compare.panel-active::before{background:radial-gradient(circle at 50% 35%,#ffb2a4 0%,#e34e39 42%,#842017 100%);box-shadow:0 0 8px #f05b4888,inset 0 1px #fff}
+.little-phatty-body #preset-controls .lp-preset-readout{min-width:0;width:100%;max-width:none;justify-content:flex-start;padding:5px 7px;color:#a7f0a9;text-align:left}
+.little-phatty-body .lp-section-master #preset-controls .lp-preset-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+.little-phatty-body .lp-section-master #preset-controls .lp-preset-actions .lp-btn{min-width:0;flex:1 1 0;padding-inline:3px;font-size:5.5px}
+@media(max-width:520px){.little-phatty-body .lp-preset-hardware-row{grid-template-columns:minmax(80px,1fr) minmax(44px,.68fr);gap:5px!important}.little-phatty-body .lp-value-encoder{width:42px;height:42px}.little-phatty-body .lp-section-master #preset-controls .lp-preset-actions{gap:3px}}

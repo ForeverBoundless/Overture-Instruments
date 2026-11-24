@@ -110,11 +110,11 @@ test('OB-Xa exposes the hardware programmer, modulation panel and voice-pan cont
   assert.match(styles, /\.obxa-programmer-layout/);
   assert.match(styles, /\.obxa-voice-grid/);
   assert.match(styles, /radial-gradient\(ellipse at 50% -20%,#314c63/);
-  assert.match(page, /ob-xa\.css\?v=20261123-discrete-controls-r1/);
+  assert.match(page, /ob-xa\.css\?v=20261124-discrete-controls-r2/);
   assert.match(page, /obxa\.js\?v=20261123-discrete-controls-r2/);
   assert.match(worker, /OBXaProcessor\.js\?v=20261123-audio-r4/);
   assert.match(worker, /obxa-patch\.js\?v=20261123-obxa-patch-r4/);
-  assert.match(worker, /ob-xa\.css\?v=20261123-discrete-controls-r1/);
+  assert.match(worker, /ob-xa\.css\?v=20261124-discrete-controls-r2/);
 });
 
 test('all library cards use canonical metadata with declared preset provenance', () => {
@@ -176,7 +176,7 @@ test('Little Phatty uses a grouped responsive layout without viewport shrinking'
   assert.match(compactLayout, /@media \(max-width: 760px\)/);
   assert.match(engine, /natural, scrollable page flow/);
   assert.doesNotMatch(engine, /availH = window\.innerHeight/);
-  assert.match(page, /little-phatty\.css\?v=20261123-discrete-controls-r1/);
+  assert.match(page, /little-phatty\.css\?v=20261124-discrete-controls-r2/);
 });
 
 test('Sub 37 keeps its top controls reachable and uses compact horizontal modulation buses', async () => {
@@ -1137,4 +1137,32 @@ test('OMNI organ starter templates expand their layout and preview to fit the dr
   assert.ok(page.includes('omni-launcher.js?v=20261119-front-panel-r18'));
   assert.match(worker, /overture-shell-v\d+/);
   assert.ok(worker.includes('templates.js?v=20261119-front-panel-r2'));
+});
+
+
+test('Little Phatty preset navigation follows the Stage Edition VALUE and PRESET workflow', async () => {
+  const [app, manager, page, styles, worker] = await Promise.all([
+    readFile(new URL('../js/engine/app.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/engine/PresetManager.js', import.meta.url), 'utf8'),
+    readFile(new URL('../html/little-phatty.html', import.meta.url), 'utf8'),
+    readFile(new URL('../css/little-phatty.css', import.meta.url), 'utf8'),
+    readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
+  ]);
+  assert.match(app, /className = 'lp-value-encoder'/);
+  assert.match(app, /PUSH \+ TURN ×10/);
+  assert.match(app, /event\.shiftKey/);
+  assert.match(app, /_togglePresetCompare\(\)/);
+  assert.match(app, /textContent = 'PRESET'/);
+  assert.match(app, /textContent = 'ENTER \/ STORE'/);
+  assert.doesNotMatch(app, /◀ PRESET|PRESET ▶/);
+  assert.match(manager, /applyPatch\(patch, options = \{\}\)/);
+  assert.match(manager, /remember = true, cache = true/);
+  assert.match(app, /applyPatch\(stored, \{ remember: false, cache: false \}\)/);
+  assert.match(styles, /\.lp-value-encoder-indicator/);
+  assert.match(styles, /\.lp-preset-compare\.panel-active/);
+  assert.match(page, /little-phatty\.css\?v=20261124-discrete-controls-r2/);
+  assert.match(page, /engine\/app\.js\?v=20261124-discrete-controls-r2/);
+  assert.match(worker, /overture-shell-v171/);
+  assert.match(worker, /little-phatty\.css\?v=20261124-discrete-controls-r2/);
+  assert.match(worker, /engine\/app\.js\?v=20261124-discrete-controls-r2/);
 });

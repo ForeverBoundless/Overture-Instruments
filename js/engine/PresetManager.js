@@ -51,7 +51,8 @@ export class PresetManager {
   }
 
   /** Apply a full patch object's parameters to the live engine's single voice. */
-  applyPatch(patch) {
+  applyPatch(patch, options = {}) {
+    const { remember = true, cache = true } = options;
     const engine = this.engine;
     const voice = engine.voice;
     if (!voice) return;
@@ -83,10 +84,10 @@ export class PresetManager {
 
     engine.glide.setTime(patch.glideTime);
     engine.setMasterVolume(patch.masterVolume ?? 0.25);
-    this._lastAppliedPatch = { ...patch };
-    if (this.currentPresetSource === 'factory') {
+    if (remember) this._lastAppliedPatch = JSON.parse(JSON.stringify(patch));
+    if (cache && this.currentPresetSource === 'factory') {
       this._factorySnapshots.set(this.currentPresetId, JSON.parse(JSON.stringify(patch)));
-    } else if (this.currentPresetSource === 'user') {
+    } else if (cache && this.currentPresetSource === 'user') {
       this._userSnapshots.set(this.currentPresetId, JSON.parse(JSON.stringify(patch)));
     }
 
