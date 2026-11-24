@@ -5,9 +5,40 @@ import { audioBufferToWav } from '../js/shared/instrumentPreview.js';
 import { Prophet10Engine } from '../js/engine/Prophet10Engine.js';
 import { postWorkletMessage, INSTRUMENT_PREVIEW_RENDERERS } from '../js/shared/instrumentPreview.js';
 import { COMMUNITY_INSTRUMENTS } from '../js/data/communityInstruments.js';
-import { attachCommunityPresetMetadata, readCommunityPresetMetadata, stripCommunityPresetMetadata, stripCommunityInstrumentTranspose } from '../js/shared/communityPreset.js';
+import { attachCommunityPresetMetadata, readCommunityPresetMetadata, stripCommunityPresetMetadata, stripCommunityInstrumentTranspose, createCommunityShareButton } from '../js/shared/communityPreset.js';
 import { validateOBXAPatch, OBXA_PROGRAM_GROUPS, OBXA_PROGRAM_COUNT, obxaProgramSlotId, obxaSpecialProgramSlotId, validateOBXAProgramRecord } from '../js/data/obxa-patch.js';
 import { PresetStore } from '../js/shared/presetStore.js';
+
+
+test('Community share controls mount when window.location is incomplete', () => {
+  const previousWindow = globalThis.window;
+  const previousDocument = globalThis.document;
+  const button = {
+    classList: { add() {} },
+    addEventListener() {},
+  };
+  const parent = { appendChild() {} };
+  globalThis.window = {};
+  globalThis.document = {
+    createElement(tag) {
+      assert.equal(tag, 'button');
+      return button;
+    },
+    querySelector() { return null; },
+  };
+  try {
+    assert.equal(createCommunityShareButton(parent, {
+      instrumentId: 'little-phatty',
+      getData: () => ({ cutoff: 0.5 }),
+    }), button);
+  } finally {
+    if (previousWindow === undefined) delete globalThis.window;
+    else globalThis.window = previousWindow;
+    if (previousDocument === undefined) delete globalThis.document;
+    else globalThis.document = previousDocument;
+  }
+});
+
 
 test('Community preview WAV output has a valid PCM RIFF/WAVE header', async () => {
   const samples = [
