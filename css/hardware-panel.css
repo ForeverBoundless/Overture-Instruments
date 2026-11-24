@@ -2,7 +2,7 @@
    Flow layout: groups are flex-wrapped, controls are laid out by grid/flex, so the
    chassis reflows instead of scaling. Skins differ only by the custom properties below. */
 @font-face{font-family:InterLocal;src:url('/ui/Inter-Variable.ttf') format('truetype');font-display:swap}
-html,body{min-height:100%;height:auto;overflow-x:hidden;overflow-y:auto}
+
 
 .hp-root{width:100%;min-height:100vh;box-sizing:border-box;display:flex;justify-content:center;align-items:flex-start;padding:clamp(10px,2vw,24px) clamp(6px,1.5vw,20px) 48px}
 .hp-stage{width:min(1760px,100%);min-width:0;display:flex;flex-direction:column;gap:8px}
@@ -15,7 +15,7 @@ html,body{min-height:100%;height:auto;overflow-x:hidden;overflow-y:auto}
 
 
 /* Responsive hardware-panel layout: one source of truth for both instruments. */
-html,body{min-height:100%;height:auto;overflow-x:hidden;overflow-y:auto}
+
 body.pn-body.hp-pro3-body,body.pn-body.hp-super8-body{min-height:100vh;overflow-x:hidden;overflow-y:auto}
 .hp-root{display:flex;align-items:flex-start;justify-content:center;width:100%;min-height:100vh;height:auto;padding:16px 8px 40px;box-sizing:border-box;overflow-x:hidden}
 .hp-stage{display:flex;flex:0 0 auto;flex-direction:column;align-items:center;width:max-content;max-width:100%;gap:8px;margin-inline:auto;box-sizing:border-box}
@@ -182,3 +182,44 @@ body.pn-body.hp-pro3-body,body.pn-body.hp-super8-body{min-height:100vh;overflow-
 .hp-super8-performance-groups .hp-cycle-control-readout{min-width:50px;text-align:left}
 
 .hp-super8-performance-group-readout{display:inline-flex;align-items:center;justify-content:center;min-width:62px;min-height:25px;padding:4px 8px;border:1px solid var(--hp-line);border-radius:3px;background:var(--hp-display-bg);color:var(--hp-display);font:8px/1.2 'DM Mono',monospace;white-space:nowrap}
+
+
+/* Discrete choice banks and cycling switches used by the hardware selectors. */
+.hp-choice-control,
+.hp-cycle-control{
+ display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+ gap:4px;min-width:0;max-width:100%;padding:3px 4px;box-sizing:border-box;
+ border:1px solid color-mix(in srgb,var(--hp-line,#52606d) 55%,transparent);
+ border-radius:4px;background:linear-gradient(180deg,color-mix(in srgb,var(--hp-control,#30363c) 86%,#fff),var(--hp-control,#30363c));
+}
+.hp-choice-control-label,.hp-cycle-control-label{
+ display:block;width:100%;min-height:13px;color:var(--hp-muted,#aeb8c0);
+ font:700 7px/1.1 InterLocal,Figtree,sans-serif;letter-spacing:.06em;
+ text-align:center;overflow-wrap:anywhere;
+}
+.hp-choice-control-bank{
+ display:grid;grid-template-columns:repeat(auto-fit,minmax(34px,1fr));
+ gap:4px;width:100%;min-width:0;
+}
+.hp-choice-control-button{
+ width:100%;min-width:0;min-height:27px;padding:4px 3px;
+ font:700 7px/1.15 InterLocal,Figtree,sans-serif;white-space:normal;
+}
+.hp-choice-control-button.active{
+ color:#241306;border-color:color-mix(in srgb,var(--hp-accent,#ff9f0a) 75%,#fff);
+ background:linear-gradient(180deg,color-mix(in srgb,var(--hp-accent,#ff9f0a) 65%,#fff),var(--hp-accent,#ff9f0a));
+ box-shadow:0 0 7px color-mix(in srgb,var(--hp-accent,#ff9f0a) 45%,transparent),inset 0 1px #fff9;
+}
+.hp-choice-control-readout,.hp-cycle-control-readout{
+ display:block;width:100%;min-width:0;min-height:13px;color:var(--hp-display,#a8eaff);
+ font:7px/1.2 'DM Mono',monospace;text-align:center;overflow-wrap:anywhere;
+}
+.hp-cycle-control-button{min-width:44px;min-height:27px;padding:4px 9px}
+.hp-choice-control:focus-within,.hp-cycle-control:focus-within{
+ outline:1px solid var(--hp-accent,#7de4ff);outline-offset:2px;
+}
+.hp-choice-control button:disabled,.hp-cycle-control button:disabled{opacity:.35;cursor:not-allowed}
+@media(max-width:520px){
+ .hp-choice-control-bank{grid-template-columns:repeat(auto-fit,minmax(30px,1fr))}
+ .hp-choice-control-button{font-size:6px}
+}

@@ -105,3 +105,16 @@ test('all instrument pages load the revised controls and the new offline shell',
   assert.match(serviceWorker, /20261123-discrete-controls-r2/);
   assert.match(serviceWorker, /20261123-sem-mixer-r1/);
 });
+
+
+test('hardware selector styles are defined and scoped to instrument surfaces', () => {
+  const panel = read('css/panel.css');
+  const hardware = read('css/hardware-panel.css');
+  assert.match(panel, /body\.pn-body \* \{ box-sizing: border-box; \}/);
+  assert.doesNotMatch(panel, /^\*\s*\{/m);
+  assert.doesNotMatch(panel, /^html,\s*body\s*\{/m);
+  assert.doesNotMatch(hardware, /^html,\s*body\s*\{/m);
+  assert.match(hardware, /\.hp-choice-control-bank/);
+  assert.match(hardware, /\.hp-choice-control-button\.active/);
+  assert.match(hardware, /\.hp-cycle-control-button/);
+});
