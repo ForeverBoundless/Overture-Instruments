@@ -175,7 +175,7 @@ class App {
     let selectedPresetId = String(PRESETS[0]?.id ?? 0);
     const renderPresetReadout = () => {
       const preset = PRESETS.find((item) => String(item.id) === selectedPresetId) || PRESETS[0];
-      presetReadout.textContent = preset ? `PRESET ${String(preset.id).padStart(3, '0')} · ${preset.name}` : 'NO PRESET';
+      presetReadout.textContent = preset ? `PRESET ${String(preset.id)} · ${preset.name}` : 'NO PRESET';
       presetReadout.title = preset?.name || '';
     };
     Object.defineProperty(presetReadout, 'value', {

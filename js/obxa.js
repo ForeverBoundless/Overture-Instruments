@@ -278,6 +278,7 @@ const allocation=section(rows,'KEYBOARD & VOICE ALLOCATION','FULL · SPLIT · DO
   this.ui.memoryProtect=toggle(hardwareActions,'MEMORY PROTECT',false,value=>{this.memoryProtected=value;this.ui.hwWrite.disabled=value;this.ui.specialWrite.disabled=value;this.display.flash(value?'MEMORY PROTECTED':'MEMORY WRITE ENABLED');});
   el('p','obxa-programmer__hint',programmer.body,OBXA_PRESETS.length+' built-in programs are preloaded. All 120 hardware locations can be overwritten or filled.');
   const specialRow=el('div','obxa-programmer__special',programmer.body);
+  el('span','obxa-programmer__control-label',specialRow,'SPLIT / DOUBLE MEMORY');
   this.ui.specialType=choiceButtons(specialRow,'SPECIAL MEMORY',[{value:'split',label:'SPLIT'},{value:'double',label:'DOUBLE'}],'split',()=>this.refreshSpecialProgramOptions());
   this.ui.specialProgram=choiceButtons(specialRow,'PROGRAM NUMBER',Array.from({length:8},(_,i)=>({value:String(i+1),label:String(i+1)})),'1',()=>{});
   const specialActions=el('div','obxa-programmer__actions',specialRow);

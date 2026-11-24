@@ -353,14 +353,14 @@ export function presetBar(parent, opts) {
   };
   function render() {
     const all = options(), index = all.findIndex((option) => option.value === selectedValue());
-    patchNumber.textContent = index >= 0 ? String(index + 1).padStart(3, '0') : '---';
+    patchNumber.textContent = index >= 0 ? String(index + 1) : '---';
     patchName.textContent = all[index]?.label || 'NO PATCH SELECTED';
     pageInfo.textContent = `BANK ${page + 1} / ${Math.max(1, Math.ceil(all.length / pageSize))}`;
     previous.disabled = page <= 0; next.disabled = page >= Math.ceil(all.length / pageSize) - 1;
     slots.replaceChildren();
     all.slice(page * pageSize, page * pageSize + pageSize).forEach((item, offset) => {
       const number = page * pageSize + offset + 1;
-      const key = button(slots, String(number).padStart(2, '0'), () => load(item.value), item.value === selectedValue());
+      const key = button(slots, String(number), () => load(item.value), item.value === selectedValue());
       key.classList.add('pn-preset-browser__slot'); key.title = item.label;
       key.setAttribute('aria-label', `Load patch ${number}: ${item.label}`);
       key.setAttribute('aria-pressed', String(item.value === selectedValue()));
