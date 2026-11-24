@@ -110,11 +110,11 @@ test('OB-Xa exposes the hardware programmer, modulation panel and voice-pan cont
   assert.match(styles, /\.obxa-programmer-layout/);
   assert.match(styles, /\.obxa-voice-grid/);
   assert.match(styles, /radial-gradient\(ellipse at 50% -20%,#314c63/);
-  assert.match(page, /ob-xa\.css\?v=20261124-discrete-controls-r2/);
+  assert.match(page, /ob-xa\.css\?v=20261123-discrete-controls-r1/);
   assert.match(page, /obxa\.js\?v=20261123-discrete-controls-r2/);
   assert.match(worker, /OBXaProcessor\.js\?v=20261123-audio-r4/);
   assert.match(worker, /obxa-patch\.js\?v=20261123-obxa-patch-r4/);
-  assert.match(worker, /ob-xa\.css\?v=20261124-discrete-controls-r2/);
+  assert.match(worker, /ob-xa\.css\?v=20261123-discrete-controls-r1/);
 });
 
 test('all library cards use canonical metadata with declared preset provenance', () => {
