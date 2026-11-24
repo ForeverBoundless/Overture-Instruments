@@ -176,3 +176,14 @@ test('Juno-106 uses maintained switches and models the separate VCF bend control
   assert.match(processor, /this\.bend \* p\.vcfBendRange/);
   assert.match(styles, /\.pn-toggle-switch__actuator/);
 });
+
+
+test('Juno-106 lever switch and VCF-bend assets are precached at the active versions', () => {
+  const worker = read('service-worker.js');
+  const page = read('html/roland-juno-106.html');
+  assert.match(worker, /overture-shell-v170/);
+  assert.match(worker, /roland-juno-106\.css\?v=20261124-discrete-controls-r1/);
+  assert.match(worker, /roland-juno-106\.js\?v=20261124-discrete-controls-r2/);
+  assert.match(page, /roland-juno-106\.css\?v=20261124-discrete-controls-r1/);
+  assert.match(page, /roland-juno-106\.js\?v=20261124-discrete-controls-r2/);
+});
