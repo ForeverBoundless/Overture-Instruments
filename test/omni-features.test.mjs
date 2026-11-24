@@ -25,7 +25,7 @@ test('OMNI chord interval sliders expose the complete ±32-semitone range', asyn
   assert.ok(source.includes(`'./omni/graph.js?v=20261119-front-panel-r2'`));
   assert.ok((await readFile(new URL('../js/omni/graph.js', import.meta.url), 'utf8')).includes(`from './modules.js?v=20261118-organ-drawbar-r1'`));
   assert.ok(worker.includes(`/js/omni/graph.js?v=20261119-front-panel-r2`));
-  assert.ok(worker.includes(`/js/omni/modules.js?v=20261118-organ-drawbar-r1`));
+  assert.ok(worker.includes(`/js/omni/modules.js?v=20261123-sem-mixer-r1`));
   assert.ok(page.includes('omni.css?v=20261119-front-panel-r17'));
   assert.ok(page.includes('omni-launcher.js?v=20261119-front-panel-r18'));
   assert.match(worker, /overture-shell-v\d+/);
