@@ -198,13 +198,13 @@ class App {
       if (this.presetManager.currentPresetSource === 'user') {
         const userPreset = this.presetManager.userPresets[this.presetManager.currentPresetId] || this.presetManager._lastAppliedPatch;
         const userName = userPreset?.name || 'USER PRESET';
-        presetReadout.textContent = `USER ${String(this.presetManager.currentPresetId + 1).padStart(3, '0')} · ${userName}`;
+        presetReadout.textContent = `USER ${String(this.presetManager.currentPresetId + 1)} · ${userName}`;
         presetReadout.title = userName;
         return;
       }
       const preset = PRESETS.find((item) => String(item.id) === selectedPresetId) || PRESETS[0];
       const index = Math.max(0, PRESETS.indexOf(preset));
-      presetReadout.textContent = preset ? `PRESET ${String(index + 1).padStart(3, '0')} · ${preset.name}` : 'NO PRESET';
+      presetReadout.textContent = preset ? `PRESET ${String(index + 1)} · ${preset.name}` : 'NO PRESET';
       presetReadout.title = preset?.name || '';
     };
     Object.defineProperty(presetReadout, 'value', {
@@ -284,7 +284,7 @@ class App {
       valueEncoder.style.setProperty('--value-angle', `${angle}deg`);
       valueEncoder.setAttribute('aria-valuenow', String(index + 1));
       valueEncoder.setAttribute('aria-valuetext', preset?.name || `Preset ${index + 1}`);
-      valueCount.textContent = `${String(index + 1).padStart(3, '0')} / ${String(PRESETS.length).padStart(3, '0')}`;
+      valueCount.textContent = `${String(index + 1)} / ${String(PRESETS.length)}`;
       valueHint.textContent = this._valueEncoderTenStep ? '×10 STEP ARMED' : 'TURN · PUSH + TURN ×10';
       valueEncoder.classList.toggle('is-armed', this._valueEncoderTenStep);
       valueEncoder.setAttribute('aria-pressed', String(this._valueEncoderTenStep));
