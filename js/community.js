@@ -28,6 +28,8 @@ const state = {
   reportingItemId: null,
   searchTimer: null,
   authorProfiles: new Map(),
+  patchDataRequests: new Map(),
+  renderedCards: new Map(),
   previewRecorderWindow: null,
   previewRecorderToken: null,
   recordedPreviewUrl: null,
@@ -334,11 +336,12 @@ function safeFilename(value) {
     .replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '') || 'overture-patch';
 }
 
-function downloadJSON(item) {
+async function downloadJSON(item) {
+  const patchData = await ensurePatchData(item);
   const instrument = item.record_type === 'instrument_preset';
   const contents = instrument
-    ? { format: 'overture-community-instrument-preset', version: 1, instrumentId: item.instrument_id, name: item.title, data: stripCommunityInstrumentTranspose(item.instrument_id, item.patch_data) }
-    : { format: 'overture-omni-patch', version: 1, data: item.patch_data };
+    ? { format: 'overture-community-instrument-preset', version: 1, instrumentId: item.instrument_id, name: item.title, data: stripCommunityInstrumentTranspose(item.instrument_id, patchData) }
+    : { format: 'overture-omni-patch', version: 1, data: patchData };
   const blob = new Blob([JSON.stringify(contents, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
@@ -405,7 +408,8 @@ async function auditionOmniPatch(item, button) {
   let context = null;
   let graph = null;
   try {
-    const patch = validatePatch(item.patch_data);
+    const patchData = await ensurePatchData(item);
+    const patch = validatePatch(patchData);
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
     if (!AudioContextClass) throw new Error('Web Audio is not supported in this browser.');
     context = new AudioContextClass({ latencyHint: 'interactive' });
@@ -455,8 +459,9 @@ async function auditionOmniPatch(item, button) {
   }
 }
 
-function openItem(item) {
+async function openItem(item) {
   try {
+    const patchData = await ensurePatchData(item);
     if (item.record_type === 'instrument_preset') {
       if (!INSTRUMENTS[item.instrument_id]) throw new Error('This instrument preset is not supported by the current prototype.');
       sessionStorage.setItem('overture.community.instrument-import', JSON.stringify({
@@ -464,12 +469,12 @@ function openItem(item) {
         title: item.title,
         communityItemId: state.user?.id === item.owner_id ? item.id : null,
         previewPath: state.user?.id === item.owner_id ? item.preview_path || null : null,
-        data: item.patch_data,
+        data: patchData,
       }));
       window.location.assign(INSTRUMENTS[item.instrument_id].route);
     } else {
       sessionStorage.setItem('overture.community.import', JSON.stringify({
-        data: item.patch_data,
+        data: patchData,
         title: item.title,
         communityItemId: state.user?.id === item.owner_id ? item.id : null,
         previewPath: state.user?.id === item.owner_id ? item.preview_path || null : null,
@@ -515,6 +520,30 @@ async function loadAuthorProfiles(items) {
     return;
   }
   (data || []).forEach((profile) => state.authorProfiles.set(profile.id, profile));
+}
+
+// Patch JSON can be up to 500 KB per item. Keep it out of paginated feed
+// requests and fetch it only when a user opens, auditions, downloads or edits
+// a specific item. Reuse in-flight requests when multiple actions target it.
+async function ensurePatchData(item) {
+  if (item.patch_data !== undefined && item.patch_data !== null) return item.patch_data;
+  const itemId = String(item.id);
+  let pending = state.patchDataRequests.get(itemId);
+  if (!pending) {
+    pending = (async () => {
+      const { data, error } = await supabase.from('community_patches')
+        .select('patch_data')
+        .eq('id', item.id)
+        .maybeSingle();
+      if (error) throw error;
+      if (!data || data.patch_data == null) throw new Error('This community item is no longer available.');
+      return normalizeCommunityItem({ ...item, patch_data: data.patch_data }).patch_data;
+    })().finally(() => state.patchDataRequests.delete(itemId));
+    state.patchDataRequests.set(itemId, pending);
+  }
+  const patchData = await pending;
+  item.patch_data = patchData;
+  return patchData;
 }
 
 function renderCard(item) {
@@ -573,7 +602,8 @@ function renderCard(item) {
       listen.disabled = true;
       listen.textContent = 'RENDERING…';
       try {
-        const blob = await generateInstrumentPreview(item.instrument_id, item.patch_data);
+        const patchData = await ensurePatchData(item);
+        const blob = await generateInstrumentPreview(item.instrument_id, patchData);
         audio = document.createElement('audio');
         audio.controls = true;
         audio.preload = 'none';
@@ -599,10 +629,31 @@ function renderCard(item) {
 
   const open = addText(actions, 'button', 'community-button', isInstrument ? 'OPEN IN INSTRUMENT' : 'OPEN IN OMNI');
   open.type = 'button';
-  open.addEventListener('click', () => openItem(item));
+  open.addEventListener('click', async () => {
+    const label = open.textContent;
+    open.disabled = true;
+    open.textContent = 'PREPARING…';
+    try {
+      await openItem(item);
+    } finally {
+      open.disabled = false;
+      open.textContent = label;
+    }
+  });
   const download = addText(actions, 'button', 'community-button', 'DOWNLOAD');
   download.type = 'button';
-  download.addEventListener('click', () => downloadJSON(item));
+  download.addEventListener('click', async () => {
+    download.disabled = true;
+    download.textContent = 'PREPARING…';
+    try {
+      await downloadJSON(item);
+    } catch (error) {
+      message('community-result-count', error.message || 'Could not download this item.', true);
+    } finally {
+      download.disabled = false;
+      download.textContent = 'DOWNLOAD';
+    }
+  });
   const share = addText(actions, 'button', 'community-button', 'SHARE');
   share.type = 'button';
   share.addEventListener('click', () => shareItem(item));
@@ -615,7 +666,19 @@ function renderCard(item) {
 
   if (state.user?.id && item.owner_id === state.user.id) {
     const edit = addText(actions, 'button', 'community-button', 'EDIT');
-    edit.type = 'button'; edit.addEventListener('click', () => beginEdit(item));
+    edit.type = 'button';
+    edit.addEventListener('click', async () => {
+      edit.disabled = true;
+      edit.textContent = 'LOADING…';
+      try {
+        await beginEdit(item);
+      } catch (error) {
+        message('community-result-count', error.message || 'Could not load this item for editing.', true);
+      } finally {
+        edit.disabled = false;
+        edit.textContent = 'EDIT';
+      }
+    });
     const remove = addText(actions, 'button', 'community-button', 'DELETE');
     remove.type = 'button'; remove.addEventListener('click', () => deleteItem(item));
   }
@@ -625,10 +688,11 @@ function renderCard(item) {
 function renderCardOnce(item, { prepend = false } = {}) {
   const grid = byId('community-grid');
   const itemId = String(item.id).toLowerCase();
-  const existing = [...grid.children].find((card) => card.dataset.communityItemId === itemId);
-  if (existing) return existing;
+  const existing = state.renderedCards.get(itemId);
+  if (existing?.isConnected) return existing;
 
   const card = renderCard(item);
+  state.renderedCards.set(itemId, card);
   if (prepend) grid.prepend(card);
   else grid.append(card);
   return card;
@@ -646,6 +710,7 @@ async function loadPatches({ append = false } = {}) {
   if (!append) {
     state.offset = 0;
     state.items = [];
+    state.renderedCards.clear();
     grid.replaceChildren();
   }
   byId('community-load-more').hidden = true;
@@ -653,7 +718,7 @@ async function loadPatches({ append = false } = {}) {
   message('community-result-count', 'Loading community items…');
   try {
     let query = supabase.from('community_patches')
-      .select('id,owner_id,record_type,instrument_id,title,description,author_name,tags,visibility,moderation_status,patch_data,preview_path,downloads,created_at');
+      .select('id,owner_id,record_type,instrument_id,title,description,author_name,tags,visibility,moderation_status,preview_path,downloads,created_at');
     if (state.mine && state.user) query = query.eq('owner_id', state.user.id);
     else query = query.eq('visibility', 'public').eq('moderation_status', 'visible');
     const search = byId('community-search').value.trim().toLowerCase().replace(/[^a-z0-9\s-]/g, '').slice(0, 50);
@@ -706,16 +771,17 @@ async function loadPatches({ append = false } = {}) {
   }
 }
 
-function beginEdit(item, { preserveDraft = false } = {}) {
+async function beginEdit(item, { preserveDraft = false } = {}) {
+  const patchData = await ensurePatchData(item);
   state.editingId = item.id;
   state.editingOriginalPreviewPath = item.preview_path || null;
   byId('community-edit-id').value = String(item.id);
   const type = item.record_type || 'omni_patch';
-  if (!preserveDraft) setDraft(item.patch_data, type, item.instrument_id, item.title, readCommunityPresetMetadata(item.patch_data));
+  if (!preserveDraft) setDraft(patchData, type, item.instrument_id, item.title, readCommunityPresetMetadata(patchData));
   else {
     state.draftType = type;
     state.draftInstrument = item.instrument_id || null;
-    state.draftPresetSelection = readCommunityPresetMetadata(item.patch_data);
+    state.draftPresetSelection = readCommunityPresetMetadata(patchData);
     byId('community-record-type').value = type;
     byId('community-instrument').value = type === 'omni_patch' ? 'omni' : (item.instrument_id || 'little-phatty');
   }
@@ -1191,7 +1257,11 @@ async function initialise() {
       if (state.user?.id && item.owner_id === state.user.id) {
         const preserveDraft = !!importedDraft?.editingItemId
           && String(importedDraft.editingItemId) === String(item.id);
-        beginEdit(item, { preserveDraft });
+        try {
+          await beginEdit(item, { preserveDraft });
+        } catch (error) {
+          message('community-result-count', error.message || 'Could not load this item for editing.', true);
+        }
       } else message('community-result-count', 'Only the owner can edit this contribution.', true);
     }
   }
