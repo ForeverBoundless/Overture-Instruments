@@ -1147,3 +1147,26 @@ test('OMNI organ starter templates expand their layout and preview to fit the dr
   assert.match(worker, /overture-shell-v\d+/);
   assert.ok(worker.includes('templates.js?v=20261119-front-panel-r2'));
 });
+
+
+test('Community feed defers patch JSON and avoids continuous full-page gradient repaints', async () => {
+  const [page, app, styles, worker] = await Promise.all([
+    readFile(new URL('../community.html', import.meta.url), 'utf8'),
+    readFile(new URL('../js/community.js', import.meta.url), 'utf8'),
+    readFile(new URL('../css/community.css', import.meta.url), 'utf8'),
+    readFile(new URL('../service-worker.js', import.meta.url), 'utf8'),
+  ]);
+  const feedLoader = app.slice(app.indexOf('async function loadPatches'), app.indexOf('async function beginEdit'));
+  assert.doesNotMatch(feedLoader, /patch_data/);
+  assert.match(app, /async function ensurePatchData\(item\)/);
+  assert.match(app, /\.select\('patch_data'\)/);
+  assert.match(app, /await ensurePatchData\(item\)/);
+  assert.match(app, /patchDataRequests: new Map\(\)/);
+  assert.match(app, /renderedCards: new Map\(\)/);
+  assert.doesNotMatch(styles, /animation:\s*community-signal-drift/);
+  assert.doesNotMatch(styles, /@keyframes community-signal-drift/);
+  assert.match(page, /community\.css\?v=20261124-community-performance-r1/);
+  assert.match(page, /community\.js\?v=20261124-lazy-patches-r1/);
+  assert.match(worker, /community\.css\?v=20261124-community-performance-r1/);
+  assert.match(worker, /community\.js\?v=20261124-lazy-patches-r1/);
+});
