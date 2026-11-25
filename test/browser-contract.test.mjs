@@ -1195,3 +1195,11 @@ test('Community waits for lazy OMNI validation when restoring a shared draft', a
   assert.match(app, /const patch = await extractOmniPatch\(payload\)/);
   assert.match(app, /const importedDraft = await readDraft\(\)/);
 });
+
+
+test('Community feed does not JSON-clone unloaded instrument patch data', async () => {
+  const app = await readFile(new URL('../js/community.js', import.meta.url), 'utf8');
+  const normalizer = app.slice(app.indexOf('function normalizeCommunityItem'), app.indexOf('function parseJsonFileObject'));
+  assert.match(normalizer, /item\\.patch_data == null\\) return item/);
+  assert.match(app, /return normalizeCommunityItem\\(\\{ \\.\\.\\.item, patch_data: data\\.patch_data \\}\\)\\.patch_data/);
+});
