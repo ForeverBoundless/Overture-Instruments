@@ -12,8 +12,8 @@ const clone=o=>JSON.parse(JSON.stringify(o));
 const SOURCE_NAMES=['DDS 2','LFO 2','ENV 1','VELOCITY','AFTERTOUCH','EXPRESSION','BENDER','NOTE'];
 const DEST_NAMES=['LFO 1 RATE','CROSS MOD','WAVE MOD','OSC MIX','HPF CUTOFF','LPF RESONANCE','ENV 1 DECAY','DELAY TIME'];
 const LAYER={
- dds1Wave:'saw',dds1Range:8,altA:0,altB:1,waveMod:0,waveModSource:'Manual',superMode:'off',detune:.16,pwDrift:.1,lfo1PitchAmount:0,env1PitchAmount:0,oscPitchDestination:'1+2',
- dds2Wave:'saw',dds2Range:8,dds2Tune:0,dds2Mode:'normal',crossMod:0,subMode:'sine',dds2WaveMod:.5,
+ dds1Wave:'saw',dds1Range:8,dds1PulseWidth:.5,altA:0,altB:1,waveMod:0,waveModSource:'Manual',superMode:'off',detune:.16,pwDrift:.1,lfo1PitchAmount:0,env1PitchAmount:0,oscPitchDestination:'1+2',
+ dds2Wave:'saw',dds2Range:8,dds2Tune:0,dds2Mode:'normal',crossMod:0,subMode:'sine',dds2PulseWidth:.5,
  mix:.5,pan:.5,hpf:.04,cutoff:.72,resonance:.16,drive:'off',keyTrack:'on',filterMod:'env1',filterLfoAmount:0,filterOscAmount:0,
  env1Attack:.08,env1AttackHold:0,env1DecayHold:0,env1Decay:.25,env1Sustain:.6,env1Release:.35,env1Loop:false,env1KeyTrack:0,
  env2Attack:.02,env2DecayHold:0,env2Decay:.32,env2Sustain:.78,env2Release:.3,
@@ -28,6 +28,12 @@ const LAYER={
 const GLOBAL={mode:'single',activeLayer:0,splitPoint:60,binaural:true,mpe:true,volume:.72,distortion:0,masterTune:0,benderX:0,benderY:0,expression:1};
 function cleanLayer(d={}){
  const p={...clone(LAYER),...d};
+ // Migrate older performances that stored DDS 2 pulse width as dds2WaveMod.
+ const legacyPulseWidth=Number(d.dds2WaveMod);
+ if(d.dds2PulseWidth==null&&d.dds2WaveMod!=null&&Number.isFinite(legacyPulseWidth))p.dds2PulseWidth=legacyPulseWidth;
+ delete p.dds2WaveMod;
+ p.dds1PulseWidth=Math.max(0,Math.min(1,Number.isFinite(Number(p.dds1PulseWidth))?Number(p.dds1PulseWidth):.5));
+ p.dds2PulseWidth=Math.max(0,Math.min(1,Number.isFinite(Number(p.dds2PulseWidth))?Number(p.dds2PulseWidth):.5));
  p.modMatrix=Array.from({length:64},(_,i)=>Number(d.modMatrix?.[i])||0);
  p.seqSteps=Array.from({length:64},(_,i)=>d.seqSteps?.[i]??null);
  p.seqChords=Array.from({length:64},(_,i)=>Array.isArray(d.seqChords?.[i])?d.seqChords[i].map(n=>Math.max(0,Math.min(127,Math.round(Number(n)||0)))):null);
@@ -213,11 +219,11 @@ class Super8App{
   const d1=addPanel(osc,{title:'DDS 1',sub:'oscillator · super wave',className:'s8-dds1'});
   s(d1.body,'dds1Wave','Waveform',WAVES1,{group:'DDS 1',wide:true});s(d1.body,'dds1Range','Range',[64,32,16,8,4,2],{group:'DDS 1'});
   s(d1.body,'altA','Wave A',Array.from({length:64},(_,i)=>i),{group:'DDS 1',labels:Array.from({length:64},(_,i)=>String(i+1))});s(d1.body,'altB','Wave B',Array.from({length:64},(_,i)=>i),{group:'DDS 1',labels:Array.from({length:64},(_,i)=>String(i+1))});
-  s(d1.body,'superMode','Super',['off','half','on'],{group:'DDS 1'});const d1knobs=addRow(d1.body,'s8-mini-knobs');k(d1knobs,'detune','Detune',{size:34,group:'DDS 1'});k(d1knobs,'pwDrift','PW drift',{size:34,group:'DDS 1'});
+  s(d1.body,'superMode','Super',['off','half','on'],{group:'DDS 1'});const d1knobs=addRow(d1.body,'s8-mini-knobs');k(d1knobs,'detune','Detune',{size:34,group:'DDS 1'});k(d1knobs,'dds1PulseWidth','Pulse width',{size:34,group:'DDS 1',fmt:v=>Math.round((.02+.96*v)*100)+'%'});k(d1knobs,'pwDrift','PW drift',{size:34,group:'DDS 1'});
   const d2=addPanel(osc,{title:'DDS 2',sub:'second oscillator · modes',className:'s8-dds2'});
   s(d2.body,'dds2Wave','Waveform',WAVES2,{group:'DDS 2',wide:true});s(d2.body,'dds2Range','Range',[32,16,8,4,2,'LFO'],{group:'DDS 2'});
   s(d2.body,'dds2Mode','Mode',['normal','sync','ring','sub'],{group:'DDS 2'});s(d2.body,'subMode','Sub wave',['sine','square'],{group:'DDS 2'});
-  const d2knobs=addRow(d2.body,'s8-mini-knobs');k(d2knobs,'dds2Tune','Fine tune',{min:-7,max:7,step:.01,bipolar:true,size:34,group:'DDS 2',fmt:v=>Number(v).toFixed(1)});k(d2knobs,'crossMod','Cross mod',{size:34,group:'DDS 2'});k(d2knobs,'dds2WaveMod','PWM',{size:34,group:'DDS 2'});
+  const d2knobs=addRow(d2.body,'s8-mini-knobs');k(d2knobs,'dds2Tune','Fine tune',{min:-7,max:7,step:.01,bipolar:true,size:34,group:'DDS 2',fmt:v=>Number(v).toFixed(1)});k(d2knobs,'crossMod','Cross mod',{size:34,group:'DDS 2'});k(d2knobs,'dds2PulseWidth','Pulse width',{size:34,group:'DDS 2',fmt:v=>Math.round((.02+.96*v)*100)+'%'});
   const dm=addPanel(osc,{title:'DDS modulator',sub:'LFO 1 · ENV 1 · wave morph',className:'s8-ddsmod'});
   const dmFaders=addRow(dm.body,'s8-faders');f(dmFaders,'lfo1PitchAmount','LFO 1',{group:'DDS MODULATOR',height:62});f(dmFaders,'env1PitchAmount','ENV 1',{group:'DDS MODULATOR',height:62});
   s(dm.body,'oscPitchDestination','Pitch dest',['DDS 1','1+2','DDS 2'],{group:'DDS MODULATOR'});s(dm.body,'waveModSource','Wave source',['Manual','LFO 1','ENV 1'],{group:'DDS MODULATOR'});
