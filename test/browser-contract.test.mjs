@@ -1170,3 +1170,20 @@ test('Community feed defers patch JSON and avoids continuous full-page gradient 
   assert.match(worker, /community\.css\?v=20261124-community-performance-r1/);
   assert.match(worker, /community\.js\?v=20261124-lazy-patches-r1/);
 });
+
+
+test('Community defers OMNI and instrument audio engines, and loads contact vendors only on demand', async () => {
+  const [page, app, contact] = await Promise.all([
+    readFile(new URL('../community.html', import.meta.url), 'utf8'),
+    readFile(new URL('../js/community.js', import.meta.url), 'utf8'),
+    readFile(new URL('../js/shared/contact.js', import.meta.url), 'utf8'),
+  ]);
+  assert.doesNotMatch(app, /from ['"]\.\/omni\/graph\.js/);
+  assert.doesNotMatch(app, /from ['"]\.\/shared\/instrumentPreview\.js/);
+  assert.match(app, /import\('\.\/omni\/graph\.js'\)/);
+  assert.match(app, /import\('\.\/shared\/instrumentPreview\.js'\)/);
+  assert.doesNotMatch(page, /cdn\.jsdelivr\.net\/npm\/\@emailjs\/browser/);
+  assert.doesNotMatch(page, /cdn\.jsdelivr\.net\/npm\/dompurify/);
+  assert.match(contact, /Load a browser library only when it is actually needed/);
+  assert.match(page, /community\.js\?v=20261124-lazy-patches-r2/);
+});
