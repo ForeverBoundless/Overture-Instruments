@@ -1187,3 +1187,11 @@ test('Community defers OMNI and instrument audio engines, and loads contact vend
   assert.match(contact, /Load a browser library only when it is actually needed/);
   assert.match(page, /community\.js\?v=20261124-lazy-patches-r2/);
 });
+
+
+test('Community waits for lazy OMNI validation when restoring a shared draft', async () => {
+  const app = await readFile(new URL('../js/community.js', import.meta.url), 'utf8');
+  assert.match(app, /async function readDraft\(\)/);
+  assert.match(app, /const patch = await extractOmniPatch\(payload\)/);
+  assert.match(app, /const importedDraft = await readDraft\(\)/);
+});
