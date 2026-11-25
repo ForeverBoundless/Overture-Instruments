@@ -56,7 +56,7 @@ function safeJsonCopy(value) {
 }
 
 function normalizeCommunityItem(item) {
-  if (!item || item.record_type !== 'instrument_preset' || !item.instrument_id) return item;
+  if (!item || item.record_type !== 'instrument_preset' || !item.instrument_id || item.patch_data == null) return item;
   return {
     ...item,
     patch_data: stripCommunityInstrumentTranspose(item.instrument_id, item.patch_data),
