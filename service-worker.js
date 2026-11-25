@@ -1,4 +1,4 @@
-const CACHE = 'overture-shell-v166';
+const CACHE = 'overture-shell-v167';
 const APP_SHELL = [
   '/account',
   '/login',
@@ -8,7 +8,7 @@ const APP_SHELL = [
   '/js/shared/account-shell.js?v=20261102-contributions-menu',
   '/community',
   '/css/community.css?v=20261124-community-performance-r1',
-  '/js/community.js?v=20261124-lazy-patches-r2',
+  '/js/community.js?v=20261124-lazy-patches-r3',
   '/omni',
   '/omni/documentation',
   '/js/omni-launcher.js?v=20261119-front-panel-r18',
