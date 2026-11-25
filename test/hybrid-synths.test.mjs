@@ -363,3 +363,26 @@ test('UDO Super 8 sequencer can trigger recorded chord steps', async () => {
   const notes = h.processor.voices.filter(v => v.active && v.layer === 0 && v.seqVoice).map(v => v.inputNote).sort((a, b) => a - b);
   assert.equal(notes.join(','), '60,64,67', 'the recorded triad is allocated as three simultaneous voices');
 });
+
+
+test('UDO Super 8 arpeggiator reuses fixed scratch buffers while rendering held notes', async () => {
+  const h = await createWorklet('../js/engine/Super8Processor.js', 'super8-processor');
+  h.processor.message({ t: 'patch', patch: {
+    mode: 'single', binaural: false, activeLayer: 0,
+    layers: [{
+      arpEnabled: true, arpMode: 'up', arpDivision: 1, arpRange: 1, seqBpm: 240,
+      voiceMode: 'poly1', unison: 'off', env2Attack: .001, env2Sustain: .9,
+      chorus: 'off', delayMix: 0, delayFeedback: 0,
+    }],
+  } });
+  for (const note of [48, 55, 60]) {
+    h.processor.message({ t: 'noteOn', note, vel: .8, channel: 1, source: 'ui' });
+  }
+  const notesScratch = h.processor.arpNotes[0];
+  const velocitiesScratch = h.processor.arpVelocities[0];
+  const output = render(h, 32768);
+  assertAudio(output, 'Super 8 arpeggiator');
+  assert.equal(h.processor.arpNotes[0], notesScratch, 'note scratch storage should be reused');
+  assert.equal(h.processor.arpVelocities[0], velocitiesScratch, 'velocity scratch storage should be reused');
+  assert.ok(h.processor.voices.some((voice) => voice.active && voice.arpVoice), 'the arpeggiator should trigger notes');
+});
