@@ -1,5 +1,3 @@
-import { validatePatch, LiveGraph } from './omni/graph.js';
-import { generateInstrumentPreview } from './shared/instrumentPreview.js';
 import { COMMUNITY_INSTRUMENT_BY_ID as INSTRUMENTS, COMMUNITY_INSTRUMENTS } from './data/communityInstruments.js';
 import { readCommunityPresetMetadata, stripCommunityInstrumentTranspose, attachCommunityPresetMetadata, COMMUNITY_INSTRUMENT_IMPORT_KEY } from './shared/communityPreset.js';
 import { supabase, supabaseConfigured, configureSupabase, previewPublicUrl } from './shared/supabaseClient.js';
@@ -71,8 +69,32 @@ function parseJsonFileObject(raw) {
   return value;
 }
 
-function extractOmniPatch(raw) {
+let omniGraphModulePromise = null;
+async function loadOmniGraph() {
+  if (!omniGraphModulePromise) {
+    omniGraphModulePromise = import('./omni/graph.js').catch((error) => {
+      omniGraphModulePromise = null;
+      throw error;
+    });
+  }
+  return omniGraphModulePromise;
+}
+
+let instrumentPreviewModulePromise = null;
+async function generateCommunityInstrumentPreview(instrumentId, patchData) {
+  if (!instrumentPreviewModulePromise) {
+    instrumentPreviewModulePromise = import('./shared/instrumentPreview.js').catch((error) => {
+      instrumentPreviewModulePromise = null;
+      throw error;
+    });
+  }
+  const { generateInstrumentPreview } = await instrumentPreviewModulePromise;
+  return generateInstrumentPreview(instrumentId, patchData);
+}
+
+async function extractOmniPatch(raw) {
   const object = parseJsonFileObject(raw);
+  const { validatePatch } = await loadOmniGraph();
   return validatePatch(object.data ?? object.patch ?? object);
 }
 
@@ -409,6 +431,7 @@ async function auditionOmniPatch(item, button) {
   let graph = null;
   try {
     const patchData = await ensurePatchData(item);
+    const { validatePatch, LiveGraph } = await loadOmniGraph();
     const patch = validatePatch(patchData);
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
     if (!AudioContextClass) throw new Error('Web Audio is not supported in this browser.');
@@ -603,7 +626,7 @@ function renderCard(item) {
       listen.textContent = 'RENDERING…';
       try {
         const patchData = await ensurePatchData(item);
-        const blob = await generateInstrumentPreview(item.instrument_id, patchData);
+        const blob = await generateCommunityInstrumentPreview(item.instrument_id, patchData);
         audio = document.createElement('audio');
         audio.controls = true;
         audio.preload = 'none';
@@ -845,7 +868,7 @@ async function publishItem(event) {
       const parsed = JSON.parse(await file.text());
       if (recordType === 'instrument_preset') presetSelection = parsed.presetSelection || readCommunityPresetMetadata(parsed.data ?? parsed.patch ?? parsed);
       data = recordType === 'omni_patch'
-        ? extractOmniPatch(parsed)
+        ? await extractOmniPatch(parsed)
         : extractInstrumentPreset(parsed, instrumentId);
     } else if (state.draftType !== recordType || (recordType === 'instrument_preset' && state.draftInstrument !== instrumentId)) {
       data = null;
@@ -853,7 +876,7 @@ async function publishItem(event) {
     if (!data) throw new Error(recordType === 'omni_patch'
       ? 'Choose an OMNI patch file or use OMNI’s COMMUNITY button.'
       : 'Choose an exported instrument preset JSON file.');
-    if (recordType === 'omni_patch') data = validatePatch(data);
+    if (recordType === 'omni_patch') data = (await loadOmniGraph()).validatePatch(data);
     else data = extractInstrumentPreset(data, instrumentId);
     const title = byId('community-title').value.trim();
     if (title.length < 3 || title.length > 80) throw new Error('The title must be between 3 and 80 characters.');
@@ -875,7 +898,7 @@ async function publishItem(event) {
       uploadedPath = previewPath;
     } else if (recordType === 'instrument_preset' && (!editingId || !editingOriginalPreviewPath || existingPreviewIsGenerated)) {
       message('community-publish-status', 'Rendering an automatic instrument preview…');
-      const generatedAudio = await generateInstrumentPreview(instrumentId, data);
+      const generatedAudio = await generateCommunityInstrumentPreview(instrumentId, data);
       previewPath = await uploadCommunityPreview(generatedAudio, itemId, 'auto-preview', 'audio/wav');
       uploadedPath = previewPath;
     } else if (editingId && editingOriginalPreviewPath) {
@@ -1193,7 +1216,7 @@ async function initialise() {
       const parsed = JSON.parse(await file.text());
       const type = byId('community-record-type').value;
       const instrumentId = type === 'instrument_preset' ? byId('community-instrument').value : null;
-      const data = type === 'omni_patch' ? extractOmniPatch(parsed) : extractInstrumentPreset(parsed, instrumentId);
+      const data = type === 'omni_patch' ? await extractOmniPatch(parsed) : extractInstrumentPreset(parsed, instrumentId);
       setDraft(data, type, instrumentId, parsed.name || file.name.replace(/\.json$/i, ''));
     } catch (error) {
       state.draft = null;
