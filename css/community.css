@@ -1139,11 +1139,7 @@ html[data-theme="light"] #community-root .community-hero h1 em {
     radial-gradient(ellipse at 78% 24%, rgba(180,119,244,.09), transparent 38%),
     radial-gradient(ellipse at 50% 76%, rgba(180,119,244,.055), transparent 46%);
   background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
-  animation: community-signal-drift 34s linear infinite;
-}
-@keyframes community-signal-drift {
-  from { background-position: 0 0, 0 0, center, center, center; }
-  to { background-position: 0 32px, 0 -28px, center, center, center; }
+  background-position: 0 0, 0 0, center, center, center;
 }
 html[data-theme="light"] .community-shell::before {
   opacity: .78;
@@ -1154,10 +1150,6 @@ html[data-theme="light"] .community-shell::before {
     radial-gradient(ellipse at 78% 24%, rgba(116,59,184,.075), transparent 38%),
     radial-gradient(ellipse at 50% 76%, rgba(116,59,184,.045), transparent 46%);
 }
-@media (prefers-reduced-motion: reduce) {
-  .community-shell::before { animation: none !important; }
-}
-
 /* Reduce the hero mark's footprint so it no longer holds the following
    controls below an oversized logo-and-letter composition. */
 .community-hero {
