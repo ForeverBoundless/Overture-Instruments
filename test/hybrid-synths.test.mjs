@@ -67,6 +67,35 @@ test('Sequential Pro 3 paraphonic mode has independent VCA envelopes and a share
   assert.equal(h.processor.envs.filter.gate, true, 'the shared filter envelope stays open while another note is held');
 });
 
+test('UDO Super 8 exposes independent pulse width controls for DDS 1 and DDS 2', async () => {
+  const ui = await readFile(new URL('../js/udo-super-8.js', import.meta.url), 'utf8');
+  assert.match(ui, /k\(d1knobs,'dds1PulseWidth','Pulse width'/, 'DDS 1 needs a manual pulse-width knob');
+  assert.match(ui, /k\(d2knobs,'dds2PulseWidth','Pulse width'/, 'DDS 2 needs an explicitly labelled pulse-width knob');
+  assert.match(ui, /d\.dds2PulseWidth==null&&d\.dds2WaveMod!=null/, 'older saved performances should migrate their DDS 2 PWM value');
+
+  const h = await createWorklet('../js/engine/Super8Processor.js', 'super8-processor');
+  h.processor.message({ t: 'patch', patch: {
+    mode: 'single', binaural: false,
+    layers: [{
+      dds1Wave: 'pulse', dds2Wave: 'pulse',
+      dds1PulseWidth: .23, dds2PulseWidth: .77, pwDrift: 0,
+      env2Attack: .001, env2Sustain: .9, mix: .5, chorus: 'off', delayMix: 0,
+    }],
+  } });
+  h.processor.message({ t: 'noteOn', note: 60, vel: .8, channel: 1, source: 'ui' });
+  assertAudio(render(h, 2048), 'Super 8 pulse-width test');
+  const expectedDds1 = .02 + .96 * .23;
+  const expectedDds2 = .02 + .96 * .77;
+  assert.ok(Math.abs(h.processor.bPW - expectedDds1) <= .041, 'DDS 1 pulse width should be centred on its manual setting');
+  assert.ok(Math.abs(h.processor.b2pw - expectedDds2) < 1e-9, 'DDS 2 should use its independent manual pulse width');
+
+  const legacy = await createWorklet('../js/engine/Super8Processor.js', 'super8-processor');
+  legacy.processor.message({ t: 'patch', patch: { layers: [{ dds2Wave: 'pulse', dds2WaveMod: .25 }] } });
+  legacy.processor.message({ t: 'noteOn', note: 60, vel: .8 });
+  render(legacy, 512);
+  assert.ok(Math.abs(legacy.processor.b2pw - (.02 + .96 * .25)) < 1e-9, 'older raw patches should retain their DDS 2 PWM value');
+});
+
 test('UDO Super 8 dual binaural mode allocates upper/lower voices and renders stereo audio', async () => {
   const h = await createWorklet('../js/engine/Super8Processor.js', 'super8-processor');
   h.processor.message({ t: 'patch', patch: {
