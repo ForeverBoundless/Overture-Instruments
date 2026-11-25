@@ -1185,7 +1185,7 @@ test('Community defers OMNI and instrument audio engines, and loads contact vend
   assert.doesNotMatch(page, /cdn\.jsdelivr\.net\/npm\/\@emailjs\/browser/);
   assert.doesNotMatch(page, /cdn\.jsdelivr\.net\/npm\/dompurify/);
   assert.match(contact, /Load a browser library only when it is actually needed/);
-  assert.match(page, /community\.js\?v=20261124-lazy-patches-r2/);
+  assert.match(page, /community\.js\?v=20261124-lazy-patches-r3/);
 });
 
 
