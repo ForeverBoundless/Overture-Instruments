@@ -2,7 +2,7 @@
    Two analog-style VCOs, a band-limited wavetable oscillator, shared paraphonic
    filter/envelopes, three zero-delay-feedback filter topologies, tuned feedback,
    modulation matrix, a stereo effects pair and sample-clocked sequencing.
-   Modulation runs at control rate (16 samples); audio-rate code never allocates. */
+   Modulation runs at control rate (32 samples); audio-rate code never allocates. */
 const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,Number(x)||0));
 const midiHz=n=>440*Math.pow(2,(n-69)/12);
 const lerp=(a,b,t)=>a+(b-a)*t;
