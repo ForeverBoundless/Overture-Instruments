@@ -7,7 +7,7 @@ const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,Number(x)||0));
 const midiHz=n=>440*Math.pow(2,(n-69)/12);
 const lerp=(a,b,t)=>a+(b-a)*t;
 const TWO_PI=Math.PI*2;
-const CTL=16;
+const CTL=32;
 const fastTanh=x=>{if(x<-3)return -1;if(x>3)return 1;const x2=x*x;return x*(27+x2)/(27+9*x2);};
 let rngState=0x9e3779b9;
 const rnd=()=>{rngState^=rngState<<13;rngState^=rngState>>>17;rngState^=rngState<<5;return (rngState>>>0)/2147483648-1;};
