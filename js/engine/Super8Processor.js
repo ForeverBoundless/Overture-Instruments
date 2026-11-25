@@ -18,8 +18,8 @@ const VOICE_GAIN=.62;
 const MASTER_GAIN=1.0;
 
 const LAYER_DEFAULT={
- dds1Wave:'saw',dds1Range:8,altA:0,altB:1,waveMod:0,waveModSource:'Manual',superMode:'off',detune:.16,pwDrift:.1,lfo1PitchAmount:0,env1PitchAmount:0,oscPitchDestination:'1+2',
- dds2Wave:'saw',dds2Range:8,dds2Tune:0,dds2Mode:'normal',crossMod:0,subMode:'sine',dds2WaveMod:.5,dds2LfoMode:false,
+ dds1Wave:'saw',dds1Range:8,dds1PulseWidth:.5,altA:0,altB:1,waveMod:0,waveModSource:'Manual',superMode:'off',detune:.16,pwDrift:.1,lfo1PitchAmount:0,env1PitchAmount:0,oscPitchDestination:'1+2',
+ dds2Wave:'saw',dds2Range:8,dds2Tune:0,dds2Mode:'normal',crossMod:0,subMode:'sine',dds2PulseWidth:.5,dds2LfoMode:false,
  mix:.5,pan:.5,hpf:.04,cutoff:.72,resonance:.16,drive:'off',keyTrack:'on',filterMod:'env1',filterLfoAmount:0,filterOscAmount:0,
  env1Attack:.08,env1AttackHold:0,env1DecayHold:0,env1Decay:.25,env1Sustain:.6,env1Release:.35,env1Loop:false,env1KeyTrack:0,
  env2Attack:.02,env2DecayHold:0,env2Decay:.32,env2Sustain:.78,env2Release:.3,
@@ -164,10 +164,10 @@ class Super8Processor extends AudioWorkletProcessor{
     if (m?.t === '__preview_flush') { this.port.postMessage({ t: '__preview_flush_ack', id: m.id }); return; }
 
   if((m.t==='noteOn'||m.t==='noteOff')&&Number.isFinite(m.frame)&&m.frame>currentFrame){this.scheduled.push(m);this.scheduled.sort((a,b)=>a.frame-b.frame);return;}
-  if(m.t==='patch'){this.global={...this.global,...m.patch};this.layers=[clone(LAYER_DEFAULT),clone(LAYER_DEFAULT)].map((d,i)=>({...d,...(m.patch.layers?.[i]||{})}));this.layers.forEach(layer=>{if(Array.isArray(layer.userWaves))layer.userWaves=layer.userWaves.map(w=>Array.isArray(w)?Float32Array.from(w):null);});this.snapSmooth();return;}
+  if(m.t==='patch'){this.global={...this.global,...m.patch};this.layers=[clone(LAYER_DEFAULT),clone(LAYER_DEFAULT)].map((d,i)=>{const incoming=m.patch.layers?.[i]||{},layer={...d,...incoming};if(incoming.dds2PulseWidth==null&&incoming.dds2WaveMod!=null)layer.dds2PulseWidth=incoming.dds2WaveMod;delete layer.dds2WaveMod;return layer;});this.layers.forEach(layer=>{if(Array.isArray(layer.userWaves))layer.userWaves=layer.userWaves.map(w=>Array.isArray(w)?Float32Array.from(w):null);});this.snapSmooth();return;}
   if(m.t==='param'){
    if(m.layer===0||m.layer===1){
-    const old=this.layers[m.layer][m.key];this.layers[m.layer][m.key]=m.value;
+    const key=m.key==='dds2WaveMod'?'dds2PulseWidth':m.key,old=this.layers[m.layer][key];this.layers[m.layer][key]=m.value;
     if(m.key==='arpHold'&&old&&!m.value){this.arpLatched[m.layer].forEach(note=>this.held[m.layer].delete(note));this.arpLatched[m.layer].clear();}
     if(m.key==='hold'&&old&&!m.value){this.held[m.layer].clear();this.arpLatched[m.layer].clear();this.voices.forEach(v=>{if(v.active&&v.layer===m.layer&&!v.seqVoice&&!v.arpVoice){v.gate=false;v.e2Stage='release';}});}
    }else this.global[m.key]=m.value;
@@ -475,7 +475,7 @@ class Super8Processor extends AudioWorkletProcessor{
   this.b1kind=kindOf(p.dds1Wave);this.bAltA=p.altA|0;this.bAltB=p.altB|0;
   this.bUserA=p.userWaves?.[this.bAltA]||null;this.bUserB=p.userWaves?.[this.bAltB]||null;
   v.pwPh+=dtc*(.3+v.pwRate);
-  this.bPW=.5+(.04+clamp(p.pwDrift)*.4)*Math.sin(v.pwPh*TWO_PI+v.noise);
+  this.bPW=clamp(.02+.96*clamp(p.dds1PulseWidth??.5)+(.04+clamp(p.pwDrift)*.4)*Math.sin(v.pwPh*TWO_PI+v.noise),.02,.98);
   const superMode=p.superMode==='on'?1:p.superMode==='half'?.5:0,n=superMode?7:1;
   const spread=clamp(p.detune)*30*superMode;
   for(let k=1;k<7;k++)this.supR[k]=superMode?Math.pow(2,SUP_UNITS[k]*spread/1200):1;
@@ -484,7 +484,7 @@ class Super8Processor extends AudioWorkletProcessor{
   const lfoMode=p.dds2Range==='LFO'&&p.dds2Mode!=='sub';
   const f2=lfoMode?(.1+clamp(p.dds2Tune/14+.5)*99.9):midiHz(common+dds2Foot+(p.dds2Tune||0)+pitch2);
   let k2=kindOf(p.dds2Wave);if(k2===6)k2=0;
-  this.b2kind=k2;this.b2inc=f2/sr;this.b2pw=clamp(.02+.96*clamp(p.dds2WaveMod??.5),.02,.98);
+  this.b2kind=k2;this.b2inc=f2/sr;this.b2pw=clamp(.02+.96*clamp(p.dds2PulseWidth??.5),.02,.98);
   this.b2mode=p.dds2Mode==='sync'?1:p.dds2Mode==='ring'?2:p.dds2Mode==='sub'?3:0;
   this.b2cross=clamp(p.crossMod+mods[1]*.5)*.3;this.b2lfo=lfoMode;
   this.b2subInc=base*.5/sr;this.b2subSquare=p.subMode==='square';
