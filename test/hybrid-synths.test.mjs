@@ -89,6 +89,21 @@ test('UDO Super 8 exposes independent pulse width controls for DDS 1 and DDS 2',
   assert.ok(Math.abs(h.processor.bPW - expectedDds1) < 1e-9, 'DDS 1 pulse width should remain fixed when PW drift is zero');
   assert.ok(Math.abs(h.processor.b2pw - expectedDds2) < 1e-9, 'DDS 2 should use its independent manual pulse width');
 
+  h.processor.b1kind = 4;
+  h.processor.bTP = 0;
+  h.processor.bPW = .2;
+  const narrowDds1 = h.processor.w1(4, .3, .01);
+  h.processor.bPW = .8;
+  const wideDds1 = h.processor.w1(4, .3, .01);
+  assert.notEqual(narrowDds1, wideDds1, 'DDS 1 sample output must respond to its width setting');
+  const voice = h.processor.voices.find(item => item.active);
+  h.processor.b2mode = 0; h.processor.b2kind = 4; h.processor.b2inc = .001; h.processor.b2cross = 0; h.processor.b2lfo = false;
+  voice.ph2L = .3; h.processor.b2pw = .2;
+  const narrowDds2 = h.processor.d2(voice, false, 0, -1);
+  voice.ph2L = .3; h.processor.b2pw = .8;
+  const wideDds2 = h.processor.d2(voice, false, 0, -1);
+  assert.notEqual(narrowDds2, wideDds2, 'DDS 2 sample output must respond to its width setting');
+
   const legacy = await createWorklet('../js/engine/Super8Processor.js', 'super8-processor');
   legacy.processor.message({ t: 'patch', patch: { layers: [{ dds2Wave: 'pulse', dds2WaveMod: .25 }] } });
   legacy.processor.message({ t: 'noteOn', note: 60, vel: .8 });
