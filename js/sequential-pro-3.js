@@ -127,7 +127,7 @@ class Pro3App{
   this.patch=clean(out);this.postPatch();this.syncHardware();
  }
  buildPerformance(){
-  this.perf=performance(this.shell,{notes:NOTES,octaves:3,startOctave:2,wheels:false,started:()=>this.engine.started,midiStatusEl:this.midi,handlers:{
+  this.perf=performance(this.shell,{notes:NOTES,octaves:3,startOctave:2,wheels:false,started:()=>this.engine.started,midiStatusEl:this.midi,extraComputerKeys:{']':18,'\\':20},handlers:{
    noteOn:(n,v)=>{this.hwKeyboard?.setActive(n,true);this.engine.noteOn(n,v);},noteOff:n=>{this.hwKeyboard?.setActive(n,false);this.engine.noteOff(n);},bend:v=>this.engine.setPitchBend(v),mod:v=>this.engine.setModWheel(v),
    aftertouch:v=>this.engine.setAftertouch(v),sustain:d=>this.engine.setSustain(d),allOff:()=>this.engine.allNotesOff(),
    program:p=>this.presets.load('f:'+(p%FACTORY.length)),clock:()=>this.engine.post({t:'clock'}),start:()=>this.engine.post({t:'transport',play:true}),continue:()=>this.engine.post({t:'transport',play:true}),stop:()=>this.engine.post({t:'transport',play:false}),cc:(cc,v)=>{if(cc===7){this.set('volume',v/127);this.syncHardware();}if(cc===74){this.set('filterCutoff',v/127);this.syncHardware();}}
