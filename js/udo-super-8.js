@@ -58,7 +58,7 @@ function validate(d){
 }
 const FACTORY=SUPER8_PRESETS.map(x=>({name:x.name,data:validate(x.data)}));
 const fmt2=v=>Number(v).toFixed(2);
-const WAVES1=['sine','saw','square','triangle','whiteNoise','altA','altB'],WAVES2=['sine','saw','square','triangle','whiteNoise','pulse'];
+const WAVES1=['sine','saw','square','triangle','pulse','whiteNoise','altA','altB'],WAVES2=['sine','saw','square','triangle','whiteNoise','pulse'];
 const LFO_SHAPES=['sine','triangle','saw','reverseSaw','square','sampleHold','noise'];
 
 class Super8App{
