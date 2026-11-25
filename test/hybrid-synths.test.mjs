@@ -86,7 +86,7 @@ test('UDO Super 8 exposes independent pulse width controls for DDS 1 and DDS 2',
   assertAudio(render(h, 2048), 'Super 8 pulse-width test');
   const expectedDds1 = .02 + .96 * .23;
   const expectedDds2 = .02 + .96 * .77;
-  assert.ok(Math.abs(h.processor.bPW - expectedDds1) <= .041, 'DDS 1 pulse width should be centred on its manual setting');
+  assert.ok(Math.abs(h.processor.bPW - expectedDds1) < 1e-9, 'DDS 1 pulse width should remain fixed when PW drift is zero');
   assert.ok(Math.abs(h.processor.b2pw - expectedDds2) < 1e-9, 'DDS 2 should use its independent manual pulse width');
 
   const legacy = await createWorklet('../js/engine/Super8Processor.js', 'super8-processor');
