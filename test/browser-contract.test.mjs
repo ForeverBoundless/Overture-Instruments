@@ -755,6 +755,8 @@ test('Sequential Pro 3 and UDO Super 8 are first-class library instruments', asy
   assert.match(superApp, /polyAftertouch/);
   assert.ok(superEngine.includes("registerProcessor('super8-processor',Super8Processor)"));
   assert.match(superEngine, /superMode/);
+  assert.match(superApp, /WAVES1=\[[^\]]*'pulse'/, 'DDS 1 should expose Pulse in its waveform menu');
+  assert.match(superEngine, /pulse:4/, 'the Super 8 oscillator should route Pulse to its band-limited pulse generator');
   assert.match(superEngine, /modMatrix/);
   assert.match(superEngine, /delayFreeze/);
   assert.ok(superApp.includes('s8-upper'));
