@@ -475,7 +475,8 @@ class Super8Processor extends AudioWorkletProcessor{
   this.b1kind=kindOf(p.dds1Wave);this.bAltA=p.altA|0;this.bAltB=p.altB|0;
   this.bUserA=p.userWaves?.[this.bAltA]||null;this.bUserB=p.userWaves?.[this.bAltB]||null;
   v.pwPh+=dtc*(.3+v.pwRate);
-  this.bPW=clamp(.02+.96*clamp(p.dds1PulseWidth??.5)+(.04+clamp(p.pwDrift)*.4)*Math.sin(v.pwPh*TWO_PI+v.noise),.02,.98);
+  // PW drift is depth around the manual setting; zero must produce a fixed duty cycle.
+  this.bPW=clamp(.02+.96*clamp(p.dds1PulseWidth??.5)+clamp(p.pwDrift)*.4*Math.sin(v.pwPh*TWO_PI+v.noise),.02,.98);
   const superMode=p.superMode==='on'?1:p.superMode==='half'?.5:0,n=superMode?7:1;
   const spread=clamp(p.detune)*30*superMode;
   for(let k=1;k<7;k++)this.supR[k]=superMode?Math.pow(2,SUP_UNITS[k]*spread/1200):1;
