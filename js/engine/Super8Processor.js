@@ -12,7 +12,7 @@
 const clamp=(x,a=0,b=1)=>Math.min(b,Math.max(a,Number(x)||0));
 const lerp=(a,b,t)=>a+(b-a)*t;
 const midiHz=n=>440*Math.pow(2,(n-69)/12);
-const CTL=16;
+const CTL=32;
 const TWO_PI=Math.PI*2;
 const VOICE_GAIN=.62;
 const MASTER_GAIN=1.0;
@@ -142,6 +142,9 @@ class Super8Processor extends AudioWorkletProcessor{
   }));
   this.sm=[0,1].map(()=>({mix:.5,pan:.5,cut:.72,res:.16,hpf:.04}));
   this.seq=[{step:0,phase:0,note:-1},{step:0,phase:0,note:-1}];this.arp=[{phase:0,index:0,note:-1},{phase:0,index:0,note:-1}];this.clockPulse=0;
+  // Reusable scratch storage: this code runs on the real-time audio thread.
+  this.arpNotes=[new Int16Array(128),new Int16Array(128)];
+  this.arpVelocities=[new Float32Array(128),new Float32Array(128)];
   this.mods=new Float64Array(8);this.supR=new Float64Array(7).fill(1);
   this.lbL=new Float64Array(CTL);this.lbR=new Float64Array(CTL);
   this.volS=this.global.volume;this.dcLx=0;this.dcLy=0;this.dcRx=0;this.dcRy=0;
@@ -610,9 +613,17 @@ class Super8Processor extends AudioWorkletProcessor{
     s.phase-=1;
     const step=s.step%length,n=p.seqSteps[step],chord=Array.isArray(p.seqChords?.[step])&&p.seqChords[step].length?p.seqChords[step]:n===null||n===undefined?[]:[n],slide=!!p.seqSlides[step]&&chord.length>0;
     const accent=!!p.seqAccents[step],gate=clamp(p.seqGates?.[step]??.75,.05,1);
-    const tied=this.voices.filter(v=>v.active&&v.layer===layer&&v.seqVoice&&v.gate);
-    if(s.note>=0&&slide&&tied.length){
-     tied.forEach(v=>{v.note=n;v.inputNote=n;v.targetPitch=n+(p.transpose||0);v.velocity=accent?1:.82;v.gate=true;});
+    let tiedCount=0;
+    if(s.note>=0&&slide){
+     for(let i=0;i<this.voices.length;i++){
+      const v=this.voices[i];
+      if(v.active&&v.layer===layer&&v.seqVoice&&v.gate){
+       v.note=n;v.inputNote=n;v.targetPitch=n+(p.transpose||0);v.velocity=accent?1:.82;v.gate=true;
+       tiedCount++;
+      }
+     }
+    }
+    if(s.note>=0&&slide&&tiedCount){
      s.note=n;s.gate=gate;
     }else{
      if(s.note>=0){
@@ -629,22 +640,40 @@ class Super8Processor extends AudioWorkletProcessor{
    }
   }
   if(p.arpEnabled){
-   const held=[...this.held[layer].entries()];
-   if(held.length){
+   const held=this.held[layer],notes=this.arpNotes[layer],velocities=this.arpVelocities[layer];
+   let heldCount=0;
+   // Map.keys() yields scalar notes; avoid spreading Map entries into fresh
+   // arrays for every audio control block.
+   for(const note of held.keys()){
+    if(heldCount>=notes.length)break;
+    notes[heldCount]=note;
+    velocities[heldCount]=held.get(note);
+    heldCount++;
+   }
+   if(heldCount){
+    if(p.arpMode!=='assign'){
+     // Stable paired insertion sort keeps velocity aligned with its note.
+     for(let i=1;i<heldCount;i++){
+      const note=notes[i],velocity=velocities[i];
+      let j=i-1;
+      while(j>=0&&notes[j]>note){notes[j+1]=notes[j];velocities[j+1]=velocities[j];j--;}
+      notes[j+1]=note;velocities[j+1]=velocity;
+     }
+    }
     const arpSwing=clamp(p.arpSwing)*.42;
     a.phase+=(p.seqBpm/60)*dt*(4/Math.max(1,p.arpDivision))*((a.index%2)?1-arpSwing:1+arpSwing);
     if(a.phase>=1){
      a.phase-=1;
-     const ordered=p.arpMode==='assign'?held:held.slice().sort((x,y)=>x[0]-y[0]);
-     const total=ordered.length*Math.max(1,Math.min(4,Math.round(p.arpRange||1)));
-     const step=a.index++%total,octave=Math.floor(step/ordered.length);
-     let index=step%ordered.length;
-     if(p.arpMode==='down')index=ordered.length-1-index;
-     else if(p.arpMode==='random')index=Math.floor(Math.abs(rnd())*ordered.length)%ordered.length;
-     else if(p.arpMode==='upDown'){const span=Math.max(1,total*2-2),z=a.index%span,absolute=z<total?z:span-z;index=absolute%ordered.length;}
-     const n=ordered[index][0]+12*octave;
+     const range=Math.max(1,Math.min(4,Math.round(p.arpRange||1)));
+     const total=heldCount*range;
+     const step=a.index++%total,octave=Math.floor(step/heldCount);
+     let index=step%heldCount;
+     if(p.arpMode==='down')index=heldCount-1-index;
+     else if(p.arpMode==='random')index=Math.floor(Math.abs(rnd())*heldCount)%heldCount;
+     else if(p.arpMode==='upDown'){const span=Math.max(1,total*2-2),z=a.index%span,absolute=z<total?z:span-z;index=absolute%heldCount;}
+     const n=notes[index]+12*octave;
      this.voices.forEach(v=>{if(v.active&&v.layer===layer&&v.arpVoice){v.gate=false;v.arpVoice=false;}});
-     this.allocateNote(n,ordered[index][1],layer,1,'arp');
+     this.allocateNote(n,velocities[index],layer,1,'arp');
      this.voices.forEach(v=>{if(v.active&&v.layer===layer&&v.inputNote===n&&v.order===this.order)v.arpVoice=true;});
     }
    }else{
