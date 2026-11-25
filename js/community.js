@@ -162,7 +162,7 @@ function extractInstrumentPreset(raw, instrumentId) {
   }
   return safeJsonCopy(data);
 }
-function readDraft() {
+async function readDraft() {
   try {
     const instrumentRaw = sessionStorage.getItem('overture.community.instrument-draft');
     if (instrumentRaw) {
@@ -182,7 +182,7 @@ function readDraft() {
     const raw = sessionStorage.getItem('overture.community.draft');
     if (!raw) return null;
     const payload = parseJsonFileObject(raw);
-    const patch = extractOmniPatch(payload);
+    const patch = await extractOmniPatch(payload);
     return {
       data: patch,
       type: 'omni_patch',
@@ -1173,7 +1173,7 @@ async function initialise() {
   }
 
   ensureCommunityInstrumentOptions();
-  const importedDraft = readDraft();
+  const importedDraft = await readDraft();
   if (importedDraft) {
     setDraft(importedDraft.data, importedDraft.type, importedDraft.instrumentId, importedDraft.title, importedDraft.presetSelection);
     if (importedDraft.editingItemId) {
