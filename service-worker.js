@@ -1,4 +1,4 @@
-const CACHE = 'overture-shell-v170';
+const CACHE = 'overture-shell-v171';
 const APP_SHELL = [
   '/account',
   '/login',
@@ -189,7 +189,7 @@ const APP_SHELL = [
   '/js/omni/templates.js?v=20261104-sem-mellotron',
   '/js/prophet10.js',
   '/js/sequential-pro-3.js?v=20261112-audio-r3',
-  '/js/udo-super-8.js?v=20261119-single-nameplate-r1',
+  '/js/udo-super-8.js?v=20261125-dds1-pulse-r1',
   '/js/roland-juno-106.js',
   '/js/roland-tr-808.js',
   '/js/oberheim-eight-voice.js',
