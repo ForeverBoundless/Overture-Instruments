@@ -43,11 +43,9 @@ function message(id, text, error = false) {
 function syncAudioConfirmationRequirement() {
   const audioInput = byId('community-audio-file');
   const checkbox = byId('community-content-confirmation');
-  const label = checkbox?.closest('.community-guidelines-check');
-  if (!audioInput || !checkbox || !label) return;
+  if (!audioInput || !checkbox) return;
   const hasUploadedAudio = !!audioInput.files?.length;
   checkbox.required = hasUploadedAudio;
-  label.hidden = !hasUploadedAudio;
   if (!hasUploadedAudio) checkbox.checked = false;
 }
 
