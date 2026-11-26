@@ -841,15 +841,19 @@ test('Granular lab initializes without AudioContext and its note keys start/stop
   assert.match(worker, /labs\.js\?v=20261118-green-sliders-r1/);
 });
 
-test('Community confirmation is required only when an audio file is attached', async () => {
-  const [page, app] = await Promise.all([
+test('Community audio confirmation uses readable checkbox styling and appears only when audio is attached', async () => {
+  const [page, app, styles] = await Promise.all([
     readFile(new URL('../community.html', import.meta.url), 'utf8'),
     readFile(new URL('../js/community.js', import.meta.url), 'utf8'),
+    readFile(new URL('../css/community.css', import.meta.url), 'utf8'),
   ]);
   assert.match(page, /community-guidelines-check" hidden/);
   assert.doesNotMatch(page, /community-content-confirmation" required/);
   assert.match(app, /checkbox\.required = hasUploadedAudio/);
   assert.match(app, /label\.hidden = !hasUploadedAudio/);
+  assert.match(styles, /\.community-publish-panel \.community-guidelines-check\s*\{[^}]*font:400 12px\/1\.55 var\(--font-body\);[^}]*letter-spacing:0;/s);
+  assert.match(styles, /\.community-publish-panel \.community-guidelines-check\[hidden\]\s*\{\s*display:none !important;/);
+  assert.match(styles, /\.community-publish-panel \.community-guidelines-check input\s*\{[^}]*min-height:15px;[^}]*padding:0;/s);
 });
 
 test('Community serializers preserve output levels and Pro 3 LFO controls stay within their panel', async () => {
